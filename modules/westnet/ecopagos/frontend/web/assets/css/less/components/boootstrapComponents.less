@@ -1,0 +1,69 @@
+/* Tab panel */
+.tab-pane{
+    border: 1px solid #dadada;
+    border-top: none;
+}
+/* end Tab panel */
+
+/*---- Input de fecha ----*/
+.grid-view #tasksearch-date-kvdate{
+
+    & .input-group-addon.kv-date-calendar{
+        display: none;
+    }
+    width: 140px;
+    margin: auto !important;
+}
+/*---- Input de fecha ----*/
+
+/*--- Jumbotron ----*/
+.jumbotron{
+
+    &.jumbotron-no-bg{
+        background-color: transparent;
+    }
+
+}
+/*--- end Jumbotron ----*/
+
+/*--- Btn ----*/
+.btn{
+
+    &:hover, &:focus{
+        .z-depth-1 !important;
+    }
+
+    .transition(all, @global-transition-time);
+    .z-depth-0;
+}
+/*--- end Btn ----*/
+
+/*--- Breadcrumb ----*/
+.breadcrumb{
+    border-radius: 0 !important;
+}
+/*--- end Breadcrumb ----*/
+
+/*--- Dropdown menu links ----*/
+.dropdown-menu{
+
+    & li {
+
+        & > a{
+            .transition(all, @global-transition-time);
+        }
+
+        &:hover, &:focus{
+
+            & > a{
+                .font-brand;
+            }
+
+        }
+
+        .transition(all, @global-transition-time);
+
+    }
+
+}
+/*--- end Dropdown menu links ----*/

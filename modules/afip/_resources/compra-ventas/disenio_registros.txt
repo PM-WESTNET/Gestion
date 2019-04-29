@@ -1,0 +1,70 @@
+Referencia:
+http://servicios.infoleg.gob.ar/infolegInternet/anexos/235000-239999/236751/norma.htm
+
+Los datos de los archivos deberan ser ordenados de la siguiente manera:
+    - Fecha del comprobante.
+    - Punto de venta.
+    - Tipo de comprobante.
+    - Numero de comprobante.
+
+Nombre de los archivos:
+    Deben serguir el siguiente formato:
+        XXXXXX_NNNNNNNNNNNNN_AAAAMMDD
+    X: nombre del archivo( DuplicadosCabecera, DuplicadosDetalle, Ventas, Compras, etc )
+    N: CUIT de la empresa.
+    YYYY: Año de los comprobantes
+    MM: Mes de los comprobantes
+    DD: Dia de los comprobantes.
+
+En Duplicados electronicos, los importes seben ser en la moneda que se emitio el comprobante.
+En Registracion, se debe consignar en pesos, haciendo la conversion segun el tipo de cambio aplicado al momento de la operacion.
+
+Marca de fin de registro: 0D0A en hexadecimal.
+
+Cabecera de Duplicados electronicos.
+    - Tantos registros tipo 1 como operaciones.
+    - 1 Registro tipo 2 con la cantidad de registros tipo 1 y los totales de los importes.
+
+Cabecera Tipo 2
+
+Campos 27
+TEXT(C5;"###000")                                    3 Tipo de comprobante
+TEXT(D5;"#####00000")                                5 Punto de venta
+TEXT(E5;"####################00000000000000000000") 20 Numero de comprobante
+TEXT(G5;"##00")                                      2 Codigo de documento de proveedor
+TEXT(H5;"####################00000000000000000000") 20 CUIT vendedor
+TEXT(AA5*100;"###############000000000000000")      15 Importe Neto gravado
+IF(AB5=0,21;"0005";IF(AB5=0,27;"0006";IF(AB5=0;"0003";IF(AB5=0,055;"0008";IF(AB5=0,025;"0009";IF(AB5=0,105;"0004";IF(AB5="Exento";"0002";IF(AB5="No Gravado";"0001")))))))) 4 TIPO DE IVA
+TEXT(AC5*100;"###############000000000000000")      15 Impuesto liquidado
+
+Cabecera Tipo 1
+Campos 31
+TEXT(B5;"yyyymmdd")                                     8  Fecha
+TEXT(C5;"###000")                                       3  Tipo de Comprobante
+TEXT(D5;"#####00000")                                   5  Punto de venta
+TEXT(E5;"####################00000000000000000000")     20 Numero de comprobante
+F5                                                         Numero de despacho de importacion
+REPT(" ";16-LEN(F5))                                    16 Numero de despacho de importacion
+TEXT(G5;"##00")                                          2 "Código de Documento del Vendedor"
+TEXT(H5;"####################00000000000000000000")     20 CUIT CUIL
+I5                                                         NOMBRE EMPRESA
+REPT(" ";30-LEN(I5))                                    30-NOMBRE EMPRESA
+TEXT(J5*100;"###############000000000000000")           15 Importe Total * 100
+TEXT(K5*100;"###############000000000000000")           15 Importe total conceptos q no integran precio neto gravado * 100
+TEXT(L5*100;"###############000000000000000")           15 Importe exentas * 100
+TEXT(M5*100;"###############000000000000000")           15 Importe de percepciones o pagos a cuenta del iva * 100
+TEXT(N5*100;"###############000000000000000")           15 "Importe de Percepciones o Pagos a Cuenta de Otros Impuestos Nacionales" * 100
+TEXT(O5*100;"###############000000000000000")           15 "Importe de Percepciones de Ingresos Brutos"  * 100
+TEXT(P5*100;"###############000000000000000")           15 "importe de Percepciones de Impuestos Municipales"  * 100
+TEXT(Q5*100;"###############000000000000000")           15 Importe de Impuestos Internos * 100
+TEXT(R5;"###000")                                        3 Codigo de moneda
+TEXT(S5*1000000;"##########0000000000")                 10 Tipo de cambio
+
+TEXT(T5;"#0")                                            1 cantidad de alicutoas de iva
+TEXT(U5;"#0")                                            1 Codigo de operacion
+TEXT(V5*100;"###############000000000000000")           15 Credito fiscal computable * 100
+TEXT(W5;"###############000000000000000")               15 Otros tributos
+TEXT(X5;"###########00000000000")                       11 CUIT EMISOR
+Y5                                                         denominacion emisor
+REPT(" ";30-LEN(Y5))                                    30-denominacion emisor
+TEXT(Z5*100;"###############000000000000000")           15 iva comision * 100

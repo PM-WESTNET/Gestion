@@ -1,0 +1,308 @@
+// menu
+.display-navbar-breakpoint{
+    display: none;
+}
+// @media (max-width: 1235px) {
+//     .display-navbar-breakpoint{
+//         display: block;
+//     }    
+// }
+@media (max-width: 1265px) {
+
+    li.dropdown.open {
+        background-color: white;
+        li {
+            a {
+                color: @gray-2;
+            }
+            &.active {
+                a {
+                    color: white;
+                }
+            }
+        }
+    }
+    .navbar-collapse {
+        ul.navbar-nav.navbar-right.nav {
+            > li{
+                &:nth-child(1),
+                &:nth-child(2) {
+                    display: none;
+                }
+                           
+            }   
+        }
+        
+    }
+    .navbar-right .dropdown-menu {
+        left: inherit;
+        width: 100%;
+    }
+    .navbar-links-responsive {
+        display: inline-block!important;
+        li {
+            float: left!important;
+            a {
+                padding: 15px 25px!important;
+            }
+        }
+    }
+    .display-navbar-breakpoint{
+        display: block;
+    }
+    .height-50{
+        padding-top: 3px;
+        height: 50px;
+    }
+    .navbar-header {
+        float: none;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .navbar-collapse.collapse {
+        display: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    .navbar-nav:not(.pull-right) {
+        float: none!important;
+        margin: 7.5px -15px;
+    }
+    .navbar-nav:not(.collapsed)>li {
+        float: none;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .navbar-text {
+        float: none;
+        margin: 15px 0;
+    }
+    /* since 3.1.0 */
+    .navbar-collapse.collapse.in { 
+        display: block!important;
+    }
+    .collapsing {
+        overflow: hidden!important;
+    }
+}
+@media (max-width: 520px) {
+    .navbar-links-responsive {
+        display: none!important;
+    }
+    .navbar-collapse {
+        ul.navbar-nav.navbar-right.nav {
+            > li{
+                &:nth-child(1),
+                &:nth-child(2){
+                    display: block;
+                }
+                           
+            }   
+        }
+        
+    }
+}
+
+// Styles
+
+// Clases Navbar 
+
+.navbar-inverse {
+    a.btn.btn-danger {
+        // .hidden-xs;
+    }
+    .navbar-nav > li > a  {
+    }
+    ul.navbar-nav {
+        height: 50px;
+    }
+}    
+.navbar-inverse .navbar-brand {
+    text-transform: uppercase;
+    .font-bold;
+}
+@media (min-width: 1266px) and (max-width: 1420px) {
+    .navbar-inverse {
+        a.btn.btn-danger {
+            padding: 19px 3px!important;
+        }
+        .navbar-nav > li > a  {
+            padding: 20px 3px;
+        }
+        ul.navbar-nav {
+            height: 60px;
+        }
+    }    
+}
+
+@media (max-width: 1265px) {
+    .navbar-inverse {
+        ul.navbar-nav {
+            height: 50%;
+            margin-left: 10px;
+            text-align: center;
+        }
+    }    
+}
+    
+@media (min-width: 300px) {
+    .navbar-nav > li > a {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px!important;
+    }    
+}
+
+.navbar-nav.navbar-right {
+    li {
+        margin-bottom: 0;
+    }    
+    @media(max-width: 1200px) {
+        // width: 80%;
+    }
+     @media(max-width: 998px) {
+        // width: 85%;
+        li {
+            a {
+                padding: 10px 8px; 
+            }
+        }
+    }
+    @media(max-width: 1230px) {
+        // width: 100%;
+        margin: 0;
+        li {
+            a {
+                text-align: center;
+                width: 100%;
+                padding: 10px 8px; 
+            }
+        }
+    }
+}
+
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover, 
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
+    color: @gray-1;
+}
+
+.navbar-img {
+    float: left;
+    width: 25px;
+    height: auto;
+    padding-top: 10px;
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+// Navbar Board
+.nav-board {
+    .col-md-3 {
+        a {
+            color: white;
+            text-align: center;
+            height: 100%;
+            margin: 0 10px 0 0;
+            display: block;
+            box-sizing: border-box;
+            h1 {
+                margin: 0;
+                padding: 50px;
+                .font-m;
+            }
+            h3 {
+                margin: 0;
+                padding: 30px 0;
+                .font-m;
+                span {
+                    .font-s;
+                }
+            }
+        }
+        .col-xs-12 {
+            height: 115px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            padding: 0;
+        }
+        .col-xs-6 {
+            height: 75px;
+            overflow: hidden;
+            padding: 0;
+            // background-color: @violet1;
+            // margin-right: 5px; 
+            margin-bottom: 10px;
+        }
+        &:first-of-type {
+            a {
+                background-color: @violet1;
+                 &:hover {
+                    background-color: @violet2;
+                }
+            }
+        }
+         &:nth-child(2) {
+            a {
+                background-color: @yellow1;
+                 &:hover {
+                    background-color: @yellow2;
+                }
+            }
+        }
+        &:nth-child(3) {
+            a {
+                background-color: @green1;
+                 &:hover {
+                    background-color: @green2;
+                }
+            }
+        }
+        &:nth-child(4) {
+            a {
+                background-color: @red1;
+                 &:hover {
+                    background-color: @red2;
+                }
+            }
+        }
+    }
+    @media (max-width: 998px) {
+        .col-md-3 {
+            a {
+                h1 {
+                    padding: 20px;
+                }
+                h3 {
+                    padding: 20px 0;
+                }
+            }
+            .col-xs-12 {
+                height: auto;
+            }
+            .col-xs-6 {
+                height: auto;
+            }
+        }
+    }
+    @media (max-width: 998px) {
+        .col-md-3 {
+            .col-xs-12 {
+                margin-top: 20px; 
+            }
+        }
+    }
+}
+@media (min-width: 768px) {
+    .navbar-nav > li > a {
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }    
+}

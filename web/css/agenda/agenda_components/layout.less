@@ -1,0 +1,132 @@
+/*
+    base agenda less styles
+*/
+/* 
+    Created on : Jul 15, 2015, 10:01:58 AM
+    Author     : smaldonado
+*/
+
+.agenda{
+    
+    & .day{
+        
+        //Nro del dia
+        & > .day-number{
+            
+            position: absolute;
+            top: 0;
+            right: 0;
+            opacity: .35;
+            
+        }
+        
+        &.day-agenda{
+            
+            //Scrollbars
+            &::-webkit-scrollbar{
+                width: 10px;
+            }
+            &::-webkit-scrollbar-thumb{
+                background-color: #dadada;
+            }
+            &::-webkit-scrollbar-track{
+                background-color: #fff;
+            }
+            
+            //Status
+            &.day-disabled{
+                background-color: @gray-color;
+            }            
+            
+            &.day-free{
+                &:after{
+                    content: "Free day! :D";
+                    position: absolute;
+                    bottom: 0;
+                    width: 100%;
+                    height: auto;
+                    text-align: center;
+                    background-color: #fff;
+                    display: block;
+                    padding: @padding-width;
+                    font-size: 18pt;
+                    color: @success-color;
+                }
+            }            
+            &.day-busy{
+            }
+            padding-top: 60px;
+            max-height: 250px;
+            overflow-y: auto;
+            flex-shrink: 0;            
+        }
+        
+        position: relative;
+        width: 13%;
+        flex-grow: 1;
+        border: 1px solid #dadada;
+        margin: 5px;
+        
+    }
+    
+    & .container-fluid{
+    
+        display: flex;
+        flex-wrap: wrap;
+        
+    }    
+        
+}
+
+.agenda-notifications{
+    
+    &:hover{
+        
+        & .icon{
+            color: #dadada;
+        }
+        
+        & [data-notification-count]{
+            color: #333;
+        }
+    }
+    
+    & .icon{        
+        top: 0px;
+        left: -8px;
+        font-size: 18pt;
+        position: absolute;
+        color: #9d9d9d !important;
+    }
+    
+    & [data-notification-count]{
+        position: absolute;
+        top: 1px;
+        left: -6px;
+        background-color: transparent;
+        color: #fff;
+    }    
+    
+    @media screen and (max-width: 1500px){
+        
+        & .icon{
+            position: relative;
+            left: 0;
+            top: 0;
+        }
+        & [data-notification-count]{
+            left: 2px;
+        }
+        
+    }
+    @media (max-width: 520px) {
+        & [data-notification-count]{
+            text-align: center;
+            display: block;
+            width: 96%;
+        }
+    }
+    
+    position: relative;
+    padding-right: 10px;
+}

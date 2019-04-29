@@ -1,0 +1,38 @@
+{
+    "name": "Westnet Impresiones",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9P3Ms1yJlLTH12oAr4pdWKQ/YTYW24GRtxLuO4CehVoHFT/aBt1/r4kvIfN+1Q4bYxLNQnihP+f1oXEITutMcQ2b15C8wpxAuiGPjmeDmpB84dTrUrCUUEXLbyK9krzpFvm0hZHDup083ggxFk18BGK1jwaob9bWPCo2w4Vwb0SEJZeolY58glNKJfWpdWptj1x4zn6E4a7L8G03tC0fXH66mke4ihPjjNkvOXHGidJxoA4ohglf+ltvOyOKha/H7CFl7QFgQgPeb9+wYYcx6XNhs+/QtmjK82l8sGRrFo2Wjc8w9gOFaHvAjxig/qkjKkMAwQ8hKWny7YwMkqPfWQIDAQAB",
+    "description": "Permite la impresión de comprobantes de pago y tickets de cierre de lote por EPSON TM-U220",
+    "version": "0.1",
+    "manifest_version": 2,
+    "app": {
+        "background": {
+            "scripts": ["background.js"]
+        }
+    },
+    "icons": {
+        "16": "printer_icon_16.png",
+        "128": "printer_icon_128.png"
+    },
+    "permissions": [
+        "serial",
+        "storage"
+    ],
+    "optional_permissions": [
+        "serial",
+        "storage"
+    ],
+    "externally_connectable": {
+        "ids": [
+            "*"
+        ],
+        "matches": [
+            "*://gestion.westnet.com.ar/*",
+            "*://westnet.quoma/*",
+            "http://localhost/*",
+            "http://localhost.localdomain/*",
+            "*://200.16.144.226:*/*",
+            "*://192.168.76.114/*",
+            "*://seba.arya2/*"
+        ]
+    }
+}
