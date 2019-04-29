@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración de Impresora</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <script src="index.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>Configuración de Impresora</h1>
+            <div id="settings" class="row">
+                <div class="col-sm-4">
+                    <label for="portPath" class="control-label">Puerto:</label>
+                    <select id="portPath" class="form-control"></select>
+                </div>
+            </div>
+            <div class="row" >
+                <div class="col-sm-12">
+                    <div class="alert alert-success" style="display: none" role="alert" id="message"></div>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-sm-12">
+                    <button id="save" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

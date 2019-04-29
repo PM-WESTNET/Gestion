@@ -1,0 +1,7 @@
+class_name: ApiGuy
+modules:
+    enabled:
+        - ApiHelper
+        - REST:
+            depends: PhpBrowser
+            url: 'http://localhost/arya2/web'
