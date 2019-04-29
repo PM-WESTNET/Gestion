@@ -1,0 +1,90 @@
+﻿/*---- Functions ----*/
+
+@success-color: #4CAF50;
+
+//Error status para inputs
+.input-error-status(){
+    border-bottom: 1px solid @brand-light-color;
+    -webkit-box-shadow: 0 1px 0 0 @brand-light-color;
+    -moz-box-shadow: 0 1px 0 0 @brand-light-color;
+    box-shadow: 0 1px 0 0 @brand-light-color;
+}
+//Focus status para inputs
+.input-focus-status(){
+    border-bottom: 1px solid @brand-color;
+    -webkit-box-shadow: 0 1px 0 0 @brand-color;
+    -moz-box-shadow: 0 1px 0 0 @brand-color;
+    box-shadow: 0 1px 0 0 @brand-color;
+}
+//Success status para inputs
+.input-success-status(){
+    border-bottom: 1px solid @success-color;
+    -webkit-box-shadow: 0 1px 0 0 @success-color;
+    -moz-box-shadow: 0 1px 0 0 @success-color;
+    box-shadow: 0 1px 0 0 @success-color;
+}
+
+//Aplica transition a cualquier regla, recibe un atributo css para afectar por la transition
+.transition(@attribute: all, @time: 0.2s, @ease: ease-in-out) {
+    -webkit-transition: @attribute @time ease-in-out;
+    -moz-transition: @attribute @time ease-in-out;
+    -ms-transition: @attribute @time ease-in-out;
+    transition: @attribute @time ease-in-out;
+}
+
+//Aplica transition a cualquier regla, recibe un atributo css para afectar por la transition
+.transition-delay(@attribute, @delay) {
+    -webkit-transition: @attribute 0.2s ease-in-out @delay;
+    -moz-transition: @attribute 0.2s ease-in-out @delay;
+    -ms-transition: @attribute 0.2s ease-in-out @delay;
+    transition: @attribute 0.2s ease-in-out @delay;
+}
+
+//Aplica transition a cualquier regla, recibe un atributo css para afectar por la transition
+.transition(@attrs : all, @time : 0.2s, @easing : linear, @delay : 0s){
+    -webkit-transition: @attrs @time @easing @delay;
+    -moz-transition: @attrs @time @easing @delay;
+    -ms-transition: @attrs @time @easing @delay;
+    transition: @attrs @time @easing @delay;
+}
+
+.transition-none(){    
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -ms-transition: none !important;
+    transition: none !important;
+}
+
+//Aplica margen nulos
+.no-margin(@top: 0px, @left: 0px, @bottom: 0px, @right: 0px) {
+    margin: @top @left @bottom @right;
+}
+
+//Aplica padding nulos
+.no-padding(@top: 0px, @left: 0px, @bottom: 0px, @right: 0px) {
+    padding: @top @left @bottom @right;
+}
+
+//Filters para imagenes
+.image-filter(){
+    -webkit-filter: brightness(1) grayscale(50%);
+}
+.image-hover-filter(){
+    -webkit-filter: brightness(1.15) grayscale(0%);
+}
+
+//Shadows
+.z-depth-1(){
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+}
+.z-depth-1-half(){
+    box-shadow: 0 5px 11px 0 rgba(0,0,0,0.18),0 4px 15px 0 rgba(0,0,0,0.15);
+}
+.z-depth-2(){
+    box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+.z-depth-3(){
+    box-shadow: 0 12px 15px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+/*---- end Functions ----*/
