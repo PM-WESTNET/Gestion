@@ -1,0 +1,14 @@
+{
+  "name": "chromeapp",
+  "version": "1.0.0",
+  "description": "Chrome application to connect with Serial Printer",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seba Maldonado",
+  "license": "MIT",
+  "dependencies": {
+    "browser-serialport": "^2.0.3"
+  }
+}

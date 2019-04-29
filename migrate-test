@@ -1,0 +1,19 @@
+#!/bin/sh
+tests/bin/yii migrate --migrationPath=vendor/webvimark/module-user-management/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/config/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/sale/migrations #--interactive=0
+tests/bin/yii migrate #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/accounting/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/acounting/migrations/afterMigrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/agenda/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/mailing/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/partner/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/westnet/ecopagos/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/westnet/reports/migrations
+tests/bin/yii migrate --migrationPath=modules/afip/migrations
+tests/bin/yii migrate --migrationPath=modules/log/migrations
+tests/bin/yii migrate --migrationPath=modules/westnet/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/westnet/notifications/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=modules/mobileapp/migrations
+tests/bin/yii migrate --migrationPath=modules/pagomiscuentas/migrations #--interactive=0
+

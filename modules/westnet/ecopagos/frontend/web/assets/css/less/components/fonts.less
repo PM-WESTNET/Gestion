@@ -1,0 +1,196 @@
+﻿/*--- Font ----*/
+
+/*--- font type ----*/
+
+.font-sans-serif {
+    font-family: @sans-serif;
+}
+
+.font-serif {
+    font-family: @serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.font-cursive {
+    font-family: @cursive;
+    -webkit-font-smoothing: antialiased;
+}
+
+/*--- end font type ----*/
+
+/*--- font size ----*/
+
+.font-size-xs {
+    font-size: @font-base-size * 0.6 !important; //9.6
+}
+
+.font-size-s {
+    font-size: @font-base-size * 0.8 !important; //12.8
+}
+
+.font-size-sm {
+    font-size: @font-base-size * 0.9 !important; //14.4
+}
+
+.font-size-n {
+
+    @line-height: 24px;
+
+    &.break-2-lines{
+        max-height: @line-height *2;
+        overflow: hidden;
+    }
+
+    line-height: 24px;
+    font-size: @font-base-size;
+}
+
+.font-size-b {
+
+    @font-size: @font-base-size*1.2; //19.2
+
+    @media screen and (max-width: 800px) {
+        font-size: @font-size * 0.8 !important;
+    }
+
+    font-size: @font-base-size*1.2; //19.2
+}
+
+.font-size-xb {
+
+    @font-size: @font-base-size*1.4; //22.4
+
+    @media screen and (max-width: 1500px) {
+        font-size: @font-size !important; //17.92
+        line-height: @font-size;
+    }
+
+    @media screen and (max-width: 800px) {
+        font-size: @font-size * 0.8 !important;
+        line-height: @font-size * 0.8;
+    }
+
+    font-size: @font-size;
+    line-height: 46px;
+}
+
+.font-size-xxb {
+
+    @font-size: @font-base-size*1.6; //22.4
+
+    @media screen and (max-width: 1500px) {
+        font-size: @font-size !important; //17.92
+        line-height: @font-size;
+    }
+
+    @media screen and (max-width: 800px) {
+        font-size: @font-size * 0.8 !important;
+        line-height: @font-size * 0.8;
+    }
+
+    font-size: @font-size;
+    line-height: @font-size;
+}
+
+.font-size-xxxb {
+
+    @font-size: @font-base-size * 3; //48
+    @media screen and (max-width: 1200px) {
+        font-size: @font-size * 0.8 !important;
+    }
+    @media screen and (max-width: 800px) {
+        font-size: @font-size * 0.6 !important;
+    }
+
+    font-size: @font-size;
+}
+
+.font-size-megatitles {
+
+    @font-size: 80px;
+
+    @media screen and (max-width: 800px) {
+        font-size: @font-size * 0.6 !important;
+    }
+    @media screen and (max-width: 600px) {
+        font-size: @font-size * 0.5 !important;
+    }
+
+    .transition(color);
+    font-size: 80px;
+    letter-spacing: -3px;
+}
+
+.font-reduce-space {
+    letter-spacing: -3px;
+}
+
+/*--- end font size ----*/
+
+/*--- font color ----*/
+
+.font-brand {
+    color: @font-main-color !important;
+}
+
+.font-brand-light{
+    color: @brand-light-color !important;
+}
+
+.font-white {
+    color: @font-inverse-color !important;
+}
+
+.font-gray {
+    color: @font-gray-color !important;
+}
+
+/*--- end font color ----*/
+
+/*--- font weight ----*/
+
+.font-thin {
+    font-weight: @font-weight-t;
+}
+
+.font-light {
+    font-weight: @font-weight-l;
+}
+
+.font-normal {
+    font-weight: @font-weight-n;
+}
+
+.font-bold {
+    font-weight: @font-weight-b;
+}
+
+.font-xbold {
+    font-weight: @font-weight-xb;
+}
+
+/*--- end font weight ----*/
+
+/*--- font variant ----*/
+
+.font-uppercase {
+    text-transform: uppercase;
+}
+
+.font-italic {
+    font-style: italic;
+}
+
+.font-shadow {
+
+    &.small {
+        text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+    }
+    &.big {
+        text-shadow: 7px 0px 10px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/*--- end font variant ----*/
+
+/*--- end Font ----*/

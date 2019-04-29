@@ -1,0 +1,190 @@
+/*
+    Ecopagos Frontend less styles
+*/
+/* 
+    Created on : Dec 2, 2015, 10:30:58 AM
+    Author     : smaldonado
+*/
+
+/*---- Variables ----*/
+
+/*---- Colors ----*/
+@brand-color: #337ab7;
+@brand-light-color: #ff0149;
+@gray-color: #dadada;
+@black-color: rgba(0, 0, 0, 1);
+@danger-color: #d9534f;
+@warning-color: #f0ad4e;
+@success-color: #5cb85c;
+@info-color: #5bc0de;
+@white-color: #fff;
+/*---- end Colors ----*/
+
+/*---- Shadows ----*/
+@shadow-base-size: 3px 3px 5px;
+@shadow-base-color: rgba(red(#333), green(#333), blue(#333), 0.3);
+/*---- end Shadows ----*/
+
+/*---- Fonts ----*/
+@serif: 'Cinzel', serif;
+@sans-serif: 'Roboto', sans-serif;
+@cursive: 'Kaushan Script', cursive;
+
+@font-weight-xb: 900;
+@font-weight-b: 700;
+@font-weight-n: 400;
+@font-weight-l: 300;
+@font-weight-t: 100;
+
+@font-main-color: @brand-color;
+@font-inverse-color: #ffffff;
+@font-gray-color: @gray-color;
+@font-alternative: @brand-light-color;
+@font-base-size: 16px;
+@font-title-size: @font-base-size * 1.2; //19.2px
+/*---- end Fonts ----*/
+
+/*---- Margins ----*/
+@margin-width: 30px;
+@padding-width: 30px;
+/*---- end Margins ----*/
+
+/*---- Navbar Heights ----*/
+@navbar-height: 50px;
+@navbar-height-thin: 50px;
+/*---- end Navbar Heights ----*/
+
+/*---- Breakpoints ----*/
+@breakpoint-small: 600px;
+@breakpoint-medium: 993px;
+@breakpoint-large: 1200px;
+@breakpoint-xlarge: 1400px;
+/*---- end Breakpoints ----*/
+
+/*--- Global vars ----*/
+@global-transition-time : 0.2s;
+/*--- end Global vars ----*/
+
+/*---- end Variables ----*/
+
+/*---- Base configuration ----*/
+body, html {
+
+}
+
+body {
+
+}
+
+.wrap{
+	margin-bottom: 0;
+}
+
+/*---- end Base configuration ----*/
+
+/*--- Something ----*/
+*::-webkit-scrollbar {
+    width: 10px;
+}
+ 
+*::-webkit-scrollbar-track {
+    background-color: darken(@brand-color, 15%);
+}
+ 
+*::-webkit-scrollbar-thumb {
+    background-color: @brand-color;
+}
+/*--- end Something ----*/
+.disable-status {
+    background-color: #EAEAEA;
+    color: #9E9E9E;
+    font-style: italic;
+}
+.navbar-brand {
+	padding: 15px 5px;
+	font-weight: 700;
+}
+.label-big {
+	input {
+		height: 50px;
+		font-size: 35px;		
+	}
+}
+.btn-height {
+	height: 50px;
+    text-transform: uppercase;
+}
+.alert {
+	padding: 10px;
+	// margin-bottom: 0;
+}
+.no-margin {
+	margin: 0;
+}
+.no-padding {
+	padding: 0;
+}
+.no-margin-content {
+	.alert {
+		margin-bottom: 0;
+		text-align: center;
+		font-weight: 700;
+		&.alert-success {
+			background-color: #9ffd78;
+		}
+	}
+}
+.panel-payment-previous {
+	border-radius: 0;
+	border: 1px solid #073598;
+	.row {
+		margin: 0;
+	}
+	[class*="col-"] {
+		text-align: center;
+		&:first-of-type {
+			padding: 26px;
+			background-color: #073598;
+			color: white;
+		}
+		&:nth-child(2) {
+			padding-top: 10px;
+			padding-bottom: 10px;
+		}
+		&:nth-child(3) {
+			padding-top: 10px;
+			padding-bottom: 10px;
+			.font-size-s {
+				font-size: 12px;
+				color: lighten(black, 40%);
+			}
+		}
+		&:last-of-type {
+			padding-top: 5px;
+			padding-bottom: 5px;
+			a {
+				margin-bottom: 6px;
+			}
+		}
+	}
+}
+//Site => CSS base de arya
+@import "components/site.less";
+
+//Funciones => Clases para funciones y mixins
+@import "components/functions.less";
+
+//Helpers => Clases helpers para utilidades
+@import "components/helpers.less";
+
+//Fonts  => Clases para fuentes
+@import "components/fonts.less";
+
+//Backgrounds  => Clases para fondos
+@import "components/backgrounds.less";
+
+//Elements  => Clases para elementos especificos
+@import "components/structures.less";
+
+//BootstrapComponents => Clases para sobreescribir componentes de bootstrap
+@import "components/boootstrapComponents.less";
