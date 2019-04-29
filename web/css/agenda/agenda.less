@@ -1,0 +1,167 @@
+/*
+    Agenda less styles
+*/
+/* 
+    Created on : Jul 15, 2015, 10:01:58 AM
+    Author     : smaldonado
+*/
+
+//Funciones => Clases para funciones y mixins
+@import "agenda_components/functions.less";
+
+/*---- Variables ----*/
+
+    /*---- Colors ----*/
+    @brand-color: #BB2B54;
+    @brand-light-color: #ff0149;
+    @gray-color: #dadada;
+    @black-color: rgba(0, 0, 0, 1);
+    @danger-color: #d9534f;
+    @warning-color: #f0ad4e;
+    @success-color: #5cb85c;
+    @info-color: #5bc0de;
+    @white-color: #fff;
+
+    /*---- end Colors ----*/
+
+    /*---- Shadows ----*/
+
+    @shadow-base-size: 3px 3px 5px;
+    @shadow-base-color: rgba(red(#333), green(#333), blue(#333), 0.3);
+
+    /*---- end Shadows ----*/
+
+    /*---- Fonts ----*/
+
+    @serif: 'Cinzel', serif;
+    @sans-serif: 'Roboto', sans-serif;
+    @cursive: 'Kaushan Script', cursive;
+
+    @font-weight-xb: 900;
+    @font-weight-b: 700;
+    @font-weight-n: 400;
+    @font-weight-l: 300;
+    @font-weight-t: 100;
+
+    @font-main-color: @brand-color;
+    @font-inverse-color: #ffffff;
+    @font-gray-color: @gray-color;
+    @font-alternative: @brand-light-color;
+    @font-base-size: 16px;
+    @font-title-size: @font-base-size * 1.2; //19.2px
+
+    /*---- end Fonts ----*/
+
+    /*---- Margins ----*/
+
+    @margin-width: 30px;
+    @padding-width: 30px;
+
+    /*---- end Margins ----*/
+
+    /*---- Navbar Heights ----*/
+
+    @navbar-height-thin: 50px;
+
+    /*---- end Navbar Heights ----*/
+
+    /*---- Breakpoints ----*/
+
+    @breakpoint-small: 600px;
+    @breakpoint-medium: 993px;
+    @breakpoint-large: 1200px;
+    @breakpoint-xlarge: 1400px;
+
+    /*---- end Breakpoints ----*/
+
+/*---- end Variables ----*/
+
+/*---- Base configuration ----*/
+
+body {
+    // font-family: 'pt_sans_narrowregular', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    // .font-regular;
+    color: #545454;
+}
+
+a {
+    text-decoration: none;
+    &:hover,
+        &:focus,
+        &:visited,
+        &:active {
+        text-decoration: none;
+    }
+}
+.select2-dropdown,
+.select2-selection,
+.selection {
+    border-radius: 0px!important;
+}
+input {
+    &.form-control {
+        border-radius: 0px;
+    }
+}
+
+textarea,
+select {
+    border-radius: 0px;
+   &.form-control {
+        border-radius: 0px;
+    } 
+}
+span.input-group-addon {
+    border-radius: 0px; 
+}
+
+input[type="radio"], input[type="checkbox"] {
+    margin-right: 6px;
+}
+
+.row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.title {
+    h1 {
+        display: inline;
+    }
+    p {
+        display: inline;
+        float: right;
+    }
+    margin: 20px 0 50px 0;
+    @media (max-width:768px) {
+        p {
+            display: block;
+            float: none!important;
+            margin-top: 10px; 
+        }
+        margin: 20px 0;
+    }
+}
+/*---- end Base configuration ----*/
+
+//Helpers => Clases helpers para utilidades
+@import "agenda_components/helpers.less";
+
+//Layout => Clases base
+@import "agenda_components/layout.less";
+
+//Task => Clases para tareas
+@import "agenda_components/task.less";
+
+//FullCalendar => Clases que sobreescriben fullcalendar base
+@import "agenda_components/fullcalendar.less";
+
+//Fonts  => Clases para fuentes
+@import "agenda_components/fonts.less";
+
+//BootstrapComponents => Clases para sobreescribir componentes de bootstrap
+@import "agenda_components/boootstrapComponents.less";
+
+// Buttons Basicos 
+@import "../button.less";

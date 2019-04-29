@@ -1,0 +1,119 @@
+@red2:#F84322;
+
+.btn, .btn-group {
+	border-radius: 0;
+	padding: 5px 10px!important;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	margin-bottom: 3px;
+	&:hover {
+		// background-color: @light-gray;
+	}
+	&.btn-view {
+		background-color: #91B501;
+		border-color: #91B501; 
+		color: white;
+		&:hover {
+			background-color: lighten(#91B501, 5%)!important;
+			border-color: lighten(#91B501, 5%)!important;
+		}
+	}
+	&.btn-print {
+		background-color: #BDBDBD;
+		border-color: #BDBDBD; 
+		color: white;
+		&:hover {
+			background-color: lighten(#BDBDBD, 5%)!important;
+			border-color: lighten(#BDBDBD, 5%)!important;
+		}
+	}
+	&.btn-repeat {
+		background-color: #A7019E;
+		border-color: #A7019E; 
+		color: white;
+		&:hover {
+			background-color: lighten(#A7019E, 5%)!important;
+			border-color: lighten(#A7019E, 5%)!important;
+		}
+	}
+	&.btn-success {
+		background-color: #399439;
+		border-color: #399439; 
+		color: white;
+		&:hover {
+			background-color: lighten(#399439, 10%)!important;
+			border-color: lighten(#399439, 10%)!important;
+		}
+	}
+	&.btn-danger {
+		background-color: @red2;
+		border-color: @red2;
+		color: white;
+		&:hover {
+			background-color: lighten(@red2, 10%)!important;
+			border-color: lighten(@red2, 10%)!important;
+		}
+		&.btn-sales {
+			padding: 14px 10px!important;
+			margin-bottom: 0;
+			margin-top: 0;
+			@media (max-width: 1265px) {
+				padding: 13px 10px!important;				
+			}
+		}
+	}
+	&.btn-warning {
+		background-color: #E6982A;
+		border-color: #E6982A; 
+		&:hover {
+			background-color: lighten(#E6982A, 10%)!important;
+			border-color:  lighten(#E6982A, 10%)!important;
+		}
+	}
+	&.btn-info {
+		background-color:#2093B5;
+		border-color: #2093B5;
+		&:hover {
+			background-color: lighten(#2093B5, 10%)!important;
+			border-color:  lighten(#2093B5, 10%)!important;
+		}
+	}
+	&.btn-primary {
+	    color: #fff;
+	    background-color: #337ab7;
+	    border-color: #337ab7;
+	    &:hover {
+	    	background-color: lighten(#337ab7, 10%);
+	    	border-color: lighten(#337ab7, 10%);
+	    }
+	}
+	&.btn-width {
+		width: 100%;
+	}
+	@media (max-width: 768px) {
+		&.btn-primary,
+		&.btn-view,
+		&.btn-info,
+		&.btn-success,
+		&.btn-warning,
+		&.btn-danger,
+		&.btn-default{
+			width: 100%;
+			margin: 10px 0;			
+		}
+	}	
+}
+.panel-heading {
+	button {
+		&.btn {
+			padding: 1px 10px!important;
+		}
+	}
+}
+.conciliation-create {
+	.panel-heading {
+		@media (max-width: 768px) {
+			height: 80px!important;
+		}
+	}
+}

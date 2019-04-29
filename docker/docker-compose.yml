@@ -1,0 +1,77 @@
+version: '3.6'
+services:
+    westnet-web:
+        container_name: westnet-web
+        build:
+            context: .
+            dockerfile: Dockerfile-webserver
+        volumes:
+            - ../.:/var/www/html
+        ports:
+            - "8180:80"
+            - "8181:443"
+        networks:
+            - westnet-net
+        depends_on:
+            - westnet-data
+
+    westnet-data:
+        container_name: westnet-data
+        image: mariadb:10.0
+        tmpfs: /var/lib/mysql
+        ports:
+            - "8183:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: 'secret'
+            MYSQL_DATABASE: test
+        networks:
+            - westnet-net
+
+    westnet-myadmin:
+        container_name: westnet-myadmin
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - "8182:80"
+        environment:
+            PMA_HOST: 'westnet-data'
+            PMA_USER: 'root'
+            PMA_PASSWORD: 'secret'
+        networks:
+            - westnet-net
+        depends_on:
+            - westnet-data
+
+    westnet-selenium:
+        image: selenium/standalone-chrome-debug
+        container_name: westnet-selenium
+        ports:
+            - "8184:4444"
+            - "8189:5900"
+        networks:
+            - westnet-net
+        depends_on:
+            - westnet-web
+
+    westnet-pdf:
+        container_name: westnet-pdf
+        build: pdf-service
+        ports:
+            - "8185:5001"
+        networks:
+            - westnet-net
+
+    westnet-mailcatcher:
+        container_name: westnet-mailcatcher
+        image: tophfr/mailcatcher
+        ports:
+            - "8186:80"
+            - "8187:25"
+        networks:
+            - westnet-net
+
+networks:
+    westnet-net:
+        driver: bridge
+            
+
+

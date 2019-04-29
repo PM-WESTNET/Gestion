@@ -1,0 +1,36 @@
+FROM centos:7
+
+MAINTAINER Marcelo Briones <ing@marcelobriones.com.ar>
+
+RUN yum -y update; \
+    yum -y install epel-release \
+        centos-release-scl \
+        centos-release-scl-rh \
+        https://centos7.iuscommunity.org/ius-release.rpm;
+
+RUN yum -y install wget nano git mysql openssl zip
+RUN yum -y install barcode barcode-devel make gcc
+RUN yum -y install httpd \
+        php56u php56u-mysqlnd php56u-curl php56u-mbstring php56u-xml php56u-intl php56u-gd php56u-pdo php56u-zip php56u-cli php56u-soap php56u-xdebug
+
+RUN curl https://ashberg.de/php-barcode/download/files/genbarcode-0.4.tar.gz -o genbarcode.tar.gz
+RUN tar -zxvf genbarcode.tar.gz
+RUN cd genbarcode-0.4; make; make install; cd ..; rm -Rf genbarcode-0.4
+
+#RUN /usr/sbin/a2dismod 'mpm_*' && /usr/sbin/a2enmod mpm_prefork
+
+RUN rm /etc/httpd/conf.d/welcome.conf
+
+RUN sed -i "s/\;date\.timezone =/date\.timezone=\'America\/Argentina\/Mendoza\'/g" /etc/php.ini
+RUN cp /usr/share/zoneinfo/America/Argentina/Mendoza /etc/localtime
+
+RUN sed -i "s/memory_limit = 128M/memory_limit = 2512M/g" /etc/php.ini
+
+ENV PATH="/var/www/html/vendor/bin:${PATH}"
+
+EXPOSE 80
+EXPOSE 443
+
+WORKDIR /var/www/html
+
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
