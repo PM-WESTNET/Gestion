@@ -1,0 +1,1 @@
+<div title='<?= \app\modules\agenda\AgendaModule::t('app', 'Create Task'); ?>' class='new-task-init font-size-n clickable'><div class='va'></div><span class='inline-block glyphicon glyphicon-bell'></span></div>
