@@ -1,0 +1,56 @@
+arya-web:
+    container_name: arya-web
+    build: web-server
+    volumes:
+        - ../..:/var/www/html
+    ports:
+        - "127.0.0.1:8180:80"
+    links:
+        - arya-data
+
+arya-westnet:
+    container_name: arya-westnet
+    build: web-server
+    volumes:
+        - ../../../arya2.westnet:/var/www/html
+    ports:
+        - "127.0.0.1:8181:80"
+    links:
+        - arya-data
+
+arya-data:
+    container_name: arya-data
+    image: mariadb:10.0
+    volumes:
+        - ../../runtime/mariadb:/var/lib/mysql
+    ports:
+        - "127.0.0.1:8183:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: 'secret'
+
+arya-myadmin:
+    container_name: arya-myadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - "127.0.0.1:8182:80"
+    links:
+        - arya-data
+    environment:
+        PMA_HOST: 'arya-data'
+        PMA_USER: 'root'
+        PMA_PASSWORD: 'secret'
+
+arya-pdf:
+    container_name: arya-pdf
+    build: pdf-service
+    ports:
+        - "127.0.0.1:8184:5001"
+
+#arya-selenium:
+#    image: selenium/standalone-chrome
+#    container_name: arya-selenium
+#    ports:
+#        - "127.0.0.1:8184:4444"
+#        - "127.0.0.1:8189:5900"
+#    links:
+#        - arya-web
