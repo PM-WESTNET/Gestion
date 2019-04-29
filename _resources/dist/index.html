@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Applet Java.</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style> 
+                #result{
+                float: left;
+                width: 800px;
+                height:100%;
+                }
+        </style>
+    </head>
+    <body>
+        
+        <h2>Prueba del applet de Java para interactuar con Epson Fiscal.</h2>
+        <form>
+        <input type="button" onclick="printer()" value="Facturar">
+        <input type="button" onclick="getNormalState()" value="Consultar Estado(Normal)">
+        <input type="button" onclick="getPrinterState()" value="Consultar Estado(C.Fiscal)">
+        <input type="button" onclick="getTaxPayerState()" value="Consultar Estado(Contribuyente)">
+        <input type="button" onclick="cancelBill()" value="Cancelar Factura">
+        <input type="button" onclick="getPreferences()" value="Obtener Preferencias de Usuario">
+        <input type="button" onclick="getDate()" value="Obtener Fecha/Hora">
+        </form>
+
+        <object id="applet_id" type="application/x-java-applet" height="30" width="30"> 
+            <!--el valor de code es el nombre de la clase (paquete.clase)-->
+            <param name="code" value="applet.AppletPrinter" />
+            <!--el valor de archive es la ruta relativa del archivo jar-->
+            <param name="archive" value="Applet.jar,lib/RXTXcomm.jar" />
+
+            <p>Mensaje a desplegar si el applet no se puede intanciar</p>
+        </object>
+        
+        <div id="result" >
+            
+        </div>
+        
+        <div><textarea id="container" readonly cols="70" rows="100"></textarea></div>
+
+    
+        <script>
+        /* Prueba para ocultar el applet de la pagina. Referencia:
+         * http://windyroad.com.au/2006/08/14/reintroducing-javascript-and-hidden-applets-jaha/
+         * 
+        $( document ).ready(function() {
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            applet.width='0';
+            applet.height='0';
+        });
+        */
+        
+        function getNormalState(){
+            console.log('Ejecutando metodo teststate de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            //applet.init();
+            //applet.setData("Datos pasados por JAVASCRIPT.");
+            //console.log("Muestro datos del applet por Javascript: " + applet.getData());
+            var resp = applet.getNormalState();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+        
+        function getPreferences(){
+            console.log('Ejecutando metodo getPreferences() de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            var resp = applet.getPreferences();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+        
+        function getDate(){
+            console.log('Ejecutando metodo getDate() de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            var resp = applet.getDate();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+        
+        function getPrinterState(){
+            console.log('Ejecutando metodo obtener estado de impresora de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            var resp = applet.getPrinterState();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+
+        function getTaxPayerState(){
+            console.log('Ejecutando metodo obtener estado de contribuyente de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            var resp = applet.getTaxPayerState();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+
+        function cancelBill(){
+            console.log('Ejecutando cancelar facturar de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            applet.init();
+            //applet.setData("Datos pasados por JAVASCRIPT.");
+            //console.log("Muestro datos del applet por Javascript: " + applet.getData());
+            var resp = applet.cancelBill();
+            
+            mostrardatos(resp); 
+            
+            applet.stop();
+            console.log(resp);
+        }
+        
+        function printer()
+        {
+            var objectJSON = {
+                "documentType":"T", // Se confecionara un Tiquet-factura
+                "documentLetter":"B", //Tique-Factura B
+                "costumerName":"Miguel Miralles",
+                "costumerType" : "F", //Consumidor final
+                "costumerDocumentType":"DNI",
+                "costumerTaskID":"33439012",
+                "costumerAdress":"San Martin 156. Ciudad. MendozaMendozaMendozaMendoza. Argentina.",
+                "paymentAmmount" : "12,30",
+                "items" : [
+                    {"description" : "Item Vendido1",
+                    "unitPrice" : "5,5",
+                    "qty" : "2",
+                    "taxes" : "21,00",
+                    },
+                    {
+                    "description" : "Item Vendido2",
+                    "unitPrice" : "1,3",
+                    "qty" : "1",
+                    "taxes" : "21,00",
+                    },
+                ]
+            }
+            var objectJSON1 = {
+                "documentType":"T", // Se confecionara un Tiquet-factura
+                "documentLetter":"C", //Tique-Factura B
+                "costumerName":"Fernando Oliva",
+                "costumerType" : "F", //Consumidor final
+                "costumerDocumentType":"DNI",
+                "costumerTaskID":"33000111",
+                "costumerAdress":"Peru 512. Gllen. San Juan.",                
+                "paymentAmmount" : "1500,3",
+                "items" : [
+                    {"description" : "Item Vendido1",
+                    "unitPrice" : "500,1",
+                    "qty" : "3",
+                    "taxes" : "21,00",
+                    },
+                ]
+            }
+            console.log('Ejecutando metodo printer de Javascript.');
+            var applet = document.getElementById('applet_id'); //Objeto del applet embebido en la pagina
+            applet.init();
+            var resp = applet.printBill(JSON.stringify(objectJSON1));            
+            //var resp = applet.printBill(JSON.stringify(objectJSON1));            
+            mostrardatos(resp);            
+            applet.stop();            
+            console.log(resp);
+        }
+        
+        function mostrardatos(resp){
+            var obj = JSON.parse(resp);
+            var box = document.getElementById('container');
+            box.value = "JSON de respuesta: " ;		
+            for(var key in obj){
+                box.value +=  "\n" + key + ":" +obj[key] ;
+                if (typeof obj[key] == "object") {					
+                        var obj2 = obj[key];
+                        //alert(obj2);
+                        for(var key2 in obj2){					
+                            box.value +=  "\n \t" + key2 + ":" +obj2[key2] ;
+                        }
+                } 
+            }
+	}
+        
+        </script>
+        
+    </body>
+    
+
+    
+</html>

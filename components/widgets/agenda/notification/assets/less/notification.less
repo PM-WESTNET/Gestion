@@ -1,0 +1,144 @@
+/* 
+    CSS For notifications
+    Created on : Jul 21, 2015, 10:16:34 AM
+    Author     : smaldonado
+*/
+
+@brand-color: #BB2B54;
+@brand-light-color: #ff0149;
+@gray-color: #dadada;
+@black-color: rgba(0, 0, 0, 1);
+@danger-color: #d9534f;
+@warning-color: #f0ad4e;
+@success-color: #5cb85c;
+@info-color: #5bc0de;
+@white-color: #fff;
+
+.notification-list{
+
+    //Status Read
+    & [data-notification-status="read"]{
+
+        & a[data-notification="mark-as-read"]{
+            display: none;
+        }
+
+        opacity: 0.5;
+
+    }
+
+    //Status Unread
+    & [data-notification-status="unread"]{
+
+        & a[data-notification="mark-as-unread"]{
+            display: none;
+        }
+
+    }
+
+    & .notification-name{        
+        text-overflow: hidden;   
+    }
+
+    //Para razones de notificacion
+    & .label{
+
+        &.label-task_created, &.label-task_updated{
+            background-color: darken(@gray-color, 10%);
+        }
+        &.label-status_change, &.label-priority_changed{
+            background-color: @danger-color;
+        }
+        &.label-note_added, &.label-date_changed{
+            background-color: @warning-color;
+        }
+
+    }
+
+    //Para estados de las tareas
+    & .btn{
+
+        &.btn-in_progress{
+
+            &:hover{
+                color: #fff;
+            }
+
+            color: #fff;
+            cursor: default;
+            background-color: @info-color;
+        }
+        &.btn-created{
+
+            &:hover{
+                color: #fff;
+            }
+
+            color: #fff;
+            cursor: default;
+            background-color: darken(@gray-color, 10%);
+        }
+        &.btn-pending{
+
+            &:hover{
+                color: #fff;
+            }
+
+            color: #fff;
+            cursor: default;
+            background-color: @warning-color;
+        }
+        &.btn-stopped{
+
+            &:hover{
+                color: #fff;
+            }
+
+            color: #fff;
+            cursor: default;
+            background-color: @danger-color;
+        }
+        &.btn-completed{
+
+            &:hover{
+                color: #fff;
+            }
+
+            color: #fff;
+            cursor: default;
+            background-color: @success-color;
+        }
+
+    }
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: #fff;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #000;
+    }
+    
+    @media screen and (max-width: 1500px){
+        
+        width: 100%;
+        
+    }
+    
+    display: none;
+    z-index: 1000;
+    background-color: #eee;
+    position: fixed;
+    top: 52px;
+    right: 0;
+    width: 55%;
+    max-height: 460px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    overflow-y: auto !important;
+
+}
+

@@ -1,0 +1,18 @@
+<?php
+
+$bill_types = [
+    ['bill_type_id' => '1','name' => 'Factura A','code' => '1','type' => '','view' => 'default','multiplier' => '1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Bill','startable' => '1','applies_to_buy_book' => '1','applies_to_sale_book' => '1'],
+    ['bill_type_id' => '2','name' => 'Factura B','code' => '6','type' => '','view' => 'final','multiplier' => '1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Bill','startable' => '1','applies_to_buy_book' => NULL,'applies_to_sale_book' => '1'],
+    ['bill_type_id' => '3','name' => 'Factura C','code' => '11','type' => '','view' => 'final','multiplier' => '1','customer_required' => '1','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\bills\\Bill','startable' => '0','applies_to_buy_book' => '1','applies_to_sale_book' => '1'],
+    ['bill_type_id' => '4','name' => 'Nota Crédito A','code' => '3','type' => '','view' => 'default','multiplier' => '-1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Credit','startable' => '1','applies_to_buy_book' => '1','applies_to_sale_book' => '1'],
+    ['bill_type_id' => '5','name' => 'Nota Débito A','code' => '2','type' => '','view' => 'default','multiplier' => '1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Debit','startable' => '1','applies_to_buy_book' => '1','applies_to_sale_book' => '1'],
+    ['bill_type_id' => '6','name' => 'Cupón de Pago ','code' => '10','type' => '','view' => 'final','multiplier' => '1','customer_required' => '1','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\bills\\Bill','startable' => '1','applies_to_buy_book' => '0','applies_to_sale_book' => '0'],
+    ['bill_type_id' => '7','name' => 'Factura No Asignado','code' => '20','type' => '','view' => 'default','multiplier' => '1','customer_required' => '1','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\bills\\Bill','startable' => '0','applies_to_buy_book' => '0','applies_to_sale_book' => '0'],
+    ['bill_type_id' => '8','name' => 'Descuento','code' => '14','type' => '','view' => 'final','multiplier' => '-1','customer_required' => '1','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\bills\\Credit','startable' => '1','applies_to_buy_book' => '0','applies_to_sale_book' => '0'],
+    ['bill_type_id' => '9','name' => 'Adicional','code' => '9','type' => '','view' => 'final','multiplier' => '1','customer_required' => '1','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\bills\\Debit','startable' => '1','applies_to_buy_book' => '0','applies_to_sale_book' => '0'],
+    ['bill_type_id' => '10','name' => 'Nota Débito B','code' => '7','type' => NULL,'view' => 'final','multiplier' => '1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Debit','startable' => '1','applies_to_buy_book' => NULL,'applies_to_sale_book' => '1'],
+    ['bill_type_id' => '11','name' => 'Nota Crédito B','code' => '8','type' => NULL,'view' => 'final','multiplier' => '-1','customer_required' => '1','invoice_class_id' => '1','class' => 'app\\modules\\sale\\models\\bills\\Credit','startable' => '1','applies_to_buy_book' => NULL,'applies_to_sale_book' => '1'],
+    ['bill_type_id' => '13','name' => 'NO-USAR-Factura  B','code' => '16','type' => NULL,'view' => 'default','multiplier' => '1','customer_required' => '0','invoice_class_id' => NULL,'class' => 'app\\modules\\sale\\models\\Bill','startable' => '0','applies_to_buy_book' => '0','applies_to_sale_book' => '0']
+];
+
+return $bill_types;
