@@ -1,0 +1,30 @@
+/* 
+    Created on : Dec 3, 2015, 10:04:26 AM
+    Author     : smaldonado
+*/
+
+/*--- Ecopago BG ----*/
+.ecopago-bg{
+    
+    //After
+    &:after{
+        content: " ";
+        .position-absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.5);
+        z-index: 0;
+    }
+    
+    & > div{
+        .position-relative;
+        z-index: 1;
+    }
+    
+    .position-relative;
+    background: url(imgs/ecopago_bg.jpg) center center no-repeat;
+    background-size: cover;
+}
+/*--- end Ecopago BG ----*/

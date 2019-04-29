@@ -1,0 +1,368 @@
+﻿/*--- Helpers ----*/
+
+/*---- Full Height ----*/
+.full-height {
+
+    &.min-height {
+        max-height: none !important;
+        min-height: 100vh;
+    }
+
+    &.full-height-percentage{
+        height: 100% !important;
+        max-height: 100% !important;
+    }
+
+
+    position: relative;
+    height: 100vh;
+    max-height: 100vh;
+}
+/*---- end Full Height ----*/
+
+.position-relative {
+    position: relative;
+}
+
+.position-absolute {
+    position: absolute;
+}
+
+.position-fixed {
+    position: fixed;
+}
+
+.width-100 {
+    width: 100%;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.cursor-normal {
+    cursor: default;;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.zoomable-in {
+    cursor: zoom-in;
+}
+
+.zoomable-out {
+    cursor: zoom-out;
+}
+
+.on-scroll {
+    display: none;
+}
+
+#genericModal .modal-body {
+    .transition(opacity);
+}
+
+.transparent {
+    opacity: 0;
+}
+
+.display-block {
+    display: block;
+}
+
+.display-inline-block {
+    display: inline-block;
+}
+
+.center-block {
+    float: none !important;
+    margin: auto !important;
+}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+.no-margin-top {
+    margin-top: 0 !important;
+}
+
+.no-margin-bottom {
+    margin-bottom: 0 !important;
+}
+
+.no-margin-right {
+    margin-right: 0 !important;
+}
+
+.no-margin-left {
+    margin-left: 0 !important;
+}
+
+.no-padding {
+    padding: 0 !important;
+}
+
+.no-padding-top {
+    padding-top: 0 !important;
+}
+
+.no-padding-bottom {
+    padding-bottom: 0 !important;
+}
+
+.no-padding-right {
+    padding-right: 0 !important;
+}
+
+.no-padding-left {
+    padding-left: 0 !important;
+}
+
+.margin-full {
+    margin: @margin-width !important;
+}
+
+.margin-half {
+    margin: @margin-width * 0.5 !important;
+}
+
+.margin-quarter {
+    margin: @margin-width * 0.25 !important;
+}
+
+.margin-bottom-double {
+    margin-bottom: @margin-width*2 !important;
+}
+
+.margin-top-double {
+    margin-top: @margin-width*2 !important;
+}
+.margin-top-navbar{
+    margin-top: @navbar-height;
+}
+
+.margin-top-full {
+    margin-top: @margin-width !important;
+}
+
+.margin-bottom-full {
+    margin-bottom: @margin-width !important;
+}
+
+.margin-right-full {
+    margin-right: @margin-width !important;
+}
+
+.margin-left-full {
+    margin-left: @margin-width !important;
+}
+
+.margin-top-half {
+    margin-top: @margin-width/2 !important;
+}
+
+.margin-bottom-half {
+    margin-bottom: @margin-width/2 !important;
+}
+
+.margin-right-half {
+    margin-right: @margin-width/2 !important;
+}
+
+.margin-left-half {
+    margin-left: @margin-width/2 !important;
+}
+
+.margin-top-quarter {
+    margin-top: @margin-width/4 !important;
+}
+
+.margin-bottom-quarter {
+    margin-bottom: @margin-width/4 !important;
+}
+
+.margin-right-quarter {
+    margin-right: @margin-width/4 !important;
+}
+
+.margin-left-quarter {
+    margin-left: @margin-width/4 !important;
+}
+
+.padding-full {
+    padding: @padding-width !important;
+}
+
+.padding-half {
+    padding: @padding-width * 0.5 !important;
+}
+
+.padding-quarter {
+    padding: @padding-width * 0.25 !important;
+}
+
+.padding-top-full {
+    padding-top: @padding-width !important;
+}
+
+.padding-bottom-full {
+    padding-bottom: @padding-width !important;
+}
+
+.padding-right-full {
+    padding-right: @padding-width !important;
+}
+
+.padding-left-full {
+    padding-left: @padding-width !important;
+}
+
+.padding-top-half {
+    padding-top: @padding-width * 0.5 !important;
+}
+
+.padding-bottom-half {
+    padding-bottom: @padding-width * 0.5 !important;
+}
+
+.padding-right-half {
+    padding-right: @padding-width * 0.5 !important;
+}
+
+.padding-left-half {
+    padding-left: @padding-width * 0.5 !important;
+}
+
+.padding-top-quarter {
+    padding-top: @padding-width * 0.25 !important;
+}
+
+.padding-bottom-quarter {
+    padding-bottom: @padding-width * 0.25 !important;
+}
+
+.padding-right-quarter {
+    padding-right: @padding-width * 0.25 !important;
+}
+
+.padding-left-quarter {
+    padding-left: @padding-width * 0.25 !important;
+}
+
+.padding-top-double {
+    padding-top: @padding-width * 2 !important;
+}
+
+.padding-bottom-double {
+    padding-bottom: @padding-width * 2 !important;
+}
+
+.padding-right-double {
+    padding-right: @padding-width * 2 !important;
+}
+
+.padding-left-double {
+    padding-left: @padding-width * 2 !important;
+}
+
+.hide-overflow {
+    overflow: hidden;
+}
+
+a:hover {
+    text-decoration: none !important;
+}
+
+.disable-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/*--- Wrap ----*/
+.wrap {
+    & > .container {
+        padding: 70px 15px 20px;
+    }
+    min-height: 100%;
+    height: auto;
+    margin: 0 auto -60px;
+    padding: 0 0 60px;
+}
+
+/*--- end Wrap ----*/
+
+/*--- Valign-wrapper ----*/
+.valign-wrapper {
+
+    & .valign {
+        display: block; 
+    }
+
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+}
+/*--- end Valign-wrapper ----*/
+
+/*--- Shadow ----*/
+.z-depth-0 {
+    box-shadow: none !important; 
+}
+.z-depth-1, nav, .card-panel, .card, .toast, .btn, .btn-large, .btn-floating, .dropdown-content, .collapsible, .side-nav {
+    
+    &.z-depth-important{
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12) !important; 
+    }
+    
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12); 
+}
+.z-depth-1-half, .btn:hover, .btn-large:hover, .btn-floating:hover {
+    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15); 
+}
+.z-depth-2 {
+    box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); 
+}
+.z-depth-3 {
+    box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19); 
+}
+.z-depth-4, .modal {
+    box-shadow: 0 16px 28px 0 rgba(0, 0, 0, 0.22), 0 25px 55px 0 rgba(0, 0, 0, 0.21); 
+}
+.z-depth-5 {
+    box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22); 
+}
+/*--- end Shadow ----*/
+
+/*--- Overlay ----*/
+.overlay{
+    
+    &.overlay-white{
+        .bg-white !important;
+    }
+    
+    .position-fixed;
+    .bg-black-transparent;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    
+}
+/*--- end Overlay| ----*/
+
+/*--- end Helpers ----*/

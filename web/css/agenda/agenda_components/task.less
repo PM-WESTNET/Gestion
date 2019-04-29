@@ -1,0 +1,274 @@
+/*---- Task ----*/
+@expired-color: #dd3f3f;
+.task{
+
+    //Dentro del calendario
+    &.scheduled{
+
+        &:hover{
+            opacity: 1 !important;
+        }
+
+        overflow: hidden;
+        cursor: pointer;
+        border-radius: 0px;
+
+    }
+    
+    /* Status */
+    &.task-default, &.task-created, & .label-default{
+
+        &:hover{
+            color: darken(@gray-color, 15%);
+            background-color: @white-color;
+        }
+
+        background-color: lighten(@gray-color, 15%);
+        border: darken(@gray-color, 15%) 1px solid;
+        color: darken(@gray-color, 35%);
+    }
+    &.task-pending, & .label-pending{
+
+        &:hover{
+            color: @warning-color;
+            background-color: @white-color;
+        }
+
+        background-color: @warning-color;
+        border: darken(@warning-color, 15%) 1px solid;
+        color: @white-color;
+    }
+    &.task-in_progress, & .label-in_progress{
+
+        &:hover{
+            color: @info-color;
+            background-color: @white-color;
+        }
+
+        background-color: @info-color;
+        border: darken(@info-color, 15%) 1px solid;
+        color: @white-color;
+    }
+    &.task-completed, & .label-completed{
+
+        &:hover{
+            color: @success-color;
+            background-color: @white-color;
+        }
+
+        background-color: @success-color;
+        border: darken(@success-color, 15%) 1px solid;
+        color: @white-color;
+    }
+    &.task-stopped, & .label-stopped, & .label-task_expired{
+
+        &:hover{
+            color: @danger-color;
+            background-color: @white-color;
+        }
+
+        background-color: @danger-color;
+        border: darken(@danger-color, 15%) 1px solid;
+        color: @white-color;
+    }
+    /* end Status */
+
+    /* Expiration */
+    &.task-expiration-expired, &.task-task_expired{
+
+        .notification-name{
+            color: #fff;
+        }
+
+        &:hover{
+            background-color: rgba(red(@expired-color), green(@expired-color), blue(@expired-color), .65) !important;
+        }
+
+        background-color: rgba(red(@expired-color), green(@expired-color), blue(@expired-color), .65);
+        color: #fff !important; 
+    }
+
+    &.task-expiration-normal{
+        color: #333;
+    }
+    /* end Expiration */
+
+    /* Priorities */
+    @base-opacity : 1;
+    &.priority-4{
+
+        @priority: 1;
+        
+        &:after{
+            content: "****";
+            position: absolute;
+            right: 1px;
+            top: -2px;
+            color: #333;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
+
+        position: relative;
+        z-index: 4;
+        opacity: @base-opacity * @priority;
+    }
+    &.priority-3{
+        
+        @priority: 0.8;
+        
+        &:after{
+            content: "***";
+            position: absolute;
+            right: 1px;
+            top: -2px;
+            color: #333;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
+        
+        position: relative;
+        z-index: 3;
+        opacity: @base-opacity * @priority;
+    }
+    &.priority-2{
+        
+        @priority: 0.6;
+        
+        &:after{
+            content: "**";
+            position: absolute;
+            right: 1px;
+            top: -2px;
+            color: #333;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
+        
+        position: relative;
+        z-index: 2;
+        opacity: @base-opacity * @priority;
+    }
+    &.priority-1{
+        
+        @priority: 0.4;
+        
+        &:after{
+            content: "*";
+            position: absolute;
+            right: 1px;
+            top: -2px;
+            color: #333;
+            font-size: 14px;
+            letter-spacing: 0px;
+        }
+        
+        position: relative;
+        z-index: 1;
+        opacity: @base-opacity * @priority;
+    }
+    /* end Priorities */
+
+    /* Ownership */
+    &.task-is-owner{
+        padding: 5px;
+    }
+    &.task-is-assigned{
+        padding: 5px;
+        border: solid 3px rgba(0, 0, 0, 0.75) !important;
+    }
+    /* end Ownership */
+    
+    /* Task level (parent) */
+    &.task-is-parent{
+
+        & .fc-time{
+            display: none;
+        }
+
+        border: none;
+        background-color: lighten(@gray-color, 15%);
+        color: darken(@gray-color, 35%);
+    }
+    /* end Task level (parent) */
+    &.task-is-child{
+
+    }
+
+    &.display-none{
+        display: none !important;
+    }
+
+    &.task-on-table{
+        border-radius: 0;
+        border: none;
+        padding: 8px !important;
+    }
+
+    .transition();
+    perspective: 600px;
+    padding: 5px;
+    color: @gray-color;
+    border-radius: 0px;
+    border: solid 3px transparent !important;
+
+}
+/*---- Task ----*/
+
+/*---- Agenda day----*/
+.fullcalendar{
+
+    [data-date]{
+
+        &.fc-other-month{
+
+            & .create-new-task{
+                display: none;
+            }
+
+        }
+
+        & .create-new-task{
+
+            opacity: 0.4;
+            z-index: 100000;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 12px;
+            height: 12px;
+            color: #666;
+            padding: 0 5px;
+            cursor: pointer;
+        }
+
+        position: relative;
+
+    }
+
+}
+/*---- Agenda day----*/
+
+/*---- Task Iframe ----*/
+#task-modal{    
+    & iframe{
+        border: none !important;
+        width: 100%;
+        height: 93%;
+    }
+
+    & .modal-content{
+        height: 90%;
+    }
+
+    & .modal-body{
+        height: 100%;
+    }
+
+    & .modal-lg{
+        width: 50%;
+        height: 100%;
+    }    
+}
+/*---- Task Iframe ----*/
+
