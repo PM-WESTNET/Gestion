@@ -1,5 +1,6 @@
 <?php
 
+use kartik\export\ExportMenu;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
@@ -21,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]), ['provider-bill/create', 'provider'=>($provider ? $provider->provider_id : null )], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
+
     <?php
         $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
 
@@ -61,6 +63,9 @@ $this->params['breadcrumbs'][] = $this->title;
             return Yii::t('app', ucfirst($model->status));
         }
     ];
+
+    $export_columns = $columns;
+
     $columns[] = [
         'class' => 'app\components\grid\ActionColumn',
         'template'=>'{view} {update} {delete} {items}',
@@ -81,6 +86,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ];
     ?>
+
+    <!-- Modulo Export -->
+    <?= ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
+        'columns' => $export_columns,
+        'showConfirmAlert'=>false
+    ]);
+    ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'options' => ['class' => 'table-responsive'],
