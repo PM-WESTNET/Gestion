@@ -537,8 +537,17 @@ class PaymentController extends Controller {
         $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
+
+        $total = 0;
+        foreach($payments as $payment) {
+            $total = $total + $payment->amount;
+        }
         
-        return $this->render('pagofacil-payment-view', ['model' => $model, 'payments' => $payments]);
+        return $this->render('pagofacil-payment-view', [
+            'model' => $model,
+            'payments' => $payments,
+            'total' => $total
+        ]);
     }
     
     public function actionConfirmFile($idFile){
