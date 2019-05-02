@@ -191,9 +191,7 @@
   'Customer Category' => 'Rubro de Cliente',
   'Customer Class' => 'Categoría de Cliente',
   'Customer Classes' => 'Categorías de Cliente',
-  'Customer code' => 'Código del cliente',
   'Customer Debts' => 'Deudores',
-  'Customer document number' => 'Número de documento del cliente',
   'Customer ID' => 'ID',
   'Customer Number'=>'Número de Cliente',
   'Customer Log' => 'Historial de Cliente',
@@ -1077,4 +1075,3 @@
     'Date new customer from' => 'Fecha de cliente nuevo desde',
     'Date new customer to' => 'Fecha de cliente nuevo hasta',
 );
-

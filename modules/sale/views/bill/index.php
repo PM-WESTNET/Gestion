@@ -104,7 +104,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                         'header'=>Yii::t('app','Customer'),
                         'value'=>function($model){ if(!empty($model->customer)) return $model->customer->fullName; }
                     ],
-                    [
+ 		    [
                         'attribute' => Yii::t('app', 'Customer document number'),
                         'value' => function($model) {
                             return $model->customer ? $model->customer->document_number : '';

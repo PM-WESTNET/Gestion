@@ -1,9 +1,9 @@
 <?php
 
-use kartik\export\ExportMenu;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use kartik\export\ExportMenu;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
@@ -22,7 +22,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]), ['provider-bill/create', 'provider'=>($provider ? $provider->provider_id : null )], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
-
     <?php
         $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
 

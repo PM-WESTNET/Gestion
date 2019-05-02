@@ -3,7 +3,6 @@
 namespace app\modules\westnet\notifications\components\transports;
 
 use app\modules\mailing\components\sender\MailSender;
-use app\modules\westnet\notifications\models\IntegratechReceivedSms;
 use app\modules\westnet\notifications\models\Notification;
 use Yii;
 use yii\base\Component;

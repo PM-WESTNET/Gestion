@@ -27,7 +27,7 @@ $formatter = Yii::$app->formatter;
                 <img style="height: 100px; display: inline-block;" src="<?= Url::base(true) . "/" . ($company->getLogoWebPath() )  ?>" alt="Marca Empresa">
             </div>
             <div style="">
-                <p style="margin: 5px 0; text-transform: capitalize;"><?=$company->name?></p>
+               <!-- <p style="margin: 5px 0; text-transform: capitalize;"><?php //echo$company->name?></p> -->
                 <p style="margin: 5px 0; text-transform: capitalize;"><?=$company->address . ($company->phone? ' | Tel: '.$company->phone : '')?></p>
             </div>
         </td>
@@ -182,7 +182,10 @@ $formatter = Yii::$app->formatter;
     <tr style="">
         <td style="width: 40%; float:left; font-size: 14px; margin-top: 80px; margin-bottom: 30px;">
             <p style="text-align: center;">________________________________________</p>
-            <p style="text-align: center;">por <?=$company->name?></p>
+	    <?php if($company->company_id !== 4): ?>	
+            	<p style="text-align: center;">por <?=$company->name?></p>
+	    <?php endif;?>
+		
         </td>
         <td style="width: 30%;  float: left; min-height: 20px;">
             <h1 style="text-align: right; padding-right: 10px; margin-top: 80px; font-weight: 800; font-size: 14px;">Total recibo</h1>
@@ -198,6 +201,7 @@ $formatter = Yii::$app->formatter;
     <tr>
         <td style="width: 50%; float:left; font-size: 12px; margin-top: 10px; margin-bottom: 30px;">
             <p style="padding-right: 20px; padding-left: 20px;">Valores que serán acreditados una vez hecho el efectivo.</p>
+	    <p style="padding-right: 20px; padding-left: 20px;">Recuerde que puede retirar su factura en nuestras oficinas.</p>	
         </td>
     </tr>
     </tbody>

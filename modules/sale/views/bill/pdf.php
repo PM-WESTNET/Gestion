@@ -42,7 +42,7 @@ $companyData = $model->company;
                 <div style="margin: 10px 0 20px 0; width: 200px; height: 100px; text-align: center; display: inline-block;">
                     <img style="height: 100px; display: inline-block;" src="<?= Url::base(true) . "/" . $company->getLogoWebPath()   ?>" alt="Marca Empresa">
                 </div>
-                <h2 style="font-size:0.45cm;">CUPÓN DE PAGO</h2>
+                
                 <p style="font-size: 0.35cm;line-height: 0.4cm;font-weight: 800;">
                     Nº: <?= str_pad($model->company->defaultPointOfSale->number, 4, "0", STR_PAD_LEFT).'-'. str_pad($model->number, 8, "0", STR_PAD_LEFT)?>
                 </p>
@@ -378,25 +378,13 @@ $companyData = $model->company;
     </tr>
     <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
         <td>
-            Lugares de Pago:
+            Medios de Pago:
         </td>
     </tr>
     <tr style=" display: block; padding-bottom: 4px;padding-top: 4px;padding-left: 30px; font-size: 0.2cm">
         <td>
             <ul>
-                <?php 
-                $contract = $model->customer->getContracts()->one();
-                if($contract){
-                    if($contract->connection) {
-                        $node = $contract->connection->node;
-                        if($node){
-                            foreach($node->ecopagos as $ecopago){
-                                echo '<li>'.$ecopago->description.'</li>';
-                            }
-                        }
-                    }
-                }
-                ?>
+                <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>;
             </ul>
         </td>
     </tr>
