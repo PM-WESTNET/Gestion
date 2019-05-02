@@ -581,4 +581,43 @@ class UtilsController extends Controller
         $service = new ContractLowService();
         $service->parseLowProcess();
     }
+    public function actionCode()
+    {
+        try {
+            $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+            $file = fopen('/tmp/clientes.csv', 'w');
+
+            $sql = "select c.customer_id, c.code as codigo_cliente, co.code codigo_empresa,
+       concat( c.name, ', ', c.lastname) as cliente,
+       c.payment_code as codigo_de_pago
+        from customer c left join company co on c.company_id = co.company_id
+                left join contract con on c.customer_id = con.customer_id where c.status= 'enabled' and con.status = 'active'";
+            fputcsv($file, [
+                "customer_id",
+                "codigo_cliente",
+                "codigo_empresa",
+                "cliente",
+                "codigo_de_pago",
+                "nuevo_codigo_pago"
+            ]);
+
+            $data = \Yii::$app->db->createCommand($sql)->query()->readAll();
+            foreach($data as $row) {
+                $code = str_pad($row['codigo_empresa'], 4, "0", STR_PAD_LEFT) . ($row['codigo_empresa'] == '9999' ? '' : '000' ) .
+                    str_pad($row['codigo_cliente'], 5, "0", STR_PAD_LEFT) ;
+                fputcsv($file, [
+                    $row["customer_id"],
+                    $row["codigo_cliente"],
+                    $row["codigo_empresa"],
+                    $row["cliente"],
+                    $row["codigo_de_pago"],
+                    $generator->generate($code)
+                ]);
+            }
+            fclose($file);
+        } catch (\Exception $ex) {
+            echo $ex->getMessage()."\n";
+        }
+
+    }
 }
