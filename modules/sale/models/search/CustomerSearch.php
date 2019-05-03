@@ -384,8 +384,10 @@ class CustomerSearch extends Customer {
             $params['CustomerSearch']['amount_due'] = 0;
         }
         $query = $this->buildDebtorsQuery($params);
-        
-        Yii::$app->session->set('totalDebtors', $query->sum('saldo'));
+
+        if (isset(Yii::$app->session)) {
+            Yii::$app->session->set('totalDebtors', $query->sum('saldo'));
+        }
 
         $dataProvider = new BigDataProvider([
             'query' => $query,
