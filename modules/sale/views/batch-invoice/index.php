@@ -67,6 +67,22 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             ]);
                             ?>
                         </div>
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'invoice_date')->widget(DatePicker::classname(), [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'invoice_date',
+                                    'pluginOptions' => [
+                                        'autoclose'=>true,
+                                        'format' => 'dd-mm-yyyy',
+                                    ],
+                                   'options'=>[
+                                        'class'=>'form-control filter dates',
+                                        'placeholder'=>Yii::t('app','Date')
+                                   ]
+                            ]);?>
+                        </div>
                         <div class="col-sm-12">
                             <label> <?= Yii::t('app', 'Informative message')?></label>
                             <input class="form-control" id="bill-observation">
@@ -213,7 +229,11 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             try {
                 var date = $('#contractsearch-period').kvDatepicker('getDate');
                 date =  "01-" +  (date.getMonth() + 1) + "-" + date.getFullYear();
+                var invoice_date = $('#contractsearch-invoice_date').kvDatepicker('getDate');
+                invoice_date = invoice_date.getDate() + '-' + (invoice_date.getMonth() + 1) + "-" + invoice_date.getFullYear();
+
                 postdata['ContractSearch[period]'] = date;
+                postdata['ContractSearch[invoice_date]'] = invoice_date;
                 postdata['bill_observation'] = $('#bill-observation').val();
             } catch(e){}
 

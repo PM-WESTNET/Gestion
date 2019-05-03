@@ -38,8 +38,8 @@ class ContractSearch extends Contract {
     public $max_debt;
     public $from_date;
     public $to_date;
-    
-    
+
+    public $invoice_date;
 
     /**
      * @inheritdoc
@@ -48,8 +48,8 @@ class ContractSearch extends Contract {
         return [
             [['contract_id', 'customer_id', 'address_id', 'contracts', 'vendor_id', 'customer_number', 'zone_id'], 'integer'],
             [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date'], 'safe'],
-            [['period', 'date'], 'date'],
-            [['period', 'company_id', 'bill_type_id'], 'required', 'on' => 'for-invoice'],
+            [['period', 'date', 'invoice_date'], 'date'],
+            [['period', 'company_id', 'bill_type_id', 'invoice_date'], 'required', 'on' => 'for-invoice'],
             [['vendor_id'], 'required', 'on' => 'vendor-search']
         ];
     }
@@ -64,6 +64,7 @@ class ContractSearch extends Contract {
         $labels['last_name']= Yii::t('app', 'Lastname');
         $labels['tentative_node']= Yii::t('app', 'Tentative Node');
         $labels['zone_id']= Yii::t('app', 'Zone');
+        $labels['invoice_date']= Yii::t('app', 'Invoice Date');
         
         return $labels;
     }
@@ -73,7 +74,7 @@ class ContractSearch extends Contract {
      */
     public function scenarios() {
         $scenarios = parent::scenarios();
-        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id'];
+        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id', 'invoice_date'];
         return $scenarios;
     }
 
@@ -176,6 +177,12 @@ class ContractSearch extends Contract {
             $period = $this->period;
         } else {
             $period = new DateTime($this->period);
+        }
+
+        if ($this->invoice_date instanceof DateTime) {
+            $invoice_date = $this->invoice_date;
+        } else {
+            $invoice_date = DateTime::createFromFormat('d-m-Y', $this->invoice_date);
         }
 
         $nextPeriod = clone $period;

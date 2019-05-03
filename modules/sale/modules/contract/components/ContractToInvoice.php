@@ -304,6 +304,11 @@ class ContractToInvoice
         $paginas = ceil($cantidadTotal/100);
         $company = Company::findOne($contractSearch->company_id);
         $period = new DateTime( $contractSearch->period );
+        if( $contractSearch->invoice_date instanceof DateTime) {
+            $invoice_date = $contractSearch->invoice_date;
+        } else {
+            $invoice_date = DateTime::createFromFormat( 'd-m-Y', $contractSearch->invoice_date );
+        }
         $customers = [];
 
         try {
@@ -331,7 +336,7 @@ class ContractToInvoice
             foreach($contractsList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date) ) {
                         $afip_error = true;
                     }
                     Yii::$app->session->set('_invoice_all_', [
@@ -372,7 +377,7 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '')
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null)
     {
 
         try{
@@ -384,7 +389,7 @@ class ContractToInvoice
                 $bill->company_id = $company->company_id;
                 $bill->point_of_sale_id = $company->getDefaultPointOfSale()->point_of_sale_id;
                 $bill->customer_id = $customer_id;
-                $bill->date = $period->format('Y-m-d');
+                $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
                 $bill->save(false);
