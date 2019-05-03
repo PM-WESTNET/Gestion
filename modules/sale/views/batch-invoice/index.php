@@ -83,6 +83,28 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                                    ]
                             ]);?>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_from')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_from,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_to')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_to,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                    </div>
+                    <div>
                         <div class="col-sm-12">
                             <label> <?= Yii::t('app', 'Informative message')?></label>
                             <input class="form-control" id="bill-observation">
@@ -225,7 +247,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             var postdata = {
                 'ContractSearch[company_id]': $('#contractsearch-company_id').val(),
                 'ContractSearch[bill_type_id]': $('#contractsearch-bill_type_id').val(),
+                'ContractSearch[date_new_from]': $('#contractsearch-date_new_from').val(),
+                'ContractSearch[date_new_to]': $('#contractsearch-date_new_to').val(),
             };
+            console.log()
             try {
                 var date = $('#contractsearch-period').kvDatepicker('getDate');
                 date =  "01-" +  (date.getMonth() + 1) + "-" + date.getFullYear();
