@@ -67,6 +67,8 @@ class ContractSearch extends Contract {
         $labels['tentative_node']= Yii::t('app', 'Tentative Node');
         $labels['zone_id']= Yii::t('app', 'Zone');
         $labels['invoice_date']= Yii::t('app', 'Invoice Date');
+        $labels['date_new_from']= Yii::t('app', 'Date new customer from');
+        $labels['date_new_to']= Yii::t('app', 'Date new customer to');
         
         return $labels;
     }
