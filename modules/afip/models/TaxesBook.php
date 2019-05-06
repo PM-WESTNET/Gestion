@@ -383,4 +383,16 @@ class TaxesBook extends \app\components\companies\ActiveRecord
         return false;
     }
 
+    /**
+     * @return array
+     * Devuelve un listado de los estados posibles, para ser listados en un desplegable
+     */
+    public static function getStatusesForSelect()
+    {
+        return [
+            self::STATE_DRAFT => Yii::t('app', self::STATE_DRAFT),
+            self::STATE_CLOSED => Yii::t('app', self::STATE_CLOSED)
+        ];
+    }
+
 }

@@ -42,13 +42,20 @@ class TaxesBookController extends \app\components\web\Controller
      */
     public function actionBuy()
     {
+        $searchModel = new TaxesBookSearch();
+        $searchModel->type = 'buy';
+
+        $query = $searchModel->search(Yii::$app->request->queryParams);
+        $query->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
+
         $dataProvider = new ActiveDataProvider([
-            'query' => TaxesBook::find()->andWhere(['type'=>'buy'])->orderBy(['period' => SORT_DESC]),
+            'query' => $query,
         ]);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'type' => 'buy'
+            'type' => 'buy',
+            'searchModel' => $searchModel
         ]);
     }
 
@@ -58,9 +65,11 @@ class TaxesBookController extends \app\components\web\Controller
      */
     public function actionSale()
     {
-        $query = TaxesBook::find()
-            ->andWhere(['type'=>'sale'])
-            ->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
+        $searchModel = new TaxesBookSearch();
+        $searchModel->type = 'sale';
+
+        $query = $searchModel->search(Yii::$app->request->queryParams);
+        $query->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -68,7 +77,8 @@ class TaxesBookController extends \app\components\web\Controller
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'type' => 'sale'
+            'type' => 'sale',
+            'searchModel' => $searchModel
         ]);
     }
 
