@@ -11,7 +11,6 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 <?=
 $form->field($model, 'content')->widget(CKEditor::class, [
     'options' => ['rows' => 6, 'id' => 'content'],
-
     'clientOptions' => [
         'toolbar' => "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
     ]

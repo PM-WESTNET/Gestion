@@ -18,8 +18,8 @@ use app\modules\westnet\notifications\models\IntegratechMessage;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
 use app\modules\westnet\notifications\models\Notification;
 
-class SMSIntegratechTransport implements TransportInterface {
-
+class SMSIntegratechTransport implements TransportInterface
+{
     public function features()
     {
         return [
@@ -356,6 +356,5 @@ class SMSIntegratechTransport implements TransportInterface {
             '@Categoria' => Config::getValue('notification-replace-@Categoria'),
         ];
     }
-
 
 }

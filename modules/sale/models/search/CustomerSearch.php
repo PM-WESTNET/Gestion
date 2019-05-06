@@ -137,8 +137,9 @@ class CustomerSearch extends Customer {
 
         $query = (new Query());
         $query->distinct()
-            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone','customer.phone2', 'customer.phone3', 'customer.phone4', 'customer.email', 'customer.email2', 'cc.name as class', 'ccat.name as category', 'company.name as company'])    
-            ->from('customer')  
+            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone','customer.phone2', 'customer.phone3', 'customer.phone4', 'customer.email', 'customer.email2', 'cc.name as class', 'ccat.name as category', 'company.name as company'])
+            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone','customer.phone2', 'customer.phone3', 'customer.phone4', 'customer.email', 'customer.email2', 'cc.name as class', 'ccat.name as category', 'company.name as company'])
+            ->from('customer')
             ->leftJoin('address add', 'add.address_id = customer.address_id' )
             ->innerJoin('customer_class_has_customer cchc', 'cchc.customer_id= customer.customer_id')
             ->innerJoin(['cchc2'=> $subQueryClass], 'cchc2.customer_id = customer.customer_id and cchc.date_updated = cchc2.maxdate')

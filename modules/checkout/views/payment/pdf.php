@@ -185,7 +185,6 @@ $formatter = Yii::$app->formatter;
 	    <?php if($company->company_id !== 4): ?>	
             	<p style="text-align: center;">por <?=$company->name?></p>
 	    <?php endif;?>
-		
         </td>
         <td style="width: 30%;  float: left; min-height: 20px;">
             <h1 style="text-align: right; padding-right: 10px; margin-top: 80px; font-weight: 800; font-size: 14px;">Total recibo</h1>

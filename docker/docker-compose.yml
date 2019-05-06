@@ -1,3 +1,4 @@
+
 version: '2'
 services:
     rex-web:
@@ -46,8 +47,6 @@ services:
 networks:
     docker-net:
         driver: bridge
-            
-
 
 
     #rex-selenium:

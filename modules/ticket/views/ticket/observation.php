@@ -33,7 +33,6 @@ $this->params['breadcrumbs'][] = TicketModule::t('app', 'Observations');
     <!-- end Ticket information -->
 
     <?php if ($model->statusIsActive()) : ?>
-
         <!-- Observation form -->
         <div class="row">
             <div class="col-lg-12">

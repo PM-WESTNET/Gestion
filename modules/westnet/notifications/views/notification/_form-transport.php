@@ -44,8 +44,6 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
         </label>
     </div>
 
-
-
     <div class="form-group " id="field-email_transport_id" style="display: none;">
         <label class="control-label" for="email_transport_id"><?= MailingModule::t('Email Transport')  ?></label>
         <select id="notification-email_transport_id" class="form-control" name="Notification[email_transport_id]">

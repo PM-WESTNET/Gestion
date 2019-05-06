@@ -443,5 +443,4 @@ class TicketController extends Controller
         ];
     }
 
-
 }

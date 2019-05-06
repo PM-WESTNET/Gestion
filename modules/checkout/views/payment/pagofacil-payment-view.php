@@ -73,7 +73,6 @@ $this->params['breadcrumbs'][] = 'Pago Fácil - ' . $model->upload_date;
         [
             'attribute' => 'paymentPayment.amount',
             'format' => ['currency'],
-            'footer' => $total
         ],        
         [
             'label' => Yii::t('app', 'Status'),
@@ -113,7 +112,6 @@ $this->params['breadcrumbs'][] = 'Pago Fácil - ' . $model->upload_date;
     echo GridView::widget([
         'dataProvider' => $payments,
         'columns' => $columns,
-        'showFooter' => true
     ]); ?>        
 </div>
 

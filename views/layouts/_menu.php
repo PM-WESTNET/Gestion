@@ -434,7 +434,6 @@ if (Yii::$app->params['agenda_enabled']) {
     }
 }
 
-
 //Usuarios
 $items[] = [
     'label' => 'Usuarios',

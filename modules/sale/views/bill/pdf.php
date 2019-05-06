@@ -42,7 +42,6 @@ $companyData = $model->company;
                 <div style="margin: 10px 0 20px 0; width: 200px; height: 100px; text-align: center; display: inline-block;">
                     <img style="height: 100px; display: inline-block;" src="<?= Url::base(true) . "/" . $company->getLogoWebPath()   ?>" alt="Marca Empresa">
                 </div>
-                
                 <p style="font-size: 0.35cm;line-height: 0.4cm;font-weight: 800;">
                     Nº: <?= str_pad($model->company->defaultPointOfSale->number, 4, "0", STR_PAD_LEFT).'-'. str_pad($model->number, 8, "0", STR_PAD_LEFT)?>
                 </p>

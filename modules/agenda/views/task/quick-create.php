@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
                 ])
                 ?>
             </div>
-        
+
             <div class="col-xs-6">
                 <?= $form->field($model, 'category_id')->dropdownList(ArrayHelper::map(Category::find()->all(), 'category_id', 'name'), [
                     'encode' => false, 
@@ -194,7 +194,6 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
                              }")
                         ],
                     ]) ?>
-
                     <div id="alert-already-selected" class="alert alert-warning" style="margin-top: 15px; display: none;">
                         Usuario ya asignado.
                     </div>
@@ -233,7 +232,6 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-
             </div>
         </div>
         <?php endif; ?>

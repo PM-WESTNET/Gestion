@@ -1074,4 +1074,12 @@
     'SMS Count' => 'Cantidad de SMS',
     'Date new customer from' => 'Fecha de cliente nuevo desde',
     'Date new customer to' => 'Fecha de cliente nuevo hasta',
+    'Customer hour range' => 'Rango horario de clientes',
+    'Hour range' => 'Rango horario',
+    'Hour Range' => 'Rango horario',
+    'Create hour range' => 'Alta de rango horario',
+    'Hour Ranges' => 'Rangos Horarios',
+    'Create Hour Range' => 'Alta de rango horario',
+    'Update Hour Range' => 'Actualizar rango horario',
+    'Customer Hour range' => 'Horarios del cliente'
 );

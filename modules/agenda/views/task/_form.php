@@ -25,7 +25,7 @@ $user = User::findOne(Yii::$app->user->id);
         <div class="row margin-bottom-half">
             <div class="col-lg-12">
                 <span class="font-bold">
-                    <?= AgendaModule::t('app', 'Task creator'); ?>: 
+                    <?= AgendaModule::t('app', 'Task creator'); ?>:
                 </span>
                 <span class="label label-primary margin-right-quarter">
                     <?= $model->creator->username; ?>
@@ -47,7 +47,7 @@ $user = User::findOne(Yii::$app->user->id);
         <div class="col-sm-6">
             <?= $form->field($model, 'task_type_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\TaskType::find()->all(), 'task_type_id', 'name'), [
                 'encode' => false, 
-                'separator' => '<br/>', 
+                'separator' => '<br/>',
                 'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                     'modelClass' => AgendaModule::t('app', 'Task type'),
                 ]),
@@ -58,7 +58,7 @@ $user = User::findOne(Yii::$app->user->id);
         <div class="col-sm-6">
             <?= $form->field($model, 'category_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Category::find()->all(), 'category_id', 'name'), [
                 'encode' => false, 
-                'separator' => '<br/>', 
+                'separator' => '<br/>',
                 'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                     'modelClass' => AgendaModule::t('app', 'Category'),
                 ]),
@@ -78,7 +78,7 @@ $user = User::findOne(Yii::$app->user->id);
             <?php if($model->isNewRecord) : ?>
                 <?= $form->field($model, 'priority')->dropdownList(\app\modules\agenda\models\Task::getPriorities(), [
                     'encode' => false, 
-                    'separator' => '<br/>', 
+                    'separator' => '<br/>',
                     'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                         'modelClass' => AgendaModule::t('app', 'Priority'),
                     ]),
@@ -87,7 +87,7 @@ $user = User::findOne(Yii::$app->user->id);
             <?php else : ?>
                 <?= $form->field($model, 'priority')->dropdownList(\app\modules\agenda\models\Task::getPriorities(), [
                     'encode' => false, 
-                    'separator' => '<br/>', 
+                    'separator' => '<br/>',
                     'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                         'modelClass' => AgendaModule::t('app', 'Priority'),
                     ]),
@@ -100,7 +100,7 @@ $user = User::findOne(Yii::$app->user->id);
         <div class="col-sm-12">
             <?= $form->field($model, 'status_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Status::find()->all(), 'status_id', 'name'), [
                 'encode' => false, 
-                'separator' => '<br/>', 
+                'separator' => '<br/>',
                 'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                     'modelClass' => AgendaModule::t('app', 'Status'),
                 ]),

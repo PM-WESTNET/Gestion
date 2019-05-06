@@ -108,8 +108,5 @@ $this->params['breadcrumbs'][] = $this->title;
     foreach($model->media as $media){
         echo Preview::widget(['media' => $media]);
     }
-            
     ?>
-    
-
 </div>

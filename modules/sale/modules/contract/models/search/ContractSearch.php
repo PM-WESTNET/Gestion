@@ -51,7 +51,7 @@ class ContractSearch extends Contract {
             [['contract_id', 'customer_id', 'address_id', 'contracts', 'vendor_id', 'customer_number', 'zone_id'], 'integer'],
             [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date', 'date_new_from', 'date_new_to'], 'safe'],
             [['period', 'date', 'invoice_date'], 'date'],
-            [['period', 'company_id', 'bill_type_id', 'invoice_date'], 'required', 'on' => 'for-invoice'],
+            [['period', 'company_id', 'bill_type_id'], 'required', 'on' => 'for-invoice'],
             [['vendor_id'], 'required', 'on' => 'vendor-search']
         ];
     }
