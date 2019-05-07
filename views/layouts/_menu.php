@@ -200,6 +200,17 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
     ]];
+
+    //Reportes por empresa
+    $items[] = ['label' => ReportsModule::t('app', 'Company Reports'), 'items' => [
+        ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports-company/customers-per-month']],
+        ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports-company/costumer-variation-per-month']],
+        ['label' => ReportsModule::t('app', 'Debt Bills'), 'url' => ['/reports/reports-company/debt-bills']],
+        ['label' => ReportsModule::t('app', 'Low By Month'), 'url' => ['/reports/reports-company/low-by-month']],
+        ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
+        ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
+        ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
+    ]];
 }
 
 //Proveedores

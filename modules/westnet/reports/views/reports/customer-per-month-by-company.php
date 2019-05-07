@@ -6,8 +6,9 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use yiier\chartjs\ChartJs;
+use app\components\companies\CompanySelector;
 use yii\jui\DatePicker;
-use dosamigos\chartjs\ChartJs;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
@@ -24,6 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="customer-search">
             <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
             <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <?= CompanySelector::widget([
+                                'model' => $model,
+                                'attribute' => 'company_id',
+                                'inputOptions' => [
+                                    'prompt' => Yii::t('app', 'All')
+                                ]
+                        ])?>
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_from'); ?>
@@ -82,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'backgroundColor' => "rgba(255, 99, 132, 0.2)",
                                 'borderColor' => "rgba(255, 99, 132, 0.2)",
                                 'pointStrokeColor' => "#fff",
-                                'data' => $data
+                                'data' => $data,
                             ],
                         ]
                     ]

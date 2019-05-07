@@ -7,12 +7,13 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use dosamigos\chartjs\ChartJs;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
 /* @var $dataProvider ActiveDataProvider */
 
-$this->title = ReportsModule::t('app', 'Payment Methods');
+$this->title = ReportsModule::t('app', 'Cost effectiveness');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="customer-index">
@@ -80,8 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-12 text-center">
-            <?php
-            echo \dosamigos\chartjs\ChartJs::widget([
+            <?= ChartJs::widget([
                 'type' => 'bar',
                 'options' => [
                     'width' => 800,
@@ -97,19 +97,37 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ]);
             ?>
-
         </div>
-        <div class="row">
-            <?= Html::tag( 'h3', Yii::t('app', 'Total'))?>
-        </div>
-        <div class="row">
-            <?php
-            foreach ($payments as $item) { ?>
-                <label> <?php echo $item['payment_name'] . ' : '.Yii::$app->formatter->asCurrency($item['facturado']) . ' ('. $item['pagos'] . ' pagos)' ?></label> <br>
-            <?php } ?>
-            <img >
-        </div>
-
+        <label><?= Yii::t('app', 'Earn').' : '.Yii::$app->formatter->asCurrency($earn) ?></label> <br>
+        <label><?= Yii::t('app', 'Provider payments').' : '.Yii::$app->formatter->asCurrency($outgo) ?></label> <br>
+        <label><?= ReportsModule::t('app', 'Cost effectiveness').' : '.Yii::$app->formatter->asCurrency($earn - $outgo - $account_movements) ?></label>
     </div>
-    
+    <div style="padding-top: 20px">
+        <?= Html::label(Yii::t('app', 'References'))?>
+        <p>
+            1 - <?= Yii::t('app', 'Earn')?>: Se calcula el total cobrado por el período. (Pagos de clientes) <br>
+            2 - <?= Yii::t('app', 'Provider payments')?> : Se calcula el total pagado por el período a partir de los pagos realizados a proveedores. <br>
+            3 - <?= ReportsModule::t('app', 'Cost effectiveness')?> : <?= Yii::t('app', 'Earn')?> - <?= Yii::t('app', 'Provider payments')?> - Gastos bancarios. <br>
+                Importante: <br>
+            Sólo se incluyen retenciones o cualquier otro item pagado, si el mismo  ha sido incluído en un comprobante de pago. <br>
+            Los gastos bancarios no están incluidos en el gráfico, ya que no es posible diferenciarlos por empresas
+        </p>
+        <?= Html::label(Yii::t('app', 'Image References'))?>
+        <div class="col-md-12">
+            <div class="col-md-6" style="padding-top: 20px">
+                <?= Html::img('@web/images/report-reference/Rentabilidad1.jpg', ['class' => 'img-responsive img-rounded align-center'])?>
+            </div>
+            <div class="col-md-6" style="padding-top: 20px">
+                <?= Html::img('@web/images/report-reference/Rentabilidad2.jpg', ['class' => 'img-responsive img-rounded align-center'])?>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-6" style="padding-top: 20px">
+                <?= Html::img('@web/images/report-reference/ClientesTotalesActivos11.png', ['class' => 'img-responsive img-rounded align-center'])?>
+            </div>
+            <div class="col-md-6" style="padding-top: 20px">
+                <?= Html::img('@web/images/report-reference/ClientesSumados.jpg', ['class' => 'img-responsive img-rounded'])?>
+            </div>
+        </div>
+    </div>
 </div>

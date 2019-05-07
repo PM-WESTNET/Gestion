@@ -1,19 +1,20 @@
 <?php
 
+use app\components\companies\CompanySelector;
 use app\modules\westnet\models\search\NodeSearch;
 use app\modules\westnet\reports\ReportsModule;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
+use yiier\chartjs\ChartJs;
 use yii\jui\DatePicker;
-use dosamigos\chartjs\ChartJs;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
 /* @var $dataProvider ActiveDataProvider */
 
-$this->title = ReportsModule::t('app', 'Active Customers per month');
+$this->title = ReportsModule::t('app', 'Low By Month');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
     <div class="customer-index">
@@ -24,6 +25,17 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="customer-search">
             <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
             <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <?= CompanySelector::widget([
+                            'model' => $model,
+                            'attribute' => 'company_id',
+                            'inputOptions' => [
+                                'prompt' => Yii::t('app', 'All')
+                            ]
+                        ])?>
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_from'); ?>
@@ -59,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success pull-right']) ?>
+                    <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
@@ -78,11 +90,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'labels' => $cols,
                         'datasets' => [
                             [
-                                'label' => \Yii::t('app', 'Customers'),
+                                'label' => \Yii::t('app', 'Percentage'),
                                 'backgroundColor' => "rgba(255, 99, 132, 0.2)",
                                 'borderColor' => "rgba(255, 99, 132, 0.2)",
                                 'pointStrokeColor' => "#fff",
-                                'data' => $data
+                                'data' => $data,
                             ],
                         ]
                     ]
@@ -93,8 +105,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <div style="padding-top: 20px">
             <?= Html::label(Yii::t('app', 'References'))?>
             <p>
-                Se tienen en cuenta los contratos activos que la fecha de finalización sea menor al dia de la consulta (ultimo dia del mes) o sea nula.
+                Se filtran todos los contratos con estado baja, dentro del período.
             </p>
-            <img >
+            <?= Html::label(Yii::t('app', 'Image References'))?>
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <?= Html::img('@web/images/report-reference/BajasTotales.jpg', ['class' => 'img-responsive img-rounded align-center'])?>
+                </div>
+            </div>
         </div>
     </div>
