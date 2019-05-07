@@ -1291,4 +1291,9 @@ class Customer extends ActiveRecord {
             'ticket_status' => $ticket ? $ticket->status->name : ''
         ];
     }
+
+    public static function verifyEmails($data, $field = "email")
+    {
+
+    }
 }

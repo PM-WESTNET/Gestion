@@ -166,8 +166,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '35875225',
-            'document_type_id' => 2,
+            'document_number' => '20358752250',
+            'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -182,8 +182,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '1000000',
-            'document_type_id' => 2,
+            'document_number' => '2010000000',
+            'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -296,6 +296,54 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Has no tickets', $response['customer_code'])->equals(59809);
         expect('Has no tickets', $response['has_ticket'])->equals(true);
         expect('Has no tickets', $response['ticket_status'])->equals('nuevo');
+
+    }
+
+    public function testVerifyEmails ()
+    {
+        $resources = fopen(Yii::getAlias('@app/tests/_data/elastics_email_test.csv'), 'r');
+
+        if ($resources) {
+            //$data = fgetcsv($resources, null, ',');
+
+            Customer::verifyEmails($resources);
+            Customer::verifyEmails($resources, 'email2');
+
+            $customers = Customer::find()->all();
+            $emails = [];
+
+            foreach ($customers as $customer) {
+                $emails[$customer->email] = $customer->email_status;
+                $emails[$customer->email2] = $customer->email2_status;
+            }
+
+
+
+            $row_index = 0;
+            while (($row = fgetcsv($resources, null, ',')) !== false) {
+
+                if ($row_index > 0) {
+                    \Codeception\Util\Debug::debug(print_r($row,1));
+                    $email = $row[0];
+                    $status = $row[1];
+
+                    if ($emails[$email] !== strtolower($status)) {
+                        expect($email . ' esperaba '. $status. ' y venia '. $emails[$email], false)->true();
+                        return;
+                    }
+                }
+
+                $row_index++;
+
+            }
+
+            expect('Fail', true)->true();
+            return;
+        }
+
+        expect('Cant open file', true)->false();
+
+
 
     }
 }
