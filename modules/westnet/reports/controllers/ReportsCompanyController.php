@@ -143,7 +143,7 @@ class ReportsCompanyController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
-            if ($this->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if ($item['company_id'] && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $company = Company::findOne($item['company_id']);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item['porcentage'];

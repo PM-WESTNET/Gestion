@@ -102,8 +102,8 @@ class ReportsCompanyController extends Controller
     {
         $rs = new ReportCompanyDataService();
         if($fromBeginning) {
-            ReportCompanyData::deleteAll(['report'=>ReportData::REPORT_UP]);
-            ReportCompanyData::deleteAll(['report'=>ReportData::REPORT_DOWN]);
+            ReportCompanyData::deleteAll(['report' => ReportCompanyData::REPORT_UP]);
+            ReportCompanyData::deleteAll(['report' => ReportCompanyData::REPORT_DOWN]);
 
             $date = new \DateTime('2010-01-31');
             do {
@@ -118,7 +118,7 @@ class ReportsCompanyController extends Controller
             if($theDate) {
                 $date = new \DateTime($theDate);
             } else {
-                $date = new \DateTime('last day of this month'); //new \DateTime('2010-01-31');
+                $date = new \DateTime('last day of this month');
                 if(!$this->isLastDayOfMonth()){
                     return;
                 }
