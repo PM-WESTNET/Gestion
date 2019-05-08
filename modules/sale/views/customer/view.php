@@ -170,8 +170,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
         ],
-        'email:email',
-        'email2:email',
+        [
+            'attribute' => 'email',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email). ' ('. Yii::t('app',ucfirst($model->email_status)). ')';
+            },
+            'format' => 'raw'
+        ],
+        [
+            'attribute' => 'email2',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email2). ' ('. Yii::t('app',ucfirst($model->email2_status)). ')';
+            },
+            'format' => 'raw'
+        ],
         'phone',
         'phone2',
         'phone3',

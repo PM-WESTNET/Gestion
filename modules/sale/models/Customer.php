@@ -442,6 +442,15 @@ class Customer extends ActiveRecord {
                         if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
                         }
+
+                        if ($attr === 'email') {
+                            $this->updateAttributes(['email_status' => 'invalid']);
+                        }
+
+                        if ($attr === 'email2') {
+                            $this->updateAttributes(['email2_status' => 'invalid']);
+                        }
+
                         switch ($attr){
                             case 'address_id':
                                 $oldAddress= Address::findOne(['address_id' => $oldValue]);
