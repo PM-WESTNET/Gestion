@@ -35,8 +35,8 @@ class m190429_214451_add_total_into_pagomiscuentas_table extends Migration
                     $total = $total + $payment->amount;
                 }
             }
+            $pago_mis_cuentas_file->updateAttributes(['total' => $total]);
         }
-        $pago_mis_cuentas_file->updateAttributes(['total' => $total]);
     }
 
     /**
@@ -44,6 +44,6 @@ class m190429_214451_add_total_into_pagomiscuentas_table extends Migration
      */
     public function safeDown()
     {
-        $this->addColumn('pagomiscuentas_file', 'total');
+        $this->dropColumn('pagomiscuentas_file', 'total');
     }
 }
