@@ -145,6 +145,7 @@ if (Yii::$app->getModule('afip')) {
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
         ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
+        ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
     ]];
 //}
 

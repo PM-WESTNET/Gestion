@@ -1294,6 +1294,32 @@ class Customer extends ActiveRecord {
 
     public static function verifyEmails($data, $field = "email")
     {
+        $row_index = 0;
+        $results = [
+            'total' => 0,
+            'active' => 0,
+            'inactive' => 0,
+            'bounced' => 0
+        ];
+        while (($row = fgetcsv($data)) !== false) {
+            Yii::info(print_r($row, 1), 'data');
+            if ($row_index > 0) {
+                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
 
+                foreach ($customers as $customer) {
+                    $status_field = $field.'_status';
+                    $customer->$status_field = strtolower($row[1]);
+                    $customer->updateAttributes([$status_field]);
+
+                    $results['total']++;
+                    $results[strtolower($row[1])]++;
+
+                }
+            }
+
+            $row_index++;
+        }
+
+        return $results;
     }
 }
