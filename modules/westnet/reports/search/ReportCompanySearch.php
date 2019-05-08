@@ -62,10 +62,9 @@ class ReportCompanySearch extends Model
             ->select(['c.*', 'cus.company_id'])
             ->from('contract c')
             ->leftJoin('customer cus', 'cus.customer_id = c.customer_id')
-            ->andWhere(new Expression('c.status = \'active\' 
+            ->andWhere(new Expression('c.status = \'active\'
                     AND (( date_format(c.from_date, \'%Y%m%d\') <= :fecha ) && (c.to_date is null || date_format(c.to_date, \'%Y%m%d\') <= :fecha  )  )'))
-            ->addParams([':fecha' => (int)$fecha->format('Ymd')])
-            ->groupBy(['cus.company_id']);
+            ->addParams([':fecha' => (int)$fecha->format('Ymd')]);
 
         $total_count = [];
         foreach ($query->all() as $contract_qty) {
