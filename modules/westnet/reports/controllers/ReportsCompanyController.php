@@ -53,7 +53,7 @@ class ReportsCompanyController extends Controller
      */
     public function actionCustumerVariationPerMonth()
     {
-        $search = new ReportSearch();
+        $search = new ReportCompanySearch();
         $data = $search->findCustomerVariationPerMonth((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
         $from = new \DateTime($search->date_from);
         $to = new \DateTime($search->date_to);

@@ -81,6 +81,9 @@ class ReportsCompanyController extends Controller
 
             try {
                 $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_1);
+                $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_2);
+                $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_3);
+                $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_4);
             } catch (\Exception $ex) {
                 error_log($ex->getMessage());
             }
