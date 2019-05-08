@@ -31,7 +31,7 @@ class ReportsCompanyController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item->period . '01');
-            if($item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if($item->company_id && $item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $company = Company::findOne($item->company_id);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item->value;
@@ -66,8 +66,8 @@ class ReportsCompanyController extends Controller
 
         foreach ($data as $item) {
             $date = new \DateTime($item['periodo'] . '-01');
-            $company = Company::findOne($item['company_id']);
-            if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if ($item['company_id'] && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                $company = Company::findOne($item['company_id']);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item['diferencia'];
 
@@ -105,8 +105,8 @@ class ReportsCompanyController extends Controller
 
             foreach ($data as $item) {
                 $date = new \DateTime($item['period'] . '01');
-                $company = Company::findOne($item['company_id']);
-                if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                if ($item['company_id'] && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                    $company = Company::findOne($item['company_id']);
                     $cols[] = $date->format('m-Y') . ' - ' . $company->name ;
                     $datas[] = $item['value'];
                 }
@@ -143,8 +143,8 @@ class ReportsCompanyController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
-            $company = Company::findOne($item['company_id']);
-            if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if ($this->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                $company = Company::findOne($item['company_id']);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item['porcentage'];
             }
@@ -181,9 +181,9 @@ class ReportsCompanyController extends Controller
             $earn += $item['facturado'];
             $outgo += $item['pagos'];
             $account_movements += $item['pagos_account'];
-            $company = Company::findOne($item['company_id']);
 
-            if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if ($item['company_id'] && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                $company = Company::findOne($item['company_id']);
                 $labels[] = $date->format('m-Y') .' - '. $company->name;
                 $diff_facturado = $item['facturado'] > 0 ? $item['diferencia'] / $item['facturado'] : $item['diferencia'] / abs($item['diferencia']);
                 $rentabilidad[] = round($diff_facturado * 100, 2);
@@ -226,8 +226,8 @@ class ReportsCompanyController extends Controller
         $bajas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . "01");
-            $company = Company::findOne($item['company_id']);
-            if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if ($item['company_id'] && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                $company = Company::findOne($item['company_id']);
                 $labels[] = $date->format('m-Y'). ' - ' . $company->name;
                 $altas[] = $item['up'];
                 $bajas[] = $item['down'];
