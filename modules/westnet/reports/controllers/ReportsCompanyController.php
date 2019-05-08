@@ -31,8 +31,8 @@ class ReportsCompanyController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item->period . '01');
-            $company = Company::findOne($item->company_id);
-            if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if($item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+                $company = Company::findOne($item->company_id);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item->value;
             }
@@ -185,7 +185,8 @@ class ReportsCompanyController extends Controller
 
             if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $labels[] = $date->format('m-Y') .' - '. $company->name;
-                $rentabilidad[] = round(($item['diferencia'] / $item['facturado']) * 100, 2);
+                $diff_facturado = $item['facturado'] > 0 ? $item['diferencia'] / $item['facturado'] : $item['diferencia'] / abs($item['diferencia']);
+                $rentabilidad[] = round($diff_facturado * 100, 2);
             }
         }
 
