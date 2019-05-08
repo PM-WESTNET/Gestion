@@ -38,7 +38,9 @@ class ReportCompanyDataService
             $companies_contract_qty = (new ReportCompanySearch())->countActiveContracts($fecha);
 
             foreach ($companies_contract_qty as $company_id => $qty) {
-                $this->save(ReportCompanyData::REPORT_ACTIVE_CONNECTION, $fecha->format('Ym'), $qty, $company_id);
+                if($company_id) {
+                    $this->save(ReportCompanyData::REPORT_ACTIVE_CONNECTION, $fecha->format('Ym'), $qty, $company_id);
+                }
             }
         } catch (\Exception $ex) {
             throw $ex;
@@ -56,14 +58,6 @@ class ReportCompanyDataService
 
             $cant = substr($report, -1);
 
-            error_log($search->buildDebtorsQuery([
-                'CustomerSearch' => [
-                    'toDate' => $periodo->modify('last day of this month')->format('Y-m-d'),
-                    'debt_bills_from' => $cant,
-                    'debt_bills_to' =>  $cant
-                ]
-            ])->select(['count(*)'])->createCommand()->getRawSql());
-
             $debt_query = [];
             $debt_query = $search->buildDebtorsQuery([
                 'CustomerSearch' => [
@@ -76,7 +70,9 @@ class ReportCompanyDataService
             //relleno el array con porcentaje diferenciado por empresa
             $companies_debt_qty = [];
             foreach ($debt_query as $company_debt_qty) {
-                $companies_debt_qty[$company_debt_qty['customer_company']] = (array_key_exists($company_debt_qty['customer_company'], $companies_debt_qty) ? $companies_debt_qty['customer_company'] : 0 ) + 1 ;
+                if(array_key_exists('customer_company', $companies_debt_qty)) {
+                    $companies_debt_qty[$company_debt_qty['customer_company']] = (array_key_exists($company_debt_qty['customer_company'], $companies_debt_qty) ? $companies_debt_qty['customer_company'] : 0 ) + 1 ;
+                }
             }
 
             //Guardo los registros en la tabla
