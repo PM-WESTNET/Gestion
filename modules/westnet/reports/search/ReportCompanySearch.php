@@ -85,7 +85,7 @@ class ReportCompanySearch extends Model
     {
         $this->load($params);
 
-        $query = ReportData::find()
+        $query = ReportCompanyData::find()
             ->where(['report' => ReportData::REPORT_ACTIVE_CONNECTION])
             ->orderBy(['period' => SORT_ASC]);
 
