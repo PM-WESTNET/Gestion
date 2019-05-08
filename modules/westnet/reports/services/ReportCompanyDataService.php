@@ -70,7 +70,7 @@ class ReportCompanyDataService
             //relleno el array con porcentaje diferenciado por empresa
             $companies_debt_qty = [];
             foreach ($debt_query as $company_debt_qty) {
-                if(array_key_exists('customer_company', $companies_debt_qty)) {
+                if(array_key_exists('customer_company', $company_debt_qty)) {
                     $companies_debt_qty[$company_debt_qty['customer_company']] = (array_key_exists($company_debt_qty['customer_company'], $companies_debt_qty) ? $companies_debt_qty['customer_company'] : 0 ) + 1 ;
                 }
             }

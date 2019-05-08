@@ -62,6 +62,7 @@ class ReportsCompanyController extends Controller
             $date = new \DateTime('2018-01-31');
             do {
                 try {
+                    echo "\n Iniciando ".$date->format('Y-m-d') ."\n";
                     $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_1);
                     $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_2);
                     $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_3);
@@ -83,6 +84,7 @@ class ReportsCompanyController extends Controller
             }
 
             try {
+                echo "\n Iniciando ".$date->format('Y-m-d') ."\n";
                 $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_1);
                 $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_2);
                 $rs->saveDebtBills($date, ReportCompanyData::REPORT_DEBT_BILLS_3);
