@@ -136,7 +136,7 @@ class ReportCompanySearch extends Model
         $query
             ->select(['periodo', new Expression('sum(alta) as alta'), new Expression('sum(baja) as baja'), new Expression('sum(alta) - sum(baja) as diferencia'), 'company_id'])
             ->from(['t' => $queryActive])
-            ->groupBy('periodo', 'company_id');
+            ->groupBy(['periodo', 'company_id']);
 
         return $query->all();
     }
@@ -303,7 +303,7 @@ class ReportCompanySearch extends Model
         $query = (new Query())
             ->select(['u.period', 'd.value as down', 'u.value as up', 'u.company_id'])
             ->from('report_company_data u')
-            ->innerJoin('report_company_data d', 'u.period = d.period')
+            ->innerJoin('report_company_data d', 'u.period = d.period and u.company_id = d.company_id')
             ->where('( u.report = \'up\' and d.report = \'down\')');
 
         if($this->company_id) {
