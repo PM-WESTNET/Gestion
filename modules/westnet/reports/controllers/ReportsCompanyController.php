@@ -21,7 +21,7 @@ class ReportsCompanyController extends Controller
      */
     public function actionCustomersPerMonth()
     {
-        $search = new ReportSearch();
+        $search = new ReportCompanySearch();
         $data = $search->findReportDataActiveContracts((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
 
         $from = new \DateTime($search->date_from);
@@ -31,7 +31,7 @@ class ReportsCompanyController extends Controller
         $datas = [];
         foreach ($data as $item) {
             $date = new \DateTime($item->period . '01');
-            if($item->company_id && $item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
+            if($item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $company = Company::findOne($item->company_id);
                 $cols[] = $date->format('m-Y') . ' - ' . $company->name;
                 $datas[] = $item->value;
