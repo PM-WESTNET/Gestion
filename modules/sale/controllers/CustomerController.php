@@ -25,6 +25,8 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use SoapClient;
+use yii\web\UploadedFile;
+use yii2fullcalendar\yii2fullcalendar;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -750,6 +752,43 @@ class CustomerController extends Controller
         }
 
         return $this->redirect(['view', 'id' => $customer->customer_id]);
+    }
+
+    public function actionVerifyEmails()
+    {
+        $results = [];
+
+        if (Yii::$app->request->isPost) {
+            $files = UploadedFile::getInstancesByName('files');
+            if (empty($files)) {
+                Yii::$app->session->addFlash('error', Yii::t('app','You must select at least a file'));
+                return $this->render('verify-emails', ['results' => $results]);
+            }
+
+
+            foreach ($files as $file) {
+                $resource = fopen($file->tempName, 'r');
+
+                if ($resource === false) {
+                    Yii::$app->session->addFlash('error', Yii::t('app','Cant open files'));
+                    return $this->render('verify-emails', ['results' => $results]);
+                }
+
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+
+                foreach ($partial_result as $key => $r) {
+                    if (isset($results[$key])) {
+                        $results[$key] = $results[$key] + $r;
+                    }else {
+                        $results[$key] = $r;
+                    }
+                }
+            }
+        }
+
+        return $this->render('verify-emails', ['results' => $results]);
+
+
     }
 
 }
