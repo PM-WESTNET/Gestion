@@ -22,13 +22,14 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <div class="customer-search">
-        <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
+        <?php $form = ActiveForm::begin(['method' => 'GET']); ?>
         <div class="row">
             <div class="col-sm-12">
                 <div class="form-group">
                     <?= CompanySelector::widget([
                         'model' => $model,
                         'attribute' => 'company_id',
+                        'setDefaultCompany' => false,
                         'inputOptions' => [
                             'prompt' => Yii::t('app', 'All')
                         ]

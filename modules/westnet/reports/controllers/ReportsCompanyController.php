@@ -165,7 +165,7 @@ class ReportsCompanyController extends Controller
     public function actionCostEffectiveness()
     {
         $search = new ReportCompanySearch();
-        $data = $search->findCostEffectiveness((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $data = $search->findCostEffectiveness(Yii::$app->request->getQueryParams());
 
         $from = new \DateTime($search->date_from);
         $to = new \DateTime($search->date_to);

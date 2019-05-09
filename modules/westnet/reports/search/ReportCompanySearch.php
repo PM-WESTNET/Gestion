@@ -245,18 +245,21 @@ class ReportCompanySearch extends Model
 
         $queryPaymentCobrado = new Query();
         $queryPaymentCobrado
-            ->select([new Expression("p.date as fecha"), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'), new Expression('0 as pagos_account'), 'p.company_id'])
+            ->select([new Expression('date_format(p.date, \'%Y-%m\') as period'), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'), new Expression('0 as pagos_account'), 'p.company_id'])
             ->from(['payment p'])
             ->leftJoin('payment_item pi', 'p.payment_id = pi.payment_id')
             ->leftJoin('payment_method m', 'pi.payment_method_id = m.payment_method_id')
-            ->where('m.payment_method_id is not null')
-            ->groupBy(['p.date'])
+            ->where(['and',['not', ['m.payment_method_id' => null]], ['p.status' => 'closed']])
+            ->groupBy(['period', 'company_id'])
         ;
 
         $queryPayment = new Query();
         $queryPayment
-            ->select(['pp.date as fecha', new Expression('0 AS facturado'), 'pp.amount AS pagos', new Expression('0 as pagos_account'), 'pp.company_id'])
-            ->from(['provider_payment pp']);
+            ->select([new Expression('date_format(pp.date, \'%Y-%m\') as period'), new Expression('0 AS facturado'), 'sum(pp.amount) AS pagos', new Expression('0 as pagos_account'), 'pp.company_id'])
+            ->from(['provider_payment pp'])
+            ->where(['pp.status' => 'closed'])
+            ->groupBy(['period', 'company_id'])
+        ;
 
         if ($this->date_from) {
             $queryPaymentCobrado->andWhere(['>=', 'p.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
@@ -277,17 +280,18 @@ class ReportCompanySearch extends Model
         $query = new Query();
         $query
             ->select([
-                new Expression('date_format(fecha, \'%Y-%m\') AS period'), new Expression('round(sum(facturado)) as facturado'),
+                'period', new Expression('round(sum(facturado)) as facturado'),
                 new Expression('round(sum(pagos)) as pagos'),
                 new Expression('round(sum(pagos_account)) as pagos_account'),
                 new Expression('round(sum(facturado) - sum(pagos) - sum(pagos_account)) as diferencia'),
                 'company_id'
             ])
             ->from(['a' => $queryPaymentCobrado])
-            ->groupBy([new Expression('date_format(fecha, \'%m/%Y\'), company_id')])
-            ->orderBy(['date_format(fecha, \'%Y%m\')' => SORT_ASC]);
+            ->groupBy(['period', 'company_id'])
+            ->orderBy(['period' => SORT_ASC]);
 
         return $query->all();
+
     }
 
     /**
