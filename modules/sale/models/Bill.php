@@ -1475,4 +1475,19 @@ class Bill extends ActiveRecord implements CountableInterface
         $this->ein_expiration = $ein_expiration;
         return $this->save(['ein' => $ein, 'ein_expiration' => $ein_expiration]);
     }
+
+
+    /**
+     * @param $bill_number_to
+     * @return bool
+     * Actualiza el bill_number_to del comprobante sólo si esta en estado closed.
+     */
+    public function updateBillNumberTo($bill_number_to) {
+
+        if($this->status != 'closed') {
+            return false;
+        }
+
+        return $this->save(['bill_number_to' => $bill_number_to]);
+    }
 }

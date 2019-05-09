@@ -1,13 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
-use yii\widgets\DetailView;
-use app\modules\sale\components\BillExpert;
 use yii\helpers\Url;
 use app\components\helpers\UserA;
-use yii\bootstrap\Modal;
-
+use app\modules\sale\models\DocumentType;
 
 /**
  * @var yii\web\View $this
@@ -25,13 +21,13 @@ $formatter = Yii::$app->formatter;
         <h1><?= $this->title ?></h1>
         <p>
             <?php if($model->isEditable): ?>
-            <a class="btn btn-primary " href="<?= \yii\helpers\Url::toRoute(['bill/update','id'=>$model->bill_id]) ?>">
+            <a class="btn btn-primary " href="<?= Url::toRoute(['bill/update','id'=>$model->bill_id]) ?>">
                 <span class="glyphicon glyphicon-pencil"></span> <?= Yii::t('app','Update'); ?>
             </a>
             <?php endif; ?>
 
             <?php if($model->status != 'closed'): ?>
-            <a id="closeBill" class="btn btn-danger <?= (!$model->customer_id) ? ' disabled' : '' ?>" href="<?= \yii\helpers\Url::toRoute(['bill/close','id'=>$model->bill_id]) ?>">
+            <a id="closeBill" class="btn btn-danger <?= (!$model->customer_id) ? ' disabled' : '' ?>" href="<?= Url::toRoute(['bill/close','id'=>$model->bill_id]) ?>">
                 <span class="glyphicon glyphicon-remove"></span> <?= Yii::t('app','Close'); ?>
             </a>
             <?php endif; ?>
@@ -52,7 +48,21 @@ $formatter = Yii::$app->formatter;
                     'id' => 'btn-ein-modal'
                 ]);
             } ?>
-            <a class="btn btn-default" href="<?= \yii\helpers\Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
+
+            <!-- Se agrega la opcion de cargar el campo "comprobante hasta", solo a los comprobantes que pertenezcan a un cliente con tipo de documento "venta global diaria".
+                Este campo será utilizado para el envio de comprobantes por lotes al sistema S.I.Ap -->
+            <?php if($model->customer) {
+                if($model->customer->document_type_id == DocumentType::getTypeVentaGlobalDiaria()->document_type_id) {
+                    echo Html::a( Yii::t('app', 'Set bill number to'), ['#'], [
+                        'class' => 'btn btn-default',
+                        'data-toggle' => 'modal',
+                        'data-target' => '#bill-number-modal',
+                        'id' => 'btn-bill-number-modal'
+                    ]);
+                }
+            } ?>
+
+            <a class="btn btn-default" href="<?= Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
         </p>
     </div>
     <h4  class="text-center font-bold">
@@ -185,7 +195,7 @@ $formatter = Yii::$app->formatter;
                 </div>
                 <?php if(!$model->payed && $model->customer !== null && $model::$payable && Yii::$app->getModule('checkout')): ?>
                     <div class="text-center " >
-                        <a class="btn btn-success btn-lg" href="<?= yii\helpers\Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>"><span class="glyphicon glyphicon-usd"></span> <?= Yii::t('app', 'Pay') ?></a>
+                        <a class="btn btn-success btn-lg" href="<?= Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>"><span class="glyphicon glyphicon-usd"></span> <?= Yii::t('app', 'Pay') ?></a>
                     </div>
                 <?php endif; ?>
             <?php else: ?>
@@ -196,7 +206,7 @@ $formatter = Yii::$app->formatter;
                 <div class="row">
                     <div class="col-lg-6">
                         <a class="btn btn-danger btn-sm" style="margin-left: 10px;"
-                           href="<?= yii\helpers\Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>"> <?= Yii::t('app', 'Pay') ?>
+                           href="<?= Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>"> <?= Yii::t('app', 'Pay') ?>
                         </a>
                     </div>
                 </div>
@@ -206,7 +216,7 @@ $formatter = Yii::$app->formatter;
         <?php endif; ?>
         
         <div class="col-lg-12 text-right">
-            <a class="btn btn-default" href="<?= \yii\helpers\Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
+            <a class="btn btn-default" href="<?= Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
             <?= $this->render('_generator', ['model' => $model]) ?>
         </div>
         
@@ -287,6 +297,10 @@ $formatter = Yii::$app->formatter;
 
     <!--Modal para actualizar el CAE y la fecha de vencimiento-->
     <?= $this->render('_modal-ein') ?>
+
+    <!-- Modal para ingresar número de comprobante hasta -->
+    <?= $this->render('_modal-bill-number-to') ?>
+
 </div>
 
 <script>
@@ -306,7 +320,33 @@ $formatter = Yii::$app->formatter;
                     $("#ein-modal").modal('hide');
                 }
             });
+
+            //Setea el número de comprobante hasta
+            $("#btn-set-bill-number").on('click', function (evt) {
+                evt.preventDefault();
+                if($('#input-bill-number-to').val() == '') {
+                    alert('Debe completar el campo');
+                } else {
+                    Bill.setBillNumberTo($('#input-bill-number-to').val());
+                    $("#bill-number-modal").modal('hide');
+                }
+            // });
         }
+
+        this.setBillNumberTo = function (bill_number_to) {
+            $.ajax({
+                url: "<?= Url::toRoute('set-bill-number-to') ?>",
+                method: 'get',
+                dataType: 'json',
+                data: {bill_id: <?= $model->bill_id?>, bill_number_to: bill_number_to}
+            }).done(function (response) {
+                if(response.status == 'success') {
+                    window.location.reload();
+                } else {
+                    alert(response.msg);
+                }
+            });
+        };
 
         this.setEin = function (ein, ein_expiration) {
             $.ajax({

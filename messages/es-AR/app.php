@@ -1096,4 +1096,6 @@
     'Cant open files' => 'No se pueden abrir los archivos',
     'Invalid' => 'Pendiente de Verificación',
     'Bounced' => 'Rebotado',
+    'Bill not found' => 'Comprobante no encontrado',
+    'Bill number to cant be updated' => 'El número de comprobante hasta no puede ser actualizado',
 );

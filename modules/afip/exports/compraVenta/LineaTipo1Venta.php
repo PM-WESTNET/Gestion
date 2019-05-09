@@ -51,7 +51,7 @@ class LineaTipo1Venta extends AbstractLine
 
         $this->line .= sprintf("%'.05d", $values['punto_de_venta']);
         $this->line .= sprintf("%'.020d", (((int) substr($bill_number, -8)) == 0) ? 1 : substr($bill_number, -8));
-        $this->line .= sprintf("%'.020d", $values['numero_comprobante']);
+        $this->line .= sprintf("%'.020d", $values['numero_comprobante']); // comprobante hasta ? hasta : $values['numero_comprobante']
         $this->line .= sprintf("%'.02d", $values['tipo_documento']);
         $this->line .= sprintf("%'.020d", str_replace("-", "", $values['numero_documento']));
         $this->line .= substr(str_pad( iconv('UTF-8', 'ASCII//TRANSLIT', mb_strtoupper($values['empresa'])), 30, " "), 0,30);

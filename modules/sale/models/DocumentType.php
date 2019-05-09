@@ -142,4 +142,9 @@ class DocumentType extends \app\components\db\ActiveRecord
         }
     }
 
+    public static function getTypeVentaGlobalDiaria()
+    {
+        return DocumentType::findOne(['code' => '99']);
+    }
+
 }

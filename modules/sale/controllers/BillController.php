@@ -1014,7 +1014,7 @@ class BillController extends Controller
     }
 
     /**
-     * Permite actualizar el CAE y fecha de vencimiento de un comprobante y devuelve la vista a la vista del comprobante
+     * Permite actualizar el CAE y fecha de vencimiento de un comprobante.
      */
     public function actionUpdateEinAndEinExpiration($bill_id, $ein, $ein_expiration)
     {
@@ -1032,6 +1032,36 @@ class BillController extends Controller
         return [
             'status' => 'error',
             'msg' => Yii::t('app', 'Ein and ein expiration cant be updated')
+        ];
+
+    }
+
+    /**
+     * Permite actualizar el "numbero de comprobante hasta" de un comprobante.
+     */
+    public function actionUpdateBillNumberTo($bill_id, $bill_number_to)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = $this->findModel($bill_id);
+
+        if(!$model) {
+            return [
+                'status' => 'error',
+                'msg' => Yii::t('app', 'Bill not found')
+            ];
+        }
+
+        if($model->updateBillnumberTo($bill_number_to)) {
+            return [
+                'status' => 'success',
+                'msg' => ''
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'msg' => Yii::t('app', 'Bill number to cant be updated')
         ];
 
     }
