@@ -396,7 +396,6 @@ var Ticket = new function () {
                 $('#div-mesa-user').show();
                 $('#mesa-user').html(self.getExternalUser(external_user_id));
             } else {
-                console.log($(this).val());
                 self.setCategoryResponsibleUser(event,$(this).val());
                 $('#user-selection').show();
                 //$('#user-selection input').removeAttr('disabled');

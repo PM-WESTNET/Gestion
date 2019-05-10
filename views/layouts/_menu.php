@@ -50,6 +50,7 @@ foreach ($billTypes2Create as $item) {
 // Agrego Facturacion masiva
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice'), 'url' => ['/sale/batch-invoice/index']];
+$billItems[] = ['label' => Yii::t('app', 'Batch Invoice with filters'), 'url' => ['/sale/batch-invoice/index-with-filters']];
 $billItems[] = ['label' => Yii::t('app','Close Pending Batch Invoices'), 'url' => ['/sale/batch-invoice/close-invoices-index']];
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Customer Invoice'), 'url' => ['/sale/bill/invoice-customer']];
@@ -134,10 +135,11 @@ if (Yii::$app->getModule('afip')) {
         ['label'=>'<li class="divider"></li>', 'encode'=>false],
         ['label'=>Yii::t('app','Document Types'), 'url'=>['/sale/document-type/index']],
         ['label'=>Yii::t('app','Tax Conditions'), 'url'=>['/sale/tax-condition/index']],
+        ['label'=>Yii::t('app','Customer Hour range'), 'url'=>['/sale/hour-range/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Customer Classes'), 'url'=>['/sale/customer-class/index']],
         ['label'=>Yii::t('app','Customer Categories'), 'url'=>['/sale/customer-category/index']],
-        ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => !User::canRoute(['/zone/zone/index'])],
+        ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
         '<li class="divider"></li>',
@@ -145,6 +147,7 @@ if (Yii::$app->getModule('afip')) {
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
         ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
+        ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
     ]];
 //}
 
@@ -199,6 +202,17 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports/up-down-variation']],
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
+    ]];
+
+    //Reportes por empresa
+    $items[] = ['label' => ReportsModule::t('app', 'Company Reports'), 'items' => [
+        ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports-company/customers-per-month']],
+        ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports-company/custumer-variation-per-month']],
+        ['label' => ReportsModule::t('app', 'Debt Bills'), 'url' => ['/reports/reports-company/debt-bills']],
+        ['label' => ReportsModule::t('app', 'Low By Month'), 'url' => ['/reports/reports-company/low-by-month']],
+        ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
+        ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
+        ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
     ]];
 }
 
@@ -433,7 +447,6 @@ if (Yii::$app->params['agenda_enabled']) {
         ];
     }
 }
-
 
 //Usuarios
 $items[] = [

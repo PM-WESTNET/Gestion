@@ -765,4 +765,25 @@ class Ticket extends \app\components\db\ActiveRecord {
         History::createHistoryEntry($this, History::TITLE_DELETE_ASSIGNATION);
     }
 
+    /**
+     * @param $ticket_id
+     * @param $exclude_users_id
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * Elimina todas las asignaciones de un ticket dando la posiblidad de excluir a ciertas asignaciones de usuarios
+     */
+    public static function deleteAllAssignations($ticket_id, $exclude_users_id = [])
+    {
+        $query = Assignation::find()->where(['ticket_id' => $ticket_id]);
+        if($exclude_users_id) {
+            $query->andWhere(['not', ['in', 'user_id', $exclude_users_id]]);
+        }
+        $assignations = $query->all();
+        foreach ($assignations as $assignation) {
+            $assignation->delete();
+        }
+
+        History::createHistoryEntry(Ticket::findOne($ticket_id), History::TITLE_DELETE_ASSIGNATION);
+    }
+
 }

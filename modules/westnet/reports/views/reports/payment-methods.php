@@ -1,5 +1,6 @@
 <?php
 
+use app\components\companies\CompanySelector;
 use app\modules\westnet\models\search\NodeSearch;
 use app\modules\westnet\reports\ReportsModule;
 use yii\data\ActiveDataProvider;
@@ -22,6 +23,17 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="customer-search">
         <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
         <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <?= CompanySelector::widget([
+                        'model' => $model,
+                        'attribute' => 'company_id',
+                        'inputOptions' => [
+                            'prompt' => Yii::t('app', 'All')
+                        ]
+                    ])?>
+                </div>
+            </div>
             <div class="col-md-6">
                 <div class="form-group">
                     <?= Html::activeLabel($model, 'date_from'); ?>

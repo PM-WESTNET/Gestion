@@ -14,6 +14,8 @@ use app\modules\sale\models\CustomerClass;
 use app\modules\sale\models\CustomerCategory;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\HourRange;
+
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Customer $model
@@ -263,6 +265,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, '_email_fields_notifications')->checkboxList(Customer::getEmailNotificationWays(), ['id' => 'email_fields'])?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-xs-12">
 

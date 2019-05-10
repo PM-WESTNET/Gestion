@@ -538,7 +538,10 @@ class PaymentController extends Controller {
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
         
-        return $this->render('pagofacil-payment-view', ['model' => $model, 'payments' => $payments]);
+        return $this->render('pagofacil-payment-view', [
+            'model' => $model,
+            'payments' => $payments,
+        ]);
     }
     
     public function actionConfirmFile($idFile){

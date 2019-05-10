@@ -60,10 +60,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Company'),
                 'value' => $model->company_id ? $model->company->name: ''
             ];
-            $attributes[] = [
-                'label' => Yii::t('partner', 'Partner Distribution Model'),
-                'value' => $model->partnerDistributionModel ? $model->partnerDistributionModel->name: ''
-            ];
         }
         $attributes = array_merge($attributes, [
             [

@@ -668,4 +668,114 @@ class ConnectionStatusController extends Controller
         }
     }
 
+    /**
+     * Actualizo los estados de las conexiones a los clientes que son deudores y deben 1 factura
+     *
+     */
+    public function actionUpdateDebtorsWithOneBill($save=false)
+    {
+        $debug = false;
+        $due_day = Config::getValue('bill_due_day');
+        if(!$due_day) {
+            $due_day = 15;
+        }
+        $newContractsDays = Config::getValue('new_contracts_days');
+        if(!$newContractsDays) {
+            $newContractsDays = 0;
+        }
+
+        $invoice_next_month = Config::getValue('contract_days_for_invoice_next_month');
+
+        $due_date = new \DateTime(date('Y-m-').$due_day);
+        $due_forced = null;
+        $date = new \DateTime('now');
+        $newContracts = new \DateTime('now +'.$newContractsDays . " days");
+        $last_bill_date = new \DateTime( (new \DateTime( 'now - 1 month'))->format('Y-m-'.$invoice_next_month) );
+        $bill_date = new \DateTime( 'last day of this month');
+
+        $estados = [];
+        $estadosAnteriores = [];
+
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_ENABLED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_DISABLED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_FORCED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_LOW] = 0;
+
+        $estados[Connection::STATUS_ACCOUNT_ENABLED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_DISABLED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_FORCED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
+        $estados[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_LOW] = 0;
+
+        // Traigo todos los customer para poder iterar.
+//        $queryDebtors = Yii::$app->db->createCommand("SELECT SQL_CALC_FOUND_ROWS * FROM (SELECT `customer`.`customer_id`, concat(customer.lastname, ' ', customer.name) as name, `customer`.`phone`, `customer`.`code`, round(coalesce((SELECT sum(b.total * bt.multiplier) as amount FROM `bill` `b` LEFT JOIN `bill_type` `bt` ON b.bill_type_id = bt.bill_type_id WHERE b.status <> 'draft' and b.customer_id = customer.customer_id), 0) - coalesce((SELECT sum(pi.amount) FROM `payment` `p` LEFT JOIN `payment_item` `pi` ON p.payment_id = pi.payment_id and pi.payment_method_id NOT IN(SELECT `payment_method_id` FROM `payment_method` WHERE type='account') WHERE (p.status <> 'cancelled' and p.status <> 'draft') and p.customer_id = customer.customer_id), 0)) as saldo, `bills`.`debt_bills`, `bills`.`payed_bills`, ( bills.debt_bills + bills.payed_bills) as total_bills, `contract_detail`.`product_id` AS `plan`, `customer`.`company_id` AS `customer_company` FROM `customer` LEFT JOIN (SELECT customer_id, sum(qty) as debt_bills, sum(qty_2) AS payed_bills FROM ( SELECT customer_id, date, i, round(amount,2), @saldo:=round(if(customer_id<>@customer_ant and @customer_ant <> 0, amount, @saldo + amount ),2) as saldo, @customer_ant:=customer_id, if((@saldo - (select cc.percentage_tolerance_debt from customer_class_has_customer cchc INNER JOIN (SELECT customer_id, max(date_updated) maxdate FROM customer_class_has_customer GROUP BY customer_id) cchc2 ON cchc2.customer_id = cchc.customer_id AND cchc.date_updated = cchc2.maxdate LEFT JOIN customer_class cc ON cchc.customer_class_id = cc.customer_class_id where cchc.customer_id =a.customer_id)) > 0 and i=1, 1, 0) as qty, if(@saldo <= 0 AND i = 1, 1, 0) as qty_2 FROM ((SELECT `customer_id`, `b`.`date` AS `date`, if(bt.multiplier<0, 0,1) AS i, sum(b.total * bt.multiplier) AS amount FROM bill b FORCE INDEX(fk_bill_customer1_idx) LEFT JOIN `bill_type` `bt` ON b.bill_type_id = bt.bill_type_id WHERE `b`.`status` <> 'draft' GROUP BY `b`.`customer_id`, `b`.`bill_id`) UNION ALL ( SELECT `p`.`customer_id`, `p`.`date` AS `date`, 0 AS i, -p.amount FROM `payment` `p` ) ) a order by customer_id, i, date ) a GROUP BY customer_id ) `bills` ON bills.customer_id = customer.customer_id LEFT JOIN `contract` ON contract.customer_id = customer.customer_id LEFT JOIN `contract_detail` ON contract.contract_id = contract_detail.contract_id INNER JOIN `customer_class_has_customer` `cchc` ON cchc.customer_id= customer.customer_id INNER JOIN (SELECT `customer_id`, max(date_updated) maxdate FROM `customer_class_has_customer` GROUP BY `customer_id`) `cchc2` ON cchc2.customer_id = customer.customer_id and cchc.date_updated = cchc2.maxdate INNER JOIN `customer_category_has_customer` `ccathc` ON ccathc.customer_id= customer.customer_id INNER JOIN (SELECT `customer_id`, max(date_updated) maxdate FROM `customer_category_has_customer` GROUP BY `customer_id`) `ccathc2` ON ccathc2.customer_id = customer.customer_id and ccathc.date_updated = ccathc2.maxdate LEFT JOIN `customer_class` `cc` ON cchc.customer_class_id = cc.customer_class_id LEFT JOIN `customer_category` `ccat` ON ccathc.customer_category_id = ccat.customer_category_id LEFT JOIN `connection` ON connection.contract_id = contract.contract_id LEFT JOIN `node` `n` ON connection.node_id = n.node_id LEFT JOIN `company` ON company.company_id = customer.parent_company_id GROUP BY `customer`.`customer_id`, `customer`.`name`, `customer`.`phone`) `b` WHERE (`saldo` > 0) AND (`debt_bills` >= '1') AND (`debt_bills` <= '1')");
+
+        $customerSearch = new CustomerSearch();
+        $customerSearch->debt_bills_from = 1;
+        $customerSearch->debt_bills_to = 1;
+        $customerSearch->contract_status = 'active';
+
+        $debtors = $customerSearch->searchDebtors([], 0)->getModels();
+        //$queryDebtors = Yii::$app->db->createCommand("SELECT SQL_CALC_FOUND_ROWS * FROM (SELECT `customer`.`customer_id`, concat(customer.lastname, ' ', customer.name) as name, `customer`.`phone`, `customer`.`code`, round(coalesce((SELECT sum(b.total * bt.multiplier) as amount FROM `bill` `b` LEFT JOIN `bill_type` `bt` ON b.bill_type_id = bt.bill_type_id WHERE b.status <> 'draft' and b.customer_id = customer.customer_id), 0) - coalesce((SELECT sum(pi.amount) FROM `payment` `p` LEFT JOIN `payment_item` `pi` ON p.payment_id = pi.payment_id and pi.payment_method_id NOT IN(SELECT `payment_method_id` FROM `payment_method` WHERE type='account') WHERE (p.status <> 'cancelled' and p.status <> 'draft') and p.customer_id = customer.customer_id), 0)) as saldo, `bills`.`debt_bills`, `bills`.`payed_bills`, ( bills.debt_bills + bills.payed_bills) as total_bills, `contract_detail`.`product_id` AS `plan`, `customer`.`company_id` AS `customer_company` FROM `customer` LEFT JOIN (SELECT customer_id, sum(qty) as debt_bills, sum(qty_2) AS payed_bills FROM ( SELECT customer_id, date, i, round(amount,2), @saldo:=round(if(customer_id<>@customer_ant and @customer_ant <> 0, amount, @saldo + amount ),2) as saldo, @customer_ant:=customer_id, if((@saldo - (select cc.percentage_tolerance_debt from customer_class_has_customer cchc INNER JOIN (SELECT customer_id, max(date_updated) maxdate FROM customer_class_has_customer GROUP BY customer_id) cchc2 ON cchc2.customer_id = cchc.customer_id AND cchc.date_updated = cchc2.maxdate LEFT JOIN customer_class cc ON cchc.customer_class_id = cc.customer_class_id where cchc.customer_id =a.customer_id)) > 0 and i=1, 1, 0) as qty, if(@saldo <= 0 AND i = 1, 1, 0) as qty_2 FROM ((SELECT `customer_id`, `b`.`date` AS `date`, if(bt.multiplier<0, 0,1) AS i, sum(b.total * bt.multiplier) AS amount FROM bill b FORCE INDEX(fk_bill_customer1_idx) LEFT JOIN `bill_type` `bt` ON b.bill_type_id = bt.bill_type_id WHERE `b`.`status` <> 'draft' GROUP BY `b`.`customer_id`, `b`.`bill_id`) UNION ALL ( SELECT `p`.`customer_id`, `p`.`date` AS `date`, 0 AS i, -p.amount FROM `payment` `p` ) ) a order by customer_id, i, date ) a GROUP BY customer_id ) `bills` ON bills.customer_id = customer.customer_id LEFT JOIN `contract` ON contract.customer_id = customer.customer_id LEFT JOIN `contract_detail` ON contract.contract_id = contract_detail.contract_id INNER JOIN `customer_class_has_customer` `cchc` ON cchc.customer_id= customer.customer_id INNER JOIN (SELECT `customer_id`, max(date_updated) maxdate FROM `customer_class_has_customer` GROUP BY `customer_id`) `cchc2` ON cchc2.customer_id = customer.customer_id and cchc.date_updated = cchc2.maxdate INNER JOIN `customer_category_has_customer` `ccathc` ON ccathc.customer_id= customer.customer_id INNER JOIN (SELECT `customer_id`, max(date_updated) maxdate FROM `customer_category_has_customer` GROUP BY `customer_id`) `ccathc2` ON ccathc2.customer_id = customer.customer_id and ccathc.date_updated = ccathc2.maxdate LEFT JOIN `customer_class` `cc` ON cchc.customer_class_id = cc.customer_class_id LEFT JOIN `customer_category` `ccat` ON ccathc.customer_category_id = ccat.customer_category_id LEFT JOIN `connection` ON connection.contract_id = contract.contract_id LEFT JOIN `node` `n` ON connection.node_id = n.node_id LEFT JOIN `company` ON company.company_id = customer.parent_company_id GROUP BY `customer`.`customer_id`, `customer`.`name`, `customer`.`phone`) `b` WHERE (`saldo` > 0) AND (`debt_bills` >= '1') AND (`debt_bills` <= '1')");
+        $customers = [];
+
+        foreach ($debtors as $debtor) {
+            $customer = Customer::findOne($debtor['customer_id']);
+            array_push($customers, $customer);
+        }
+//        $queryCustomer = Customer::find()->andWhere(['status' => 'enabled']);
+
+
+//        if($debug) {//1403,1533,2303, 25372
+//            $queryCustomer->andWhere(new Expression( 'customer_id in (12748)'));
+//        }
+//        $customers = $queryCustomer->all();
+
+        $this->stdout('Se les va a cortar a : '. count($customers));
+        $this->stdout("Westnet - Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+        $r=0;
+        $i = 0;
+        try{
+            error_log( "customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$" );
+
+            foreach($customers as $customer) {
+                $contracts = [];
+
+                $contracts = Contract::findAll(['customer_id'=>$customer->customer_id]);
+
+                //TODO Si el contrato tiene fecha de hoy y tiene deuda se corta
+                foreach($contracts as $contract) {
+                    $connection = Connection::findOne(['contract_id'=>$contract->contract_id]);
+
+                    if($connection) {
+                        $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+
+                        $estados[$connection->status_account]++;
+                        if($save) {
+                                $connection->detachBehaviors();
+                                $connection->update(false);
+                        }
+                        $i++;
+                        if(($i%1000)== 0) {
+                            $this->stdout("Westnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
+                        }
+                    }
+
+                }
+            }
+        }catch(\Exception $ex) {
+            echo $ex->getMessage();
+            echo $ex->getLine();
+            echo $ex->getTraceAsString();
+        }
+
+        foreach($estados as $key=>$value) {
+            $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
+        }
+        $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+    }
+
 }

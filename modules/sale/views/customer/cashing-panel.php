@@ -108,8 +108,6 @@ $this->params['breadcrumbs'][] = $this->title;
         <input class="text form-control" name="title" id="massive-assign-title">
 
         <input class="text hidden" name="customer_codes" id="massive-assign-customer-codes">
-<input class="text hidden" name="category_id" id="massive-assign-category_id" value="<?php echo \app\modules\config\models\Config::getValue('cobranza_category_id')?>">
-
 
         <label style="padding-top: 20px"> <?= Yii::t('app', 'Assign to')?> : </label>
         <?= Select2::widget([
@@ -163,9 +161,9 @@ Modal::end();?>
             });
 
             $.ajax({
-                url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
+                url: '<?= Url::to(['/ticket/ticket/customers-has-cobranza-ticket'])?>',
                 method: 'POST',
-                data: {customer_codes: codes, category_id: "<?php echo \app\modules\config\models\Config::getValue('cobranza_category_id')?>"},
+                data: {customer_codes: codes},
                 dataType: 'json',
 
             }).done(function(data, status){

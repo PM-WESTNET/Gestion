@@ -69,11 +69,14 @@ class TaskController extends Controller
      * @param integer $id
      * @return mixed
      */
-    public function actionUpdate($id) {
+    public function actionUpdate($id, $agenda = false) {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
 
+            if($agenda) {
+                return $this->redirect(['/agenda/default/index']);
+            }
             return $this->redirect(['view', 'id' => $model->task_id]);
         } else {
             return $this->render('update', [

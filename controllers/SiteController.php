@@ -32,6 +32,12 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
+        //Si posee el rol, el  index debe ser la vista de agenda
+        if(!Yii::$app->user->isGuest){
+            if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
+                return $this->redirect(['/agenda/default/index']);
+            }
+        }
         return $this->render('index');
     }
 

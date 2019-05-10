@@ -100,6 +100,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'label' => Yii::t('app', 'Total'),
+                'value' => function ($model) {
+                    return $model->total ? $model->total : 0;
+                },
+                'format' => 'currency'
+            ],
+            [
                 'class' => 'app\components\grid\ActionColumn',
                 'template' => '{view}{delete}',
                 'buttons' => [

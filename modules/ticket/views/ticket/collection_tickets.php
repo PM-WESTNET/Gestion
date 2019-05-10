@@ -85,11 +85,11 @@ $this->params['breadcrumbs'][] = $this->title;
                          echo '<div class="task_date_div hidden">';
                              $widget->model->task_date = (new \DateTime('now'))->format('Y-m-d');
                              echo $form->field($widget->model, 'task_date')->widget(DatePicker::class, [
-                                'options'=>['placeholder'=>'To date'],
+                                'options'=>['placeholder'=>'To date', 'id' => 'task-date-'.$widget->model->ticket_id],
                                 'pluginOptions' => [
                                     'autoclose'=>true,
                                     'format' => 'yyyy-mm-dd'
-                                ]
+                                ],
                             ])->label(false);
                         echo '</div>';
                     },
@@ -205,8 +205,18 @@ $this->params['breadcrumbs'][] = $this->title;
             })
 
             $('.status-class').on('change', function() {
-                Tickets.statusAllowToSetDate($('.status-class').val());
+                Tickets.statusAllowToSetDate($(this).val());
             });
+            $('.close').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            });
+            $('.kv-editable-reset').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            })
+            $('.kv-editable-submit').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            })
+            $('.task_date_div').addClass('hidden');
         };
 
         this.statusAllowToSetDate = function(status_id) {

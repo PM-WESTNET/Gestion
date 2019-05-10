@@ -7,12 +7,9 @@ use kartik\select2\Select2;
 use webvimark\modules\UserManagement\models\User;
 use yii\bootstrap\Collapse;
 use yii\bootstrap\Html;
-use yii\bootstrap\Modal;
 use yii\grid\GridView;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\web\View;
-use yii\widgets\ActiveForm;
 
 
 /**
@@ -52,7 +49,6 @@ $this->params['breadcrumbs'][] = $this->title;
     ExportMenu::widget([
         'dataProvider' => $data,
         'columns' => [
-
             [
                 'label'=> Yii::t('app', 'Customer Number'),
                 'value'=>function($model){
@@ -158,8 +154,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ]
     ])
-
-
         
     ?>
 

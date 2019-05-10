@@ -426,7 +426,7 @@ class TicketController extends Controller
                 Ticket::assignTicketToUser($ticket_id, $user_id);
             }
 
-        $ticket->deleteAssignedUser(Yii::$app->user->getId());
+            Ticket::deleteAllAssignations($ticket->ticket_id, [$user_id]);
 
         return [
             'status' => 'success'
@@ -448,6 +448,5 @@ class TicketController extends Controller
             'has_event_action' => $status ? $status->hasEventAction() : false
         ];
     }
-
 
 }

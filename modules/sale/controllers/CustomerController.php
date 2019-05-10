@@ -27,6 +27,8 @@ use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use SoapClient;
+use yii\web\UploadedFile;
+use yii2fullcalendar\yii2fullcalendar;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -92,9 +94,14 @@ class CustomerController extends Controller
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['document_number', Yii::t('app', 'Document Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'D' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'E' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'F' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'G' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'E' => ['phone2', Yii::t('app', 'Second Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'F' => ['phone3', Yii::t('app', 'Third Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'G' => ['phone4', Yii::t('app', 'Cellphone 4'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+	        'H' => ['email', Yii::t('app', 'Email'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'I' => ['email2', Yii::t('app', 'Secondary Email'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'J' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'K' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'L' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();       
         
@@ -104,6 +111,11 @@ class CustomerController extends Controller
                 'name'=> (!($c instanceof Customer) ? $c['name'] : $c->fullName),
                 'document_number' => $c['document_number'],
                 'phone' => $c['phone'],
+                'phone2' => $c['phone2'],
+                'phone3' => $c['phone3'],
+                'phone4' => $c['phone4'],
+                'email' => $c['email'],
+                'email2' => $c['email2'],
                 'class' => (!($c instanceof Customer) ? $c['class'] : $c->customerClass->name),
                 'category' => (!($c instanceof Customer) ? $c['category'] : $c->customerCategory->name),
                 'company' => (!($c instanceof Customer) ? $c['company'] : $c->company->name),
@@ -613,7 +625,8 @@ class CustomerController extends Controller
         
         $dataProvider= new ActiveDataProvider(['query' => $installations]);
         $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
-        
+
+
         $this->layout= '//fluid';
         return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
     }
@@ -743,6 +756,43 @@ class CustomerController extends Controller
         }
 
         return $this->redirect(['view', 'id' => $customer->customer_id]);
+    }
+
+    public function actionVerifyEmails()
+    {
+        $results = [];
+
+        if (Yii::$app->request->isPost) {
+            $files = UploadedFile::getInstancesByName('files');
+            if (empty($files)) {
+                Yii::$app->session->addFlash('error', Yii::t('app','You must select at least a file'));
+                return $this->render('verify-emails', ['results' => $results]);
+            }
+
+
+            foreach ($files as $file) {
+                $resource = fopen($file->tempName, 'r');
+
+                if ($resource === false) {
+                    Yii::$app->session->addFlash('error', Yii::t('app','Cant open files'));
+                    return $this->render('verify-emails', ['results' => $results]);
+                }
+
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+
+                foreach ($partial_result as $key => $r) {
+                    if (isset($results[$key])) {
+                        $results[$key] = $results[$key] + $r;
+                    }else {
+                        $results[$key] = $r;
+                    }
+                }
+            }
+        }
+
+        return $this->render('verify-emails', ['results' => $results]);
+
+
     }
 
 }
