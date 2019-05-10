@@ -134,6 +134,7 @@ if (Yii::$app->getModule('afip')) {
         ['label'=>'<li class="divider"></li>', 'encode'=>false],
         ['label'=>Yii::t('app','Document Types'), 'url'=>['/sale/document-type/index']],
         ['label'=>Yii::t('app','Tax Conditions'), 'url'=>['/sale/tax-condition/index']],
+        ['label'=>Yii::t('app','Customer Hour range'), 'url'=>['/sale/hour-range/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Customer Classes'), 'url'=>['/sale/customer-class/index']],
         ['label'=>Yii::t('app','Customer Categories'), 'url'=>['/sale/customer-category/index']],
