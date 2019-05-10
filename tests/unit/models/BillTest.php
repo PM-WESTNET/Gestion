@@ -47,15 +47,15 @@ class BillTest extends \Codeception\Test\Unit
     }
 
 
-    public function _before()
-    {
-        Yii::$app->db->createCommand('INSERT INTO `company_has_bill_type` (`company_id`, `bill_type_id`, `default`) VALUES (1, 1, 1)')->execute();
-    }
-
-    public function _after()
-    {
-        Yii::$app->db->createCommand('DELETE FROM`company_has_bill_type` WHERE `company_id` = 1 AND `bill_type_id` = 1 AND `default` = 1')->execute();
-    }
+//    public function _before()
+//    {
+//        Yii::$app->db->createCommand('INSERT INTO `company_has_bill_type` (`company_id`, `bill_type_id`, `default`) VALUES (1, 1, 1)')->execute();
+//    }
+//
+//    public function _after()
+//    {
+//        Yii::$app->db->createCommand('DELETE FROM`company_has_bill_type` WHERE `company_id` = 1 AND `bill_type_id` = 1 AND `default` = 1')->execute();
+//    }
 
     public function testInvalidAndEmpty()
     {
@@ -211,7 +211,7 @@ class BillTest extends \Codeception\Test\Unit
 
     public function testUpdateEinAndEinExpiration() {
         $ein = 123;
-        $ein_expiration = (new \DateTime('now'))->format('y-m-d');
+        $ein_expiration = (new \DateTime('now'))->format('Y-m-d');
 
         $model = BillExpert::createBill(1);
         $model->company_id = 1;
@@ -224,7 +224,7 @@ class BillTest extends \Codeception\Test\Unit
 
         expect('Can update ein if status is closed and ein is null', $model->updateEinAndEinExpiration($ein, $ein_expiration))->true();
         expect('Ein is correct', $model->ein)->equals(123);
-        expect('Ein expiration is correct', $model->ein_expiration)->equals((new \DateTime('now'))->format('y-m-d'));
+        expect('Ein expiration is correct', $model->ein_expiration)->equals((new \DateTime('now'))->format('Y-m-d'));
         expect('Cant update ein if status is closed and ein is not null', $model->updateEinAndEinExpiration($ein, $ein_expiration))->false();
     }
 
@@ -296,5 +296,20 @@ class BillTest extends \Codeception\Test\Unit
         expect('Base is correct', $taxesApplied[1]['base'])->equals(935.12);
         expect('Amount is correct', $taxesApplied[5]['amount'])->equals(-191);
         expect('Base is correct', $taxesApplied[5]['base'])->equals(191);
+    }
+
+    public function testUpdateBillNumberTo()
+    {
+        $model = BillExpert::createBill(1);
+        $model->company_id = 1;
+        $model->status = 'draft';
+        $model->partner_distribution_model_id = 1;
+        $model->save();
+
+        expect('Cant update bill number to if status is closed', $model->updateBillNumberTo('69'))->false();
+        $model->status = 'closed';
+
+        expect('bill number to is updated', $model->updateBillNumberTo('69'))->true();
+        expect('Bill numbet to is correct', $model->bill_number_to)->equals('00000000000000000069');
     }
 }
