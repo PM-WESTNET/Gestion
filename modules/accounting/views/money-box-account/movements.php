@@ -6,6 +6,7 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use kartik\export\ExportMenu;
 
 /* @var $this View */
 /* @var $dataProvider ActiveDataProvider */
@@ -45,18 +46,66 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ]);
 
-    /** Renders a export dropdown menu
+    // Renders a export dropdown menu
     echo ExportMenu::widget([
         'dataProvider' => $dataProvider,
+        'showFooter' => true,
         'columns' => [
-            'date',
-            'description',
-            'debit:currency',
-            'credit:currency',
+            [
+                'label' => Yii::t('app', 'Date'),
+                'value' => function($model) {
+                    return $model['date'];
+                }
+            ],
+            [
+                'label' => Yii::t('app', 'From / To'),
+                'value' => function($model) {
+                    return ($model['debit'] != 0 ? $model['from'] : '  A '. $model['from']);
+                }
+            ],
+            [
+                'label' => Yii::t('app', 'Description'),
+                'value' => function($model) {
+                    return $model['description'];
+                }
+            ],
+            [
+                'label' => Yii::t('app', 'Description'),
+                'value' => function($model) {
+                    return $model['description'];
+                }
+            ],
+            [
+                'label' => Yii::t('accounting', 'Debit'),
+                'value' => function($model) {
+                    return Yii::$app->formatter->asCurrency($model['debit']);
+                },
+                'footer' => Yii::$app->formatter->asCurrency($searchModel->totalDebit),
+            ],
+            [
+                'label' => Yii::t('accounting', 'Credit'),
+                'value' => function($model) {
+                    return Yii::$app->formatter->asCurrency($model['credit']);
+                },
+                'footer' => Yii::$app->formatter->asCurrency($searchModel->totalCredit),
+            ],
+            [
+                'label' => Yii::t('app', 'Balance'),
+                'value' => function($model) {
+                    return Yii::$app->formatter->asCurrency($model['partial_balance']);
+                },
+                'footer' => Yii::$app->formatter->asCurrency( $searchModel->totalDebit - $searchModel->totalCredit ),
+            ],
+            [
+                'label' => Yii::t('app', 'Status'),
+                'value' => function($model) {
+                    return Yii::t('accounting', $model['status']);
+                }
+            ],
 
         ],
         'showConfirmAlert'=>false
-    ]);**/
+    ]);
 
         
     ?>
