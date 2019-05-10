@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\AutomaticDebit */
 
-$this->title = $model->automatic_debit_id;
+$this->title = Yii::t('app','Automatic Debit'). ': '.$model->customer->fullName;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Automatic Debits'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -28,14 +28,28 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'automatic_debit_id',
-            'customer_id',
-            'bank_id',
+            [
+                'attribute' => 'customer_id',
+                'value' => function ($model) {
+                    return $model->customer->fullName;
+                }
+            ],
+            [
+                'attribute' => 'bank_id',
+                'value' => function ($model) {
+                    return $model->bank->name;
+                }
+            ],
             'cbu',
             'beneficiario_number',
-            'status',
-            'created_at',
-            'updated_at',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return $model->getStatusLabel();
+                }
+            ],
+            'created_at:datetime',
+            'updated_at:datetime',
         ],
     ]) ?>
 

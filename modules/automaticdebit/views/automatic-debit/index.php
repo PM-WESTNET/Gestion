@@ -25,14 +25,25 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'automatic_debit_id',
-            'customer_id',
-            'bank_id',
+            [
+                'attribute' => 'customer_id',
+                'value' => function ($model) {
+                    return $model->customer->fullName;
+                }
+            ],
+            [
+                'attribute' => 'bank_id',
+                'value' => function ($model) {
+                    return $model->bank->name;
+                }
+            ],
             'cbu',
-            'beneficiario_number',
-            //'status',
-            //'created_at',
-            //'updated_at',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return $model->getStatusLabel();
+                }
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
