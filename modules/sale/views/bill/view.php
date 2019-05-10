@@ -330,21 +330,23 @@ $formatter = Yii::$app->formatter;
                     Bill.setBillNumberTo($('#input-bill-number-to').val());
                     $("#bill-number-modal").modal('hide');
                 }
-            // });
+            });
         }
 
         this.setBillNumberTo = function (bill_number_to) {
+            console.log(bill_number_to);
             $.ajax({
-                url: "<?= Url::toRoute('set-bill-number-to') ?>",
+                url: "<?= Url::toRoute('update-bill-number-to') ?>",
                 method: 'get',
                 dataType: 'json',
                 data: {bill_id: <?= $model->bill_id?>, bill_number_to: bill_number_to}
             }).done(function (response) {
-                if(response.status == 'success') {
-                    window.location.reload();
-                } else {
-                    alert(response.msg);
-                }
+                console.log(response);
+                // if(response.status == 'success') {
+                //     window.location.reload();
+                // } else {
+                //     alert(response.msg);
+                // }
             });
         };
 

@@ -127,7 +127,7 @@ class Bill extends ActiveRecord implements CountableInterface
             [['currency'], 'string', 'max' => 45],
             [['observation'], 'string', 'max' => 250],
             [['company_id', 'user_id', 'partner_distribution_model_id'], 'number'],
-            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
+            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number', 'bill_number_to'], 'safe']
         ]);
     }
     
@@ -1488,6 +1488,12 @@ class Bill extends ActiveRecord implements CountableInterface
             return false;
         }
 
-        return $this->save(['bill_number_to' => $bill_number_to]);
+        $updated_attributes = $this->updateAttributes(['bill_number_to' => sprintf("%'.020d", $bill_number_to)]);
+
+        if($updated_attributes) {
+            return true;
+        }
+
+        return false;
     }
 }

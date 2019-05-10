@@ -1098,4 +1098,5 @@
     'Bounced' => 'Rebotado',
     'Bill not found' => 'Comprobante no encontrado',
     'Bill number to cant be updated' => 'El número de comprobante hasta no puede ser actualizado',
+    'Set bill number to' => 'Actualizar número de comprobante hasta',
 );
