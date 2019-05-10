@@ -166,11 +166,13 @@ class MoneyBoxAccountController extends Controller
             $searchModel->account_id_to = $account->rgt;
             $searchModel->account_id = $account->account_id;
 
-            $dataProvider = $searchModel->search($params, 1);
-            
+            $data = $searchModel->search($params, 1);
+            $dataProvider = $searchModel->search($params, 0);
+
             return $this->render('movements', [
                 'model'         => $model,
-                'data'  => $dataProvider,
+                'data'  => $data,
+                'dataProvider' => $dataProvider,
                 'searchModel'   => $searchModel,
                 'fromMoneyBox'  => $fromMoneyBox,
                 'init' => $init
