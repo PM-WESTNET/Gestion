@@ -53,6 +53,27 @@ class BatchInvoiceController  extends Controller
     }
 
     /**
+     * Lists all Contracts for invoice with extra filters.
+     * @return mixed
+     */
+    public function actionIndexWithFilters()
+    {
+        $searchModel = new ContractSearch();
+        $searchModel->setScenario('for-invoice');
+        $dataProvider = new ActiveDataProvider([
+            'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),
+            'pagination' => [
+                'pageSize' => 10
+            ]
+        ]);
+
+        return $this->render('index-with-filters', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
+
+    /**
      * Retorna los tipos de comprobantes de la compañia seleccionada
      * @return array
      */

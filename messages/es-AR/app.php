@@ -1096,4 +1096,6 @@
     'Cant open files' => 'No se pueden abrir los archivos',
     'Invalid' => 'Pendiente de Verificación',
     'Bounced' => 'Rebotado',
+    'Batch Invoice with filters' => 'Facturación por lotes con filtros',
+    'Invoice Date' => 'Fecha de facturación',
 );

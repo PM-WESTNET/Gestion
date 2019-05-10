@@ -1,14 +1,13 @@
 <?php
 
-use app\modules\config\models\Config;
 use kartik\grid\GridView;
 use kartik\widgets\DatePicker;
-use kartik\widgets\DepDrop;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
-
+use yii\db\Expression;
+use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
 
@@ -26,7 +25,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
 <div class="batch-invoice">
     <div class="row">
         <div class="col-sm-12">
+
             <h1><?= Html::encode($this->title) ?></h1>
+
             <!-- Inicio Seleccion de datos para facturacion -->
             <div class="panel panel-default">
                 <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-bill" aria-expanded="true" aria-controls="panel-body-bill">
@@ -37,7 +38,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                     <?php $form = ActiveForm::begin(['id'=>'bill-form', 'method' => 'get']); ?>
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= CompanySelector::widget(['model'=>$searchModel, 'id'=>'company_id', 'conditions'=>['parent_id' => new \yii\db\Expression('parent_id is not null')]]); ?>
+                            <?= CompanySelector::widget(['model' => $searchModel, 'id' => 'company_id', 'conditions' => ['parent_id' => new Expression('parent_id is not null')]]); ?>
                         </div>
 
                         <div class="col-sm-6">
@@ -51,7 +52,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?=$form->field($searchModel, 'period')->widget(DatePicker::classname(), [
+                            <?=$form->field($searchModel, 'period')->widget(DatePicker::class, [
                                 'type' => 1,
                                 'language' => Yii::$app->language,
                                 'model' => $searchModel,
@@ -66,6 +67,42 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                                 ]
                             ]);
                             ?>
+                        </div>
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'invoice_date')->widget(DatePicker::class, [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'invoice_date',
+                                    'pluginOptions' => [
+                                        'autoclose'=>true,
+                                        'format' => 'dd-mm-yyyy',
+                                    ],
+                                   'options'=>[
+                                        'class'=>'form-control filter dates',
+                                        'placeholder'=>Yii::t('app','Date')
+                                   ]
+                            ]);?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_from')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_from,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_to')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_to,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
                         </div>
                     </div>
                     <div>
@@ -133,8 +170,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                     <h3 class="panel-title"><?= Yii::t('app', 'Contract to Invoice') ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php
-                    \yii\widgets\Pjax::begin(
+                    <?php Pjax::begin(
                         [
                             'id' => 'contracts',
                             'enablePushState'=>FALSE
@@ -162,12 +198,13 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                         ]);
                     }
 
-                    \yii\widgets\Pjax::end() ?>
+                    Pjax::end() ?>
                 </div>
             </div> <!-- Fin Seleccion de datos para filtro de facturas -->
 
         </div>
     </div>
+
 <script>
     var BatchInvoice = new function(){
         this.processing = false;
@@ -214,7 +251,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 'ContractSearch[date_new_from]': $('#contractsearch-date_new_from').val(),
                 'ContractSearch[date_new_to]': $('#contractsearch-date_new_to').val(),
             };
-            console.log()
             try {
                 var date = $('#contractsearch-period').kvDatepicker('getDate');
                 date =  "01-" +  (date.getMonth() + 1) + "-" + date.getFullYear();

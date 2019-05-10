@@ -296,7 +296,7 @@ class ContractToInvoice
     {
         Yii::setLogger(new EmptyLogger());
 
-        $bill_observation = $params['bill_observation'];
+        $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
         $contractSearch->setScenario('for-invoice');
 
