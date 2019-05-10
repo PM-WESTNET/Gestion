@@ -145,9 +145,19 @@ $formatter = Yii::$app->formatter;
                 <span class=""><?= Yii::t('app', 'Observations') ?>:</span>
             </div>
              <div class="col-sm-10 display-block">
-                <!-- <hr> -->
                 <span class="text-center font-bold  display-block"><?=$model->observation?></span>
             </div>
+
+            <!-- Número de comprobante hasta -->
+            <?php if($model->bill_number_to) { ?>
+                <div class="col-sm-2">
+                    <span class=""> <?= Yii::t('app', 'Bill number to') ?> : </span>
+                </div>
+                <div class="col-sm-10 display-block">
+                    <span class="text-center font-bold  display-block"><?=$model->bill_number_to ?></span>
+                </div>
+            <?php } ?>
+
             <?php if($model::$expirable): ?>
                 <div class="col-sm-2">
                     <span class=""><?= Yii::t('app', 'Expiration') ?>:</span>
@@ -341,12 +351,11 @@ $formatter = Yii::$app->formatter;
                 dataType: 'json',
                 data: {bill_id: <?= $model->bill_id?>, bill_number_to: bill_number_to}
             }).done(function (response) {
-                console.log(response);
-                // if(response.status == 'success') {
-                //     window.location.reload();
-                // } else {
-                //     alert(response.msg);
-                // }
+                if(response.status == 'success') {
+                    window.location.reload();
+                } else {
+                    alert(response.msg);
+                }
             });
         };
 

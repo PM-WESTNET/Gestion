@@ -314,6 +314,7 @@ class TaxesBookSearch extends ProviderBill
                     b.date,
                     bt.name                                     AS bill_type,
                     b.number as numero_comprobante,
+                    b.bill_number_to                            AS numero_de_comprobante_hasta,
                     b.amount,
                     tr.code                                     as tipo_de_iva,
                     ''                                          as numero_importacion,

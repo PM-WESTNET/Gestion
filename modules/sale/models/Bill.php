@@ -1471,9 +1471,13 @@ class Bill extends ActiveRecord implements CountableInterface
             return false;
         }
 
-        $this->ein = $ein;
-        $this->ein_expiration = $ein_expiration;
-        return $this->save(['ein' => $ein, 'ein_expiration' => $ein_expiration]);
+        $updated_attributes = $this->updateAttributes(['ein' => $ein, 'ein_expiration' => $ein_expiration]);
+
+        if($updated_attributes) {
+            return true;
+        }
+
+        return false;
     }
 
 
