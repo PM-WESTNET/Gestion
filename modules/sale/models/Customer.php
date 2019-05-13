@@ -1129,11 +1129,11 @@ class Customer extends ActiveRecord {
     }
 
     public static function getNewCode(){
-        $maxCodeInCustomer= (int)(new Query())
+        $maxCodeInCustomer = (int)(new Query())
                             ->from('(SELECT code from customer WHERE code < 9900000) c')
                             ->max('c.code');
         
-        $maxCodeInEmptyAds= EmptyAds::maxCode();
+        $maxCodeInEmptyAds = EmptyAds::maxCode();
         
         if ((int)$maxCodeInCustomer > (int)$maxCodeInEmptyAds) {
             return $maxCodeInCustomer + 1;

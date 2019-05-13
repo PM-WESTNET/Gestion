@@ -2,6 +2,8 @@
 
 namespace app\modules\sale\models;
 
+use app\modules\checkout\models\CompanyHasPaymentTrack;
+use app\modules\checkout\models\Track;
 use app\modules\partner\models\PartnerDistributionModel;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -41,6 +43,8 @@ class Company extends \app\components\db\ActiveRecord
 
     private $_billTypes;
 
+    private $_paymentTracks;
+
     private $_defaultBillType;
 
     /**
@@ -78,7 +82,7 @@ class Company extends \app\components\db\ActiveRecord
             [['web', 'portal_web'], 'string', 'max' => 100],
             [['status'], 'in', 'range' => ['enabled', 'disabled']],
             [['parent_id', 'tax_condition_id', 'partner_distribution_model_id', 'pagomiscuentas_code'], 'integer'],
-            [['billTypes', 'partnerDistributionModel'], 'safe'],
+            [['billTypes', 'partnerDistributionModel', 'paymentTracks'], 'safe'],
             [['tax_identification', 'phone', 'iibb', 'technical_service_phone'], 'string', 'max' => 45],
             [['code'], 'string', 'max' => 4],
             [['certificate'], 'file', 'extensions' => 'crt'],
@@ -112,6 +116,7 @@ class Company extends \app\components\db\ActiveRecord
             'key' => Yii::t('app', 'Key'),
             'parent' => Yii::t('app', 'Parent'),
             'billTypes' => Yii::t('app', 'Bill Types'),
+            'paymentTracks' => Yii::t('app', 'Payment methods and tracks'),
             'taxCondition' => Yii::t('app', 'Tax Condition'),
             'iibb' => Yii::t('app', 'IIBB'),
             'start' => Yii::t('app', 'Company Start Date'),
@@ -160,7 +165,23 @@ class Company extends \app\components\db\ActiveRecord
     {
         return $this->hasMany(BillType::className(), ['bill_type_id' => 'bill_type_id'])->viaTable('company_has_bill_type', ['company_id' => 'company_id']);
     }
-    
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTracks()
+    {
+        return $this->hasMany(Track::class, ['track_id' => 'track_id'])->viaTable('company_has_payment_track', ['company_id' => 'company_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPaymentTracks()
+    {
+        return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -226,8 +247,27 @@ class Company extends \app\components\db\ActiveRecord
         $this->on(self::EVENT_AFTER_INSERT, $saveBillTypes);
         $this->on(self::EVENT_AFTER_UPDATE, $saveBillTypes);
     }
-    
-        
+
+    public function setPaymentTracks($paymentTracks){
+
+        if(empty($paymentTracks)){
+            $paymentTracks = [];
+        }
+
+        $this->_paymentTracks = $paymentTracks;
+
+        $savePaymentTracks = function($event){
+            $this->unlinkAll('paymentTracks', true);
+
+            foreach ($this->_paymentTracks['Track'] as $payment_method_id => $track_id) {
+                $payment_method_status = array_key_exists($payment_method_id, $this->_paymentTracks['Payment_method']) ? CompanyHasPaymentTrack::STATUS_ENABLED : CompanyHasPaymentTrack::STATUS_DISABLED;
+                $this->link('paymentTracks', Track::findOne($track_id), ['company_id' => $this->company_id, 'payment_method_id' => $payment_method_id, 'status' => $payment_method_status]);
+            }
+        };
+        $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);
+        $this->on(self::EVENT_AFTER_UPDATE, $savePaymentTracks);
+    }
+
     /**
      * @inheritdoc
      * Strong relations: Parent, BillTypes.

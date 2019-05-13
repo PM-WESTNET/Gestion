@@ -69,8 +69,9 @@ $billIndexItems = [
             ['label' => Yii::t('app', 'Taxes'), 'url' => ['/sale/tax/index'], 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Tax Rates'), 'url' => ['/sale/tax-rate/index'], 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            //'<li class="divider"></li>',
+            ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => Yii::$app->user->isSuperadmin],
+            ['label' => Yii::t('app', 'Payment methods and tracks'), 'url' => ['/checkout/track/index'], 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Invoice Classes'), 'url' => ['/sale/invoice-class/index'], 'visible' => Yii::$app->user->isSuperadmin]
     ], 'visible' => Yii::$app->user->isSuperadmin],

@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
+use app\modules\checkout\models\CompanyHasPaymentTrack;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\models\Company */
@@ -104,7 +105,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 'code',
                 'web',
                 'portal_web',
-                'pagomiscuentas_code'
+                'pagomiscuentas_code',
+                 [
+                     'attribute' => 'paymentTracks',
+                     'value' => function($model) {
+                        $string = '';
+                        foreach ($model->getPaymentTracks()->where(['status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all() as $payment_tracks) {
+                            $string .= 'Medio: '.$payment_tracks->paymentMethod->name .' - Canal de pago: '. $payment_tracks->track->name ."<br>";
+                        }
+                        return $string;
+                     },
+                     'format' => 'raw'
+                 ],
             ],
         ]) ?>
    </div>

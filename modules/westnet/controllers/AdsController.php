@@ -103,14 +103,14 @@ class AdsController extends Controller {
                 $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
                     str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
 
-                $payment_code= $generator->generate($code);
+                $payment_code = $generator->generate($code);
                 $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
-                $emptyAds= new EmptyAds();
+                $emptyAds = new EmptyAds();
                 $emptyAds->code = $init_value;
-                $emptyAds->payment_code= $payment_code;
-                $emptyAds->node_id= $node->node_id;
-                $emptyAds->company_id= $company->company_id;
-                $emptyAds->used= false;
+                $emptyAds->payment_code = $payment_code;
+                $emptyAds->node_id = $node->node_id;
+                $emptyAds->company_id = $company->company_id;
+                $emptyAds->used = false;
                 $emptyAds->save(false);
                 $init_value = Customer::getNewCode();
             }

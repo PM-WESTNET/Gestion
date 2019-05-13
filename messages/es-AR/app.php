@@ -1098,4 +1098,8 @@
     'Bounced' => 'Rebotado',
     'Batch Invoice with filters' => 'Facturación por lotes con filtros',
     'Invoice Date' => 'Fecha de facturación',
+    'Tracks' => 'Canales de pago',
+    'Create Track' => 'Crear canal de pago',
+    'Update Track: ' => 'Actualizar canal de pago: ',
+    'Payment methods and tracks' => 'Medios y canales de pago',
 );
