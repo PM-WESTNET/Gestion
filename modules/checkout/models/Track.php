@@ -32,6 +32,7 @@ class Track extends ActiveRecord
     public function rules()
     {
         return [
+            [['name', 'description'], 'required'],
             [['description'], 'string'],
             [['name', 'slug'], 'string', 'max' => 255],
         ];

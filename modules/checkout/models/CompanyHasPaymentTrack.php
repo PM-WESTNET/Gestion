@@ -4,6 +4,9 @@ namespace app\modules\checkout\models;
 
 use Yii;
 use app\modules\log\db\ActiveRecord;
+use app\modules\sale\models\Company;
+use app\modules\checkout\models\PaymentMethod;
+use app\modules\checkout\models\Track;
 
 /**
  * This is the model class for table "company_has_payment_track".
@@ -35,6 +38,7 @@ class CompanyHasPaymentTrack extends ActiveRecord
     public function rules()
     {
         return [
+            [['company_id', 'payment_method_id', 'track_id', 'status'], 'required'],
             [['company_id', 'payment_method_id', 'track_id'], 'integer'],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
             [['payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['payment_method_id' => 'payment_method_id']],
