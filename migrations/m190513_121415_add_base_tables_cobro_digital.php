@@ -59,10 +59,31 @@ class m190513_121415_add_base_tables_cobro_digital extends Migration
             }
         }
 
+        $this->createTable('payment_card_file', [
+            'payment_card_file_id' => $this->primaryKey(),
+            'upload_date' => $this->string(),
+            'file_name' => $this->string(),
+            'path' =>  $this->text(),
+            'status' => "ENUM('draft', 'imported')"
+        ]);
+
+        $this->createTable('payment_card', [
+            'payment_card_id' => $this->primaryKey(),
+            'payment_card_file_id' => $this->integer(),
+            'code_19_digits' => $this->string(),
+            'code_29_digits' => $this->string(),
+            'url' => $this->text(),
+            'used' => $this->boolean(),
+        ]);
+
+        $this->addForeignKey('fk_payment_card_payment_card_file_id', 'payment_card', 'payment_card_file_id', 'payment_card_file', 'payment_card_file_id');
+
     }
 
     public function safeDown()
     {
+        $this->dropTable('payment_card');
+
         $this->dropColumn('customer', 'payment_code_cobro_digital_pdf');
         $this->dropColumn('customer', 'payment_code_cobro_digital_29');
         $this->dropColumn('customer', 'payment_code_cobro_digital_19');

@@ -16,13 +16,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->track_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->track_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php if($model->getDeletable()) {
+            echo Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->track_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    'method' => 'post',
+                ],
+            ]);
+        }?>
+
     </p>
 
     <?= DetailView::widget([

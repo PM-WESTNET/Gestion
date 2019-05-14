@@ -362,6 +362,10 @@ if (Yii::$app->getModule('westnet')) {
             ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
             ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
             ['label' => Yii::t('westnet', 'Assign Company to Customers'), 'url' => ['/westnet/batch/company-to-customer']],
+            '<li class="divider"></li>',
+            ['label' => Yii::t('app', 'Cobro digital'), 'visible' => Yii::$app->user->isSuperadmin],
+            ['label' => Yii::t('cobrodigital', 'Payment card files'), 'url' => ['/cobrodigital/payment-card-file/index']],
+            ['label' => Yii::t('cobrodigital', 'Payment cards'), 'url' => ['/cobrodigital/payment-card/index']],
         ],
     ];
 }
