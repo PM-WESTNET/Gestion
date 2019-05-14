@@ -4,6 +4,7 @@ namespace app\modules\checkout\models;
 
 use app\components\db\ActiveRecord;
 use app\modules\accounting\models\MoneyBoxAccount;
+use app\modules\pagomiscuentas\components\Cobranza\PagoFacilReader;
 use app\modules\sale\models\Customer;
 use Yii;
 use yii\db\Expression;
@@ -24,6 +25,10 @@ use yii\helpers\FileHelper;
  * @property string $status
  */
 class PagoFacilTransmitionFile extends ActiveRecord {
+
+
+    const STATUS_DRAFT = 'draft';
+    const STATUS_CLOSED = 'closed';
 
     public $file;
 
@@ -192,71 +197,16 @@ class PagoFacilTransmitionFile extends ActiveRecord {
             return false;
         }
         
-        $data = fopen($path, 'r');
+//        $data = fopen($path, 'r');
         $transaction = Yii::$app->db->beginTransaction(); // Inicia transaccion con la base de datos
         if (!$this->isRepeat()) {
 
             try {
-                while ($line = fgets($data)) { // Mientras que haya lineas para leer
-                    $array_line = str_split($line); // lleva la linea obtenida a un array para recorrerlo mas facilmente
-                    switch ($array_line[0]) {
-                        //Depende del valor del primer caracter de la linea actual se deduce para que sirve.
-                        //Si el primer caracter es 1 estamos en la cabecera del archivo, de lo contrario si es 5 estamos en el inicio de un pago
-                        case '1':
-                            $next_line = fgets($data); // El encabezado posee 2 lineas, como sabemos que estamos en la 1ra linea, la siguiente linea tambien es del encabezado
-                            $this->header_file = $line . $next_line;
+                $array_data = PagoFacilReader::parse($this);
 
-                            $this->upload_date = date('Y-m-d');
-
-                            if (!$this->save(false)) {
-                                $transaction->rollBack();
-                                Yii::$app->session->setFlash('unsave_file', 'El archivo seleccionado no se puede importar. Reintente');
-                                return false;
-                            }
-
-                            break;
-                        case '5':
-                            $date = "";
-                            $customer_id = "";
-                            $amount = "";
-                            $payment_method = '';
-
-                            //Extraigo la fecha del pago que va desde la posicion 64 a 71 de la linea del archivo
-                            $date = substr($line, 64, 4)."-".substr($line, 68, 2)."-".substr($line, 70, 2);
-
-                            $line = fgets($data); // El pago posee 3 lineas. Obtengo la segunda para definir el cliente
-                            $array_line = str_split($line);
-                            for ($j = 5; $j < 13; $j++) {// recorro la linea y extraigo el codigo del cliente,
-                                //el codigo del cliente va desde el caracter 5 al 12 de la segunda linea
-                                $customer_id .= $array_line[$j];
-                            }
-
-                            $line = fgets($data); // Obtengo la tercer linea del pago
-                            $array_line = str_split($line);
-                            for ($k = 4; $k < 100; $k++) { // recorro la linea desde el caracter 4, el cual indica la forma de pago
-                                //el monto del pago va desde el caracter 85 al 99 de la misma linea. Una vez que obtengo la forma de pago,
-                                //salto directamente al caracter 84 para que al iterar nuevamente me posicione en el caracter 85
-                                if ($array_line[$k] == 'E' || $array_line[$k] == 'P') { // EFECTIVO O DEBITO
-
-                                    $payment_method = "Pago Facil";
-                                    $k = 84;
-                                } else {
-                                    if ($k !== 98) { // El punto ddecimal no esta contemplado en la linea, pero debe ir antes del caracter 98
-                                        $amount .= $array_line[$k];
-                                    } else {
-                                        $amount .= '.' . $array_line[$k];
-                                    }
-                                }
-                            }
-
-
-                            $amount = (float) $amount; // Al tener 0 delante del monto, al castear el string resultante, elimino los 0 de adelante y me queda el valor del pago
-
-                            $this->total += $amount; // Voy sumando el total de todos los pagos
-
-                            $customer_id = (int) $customer_id; // Al igual que el monto, la cadena obtenida tiene 0 delante del codigo del cliente, al castear, los elimino
-                            // Selecciono el cliente con el codigo obtenido
-
+//                foreach ($array_data as $data) {
+//
+//                }
 
                             $customer = Customer::find()
                                 ->orWhere(['customer.code' => $customer_id])->one();
@@ -309,9 +259,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
                                     return false;
                                 }
                             }
-                            break;
-                    }
-                }
+//                }
 
                 if (!$this->updateAttributes(['total'])) {
                     $transaction->rollBack();
