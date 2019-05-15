@@ -6,7 +6,7 @@
  * Time: 16:01
  */
 
-namespace app\modules\pagomiscuentas\components\Cobranza;
+namespace app\modules\checkout\components;
 
 use app\modules\checkout\models\PagoFacilTransmitionFile;
 use app\modules\pagomiscuentas\models\PagomiscuentasFile;
@@ -23,9 +23,7 @@ class PagoFacilReader
 
         try {
             $file = fopen(Yii::getAlias('@webroot') ."/".$pagoFacilTransmitionFile->file_name, 'r');
-            $i = 0;
             while ($line = fgets($file)) {
-                if($i != 0) {
                     $array_line = str_split($line);
 
                     //Depende del valor del primer caracter de la linea actual se deduce para que sirve.
@@ -69,19 +67,17 @@ class PagoFacilReader
                             }
                         }
 
-                        $total += (float) $amount;
-
                         $data = [
-                            'date'          => $date,
-                            'customer_id'   => (int) $customer_id,
-                            'amount'        => (float) $amount,
+                            'date'            => $date,
+                            'customer_id'     => (int) $customer_id,
+                            'amount'          => (float) $amount,
+                            'payment_method'  => $payment_method  ? $payment_method  : '',
+                            'payment_id'      => '',
                         ];
+
+                        $datas[] = $data;
+                        $total += (float) $amount;
                     }
-
-
-                    $datas[] = $data;
-                }
-                $i++;
             }
             $datas = array_slice($datas, 0, count($datas)-1);
         } catch (\Exception $ex){
