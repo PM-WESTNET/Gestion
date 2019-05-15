@@ -4,6 +4,7 @@ namespace app\modules\checkout\models;
 
 use app\components\db\ActiveRecord;
 use app\modules\accounting\models\MoneyBoxAccount;
+use app\modules\checkout\components\PagoFacilReader;
 use app\modules\sale\models\Customer;
 use Yii;
 use yii\db\Expression;
@@ -24,6 +25,10 @@ use yii\helpers\FileHelper;
  * @property string $status
  */
 class PagoFacilTransmitionFile extends ActiveRecord {
+
+
+    const STATUS_DRAFT = 'draft';
+    const STATUS_CLOSED = 'closed';
 
     public $file;
 
@@ -164,6 +169,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         if (empty($file)) {
             return false;
         } else {
+            Yii::$app->session->setFlash('error', 'El archivo seleccionado ya ha sido importado antes. Seleccione otro y reintente.');
             return true;
         }
     }
@@ -173,168 +179,130 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * @return boolean
      */
     public function import() {
-        //Creo la instancia del archivo cargado
-        $this->file = UploadedFile::getInstance($this, 'file');
-        
-        $directory = 'uploads/'.date('Y').'/'.date('m').'/';
-        
-        //Directorio donde subir archivos
-        FileHelper::createDirectory($directory, 0775, true);
-        $path = $directory . $this->file->baseName . uniqid() . '.' . $this->file->extension;
-        
-        $this->file->saveAs($path, false);
-        
-        $this->file_name = $path;
-        $this->status= "draft";
-        
+
         if (empty($this->money_box_account_id) && empty($this->money_box)) {
             Yii::$app->session->setFlash('error', 'Seleccione el banco y/o la cuenta destinatarios');
             return false;
         }
-        
-        $data = fopen($path, 'r');
+
         $transaction = Yii::$app->db->beginTransaction(); // Inicia transaccion con la base de datos
-        if (!$this->isRepeat()) {
 
-            try {
-                while ($line = fgets($data)) { // Mientras que haya lineas para leer
-                    $array_line = str_split($line); // lleva la linea obtenida a un array para recorrerlo mas facilmente
-                    switch ($array_line[0]) {
-                        //Depende del valor del primer caracter de la linea actual se deduce para que sirve.
-                        //Si el primer caracter es 1 estamos en la cabecera del archivo, de lo contrario si es 5 estamos en el inicio de un pago
-                        case '1':
-                            $next_line = fgets($data); // El encabezado posee 2 lineas, como sabemos que estamos en la 1ra linea, la siguiente linea tambien es del encabezado
-                            $this->header_file = $line . $next_line;
+        try {
+            $array_data = PagoFacilReader::parse($this);
+            $moneyBoxAccount = MoneyBoxAccount::findOne(['money_box_account_id' => $this->money_box_account_id]);
+            $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower("Pago Facil")."'")->one();
 
-                            $this->upload_date = date('Y-m-d');
-
-                            if (!$this->save(false)) {
-                                $transaction->rollBack();
-                                Yii::$app->session->setFlash('unsave_file', 'El archivo seleccionado no se puede importar. Reintente');
-                                return false;
-                            }
-
-                            break;
-                        case '5':
-                            $date = "";
-                            $customer_id = "";
-                            $amount = "";
-                            $payment_method = '';
-
-                            //Extraigo la fecha del pago que va desde la posicion 64 a 71 de la linea del archivo
-                            $date = substr($line, 64, 4)."-".substr($line, 68, 2)."-".substr($line, 70, 2);
-
-                            $line = fgets($data); // El pago posee 3 lineas. Obtengo la segunda para definir el cliente
-                            $array_line = str_split($line);
-                            for ($j = 5; $j < 13; $j++) {// recorro la linea y extraigo el codigo del cliente,
-                                //el codigo del cliente va desde el caracter 5 al 12 de la segunda linea
-                                $customer_id .= $array_line[$j];
-                            }
-
-                            $line = fgets($data); // Obtengo la tercer linea del pago
-                            $array_line = str_split($line);
-                            for ($k = 4; $k < 100; $k++) { // recorro la linea desde el caracter 4, el cual indica la forma de pago
-                                //el monto del pago va desde el caracter 85 al 99 de la misma linea. Una vez que obtengo la forma de pago,
-                                //salto directamente al caracter 84 para que al iterar nuevamente me posicione en el caracter 85
-                                if ($array_line[$k] == 'E' || $array_line[$k] == 'P') { // EFECTIVO O DEBITO
-
-                                    $payment_method = "Pago Facil";
-                                    $k = 84;
-                                } else {
-                                    if ($k !== 98) { // El punto ddecimal no esta contemplado en la linea, pero debe ir antes del caracter 98
-                                        $amount .= $array_line[$k];
-                                    } else {
-                                        $amount .= '.' . $array_line[$k];
-                                    }
-                                }
-                            }
-
-
-                            $amount = (float) $amount; // Al tener 0 delante del monto, al castear el string resultante, elimino los 0 de adelante y me queda el valor del pago
-
-                            $this->total += $amount; // Voy sumando el total de todos los pagos
-
-                            $customer_id = (int) $customer_id; // Al igual que el monto, la cadena obtenida tiene 0 delante del codigo del cliente, al castear, los elimino
-                            // Selecciono el cliente con el codigo obtenido
-
-
-                            $customer = Customer::find()
-                                ->orWhere(['customer.code' => $customer_id])->one();
-
-
-                            if (!empty($customer)) {
-                                // Creo el pago y seteo los atributos correspondientes
-                                $payment = new Payment();
-                                $payment->company_id = $customer->company_id;
-                                $payment->customer_id = $customer->customer_id;
-                                $payment->concept = "PAGO FACIL";
-                                $payment->date = $date;
-                                $payment->amount = $amount;
-                                $payment->partner_distribution_model_id = $customer->company->partner_distribution_model_id;
-
-
-                                if ($payment->save()) {
-
-                                    $paymentDetail = new PaymentItem();
-
-
-                                    $paymentMethod = PaymentMethod::find()
-                                        ->where("status='enabled' AND lower(name) = '".strtolower($payment_method)."'")
-                                        ->one();
-                                    $moneyBoxAccount = MoneyBoxAccount::findOne(['money_box_account_id' => $this->money_box_account_id]);
-                                    if (!empty($paymentMethod)) {
-                                        $paymentDetail->payment_id = $payment->payment_id;
-                                        $paymentDetail->amount = $amount;
-                                        $paymentDetail->description = "PAGO FACIL";
-                                        $paymentDetail->payment_method_id = $paymentMethod->payment_method_id;
-                                        if ($moneyBoxAccount) {
-                                            $paymentDetail->money_box_account_id = $moneyBoxAccount->money_box_account_id;
-                                        }
-                                        $paymentDetail->save(false);
-                                    } else {
-                                        $transaction->rollBack();
-                                        Yii::$app->session->setFlash('error_payment', 'Error al guardar un pago. No hay metodo de pago. Reintente');
-                                        return FALSE;
-                                    }
-
-
-
-                                    $pagoFacilPayment = new PagoFacilPayment();
-                                    $pagoFacilPayment->pago_facil_transmition_file_pago_facil_transmition_file_id = $this->pago_facil_transmition_file_id;
-                                    $pagoFacilPayment->payment_payment_id = $payment->payment_id;
-                                    $pagoFacilPayment->save();
-                                } else {
-                                    $transaction->rollBack();
-                                    Yii::$app->session->setFlash('error_payment', 'Error al guardar un pago. Reintente');
-                                    return false;
-                                }
-                            }
-                            break;
-                    }
-                }
-
-                if (!$this->updateAttributes(['total'])) {
-                    $transaction->rollBack();
-                    Yii::$app->session->setFlash('unsave_file', 'El archivo seleccionado no se puede importar. Reintente');
-                    return false;
-                }
+            if($this->createPayments($array_data, $moneyBoxAccount, $paymentMethod)) {
                 $transaction->commit(); // Finaliza transaccion
-                fclose($data);
-                unlink($path);
-
                 return TRUE;
-            } catch (\Exception $ex) {
-                $transaction->commit();
-                Yii::$app->session->setFlash('unsave_file', $ex->getMessage());
+            } else {
+                $transaction->rollBack();
+                return false;
+            }
+        } catch (\Exception $ex) {
+            Yii::$app->session->setFlash('error', $ex->getMessage());
+        }
+    }
+
+    /**
+     * @param $array_data
+     * @param $moneyBoxAccount
+     * @param $paymentMethod
+     * @return bool
+     * Crea Payments, PaymentItems y PagofacilPayments. Actualiza el total del archivo
+     */
+    private function createPayments($array_data, $moneyBoxAccount, $paymentMethod) {
+        $paymentItem = [];
+        $pagofacilPayment = [];
+        $count = 0;
+        $total = 0;
+
+        foreach ($array_data as $data) {
+            $customer = Customer::find()->where(['customer.code' => $data['customer_id']])->one();
+
+            if (!$customer) {
+                return false;
             }
 
+            $payment_id = $this->createPayment($customer->company_id, $customer->customer_id, "PAGO FACIL", $data['date'], $data['amount'], $customer->company->partner_distribution_model_id, $data);
+            if(!$payment_id) {
+                Yii::$app->session->setFlash('error_payment', 'Error al guardar un pago. Reintente');
+                return false;
+            }
 
-        } else {
-            $transaction->rollBack();
-            unlink($this->file->baseName);
-            Yii::$app->session->setFlash('error', 'El archivo seleccionado ya ha sido importado antes. Seleccione otro y reintente.');
-            return FALSE;
+            //actualizo el valor en el array
+            $data['payment_id'] = $payment_id;
+
+            //Si el medio de pago es diferente al de pago facil, busco nuevamente.
+            if(strtolower($data['payment_method']) != strtolower("Pago Facil")) {
+                $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower($array_data['payment_method'])."'")->one();
+            }
+
+            $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
+            $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
+            $total += $data['amount'];
+
+            $count ++;
+            if($count == 500) {
+                $this->batchPaymentItemInsert($paymentItem);
+                $this->batchPagoFacilPaymentInsert($pagofacilPayment);
+                $paymentItem = [];
+                $pagofacilPayment = [];
+                $count = 0;
+            }
+
         }
+        $this->updateAttributes(['total' => $total]);
+        return true;
+    }
+
+    /**
+     * @param $company_id
+     * @param $customer_id
+     * @param $concept
+     * @param $date
+     * @param $amount
+     * @param $partner_distribution_model_id
+     * @param $data
+     * @return bool|int
+     * Crea un pago y devuelve el payment_id
+     */
+    private function createPayment($company_id, $customer_id, $concept, $date, $amount, $partner_distribution_model_id, &$data)
+    {
+        $payment = new Payment([
+            'company_id' => $company_id,
+            'customer_id' => $customer_id,
+            'concept' => $concept,
+            'date' => $date,
+            'amount' => $amount,
+            'partner_distribution_model_id' => $partner_distribution_model_id,
+        ]);
+
+        if($payment->save()) {
+            return $payment->payment_id;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $data
+     * @throws \yii\db\Exception
+     * Inserta por lotes PaymentItems
+     */
+    private function batchPaymentItemInsert($data)
+    {
+        Yii::$app->db->createCommand()->batchInsert('payment_item', ['payment_id', 'amount', 'description', 'payment_method_id', 'money_box_account_id'], $data)->execute();
+    }
+
+    /**
+     * @param $data
+     * @throws \yii\db\Exception
+     * Inserta por lotes PagoFacilPayments
+     */
+    private function batchPagoFacilPaymentInsert($data)
+    {
+        Yii::$app->db->createCommand()->batchInsert('pago_facil_payment', ['pago_facil_transmition_file_pago_facil_transmition_file_id', 'payment_payment_id'], $data)->execute();
     }
     
     /**
@@ -343,9 +311,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      */
     public function getPayments()
     {
-        return $this->hasMany(PagoFacilPayment::className(), [
-            'pago_facil_transmition_file_pago_facil_transmition_file_id' => 'pago_facil_transmition_file_id'
-        ]);
+        return $this->hasMany(PagoFacilPayment::class, ['pago_facil_transmition_file_pago_facil_transmition_file_id' => 'pago_facil_transmition_file_id']);
     }
     
     public function payments(){
@@ -359,7 +325,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
             $payment->paymentPayment->close();           
         }
         
-        $this->status= 'closed';
+        $this->status = 'closed';
         $this->updateAttributes(['status']);
         return true;
     }
