@@ -30,6 +30,7 @@ class PaymentCardReader
             }
             $datas = array_slice($datas, 0, count($datas)-1);
         } catch (\Exception $ex){
+            \Yii::trace($ex);
             error_log($ex->getMessage());
         }
         if($file) {

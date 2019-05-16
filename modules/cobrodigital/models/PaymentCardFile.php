@@ -66,25 +66,23 @@ class PaymentCardFile extends ActiveRecord
      */
     public function getPaymentCards()
     {
-        return $this->hasMany(PaymentCard::className(), ['payment_card_file_id' => 'payment_card_file_id']);
+        return $this->hasMany(PaymentCard::class, ['payment_card_file_id' => 'payment_card_file_id']);
     }
 
     public function import() {
         $data = PaymentCardReader::parse($this);
-//        var_dump($data);die();
         $this->createPaymentsCards($data);
+        $this->updateAttributes(['status' => PaymentCardFile::STATUS_IMPORTED]);
+        return true;
     }
 
     private function createPaymentsCards($data) {
+        $array_payment_card = [];
+
         foreach ($data as $payment_card_data) {
-            $payment_card = new PaymentCard([
-                'payment_card_file_id' => $this->payment_card_file_id,
-                'code_19_digits' => $payment_card_data['code_19_digits'],
-                'code_29_digits' => $payment_card_data['code_29_digits'],
-                'url' => $payment_card_data['url'],
-                'used' => 0
-            ]);
-            $payment_card->save();
+            array_push($array_payment_card, [$this->payment_card_file_id, $payment_card_data['code_19_digits'], $payment_card_data['code_29_digits'], $payment_card_data['url'], 'used' => 0]);
         }
+
+        Yii::$app->db->createCommand()->batchInsert('payment_card', ['payment_card_file_id', 'code_19_digits', 'code_29_digits', 'url', 'used'], $array_payment_card)->execute();
     }
 }

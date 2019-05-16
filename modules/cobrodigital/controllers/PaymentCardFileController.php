@@ -6,6 +6,7 @@ use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use Yii;
 use app\modules\cobrodigital\models\PaymentCardFile;
 use app\modules\cobrodigital\models\search\PaymentCardFileSearch;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -54,8 +55,16 @@ class PaymentCardFileController extends Controller
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $searchModel = new PaymentCardFileSearch();
+        $dataProvider = new ActiveDataProvider([
+            'query' => $model->getPaymentCards()
+        ]);
+
         return $this->render('view', [
             'model' => $this->findModel($id),
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider
         ]);
     }
 
@@ -170,12 +179,18 @@ class PaymentCardFileController extends Controller
 
     public function actionImport($id) {
         $model = $this->findModel($id);
-
-        if($model->import()) {
-            Yii::$app->session->setFlash('success', Yii::t('cobrodigital', 'File imported successfully'));
-            return $this->redirect('index');
+        try {
+            if($model->import()) {
+                Yii::$app->session->setFlash('success', Yii::t('cobrodigital', 'File imported successfully'));
+                return $this->redirect(['index']);
+            } else {
+                Yii::$app->session->setFlash('error', Yii::t('cobrodigital', 'An error occurred while importing file'));
+                return $this->redirect(['index']);
+            }
+        } catch (\Exception $ex) {
+            \Yii::trace($ex);die();
         }
 
-        Yii::$app->session->setFlash('error', Yii::t('cobrodigital', 'An error occurred while importing file'));
+        return $this->redirect(['index']);
     }
 }

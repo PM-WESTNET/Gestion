@@ -18,5 +18,7 @@
     'Payment Card ID' => 'ID de tarjeta de cobro',
     'Code 19 Digits' => 'Código de 19 dígitos',
     'Code 29 Digits' => 'Código de 29 dígitos',
-    'Used' => 'Utilizado'
+    'Used' => 'Utilizado',
+    'draft' => 'Borrador',
+    'imported' => 'Importado',
 ];

@@ -28,6 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'payment_card_file_id',
             'upload_date',
             'file_name',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return Yii::t('cobrodigital', $model->status);
+                }
+            ],
             'path:ntext',
 
             ['class' => 'app\components\grid\ActionColumn'],
