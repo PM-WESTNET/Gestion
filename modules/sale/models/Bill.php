@@ -1081,7 +1081,7 @@ class Bill extends ActiveRecord implements CountableInterface
                 if($this->getPointOfSale()->electronic_billing ) {
                     $date = new \DateTime($this->date);
                     if ((new \DateTime('now'))->diff($date)->days > 5) {
-                        $this->date = (new \DateTime('now -5 days'))->format('Y-m-d');
+                        $this->date = (new \DateTime('now'))->format('Y-m-d');
                     }
                 }
             }
