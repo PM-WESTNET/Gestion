@@ -134,13 +134,17 @@ class Bill extends ActiveRecord implements CountableInterface
     public function behaviors()
     {
         return [
-            /*'datestamp' => [
+            'datestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
                 ],
-                'value' => function(){return date('Y-m-d');},
-            ],*/
+                'value' => function(){
+                    if(!$this->date) {
+                        return date('Y-m-d');
+                    }
+                },
+            ],
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
