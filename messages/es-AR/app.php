@@ -1102,5 +1102,7 @@
     'Create Track' => 'Crear canal de pago',
     'Update Track: ' => 'Actualizar canal de pago: ',
     'Payment methods and tracks' => 'Medios y canales de pago',
-    'Use a payment_card?' => '¿Usa tarjetas de cobro?'
+    'Use a payment_card?' => '¿Usa tarjetas de cobro?',
+    'Ads Percentage Per Companies' => 'Porcentaje de ADS por empresa',
+    'ADS percentage per companies' => 'Porcentaje de ADS por empresa',
 );

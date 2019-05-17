@@ -303,16 +303,12 @@ if (Yii::$app->getModule('westnet')) {
             ['label'=>Yii::t('westnet','Servers'), 'url'=>['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
             ['label'=>Yii::t('westnet','Nodes'), 'url'=>['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
             ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
-            //'<li class="divider"></li>',
             ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/westnet/node/assigned-ip']],
-            [
-                'label' => Yii::t('westnet', 'Empty ADS not used'),
-                'url' => ['/westnet/empty-ads/index']
-            ],
-            [
-                'label' => Yii::t('app', 'Create Empty ADS'),
-                'url' => ['/westnet/ads/print-empty-ads']
-            ],
+            '<li class="divider"></li>',
+            ['label' => Yii::t('app', 'ADS'), 'visible' => Yii::$app->user->isSuperadmin],
+            ['label' => Yii::t('westnet', 'Empty ADS not used'), 'url' => ['/westnet/empty-ads/index']],
+            ['label' => Yii::t('app', 'Create Empty ADS'), 'url' => ['/westnet/ads/print-empty-ads']],
+            ['label' => Yii::t('app', 'ADS percentage per companies'), 'url' => ['/westnet/ads-percentage-per-company/index']],
             '<li class="divider"></li>',
             [
                 'label' => Yii::t('app', 'Ecopagos'),

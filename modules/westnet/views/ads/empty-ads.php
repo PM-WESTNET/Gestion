@@ -14,6 +14,14 @@ $model = new Node();
     <div class="title">
         <h1><?= $this->title ?></h1>
     </div>
+
+    <div id="flash-messages" class="alert-info alert fade in hidden">
+        <div id="messages">
+            <?= Yii::t('cobrodigital', 'For this company you have limited payment cards. If you dont have payment cards, you can´t create new empty ADS. Quantity available:')?>
+        </div>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    </div>
+
     <p>
         Seleccione un nodo y especifique la cantidad de formularios ADS que desee crear.
     </p>
@@ -35,7 +43,7 @@ $model = new Node();
                 <?php
                 echo $form->field($model, 'node_id')->widget(Select2::classname(), [
                     'language' => 'es',
-                    'data' => yii\helpers\ArrayHelper::map(Node::findAll(['status'=>'enabled']), 'node_id', 'name'),
+                    'data' => ArrayHelper::map(Node::findAll(['status'=>'enabled']), 'node_id', 'name'),
                     'options' => [
                         'multiple' => true,
                         'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false, 'id'=>'node_id'],
@@ -115,6 +123,10 @@ $model = new Node();
                     dataType: 'json'
                 }).done(function (json) {
                     console.log(json)
+                    if(json.qty) {
+                        $('#messages').html($('#messages').text() + json.qty );
+                        $('#flash-messages').removeClass('hidden');
+                    }
                 });
             }
 
