@@ -13,6 +13,7 @@ use yii\behaviors\SluggableBehavior;
  * @property string $name
  * @property string $slug
  * @property string $description
+ * @property boolean $use_payment_card
  *
  * @property CompanyHasPaymentTrack[] $companyHasPaymentTracks
  */
@@ -34,6 +35,7 @@ class Track extends ActiveRecord
         return [
             [['name', 'description'], 'required'],
             [['description'], 'string'],
+            [['use_payment_card'], 'safe'],
             [['name', 'slug'], 'string', 'max' => 255],
         ];
     }
@@ -61,6 +63,7 @@ class Track extends ActiveRecord
             'name' => Yii::t('app', 'Name'),
             'slug' => Yii::t('app', 'Slug'),
             'description' => Yii::t('app', 'Description'),
+            'use_payment_card' => Yii::t('app', 'Use a payment_card?')
         ];
     }
 

@@ -413,4 +413,30 @@ class Company extends \app\components\db\ActiveRecord
     {
         return Company::find()->where(['parent_id' => null])->andWhere(['status' => 'enabled'])->all();
     }
+
+    /**
+     * @param bool $verify_child_companies
+     * @return bool
+     *      Verifica si en alguno de sus medios de pago tiene asociado algun canal que utilice tarjetas de cobro
+     * Es posible pasarle el parámetro verify_child_companies en true para que se fije si una de las empresas hijas lo
+     * tiene habilitado, ademas de ella misma
+     */
+    public function hasEnabledTrackWithPaymentCards($verify_child_companies = false)
+    {
+        $has_track_with_payment_card = false;
+
+        if($verify_child_companies) {
+            foreach ($this->companies as $company) {
+                if($company->getTracks()->where(['use_payment_card' => 1])->exists()) {
+                    $has_track_with_payment_card = true;
+                }
+            }
+        }
+
+        if($this->getTracks()->where(['use_payment_card' => 1])->exists()) {
+            $has_track_with_payment_card = true;
+        }
+
+        return $has_track_with_payment_card;
+    }
 }

@@ -8,6 +8,7 @@ use app\modules\cobrodigital\models\search\PaymentCardSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * PaymentCardController implements the CRUD actions for PaymentCard model.
@@ -71,5 +72,21 @@ class PaymentCardController extends Controller
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    /**
+     * @return array
+     * Indica la cantidad de tarjetas de cobro que hay sin usar
+     */
+    public function actionGetUnusedPaymnetCardsQty()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $qty = PaymentCard::find()->where(['used' => 0])->count();
+
+        return [
+            'status' => 'success',
+            'qty' => $qty
+        ];
     }
 }

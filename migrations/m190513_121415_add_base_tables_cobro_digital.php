@@ -15,19 +15,22 @@ class m190513_121415_add_base_tables_cobro_digital extends Migration
             'track_id' => $this->primaryKey(),
             'name' => $this->string(),
             'slug' => $this->string(),
-            'description' => $this->text()
+            'description' => $this->text(),
+            'use_payment_card' => $this->boolean(),
         ]);
 
         $this->insert('track', [
            'name' => 'Directo',
            'slug' => 'directo',
-           'description' => 'Los códigos de pago se administran directamente desde gestión'
+           'description' => 'Los códigos de pago se administran directamente desde gestión',
+           'use_payment_card' => 0,
         ]);
 
         $this->insert('track', [
             'name' => 'Cobro digital',
             'slug' => 'cobro-digital',
-            'description' => 'Los códigos de pago se administran directamente desde la entidad de cobro digital'
+            'description' => 'Los códigos de pago se administran directamente desde la entidad de cobro digital',
+            'use_payment_card' => 1,
         ]);
 
         $this->createTable('company_has_payment_track', [

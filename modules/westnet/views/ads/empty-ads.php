@@ -60,6 +60,13 @@ $model = new Node();
     <script>
         var EmptyAds = new function () {
             this.init = function () {
+
+                $('#company_id').on('change', function () {
+                    if($('#company_id').val() !== '') {
+                        EmptyAds.companyUsePaymentCard($('#company_id').val());
+                    }
+                });
+
                 $(document).off('click', '#generate').on('click', '#generate', function (e) {
                     e.preventDefault();
                     var cantidad = $("#node-count").val();
@@ -87,6 +94,29 @@ $model = new Node();
                     window.open(url);
                 });
             };
+
+            this.companyUsePaymentCard = function (company_id) {
+                $.ajax({
+                    method: 'GET',
+                    url: '<?= Url::to(['/sale/company/company-use-payment-card'])?>',
+                    data: { 'company_id': company_id },
+                    dataType: 'json',
+                }).done(function(json){
+                    if(json.status == 'success' && json.use_payment_card == true) {
+                        EmptyAds.getUnusedPaymentCardsQty();
+                    }
+                });
+            }
+
+            this.getUnusedPaymentCardsQty = function () {
+                $.ajax({
+                    method: 'GET',
+                    url: '<?= Url::to(['/cobrodigital/payment-card/get-unused-paymnet-cards-qty'])?>',
+                    dataType: 'json'
+                }).done(function (json) {
+                    console.log(json)
+                });
+            }
 
 
         }

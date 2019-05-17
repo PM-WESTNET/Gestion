@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             'slug',
             'description:ntext',
+            'use_payment_card:boolean'
         ],
     ]) ?>
 

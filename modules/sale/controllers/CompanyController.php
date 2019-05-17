@@ -9,6 +9,7 @@ use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
+use yii\web\Response;
 
 /**
  * CompanyController implements the CRUD actions for Company model.
@@ -248,13 +249,38 @@ class CompanyController extends Controller
                 'code' => $ex->getCode(),
                 'message' => $ex->getMessage()
             ];
-            \Yii::trace($errors);
         }
 
         return [
             'status' => $valid_data ? true : false,
             'data' => $final_data
         ];
+    }
+
+    /**
+     * @param $company_id
+     * @return array
+     * @throws NotFoundHttpException
+     * Indica si la empresa o las empresas hijas tienen un canal de pago habilitado- canal de pago que use tarjetas de cobro
+     */
+    public function actionCompanyUsePaymentCard($company_id) {
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = $this->findModel($company_id);
+
+        if(!$model) {
+            return [
+                'status' => 'error',
+                'use_payment_card' => ''
+            ];
+        }
+
+        return [
+            'status' => 'success',
+            'use_payment_card' => $model->hasEnabledTrackWithPaymentCards(true),
+        ];
+
     }
 
 }
