@@ -2,12 +2,14 @@
 
 namespace app\modules\westnet\controllers;
 
+use app\modules\sale\models\Company;
 use Yii;
 use app\modules\westnet\models\AdsPercentagePerCompany;
 use app\modules\westnet\models\search\AdsPercentagePerCompanySearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * AdsPercentagePerCompanyController implements the CRUD actions for AdsPercentagePerCompany model.
@@ -35,78 +37,36 @@ class AdsPercentagePerCompanyController extends Controller
      */
     public function actionIndex()
     {
-        $searchModel = new AdsPercentagePerCompanySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $child_companies = Company::find()
+            ->leftJoin('ads_percentage_per_company appc', 'appc.company_id = company.company_id and appc.parent_company_id = company.parent_id')
+            ->where(['not',['company.parent_id' => null]])
+            ->orderBy(['parent_id' => SORT_ASC])->all();
+
+        $parent_companies = Company::find()->where(['parent_id' => null])->all();
 
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'parent_companies' => $parent_companies,
+            'companies' => $child_companies
         ]);
     }
 
     /**
-     * Displays a single AdsPercentagePerCompany model.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
+     * @param $parent_company_id
+     * @param $company_id
+     * @return array
+     * Actualiza el valor del porcentaje de una empresa
      */
-    public function actionView($id)
+    public function actionUpdateCompanyPercentage($company_id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
+        if (isset($_POST['hasEditable'])) {
+            \Yii::$app->response->format = Response::FORMAT_JSON;
 
-    /**
-     * Creates a new AdsPercentagePerCompany model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new AdsPercentagePerCompany();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->percentage_per_company_id]);
+            if (AdsPercentagePerCompany::setCompanyPercentage($company_id, Yii::$app->request->post('percentage'))){
+                return ['output' => Yii::$app->request->post('percentage'), 'message' => ''];
+            } else {
+                return ['output' => 'false', 'message' => Yii::t('app', 'An error occurred')];
+            }
         }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Updates an existing AdsPercentagePerCompany model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->percentage_per_company_id]);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Deletes an existing AdsPercentagePerCompany model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
     }
 
     /**

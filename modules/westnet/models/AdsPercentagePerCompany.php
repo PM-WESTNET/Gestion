@@ -32,8 +32,9 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['parent_company_id', 'company_id', 'percentage'], 'required'],
             [['parent_company_id', 'company_id'], 'integer'],
-            [['percentage'], 'number'],
+            [['percentage'], 'number', 'max' => 100 ],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['company_id' => 'company_id']],
             [['parent_company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['parent_company_id' => 'company_id']],
         ];
@@ -66,5 +67,52 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
     public function getParentCompany()
     {
         return $this->hasOne(Company::className(), ['company_id' => 'parent_company_id']);
+    }
+
+    /**
+     * @param $parent_company_id
+     * @param $company_id
+     * @return mixed|string
+     * Devuelve el valor de configuracion en porcentaje de una empresa, si no encuentra la configuración devolverá 0
+     */
+    public static function getCompanyPercentage($company_id) {
+        $company = Company::findOne($company_id);
+
+        if(!$company) {
+            return '0';
+        }
+
+        $percentage = AdsPercentagePerCompany::find()->where(['parent_company_id' => $company->parent_id, 'company_id' => $company->company_id])->one();
+
+        return $percentage ? $percentage->percentage : '0';
+    }
+
+    /**
+     * @param $parent_company_id
+     * @param $company_id
+     * @param $percentage_value
+     * @return bool
+     * Setea el valor de porcentaje par una empresa en particular, si el regustro de la configuración no existiera, creará uno.
+     */
+    public static function setCompanyPercentage($company_id, $percentage_value) {
+        $company = Company::findOne($company_id);
+
+        if(!$company) {
+            return false;
+        }
+
+        $percentage = AdsPercentagePerCompany::find()->where(['parent_company_id' => $company->parent_id, 'company_id' => $company->company_id])->one();
+
+        if(!$percentage) {
+            $percentage = new AdsPercentagePerCompany([
+               'parent_company_id' => $company->parent_id,
+               'company_id' => $company_id,
+               'percentage' => $percentage_value
+            ]);
+        } else {
+            $percentage->percentage = $percentage_value;
+        }
+
+        return $percentage->save();
     }
 }

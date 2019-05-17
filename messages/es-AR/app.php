@@ -1105,4 +1105,6 @@
     'Use a payment_card?' => '¿Usa tarjetas de cobro?',
     'Ads Percentage Per Companies' => 'Porcentaje de ADS por empresa',
     'ADS percentage per companies' => 'Porcentaje de ADS por empresa',
+    'The parent company percentage sum have to be 100%' => 'La suma de los porcentajes por empresa padre debe ser 100%',
+    'An error occurred' => 'Ocurrió un error',
 );
