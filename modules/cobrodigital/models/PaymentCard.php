@@ -34,6 +34,7 @@ class PaymentCard extends ActiveRecord
     public function rules()
     {
         return [
+            [['payment_card_file_id', 'code_19_digits', 'code_29_digits', 'url'], 'required'],
             [['payment_card_file_id', 'used'], 'integer'],
             [['url'], 'string'],
             [['code_19_digits', 'code_29_digits'], 'string', 'max' => 255],
