@@ -130,21 +130,21 @@ class Bill extends ActiveRecord implements CountableInterface
             [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
         ]);
     }
-    
+
     public function behaviors()
     {
         return [
-            'datestamp' => [
+            /*'datestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
                 ],
                 'value' => function(){
-                    if(!$this->date) {
+                    if($this->date && $this->date != '<span class="not-set">(no definido)</span>') {
                         return date('Y-m-d');
                     }
-                },
-            ],
+                }
+            ],*/
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
@@ -166,7 +166,7 @@ class Bill extends ActiveRecord implements CountableInterface
             ],
         ];
     }
-    
+
     /**
      * Inicializa tipo por defecto de factura, tipo por defecto de moneda, y valida estos datos.
      * @throws \yii\web\HttpException
@@ -1083,8 +1083,16 @@ class Bill extends ActiveRecord implements CountableInterface
             //  pongo la fecha de hoy
             if ($this->point_of_sale_id){
                 if($this->getPointOfSale()->electronic_billing ) {
-                    $date = new \DateTime($this->date);
-                    if ((new \DateTime('now'))->diff($date)->days > 5) {
+                    if($this->date) {
+                        if ($this->date != '<span class="not-set">(no definido)</span>') {
+                            $date = new \DateTime($this->date);
+                            if ((new \DateTime('now'))->diff($date)->days > 5) {
+                                $this->date = (new \DateTime('now'))->format('Y-m-d');
+                            }
+                        } else {
+                            $this->date = (new \DateTime('now'))->format('Y-m-d');
+                        }
+                    } else {
                         $this->date = (new \DateTime('now'))->format('Y-m-d');
                     }
                 }
