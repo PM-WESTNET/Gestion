@@ -82,7 +82,7 @@ class PaymentCardController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        $qty = PaymentCard::find()->where(['used' => 0])->count();
+        $qty = PaymentCard::getUnusedPaymentCardsQty();
 
         return [
             'status' => 'success',

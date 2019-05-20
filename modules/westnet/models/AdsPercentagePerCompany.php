@@ -88,6 +88,24 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param $company_id
+     * @param $reference_total_qty
+     * @return float|int
+     * Devuelve la cantidad de ads que le corresponde crear a esa empresa, teniendo como referencia un total de ADS a crear.
+     */
+    public static function getCompanyPercentageQty($company_id, $reference_total_qty) {
+
+        $percentage = AdsPercentagePerCompany::getCompanyPercentage($company_id);
+        $percentage_qty = 0;
+
+        if($percentage != 0) {
+            $percentage_qty = round(($percentage * $reference_total_qty) / 100);
+        }
+
+        return $percentage_qty;
+    }
+
+    /**
      * @param $parent_company_id
      * @param $company_id
      * @param $percentage_value

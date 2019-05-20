@@ -3,7 +3,10 @@
 namespace app\modules\westnet\models;
 
 use app\components\db\ActiveRecord;
+use app\modules\cobrodigital\models\PaymentCard;
+use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\models\Company;
+use app\modules\sale\models\Customer;
 use Yii;
 use yii\db\Query;
 
@@ -135,6 +138,75 @@ class EmptyAds extends ActiveRecord
                     ->max('code');
         
         return $maxCode;
+    }
+
+    /**
+     * @param Company $company
+     * @param $qty
+     * @return bool
+     * Verifica si la empresa está en condiciones de generar nuevos ADS vacíos.
+     * En caso de tener un medio de pago que use tarjetas de cobro, se limitará a verificar si las tarjetas de cobro son suficientes para la cantidad de ADS que se desean crear.
+     */
+    public static function canCreateEmptyAds(Company $parent_company, $qty)
+    {
+        //La empresa desde la que se debe partir debe ser una padre.
+        if ($parent_company->parent_id != null) {
+            return false;
+        }
+
+        //Verifico si alguna de las empresas hijas tiene las tarjetas de cobro habilitadas
+        if ($parent_company->hasEnabledTrackWithPaymentCards(true)) {
+
+            $qty_percentage = round(($parent_company->getTotalADSPercentage() * $qty) / 100);
+
+            //Verifico que la cantidad de ADS disponible sea mayor o igual a la cantidad porcentual entre las empresas hijas
+            $availablePaymentCardsQty = PaymentCard::getUnusedPaymentCardsQty();
+            if ($availablePaymentCardsQty < $qty_percentage) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Company $parent_company
+     * @param $node
+     * @param $qty
+     * @return array
+     * Crea ADS vacios.
+     * Se tiene en cuenta el porcentaje de ADS que se deben crear para cada empresa hija.
+     */
+    public static function createEmptyAds(Company $parent_company, $node, $qty)
+    {
+        $codes = [];
+
+        foreach ($parent_company->companies as $company) {
+            $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+            $percentage_qty = AdsPercentagePerCompany::getCompanyPercentageQty($company->company_id, $qty);
+
+            for ($i = 0; $i < $percentage_qty; $i++) {
+                $init_value = Customer::getNewCode();
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
+                    str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+
+                $payment_code = $generator->generate($code);
+
+                $emptyAds = new EmptyAds([
+                    'code' => $init_value,
+                    'payment_code' => $payment_code,
+                    'node_id' => $node->node_id,
+                    'company_id' => $company->company_id,
+                    'used' => false,
+                ]);
+
+                $emptyAds->save(false);
+                //TODO ver si es necesario guardar en el array company_id o similar
+                $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+            }
+        }
+
+        return $codes;
     }
 
 }

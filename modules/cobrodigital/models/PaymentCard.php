@@ -62,6 +62,10 @@ class PaymentCard extends ActiveRecord
      */
     public function getPaymentCardFile()
     {
-        return $this->hasOne(PaymentCardFile::className(), ['payment_card_file_id' => 'payment_card_file_id']);
+        return $this->hasOne(PaymentCardFile::class, ['payment_card_file_id' => 'payment_card_file_id']);
+    }
+
+    public static function getUnusedPaymentCardsQty() {
+        return PaymentCard::find()->where(['used' => 0])->count();
     }
 }

@@ -5,6 +5,7 @@ namespace app\modules\sale\models;
 use app\modules\checkout\models\CompanyHasPaymentTrack;
 use app\modules\checkout\models\Track;
 use app\modules\partner\models\PartnerDistributionModel;
+use app\modules\westnet\models\AdsPercentagePerCompany;
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -438,5 +439,32 @@ class Company extends \app\components\db\ActiveRecord
         }
 
         return $has_track_with_payment_card;
+    }
+
+    public function getCompaniesWithPaymentCards() {
+        $companies_with_payment_card = [];
+
+        foreach ($this->companies as $company) {
+            if ($company->getTracks()->where(['use_payment_card' => 1])->exists()) {
+                array_push($companies_with_payment_card, $company->company_id);
+            }
+        }
+
+        return $companies_with_payment_card;
+    }
+
+    public function getTotalADSPercentage()
+    {
+        $total_percentage = 0;
+
+        //Para el calculo solo tengo en cuenta las empresas hijas que tienen las tarjetas de cobro habilitadas
+        $companies_with_payment_card = $this->getCompaniesWithPaymentCards();
+
+        //Obtengo el porcentaje de ads que va tenerse en cuenta de las empresas hijas
+        foreach ($companies_with_payment_card as $company_id) {
+            $total_percentage += AdsPercentagePerCompany::getCompanyPercentage($company_id);
+        }
+
+        return $total_percentage;
     }
 }

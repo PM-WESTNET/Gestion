@@ -94,48 +94,33 @@ class AdsController extends Controller {
             $node = Node::findOne(['node_id' => $node_id]);
             $company = Company::findOne(['company_id'=> $company_id]);
 
-            $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+            if(EmptyAds::canCreateEmptyAds($company, $qty)) {
+                $codes = EmptyAds::createEmptyAds($company, $node, $qty);
 
-            $init_value = Customer::getNewCode();
-            $codes = [];
+                $this->layout = '//pdf';
 
-            for ($i = 0; $i < $qty; $i++) {
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
-                    str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+                $view = $this->render('pdf', [
+                    'codes'     => $codes,
+                    'node'      => $node,
+                    'company'   => $company,
+                    'plans'     => $this->getPlans($company_id)
+                ]);
 
-                $payment_code = $generator->generate($code);
-                $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
-                $emptyAds = new EmptyAds();
-                $emptyAds->code = $init_value;
-                $emptyAds->payment_code = $payment_code;
-                $emptyAds->node_id = $node->node_id;
-                $emptyAds->company_id = $company->company_id;
-                $emptyAds->used = false;
-                $emptyAds->save(false);
-                $init_value = Customer::getNewCode();
+                $response = Yii::$app->getResponse();
+                $response->format = Response::FORMAT_RAW;
+                $response->headers->set('Content-type: application/pdf');
+                $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+
+                return PDFService::makePdf($view);
+
+            } else {
+                Yii::$app->session->setFlash('error', 'Cant create that ADS');
+                return $this->render('empty-ads');
             }
-
-            $this->layout = '//pdf';
-
-            $plans = $this->getPlans($company_id);
-
-            $view = $this->render('pdf', [
-                'codes'     => $codes,
-                'node'      => $node,
-                'company'   => $company,
-                'plans'     => $plans
-            ]);
-
-            $response = Yii::$app->getResponse();
-            $response->format = Response::FORMAT_RAW;
-            $response->headers->set('Content-type: application/pdf');
-            $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
-
-            return PDFService::makePdf($view);
             
-        }else{
-            return $this->render('empty-ads');
         }
+
+        return $this->render('empty-ads');
     }
     /**
      *  Imprime un Ads en blanco ya generado
