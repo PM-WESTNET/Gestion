@@ -159,6 +159,11 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         }
     }
 
+    public function getMoneyBoxAccount()
+    {
+        return $this->hasOne(MoneyBoxAccount::class, ['money_box_account_id' => 'money_box_account_id']);
+    }
+
     /**
      * Verifica si el archivo a importar ha sido importado antes 
      * @return boolean
