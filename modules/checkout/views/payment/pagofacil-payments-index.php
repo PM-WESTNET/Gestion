@@ -30,9 +30,12 @@ $this->params['breadcrumbs'][]= $this->title;
             [
                 'label' => Yii::t('app', 'Account'),
                 'value' => function (app\modules\checkout\models\PagoFacilTransmitionFile $model){
-                    $account= app\modules\accounting\models\MoneyBoxAccount::findOne(['money_box_account_id' => $model->money_box_account_id]);
-                    return $account->account->name . ' - ' . $account->moneyBox->name;
-                } 
+                    $account = app\modules\accounting\models\MoneyBoxAccount::findOne(['money_box_account_id' => $model->money_box_account_id]);
+                    if($account) {
+                        return $account->account->name . ' - ' . $account->moneyBox->name;
+                    }
+                    return '';
+                }
             ],
             'total:currency',
             [
