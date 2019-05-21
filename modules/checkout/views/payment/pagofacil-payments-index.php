@@ -48,10 +48,17 @@ $this->params['breadcrumbs'][]= $this->title;
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template'=>'{view} ',
+                'template'=>'{view} {delete}',
                 'buttons'=>[
                     'view' => function ($url, $model, $key) {
                         return  Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::toRoute(['payment/pagofacil-payment-view', 'idFile'=>$model->pago_facil_transmition_file_id]), ['class' => 'btn btn-view']);
+                    },
+                    'delete' => function ($url, $model, $key) {
+                        if($model->getDeletable()) {
+                            return  Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::toRoute(['payment/delete-pago-facil-transmition-file', 'id'=>$model->pago_facil_transmition_file_id]), ['class' => 'btn btn-danger']);
+                        }
+
+                        return '';
                     },
                 ],
             ],

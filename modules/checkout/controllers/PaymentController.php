@@ -615,4 +615,22 @@ class PaymentController extends Controller {
             return false;
         }
     }
+
+    public function actionDeletePagoFacilTransmitionFile($id) {
+        $model = PagoFacilTransmitionFile::findOne($id);
+        if(!$model) {
+            Yii::$app->setFlash('error', 'No es posible encontrar el modelo');
+        }
+
+        if($model->getDeletable()) {
+            if($model->file_name && file_exists(Yii::getAlias('@webroot') . '/' .$model->file_name)){
+                unlink(Yii::getAlias('@webroot') . '/'.$model->file_name);
+            }
+            $model->delete();
+        } else {
+            Yii::$app->setFlash('error', 'No es posible eliminar el archivo');
+        }
+
+        return $this->redirect(['pagofacil-payments-index']);
+    }
 }
