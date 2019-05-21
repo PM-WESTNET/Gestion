@@ -11,7 +11,6 @@ $this->title= "Importar Archivo de Pago Fácil";
 $this->params['breadcrumbs'][]= ['label' => Yii::t('app', 'Pago Fácil Files'), 'url' => ['pagofacil-payments-index']];
 $this->params['breadcrumbs'][]= $this->title;
 ?>
-
 <div class="pagofacil-import">
      <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>

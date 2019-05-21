@@ -509,10 +509,20 @@ class PaymentController extends Controller {
 
         $transmition_file = new PagoFacilTransmitionFile();
 
-        if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file') && $transmition_file->import()) {
-            $transmition_file->refresh();
-            Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
-            return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
+        if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
+            $import = $transmition_file->import();
+            if($import['status']) {
+                Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
+                return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
+            } else {
+                unlink(Yii::getAlias('@webroot') . '/'.$transmition_file->file_name);
+                $transmition_file->delete();
+                $string_error = '';
+                foreach ($import['errors'] as $error) {
+                    $string_error .= $error . "<br>";
+                }
+                Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
+            }
         }
 
         return $this->render('pagofacil-payments-import', ['model'=> $transmition_file]);
@@ -597,7 +607,6 @@ class PaymentController extends Controller {
                 }
 
                 $file->saveAs(Yii::getAlias('@webroot') . '/' . $filePath);
-
                 return $model->save(false);
             }
 
@@ -605,5 +614,23 @@ class PaymentController extends Controller {
         } else {
             return false;
         }
+    }
+
+    public function actionDeletePagoFacilTransmitionFile($id) {
+        $model = PagoFacilTransmitionFile::findOne($id);
+        if(!$model) {
+            Yii::$app->setFlash('error', 'No es posible encontrar el modelo');
+        }
+
+        if($model->getDeletable()) {
+            if($model->file_name && file_exists(Yii::getAlias('@webroot') . '/' .$model->file_name)){
+                unlink(Yii::getAlias('@webroot') . '/'.$model->file_name);
+            }
+            $model->delete();
+        } else {
+            Yii::$app->setFlash('error', 'No es posible eliminar el archivo');
+        }
+
+        return $this->redirect(['pagofacil-payments-index']);
     }
 }

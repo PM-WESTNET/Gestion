@@ -1107,4 +1107,6 @@
     'ADS percentage per companies' => 'Porcentaje de ADS por empresa',
     'The parent company percentage sum have to be 100%' => 'La suma de los porcentajes por empresa padre debe ser 100%',
     'An error occurred' => 'Ocurrió un error',
+    'An error occurred while importing file: ' => 'Ha ocurrido un error al importar el archivo: ',
+    'Customer not found: ' => 'Cliente no encontrado: '
 );

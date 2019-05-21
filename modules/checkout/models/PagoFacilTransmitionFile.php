@@ -3,6 +3,7 @@
 namespace app\modules\checkout\models;
 
 use app\components\db\ActiveRecord;
+use app\components\helpers\EmptyLogger;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\components\PagoFacilReader;
 use app\modules\sale\models\Customer;
@@ -134,7 +135,11 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * Strong relations: None.
      */
     public function getDeletable() {
-        return true;
+        if($this->status == self::STATUS_DRAFT && (!$this->getPayments()->exists())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -185,24 +190,31 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      */
     public function import() {
 
+        Yii::setLogger(new EmptyLogger());
         if (empty($this->money_box_account_id) && empty($this->money_box)) {
             Yii::$app->session->setFlash('error', 'Seleccione el banco y/o la cuenta destinatarios');
             return false;
         }
 
         $transaction = Yii::$app->db->beginTransaction(); // Inicia transaccion con la base de datos
-
         try {
             $array_data = PagoFacilReader::parse($this);
             $moneyBoxAccount = MoneyBoxAccount::findOne(['money_box_account_id' => $this->money_box_account_id]);
             $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower("Pago Facil")."'")->one();
 
-            if($this->createPayments($array_data, $moneyBoxAccount, $paymentMethod)) {
+            $newPayments = $this->createPayments($array_data, $moneyBoxAccount, $paymentMethod);
+            if($newPayments['status']) {
                 $transaction->commit(); // Finaliza transaccion
-                return TRUE;
+                return [
+                    'status' => true,
+                    'errors' => $newPayments['errors']
+                ];
             } else {
                 $transaction->rollBack();
-                return false;
+                return [
+                    'status' => false,
+                    'errors' => $newPayments['errors']
+                ];
             }
         } catch (\Exception $ex) {
             Yii::$app->session->setFlash('error', $ex->getMessage());
@@ -221,44 +233,41 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         $pagofacilPayment = [];
         $count = 0;
         $total = 0;
+        $errors = [];
 
         foreach ($array_data as $data) {
             $customer = Customer::find()->where(['customer.code' => $data['customer_id']])->one();
 
             if (!$customer) {
-                return false;
-            }
+                array_push($errors, Yii::t('app', 'Customer not found: ') . $data['customer_id']);
+            } else {
+                $payment_id = $this->createPayment($customer->company_id, $customer->customer_id, "PAGO FACIL", $data['date'], $data['amount'], $customer->company->partner_distribution_model_id, $data);
+                if(!$payment_id) {
+                    array_push($errors, "Error al guardar el pago del cliente $customer->code. Reintente");
+                }
 
-            $payment_id = $this->createPayment($customer->company_id, $customer->customer_id, "PAGO FACIL", $data['date'], $data['amount'], $customer->company->partner_distribution_model_id, $data);
-            if(!$payment_id) {
-                Yii::$app->session->setFlash('error_payment', 'Error al guardar un pago. Reintente');
-                return false;
-            }
+                //actualizo el valor en el array
+                $data['payment_id'] = $payment_id;
 
-            //actualizo el valor en el array
-            $data['payment_id'] = $payment_id;
+                //Si el medio de pago es diferente al de pago facil, busco nuevamente.
+                if(strtolower($data['payment_method']) != strtolower("Pago Facil")) {
+                    $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower($array_data['payment_method'])."'")->one();
+                }
 
-            //Si el medio de pago es diferente al de pago facil, busco nuevamente.
-            if(strtolower($data['payment_method']) != strtolower("Pago Facil")) {
-                $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower($array_data['payment_method'])."'")->one();
-            }
-
-            $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
-            $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
-            $total += $data['amount'];
-
-            $count ++;
-            if($count == 500) {
-                $this->batchPaymentItemInsert($paymentItem);
-                $this->batchPagoFacilPaymentInsert($pagofacilPayment);
-                $paymentItem = [];
-                $pagofacilPayment = [];
-                $count = 0;
+                $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
+                $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
+                $total += $data['amount'];
             }
 
         }
+        $this->batchPaymentItemInsert($paymentItem);
+        $this->batchPagoFacilPaymentInsert($pagofacilPayment);
+
         $this->updateAttributes(['total' => $total]);
-        return true;
+        return [
+            'status' => $errors ? false : true,
+            'errors' => $errors
+        ];
     }
 
     /**
