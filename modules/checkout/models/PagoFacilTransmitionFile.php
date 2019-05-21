@@ -3,6 +3,7 @@
 namespace app\modules\checkout\models;
 
 use app\components\db\ActiveRecord;
+use app\components\helpers\EmptyLogger;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\components\PagoFacilReader;
 use app\modules\sale\models\Customer;
@@ -189,13 +190,13 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      */
     public function import() {
 
+        Yii::setLogger(new EmptyLogger());
         if (empty($this->money_box_account_id) && empty($this->money_box)) {
             Yii::$app->session->setFlash('error', 'Seleccione el banco y/o la cuenta destinatarios');
             return false;
         }
 
         $transaction = Yii::$app->db->beginTransaction(); // Inicia transaccion con la base de datos
-
         try {
             $array_data = PagoFacilReader::parse($this);
             $moneyBoxAccount = MoneyBoxAccount::findOne(['money_box_account_id' => $this->money_box_account_id]);
@@ -235,7 +236,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         $errors = [];
 
         foreach ($array_data as $data) {
-            $customer = Customer::find()->where(['customer.code' => $data['customer_id']])->one();
+            $customer = Customer::find()->where(['customer.code' => 1])->one();
 
             if (!$customer) {
                 array_push($errors, Yii::t('app', 'Customer not found: ') . $data['customer_id']);
@@ -256,18 +257,12 @@ class PagoFacilTransmitionFile extends ActiveRecord {
                 $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
                 $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
                 $total += $data['amount'];
-
-                $count ++;
-                if($count == 500) {
-                    $this->batchPaymentItemInsert($paymentItem);
-                    $this->batchPagoFacilPaymentInsert($pagofacilPayment);
-                    $paymentItem = [];
-                    $pagofacilPayment = [];
-                    $count = 0;
-                }
             }
 
         }
+        $this->batchPaymentItemInsert($paymentItem);
+        $this->batchPagoFacilPaymentInsert($pagofacilPayment);
+
         $this->updateAttributes(['total' => $total]);
         return [
             'status' => $errors ? false : true,

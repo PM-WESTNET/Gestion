@@ -18,7 +18,6 @@ class PagoFacilReader
     {
         $file = null;
         $datas = [];
-        $header = '';
         $total = 0;
 
         try {
@@ -32,7 +31,6 @@ class PagoFacilReader
                     if($array_line[0] == '1') {
                         // El encabezado posee 2 lineas, como sabemos que estamos en la 1ra linea, la siguiente linea tambien es del encabezado
                         $next_line = fgets($file); // El encabezado posee 2 lineas, como sabemos que estamos en la 1ra linea, la siguiente linea tambien es del encabezado
-                        $header = $line . $next_line;
                     }
 
                     if($array_line[0] == '5') {
@@ -56,7 +54,7 @@ class PagoFacilReader
                             //el monto del pago va desde el caracter 85 al 99 de la misma linea. Una vez que obtengo la forma de pago,
                             //salto directamente al caracter 84 para que al iterar nuevamente me posicione en el caracter 85
                             if ($array_line[$k] == 'E' || $array_line[$k] == 'P') { // EFECTIVO O DEBITO
-                                $payment_method = "Pago Facil";  //TODO --------------------------------------------------> VER
+                                $payment_method = "Pago Facil";
                                 $k = 84;
                             } else {
                                 if ($k !== 98) { // El punto decimal no esta contemplado en la linea, pero debe ir antes del caracter 98
@@ -79,7 +77,6 @@ class PagoFacilReader
                         $total += (float) $amount;
                     }
             }
-            $datas = array_slice($datas, 0, count($datas)-1);
         } catch (\Exception $ex){
             error_log($ex->getMessage());
         }
