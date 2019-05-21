@@ -19,6 +19,7 @@ use yii\db\Query;
  * @property integer $node_id
  * @property integer $used
  * @property integer $company_id
+ * @property integer $payment_card_id
  * @property Company $company
  */
 class EmptyAds extends ActiveRecord
@@ -88,6 +89,7 @@ class EmptyAds extends ActiveRecord
             'payment_code' => Yii::t('app','Payment Code'),
             'node_id' => Yii::t('westnet','Node'),
             'used' => 'Used',
+            'payment_card' => Yii::t('cobrodigital', 'PaymentCard'),
         ];
     }
 
@@ -180,10 +182,14 @@ class EmptyAds extends ActiveRecord
     public static function createEmptyAds(Company $parent_company, $node, $qty)
     {
         $codes = [];
+        $associate_payment_card = false;
 
         foreach ($parent_company->companies as $company) {
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
             $percentage_qty = AdsPercentagePerCompany::getCompanyPercentageQty($company->company_id, $qty);
+            if($company->hasEnabledTrackWithPaymentCards()) {
+                $associate_payment_card = true;
+            }
 
             for ($i = 0; $i < $percentage_qty; $i++) {
                 $init_value = Customer::getNewCode();
@@ -199,14 +205,33 @@ class EmptyAds extends ActiveRecord
                     'company_id' => $company->company_id,
                     'used' => false,
                 ]);
-
                 $emptyAds->save(false);
-                //TODO ver si es necesario guardar en el array company_id o similar
                 $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+
+                if($associate_payment_card) {
+                    $emptyAds->associatePaymentCard();
+                }
             }
         }
 
         return $codes;
     }
 
+    /**
+     * @return bool|mixed
+     * Asocia una tarjeta de cobro que no ha sido usada a un ADS vacio.
+     */
+    public function associatePaymentCard()
+    {
+        $payment_card = PaymentCard::find()->where(['used' => 0])->one();
+
+        if(!$payment_card) {
+            return false;
+        }
+
+        $this->updateAttributes(['payment_card_id' => $payment_card->payment_card_id]);
+        $payment_card->updateAttributes(['used' => 1]);
+
+        return $payment_card->payment_card_id;
+    }
 }

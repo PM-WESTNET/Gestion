@@ -528,7 +528,7 @@ class PaymentController extends Controller {
     }
     
     public function actionPagofacilPaymentView($idFile){
-        $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
+        $model= PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
         
