@@ -236,7 +236,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         $errors = [];
 
         foreach ($array_data as $data) {
-            $customer = Customer::find()->where(['customer.code' => 1])->one();
+            $customer = Customer::find()->where(['customer.code' => $data['customer_id']])->one();
 
             if (!$customer) {
                 array_push($errors, Yii::t('app', 'Customer not found: ') . $data['customer_id']);
