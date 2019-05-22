@@ -16,9 +16,11 @@ use app\modules\config\models\Config;
 use app\tests\fixtures\CustomerFixture;
 use app\tests\fixtures\BillFixture;
 use app\tests\fixtures\PaymentFixture;
-use app\modules\config\models\Category;
+use app\modules\ticket\models\Category;
 use app\modules\ticket\models\Ticket;
 use app\tests\fixtures\TicketStatusFixture;
+use app\tests\fixtures\EmptyAdsFixture;
+use app\modules\westnet\models\EmptyAds;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -53,6 +55,9 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'status' => [
                 'class' => TicketStatusFixture::class
+            ],
+            'empty_ads' => [
+                'class' => EmptyAdsFixture::class
             ]
         ];
     }
@@ -67,7 +72,8 @@ class CustomerTest extends \Codeception\Test\Unit
     public function testValidWhenFullAndNew()
     {
         $model = new Customer([
-            'tax_condition_id' => 1,
+            'tax_condition_id' => 3,
+            'document_type_id' => 2,
             'publicity_shape' => 'web',
             'document_number' => '12456789',
             'customerClass' => 1
@@ -87,7 +93,8 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -166,7 +173,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '20358752250',
+            'document_number' => '27381010673',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -182,7 +189,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '2010000000',
+            'document_number' => '20175137611',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -195,7 +202,7 @@ class CustomerTest extends \Codeception\Test\Unit
 
         $updatedModel = Customer::findOne($model2->customer_id);
 
-        $updatedModel->document_number = '35875225';
+        $updatedModel->document_number = '20358752250';
         $updatedModel->_notifications_way = [Customer::getNotificationWays()];
 
         expect('Failed', $updatedModel->save())->true();
@@ -233,8 +240,9 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '20175137611',
             'customerClass' => 1,
+            'document_type_id' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111
         ]);
@@ -274,7 +282,7 @@ class CustomerTest extends \Codeception\Test\Unit
     public function testHasCategoryTicket()
     {
         $category = Category::findOne(Config::getValue('cobranza_category_id'));
-        $response =  Customer::hasCategoryTicket(59809, $category->category_id, true);
+        $response = Customer::hasCategoryTicket(59809, $category->category_id, true);
         $customer = Customer::findOne(['code' => 59809]);
 
         expect('Has no tickets', $response['customer_code'])->equals(59809);
@@ -343,7 +351,55 @@ class CustomerTest extends \Codeception\Test\Unit
 
         expect('Cant open file', true)->false();
 
+    }
 
+    public function testAssociateEmptyAds()
+    {
+        EmptyAds::updateAll(['used' => 1]);
+
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        expect('Cant associate empty ads if ads_code doesnt exists', $model->associateEmptyADS(55))->false();
+
+        $empty_ads_without_payment_card = EmptyAds::find()->where(['payment_card_id' => null])->one();
+        $empty_ads_without_payment_card->updateAttributes(['used' => 0]);
+
+        $associate_empty_ads = $model->associateEmptyADS($empty_ads_without_payment_card->code);
+        expect('Associate empty ads successfully', $associate_empty_ads)->true();
+        expect('Customer code has been chanched', $model->code)->equals($empty_ads_without_payment_card->code);
+        expect('Customer company has been changed', $model->company_id)->equals($empty_ads_without_payment_card->company_id);
+        expect('Customer payment code 19 digits is empty', $model->payment_code_19_digits)->isEmpty();
+        expect('Customer payment code 29 digits is empty', $model->payment_code_29_digits)->isEmpty();
+
+        EmptyAds::updateAll(['used' => 1]);
+
+        $model2 = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model2->save();
+
+        $empty_ads_with_payment_card = EmptyAds::find()->where(['not',['payment_card_id' => null]])->one();
+        $empty_ads_with_payment_card->updateAttributes(['used' => 0]);
+
+        $associate_empty_ads = $model->associateEmptyADS($empty_ads_with_payment_card->code);
+        expect('Associate empty ads successfully', $associate_empty_ads)->true();
+        expect('Customer code has been chanched', $model->code)->equals($empty_ads_with_payment_card->code);
+        expect('Customer company has been changed', $model->company_id)->equals($empty_ads_with_payment_card->company_id);
+        expect('Customer payment code 19 digits', $model->payment_code_19_digits)->equals($empty_ads_with_payment_card->paymentCard->code_19_digits);
+        expect('Customer payment code 29 digits', $model->payment_code_29_digits)->equals($empty_ads_with_payment_card->paymentCard->code_29_digits);
 
     }
 }

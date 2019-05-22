@@ -44,7 +44,7 @@ class CompanyHasPaymentCompanyHasPaymentTrackTest extends \Codeception\Test\Unit
         $model = new CompanyHasPaymentTrack([
             'company_id' => 1,
             'payment_method_id' => 1,
-            'track_id' => 3,
+            'track_id' => 1,
             'status' => CompanyHasPaymentTrack::STATUS_ENABLED
         ]);
 
@@ -63,7 +63,7 @@ class CompanyHasPaymentCompanyHasPaymentTrackTest extends \Codeception\Test\Unit
         $model = new CompanyHasPaymentTrack([
             'company_id' => 1,
             'payment_method_id' => 1,
-            'track_id' => 3,
+            'track_id' => 1,
             'status' => CompanyHasPaymentTrack::STATUS_ENABLED
         ]);
 

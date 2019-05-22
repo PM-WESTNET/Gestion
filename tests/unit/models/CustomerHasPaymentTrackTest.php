@@ -3,8 +3,9 @@
 use app\tests\fixtures\CustomerFixture;
 use app\tests\fixtures\PaymentMethodFixture;
 use app\tests\fixtures\TrackFixture;
+use app\modules\sale\models\CustomerHasPaymentTrack;
 
-class CustomerHasPaymentTrack extends \Codeception\Test\Unit
+class CustomerHasPaymentTrackTest extends \Codeception\Test\Unit
 {
     /**
      * @var \UnitTester
@@ -43,8 +44,12 @@ class CustomerHasPaymentTrack extends \Codeception\Test\Unit
         $model = new CustomerHasPaymentTrack([
             'customer_id' => 45900,
             'payment_method_id' => 1,
-            'track_id' => 3,
+            'track_id' => 1,
         ]);
+
+        $model->validate();
+
+        \Codeception\Util\Debug::debug($model->getErrors());
 
         expect('CustomerHasPaymentTrack valid when full and new', $model->validate())->true();
     }
@@ -61,7 +66,7 @@ class CustomerHasPaymentTrack extends \Codeception\Test\Unit
         $model = new CustomerHasPaymentTrack([
             'customer_id' => 45900,
             'payment_method_id' => 1,
-            'track_id' => 3,
+            'track_id' => 1,
         ]);
 
         expect('CustomerHasPaymentTrack saved when full and new', $model->save())->true();
