@@ -179,7 +179,7 @@ class EmptyAds extends ActiveRecord
      * Crea ADS vacios.
      * Se tiene en cuenta el porcentaje de ADS que se deben crear para cada empresa hija.
      */
-    public static function createEmptyAds(Company $parent_company, $node, $qty)
+    public static function createEmptyAds(Company $parent_company, Node $node, $qty)
     {
         $codes = [];
         $associate_payment_card = false;

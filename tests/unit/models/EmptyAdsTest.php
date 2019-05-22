@@ -7,6 +7,8 @@ use app\tests\fixtures\CompanyHasPaymentTrackFixture;
 use app\tests\fixtures\AdsPercentagePerCompanyFixture;
 use app\modules\cobrodigital\models\PaymentCard;
 use app\tests\fixtures\PaymentCardFixture;
+use app\modules\sale\models\Company;
+use app\modules\westnet\models\Node;
 
 class EmptyAdsTest extends \Codeception\Test\Unit
 {
@@ -52,7 +54,7 @@ class EmptyAdsTest extends \Codeception\Test\Unit
     public function testValidWhenFullAndNew()
     {
         $model = new EmptyAds([
-            'code' => '123',
+            'code' => '236',
             'payment_code' => '456',
             'node_id' => 1
         ]);
@@ -69,7 +71,7 @@ class EmptyAdsTest extends \Codeception\Test\Unit
     public function testSaveWhenFullAndNew()
     {
         $model = new EmptyAds([
-            'code' => '123',
+            'code' => '236',
             'payment_code' => '456',
             'node_id' => 1
         ]);
@@ -79,101 +81,67 @@ class EmptyAdsTest extends \Codeception\Test\Unit
 
     public function testCanCreateEmptyAds()
     {
-        $can_create = EmptyAds::canCreateEmptyAds(1, 10);
+        $company = Company::findOne(1);
+        $can_create = EmptyAds::canCreateEmptyAds($company, 10);
 
         expect('Cant create Empty ads when company_id param is not a parent company', $can_create)->false();
 
-        $can_create = EmptyAds::canCreateEmptyAds(9, 10);
+        $company = Company::findOne(9);
+        $can_create = EmptyAds::canCreateEmptyAds($company, 10);
 
         expect('Can create empty ads cause parent company doesnt use payment_cards', $can_create)->true();
 
-        $can_create = EmptyAds::canCreateEmptyAds(8, 10);
+        $company = Company::findOne(1);
+        $can_create = EmptyAds::canCreateEmptyAds($company, 10);
 
         expect('Cant create empty ads cause theres only 3 avalable', $can_create)->false();
 
-        $payment_card = new PaymentCard([
-            'payment_card_file_id' => 1,
-            'code_19_digits' =>
-        ]);
+        PaymentCard::updateAll(['used' => 0]);
+        $company = Company::findOne(8);
+        $can_create = EmptyAds::canCreateEmptyAds($company, 10);
 
-        $can_create = EmptyAds::canCreateEmptyAds(8, 10);
-
-
+        expect('Can create empty ads cause theres 10 available payment cards', $can_create)->true();
     }
-}
 
-/*
-     public static function canCreateEmptyAds(Company $parent_company, $qty)
+    public function testCreateEmptyAds() {
+        $node  = Node::findOne(1);
+        $previous_empty_ads = count(EmptyAds::find()->all());
+
+        //Cuando la empresa no es padre
+        $company = Company::findOne(1);
+        $codes = EmptyAds::createEmptyAds($company, $node, 10);
+
+        expect('Result is empty when company param is not a parent company', $codes)->isEmpty();
+
+        //Cuando la empresa es padre
+        $company = Company::findOne(8);
+        $codes = EmptyAds::createEmptyAds($company, $node, 10);
+
+        expect('Result is not empty cuase the company param is a parent company', $codes)->notEmpty();
+        expect('Result has 10 items', count($codes))->equals(11);
+        expect('Result has key payment_code', array_key_exists('payment_code',$codes[0]))->true();
+        expect('Result has key code', array_key_exists('code',$codes[0]))->true();
+        expect('Theres 10 empty ads', count(EmptyAds::find()->all()) >= $previous_empty_ads + 10 );
+    }
+
+    public function testAssociatePaymentCard()
     {
-        //La empresa desde la que se debe partir debe ser una padre.
-        if ($parent_company->parent_id != null) {
-            return false;
-        }
+        PaymentCard::updateAll(['used' => 1]);
 
-        //Verifico si alguna de las empresas hijas tiene las tarjetas de cobro habilitadas
-        if ($parent_company->hasEnabledTrackWithPaymentCards(true)) {
+        $model = new EmptyAds([
+            'code' => '236',
+            'payment_code' => '456',
+            'node_id' => 1
+        ]);
+        $model->save();
 
-            $qty_percentage = round(($parent_company->getTotalADSPercentage() * $qty) / 100);
+        expect('Cant associate payment card cause all are already used', $model->associatePaymentCard())->false();
 
-            //Verifico que la cantidad de ADS disponible sea mayor o igual a la cantidad porcentual entre las empresas hijas
-            $availablePaymentCardsQty = PaymentCard::getUnusedPaymentCardsQty();
-            if ($availablePaymentCardsQty < $qty_percentage) {
-                return false;
-            }
-        }
+        PaymentCard::updateAll(['used' => 0]);
 
-        return true;
+        $payment_card_id = $model->associatePaymentCard();
+        expect('Payment card associated', $payment_card_id > 0)->true();
+        expect('Payment card exist', PaymentCard::findOne($payment_card_id))->isInstanceOf(PaymentCard::class);
+        expect('Payment card id is associated to empty ads', $model->payment_card_id)->equals($payment_card_id);
     }
-
-public static function createEmptyAds(Company $parent_company, $node, $qty)
-{
-    $codes = [];
-    $associate_payment_card = false;
-
-    foreach ($parent_company->companies as $company) {
-        $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-        $percentage_qty = AdsPercentagePerCompany::getCompanyPercentageQty($company->company_id, $qty);
-        if($company->hasEnabledTrackWithPaymentCards()) {
-            $associate_payment_card = true;
-        }
-
-        for ($i = 0; $i < $percentage_qty; $i++) {
-            $init_value = Customer::getNewCode();
-            $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
-                str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
-
-            $payment_code = $generator->generate($code);
-
-            $emptyAds = new EmptyAds([
-                'code' => $init_value,
-                'payment_code' => $payment_code,
-                'node_id' => $node->node_id,
-                'company_id' => $company->company_id,
-                'used' => false,
-            ]);
-            $emptyAds->save(false);
-            $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
-
-            if($associate_payment_card) {
-                $emptyAds->associatePaymentCard();
-            }
-        }
-    }
-
-    return $codes;
 }
-
-public function associatePaymentCard()
-{
-    $payment_card = PaymentCard::find()->where(['used' => 0])->one();
-
-    if(!$payment_card) {
-        return false;
-    }
-
-    $this->updateAttributes(['payment_card_id' => $payment_card->payment_card_id]);
-    $payment_card->updateAttributes(['used' => 1]);
-
-    return $payment_card->payment_card_id;
-}
- */
