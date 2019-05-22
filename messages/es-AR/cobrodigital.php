@@ -21,4 +21,5 @@
     'Used' => 'Utilizado',
     'draft' => 'Borrador',
     'imported' => 'Importado',
+    'Selected company have limited payment cards. If dont have payment cards, you`ll cannot create new empty ADS. Quantity available: ' => 'La empresa seleccionada tiene tarjetas de cobro limitadas. Si no hay trajetas de cobro disponibles, no podrá crear nuevos ADS vacíos. Cantidad disponible: ',
 ];

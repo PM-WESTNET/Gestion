@@ -17,7 +17,7 @@ $model = new Node();
 
     <div id="flash-messages" class="alert-info alert fade in hidden">
         <div id="messages">
-            <?= Yii::t('cobrodigital', 'For this company you have limited payment cards. If you dont have payment cards, you can´t create new empty ADS. Quantity available:')?>
+            <?= Yii::t('cobrodigital', 'Selected company have limited payment cards. If dont have payment cards, you`ll cannot create new empty ADS. Quantity available: ')?>
         </div>
         <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
     </div>

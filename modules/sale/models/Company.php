@@ -262,7 +262,13 @@ class Company extends \app\components\db\ActiveRecord
 
             foreach ($this->_paymentTracks['Track'] as $payment_method_id => $track_id) {
                 $payment_method_status = array_key_exists($payment_method_id, $this->_paymentTracks['Payment_method']) ? CompanyHasPaymentTrack::STATUS_ENABLED : CompanyHasPaymentTrack::STATUS_DISABLED;
-                $this->link('paymentTracks', Track::findOne($track_id), ['company_id' => $this->company_id, 'payment_method_id' => $payment_method_id, 'status' => $payment_method_status]);
+                $company_has_payment_track = new CompanyHasPaymentTrack([
+                    'company_id' => $this->company_id,
+                    'payment_method_id' => $payment_method_id,
+                    'status' => $payment_method_status,
+                    'track_id' => $track_id,
+                ]);
+                $company_has_payment_track->save();
             }
         };
         $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);

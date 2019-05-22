@@ -751,19 +751,11 @@ class ContractController extends Controller {
         }
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
-            $code=$_POST['Contract']['customerCodeADS'];
+            $ads_code = $_POST['Contract']['customerCodeADS'];
             $customer = Customer::findOne(['customer_id' => $model->customer_id]);
-            // Busco el ADS vacio
-            $emptyAds = EmptyAds::findOne(['code' => $code , 'used' => false]);
+
             // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
-            if(!empty($emptyAds)) {
-                $customer->code = $code;
-                $customer->payment_code = $emptyAds->payment_code;
-                $customer->company_id = $emptyAds->company_id;
-                $emptyAds->used = true;
-                $customer->updateAttributes(['code', 'payment_code', 'company_id']);
-                $emptyAds->updateAttributes(['used']);
-            }else{
+            if(!$customer->associateEmptyADS($ads_code)) {
                 Yii::$app->session->setFlash('error', Yii::t('app', 'This ADS has been used before or not exist'));
                 return $this->render('active-contract', [
                     'model' => $model,
@@ -772,11 +764,7 @@ class ContractController extends Controller {
                 ]);
             }
         }
-        
-        
-        /* if ($model->from_date == Yii::t('app', 'Undetermined time')){
-          $model->from_date = Yii::$app->formatter->asDate(new \DateTime());
-          } */
+
         $model->from_date = Yii::$app->formatter->asDate(new DateTime());
         $model->setScenario('invoice');
         if ($model->load(Yii::$app->request->post()) && $connection->load(Yii::$app->request->post()) && $model->validate()) {

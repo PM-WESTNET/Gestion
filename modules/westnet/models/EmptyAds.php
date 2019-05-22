@@ -99,7 +99,15 @@ class EmptyAds extends ActiveRecord
      */
     public function getCompany()
     {
-        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPaymentCard()
+    {
+        return $this->hasOne(PaymentCard::class, ['payment_card_id' => 'payment_card_id']);
     }
 
     /**

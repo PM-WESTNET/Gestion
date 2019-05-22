@@ -1,6 +1,8 @@
 <?php
 
 use app\modules\accounting\models\Account;
+use app\modules\checkout\models\PaymentMethod;
+use app\modules\checkout\models\Track;
 use kartik\widgets\Select2;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -270,6 +272,47 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
         </div>
     </div>
+    <!-- Medios y canales de pago-->
+
+    <div id="same-company-config" style="padding-bottom: 20px" class="col-sm-12">
+        <?php $checked = !$model->hasCustomizedPaymentConfiguration() || $model->isNewRecord ? 'checked' : ''?>
+        <label class="control-label">
+            <input id="company-config-input" type="checkbox" name="Customer[paymentTracks][sameCompanyConfig]" <?= $checked ?> > Conservar configuración de pago por defecto de empresa
+        </label>
+    </div>
+
+    <div class="col-xs-12 well hidden" id="customer-payment-tracks">
+        <div class="form-group field-company-paymenttracks">
+            <label class="control-label">
+                <?= Yii::t('app', 'Payment methods and tracks')?>
+            </label>
+
+            <div>
+                <?php foreach (PaymentMethod::find()->all() as $payment_method) {
+                    $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one(); ?>
+
+                    <div class="row col-sm-12">
+                        <div class="col-sm-6">
+                            <label>
+                                 <?=$payment_method->name?>
+                            </label>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <?= Select2::widget([
+                                'data' => ArrayHelper::map(Track::find()->all(), 'track_id', 'name'),
+                                'name' => "Customer[paymentTracks][Track][$payment_method->payment_method_id]",
+                                'value' => $payment_track_config ? $payment_track_config->track_id : ''
+                            ])?>
+                            <br>
+                        </div>
+                    </div>
+
+                <?php }?>
+            </div>
+        </div>
+    </div>
+    <!-- Fin medios y canales de pago -->
 
     <div class="row">
         <div class="col-xs-12">
@@ -371,6 +414,22 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             });
 
             self.changeDocumentType();
+
+            $('#company-config-input').on('click', function () {
+                console.log(document.getElementById('company-config-input').checked);
+                if(document.getElementById('company-config-input').checked) {
+                    $('#customer-payment-tracks').addClass('hidden');
+                } else {
+                    $('#customer-payment-tracks').removeClass('hidden');
+                }
+            });
+
+            if(document.getElementById('company-config-input').checked) {
+                $('#customer-payment-tracks').addClass('hidden');
+            } else {
+                console.log('no-checked');
+                $('#customer-payment-tracks').removeClass('hidden');
+            }
         }
 
         this.changeDocumentType = function(){

@@ -7,6 +7,7 @@ use app\components\helpers\CuitValidator;
 use app\modules\accounting\models\Account;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\checkout\models\Track;
 use app\modules\config\models\Config;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\modules\contract\models\Contract;
@@ -52,6 +53,8 @@ use app\modules\ticket\models\Ticket;
  * @property string $email_fields_notifications
  * @property integer $parent_company_id
  * @property integer $needs_bill
+ * @property integer $payment_code_19_digits
+ * @property integer $payment_code_29_digits
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -80,6 +83,7 @@ class Customer extends ActiveRecord {
     public $_sms_fields_notifications;
     public $_email_fields_notifications;
     public $_notifications_way;
+    public $_paymentTracks;
 
     /**
      * @inheritdoc
@@ -104,7 +108,7 @@ class Customer extends ActiveRecord {
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
-            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges' ], 'safe'],
+            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges', 'payment_code_19_digits', 'payment_code_29_digits', 'paymentTracks' ], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -350,7 +354,9 @@ class Customer extends ActiveRecord {
             'needs_bill' => Yii::t('app', 'Needs Bill'),
             'phone4' => Yii::t('app', 'Cellphone 4'),
             'last_update' => Yii::t('app', 'Last update'),
-            'hourRanges' => Yii::t('app', 'Customer Hour range')
+            'hourRanges' => Yii::t('app', 'Customer Hour range'),
+            'payment_code_19_digits' => Yii::t('app', 'Payment code 19 digits'),
+            'payment_code_29_digits' => Yii::t('app', 'Payment code 29 digits')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -414,6 +420,22 @@ class Customer extends ActiveRecord {
 
     public function getContracts() {
         return $this->hasMany(Contract::className(), ['customer_id' => 'customer_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTracks()
+    {
+        return $this->hasMany(Track::class, ['track_id' => 'track_id'])->viaTable('customer_has_payment_track', ['customer_id' => 'customer_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPaymentTracks()
+    {
+        return $this->hasMany(CustomerHasPaymentTrack::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -982,6 +1004,36 @@ class Customer extends ActiveRecord {
         
     }
 
+    public function setPaymentTracks($paymentTracks){
+
+        if(empty($paymentTracks)){
+            $paymentTracks = [];
+        }
+
+        $this->_paymentTracks = $paymentTracks;
+
+        $savePaymentTracks = function($event){
+
+            $this->unlinkAll('paymentTracks', true);
+
+            //  Si en el array viene la opcion sameCompanyConfig significa que tomará los medios de pagos y canales que
+            // la empresa tenga configuradas, de lo contrario crea los regitros en la tabla de configuracion customer_has_payment_track
+            if(!array_key_exists('sameCompanyConfig', $this->_paymentTracks)) {
+                foreach ($this->_paymentTracks['Track'] as $payment_method_id => $track_id) {
+
+                    $customer_has_payment_track = new CustomerHasPaymentTrack([
+                        'customer_id' => $this->customer_id,
+                        'payment_method_id' => $payment_method_id,
+                        'track_id' => $track_id
+                    ]);
+                    $customer_has_payment_track->save();
+                }
+            }
+        };
+        $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);
+        $this->on(self::EVENT_AFTER_UPDATE, $savePaymentTracks);
+    }
+
     /**
      * Devuelve un array con la cantidad de comprobantes por tipo y estado
      * @return array
@@ -1330,5 +1382,54 @@ class Customer extends ActiveRecord {
         }
 
         return $results;
+    }
+
+    /**
+     * @param $ads_code
+     * @return bool
+     * Asocia un ADS vacio un cliente, si el ADS tiene asociada una tarjeta de cobro, actualizo ademas los codigos de pago de 19 y 20 digitos
+     */
+    public function associateEmptyADS($ads_code)
+    {
+        $emptyAds = EmptyAds::findOne(['code' => $ads_code, 'used' => false]);
+        if ($emptyAds) {
+
+            //Si el ADS tiene asociado una tarjeta de cobro, se actualizan los codigos de pago del cliente
+            if ($emptyAds->getPaymentCard()->exists()) {
+                $this->updateAttributes([
+                    'code' => $ads_code,
+                    'payment_code' => $emptyAds->payment_code,
+                    'company_id' => $emptyAds->company_id,
+                    'payment_code_19_digits' => $emptyAds->paymentCard->code_19_digits,
+                    'payment_code_29_digits' => $emptyAds->paymentCard->code_29_digits
+                ]);
+            } else {
+                $this->updateAttributes([
+                    'code' => $ads_code,
+                    'payment_code' => $emptyAds->payment_code,
+                    'company_id' => $emptyAds->company_id
+                ]);
+            }
+
+            $emptyAds->used = true;
+
+            return $emptyAds->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     * Indica si el cliente tiene una configuracion de medios de pago y canales de pago personalizada.
+     * En caso de existir, se debería tomar esta en cuenta, en vez de la configuración de la empresa (company_has_payment_track)
+     */
+    public function hasCustomizedPaymentConfiguration()
+    {
+        if($this->getPaymentTracks()->exists()) {
+            return true;
+        }
+
+        return false;
     }
 }

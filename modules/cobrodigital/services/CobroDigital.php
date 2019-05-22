@@ -82,7 +82,7 @@ class CobroDigital
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    public static function editarPagador($customer_code, $new_customer_document_number, $new_customer_email)
+    public static function editarPagadorByCustomerCode($customer_code, $new_customer_document_number, $new_customer_email)
     {
         $client = new Client();
         $url = Config::getValue('cobrodigital-url');
@@ -102,6 +102,44 @@ class CobroDigital
                     'numerocliente' => $customer_code,
                     'NroDocumento' => $new_customer_document_number,
                     'email' => $new_customer_email,
+                ]
+            ])
+            ->send();
+
+        if($response['ejecucion_correcta']) {
+            \Yii::$app->session->setFlash($response['log']);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param Customer $customer
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     */
+    //TODO ver si no es necesario el resto de datos en la peticion. Documentacion: Nota: si se desea editar el pagador de asociado a un código de barras de pago abierto “TARJETA DE COBRANZA”. En el campo “identificador” se deberá enviar “codigo_de_barras” y en el campo “buscar” El código en cuestión, en el campo pagador todos los campos de la estructura de clientes. Incluido el campo “TARJETA y COD ELECTRONICO”, estos últimos datos son provistos por CobroDigital.
+    public static function editarPagadorBy19DigitsCode($code, $customer_code, $customer_document_number, $customer_email)
+    {
+        $client = new Client();
+        $url = Config::getValue('cobrodigital-url');
+        $id = Config::getValue('cobrodigital-user');
+        $sid = Config::getValue('cobrodigital-password');
+
+        $response = $client->createRequest()
+            ->setMethod('POST')
+            ->setUrl($url)
+            ->setData([
+                'idComercio' => $id,
+                'sid' => $sid,
+                'metodo_webservice' => self::METHOD_EDITAR_PAGADOR,
+                'identificador' => 'codigo_de_barras',
+                'buscar' => $code,
+                'pagador' => [
+                    'numerocliente' => $customer_code,
+                    'NroDocumento' => $customer_document_number,
+                    'email' => $customer_email,
                 ]
             ])
             ->send();
