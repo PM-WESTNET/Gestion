@@ -1,11 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Perez Janet
- * Date: 12/12/18
- * Time: 12:15
- */
 
+use app\modules\checkout\models\CompanyHasPaymentTrack;
+use app\modules\cobrodigital\models\PaymentCard;
 use app\modules\sale\models\Customer;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
@@ -21,6 +17,10 @@ use app\modules\ticket\models\Ticket;
 use app\tests\fixtures\TicketStatusFixture;
 use app\tests\fixtures\EmptyAdsFixture;
 use app\modules\westnet\models\EmptyAds;
+use app\modules\sale\models\Company;
+use app\tests\fixtures\CompanyHasPaymentTrackFixture;
+use app\modules\checkout\models\PaymentMethod;
+use app\modules\sale\models\CustomerHasPaymentTrack;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -58,6 +58,9 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'empty_ads' => [
                 'class' => EmptyAdsFixture::class
+            ],
+            'company_has_payment_track' => [
+                'class' => CompanyHasPaymentTrackFixture::class
             ]
         ];
     }
@@ -400,6 +403,79 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Customer company has been changed', $model->company_id)->equals($empty_ads_with_payment_card->company_id);
         expect('Customer payment code 19 digits', $model->payment_code_19_digits)->equals($empty_ads_with_payment_card->paymentCard->code_19_digits);
         expect('Customer payment code 29 digits', $model->payment_code_29_digits)->equals($empty_ads_with_payment_card->paymentCard->code_29_digits);
+
+    }
+
+    public function testGetAvailablePaymentTracks()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            'company_id' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $company = Company::findOne(1);
+        $payment_methods = PaymentMethod::find()->all();
+
+        foreach ($payment_methods as $payment_method) {
+            $company_payment_track = $company->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
+            $customer_payment_track = $model->getAvailablePaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
+
+            expect("Payment method $payment_method->payment_method_id has same track id", $company_payment_track->track_id)->equals($customer_payment_track->track_id);
+        }
+
+        foreach ($payment_methods as $payment_method) {
+            $customer_has_payment_track = new CustomerHasPaymentTrack([
+                'customer_id' => $model->customer_id,
+                'payment_method_id' => $payment_method->payment_method_id,
+                'track_id' => 2
+            ]);
+            $customer_has_payment_track->save();
+        }
+
+        foreach ($payment_methods as $payment_method) {
+            $customer_payment_track = $model->getAvailablePaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
+
+            expect("Payment method $payment_method->payment_method_id has not same track id", $customer_payment_track->track_id)->equals(2);
+        }
+    }
+
+    public function testAssociatePaymentCard() {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            'company_id' => 2,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        expect('Cant associate payment card cause company doesnt have a track with payment cards', $model->associatePaymentCard())->false();
+
+        $company_has_payment_track = CompanyHasPaymentTrack::find()->where(['company_id' => 2, 'payment_method_id' => 1, 'track_id' => 1, 'status' => 'disabled'])->one();
+        $company_has_payment_track->updateAttributes(['track_id' => 2]);
+        $unused_payment_cards = count(PaymentCard::find()->where(['used' => 0])->all());
+
+        expect('Associate card successfully', $model->associatePaymentCard())->true();
+        expect('Customer has 19 digits payment code', $model->payment_code_19_digits)->notEmpty();
+        expect('Customer has 29 digits payment code', $model->payment_code_29_digits)->notEmpty();
+        expect('Payment card mark as used', count(PaymentCard::find()->where(['used' => 0])->all()))->equals($unused_payment_cards - 1);
+
+        $code_19 = $model->payment_code_19_digits;
+        $code_29 = $model->payment_code_29_digits;
+
+        //Ya no deberia volver a asociar una tarjeta
+        expect('Cant associate payment card again', $model->associatePaymentCard())->false();
+        expect('Payment code 19 digits didnt change', $model->payment_code_19_digits)->equals($code_19);
+        expect('Payment code 29 digits didnt change', $model->payment_code_29_digits)->equals($code_29);
+        expect('Payment card quantity', count(PaymentCard::find()->where(['used' => 0])->all()))->equals($unused_payment_cards - 1);
 
     }
 }

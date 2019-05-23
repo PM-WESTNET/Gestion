@@ -142,6 +142,6 @@ class EmptyAdsTest extends \Codeception\Test\Unit
         $payment_card_id = $model->associatePaymentCard();
         expect('Payment card associated', $payment_card_id > 0)->true();
         expect('Payment card exist', PaymentCard::findOne($payment_card_id))->isInstanceOf(PaymentCard::class);
-        expect('Payment card id is associated to empty ads', $model->payment_card_id)->equals($payment_card_id);
+        expect('Payment card id is associated to empty ads', $model->payment_card_id)->equals($payment_card_id->payment_card_id);
     }
 }
