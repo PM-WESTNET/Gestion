@@ -4,10 +4,8 @@ use app\modules\accounting\models\Account;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\Track;
 use kartik\widgets\Select2;
-use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
-use yii\web\JsExpression;
 use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\modules\sale\models\DocumentType;
@@ -17,7 +15,9 @@ use app\modules\sale\models\CustomerCategory;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\HourRange;
-
+use app\modules\sale\models\search\CompanySearch;
+use app\modules\sale\models\Company;
+use webvimark\modules\UserManagement\models\User;
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Customer $model
@@ -47,10 +47,10 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
         <div class="col-sm-6 col-xs-6">
             <?php
-            $search = new \app\modules\sale\models\search\CompanySearch();
+            $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
-                $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
+                $data = ArrayHelper::map(Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
             }
             ?>
             <div class="form-group field-company_id">
@@ -86,7 +86,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         <div class="col-sm-3 col-xs-12">
             <?php
-                if (!\webvimark\modules\UserManagement\models\User::hasRole('superadmin')){
+                if (!User::hasRole('superadmin')){
                     $document_types= DocumentType::find()->andWhere(['<>','code', 99]);
                 }else{
                     $document_types= DocumentType::find();
@@ -254,7 +254,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         }    
     ?>    
         
-    <div class="row" <?=(webvimark\modules\UserManagement\models\User::hasRole('seller', false) && !(webvimark\modules\UserManagement\models\User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
+    <div class="row" <?=(User::hasRole('seller', false) && !(User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
         <div class="col-sm-4 col-xs-4" >
             <?= $form->field($model, '_notifications_way')->checkboxList(Customer::getNotificationWays(), ['id' => 'notifications_way'])?>
         </div>
@@ -272,46 +272,15 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
         </div>
     </div>
+
     <!-- Medios y canales de pago-->
-
-    <div id="same-company-config" style="padding-bottom: 20px" class="col-sm-12">
-        <?php $checked = !$model->hasCustomizedPaymentConfiguration() || $model->isNewRecord ? 'checked' : ''?>
-        <label class="control-label">
-            <input id="company-config-input" type="checkbox" name="Customer[paymentTracks][sameCompanyConfig]" <?= $checked ?> > Conservar configuración de pago por defecto de empresa
-        </label>
-    </div>
-
-    <div class="col-xs-12 well hidden" id="customer-payment-tracks">
-        <div class="form-group field-company-paymenttracks">
+        <div id="same-company-config" style="padding-bottom: 20px" class="col-sm-12">
+            <?php $checked = !$model->hasCustomizedPaymentConfiguration() || $model->isNewRecord ? 'checked' : ''?>
             <label class="control-label">
-                <?= Yii::t('app', 'Payment methods and tracks')?>
+                <input id="company-config-input" type="checkbox" name="Customer[paymentTracks][sameCompanyConfig]" <?= $checked ?> > Conservar configuración de pago por defecto de empresa
             </label>
-
-            <div>
-                <?php foreach (PaymentMethod::find()->all() as $payment_method) {
-                    $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one(); ?>
-
-                    <div class="row col-sm-12">
-                        <div class="col-sm-6">
-                            <label>
-                                 <?=$payment_method->name?>
-                            </label>
-                        </div>
-
-                        <div class="col-sm-6">
-                            <?= Select2::widget([
-                                'data' => ArrayHelper::map(Track::find()->all(), 'track_id', 'name'),
-                                'name' => "Customer[paymentTracks][Track][$payment_method->payment_method_id]",
-                                'value' => $payment_track_config ? $payment_track_config->track_id : ''
-                            ])?>
-                            <br>
-                        </div>
-                    </div>
-
-                <?php }?>
-            </div>
         </div>
-    </div>
+        <?= $this->render('_payment-methods', ['model' => $model, 'paymentMethods' => $paymentMethods])?>
     <!-- Fin medios y canales de pago -->
 
     <div class="row">
@@ -427,9 +396,30 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             if(document.getElementById('company-config-input').checked) {
                 $('#customer-payment-tracks').addClass('hidden');
             } else {
-                console.log('no-checked');
                 $('#customer-payment-tracks').removeClass('hidden');
             }
+
+            $('#company_id').on('change', function () {
+                self.getPartialPaymentMethods($('#company_id').val());
+            })
+
+        }
+
+        this.getPartialPaymentMethods = function (company_id) {
+            $.ajax({
+                url: '<?= Url::to(['get-customer-payment-method-partial']) ?>' ,
+                data: {company_id: company_id <?= $model->isNewRecord ? ', customer_id: 0' : ', customer_id: '.$model->customer_id ?>},
+                method: 'POST',
+            }).done(function(json){
+                if(json.status == 'success') {
+                    if(json.showDiv) {
+                        $('#customer-payment-tracks').replaceWith(json.html);
+                        document.getElementById('company-config-input').disabled = false;
+                    } else {
+                        document.getElementById('company-config-input').disabled = true;
+                    }
+                }
+            });
         }
 
         this.changeDocumentType = function(){

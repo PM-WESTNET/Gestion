@@ -261,7 +261,7 @@ class Company extends \app\components\db\ActiveRecord
             $this->unlinkAll('paymentTracks', true);
 
             foreach ($this->_paymentTracks['Track'] as $payment_method_id => $track_id) {
-                $payment_method_status = array_key_exists($payment_method_id, $this->_paymentTracks['Payment_method']) ? CompanyHasPaymentTrack::STATUS_ENABLED : CompanyHasPaymentTrack::STATUS_DISABLED;
+                $payment_method_status = array_key_exists('Payment_method', $this->_paymentTracks) ? (array_key_exists($payment_method_id, $this->_paymentTracks['Payment_method']) ? CompanyHasPaymentTrack::STATUS_ENABLED : CompanyHasPaymentTrack::STATUS_DISABLED) : CompanyHasPaymentTrack::STATUS_DISABLED;
                 $company_has_payment_track = new CompanyHasPaymentTrack([
                     'company_id' => $this->company_id,
                     'payment_method_id' => $payment_method_id,

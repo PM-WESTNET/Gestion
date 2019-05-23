@@ -461,9 +461,15 @@ try {
                 <img style="height: 100px; display: inline-block;" src="<?=Url::base(true) . "/" . $company->getLogoWebPath()?>"/>
             <?php } ?>
         </td>
-        <td style="width:286px; text-align: center;">
-            <img  width="143px" height="50px" src="<?= Url::to(['/westnet/ads/barcode', 'code'=> $code['payment_code']], true)?>">
-        </td>
+        <?php if(array_key_exists('barcode_url', $code)) { ?>
+            <td style="width:286px; text-align: center;">
+                <img  width="143px" height="50px" src="<?= $code['barcode_url']?>">
+            </td>
+        <?php } else { ?>
+            <td style="width:286px; text-align: center;">
+                <img  width="143px" height="50px" src="<?= Url::to(['/westnet/ads/barcode', 'code'=> $code['payment_code']], true)?>">
+            </td>
+        <?php } ?>
         <td style="width:286px; text-align: center;">
             <table>
                 <tbody>

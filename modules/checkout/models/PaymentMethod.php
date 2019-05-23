@@ -2,7 +2,9 @@
 
 namespace app\modules\checkout\models;
 
+use app\modules\sale\models\Company;
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "payment_method".
@@ -11,6 +13,7 @@ use Yii;
  * @property string $name
  * @property string $status
  * @property integer $register_number
+ * @property boolean $allow_track_config
  *
  * @property Payment[] $payments
  */
@@ -31,7 +34,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['register_number'], 'boolean'],
+            [['register_number', 'allow_track_config'], 'boolean'],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
             [['name'], 'string', 'max' => 45],
@@ -49,6 +52,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'register_number' => Yii::t('app', 'Register Number?'),
             'type' => Yii::t('app', 'Tipo de pago'),
+            'allow_track_config' => Yii::t('app', 'Allow track config'),
         ];
     }
 
@@ -113,5 +117,29 @@ class PaymentMethod extends \app\components\db\ActiveRecord
         return true;
         
     }
-    
+
+    public static function getAllowedTrackConfigPaymentMethods()
+    {
+        return PaymentMethod::find()->where(['allow_track_config' => 1])->all();
+    }
+
+    public static function getAllowedAndEnabledPaymentMethods($company_id)
+    {
+        $company = Company::findOne($company_id);
+
+        if(!$company) {
+            return false;
+        }
+
+        $payment_method_ids = (new Query())->select('payment_method_id')
+            ->from('company_has_payment_track')
+            ->where(['company_id' => $company_id])
+            ->andWhere(['status' => CompanyHasPaymentTrack::STATUS_ENABLED])
+            ->all();
+
+        return PaymentMethod::find()
+            ->where(['in', 'payment_method_id', $payment_method_ids])
+            ->andWhere(['payment_method.allow_track_config' => 1])
+            ->all();
+    }
 }

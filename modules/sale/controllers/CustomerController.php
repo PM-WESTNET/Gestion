@@ -6,6 +6,7 @@ use app\components\helpers\ExcelExporter;
 use app\components\helpers\PDFService;
 use app\components\web\Controller;
 use app\modules\afip\components\CuitOnlineValidator;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\invoice\components\einvoice\ApiFactory;
 use app\modules\sale\models\Address;
@@ -196,6 +197,7 @@ class CustomerController extends Controller
         $address= new Address;
         $address->scenario = 'insert';
         $model->scenario= 'insert';
+        $paymentMethods = PaymentMethod::getAllowedTrackConfigPaymentMethods();
 
         if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
             if($address->save()){
@@ -215,6 +217,7 @@ class CustomerController extends Controller
         return $this->render('create', [
             'model' => $model,
             'address'=> $address,
+            'paymentMethods' => $paymentMethods
         ]);
 
     }
@@ -259,6 +262,8 @@ class CustomerController extends Controller
     {
         $model = $this->findModel($id);
         $address=  $model->address ? $model->address : new Address;
+        $paymentMethods = PaymentMethod::getAllowedTrackConfigPaymentMethods();
+
         if($model->canUpdate()){
             if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
 
@@ -274,6 +279,7 @@ class CustomerController extends Controller
             return $this->render('update', [
                         'model' => $model,
                         'address' => $address,
+                        'paymentMethods' => $paymentMethods
             ]);
         }else{
             throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
@@ -787,8 +793,32 @@ class CustomerController extends Controller
         }
 
         return $this->render('verify-emails', ['results' => $results]);
+    }
 
+    public function actionGetCustomerPaymentMethodPartial()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
+        $company_id = Yii::$app->request->post('company_id');
+        $customer_id = Yii::$app->request->post('customer_id');
+
+        $model = Customer::findOne($customer_id);
+        if(!$model) {
+            $model = new Customer();
+        }
+
+        $payment_methods = PaymentMethod::getAllowedAndEnabledPaymentMethods($company_id);
+
+        $view = $this->renderAjax('_payment-methods', [
+            'paymentMethods' => $payment_methods,
+            'model' => $model,
+        ]);
+
+        return [
+            'status' => 'success',
+            'html' => $view,
+            'showDiv' => count($payment_methods) > 0 ? true : false,
+        ];
     }
 
 }

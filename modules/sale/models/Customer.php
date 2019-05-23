@@ -8,6 +8,7 @@ use app\modules\accounting\models\Account;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\checkout\models\Track;
+use app\modules\cobrodigital\models\PaymentCard;
 use app\modules\config\models\Config;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\modules\contract\models\Contract;
@@ -1028,6 +1029,9 @@ class Customer extends ActiveRecord {
                     ]);
                     $customer_has_payment_track->save();
                 }
+            } else {
+                //Asociar tarjeta de cobro
+                $this->associatePaymentCard();
             }
         };
         $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);
@@ -1420,6 +1424,23 @@ class Customer extends ActiveRecord {
     }
 
     /**
+     * Asocia los codigos de una tarjeta disponible al cliente solo si la empresa a la que pertenece tiene habilitado un canal de pago con tarjetas de cobro.
+     * Marca la tarjeta de cobro como usada
+     */
+    public function associatePaymentCard()
+    {
+        if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_19_digits && !$this->payment_code_29_digits) {
+            $unused_payment_card = PaymentCard::find()->where(['used' => 0])->one();
+
+            $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
+            $unused_payment_card->updateAttributes(['used' => 1]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @return bool
      * Indica si el cliente tiene una configuracion de medios de pago y canales de pago personalizada.
      * En caso de existir, se debería tomar esta en cuenta, en vez de la configuración de la empresa (company_has_payment_track)
@@ -1431,5 +1452,18 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @return app\modules\sale\models\Profile|mixed|null
+     * Devuelve la configuracion de los medios y canales de pagos. Prioriza un configuraciónn personalizada a la configuración general de la empresa
+     */
+    public function getAvailablePaymentTracks()
+    {
+        if($this->hasCustomizedPaymentConfiguration()) {
+            return $this->getPaymentTracks();
+        }
+
+        return $this->company->getPaymentTracks();
     }
 }

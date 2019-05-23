@@ -177,13 +177,13 @@ use app\modules\checkout\models\CompanyHasPaymentTrack;
                     <?= Yii::t('app', 'Payment methods and tracks')?>
                 </label>
                 <div id="company-paymenttracks">
-                    <?php foreach (PaymentMethod::find()->all() as $payment_method) {
+                    <?php foreach (PaymentMethod::getAllowedTrackConfigPaymentMethods() as $payment_method) {
                         $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one(); ?>
 
                         <div class="row col-sm-12">
                             <div class="col-sm-6">
                                 <label>
-                                    <?php $checked = $payment_track_config->status == CompanyHasPaymentTrack::STATUS_ENABLED ? 'checked' : ''; ?>
+                                    <?php $checked = $payment_track_config ? ($payment_track_config->status == CompanyHasPaymentTrack::STATUS_ENABLED ? 'checked' : '') : ''; ?>
                                     <input type="checkbox" name="Company[paymentTracks][Payment_method][<?= $payment_method->payment_method_id ?>]" <?= $checked ?> > <?=$payment_method->name?>
                                 </label>
                             </div>
@@ -192,7 +192,7 @@ use app\modules\checkout\models\CompanyHasPaymentTrack;
                                 <?= Select2::widget([
                                     'data' => ArrayHelper::map(Track::find()->all(), 'track_id', 'name'),
                                     'name' => "Company[paymentTracks][Track][$payment_method->payment_method_id]",
-                                    'value' => $payment_track_config->track_id
+                                    'value' => $payment_track_config ? $payment_track_config->track_id : '',
                                 ])?>
                                 <br>
                             </div>

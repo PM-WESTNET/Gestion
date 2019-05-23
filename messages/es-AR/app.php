@@ -1111,4 +1111,5 @@
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Payment code 19 digits' => 'Código de pago de 19 dígitos',
     'Payment code 29 digits' => 'Código de pago de 29 dígitos',
+    'Allow track config' => '¿Permite configurar el canal de pago?'
 );

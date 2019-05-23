@@ -8,6 +8,7 @@ use app\modules\checkout\models\search\PaymentMethodSearch;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * PaymentMethodController implements the CRUD actions for PaymentMethod model.

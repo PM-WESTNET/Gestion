@@ -214,10 +214,13 @@ class EmptyAds extends ActiveRecord
                     'used' => false,
                 ]);
                 $emptyAds->save(false);
-                $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+
 
                 if($associate_payment_card) {
-                    $emptyAds->associatePaymentCard();
+                    $payment_card = $emptyAds->associatePaymentCard();
+                    $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, '', 'barcode_url' => $payment_card->url];
+                } else {
+                    $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
                 }
             }
         }
@@ -240,6 +243,6 @@ class EmptyAds extends ActiveRecord
         $this->updateAttributes(['payment_card_id' => $payment_card->payment_card_id]);
         $payment_card->updateAttributes(['used' => 1]);
 
-        return $payment_card->payment_card_id;
+        return $payment_card;
     }
 }
