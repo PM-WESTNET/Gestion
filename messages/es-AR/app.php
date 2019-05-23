@@ -1098,4 +1098,5 @@
     'Bounced' => 'Rebotado',
     'Batch Invoice with filters' => 'Facturación por lotes con filtros',
     'Invoice Date' => 'Fecha de facturación',
+    'Installations Manage Tickets' => 'Tickets de Gestión de Instalaciones'
 );

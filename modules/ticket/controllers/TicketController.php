@@ -350,6 +350,31 @@ class TicketController extends Controller
 
     }
 
+    public function actionInstallationsTickets()
+    {
+
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+
+        $category = Category::findOne(Config::getValue('installations_category_id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoria de Instalaciones no encontrada');
+        }
+
+        $search->category_id = $category->category_id;
+
+        if (!User::hasRole('installations_manager')){
+            $search->user_id = Yii::$app->user->id;
+        }
+
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+
+    }
+
     public function actionGetObservations($id)
     {
         if (Yii::$app->request->isAjax) {
