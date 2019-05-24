@@ -157,7 +157,6 @@ $companyData = $model->company;
                 </ul>
             </td>
         </tr>
-
         <tr style=" display: block; border-top: 1px solid gray;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px; width: 100%">
             <td style="width: 60%">
                 <img width="100%" src="<?=Url::toRoute(['/sale/customer/barcode', 'code'=>$model->customer->payment_code], true) ?>"/>
@@ -375,29 +374,26 @@ $companyData = $model->company;
             Puede retirar su factura en: <?php echo $model->company->address  ?>
         </td>
     </tr>
-    <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
+    <tr style=" display: block; border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px;">
         <td>
             Medios de Pago:
         </td>
-    </tr>
-    <tr style=" display: block; padding-bottom: 4px;padding-top: 4px;padding-left: 30px; font-size: 0.2cm">
-        <td>
-            <ul>
-                <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>;
-            </ul>
-        </td>
-    </tr>
-
-    <tr style=" display: block; border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px;">
-        <td>
-            <img width="100%" src="<?=Url::toRoute(['/sale/customer/barcode', 'code'=>$model->customer->payment_code], true) ?>"/>
-        </td>
-        <td>
-            <p style="margin-bottom:5px; margin-top:5px;padding-left: 30px; font-weight: 700;">CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
-            <?php if($debt < 0) { ?>
-                <p style="margin-bottom:5px; margin-top:5px;padding-left: 30px; font-weight: 700;">DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
-            <?php } ?>
-        </td>
+        <?php foreach ($model->customer->getPaymentMethodNameAndCodes() as $payment_method_name) { ?>
+            <tr>
+                <td>
+                    <div>
+                        <?= $payment_method_name['payment_method_name'] .': '?>
+                    </div>
+                    <div style="padding-left: 100px">
+                        <?php if($payment_method_name['use_barcode']) { ?>
+                            <img width="30%" src="<?=Url::toRoute(['/sale/customer/barcode', 'code' => $payment_method_name['code']], true) ?>"/>
+                        <?php } else {
+                            echo $payment_method_name['code'];
+                        }?>
+                    </div>
+                </td>
+            </tr>
+        <?php } ?>
     </tr>
 
     <!-- Totales Facturados -->

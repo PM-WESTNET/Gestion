@@ -1490,24 +1490,31 @@ class Customer extends ActiveRecord {
 
             $type_code = $config_payment_track->paymentMethod->type_code_if_isnt_direct_channel;
             $code = '';
+            $use_barcode = true;
 
             //Me fijo si el codigo lo tengo que tomar de payment_code_19_digits o payment_code_29_digits
             if($type_code) {
                 if($type_code == PaymentMethod::TYPE_CODE_19) {
                     $code = $this->payment_code_19_digits;
+                    $use_barcode = false;
                 }
                 if($type_code == PaymentMethod::TYPE_CODE_29) {
                     $code = $this->payment_code_29_digits;
                 }
+            } else {
+                $use_barcode = false;
             }
 
             //Si llegado a este punto el código está vacio, relleno con el codigo de pago normal
             if(!$code) {
                 $code = $this->payment_code;
             }
-            array_push($payment_method_and_code, ['payment_method_name' => $config_payment_track->paymentMethod->name, 'code' => $code]);
+            array_push($payment_method_and_code, ['payment_method_name' => $config_payment_track->paymentMethod->name, 'code' => $code, 'use_barcode' => $use_barcode]);
         }
 
+        if(empty($payment_method_and_code)) {
+            array_push($payment_method_and_code, ['payment_method_name' => 'Código de pago', 'code' => $this->payment_code, 'use_barcode' => $use_barcode]);
+        }
         return $payment_method_and_code;
     }
 }
