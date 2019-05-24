@@ -253,8 +253,15 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     $attributes[]=[
-        'label'=> Yii::t('app', 'Payment Code'),
-        'value'=> $model->payment_code
+        'label'=> Yii::t('app', 'Payment methods and codes'),
+        'value'=> function($model) {
+            $payment_methods_and_codes = '';
+            foreach ($model->getPaymentMethodNameAndCodes() as $payment_method_name) {
+                $payment_methods_and_codes .= $payment_method_name['payment_method_name'] .': '. $payment_method_name['code'] .'.'.'<br>';
+            }
+            return $payment_methods_and_codes;
+        },
+        'format' => 'raw'
     ];
     
     $notifications_way= '';

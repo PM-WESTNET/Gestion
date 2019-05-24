@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
+use app\modules\checkout\models\PaymentMethod;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\checkout\models\PaymentMethod */
@@ -19,6 +21,16 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'register_number')->checkbox() ?>
 
     <?= $form->field($model, 'allow_track_config')->checkbox() ?>
+
+    <?= $form->field($model, 'type_code_if_isnt_direct_channel')->widget(Select2::class, [
+            'data' => PaymentMethod::getTypeCodesForSelect(),
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+            'options' => [
+                'placeholder' => Yii::t('app', 'Select ...')
+            ]
+    ]) ?>
 
     <?php
     $disabled = $model->isNewRecord ? [] : ['disabled'=>'disabled'];

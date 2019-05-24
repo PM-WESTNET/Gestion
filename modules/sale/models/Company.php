@@ -7,6 +7,7 @@ use app\modules\checkout\models\Track;
 use app\modules\partner\models\PartnerDistributionModel;
 use app\modules\westnet\models\AdsPercentagePerCompany;
 use Yii;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -181,6 +182,14 @@ class Company extends \app\components\db\ActiveRecord
     public function getPaymentTracks()
     {
         return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPaymentEnabledTracks()
+    {
+        return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id'])->where(['status' => 'enabled']);
     }
 
     /**

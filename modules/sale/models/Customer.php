@@ -5,7 +5,9 @@ namespace app\modules\sale\models;
 use app\components\companies\ActiveRecord;
 use app\components\helpers\CuitValidator;
 use app\modules\accounting\models\Account;
+use app\modules\checkout\models\CompanyHasPaymentTrack;
 use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\checkout\models\Track;
 use app\modules\cobrodigital\models\PaymentCard;
@@ -438,6 +440,13 @@ class Customer extends ActiveRecord {
     {
         return $this->hasMany(CustomerHasPaymentTrack::class, ['customer_id' => 'customer_id']);
     }
+
+    public function getPaymentEnabledTracks()
+    {
+        $payment_method_ids = (new Query())->select('payment_method_id')->from('company_has_payment_track')->where(['company_id' => $this->company_id, 'status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all();
+        return $this->hasMany(CustomerHasPaymentTrack::class, ['customer_id' => 'customer_id'])->where(['in','payment_method_id', $payment_method_ids]);
+    }
+
 
     /**
      * Despues de guardar, guarda los profiles
@@ -1461,9 +1470,44 @@ class Customer extends ActiveRecord {
     public function getAvailablePaymentTracks()
     {
         if($this->hasCustomizedPaymentConfiguration()) {
-            return $this->getPaymentTracks();
+            return $this->getPaymentEnabledTracks();
         }
 
-        return $this->company->getPaymentTracks();
+        return $this->company->getPaymentEnabledTracks();
+    }
+
+    /**
+     * @return array
+     * Devuelve un array con el nombre de el metodo de pago => codigo de pago.
+     * en caso de no tener codigpo de 19 o 29 digitos, devuelve el codigo normal (payment_code)
+     * Solo tiene en cuenta los medios de pago que la empresa del cliente tiene habilitados
+     */
+    public function getPaymentMethodNameAndCodes()
+    {
+        $payment_method_and_code = [];
+
+        foreach ($this->availablePaymentTracks as $config_payment_track) {
+
+            $type_code = $config_payment_track->paymentMethod->type_code_if_isnt_direct_channel;
+            $code = '';
+
+            //Me fijo si el codigo lo tengo que tomar de payment_code_19_digits o payment_code_29_digits
+            if($type_code) {
+                if($type_code == PaymentMethod::TYPE_CODE_19) {
+                    $code = $this->payment_code_19_digits;
+                }
+                if($type_code == PaymentMethod::TYPE_CODE_29) {
+                    $code = $this->payment_code_29_digits;
+                }
+            }
+
+            //Si llegado a este punto el código está vacio, relleno con el codigo de pago normal
+            if(!$code) {
+                $code = $this->payment_code;
+            }
+            array_push($payment_method_and_code, ['payment_method_name' => $config_payment_track->paymentMethod->name, 'code' => $code]);
+        }
+
+        return $payment_method_and_code;
     }
 }

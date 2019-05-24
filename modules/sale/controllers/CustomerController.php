@@ -262,7 +262,11 @@ class CustomerController extends Controller
     {
         $model = $this->findModel($id);
         $address=  $model->address ? $model->address : new Address;
-        $paymentMethods = PaymentMethod::getAllowedTrackConfigPaymentMethods();
+        if($model->company_id) {
+            $paymentMethods = PaymentMethod::getAllowedAndEnabledPaymentMethods($model->company_id);
+        } else {
+            $paymentMethods = PaymentMethod::getAllowedTrackConfigPaymentMethods();
+        }
 
         if($model->canUpdate()){
             if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {

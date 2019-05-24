@@ -14,14 +14,16 @@ use yii\db\Query;
  * @property string $status
  * @property integer $register_number
  * @property boolean $allow_track_config
+ * @property string $type_code_if_isnt_direct_channel
  *
  * @property Payment[] $payments
  */
 class PaymentMethod extends \app\components\db\ActiveRecord
 {
-    /**
-     * @inheritdoc
-     */
+
+    const TYPE_CODE_19 = 'code_19_digits';
+    const TYPE_CODE_29 = 'code_29_digits';
+
     public static function tableName()
     {
         return 'payment_method';
@@ -34,6 +36,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
+            [['type_code_if_isnt_direct_channel'], 'safe'],
             [['register_number', 'allow_track_config'], 'boolean'],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
@@ -53,6 +56,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'register_number' => Yii::t('app', 'Register Number?'),
             'type' => Yii::t('app', 'Tipo de pago'),
             'allow_track_config' => Yii::t('app', 'Allow track config'),
+            'type_code_if_isnt_direct_channel' => Yii::t('app', 'Type code if isnt direct channel'),
         ];
     }
 
@@ -141,5 +145,17 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             ->where(['in', 'payment_method_id', $payment_method_ids])
             ->andWhere(['payment_method.allow_track_config' => 1])
             ->all();
+    }
+
+    /**
+     * @return array
+     * Devuelve un array para ser mostrado en un desplegable
+     */
+    public static function getTypeCodesForSelect()
+    {
+        return [
+            self::TYPE_CODE_19 => Yii::t('app', self::TYPE_CODE_19),
+            self::TYPE_CODE_29 => Yii::t('app', self::TYPE_CODE_29),
+        ];
     }
 }

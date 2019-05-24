@@ -423,10 +423,14 @@ class CustomerTest extends \Codeception\Test\Unit
         $payment_methods = PaymentMethod::find()->all();
 
         foreach ($payment_methods as $payment_method) {
-            $company_payment_track = $company->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
+            $company_payment_track = $company->getPaymentEnabledTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
             $customer_payment_track = $model->getAvailablePaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
 
-            expect("Payment method $payment_method->payment_method_id has same track id", $company_payment_track->track_id)->equals($customer_payment_track->track_id);
+            if($company_payment_track && $customer_payment_track) {
+                expect("Payment method $payment_method->payment_method_id has same track id", $company_payment_track
+                    ->track_id)->equals($customer_payment_track
+                    ->track_id);
+            }
         }
 
         foreach ($payment_methods as $payment_method) {
@@ -477,5 +481,32 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Payment code 29 digits didnt change', $model->payment_code_29_digits)->equals($code_29);
         expect('Payment card quantity', count(PaymentCard::find()->where(['used' => 0])->all()))->equals($unused_payment_cards - 1);
 
+    }
+
+    public function testGetPaymentMethodNameAndCodes()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '27381010673',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            'company_id' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $payment_method_name_exists = false;
+
+        foreach ($model->availablePaymentTracks as $payment_track) {
+            foreach ($model->getPaymentMethodNameAndCodes() as $payment_name_and_code) {
+
+                if($payment_track->paymentMethod->name == $payment_name_and_code['payment_method_name']) {
+                    $payment_method_name_exists = true;
+                }
+            }
+        }
+
+        expect('Payment metod exists in array', $payment_method_name_exists)->true();
     }
 }
