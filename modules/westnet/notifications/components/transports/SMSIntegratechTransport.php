@@ -15,7 +15,6 @@ use app\components\helpers\EmptyLogger;
 use yii\base\Exception;
 use yii\db\Query;
 use app\modules\westnet\notifications\models\IntegratechMessage;
-use app\modules\westnet\notifications\components\transports\IntegratechService;
 use app\modules\westnet\notifications\models\Notification;
 
 class SMSIntegratechTransport implements TransportInterface

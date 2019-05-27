@@ -3,6 +3,7 @@
 namespace app\modules\sale\models;
 
 use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\westnet\notifications\components\transports\InfobipService;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
 use Yii;
 
@@ -197,7 +198,7 @@ class CustomerMessage extends \app\components\db\ActiveRecord
             $number = $customer->getAttribute($phone);
 
             if ($number) {
-                $response = IntegratechService::sendSMS($number, $message);
+                $response = InfobipService::sendSimpleSMS('Westnet', $number, $message);
                 Yii::info('SMS response: '. print_r($response,1));
                 if ($response['status'] === 'success') {
                     $alerts[] = [

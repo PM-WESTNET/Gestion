@@ -357,6 +357,14 @@ if (Yii::$app->getModule('westnet')) {
                 'label' => NotificationsModule::t('app', 'Integratech received sms'), 'url' => ['/westnet/notifications/integratech-received-sms'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             '<li class="divider"></li>',
+            ['label' => Yii::t('app', 'Infobip'), 'visible' => Yii::$app->user->isSuperadmin],
+            [
+                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
+            ],
+            [
+                'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
+            ],
+            '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Batch Process'), 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
             ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
