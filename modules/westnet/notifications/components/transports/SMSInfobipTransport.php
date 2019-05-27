@@ -186,15 +186,15 @@ class SMSInfobipTransport implements TransportInterface
         $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
 
         if(strlen($p1) > 7 ) {
-            $phones[] = '54'.(string)$p1;
+            $phones[] = '549'.(string)$p1;
         }
 
         if(strlen($p2) > 7 && $p1 != $p2 ) {
-            $phones[] = '54'.(string)$p2;
+            $phones[] = '549'.(string)$p2;
         }
 
         if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
-            $phones[] = '54'.(string)$p3;
+            $phones[] = '549'.(string)$p3;
         }
 
         return $phones;

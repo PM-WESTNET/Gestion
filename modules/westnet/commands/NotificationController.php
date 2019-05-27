@@ -7,6 +7,7 @@
 
 namespace app\modules\westnet\commands;
 
+use app\modules\westnet\notifications\components\transports\InfobipService;
 use yii\console\Controller;
 use app\modules\westnet\notifications\components\scheduler\Scheduler;
 use app\modules\westnet\notifications\models\Notification;
@@ -80,5 +81,19 @@ class NotificationController extends Controller
             }
         }
         
+    }
+
+    public function actionReceiveInfobipResponses() {
+
+        echo "Consultando.....";
+        echo "\n";
+
+        $response= InfobipService::getResponses();
+
+        echo 'Resultado: '. $response['status'];
+        echo "\n";
+
+        echo 'Respuestas: '. $response['count'];
+        echo "\n";
     }
 }

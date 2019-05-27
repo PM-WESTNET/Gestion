@@ -1099,5 +1099,8 @@
     'Batch Invoice with filters' => 'Facturación por lotes con filtros',
     'Invoice Date' => 'Fecha de facturación',
     'An error occurred while importing file: ' => 'Ha ocurrido un error al importar el archivo: ',
-    'Customer not found: ' => 'Cliente no encontrado: '
+    'Customer not found: ' => 'Cliente no encontrado: ',
+    'Infobip Response Messages' => 'Respuestas de Infobip',
+    'Infobip received sms' => 'Mensajes recibidos de Infobip'
+
 );
