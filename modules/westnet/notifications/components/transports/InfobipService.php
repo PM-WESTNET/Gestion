@@ -22,7 +22,7 @@ class InfobipService
      * @param string $from Telefono o nombre del remitente
      * @param array|string $to String con el telefono de destino o array de telefonos
      * @param $message Mensaje a enviar
-     * @return bool
+     * @return array
      */
     public static function sendSimpleSMS($from, $to, $message)
     {
@@ -67,10 +67,16 @@ class InfobipService
 
         if ($err) {
             \Yii::info("cURL Error #:" . $err);
-            return false;
+            return [
+                'status' => 'error',
+                'error'  => $err
+            ];
         } else {
             \Yii::info($response);
-            return true;
+            return [
+                'status' => 'success',
+                'response'  => $response
+            ];
         }
     }
 
