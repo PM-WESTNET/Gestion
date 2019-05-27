@@ -392,6 +392,7 @@ if (Yii::$app->params['ticket_enabled']) {
         'items' => [
             ['label' => Yii::t('app', 'Tickets'), 'url' => ['/ticket/ticket/open-tickets']],
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
+            ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',

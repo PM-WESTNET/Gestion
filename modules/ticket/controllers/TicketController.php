@@ -278,21 +278,27 @@ class TicketController extends Controller
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        $category = Category::findOne(Config::getValue('cobranza_category_id'));
-        $customer_codes = explode(',', Yii::$app->request->post('customer_codes'));
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['customer_codes']) || !isset($data['title']) || !isset($data['user_id']) || !isset($data['category_id'])) {
+            throw new BadRequestHttpException('Customer Codes, Title, User ID and Category ID are required');
+        }
+
+        $category = Category::findOne($data['category_id']);
+        $customer_codes = explode(',', $data['customer_codes']);
         $status = true;
         foreach($customer_codes as $code) {
             $customer = Customer::findOne(['code' => $code]);
             $ticket = new Ticket([
-                'title' => Yii::$app->request->post('title'),
+                'title' => $data['title'],
                 'user_id' => Yii::$app->user->getId(),
                 'category_id' => $category->category_id,
                 'customer_id' => $customer->customer_id,
                 'status_id' => 1,
-                'content' => Yii::$app->request->post('title')
+                'content' => $data['title']
             ]);
 
-            if(!$ticket->save() || !Ticket::assignTicketToUser($ticket->ticket_id, Yii::$app->request->post('user_id'))){
+            if(!$ticket->save() || !Ticket::assignTicketToUser($ticket->ticket_id, $data['user_id'])){
                 $status = false;
             }
         }
@@ -304,13 +310,13 @@ class TicketController extends Controller
      * @return array
      * Verifica si el customer tiene un ticket que pertenezca a la cateoria de cobranza, si tiene indica el estado en el que está
      */
-    public function actionCustomersHasCobranzaTicket()
+    public function actionCustomersHasCategoryTicket()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
         $customer_codes = Yii::$app->request->post('customer_codes');
         $response = [];
-        $category = Category::findOne(Config::getValue('cobranza_category_id'));
+        $category = Category::findOne(Yii::$app->request->post('category_id'));
 
         foreach ($customer_codes as $code) {
             $response[] = Customer::hasCategoryTicket($code, $category->category_id, true);
@@ -341,6 +347,31 @@ class TicketController extends Controller
         $dataProvider = $search->search(Yii::$app->request->getQueryParams());
 
         return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+
+    }
+
+    public function actionInstallationsTickets()
+    {
+
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+
+        $category = Category::findOne(Config::getValue('installations_category_id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoria de Instalaciones no encontrada');
+        }
+
+        $search->category_id = $category->category_id;
+
+        if (!User::hasRole('installations_manager')){
+            $search->user_id = Yii::$app->user->id;
+        }
+
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 
     }
 

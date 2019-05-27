@@ -103,7 +103,7 @@ class TaskSearch extends Task {
         if ($this->user_option == 'others') {
            $query->andFilterWhere(['<>', 'n.user_id', Yii::$app->user->id]);
         } elseif ($this->user_option == 'me') {
-            
+
             $query->andFilterWhere(['n.user_id' => Yii::$app->user->id]);
         }
 

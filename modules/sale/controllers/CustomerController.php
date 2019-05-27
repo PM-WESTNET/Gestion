@@ -18,9 +18,11 @@ use app\modules\sale\modules\contract\models\search\ContractSearch;
 use app\modules\ticket\models\Ticket;
 use Hackzilla\BarcodeBundle\Utility\Barcode;
 use PHPExcel_Style_NumberFormat;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
+use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -621,10 +623,12 @@ class CustomerController extends Controller
         
         
         
-        $dataProvider= new ActiveDataProvider(['query' => $installations]);        
-        
+        $dataProvider= new ActiveDataProvider(['query' => $installations]);
+        $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
+
+
         $this->layout= '//fluid';
-        return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search]);
+        return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
     }
 
     public function actionAfipValidation($document)
