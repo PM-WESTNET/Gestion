@@ -1105,4 +1105,7 @@
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
 
+    'Customer not found: ' => 'Cliente no encontrado: ',
+    'Email 1 status' => 'Estado de email 1',
+    'Email 2 status' => 'Estado de email 2',
 );
