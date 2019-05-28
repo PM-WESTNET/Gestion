@@ -4,10 +4,12 @@ namespace app\modules\automaticdebit\controllers;
 
 use app\components\web\Controller;
 use app\modules\automaticdebit\models\BankCompanyConfig;
+use app\modules\automaticdebit\models\DirectDebitExport;
 use Yii;
 use app\modules\automaticdebit\models\Bank;
 use app\modules\automaticdebit\models\BankSearch;
 use yii\data\ActiveDataProvider;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -131,4 +133,22 @@ class BankController extends Controller
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
+
+    public function actionExports($bank_id) {
+        $bank = Bank::findOne($bank_id);
+
+        if (empty($bank)) {
+            throw new BadRequestHttpException('Bank not found');
+        }
+
+        $query = DirectDebitExport::find()
+            ->andWhere(['bank_id' => $bank_id])
+            ->orderBy(['create_timestamp' => SORT_DESC]);
+
+        $dataProvider = new ActiveDataProvider(['query' => $query]);
+
+        return $this->render('exports', ['dataProvider' => $dataProvider, 'bank' => $bank]);
+    }
+
+
 }
