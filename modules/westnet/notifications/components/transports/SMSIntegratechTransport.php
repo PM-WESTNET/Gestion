@@ -19,7 +19,7 @@ use app\modules\westnet\notifications\components\transports\IntegratechService;
 use app\modules\westnet\notifications\models\Notification;
 
 class SMSIntegratechTransport implements TransportInterface {
-    
+
     public function features()
     {
         return [
@@ -50,6 +50,13 @@ class SMSIntegratechTransport implements TransportInterface {
                     $this->forceSendMessage($notification, $bd_status_notification, $current_msg, $msg, $saved, $sended, $errors);
                 } else {
                     $this->sendMessage($notification, $bd_status_notification, $current_msg, $msg, $saved, $sended, $errors);
+                }
+                //Envio mensaje de prueba.
+                if($notification->test_phone) {
+                    //Verifico si tengo que hacer el envio de mensaje de test
+                    if($sended != 0 && ($sended % $notification->test_phone_frecuency == 0)) {
+                        $this->sendTestMessage($notification, $bd_status_notification, $current_msg, $saved, $sended, $errors);
+                    }
                 }
             }
             $this->updateNotificationLastSend($notification);
@@ -106,6 +113,22 @@ class SMSIntegratechTransport implements TransportInterface {
             'current_msg' => $current_msg,
         ];
 
+    }
+
+    private function sendTestMessage($notification, &$bd_status_notification, &$current_msg, &$saved, &$sended, &$errors){
+
+        $integratech_service = IntegratechService::getInstance();
+        $message_content = "Se han enviado $sended mensajes";
+        $msg = $integratech_service->addMessage($message_content, $notification->test_phone, IntegratechMessage::STATUS_PENDING, $notification->notification_id, 0);
+
+        if($bd_status_notification == Notification::STATUS_ENABLED){
+            $msg->send();
+        }
+
+        return [
+            'bd_status_notification' => $bd_status_notification,
+            'current_msg' => $current_msg,
+        ];
     }
 
     private function forceSendMessage($notification, &$bd_status_notification, &$current_msg, $msg, &$saved, &$sended, &$errors){
@@ -187,17 +210,18 @@ class SMSIntegratechTransport implements TransportInterface {
     {
         $replaced_text = $text;
 
-        $replaced_text = str_replace('@Nombre', trim($customer['name']), $replaced_text);
-        $replaced_text = str_replace('@Telefono1', $customer['phone'], $replaced_text);
-        $replaced_text = str_replace('@Telefono2', $customer['phone'], $replaced_text);
-        $replaced_text = str_replace('@Codigo', $customer['code'], $replaced_text);
-        $replaced_text = str_replace('@CodigoDePago', $customer['payment_code'], $replaced_text);
-        $replaced_text = str_replace('@Nodo', $customer['node'], $replaced_text);
-        $replaced_text = str_replace('@Saldo', $customer['saldo'], $replaced_text);
-        $replaced_text = str_replace('@CodigoEmpresa', $customer['company_code'], $replaced_text);
-        $replaced_text = str_replace('@FacturasAdeudadas', $customer['debt_bills'], $replaced_text);
+        $replace_max_string = self::getMaxLengthReplacement();
+        $replaced_text = str_replace('@Nombre', trim(substr($customer['name'], 0, $replace_max_string['@Nombre'])), $replaced_text);
+        $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
+        $replaced_text = str_replace('@Telefono2', substr($customer['phone'], 0, $replace_max_string['@Telefono2']), $replaced_text);
+        $replaced_text = str_replace('@Codigo', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
+        $replaced_text = str_replace('@CodigoDePago', substr($customer['payment_code'], 0, $replace_max_string['@CodigoDePago']), $replaced_text);
+        $replaced_text = str_replace('@Nodo', substr($customer['node'], 0, $replace_max_string['@Nodo']), $replaced_text);
+        $replaced_text = str_replace('@Saldo', substr($customer['saldo'], 0, $replace_max_string['@Saldo']), $replaced_text);
+        $replaced_text = str_replace('@CodigoEmpresa', substr($customer['company_code'], 0, $replace_max_string['@CodigoEmpresa']), $replaced_text);
+        $replaced_text = str_replace('@FacturasAdeudadas', substr($customer['debt_bills'], 0, $replace_max_string['@FacturasAdeudadas']), $replaced_text);
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
-        $replaced_text = str_replace('@Categoria', $customer['category'], $replaced_text);
+        $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
 
         return $replaced_text;
 
@@ -311,5 +335,25 @@ class SMSIntegratechTransport implements TransportInterface {
         foreach ($pending_messages as $message) {
             $message->updateAttributes(['status' => IntegratechMessage::STATUS_CANCELLED]);
         }
+    }
+
+    /**
+     * @return array
+     * devuelve el largo máximo que debe tener cada uno de los reemplazos
+     */
+    public static function getMaxLengthReplacement()
+    {
+        return [
+            '@Nombre' => Config::getValue('notification-replace-@Nombre'),
+            '@Telefono1' => Config::getValue('notification-replace-@Telefono1'),
+            '@Telefono2' => Config::getValue('notification-replace-@Telefono2'),
+            '@Codigo' => Config::getValue('notification-replace-@Codigo'),
+            '@CodigoDePago' => Config::getValue('notification-replace-@CodigoDePago'),
+            '@Nodo' => Config::getValue('notification-replace-@Nodo'),
+            '@Saldo' => Config::getValue('notification-replace-@Saldo'),
+            '@CodigoEmpresa' => Config::getValue('notification-replace-@CodigoEmpresa'),
+            '@FacturasAdeudadas' => Config::getValue('notification-replace-@FacturasAdeudadas'),
+            '@Categoria' => Config::getValue('notification-replace-@Categoria'),
+        ];
     }
 }

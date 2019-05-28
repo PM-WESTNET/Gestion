@@ -2,6 +2,9 @@
 
 use yii\helpers\Html;
 use kartik\grid\GridView;
+use yii\widgets\Pjax;
+use app\modules\ticket\TicketModule;
+use yii\bootstrap\Collapse;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -25,14 +28,14 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <?php
-    \yii\widgets\Pjax::begin();
+    Pjax::begin();
 
     $columns = [
 
         ['class' => 'yii\grid\SerialColumn'],
         [
             'attribute' => 'document',
-            'header' => \app\modules\ticket\TicketModule::t('app', 'ID Card number'),
+            'header' => TicketModule::t('app', 'ID Card number'),
             'value' => function($model) {
                 if (!empty($model->customer))
                     return $model->customer->document_number;
@@ -49,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'attribute' => 'customer',
-            'header' => \app\modules\ticket\TicketModule::t('app', 'Customer'),
+            'header' => TicketModule::t('app', 'Customer'),
             'value' => function($model) {
                 if (!empty($model->customer))
                     return $model->customer->name . ' ' . $model->customer->lastname;
@@ -58,14 +61,14 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'color_id',
             'format' => 'raw',
-            'header' => \app\modules\ticket\TicketModule::t('app', 'Color'),
+            'header' => TicketModule::t('app', 'Color'),
             'value' => function($model) {
                 if (!empty($model->color) && !empty($model->number))
                     return "<span class='label label-default' style='background-color: " . $model->color->color . "'>" . $model->color->name . ' (' . $model->number . ")</span>";
             }
         ],
         [
-            'header' => \app\modules\ticket\TicketModule::t('app', 'Category'),
+            'header' => TicketModule::t('app', 'Category'),
             'attribute' => 'category_id',
             'value' => function($model) {
                 if (!empty($model->category))
@@ -73,8 +76,7 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         [
-            'header' => \app\modules\ticket\TicketModule::t('app', 'Status'),
-            
+            'header' => TicketModule::t('app', 'Status'),
             'attribute' => 'status_id',
             'value' => function($model) {
                 if (!empty($model->status))
@@ -108,8 +110,8 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php
         $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
-        
-        echo \yii\bootstrap\Collapse::widget([
+
+        echo Collapse::widget([
             'items' => [
                 [
                     'label' => $item,
@@ -124,8 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
 
     <div class="container-fluid no-padding no-margin">
-        <?=
-        GridView::widget([
+        <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'columns' => $columns,
             'id' => 'grid',
@@ -140,6 +141,5 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
     </div>
 
-    <?php \yii\widgets\Pjax::end(); ?>
-
+    <?php Pjax::end(); ?>
 </div>

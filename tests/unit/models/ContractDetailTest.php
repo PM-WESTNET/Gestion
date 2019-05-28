@@ -90,6 +90,7 @@ class ContractDetailTest extends \Codeception\Test\Unit
         expect('Save when full and new', $model->save())->true();
     }
 
+
     public function testIsEqual()
     {
         $contract = new Contract([
@@ -144,5 +145,5 @@ class ContractDetailTest extends \Codeception\Test\Unit
         expect('Contract detail log created', $log)->isInstanceOf(ContractDetailLog::class);
     }
 
-
+    //TODO resto de la clase
 }

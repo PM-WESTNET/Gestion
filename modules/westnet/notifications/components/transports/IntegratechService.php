@@ -69,7 +69,7 @@ class IntegratechService
             return [
                     'status' => $status,
                     'response' => json_decode($response, true)
-                    ];
+            ];
     }
 
     public static function updateIntegratechMessageStatus($message_ids, $status)

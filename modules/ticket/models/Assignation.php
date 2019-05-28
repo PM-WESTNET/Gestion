@@ -3,6 +3,7 @@
 namespace app\modules\ticket\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 
 /**
  * This is the model class for table "assignation".
@@ -16,7 +17,8 @@ use Yii;
  *
  * @property Ticket $ticket
  */
-class Assignation extends \app\components\db\ActiveRecord {
+
+class Assignation extends ActiveRecord {
 
     public $userModelClass;
     public $userModelId;
@@ -54,44 +56,11 @@ class Assignation extends \app\components\db\ActiveRecord {
     /**
      * @inheritdoc
      */
-    /*
-      public function behaviors()
-      {
-      return [
-      'timestamp' => [
-      'class' => 'yii\behaviors\TimestampBehavior',
-      'attributes' => [
-      yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
-      ],
-      ],
-      'date' => [
-      'class' => 'yii\behaviors\TimestampBehavior',
-      'attributes' => [
-      yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-      ],
-      'value' => function(){return date('Y-m-d');},
-      ],
-      'time' => [
-      'class' => 'yii\behaviors\TimestampBehavior',
-      'attributes' => [
-      yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
-      ],
-      'value' => function(){return date('h:i');},
-      ],
-      ];
-      }
-     */
-
-    /**
-     * @inheritdoc
-     */
     public function rules() {
         return [
-            [['date', 'time', 'user_id', 'ticket_id', 'external_id'], 'required'],
+            [['date', 'time', 'user_id', 'ticket_id'], 'required'],
             [['date', 'time', 'ticket'], 'safe'],
-            [['date'], 'date'],
-            [['ticket_id'], 'integer'],
-            [['user_id'], 'string', 'max' => 45]
+            [['ticket_id', 'user_id'], 'integer'],
         ];
     }
 

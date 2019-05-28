@@ -210,7 +210,8 @@ class Contract extends ActiveRecord {
      * Retorna los Detalles del contrato en base a un type de producto
      * @return ActiveQuery
      */
-    public function getContractDetailsByType($types = [], $exclude = []) {
+    public function getContractDetailsByType($types = [], $exclude = [])
+    {
         $query = $this->hasMany(ContractDetail::class, ['contract_id' => 'contract_id'])
                 ->leftJoin('product p', 'contract_detail.product_id = p.product_id');
 
@@ -531,7 +532,8 @@ class Contract extends ActiveRecord {
         return $charges;
     }
 
-    public static function getStatuses(){
+    public static function getStatuses()
+    {
         return [
             self::STATUS_DRAFT => self::STATUS_DRAFT,
             self::STATUS_ACTIVE => self::STATUS_ACTIVE,
@@ -544,7 +546,8 @@ class Contract extends ActiveRecord {
         ];
     }
 
-    public static function getStatusesForSelect(){
+    public static function getStatusesForSelect()
+    {
         $status_array = Contract::getStatuses();
         foreach($status_array as $key => $value){
             $status_array[$key] = Yii::t('app',$value);

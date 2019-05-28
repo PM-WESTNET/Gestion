@@ -3,14 +3,25 @@
 namespace app\modules\ticket\controllers;
 
 use app\modules\westnet\components\MesaTicketManager;
+use app\modules\sale\models\Customer;
+use app\modules\ticket\models\Action;
+use app\modules\ticket\models\Assignation;
+use app\modules\ticket\models\Category;
+use app\modules\ticket\models\Observation;
+use app\modules\ticket\models\Status;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\ticket\models\Ticket;
 use \app\modules\ticket\models\search\TicketSearch;
 use app\components\web\Controller;
+use yii\data\ActiveDataProvider;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\data\Pagination;
 use app\modules\config\models\Config;
+use yii\web\Response;
+use app\modules\ticket\TicketModule;
+use app\modules\ticket\models\History;
 
 /**
  * TicketController implements the CRUD actions for Ticket model.
@@ -137,25 +148,23 @@ class TicketController extends Controller
     public function actionObservation($id) {
 
         $model = $this->findModel($id);
-
-        $observation = new \app\modules\ticket\models\Observation();
+        $observation = new Observation();
         $observation->user_id = \Yii::$app->user->id;
         $observation->ticket_id = $model->ticket_id;
 
         if ($observation->load(Yii::$app->request->post())) {
             if ($observation->save()){
                 $model->externalColorAssignation();
-                $observation = new \app\modules\ticket\models\Observation();
+                $observation = new Observation();
                 MesaTicketManager::getInstance()->updateRemoteTicket($model);
-                Yii::$app->getSession()->setFlash('success', \app\modules\ticket\TicketModule::t('app', 'Observation successfully saved!'));
+                Yii::$app->getSession()->setFlash('success', TicketModule::t('app', 'Observation successfully saved!'));
             }
             else
-                Yii::$app->getSession()->setFlash('danger', \app\modules\ticket\TicketModule::t('app', 'An error ocurred when saving the observation.'));
+                Yii::$app->getSession()->setFlash('danger', TicketModule::t('app', 'An error ocurred when saving the observation.'));
         }
 
         //Observations query and pagination
-        $query = \app\modules\ticket\models\Observation::find()->where(['ticket_id' => $model->ticket_id]);
-
+        $query = Observation::find()->where(['ticket_id' => $model->ticket_id]);
         $pagination = new Pagination([
             'totalCount' => $query->count(),
             'pageSize' => (!empty(Config::getConfig('expiration_timeout')->value)) ? Config::getConfig('pagination_limit')->value : \Yii::$app->getModule('ticket')->params['pagination_limit'],
@@ -185,7 +194,7 @@ class TicketController extends Controller
         $model = $this->findModel($id);
 
         if ($model->closeTicket()) {
-            Yii::$app->getSession()->setFlash('success', \app\modules\ticket\TicketModule::t('app', 'Ticket successfully closed!'));
+            Yii::$app->getSession()->setFlash('success', TicketModule::t('app', 'Ticket successfully closed!'));
         } else {
             
         }
@@ -204,7 +213,7 @@ class TicketController extends Controller
         $model = $this->findModel($id);
 
         if ($model->reopenTicket()) {
-            Yii::$app->getSession()->setFlash('success', \app\modules\ticket\TicketModule::t('app', 'Ticket successfully reopened!'));
+            Yii::$app->getSession()->setFlash('success', TicketModule::t('app', 'Ticket successfully reopened!'));
         } else {
             
         }
@@ -223,8 +232,8 @@ class TicketController extends Controller
 
         $model = $this->findModel($id);
         
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'query' => \app\modules\ticket\models\History::find()
+        $dataProvider = new ActiveDataProvider([
+            'query' => History::find()
                 ->where(['ticket_id' => $id]),
         ]);
 
@@ -261,4 +270,206 @@ class TicketController extends Controller
         }
     }
 
+    /**
+     * Crea tickets para todos los customer dados y los asigna al user indicado
+     */
+    public function actionCreateAndAssignUser()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['customer_codes']) || !isset($data['title']) || !isset($data['user_id']) || !isset($data['category_id'])) {
+            throw new BadRequestHttpException('Customer Codes, Title, User ID and Category ID are required');
+        }
+
+        $category = Category::findOne($data['category_id']);
+        $customer_codes = explode(',', $data['customer_codes']);
+        $status = true;
+        foreach($customer_codes as $code) {
+            $customer = Customer::findOne(['code' => $code]);
+            $ticket = new Ticket([
+                'title' => $data['title'],
+                'user_id' => Yii::$app->user->getId(),
+                'category_id' => $category->category_id,
+                'customer_id' => $customer->customer_id,
+                'status_id' => 1,
+                'content' => $data['title']
+            ]);
+
+            if(!$ticket->save() || !Ticket::assignTicketToUser($ticket->ticket_id, $data['user_id'])){
+                $status = false;
+            }
+        }
+
+        return [ 'status' => $status ? 'success' : 'error' ];
+    }
+
+    /**
+     * @return array
+     * Verifica si el customer tiene un ticket que pertenezca a la cateoria de cobranza, si tiene indica el estado en el que está
+     */
+    public function actionCustomersHasCategoryTicket()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $customer_codes = Yii::$app->request->post('customer_codes');
+        $response = [];
+        $category = Category::findOne(Yii::$app->request->post('category_id'));
+
+        foreach ($customer_codes as $code) {
+            $response[] = Customer::hasCategoryTicket($code, $category->category_id, true);
+        }
+
+        return $response;
+    }
+
+    public function actionCollectionTickets()
+    {
+
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+
+        $category = Category::findOne(Config::getValue('cobranza_category_id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoria de Cobranza no encontrada');
+        }
+
+        $search->category_id = $category->category_id;
+
+        if (!User::hasRole('collection_manager')){
+            $search->user_id = Yii::$app->user->id;
+        }
+
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+
+    }
+
+    public function actionInstallationsTickets()
+    {
+
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+
+        $category = Category::findOne(Config::getValue('installations_category_id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoria de Instalaciones no encontrada');
+        }
+
+        $search->category_id = $category->category_id;
+
+        if (!User::hasRole('installations_manager')){
+            $search->user_id = Yii::$app->user->id;
+        }
+
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+
+    }
+
+    public function actionGetObservations($id)
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = $this->findModel($id);
+
+            $dataProvider = new ActiveDataProvider(['query' => $model->getObservations()]);
+
+            $observations = $this->renderAjax('_observations', ['dataProvider' => $dataProvider, 'model' => $model]);
+
+            return [
+                'title' => Yii::t('app','Ticket') . ': '. $model->title . ' - ' . Yii::t('app','Observations'),
+                'observations' => $observations
+            ];
+
+        }
+
+        throw new NotFoundHttpException('Page Not Found');
+
+    }
+
+
+    public function actionGetObservationForm($ticket_id)
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = new Observation();
+            $form = $this->renderPartial('../observation/_new-observation', ['model' => $model, 'ticket_id' => $ticket_id]);
+
+            return [
+                'form' => $form
+            ];
+        }
+
+        throw new NotFoundHttpException('Page Not Found');
+    }
+
+    /**
+     * @param $step_id
+     * @param $template_id
+     * @return array
+     * Permite editar por ajax el estado de un ticket
+     */
+    public function actionEditStatus($ticket_id)
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $hasEditable = Yii::$app->request->post('hasEditable');
+
+        if ($hasEditable) {
+            $model = Ticket::findOne($ticket_id);
+            if ($model->load(Yii::$app->request->post()) && $model->save()) {
+                return ['output' => $model->status->name, 'message' => ''];
+            } else {
+                return ['output' => '', 'message' => $model->getErrors()];
+            }
+        }
+    }
+
+    /**
+     * @param $step_id
+     * @param $template_id
+     * @return array
+     * Permite editar por ajax el estado de un ticket
+     */
+    public function actionAssignTicketToUser()
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $ticket_id = Yii::$app->request->post('ticket_id');
+        $user_id = Yii::$app->request->post('users_id');
+
+        $ticket = Ticket::findOne($ticket_id);
+
+            if(!$ticket->isAssignatedUser($user_id)) {
+                Ticket::assignTicketToUser($ticket_id, $user_id);
+            }
+
+            Ticket::deleteAllAssignations($ticket->ticket_id, [$user_id]);
+
+        return [
+            'status' => 'success'
+        ];
+    }
+
+    /**
+     * @param $status_id
+     * @return array
+     * Indica si un status esta asociado a una accion de tipo event
+     */
+    public function actionStatusHasEventAction($status_id)
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $status = Status::findOne($status_id);
+
+        return [
+            'status' => $status ? 'success' : 'error',
+            'has_event_action' => $status ? $status->hasEventAction() : false
+        ];
+    }
 }

@@ -90,8 +90,7 @@ class LogSearch extends Log
         }
 
         if($this->search_text){
-            $query->andFilterWhere(['like', 'old_value', $this->search_text]);
-            $query->orFilterWhere(['like', 'new_value', $this->search_text]);
+            $query->andFilterWhere(['or', ['like', 'old_value', $this->search_text], ['like', 'new_value', $this->search_text]]);
         }
 
         return $dataProvider;

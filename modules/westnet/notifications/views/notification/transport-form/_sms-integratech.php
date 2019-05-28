@@ -2,6 +2,10 @@
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\notifications\models\Notification */
 /* @var $form yii\widgets\ActiveForm */
+
+use app\modules\westnet\notifications\components\transports\SMSIntegratechTransport;
+
+$dataLength = SMSIntegratechTransport::getMaxLengthReplacement();
 ?>
 
 <?=
@@ -12,16 +16,16 @@ $form->field($model, 'content')->textarea(['id' => 'content']);
         <?= Yii::t('app', 'References') ?>:
     </div>
     <div class="col-sm-9">
-        <span class="reference label label-default" data-ref="@Nombre">@Nombre</span>
-        <span class="reference label label-primary" data-ref="@Telefono1">@Telefono1</span>
-        <span class="reference label label-success" data-ref="@Telefono2">@Telefono2</span>
-        <span class="reference label label-info" data-ref="@Codigo"></span>
-        <span class="reference label label-warning" data-ref="@CodigoDePago">@CodigoDePago</span>
-        <span class="reference label label-danger" data-ref="@CodigoEmpresa">@CodigoEmpresa</span>
-        <span class="reference label label-default" data-ref="@FacturasAdeudadas">@FacturasAdeudadas</span>
-        <span class="reference label label-primary" data-ref="@Saldo">@Saldo</span>
+        <span class="reference label label-default" data-ref="@Nombre" id="lbl-nombre" data-length="<?=$dataLength['@Nombre']?>">@Nombre</span>
+        <span class="reference label label-primary" data-ref="@Telefono1" id="lbl-telefono1" data-length="<?=$dataLength['@Telefono1']?>">@Telefono1</span>
+        <span class="reference label label-success" data-ref="@Telefono2" id="lbl-telefono2" data-length="<?=$dataLength['@Telefono2']?>">@Telefono2</span>
+        <span class="reference label label-info" data-ref="@Codigo" id="lbl-codigo" data-length="<?=$dataLength['@Codigo']?>"></span>
+        <span class="reference label label-warning" data-ref="@CodigoDePago" id="lbl-codigo-de-pago" data-length="<?=$dataLength['@CodigoDePago']?>">@CodigoDePago</span>
+        <span class="reference label label-danger" data-ref="@CodigoEmpresa" id="lbl-codigo-empresa" data-length="<?=$dataLength['@CodigoEmpresa']?>">@CodigoEmpresa</span>
+        <span class="reference label label-default" data-ref="@FacturasAdeudadas" id="lbl-facturas-adeudadas" data-length="<?=$dataLength['@FacturasAdeudadas']?>">@FacturasAdeudadas</span>
+        <span class="reference label label-primary" data-ref="@Saldo" id="lbl-saldo" data-length="<?=$dataLength['@Saldo']?>">@Saldo</span>
         <span class="reference label label-success" data-ref="@Estado"></span>
-        <span class="reference label label-info" data-ref="@Categoria">@Categoria</span>
+        <span class="reference label label-info" data-ref="@Categoria" id="lbl-categoria" data-length="<?=$dataLength['@Categoria']?>">@Categoria</span>
     </div>
 </div>
 <div class="row">
@@ -97,8 +101,19 @@ $.fn.extend({
             charsLeft = 0,
             text = e.val(),
             isUnicode = false;
+            
+            //Reemplazo la cantidad de caracteres con la cantidad que me indica cada etiqueta y no con su valor real.
+            text2 = e.val().replace('@Nombre', 'x'.repeat($('#lbl-nombre').data('length')));
+            text2 = text2.replace('@Telefono1', 'x'.repeat($('#lbl-telefono1').data('length')));
+            text2 = text2.replace('@Telefono2', 'x'.repeat($('#lbl-telefono2').data('length')));
+            text2 = text2.replace('@Codigo', 'x'.repeat($('#lbl-codigo').data('length')));
+            text2 = text2.replace('@CodigoDePago', 'x'.repeat($('#lbl-codigo-de-pago').data('length')));
+            text2 = text2.replace('@CodigoEmpresa', 'x'.repeat($('#lbl-codigo-empresa').data('length')));
+            text2 = text2.replace('@FacturasAdeudadas', 'x'.repeat($('#lbl-facturas-adeudadas').data('length')));
+            text2 = text2.replace('@Saldo', 'x'.repeat($('#lbl-saldo').data('length')));
+            text2 = text2.replace('@Categoria', 'x'.repeat($('#lbl-categoria').data('length')));
 
-            for(var charPos = 0; charPos < text.length; charPos++){
+            for(var charPos = 0; charPos < text2.length; charPos++){
                 switch(text[charPos]){
                     case "\\n": 
                     case "[":

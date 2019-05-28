@@ -3,6 +3,7 @@
 namespace app\modules\agenda\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "category".
@@ -96,4 +97,12 @@ class Category extends \app\components\db\ActiveRecord {
         }
     }
 
+    /**
+     * @return array
+     * Devuelve las categorías para ser listadas en un desplegable
+     */
+    public static function getForSelect()
+    {
+        return ArrayHelper::map(self::find()->all(), 'category_id', 'name');
+    }
 }

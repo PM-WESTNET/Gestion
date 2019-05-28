@@ -36,13 +36,14 @@ class ActiveRecord extends \yii\db\ActiveRecord
         $senderClass = get_class($event->sender);
         $keys = array_keys($this->attributes);
         $words_to_ignore = \Yii::$app->params['words-to-ignore-in-log'];
-        foreach($keys as $key){
-            $have_to_ignore = false;
-            foreach ($words_to_ignore as $ignore){
-                if($key == $ignore){
-                    $have_to_ignore = true;
+        if(!YII_ENV_TEST) {
+            foreach($keys as $key){
+                $have_to_ignore = false;
+                foreach ($words_to_ignore as $ignore){
+                    if($key == $ignore){
+                        $have_to_ignore = true;
+                    }
                 }
-            }
                 if(array_key_exists($key, $this->attributes) && array_key_exists($key, $event->changedAttributes)){
                     if($this->attributes[$key] != $event->changedAttributes[$key]){
                         $create_log = true;
@@ -51,11 +52,12 @@ class ActiveRecord extends \yii\db\ActiveRecord
                         array_push($new_values, $have_to_ignore ? '*****' : $this->attributes[$key]);
                     }
                 }
-            $have_to_ignore = false;
+                $have_to_ignore = false;
 
-        }
-        if($create_log){
-            Log::log($senderClass, $this->primaryKey, $attributes, $old_values, $new_values);
+            }
+            if($create_log){
+                Log::log($senderClass, $this->primaryKey, $attributes, $old_values, $new_values);
+            }
         }
     }
 

@@ -18,6 +18,9 @@ class NotificationsModule extends \yii\base\Module {
                     ],
                 ],
             ],
+            'infobip' => [
+                'class' => 'app\modules\westnet\notifications\modules\infobip\InfobipModule',
+            ],
             ];
 
         //Module parameters

@@ -14,6 +14,8 @@ use app\modules\checkout\models\search\PaymentSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
+use app\modules\checkout\models\PagoFacilTransmitionFile;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -203,15 +205,7 @@ class PaymentController extends Controller {
         }
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $customer->customer_id;
-        //$searchModel->desde = '01'.(new \DateTime('now'))->format('/m/Y');
-        //$searchModel->hasta = (new \DateTime('now'))->se
-
         $dataProvider = $searchModel->searchAccount($customer->customer_id, Yii::$app->request->queryParams);
-        
-//        if (empty(Yii::$app->request->queryParams['page'])) {
-//            $lastPage = floor(($dataProvider->totalCount - 1) / $dataProvider->pagination->getPageSize());
-//            $dataProvider->pagination->setPage($lastPage);
-//        }
 
         $retVals = [
             'searchModel' => $searchModel,
@@ -512,22 +506,31 @@ class PaymentController extends Controller {
 
     public function actionPagofacilPaymentsImport() {
 
-        $transmition_file = new \app\modules\checkout\models\PagoFacilTransmitionFile();
+        $transmition_file = new PagoFacilTransmitionFile();
 
-
-        if ($transmition_file->load(Yii::$app->request->post()) && $transmition_file->import()) {
-            $transmition_file->refresh();
-            Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
-            return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
+        if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
+            $import = $transmition_file->import();
+            if($import['status']) {
+                Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
+                return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
+            } else {
+                unlink(Yii::getAlias('@webroot') . '/'.$transmition_file->file_name);
+                $transmition_file->delete();
+                $string_error = '';
+                foreach ($import['errors'] as $error) {
+                    $string_error .= $error . "<br>";
+                }
+                Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
+            }
         }
 
         return $this->render('pagofacil-payments-import', ['model'=> $transmition_file]);
     }
     
-    public function actionPagofacilPaymentsIndex(){
-        
-        $pagofacilFiles= \app\modules\checkout\models\PagoFacilTransmitionFile::find()->orderBy(['pago_facil_transmition_file_id' => SORT_DESC]);
-        
+    public function actionPagofacilPaymentsIndex()
+    {
+        $pagofacilFiles= PagoFacilTransmitionFile::find()->orderBy(['pago_facil_transmition_file_id' => SORT_DESC]);
+
         $dataProvider = new ActiveDataProvider(['query' => $pagofacilFiles]);
         
         return $this->render('pagofacil-payments-index', ['dataProvider' => $dataProvider]);
@@ -537,13 +540,16 @@ class PaymentController extends Controller {
         $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
-        
-        return $this->render('pagofacil-payment-view', ['model' => $model, 'payments' => $payments]);
+
+        return $this->render('pagofacil-payment-view', [
+            'model' => $model,
+            'payments' => $payments,
+        ]);
     }
     
     public function actionConfirmFile($idFile){
         set_time_limit(300);
-        $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
+        $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
         
         if ($model->confirmFile()) {
             Yii::$app->session->setFlash('success', 'Archivo de pagos confirmado con éxito');
@@ -577,4 +583,53 @@ class PaymentController extends Controller {
         }
     }
 
+    /**
+     * @param $model
+     * @param $attribute
+     * @return bool
+     * @throws \Exception
+     * Sube un archivo de pago facil, primero se fija que no haya sido importado previamente.
+     */
+    public function upload($model, $attribute)
+    {
+        $file = UploadedFile::getInstance($model, $attribute);
+        $folder = date('Y').'/'.date('m');
+        if ($file) {
+            $filePath = Yii::$app->params['upload_directory'] . "$folder/". $file->baseName . '.' . $file->extension;
+
+            $model->file_name = $filePath;
+            $model->upload_date = (new \DateTime('now'))->format('Y-m-d');
+
+            if(!$model->isRepeat()) {
+                if (!file_exists(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/")) {
+                    mkdir(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/", 0775, true);
+                }
+
+                $file->saveAs(Yii::getAlias('@webroot') . '/' . $filePath);
+                return $model->save(false);
+            }
+
+            return false;
+        } else {
+            return false;
+        }
+    }
+
+    public function actionDeletePagoFacilTransmitionFile($id) {
+        $model = PagoFacilTransmitionFile::findOne($id);
+        if(!$model) {
+            Yii::$app->setFlash('error', 'No es posible encontrar el modelo');
+        }
+
+        if($model->getDeletable()) {
+            if($model->file_name && file_exists(Yii::getAlias('@webroot') . '/' .$model->file_name)){
+                unlink(Yii::getAlias('@webroot') . '/'.$model->file_name);
+            }
+            $model->delete();
+        } else {
+            Yii::$app->setFlash('error', 'No es posible eliminar el archivo');
+        }
+
+        return $this->redirect(['pagofacil-payments-index']);
+    }
 }

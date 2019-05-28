@@ -65,5 +65,18 @@ return [
         'balance' => 200,
         'status' => \app\modules\checkout\models\Payment::PAYMENT_CLOSED,
         'partner_distribution_model_id' => 1,
+    ],
+    [
+        'payment_id' => 6,
+        'amount' => 200,
+        'date' => '2019-01-30',
+        'time' => '15:15',
+        'timestamp' => 1548861300,
+        'number' => 5,
+        'concept' => 'XXXX',
+        'customer_id' => 45901,
+        'balance' => 200,
+        'status' => \app\modules\checkout\models\Payment::PAYMENT_CLOSED,
+        'partner_distribution_model_id' => 1,
     ]
 ];

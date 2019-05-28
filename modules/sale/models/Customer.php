@@ -21,6 +21,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\validators\RegularExpressionValidator;
 use yii\web\HttpException;
+use app\modules\ticket\models\Ticket;
 
 /**
  * This is the model class for table "customer".
@@ -79,8 +80,6 @@ class Customer extends ActiveRecord {
     public $_sms_fields_notifications;
     public $_email_fields_notifications;
     public $_notifications_way;
-    
-        
 
     /**
      * @inheritdoc
@@ -105,7 +104,7 @@ class Customer extends ActiveRecord {
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
-            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update' ], 'safe'],
+            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges' ], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -162,6 +161,10 @@ class Customer extends ActiveRecord {
             if($this->document_number <= 999999) {
                 $this->addError('document_number', Yii::t('app', 'The document number must be geater than 999999.'));
             }
+
+            if (count($this->getErrors($this->document_number)) > 8 && (integer)$this->document_number >=100000000) {
+                $this->addError('document_number', Yii::t('app','The document number must be less than 100000000.'));
+            }
         } else {
             $validator = new CuitValidator();
             $validator->validateAttribute($this, 'document_number');
@@ -175,6 +178,10 @@ class Customer extends ActiveRecord {
     public function validateCustomer()
     {
         if ($this->document_number) {
+            $this->compareDocument();
+            if ($this->hasErrors()){
+                return ['status' => 'invalid'];
+            }
             $customer = Customer::findOne(['document_number' => $this->document_number]);
 
             if ($customer) {
@@ -342,7 +349,8 @@ class Customer extends ActiveRecord {
             'parent_company_id' => Yii::t('app', 'Parent Company'),
             'needs_bill' => Yii::t('app', 'Needs Bill'),
             'phone4' => Yii::t('app', 'Cellphone 4'),
-            'last_update' => Yii::t('app', 'Last update')
+            'last_update' => Yii::t('app', 'Last update'),
+            'hourRanges' => Yii::t('app', 'Customer Hour range')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -359,6 +367,13 @@ class Customer extends ActiveRecord {
      */
     public function getBills() {
         return $this->hasMany(Bill::className(), ['customer_id' => 'customer_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getHourRanges() {
+        return $this->hasMany(HourRange::class, ['hour_range_id' => 'hour_range_id'])->viaTable('customer_has_hour_range', ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -424,9 +439,18 @@ class Customer extends ActiveRecord {
             } else {
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4') {
+                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
                         }
+
+                        if ($attr === 'email') {
+                            $this->updateAttributes(['email_status' => 'invalid']);
+                        }
+
+                        if ($attr === 'email2') {
+                            $this->updateAttributes(['email2_status' => 'invalid']);
+                        }
+
                         switch ($attr){
                             case 'address_id':
                                 $oldAddress= Address::findOne(['address_id' => $oldValue]);
@@ -648,6 +672,7 @@ class Customer extends ActiveRecord {
             foreach ($logs as $p)
                 $p->delete();
 
+            $this->unlinkAll('hourRanges', $this);
             return true;
         } else {
             return false;
@@ -849,6 +874,30 @@ class Customer extends ActiveRecord {
                 $this->on(self::EVENT_AFTER_INSERT, $saveCategories);
                 $this->on(self::EVENT_AFTER_UPDATE, $saveCategories);
             }
+        }
+    }
+
+    /**
+     * @param $hour_ranges
+     * Crea la relacion para guardar los horarios disponibles del cliente
+     */
+    public function setHourRanges($hour_ranges) {
+        if($hour_ranges) {
+            //Borro relaciones anteriores
+            $this->unlinkAll('hourRanges', $this);
+            //Creo las nuevas relaciones
+            $setRange = function () use ($hour_ranges) {
+                foreach ($hour_ranges as $hour_range) {
+                    $customer_has_hour_range = new CustomerHasHourRange([
+                        'customer_id' => $this->customer_id,
+                        'hour_range_id' => $hour_range
+                    ]);
+                    $customer_has_hour_range->save();
+                    }
+            };
+
+            $this->on(ActiveRecord::EVENT_AFTER_INSERT, $setRange);
+            $this->on(ActiveRecord::EVENT_AFTER_UPDATE, $setRange);
         }
     }
 
@@ -1227,5 +1276,58 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @param $customer_code
+     * @param $category_id
+     * @param $is_open
+     * @return array
+     * Indica si el cliente tiene un ticket de la categoría indicada
+     */
+    public static function hasCategoryTicket($customer_code, $category_id, $is_open)
+    {
+        $customer = Customer::findOne(['code' => $customer_code]);
+        $ticket = Ticket::find()
+            ->leftJoin('status', 'status.status_id = ticket.status_id')
+            ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
+            ->one();
+
+        return [
+            'customer_code' => $customer_code,
+            'has_ticket' => $ticket ? true : false,
+            'ticket_status' => $ticket ? $ticket->status->name : ''
+        ];
+    }
+
+    public static function verifyEmails($data, $field = "email")
+    {
+        $row_index = 0;
+        $results = [
+            'total' => 0,
+            'active' => 0,
+            'inactive' => 0,
+            'bounced' => 0
+        ];
+        while (($row = fgetcsv($data)) !== false) {
+            Yii::info(print_r($row, 1), 'data');
+            if ($row_index > 0) {
+                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+
+                foreach ($customers as $customer) {
+                    $status_field = $field.'_status';
+                    $customer->$status_field = strtolower($row[1]);
+                    $customer->updateAttributes([$status_field]);
+
+                    $results['total']++;
+                    $results[strtolower($row[1])]++;
+
+                }
+            }
+
+            $row_index++;
+        }
+
+        return $results;
     }
 }

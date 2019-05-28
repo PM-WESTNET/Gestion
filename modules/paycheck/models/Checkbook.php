@@ -168,8 +168,7 @@ class Checkbook extends \app\components\db\ActiveRecord
 
     public static function findActive($money_box_account_id)
     {
-        $query = new Query();
-        $query->select('*')
+        $query = Checkbook::find()->select('*')
             ->from('checkbook')
             ->where(['money_box_account_id' => $money_box_account_id])
             ->andWhere(['=', 'enabled', true ])

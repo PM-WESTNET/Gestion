@@ -151,6 +151,7 @@ class ContractToInvoice
             return true;
         } catch (Exception $ex){
             error_log($ex->getMessage());
+            Debug::debug($ex);
             return false;
         }
     }
@@ -294,9 +295,9 @@ class ContractToInvoice
 
     public function invoiceAll($params)
     {
-        //Yii::setLogger(new EmptyLogger());
+        Yii::setLogger(new EmptyLogger());
 
-        $bill_observation = $params['bill_observation'];
+        $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
         $contractSearch->setScenario('for-invoice');
 
@@ -304,6 +305,13 @@ class ContractToInvoice
         $paginas = ceil($cantidadTotal/100);
         $company = Company::findOne($contractSearch->company_id);
         $period = new DateTime( $contractSearch->period );
+
+        if( $contractSearch->invoice_date instanceof DateTime) {
+            $invoice_date = $contractSearch->invoice_date;
+        } else {
+            $invoice_date = DateTime::createFromFormat( 'd-m-Y', $contractSearch->invoice_date );
+        }
+
         $customers = [];
 
         try {
@@ -331,7 +339,7 @@ class ContractToInvoice
             foreach($contractsList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date) ) {
                         $afip_error = true;
                     }
                     Yii::$app->session->set('_invoice_all_', [
@@ -372,18 +380,31 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan = true, $bill_observation = '')
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null)
     {
 
         try{
 
             if ($company && $bill_type_id && $customer_id) {
-
-                //Creo el comprobante
-                $bill = $this->createBill($bill_type_id, $company->company_id, $company->getDefaultPointOfSale()->point_of_sale_id, $customer_id, $period->format('Y-m-d'), 'draft', $bill_observation);
+                $node = null;
+                /** @var Bill $bill */
+                $bill = BillExpert::createBill($bill_type_id);
+                $bill->company_id = $company->company_id;
+                $bill->point_of_sale_id = $company->getDefaultPointOfSale()->point_of_sale_id;
+                $bill->customer_id = $customer_id;
+                $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
+                $bill->status = 'draft';
+                $bill->observation = $bill_observation;
+                $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
-                $contracts = $this->getContracts($company->company_id, $customer_id, $bill_type_id, $period, $includePlan);
+                $contractSearch = new ContractSearch();
+                $contractSearch->setScenario('for-invoice');
+                $contractSearch->company_id = $company->company_id;
+                $contractSearch->customer_id = $customer_id;
+                $contractSearch->bill_type_id = $bill_type_id;
+                $contractSearch->period = $period;
+                $contracts = $contractSearch->searchForInvoice([], true, $includePlan)->all();
 
                 // Busco el customer que estoy procesando
                 $customer = Customer::findOne($customer_id);
@@ -419,6 +440,16 @@ class ContractToInvoice
         return false;
     }
 
+    /**
+     * @param $bill
+     * @param $contracts
+     * @param $includePlan
+     * @param $customerActiveDiscount
+     * @param $period
+     * @param $default_unit_id
+     * @throws \yii\base\InvalidConfigException
+     * Agrega items al comprobante por cada contrato
+     */
     private function addItemsToBillThroughContracts($bill, $contracts, $includePlan, $customerActiveDiscount, $period, $default_unit_id)
     {
         foreach ($contracts as $contract_value) {
@@ -446,6 +477,14 @@ class ContractToInvoice
         }
     }
 
+    /**
+     * @param $periods
+     * @param $next
+     * @param $nextPeriod
+     * @param $contractStart
+     * @throws Exception
+     * Obtiene los períodos corresponientes
+     */
     private function getPeriods(&$periods, &$next, &$nextPeriod, $contractStart)
     {
         $current_month = (new DateTime('now'))->format('Ym') ;
@@ -462,6 +501,18 @@ class ContractToInvoice
         }
     }
 
+    /**
+     * @param $contractDetails
+     * @param $includePlan
+     * @param $periods
+     * @param $customerActiveDiscount
+     * @param $next
+     * @param $nextPeriodDate
+     * @param $periodDate
+     * @param $contract
+     * @throws Exception
+     * Agrega los planes al contrato
+     */
     private function addPlansToContract($contractDetails, $includePlan, $periods, $customerActiveDiscount, $next, $nextPeriodDate, $periodDate, $contract)
     {
         foreach($contractDetails as $contractDetail) {
@@ -489,6 +540,11 @@ class ContractToInvoice
         }
     }
 
+    /**
+     * @param $bill
+     * @param $customerActiveDiscount
+     * Agrega los descuentos correspondientes a un comprobante
+     */
     private function addDiscountsTobill($bill, $customerActiveDiscount)
     {
         foreach($customerActiveDiscount as $key => $customerDiscount) {
@@ -515,6 +571,18 @@ class ContractToInvoice
         }
     }
 
+    /**
+     * @param $bill
+     * @param $products_to_invoice
+     * @param $contract
+     * @param $includePlan
+     * @param $period
+     * @param $contractStart
+     * @param $next
+     * @param $default_unit_id
+     * @throws \yii\base\InvalidConfigException
+     * Agrega billdetails al comprobante
+     */
     private function addItemsToBill($bill, $products_to_invoice, $contract, $includePlan, $period, $contractStart, $next, $default_unit_id)
     {
         foreach($products_to_invoice as $pti) {
@@ -590,6 +658,12 @@ class ContractToInvoice
         }
     }
 
+    /**
+     * @param $product
+     * @param $unit_net_price_with_discount
+     * @return float
+     * Calcula el precio final unitario
+     */
     private function calculateUnitFinalPrice($product, $unit_net_price_with_discount)
     {
         if($product->contractDetail) {
@@ -606,6 +680,19 @@ class ContractToInvoice
         return $unit_final_price;
     }
 
+    /**
+     * @param $bill_type_id
+     * @param $company_id
+     * @param $point_of_sale_id
+     * @param $customer_id
+     * @param $date
+     * @param $status
+     * @param $observation
+     * @return \app\modules\sale\components\type
+     * @throws \yii\web\ForbiddenHttpException
+     * @throws \yii\web\HttpException
+     * Crea un comprobante
+     */
     private function createBill($bill_type_id, $company_id, $point_of_sale_id, $customer_id, $date, $status, $observation)
     {
         $bill = BillExpert::createBill($bill_type_id);
@@ -620,6 +707,15 @@ class ContractToInvoice
         return $bill;
     }
 
+    /**
+     * @param $company_id
+     * @param $customer_id
+     * @param $bill_type_id
+     * @param $period
+     * @param $includePlan
+     * @return mixed
+     * Obtiene los contratos de la empresa, cliente, tipo y periodo correspondiente
+     */
     private function getContracts($company_id, $customer_id, $bill_type_id, $period, $includePlan)
     {
         $contractSearch = new ContractSearch([

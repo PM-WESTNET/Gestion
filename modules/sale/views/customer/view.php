@@ -116,6 +116,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
+            <?php if (User::canRoute('/sale/customer/send-message')):?>
+            <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
+                <div class="dropdown">
+                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <?php echo '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="send-message">
+                        <?php foreach ($messages as $message):?>
+                            <li>
+                                <?= \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
+                            </li>
+                        <?php endforeach;?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif;?>
         </div>
     </div>
 
@@ -153,8 +170,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
         ],
-        'email:email',
-        'email2:email',
+        [
+            'attribute' => 'email',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email). ' ('. Yii::t('app',ucfirst($model->email_status)). ')';
+            },
+            'format' => 'raw'
+        ],
+        [
+            'attribute' => 'email2',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email2). ' ('. Yii::t('app',ucfirst($model->email2_status)). ')';
+            },
+            'format' => 'raw'
+        ],
         'phone',
         'phone2',
         'phone3',
@@ -294,6 +323,39 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
     </div>
+
+<div class="modal fade" id="phoneModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo Yii::t('app','Select the phones to send message')?></h4>
+            </div>
+            <div class="modal-body">
+                <?php if ($model->phone):?>
+                    <?php echo Html::checkbox('phone', true, ['class' => 'phone-check','data-attr' => 'phone']) . $model->phone?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone2):?>
+                    <?php echo Html::checkbox('phone2', true, ['class' => 'phone-check', 'data-attr' => 'phone2']) . $model->phone2?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone3):?>
+                    <?php echo Html::checkbox('phone3', true, ['class' => 'phone-check', 'data-attr' => 'phone3']) . $model->phone3?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone4):?>
+                    <?php echo Html::checkbox('phone4', true, ['class' => 'phone-check', 'data-attr' => 'phone4']) . $model->phone4?>
+                    <br>
+                <?php endif;?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo Yii::t('app','Close')?></button>
+                <button type="button" class="btn btn-primary" id="send-message-btn"> <?php echo Yii::t('app','Send Message')?></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 <script>
     var CustomerView= new function(){
         
@@ -303,7 +365,15 @@ $this->params['breadcrumbs'][] = $this->title;
             });
             $(document).on('click', '#btn-change-company', function(){
                 CustomerView.changeCompany();
+            });
+            $(document).on('click', '.select_msj', function (e) {
+                e.preventDefault();
+                CustomerView.selectPhones($(this));
             })
+            $(document).on('click', '#send-message-btn', function (e) {
+                e.preventDefault();
+                CustomerView.sendMessage($('#send-message-btn').data('message_id'))
+            });
         }
 
         this.changeCompany= function(){
@@ -319,6 +389,26 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             });
+        }
+        
+        this.selectPhones = function (opt) {
+            $('#send-message-btn').data('message_id', $(opt).data('message_id'))
+            $('#phoneModal').modal('show');
+        }
+
+        this.sendMessage = function (message) {
+            var phones = [];
+
+
+            var url = "<?php echo Url::to(['/sale/customer/send-message', 'customer_id' => $model->customer_id])?>&customer_message_id="+message;
+
+            $.each($('.phone-check'), function (i, ch) {
+                if ($(ch).is(':checked')) {
+                    url = url + '&phones['+i+']='+$(ch).data('attr');
+                }
+            });
+
+            location.replace(url);
         }
 
     }

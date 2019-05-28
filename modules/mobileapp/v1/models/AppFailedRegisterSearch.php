@@ -19,7 +19,7 @@ class AppFailedRegisterSearch extends AppFailedRegister
     {
         return [
             [['app_failed_register_id'], 'integer'],
-            [['name', 'document_type', 'document_number', 'email', 'phone', 'status'], 'safe'],
+            [['name', 'document_type', 'document_number', 'email', 'phone', 'status', 'type', 'text', 'customer_code'], 'safe'],
         ];
     }
 
@@ -57,6 +57,7 @@ class AppFailedRegisterSearch extends AppFailedRegister
 
         $query->andFilterWhere([
             'app_failed_register_id' => $this->app_failed_register_id,
+            'type' => $this->type,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
@@ -64,6 +65,8 @@ class AppFailedRegisterSearch extends AppFailedRegister
             ->andFilterWhere(['like', 'document_number', $this->document_number])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'phone', $this->phone])
+            ->andFilterWhere(['like', 'text', $this->text])
+            ->andFilterWhere(['like', 'customer_code', $this->customer_code])
             ->andFilterWhere(['like', 'status', 'pending']);
 
         $query->orderBy(['app_failed_register_id' => SORT_DESC]);

@@ -1174,5 +1174,4 @@ class Product extends ActiveRecord
 
         return $queryplans->all();
     }
-
 }

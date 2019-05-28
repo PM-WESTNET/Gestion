@@ -109,7 +109,7 @@ class PagomiscuentasFileTest extends \Codeception\Test\Unit
         ]);
         $model->save();
 
-        expect('Create payment when type is payment only', $model->createPayment(45900, (new \DateTime('now'))->format('Y-m-d'), 123, 'description', 1))->isInstanceOf(Payment::class);
+        expect('Create payment when type is payment only', $model->createPayment(45900, (new \DateTime('now'))->format('Y-m-d'), 123, 'description', 1))->true();
     }
 
     public function testCreateRelationWithPayment()

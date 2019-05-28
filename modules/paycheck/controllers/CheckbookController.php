@@ -10,6 +10,7 @@ use yii\helpers\Json;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * CheckbookController implements the CRUD actions for Checkbook model.
@@ -115,5 +116,14 @@ class CheckbookController extends Controller
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+    public function actionGetLastNumberUsed($checkbook_id)
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $checkbook = Checkbook::findOne($checkbook_id);
+        $last_number = $checkbook->lastNumberUsed;
+        return $last_number;
     }
 }

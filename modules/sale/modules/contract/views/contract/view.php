@@ -14,6 +14,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
 use app\components\helpers\UserA;
+use app\modules\sale\modules\contract\models\search\ContractDetailSearch;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -69,9 +70,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             
             <?php
             if ($model->status == Contract::STATUS_ACTIVE) {
-                if(!$model->low_date) {
-                    echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
-                }
+                echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
             }
             if ($model->status == Contract::STATUS_LOW_PROCESS) {
                 echo UserA::a(Yii::t('app', 'Definitive Low'), ['cancel-contract', 'id' => $model->contract_id], ['class' => 'btn btn-danger', 'id' => 'btn-definitive-low' ]);
@@ -261,7 +260,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
     <?=
     GridView::widget([
-        'dataProvider' => \app\modules\sale\modules\contract\models\search\ContractDetailSearch::getdataProviderDetail($model->contract_id),
+        'dataProvider' => ContractDetailSearch::getdataProviderDetail($model->contract_id),
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
@@ -317,7 +316,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             [
                 'attribute' => 'status',
                 'value' => function($model) {
-
                     if ($model->status){
                         if($model->from_date !== Yii::t('app', 'Undetermined time') && strtotime(Yii::$app->formatter->asDate($model->from_date, 'yyyy-MM-dd')) > time()) {
                             return  Yii::t('app', ucfirst($model->status)). ' ('. Yii::t('app','Future').')';
@@ -344,7 +342,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
 </div>
 <!-- Modal -->
-<div class="modal fade" id="connection-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="top:25%">
+<div class="modal fade" id="connection-modal" role="dialog" aria-labelledby="myModalLabel" style="top:25%">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -375,8 +373,37 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                     <label for="due_date" class="control-label"><?php echo Yii::t('app', 'Reason') ?></label>
                     <textarea cols="35" rows="5" id="reason" class="form-control"></textarea>
                 </div>
-                
+                <div class="form-group">
+                    <?php echo Html::checkbox('create_product_to_invoice', false, ['id' => 'create_product'])?> <label
+                            for="create_product"><?php echo Yii::t('app','Create Product to Invoice')?></label>
 
+                </div>
+                <div class="form-group">
+                    <label for="extend_payment_product_id"><?php echo Yii::t('app','Product to Invoice for Extend Payment')?></label>
+                    <?php
+                        echo Select2::widget([
+                            'name' => 'extend_payment_product_id',
+                            'value' => Config::getValue('extend_payment_product_id'),
+                            'data' => $products,
+                            'pluginOptions' => [
+                                'allowClear' => false,
+                            ],
+                            'options' => ['placeholder' => Yii::t('app','Select a Product'), 'id' => 'extend_product_id']
+                    ])?>
+                </div>
+                <div class="form-group">
+                    <label for="vendor_id"><?php echo Yii::t('app','Vendor')?></label>
+                    <?php
+                        echo Select2::widget([
+                            'name' => 'vendor_id',
+                            'value' => $model->vendor_id,
+                            'data' => $vendors,
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                            ],
+                            'options' => ['placeholder' => Yii::t('app','Select a Vendor'), 'id' => 'vendor_id']
+                    ])?>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="force-conn-bton-cancel"><?php echo Yii::t('app', 'Cancel') ?></button>
@@ -579,7 +606,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
     var ContractView = new function () {
         
         this.tentative_node= '<?php 
-                             $tentativeNode= Node::findOne(['subnet' => $model->tentative_node]); 
+                             $tentativeNode = Node::findOne(['subnet' => $model->tentative_node]);
                             echo (empty($tentativeNode) ? '0' : $tentativeNode->node_id ); ?>';
         this.init = function () {
             $(document).off('click', '#disable-connection')
@@ -670,7 +697,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 $('#start-low-process-modal').modal('hide');
                 if(category_id) {
                     $.ajax({
-                        url: '<?php echo Url::to(['/sale/contract/contract/low-process-contract', 'contract_id'=>$model->contract_id]) ?>',
+                        url: '<?= Url::to(['/sale/contract/contract/low-process-contract', 'contract_id'=>$model->contract_id]) ?>',
                         data: {
                             category_id: category_id,
                             date: date
@@ -693,6 +720,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 $('#force-connection').button('reset');
                 $('#enable-connection').button('reset');
                 $('#message-con').empty();
+            });
+
+            $('#create_product').change(function () {
+                if (!$('#create_product').is(':checked')) {
+
+                    $('#extend_product_id').prop('disabled', 'disabled');
+                    $('#vendor_id').prop('disabled', 'disabled');
+                }else{
+
+                    $('#extend_product_id').removeAttr('disabled');
+                    $('#vendor_id').removeAttr('disabled');
+
+                }
             })
             $('#node-modal').removeAttr('tabindex');
             ContractView.map();
@@ -733,8 +773,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 $('#connection-modal').modal('hide')
                 if ($('#due_date').kvDatepicker('getDate') != null) {
                     var vDate = $('#due_date').kvDatepicker('getDate');
-                    ContractView.execute('<?php echo \yii\helpers\Url::to(['/westnet/connection/force', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>', {
-                    '   due_date': vDate.getFullYear() + "-" + (vDate.getMonth() + 1) + "-" + vDate.getDate(), reason: $('#reason').val()
+                    ContractView.execute('<?= Url::to(['/westnet/connection/force', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>', {
+                        due_date: vDate.getFullYear() + "-" + (vDate.getMonth() + 1) + "-" + vDate.getDate(),
+                        reason: $('#reason').val(), create_product: $('#create_product').is(':checked'),
+                        product_id: $('#extend_product_id').val(), vendor_id: $('#vendor_id').val()
                     });
                 }
             }else{
@@ -780,19 +822,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
         this.changeCompany = function () {
             var id = $('#form-company #connection-company_id').val();
             if (id) {
-                ContractView.execute('<?php echo \yii\helpers\Url::to(['/sale/contract/contract/change-company', 'connection_id' => ($connection ? $connection->connection_id : '' )]) ?>&company_id=' + id, [], '#btn-change-company');
+                ContractView.execute('<?= Url::to(['/sale/contract/contract/change-company', 'connection_id' => ($connection ? $connection->connection_id : '' )]) ?>&company_id=' + id, [], '#btn-change-company');
             }
         }
 
         this.changeNode = function () {
             var id = $('#form-node #connection-node_id').val();
             if (id) {
-                ContractView.execute('<?php echo \yii\helpers\Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id, [], '#btn-change-node');
+                ContractView.execute('<?= Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id, [], '#btn-change-node');
             }
         }
 
         this.activeNewItems = function () {
-            ContractView.execute('<?php echo \yii\helpers\Url::to(['/sale/contract/contract/active-new-items', 'contract_id' => $model->contract_id]) ?>', [], '#btn-active-new-items');
+            ContractView.execute('<?= Url::to(['/sale/contract/contract/active-new-items', 'contract_id' => $model->contract_id]) ?>', [], '#btn-active-new-items');
         }
 
         this.map = function () {
@@ -819,10 +861,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
         };
         
-        this.getNodes= function(){
+        this.getNodes = function(){
             $('#ads-modal #node_id option').remove();
             $.ajax({
-                url : "<?= \yii\helpers\Url::to(['/westnet/node/all-nodes'])?>",
+                url : "<?= Url::to(['/westnet/node/all-nodes'])?>",
                 method: "post",
                 dataType: "json",
                 success: function(data){
@@ -835,31 +877,31 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             });
         }
 
-        this.printAds= function(node){
+        this.printAds = function(node){
             if(node === '0' || typeof  node === 'undefined'){
-                window.open("<?= \yii\helpers\Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ $('#node_id').val());
+                window.open("<?= Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ $('#node_id').val());
                 location.reload();
             }else{
-                window.open("<?= \yii\helpers\Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ node);
+                window.open("<?= Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ node);
                 location.reload();
             }
 
         }
         
-        this.lowProcess= function(){
+        this.lowProcess = function(){
             $.ajax({
-                url : '<?= \yii\helpers\Url::to(['/sale/contract/contract/cancel-contract'])?>',
+                url : '<?= Url::to(['/sale/contract/contract/cancel-contract'])?>',
                 data: {id: <?= $model->contract_id?>, mac_address: $('#mac-address').val()},
                 dataType: 'json',
                 success: function(data){
-                    location.href= '<?= \yii\helpers\Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id])?>';
+                    location.href= '<?= Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id])?>';
                 }
             });
         }
 
         this.changeIp = function () {
             if (confirm('<?php echo Yii::t('westnet', 'Are you sure you want to change the ip of this connection?') ?>')) {
-                ContractView.execute('<?php echo \yii\helpers\Url::to(['/sale/contract/contract/change-ip', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>')
+                ContractView.execute('<?= Url::to(['/sale/contract/contract/change-ip', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>')
             } else {
                 $('#change-ip').button('reset');
             }

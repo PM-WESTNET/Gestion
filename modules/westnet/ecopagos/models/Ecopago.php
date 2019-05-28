@@ -3,6 +3,7 @@
 namespace app\modules\westnet\ecopagos\models;
 
 use app\modules\provider\models\Provider;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\westnet\ecopagos\EcopagosModule;
 
@@ -390,4 +391,54 @@ class Ecopago extends \app\components\db\ActiveRecord {
         }
     }
 
+    public function canDisable() {
+
+        $enabled_status = Status::findOne(['slug' => 'enabled']);
+
+        return $this->status_id === $enabled_status->status_id && !Payout::find()
+            ->andWhere(['ecopago_id' => $this->ecopago_id])
+            ->andWhere(['IN', 'status', ['valid', 'closed']])
+            ->exists() && !DailyClosure::find()->andWhere([
+                'ecopago_id' => $this->ecopago_id,
+                'status' => 'open'
+            ])->exists();
+    }
+
+    /**
+     * Deshabilita por completo el ecopago. Se les quita el acceso a los cajeros
+     */
+    public function disable()
+    {
+        if ($this->canDisable()){
+
+            $cashiers = $this->cashiers;
+            $transaction = Yii::$app->dbecopago->beginTransaction();
+            foreach ($cashiers as $cashier) {
+                $user = User::findOne($cashier->user_id);
+
+                if ($user) {
+                    $user->updateAttributes(['status' => User::STATUS_BANNED, 'updated_at' => time()]);
+                }
+
+                $cashier->updateAttributes(['status' => 'inactive']);
+            }
+
+            $status = Status::findOne(['slug'  => 'disabled']);
+
+            if (empty($status)){
+                $transaction->rollBack();
+                return false;
+            }
+
+            $this->status_id = $status->status_id;
+            if($this->updateAttributes(['status_id', 'update_datetime' => time()])) {
+                $transaction->commit();
+                return true;
+            }
+            $transaction->rollBack();
+        }
+
+        return false;
+
+    }
 }

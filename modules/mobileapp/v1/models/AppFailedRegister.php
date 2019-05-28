@@ -20,6 +20,8 @@ use Yii;
 class AppFailedRegister extends \app\components\db\ActiveRecord
 {
 
+    const TYPE_REGISTER = 'register';
+    const TYPE_CONTACT = 'contact';
 
     /**
      * @inheritdoc
@@ -66,9 +68,9 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'phone'], 'required'],
-
-            [['status'], 'string'],
+            [['name', 'phone', 'type'], 'required'],
+            [['status', 'text'], 'string'],
+            [['customer_code'], 'integer'],
             [['name', 'document_type', 'document_number', 'phone'], 'string', 'max' => 45],
             [['email'], 'string', 'max' => 255]
         ];
@@ -88,6 +90,9 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
             'phone' => Yii::t('app', 'Phone'),
             'status' => Yii::t('app', 'Status'),
             'fullName' => Yii::t('app', 'Name'),
+            'type' => Yii::t('app', 'Type'),
+            'text' => Yii::t('app','Text'),
+            'customer_code' => Yii::t('app', 'Customer code'),
         ];
     }    
 
@@ -140,4 +145,15 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
         return $this->name;
     }
 
+    /**
+     * @return array
+     * Devuelve los tipos para ser listados en un desplegable
+     */
+    public static function getTypesForSelect()
+    {
+        return [
+            self::TYPE_REGISTER => Yii::t('app', self::TYPE_REGISTER),
+            self::TYPE_CONTACT => Yii::t('app', self::TYPE_CONTACT)
+        ];
+    }
 }

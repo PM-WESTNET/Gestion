@@ -14,7 +14,7 @@ use app\modules\sale\models\Company;
 <div class="debtors-filters">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['debtors'],
+        'action' => [$action],
         'method' => 'get',
     ]); ?>
     
@@ -32,7 +32,7 @@ use app\modules\sale\models\Company;
 
     <div class="row hidden-print">
         <div class="col-sm-2">
-            <?= $form->field($searchModel, 'toDate')->widget(yii\jui\DatePicker::className(), [
+            <?= $form->field($searchModel, 'toDate')->widget(DatePicker::class, [
                 'language' => Yii::$app->language,
                 'model' => $searchModel,
                 'attribute' => 'date',
@@ -45,7 +45,7 @@ use app\modules\sale\models\Company;
             ?>
         </div>
         <div class="col-sm-2">
-            <?= $form->field($searchModel, 'activatedFrom')->widget(yii\jui\DatePicker::className(), [
+            <?= $form->field($searchModel, 'activatedFrom')->widget(DatePicker::class, [
                 'language' => Yii::$app->language,
                 'model' => $searchModel,
                 'attribute' => 'date',
@@ -86,9 +86,9 @@ use app\modules\sale\models\Company;
     <div class="row hidden-print">
         <div class="col-sm-12">
         <?=
-            $form->field($searchModel, 'nodes')->widget(Select2::classname(), [
+            $form->field($searchModel, 'nodes')->widget(Select2::class, [
                 'language' => 'es',
-                'data' => \yii\helpers\ArrayHelper::map(Node::find()->all(), 'node_id', 'name'),
+                'data' => ArrayHelper::map(Node::find()->all(), 'node_id', 'name'),
                 'options' => [
                     'multiple' => true,
                     'placeholder' => Yii::t('app', 'Select an option...')
@@ -119,7 +119,4 @@ use app\modules\sale\models\Company;
     </div>
     
     <?php ActiveForm::end(); ?>
-
-
 </div>
-<?php $this->registerJs('ZoneCombo.init();')?>

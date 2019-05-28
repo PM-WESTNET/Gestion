@@ -7,6 +7,13 @@ use kartik\widgets\DepDrop;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\helpers\ArrayHelper;
+use app\modules\sale\models\Company;
+use app\modules\sale\modules\contract\models\Plan;
+use app\modules\sale\models\CustomerCategory;
+use app\modules\westnet\models\Server;
+use app\modules\westnet\models\Node;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -38,8 +45,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'company_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\models\Company::findAll(['status'=>'enabled']), 'company_id', 'name'),[
+                            <?= $form->field($searchModel, 'company_id')->dropDownList(ArrayHelper::map(Company::findAll(['status'=>'enabled']), 'company_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Company')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -49,8 +55,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'product_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\modules\contract\models\Plan::findAll(['type'=>'plan']), 'product_id', 'name'),[
+                            <?= $form->field($searchModel, 'product_id')->dropDownList(ArrayHelper::map(Plan::findAll(['type'=>'plan']), 'product_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Plan')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -58,8 +63,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                         </div>
 
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'customer_category_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\models\CustomerCategory::find()->all(), 'customer_category_id', 'name'),[
+                            <?= $form->field($searchModel, 'customer_category_id')->dropDownList(ArrayHelper::map(CustomerCategory::find()->all(), 'customer_category_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Customer Category')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -69,20 +73,38 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'server_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Server::find()->all(), 'server_id', 'name'),[
+                            <?= $form->field($searchModel, 'server_id')->dropDownList(ArrayHelper::map(Server::find()->all(), 'server_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Server')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
                             ]) ?>
                         </div>
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'node_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Node::find()->all(), 'node_id', 'name'),[
+                            <?= $form->field($searchModel, 'node_id')->dropDownList(ArrayHelper::map(Node::find()->all(), 'node_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Node')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
                             ]) ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_from')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_from,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_to')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_to,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
                         </div>
                     </div>
                     <div class="row">
@@ -98,8 +120,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= $form->field($searchModel, 'new_company_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\models\Company::findAll(['status'=>'enabled']), 'company_id', 'name'),[
+                            <?= $form->field($searchModel, 'new_company_id')->dropDownList(ArrayHelper::map(Company::findAll(['status'=>'enabled']), 'company_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Company')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -159,8 +180,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                     <h3 class="panel-title"><?= Yii::t('westnet', 'Customers to Change') ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php
-                    \yii\widgets\Pjax::begin(
+                    <?php Pjax::begin(
                         [
                             'id' => 'contracts',
                             'enablePushState'=>FALSE
@@ -186,7 +206,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                         ]);
                     }
 
-                    \yii\widgets\Pjax::end() ?>
+                    Pjax::end() ?>
                 </div>
             </div> <!-- Fin Seleccion de datos para filtro de facturas -->
 
@@ -214,6 +234,8 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                 'CustomerContractSearch[node_id]': $('#customercontractsearch-node_id').val(),
                 'CustomerContractSearch[new_company_id]': $('#customercontractsearch-new_company_id').val(),
                 'CustomerContractSearch[company_id]': $('#customercontractsearch-company_id').val(),
+                'CustomerContractSearch[date_new_from]': $('#customercontractsearch-date_new_from').val(),
+                'CustomerContractSearch[date_new_to]': $('#customercontractsearch-date_new_to').val(),
             };
             return postdata;
         }

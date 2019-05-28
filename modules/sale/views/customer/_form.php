@@ -14,6 +14,11 @@ use app\modules\sale\models\CustomerClass;
 use app\modules\sale\models\CustomerCategory;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\HourRange;
+use app\modules\sale\models\search\CompanySearch;
+use app\modules\sale\models\Company;
+use webvimark\modules\UserManagement\models\User;
+
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Customer $model
@@ -43,10 +48,10 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
         <div class="col-sm-6 col-xs-6">
             <?php
-            $search = new \app\modules\sale\models\search\CompanySearch();
+            $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
-                $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
+                $data = ArrayHelper::map( Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
             }
             ?>
             <div class="form-group field-company_id">
@@ -82,7 +87,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         <div class="col-sm-3 col-xs-12">
             <?php
-                if (!\webvimark\modules\UserManagement\models\User::hasRole('superadmin')){
+                if (!User::hasRole('superadmin')){
                     $document_types= DocumentType::find()->andWhere(['<>','code', 99]);
                 }else{
                     $document_types= DocumentType::find();
@@ -263,6 +268,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, '_email_fields_notifications')->checkboxList(Customer::getEmailNotificationWays(), ['id' => 'email_fields'])?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-xs-12">
 
@@ -459,6 +470,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                     case 'new':
                         $('.customer_validation').html('<div class="alert alert-success">'+
                             '<?php echo Yii::t("app","The customer not exists in database")?>'+
+                            '</div>');
+                        $('.customer_validation').removeClass('hidden');
+                        break;
+                    case 'invalid':
+                        $('.customer_validation').html('<div class="alert alert-danger">'+
+                            '<?php echo Yii::t("app","Invalid Document Number")?>'+
                             '</div>');
                         $('.customer_validation').removeClass('hidden');
                         break;

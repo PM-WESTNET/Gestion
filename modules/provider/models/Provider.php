@@ -121,6 +121,10 @@ class Provider extends \app\components\db\ActiveRecord
         return true;
     }
 
+    public function getFullname() {
+        return $this->name . ' (' .$this->tax_identification . ')';
+    }
+
     /**
      * @return array
      * Devuelve todos los posibles tipos de comprobantes.

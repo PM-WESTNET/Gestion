@@ -2,7 +2,9 @@
 
 namespace app\modules\accounting\models;
 
+use app\modules\config\models\Config;
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "money_box".

@@ -29,6 +29,7 @@ use yii\validators\EmailValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use app\modules\sale\modules\contract\models\Contract;
 
 class UserAppController extends Controller
 {
@@ -338,20 +339,39 @@ class UserAppController extends Controller
      *
      * @return array
      */
-    public function actionEcopagos(){
-        $userApp= $this->getUserApp();
-        $result= [];
+    public function actionEcopagos()
+    {
+        $userApp = $this->getUserApp();
+        $ecopagos = Ecopago::find()->all();
+        $all_ecopagos = [];
+        $related_ecopagos = [];
+        $customer_ids = UserAppHasCustomer::find()->select('customer_id')->where(['user_app_id' => $userApp->user_app_id])->all();
+
         if($userApp->getCustomers()->andWhere(['customer.company_id' => Config::getValue('ecopagos_company_id')])->exists()){
+            $contracts = Contract::find()->where(['in', 'customer_id', $customer_ids])->all();
 
-            $ecopagos = Ecopago::find()->all();
-
-            foreach ($ecopagos as $ecopago){
-                $result[]= $ecopago->description;
+            //Relleno related ecopagos
+            foreach ($contracts as $contract) {
+                if($contract->connection) {
+                    $node = $contract->connection->node;
+                    if($node){
+                        foreach($node->ecopagos as $ecopago){
+                           $related_ecopagos[] = $ecopago->description;
+                        }
+                    }
+                }
             }
 
+            //Relleno all ecopagos
+            foreach ($ecopagos as $ecopago){
+                $all_ecopagos[]= $ecopago->description;
+            }
         }
 
-        return  $result;
+        return  [
+            'all-ecopagos' => $all_ecopagos,
+            'related_ecopagos' => $related_ecopagos
+        ];
     }
 
     /**
@@ -443,29 +463,39 @@ class UserAppController extends Controller
      * @return array
      *
      */
-    public function actionAddCustomer(){
-        $data= \Yii::$app->request->getBodyParams();
-
-        $userApp= $this->getUserApp();
+    public function actionAddCustomer()
+    {
+        $data = \Yii::$app->request->getBodyParams();
+        $userApp = $this->getUserApp();
 
         if (!empty($userApp)){
 
-            $customer= Customer::findOne(['email' => $data['email'], 'status' => 'enabled', 'code' => $data['customer_code']]);
+            $customer = Customer::findOne(['code' => $data['code'], 'status' => 'enabled']);
             $company = Company::findOne(['name' => 'Westnet']);
 
-            if (!empty($customer) && ($customer->company_id == $company->company_id || $customer->parent_company_id == $company->company_id)){
-                if($userApp->addCustomer($customer)){
-                    $destinataries= $customer->getDestinataries();
-                    return [
-                        'status' => 'success',
-                        'user' => $userApp,
-                        'destinataries' => $destinataries,
-                    ];
+            if(!empty($customer)) {
+                $have_same_document_number = $userApp->getCustomers()->where(['document_number' => $customer->document_number])->exists();
+                if ($have_same_document_number && ($customer->company_id == $company->company_id || $customer->parent_company_id == $company->company_id)){
+                    if($userApp->addCustomer($customer, true)){
+                        $destinataries= $customer->getDestinataries();
+                        return [
+                            'status' => 'success',
+                            'user' => $userApp,
+                            'destinataries' => $destinataries,
+                        ];
+                    }
+                     return [
+                         'status' => 'error',
+                         'errors' => Yii::t('app', 'Error saving the relation')
+                     ];
                 }
-                 return [
-                     'status' => 'error',
-                     'errors' => Yii::t('app', 'Error saving the relation')
-                 ];
+
+                Yii::$app->response->setStatusCode(400);
+
+                return [
+                    'status' => 'error',
+                    'errors' => Yii::t('app','The actual account document number and the account that you want to link are not the same')
+                ];
             }
         }
 
@@ -828,9 +858,9 @@ class UserAppController extends Controller
      * Registra los login fallidos para poder comunicarse con el cliente posteriormente
      * @return array
      */
-    public function actionCreateAppFailedRegister(){
-        $data= Yii::$app->request->getBodyParams();
-
+    public function actionCreateAppFailedRegister()
+    {
+        $data = Yii::$app->request->getBodyParams();
         $failed_register= new AppFailedRegister();
 
         if ($failed_register->load($data, '') && $failed_register->save()){

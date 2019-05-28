@@ -1,6 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Yii template
-assets/*
 web/assets/*
 !assets/.gitignore
 protected/runtime/*
@@ -82,7 +81,6 @@ nbproject
 
 # Upload files
 modules/westnet/notifications/_files
-/modules/sale/views/customer/_filters-customer.php
 /tests/acceptance/CredentialCest.php
 /.idea/
 /vendor/
@@ -92,3 +90,5 @@ web/index.php
 /tests/_support/UnitTester.php
 /tests/_support/_generated/FunctionalTesterActions.php
 /tests/_support/_generated/UnitTesterActions.php
+/mysql/
+/westnet/mysql/

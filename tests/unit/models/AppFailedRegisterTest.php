@@ -31,7 +31,8 @@ class AppFailedRegisterTest extends \Codeception\Test\Unit
     {
         $model = new AppFailedRegister([
             'name' => 'AppFailedRegister',
-            'phone' => '123456789'
+            'phone' => '123456789',
+            'type' => AppFailedRegister::TYPE_REGISTER
         ]);
 
         expect('Valid when full and new', $model->validate())->true();
@@ -47,7 +48,8 @@ class AppFailedRegisterTest extends \Codeception\Test\Unit
     {
         $model = new AppFailedRegister([
             'name' => 'AppFailedRegister',
-            'phone' => '123456789'
+            'phone' => '123456789',
+            'type' => AppFailedRegister::TYPE_REGISTER
         ]);
 
         expect('Saved when full and new', $model->save())->true();
@@ -57,10 +59,19 @@ class AppFailedRegisterTest extends \Codeception\Test\Unit
     {
         $model = new AppFailedRegister([
             'name' => 'AppFailedRegister',
-            'phone' => '123456789'
+            'phone' => '123456789',
+            'type' => AppFailedRegister::TYPE_REGISTER
         ]);
         $model->save();
 
         expect('Get fullname', $model->getFullName())->equals('AppFailedRegister');
+    }
+
+    public function testGetTypesForSelect()
+    {
+        $types = AppFailedRegister::getTypesForSelect();
+
+        expect('Array has type register', array_key_exists(AppFailedRegister::TYPE_REGISTER, $types))->true();
+        expect('Array has type contact', array_key_exists(AppFailedRegister::TYPE_CONTACT, $types))->true();
     }
 }

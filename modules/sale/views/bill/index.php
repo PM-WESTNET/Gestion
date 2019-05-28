@@ -5,6 +5,11 @@ use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use app\modules\sale\models\BillType;
 use yii\bootstrap\Modal;
+use app\components\helpers\Inflector;
+use yii\bootstrap\Collapse;
+use yii\jui\DatePicker;
+use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * @var yii\web\View $this
@@ -32,7 +37,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         <small>
             <?php 
             //Utilizamos inflector para mostrar en plural
-            $inflector = app\components\helpers\Inflector::getInflector();
+            $inflector = Inflector::getInflector();
             
             foreach($types as $i=>$type) { 
                 $name = $inflector->pluralize($type->name);
@@ -52,7 +57,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
     
     $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
     
-    echo \yii\bootstrap\Collapse::widget([
+    echo Collapse::widget([
         'items' => [
             [
                 'label' => $item,
@@ -104,6 +109,18 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                         'header'=>Yii::t('app','Customer'),
                         'value'=>function($model){ if(!empty($model->customer)) return $model->customer->fullName; }
                     ],
+ 		    [
+                        'attribute' => Yii::t('app', 'Customer document number'),
+                        'value' => function($model) {
+                            return $model->customer ? $model->customer->document_number : '';
+                        }
+                    ],
+                    [
+                        'attribute' => Yii::t('app', 'Customer code'),
+                        'value' => function ($model) {
+                            return $model->customer ? $model->customer->code : '';
+                        }
+                    ],
                 ],
                 'showConfirmAlert'=>false
             ]);
@@ -115,8 +132,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
             <form class="form-inline" role="form">
                 <div class="form-group">
                     <?= Html::activeLabel($searchModel, 'fromDate', ['class'=>'sr-only']); ?>
-                    <?php 
-                    echo yii\jui\DatePicker::widget([
+                    <?= DatePicker::widget([
                         'language' => Yii::$app->language,
                         'model' => $searchModel,
                         'attribute' => 'fromDate',
@@ -127,12 +143,10 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                         ]
                     ]);
                     ?>
-                    <?php //Html::activeTextInput($searchModel, 'fromDate', ['class'=>'form-control filter','placeholder'=>Yii::t('app','From Date')]); ?>
                 </div>
                 <div class="form-group">
                     <?= Html::activeLabel($searchModel, 'toDate', ['class'=>'sr-only']); ?>
-                    <?php 
-                    echo yii\jui\DatePicker::widget([
+                    <?= DatePicker::widget([
                         'language' => Yii::$app->language,
                         'model' => $searchModel,
                         'attribute' => 'toDate',
@@ -143,7 +157,6 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                         ]
                     ]);
                     ?>
-                    <?php // Html::activeTextInput($searchModel, 'toDate', ['class'=>'form-control filter','placeholder'=>Yii::t('app','To Date')]); ?>
                 </div>
                 <div class="form-group">
                     <a id="clean-date-btn" onclick="Search.clearDates();" class="btn btn-warning"><span class="glyphicon glyphicon-remove"></span> <?= Yii::t('app','Clean dates'); ?></a>
@@ -159,7 +172,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
     if($searchModel->bill_types){
         $typeFilter = false;
     }else{
-        $typeFilter = \yii\helpers\ArrayHelper::map(BillType::find()->all(), 'bill_type_id', 'name');
+        $typeFilter = ArrayHelper::map(BillType::find()->all(), 'bill_type_id', 'name');
     }
     ?>
     
@@ -168,7 +181,6 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         
         //Se ocultan los filtros por un error en gridView.js que no permite utilizar filtros de tipo array
         //'filterModel' => $searchModel,
-        
         'filterSelector'=>'.filter',
         'export'=>false,
         'rowOptions' => function ($model, $index, $widget, $grid){
@@ -247,23 +259,23 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                     'open' => function ($url, $model, $key) {
                         
                         if($model->isOpenable()){
-                            return Html::a('<span class="glyphicon glyphicon-repeat"></span>', yii\helpers\Url::toRoute(['bill/open', 'id'=>$key]), ['title' => Yii::t('app', 'Open'), 'class' => 'btn btn-repeat']);
+                            return Html::a('<span class="glyphicon glyphicon-repeat"></span>', Url::toRoute(['bill/open', 'id'=>$key]), ['title' => Yii::t('app', 'Open'), 'class' => 'btn btn-repeat']);
                         }
                     },
                     'email' => function ($url, $model, $key) {
                         if($model->status === 'closed' && ($model->customer ? trim($model->customer->email) : "" ) !=""){
-                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', yii\helpers\Url::toRoute(['bill/email', 'id'=>$key]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['bill/email', 'id'=>$key]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
                         }
                     },
                     'resend' => function ($url, $model, $key) {
                         if($model->class === 'bill' && $model->status === 'closed' && is_null($model->ein) && ($model->billType->invoiceClass!==null) ){
                             return  Html::a('<span class="glyphicon glyphicon-share"></span>',
-                                yii\helpers\Url::toRoute(['bill/resend', 'id'=>$key]), ['title' => Yii::t('app', 'Re-send Invoice'), 'onclick'=>'Search.removeIcon(this)']);
+                                Url::toRoute(['bill/resend', 'id'=>$key]), ['title' => Yii::t('app', 'Re-send Invoice'), 'onclick'=>'Search.removeIcon(this)']);
                         }
                     },
                     'delete' => function ($url, $model, $key) {
                         if($model->getDeletable() ){
-                            return Html::a('<span class="glyphicon glyphicon-trash"></span>', yii\helpers\Url::toRoute(['bill/delete', 'id'=>$key]), [
+                            return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::toRoute(['bill/delete', 'id'=>$key]), [
                                 'title' => Yii::t('yii', 'Delete'),
                                 'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
                                 'data-method' => 'post',
@@ -315,7 +327,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         }
         this.clear = function(){
 
-            $.pjax({container: '#grid', url: '<?= yii\helpers\Url::toRoute(['stock-movement/graph']) ?>'});
+            $.pjax({container: '#grid', url: '<?= Url::toRoute(['stock-movement/graph']) ?>'});
 
         }
         

@@ -45,7 +45,7 @@ var Ticket = new function () {
         this.bindGetCustomerInfo();
         this.bindGetCategoriesByType()
         this.bindCategoryChange();
-        $("#category_id").trigger('change');
+        $("#category_id").trigger("change");
     }
 
     //addUser - Agrega un input hidden con su label para un usuario, verifica tambien que ya no se haya agregado anteriormente
@@ -55,10 +55,10 @@ var Ticket = new function () {
 
         var userId = parseInt(ui.item.id);
 
-        $('#no-users').fadeOut();
+        $("#no-users").fadeOut();
 
         if ($.inArray(userId, self.alreadySelected) < 0) {
-            $('#user-list').append(self.createHiddenInput(ui.item.id, ui.item.value, 'default'));
+            $("#user-list").append(self.createHiddenInput(ui.item.id, ui.item.value, "default"));
             self.bindDeleteEvent();
             self.alreadySelected.push(userId);
         } else {
@@ -68,7 +68,7 @@ var Ticket = new function () {
             }, 5000);
         }
 
-        $('#user-selection-input').val('');
+        $("#user-selection-input").val("");
 
     }
 
@@ -91,10 +91,10 @@ var Ticket = new function () {
 
             }
         }).done(function (response) {
-            if (response.status == 'success') {
+            if (response.status === "success") {
                 //Solo agregamos si el usuario NO esta seleccionado
                 if ($.inArray(response.user.id, self.alreadySelected) < 0) {
-                    $('#user-list').append(self.createHiddenInput(response.user.id, username, 'default'));
+                    $("#user-list").append(self.createHiddenInput(response.user.id, username, "default"));
                     self.setUser(response.user.id);
                     self.bindDeleteEvent();
                 }
@@ -175,7 +175,7 @@ var Ticket = new function () {
                     $target.text("Buscando información del cliente...");
                 }
             }).done(function (response) {
-                if (response.status == 'success') {
+                if (response.status === "success") {
 
                     $target.html(response.html);
 
@@ -383,8 +383,12 @@ var Ticket = new function () {
         this.externalUsersUrl = url;
     }
 
+    this.setGetCategoryResponsibleUserUrl = function (url) {
+        this.categoryResponsibleUser = url;
+    }
+
     this.bindCategoryChange = function() {
-        $(document).off('change', "#category_id").on('change', "#category_id", function(){
+        $(document).off('change', "#category_id").on('change', "#category_id", function(event){
             var external_user_id = $(this).find('option:selected').data('notify');
             if(external_user_id) {
                 $('#user-selection').hide();
@@ -392,9 +396,25 @@ var Ticket = new function () {
                 $('#div-mesa-user').show();
                 $('#mesa-user').html(self.getExternalUser(external_user_id));
             } else {
+                self.setCategoryResponsibleUser(event,$(this).val());
                 $('#user-selection').show();
                 //$('#user-selection input').removeAttr('disabled');
                 $('#div-mesa-user').hide();
+            }
+        });
+    }
+
+    this.setCategoryResponsibleUser = function(event,category_id) {
+        $.ajax({
+            url: self.categoryResponsibleUser,
+            data: {category_id: category_id},
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if(data.status == 'success') {
+                    Ticket.addUser(event, data);
+                }
             }
         });
     }

@@ -33,15 +33,16 @@ use app\modules\sale\models\Currency;
         <div class="col-sm-7">
             <?= app\components\companies\CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')]]) ?>
 
+            <?= $form->field($model, 'account_id')->widget(Select2::class, [
+                'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+                'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ]
+            ]);
+            ?>
 
-                    <?= $form->field($model, 'account_id')->widget(Select2::class, [
-                        'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
-                        'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
-                        'pluginOptions' => [
-                            'allowClear' => true
-                        ]
-                    ]);
-                    ?>
+            <?php echo $form->field($model, 'account_movement_id')->textInput()->label(Yii::t('app','Number'))?>
 
         </div>
         <div class="row">

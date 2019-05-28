@@ -3,6 +3,7 @@
 use app\modules\westnet\ecopagos\EcopagosModule;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use webvimark\modules\UserManagement\models\User;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\ecopagos\models\Ecopago */
@@ -18,10 +19,20 @@ $this->params['breadcrumbs'][] = $this->title;
         <!-- Options -->
         <p>
             <?= Html::a('<span class="glyphicon glyphicon-pencil"></span> ' . Yii::t('app', 'Update'), ['update', 'id' => $model->ecopago_id], ['class' => 'btn btn-primary']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-copy"></span> ' . EcopagosModule::t('app', 'Manage cashiers'), ['cashier/list-by-ecopago', 'ecopago_id' => $model->ecopago_id], ['class' => 'btn btn-info']) ?>
-            <?= Html::a('<span class="glyphicon glyphicon-paste"></span> ' . EcopagosModule::t('app', 'Manage collectors'), ['collectors', 'id' => $model->ecopago_id], ['class' => 'btn btn-info']) ?>
+            <?php if ($model->status->slug === 'enabled'):?>
+                <?= Html::a('<span class="glyphicon glyphicon-copy"></span> ' . EcopagosModule::t('app', 'Manage cashiers'), ['cashier/list-by-ecopago', 'ecopago_id' => $model->ecopago_id], ['class' => 'btn btn-info']) ?>
+                <?= Html::a('<span class="glyphicon glyphicon-paste"></span> ' . EcopagosModule::t('app', 'Manage collectors'), ['collectors', 'id' => $model->ecopago_id], ['class' => 'btn btn-info']) ?>
+            <?php endif;?>
+            <?php if(User::canRoute(['/westnet/ecopagos/ecopago/disable']) && $model->canDisable()):?>
+                <?php echo Html::a('<span class="glyphicon glyphicon-remove"></span> '. Yii::t('app','Disable Ecopago'), ['disable', 'id' => $model->ecopago_id], [
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => EcopagosModule::t('app', 'Are you sure you want to disable this ecopago?'),
+                        'method' => 'post',
+                    ]])?>
+            <?php endif;?>
 
-            <?php if($model->deletable) echo Html::a('<span class="glyphicon glyphicon-remove"></span> ' . EcopagosModule::t('app', 'Delete'), ['delete', 'id' => $model->ecopago_id], [
+            <?php if($model->deletable) echo Html::a('<span class="glyphicon glyphicon-trash"></span> ' . EcopagosModule::t('app', 'Delete'), ['delete', 'id' => $model->ecopago_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => EcopagosModule::t('app', 'Are you sure you want to delete this item?'),

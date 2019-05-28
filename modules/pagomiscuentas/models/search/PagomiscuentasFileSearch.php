@@ -11,6 +11,8 @@ namespace app\modules\pagomiscuentas\models\search;
 
 use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\bills\Credit;
+use app\modules\sale\models\BillType;
 use Codeception\Util\Debug;
 use Yii;
 use yii\db\ActiveQuery;
@@ -47,7 +49,7 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
             $query->andWhere(new Expression("date <= '" . $this->to->format('Y-m-d') . "'"));
         }
 
-        $query->orderBy(['from_date' => SORT_DESC, 'date' => SORT_DESC ]);
+        $query->orderBy(['date' => SORT_DESC ]);
 
         return $query;
     }
@@ -57,18 +59,23 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
     {
         $model = PagomiscuentasFile::findOne(['pagomiscuentas_file_id'=>$pagomiscuentas_file_id]);
 
+        $credit_types = BillType::find()->andWhere(['class' => Credit::class])->all();
+
+        $typesId= array_map(function ($model) { return $model->bill_type_id;}, $credit_types);
+
         $date = (new \DateTime($model->date))->format('Y-m-d');
         $fromDate= (new \DateTime($model->from_date))->format('Y-m-d');
         /** @var ActiveQuery $query */
         $query = (new Query());
         $query
-            ->select("b.bill_id")
+            ->select("b.bill_id, b.total")
             ->from('bill b')
             ->leftJoin('pagomiscuentas_file_has_bill pfhb', 'b.bill_id = pfhb.bill_id')
             ->where('pfhb.bill_id is null')
             ->andWhere(['between', 'b.date', $fromDate, $date])
             ->andwhere(['b.company_id' => $model->company_id])
             ->andWhere(['b.status' => 'closed'])
+            ->andWhere(['NOT IN', 'b.bill_type_id', $typesId])
             ->orderBy(['b.bill_id'=>SORT_DESC])
         ;
 

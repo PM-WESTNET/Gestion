@@ -2,6 +2,10 @@
 
 namespace app\modules\ticket\controllers;
 
+use app\modules\ticket\models\Observation;
+use yii\web\Response;
+use Yii;
+
 class ObservationController extends \app\components\web\Controller {
 
     public function actionIndex() {
@@ -13,10 +17,9 @@ class ObservationController extends \app\components\web\Controller {
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionBuildObservation() {
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
+    public function actionBuildObservation()
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
         $json = [];
 
         if ($post = \Yii::$app->request->post()) {
@@ -46,4 +49,27 @@ class ObservationController extends \app\components\web\Controller {
         }
     }
 
+    /**
+     * @return array
+     * Crea una observacion y devuelve una respuesta json
+     */
+    public function actionCreate()
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = new Observation();
+
+        if($model->load(Yii::$app->request->post()) && $model->save()){
+            return [
+                'status' => 'success',
+                'observation' => $model,
+                'errors' => []
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'observation' => $model,
+            'errors' => $model->getErrors()
+        ];
+    }
 }

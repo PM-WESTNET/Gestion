@@ -38,4 +38,6 @@ return array(
     'Amount' => 'Monto',
     'Payment Method' => 'Medio de pago',
     'Payment Methods' => 'Medios de pago',
+    'Company Reports' => 'Reportes por empresa',
+    'Company' => 'Empresa',
 );

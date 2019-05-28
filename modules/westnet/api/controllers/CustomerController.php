@@ -225,6 +225,10 @@ class CustomerController extends RestController
         $rs = $cs->searchDebtBills($customer->customer_id);
         $response['debt_bills'] = (!$rs ? 0 : $rs['debt_bills'] );
 
+        //TODO: Por el momento hasta actualizar panel
+        $response['bill'] = array_reverse($response['bill']);
+        $response['account'] = array_reverse($response['account']);
+
         return $response;
     }
 
@@ -423,7 +427,10 @@ class CustomerController extends RestController
 
     public function actionCustomerExists($email, $code)
     {
-        $customer = Customer::findOne(['email'=>$email, 'code'=>$code]);
+        $customer = Customer::find()
+                ->orWhere(['email'=>$email, 'code'=>$code])
+                ->orWhere(['email2'=>$email, 'code'=>$code])
+                ->one();
 
         return [
             'exists'    => ($customer ? true : false ),

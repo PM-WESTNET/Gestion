@@ -38,8 +38,9 @@ class ContractSearch extends Contract {
     public $max_debt;
     public $from_date;
     public $to_date;
-    
-    
+    public $invoice_date;
+    public $date_new_from;
+    public $date_new_to;
 
     /**
      * @inheritdoc
@@ -47,8 +48,8 @@ class ContractSearch extends Contract {
     public function rules() {
         return [
             [['contract_id', 'customer_id', 'address_id', 'contracts', 'vendor_id', 'customer_number', 'zone_id'], 'integer'],
-            [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date'], 'safe'],
-            [['period', 'date'], 'date'],
+            [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date', 'date_new_from', 'date_new_to'], 'safe'],
+            [['period', 'date', 'invoice_date'], 'date'],
             [['period', 'company_id', 'bill_type_id'], 'required', 'on' => 'for-invoice'],
             [['vendor_id'], 'required', 'on' => 'vendor-search']
         ];
@@ -64,6 +65,9 @@ class ContractSearch extends Contract {
         $labels['last_name']= Yii::t('app', 'Lastname');
         $labels['tentative_node']= Yii::t('app', 'Tentative Node');
         $labels['zone_id']= Yii::t('app', 'Zone');
+        $labels['invoice_date']= Yii::t('app', 'Invoice Date');
+        $labels['date_new_from']= Yii::t('app', 'Date new customer from');
+        $labels['date_new_to']= Yii::t('app', 'Date new customer to');
         
         return $labels;
     }
@@ -73,7 +77,7 @@ class ContractSearch extends Contract {
      */
     public function scenarios() {
         $scenarios = parent::scenarios();
-        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id'];
+        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id', 'invoice_date', 'date_new_from', 'date_new_to'];
         return $scenarios;
     }
 
@@ -251,8 +255,18 @@ class ContractSearch extends Contract {
                 ->leftJoin(['pti' => $subQueryPti], 'pti.contract_detail_id = cd.contract_detail_id AND ( pti.period = ' . $period->format('Ym') . " OR (" .
                     " pti.period = if( con.from_date >= date_add(date_format(now(), '%Y-%m-01'), INTERVAL (select value from `$configDB`.config where item_id = (select item_id from `$configDB`.item where attr = 'contract_days_for_invoice_next_month'))-1 DAY), " . $nextPeriod->format('Ym') . ", " . $period->format('Ym') . ") "
                         . ") ) ")
-                ->andWhere($where)
-                ->groupBy($groupBy);
+                ->andWhere($where);
+
+
+        if($this->date_new_from) {
+            $query->andFilterWhere(['>=', 'c.date_new', $this->date_new_from]);
+        }
+
+        if($this->date_new_to) {
+            $query->andFilterWhere(['<=', 'c.date_new', $this->date_new_to]);
+        }
+
+        $query->groupBy($groupBy);
 
         return $query;
     }

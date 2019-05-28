@@ -191,13 +191,16 @@ class UserApp extends \app\components\db\ActiveRecord
     }
 
 
-
-
-    public function addCustomer($customer){
+    public function addCustomer($customer, $set_customer_id = false)
+    {
         $uahc= new UserAppHasCustomer([
             'user_app_id' => $this->user_app_id,
             'customer_code' => $customer->code,
         ]);
+
+        if($set_customer_id){
+            $uahc->customer_id = $customer->customer_id;
+        }
 
         return $uahc->save();
     }

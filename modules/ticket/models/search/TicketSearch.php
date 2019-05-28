@@ -7,6 +7,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\ticket\models\Ticket;
 use app\components\helpers\DbHelper;
+use app\modules\sale\models\Customer;
 
 /**
  * TicketSearch represents the model behind the search form about `app\modules\agenda\models\Ticket`.
@@ -60,7 +61,7 @@ class TicketSearch extends Ticket {
 
         $query->joinWith([
             'customer' => function($query) {
-                return $query->from(DbHelper::getDbName(Yii::$app->db) . '.' . \app\modules\sale\models\Customer::tableName());
+                return $query->from(DbHelper::getDbName(Yii::$app->db) . '.' . Customer::tableName());
             },
             'users' => function($query) {
                 $userTableName = $this->userModelClass;
@@ -114,9 +115,16 @@ class TicketSearch extends Ticket {
         $query->andFilterWhere(['like', 'number', $this->number]);
         $query->andFilterWhere(['like', 'customer.name', $this->customer]);
         $query->andFilterWhere(['like', 'customer.document_number', $this->document]);
-        $query->andFilterWhere(['like', 'user.username', $this->assignations]);
         $query->andFilterWhere(['like', 'customer.code', $this->customer_number]);
-        
+
+        if($this->assignations) {
+            $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
+                ->andFilterWhere(['assig.user_id' => $this->assignations]);
+        }
+
+        if($this->user_id) {
+            $query->andFilterWhere(['like', 'user.id', $this->user_id]);
+        }
         
         if (empty($params['sort'])) {
             $query->orderBy([

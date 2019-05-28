@@ -3,6 +3,7 @@
 namespace app\modules\ticket\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 
 /**
  * This is the model class for table "history".
@@ -17,13 +18,15 @@ use Yii;
  *
  * @property Ticket $ticket
  */
-class History extends \app\components\db\ActiveRecord {
+class History extends ActiveRecord {
 
     const TITLE_CREATED = 'created';
     const TITLE_UPDATED = 'updated';
     const TITLE_CLOSED = 'closed';
     const TITLE_REOPENED = 'reopened';
     const TITLE_NEW_OBSERVATION = 'new_observation';
+    const TITLE_NEW_ASSIGNATION = 'new_assignation';
+    const TITLE_DELETE_ASSIGNATION = 'delete_assignation';
 
     public $userModelClass;
     public $userModelId;
@@ -134,6 +137,8 @@ class History extends \app\components\db\ActiveRecord {
             'closed' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been closed'),
             'reopened' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been reopened'),
             'new_observation' => \app\modules\ticket\TicketModule::t('app', 'New observation created'),
+            'new_assignation' => \app\modules\ticket\TicketModule::t('app', 'New assignation'),
+            'delete_assignation' => \app\modules\ticket\TicketModule::t('app', 'Delete assignation'),
         ];
     }
 
@@ -228,8 +233,7 @@ class History extends \app\components\db\ActiveRecord {
 
         $historyEntry = new self;
         $historyEntry->ticket_id = $ticket->ticket_id;
-        $historyEntry->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id);
-
+        $historyEntry->user_id = (Yii::$app instanceof \yii\console\Application || YII_ENV_TEST ? 1 : Yii::$app->user->id);
         $historyEntry->datetime = time();
         $historyEntry->date = date("Y-m-d");
         $historyEntry->time = date("H:i:s");

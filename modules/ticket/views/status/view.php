@@ -27,14 +27,28 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
     </div>
 
+    <?php $columns = [
+        'status_id',
+        'name',
+        'description:ntext',
+        'is_open:boolean',
+        'generate_action:boolean'
+    ];
+
+    if($model->generate_action) {
+        $columns [] =
+            [
+                'label' => Yii::t('app','Action'),
+                'value' => function ($model) {
+                    return $model->actionConfig->action->name;
+                }
+            ]
+        ;
+    }?>
+
     <?= DetailView::widget([
         'model' => $model,
-        'attributes' => [
-            'status_id',
-            'name',
-            'description:ntext',
-            'is_open:boolean',
-        ],
+        'attributes' => $columns
     ]) ?>
 
 </div>

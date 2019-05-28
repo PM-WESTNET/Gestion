@@ -25,6 +25,19 @@ $product = [
         'account_id' => NULL,
         'product_commission_id' => NULL
     ],
+    [
+        'product_id' => 3,
+        'name' => 'Recargo Extension de pago','system' => 'recargo',
+        'code' => '192',
+        'description' => 'Extension de Pago',
+        'status' => 'enabled',
+        'balance' => NULL,'secondary_balance' => NULL,'create_timestamp' => '1458234653',
+        'update_timestamp' => '1488378738','unit_id' => '1','secondary_unit_id' => NULL,
+        'type' => 'product',
+        'uid' => NULL,
+        'account_id' => NULL,
+        'product_commission_id' => NULL
+    ],
 ];
 
 return $product;
