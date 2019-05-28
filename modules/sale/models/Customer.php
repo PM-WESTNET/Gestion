@@ -1513,7 +1513,7 @@ class Customer extends ActiveRecord {
         }
 
         if(empty($payment_method_and_code)) {
-            array_push($payment_method_and_code, ['payment_method_name' => 'Código de pago', 'code' => $this->payment_code, 'use_barcode' => $use_barcode]);
+            array_push($payment_method_and_code, ['payment_method_name' => 'Código de pago', 'code' => $this->payment_code, 'use_barcode' => false]);
         }
         return $payment_method_and_code;
     }
