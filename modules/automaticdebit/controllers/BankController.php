@@ -134,7 +134,8 @@ class BankController extends Controller
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
-    public function actionExports($bank_id) {
+    public function actionExports($bank_id)
+    {
         $bank = Bank::findOne($bank_id);
 
         if (empty($bank)) {
@@ -150,6 +151,14 @@ class BankController extends Controller
         return $this->render('exports', ['dataProvider' => $dataProvider, 'bank' => $bank]);
     }
 
+    public function actionExportView($export_id)
+    {
+        $export = DirectDebitExport::findOne($export_id);
+
+        return $this->render('export-view', ['export' => $export]);
+
+    }
+
     public function actionCreateExport($bank_id) {
 
         $bank = Bank::findOne($bank_id);
@@ -161,8 +170,8 @@ class BankController extends Controller
         $export = new DirectDebitExport();
         $export->bank_id = $bank->bank_id;
 
-        if ($export->load(Yii::$app->request->post())){
-
+        if ($export->load(Yii::$app->request->post()) && $export->generate()){
+            $this->redirect(['export-view', 'export_id' => $export->direct_debit_export_id]);
         }
 
         return $this->render('create-export', ['export' => $export]);

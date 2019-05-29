@@ -32,9 +32,9 @@ class BancoFrances implements BankInterface
      * @param $company_id
      * @return mixed
      */
-    public function export($company_id)
+    public function export($export)
     {
-        $companyConfig = BankCompanyConfig::findOne(['company_id' => $company_id, 'class' => self::class]);
+        $companyConfig = BankCompanyConfig::findOne(['company_id' => $export->company_id, 'bank_id' => $export->bank_id]);
 
         if (empty($companyConfig)) {
             throw new InvalidConfigException('Company not configured for bank');
@@ -42,27 +42,25 @@ class BancoFrances implements BankInterface
 
         $this->companyConfig = $companyConfig;
 
-        $file = \Yii::getAlias('@web/direct_debit').time().uniqid().'.txt';
+        $file = \Yii::getAlias('@app').'/web/direct_debit/'.time().uniqid().'.txt';
 
-        $resource = fopen($file, '+w');
+        $resource = fopen($file, 'w');
 
         if ($resource === false) {
             return false;
         }
 
-        $export = new DirectDebitExport([
-           'file' => $file,
-           'create_timestamp' => time(),
-           'bank_id' => $companyConfig->bank_id
-        ]);
+        $export->file = $file;
 
         $export->save();
+
+        $debits= $this->getDebits($export->bank_id, $export->company_id);
 
         $resource = $this->addHeader($resource);
         $totalRegister = 1;
         $totalOperations = 0;
         $totalAmount = 0;
-        foreach ($this->debitAutomatics as $debit) {
+        foreach ($debits as $debit) {
             $bills = $this->getCustomerBills($debit->customer_id, $this->periodFrom, $this->periodTo);
 
             foreach ($bills as $bill) {
@@ -86,7 +84,7 @@ class BancoFrances implements BankInterface
 
         fclose($resource);
 
-        return $file;
+        return true;
     }
 
     /**
@@ -239,5 +237,17 @@ class BancoFrances implements BankInterface
             ->all();
 
         return $bills;
+    }
+
+    private function getDebits($bank_id, $company_id) {
+        $debits = AutomaticDebit::find()
+            ->innerJoin('customer c', 'c.customer_id=automatic_debit.customer_id')
+            ->andWhere([
+                'bank_id' => $bank_id,
+                'c.company_id' => $company_id,
+                'automatic_debit.status' => AutomaticDebit::ENABLED_STATUS
+            ])->all();
+
+        return $debits;
     }
 }

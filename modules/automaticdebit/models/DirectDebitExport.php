@@ -2,6 +2,7 @@
 
 namespace app\modules\automaticdebit\models;
 
+use app\modules\sale\models\Company;
 use Yii;
 
 /**
@@ -72,4 +73,22 @@ class DirectDebitExport extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Bank::className(), ['bank_id' => 'bank_id']);
     }
+
+    public function generate()
+    {
+        $bankInstance = $this->bank->getBankInstance();
+
+        $bankInstance->processTimestamp = strtotime(Yii::$app->formatter->asDate($this->debit_date, 'yyyy-MM-dd'));
+        $bankInstance->periodFrom = strtotime(Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd'));
+        $bankInstance->periodTo = strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'));
+
+        return $bankInstance->export($this);
+    }
+
+    public function getCompany()
+    {
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
+    }
+
+
 }

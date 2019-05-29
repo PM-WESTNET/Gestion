@@ -18,7 +18,7 @@ interface BankInterface
      * @param $company_id
      * @return mixed
      */
-    public function export($company_id);
+    public function export($export);
 
 
     /**

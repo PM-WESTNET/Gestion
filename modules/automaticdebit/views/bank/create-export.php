@@ -14,29 +14,31 @@ $this->title = Yii::t('app','Create new export for direct debit');
 
     <?php echo \app\components\companies\CompanySelector::widget([
         'form' => $form,
-        'model' => $model
+        'model' => $export
     ])?>
 
-    <?php echo $form->field($model, 'from_date')->widget(\kartik\widgets\DatePicker::class, [
+    <?php echo $form->field($export, 'from_date')->widget(\kartik\widgets\DatePicker::class, [
         'pluginOptions' => [
             'autoclose'=> true,
-            'format' => 'dd-M-yyyy'
+            'format' => 'dd-mm-yyyy'
         ]
     ])?>
 
-    <?php echo $form->field($model, 'to_date')->widget(\kartik\widgets\DatePicker::class, [
+    <?php echo $form->field($export, 'to_date')->widget(\kartik\widgets\DatePicker::class, [
         'pluginOptions' => [
             'autoclose'=> true,
-            'format' => 'dd-M-yyyy'
+            'format' => 'dd-mm-yyyy'
         ]
     ])?>
 
-    <?php echo $form->field($model, 'debit_date')->widget(\kartik\widgets\DatePicker::class, [
+    <?php echo $form->field($export, 'debit_date')->widget(\kartik\widgets\DatePicker::class, [
         'pluginOptions' => [
             'autoclose'=> true,
-            'format' => 'dd-M-yyyy'
+            'format' => 'dd-mm-yyyy'
         ]
     ])?>
+
+    <?php echo \yii\helpers\Html::submitButton(Yii::t('app','Create'), ['class' => 'btn btn-success'])?>
 
     <?php \yii\bootstrap\ActiveForm::end()?>
 
