@@ -11,12 +11,17 @@ use Yii;
  * @property string $file
  * @property int $create_timestamp
  * @property int $bank_id
+ * @property int $company_id
  *
  * @property BillHasExportToDebit[] $billHasExportToDebits
  * @property Bank $bank
+ * @property Company $company
  */
 class DirectDebitExport extends \yii\db\ActiveRecord
 {
+    public $from_date;
+    public $to_date;
+    public $debit_date;
     /**
      * {@inheritdoc}
      */
@@ -31,8 +36,10 @@ class DirectDebitExport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['create_timestamp', 'bank_id'], 'integer'],
+            [['company_id'], 'required'],
+            [['create_timestamp', 'bank_id', 'company_id'], 'integer'],
             [['file'], 'string', 'max' => 255],
+            [['from_date', 'to_date', 'debit_date'], 'safe'],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::className(), 'targetAttribute' => ['bank_id' => 'bank_id']],
         ];
     }

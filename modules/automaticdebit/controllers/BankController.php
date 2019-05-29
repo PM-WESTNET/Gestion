@@ -150,5 +150,22 @@ class BankController extends Controller
         return $this->render('exports', ['dataProvider' => $dataProvider, 'bank' => $bank]);
     }
 
+    public function actionCreateExport($bank_id) {
+
+        $bank = Bank::findOne($bank_id);
+
+        if (empty($bank)) {
+            throw new BadRequestHttpException('Bank not found');
+        }
+
+        $export = new DirectDebitExport();
+        $export->bank_id = $bank->bank_id;
+
+        if ($export->load(Yii::$app->request->post())){
+
+        }
+
+        return $this->render('create-export', ['export' => $export]);
+    }
 
 }
