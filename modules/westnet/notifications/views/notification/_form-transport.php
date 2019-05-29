@@ -7,10 +7,12 @@ use app\modules\westnet\notifications\models\Transport;
 use app\modules\westnet\notifications\NotificationsModule;
 use app\components\companies\CompanySelector;
 use app\modules\mailing\MailingModule;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\notifications\models\Notification */
 /* @var $form yii\widgets\ActiveForm */
+$integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
 ?>
 
 <div class="notification-form">
@@ -25,9 +27,10 @@ use app\modules\mailing\MailingModule;
         'encode' => false,
         'separator' => '<br/>',
         'prompt' => NotificationsModule::t('app', 'Select an option...'),
+        'id' => 'transport'
     ])?>
 
-    <div class="row">
+    <div class="row" id="test-phone-fields">
         <div class="col-xs-6">
             <?= $form->field($model, 'test_phone')->textInput() ?>
         </div>
@@ -40,8 +43,6 @@ use app\modules\mailing\MailingModule;
             Es decir, que cada mil mensajes enviados, se enviará un mensaje al teléfono de prueba
         </label>
     </div>
-
-
 
     <div class="form-group " id="field-email_transport_id" style="display: none;">
         <label class="control-label" for="email_transport_id"><?= MailingModule::t('Email Transport')  ?></label>
@@ -63,20 +64,35 @@ use app\modules\mailing\MailingModule;
         var self = this;
 
         this.init = function(){
-            $(document).off('change', "#notification-transport_id,#notification-company_id")
-                .on('change', "#notification-transport_id,#notification-company_id", function(evt){
+            $(document).off('change', "#transport,#notification-company_id")
+                .on('change', "#transport,#notification-company_id", function(evt){
                 evt.preventDefault();
                 self.loadEmail();
+
+                if($('#transport').val() == <?= $integratech_transport->transport_id ?>) {
+                    $('#test-phone-fields').removeClass('hidden');
+                } else {
+                    $('#test-phone-fields').addClass('hidden');
+                }
             });
             self.loadEmail();
+            $('#test-phone-fields').addClass('hidden');
+
+            /**$('#transport').on('change', function () {
+                if($('#transport').val() == <?= $integratech_transport->transport_id ?>) {
+                   $('#test-phone-fields').removeClass('hidden');
+                } else {
+                   $('#test-phone-fields').addClass('hidden');
+                }
+            })**/
         }
 
         this.loadEmail = function(){
             var company_id = $('#notification-company_id').val();
-            var transport_id = $('#notification-transport_id').val();
+            var transport_id = $('#transport').val();
 
             $.ajax({
-                url: '<?php echo \yii\helpers\Url::to(['/westnet/notifications/notification/find-email-transports'])  ?>',
+                url: '<?= Url::to(['/westnet/notifications/notification/find-email-transports'])  ?>',
                 data: {
                     company_id: company_id,
                     transport_id: transport_id

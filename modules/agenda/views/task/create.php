@@ -1,13 +1,13 @@
 <?php
 
 use yii\helpers\Html;
-
+use \app\modules\agenda\AgendaModule;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\agenda\models\Task */
 
-$this->title = \app\modules\agenda\AgendaModule::t('app', 'Create Task');
-$this->params['breadcrumbs'][] = ['label' => \app\modules\agenda\AgendaModule::t('app', 'Tasks'), 'url' => ['index']];
+$this->title = AgendaModule::t('app', 'Create Task');
+$this->params['breadcrumbs'][] = ['label' => AgendaModule::t('app', 'Tasks'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">

@@ -60,6 +60,10 @@ class CustomerSearch extends Customer {
     public $amount_due_to;
     public $geocode;
 
+    //Email status
+    public $email_status;
+    public $email2_status;
+
     public function rules()
     {
         return [
@@ -69,6 +73,7 @@ class CustomerSearch extends Customer {
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
+            [['email_status', 'email2_status'], 'safe'],
         ];
     }
 
@@ -97,7 +102,10 @@ class CustomerSearch extends Customer {
             'amount_due' => Yii::t('app', 'Amount due'),
             'status_account' => Yii::t('app', 'Connection Status'),
             'customer_id' => Yii::t('app', 'Customer'),
-            'geocode' => Yii::t('westnet', 'Geocode')
+            'geocode' => Yii::t('westnet', 'Geocode'),
+            'email_status' => Yii::t('app', 'Email 1 status'),
+            'email2_status' => Yii::t('app', 'Email 2 status'),
+
         ]);
     }
 
@@ -137,8 +145,9 @@ class CustomerSearch extends Customer {
 
         $query = (new Query());
         $query->distinct()
-            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone', 'cc.name as class', 'ccat.name as category', 'company.name as company'])    
-            ->from('customer')  
+            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone','customer.phone2', 'customer.phone3', 'customer.phone4', 'customer.email', 'customer.email2', 'cc.name as class', 'ccat.name as category', 'company.name as company'])
+            ->select(['customer.code', 'CONCAT(customer.lastname, ", ",customer.name) as name', 'customer.document_number', 'customer.phone','customer.phone2', 'customer.phone3', 'customer.phone4', 'customer.email', 'customer.email2', 'cc.name as class', 'ccat.name as category', 'company.name as company'])
+            ->from('customer')
             ->leftJoin('address add', 'add.address_id = customer.address_id' )
             ->innerJoin('customer_class_has_customer cchc', 'cchc.customer_id= customer.customer_id')
             ->innerJoin(['cchc2'=> $subQueryClass], 'cchc2.customer_id = customer.customer_id and cchc.date_updated = cchc2.maxdate')
@@ -192,7 +201,6 @@ class CustomerSearch extends Customer {
      */
     public function buildSearchQuery($params, $normal = true)
     {
-
         $subQueryClass = (new Query())
             ->select(['customer_id', new Expression('max(date_updated) maxdate') ])
             ->from('customer_class_has_customer')
@@ -216,7 +224,7 @@ class CustomerSearch extends Customer {
             ;
 
         $this->load($params);
-        
+
         if($normal){
             $this->filterByCategory($query);
             $this->filterByClass($query);
@@ -234,6 +242,7 @@ class CustomerSearch extends Customer {
         $this->filterByZone($query);
         $this->filterByPlan($query);
         $this->filterByIssetGeocode($query);
+        $this->filterEmailStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -384,8 +393,10 @@ class CustomerSearch extends Customer {
             $params['CustomerSearch']['amount_due'] = 0;
         }
         $query = $this->buildDebtorsQuery($params);
-        
-        Yii::$app->session->set('totalDebtors', $query->sum('saldo'));
+
+        if (isset(Yii::$app->session)) {
+            Yii::$app->session->set('totalDebtors', $query->sum('saldo'));
+        }
 
         $dataProvider = new BigDataProvider([
             'query' => $query,
@@ -727,7 +738,6 @@ class CustomerSearch extends Customer {
         $determinant = 0;
         if (!empty($this->geocode)) {
             foreach ($this->geocode as $key) {
-                            \Yii::trace($key);
                 $determinant = $determinant + $key;
                 }
         if ($determinant == 1) {
@@ -736,6 +746,16 @@ class CustomerSearch extends Customer {
         if ($determinant == 2) {
             $query->andFilterWhere(['add.geocode' => '-32.8988839,-68.8194614']);
         }
+        }
+    }
+
+    private function filterEmailStatus($query){
+        if ($this->email_status) {
+            $query->andWhere(['customer.email_status' => $this->email_status]);
+        }
+
+        if ($this->email2_status) {
+            $query->andWhere(['customer.email2_status' => $this->email2_status]);
         }
     }
 

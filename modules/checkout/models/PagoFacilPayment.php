@@ -98,7 +98,7 @@ class PagoFacilPayment extends \app\components\db\ActiveRecord
      */
     public function getPaymentPayment()
     {
-        return $this->hasOne(Payment::className(), ['payment_id' => 'payment_payment_id']);
+        return $this->hasOne(Payment::class, ['payment_id' => 'payment_payment_id']);
     }
     
         

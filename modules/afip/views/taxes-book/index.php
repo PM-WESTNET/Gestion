@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\bootstrap\Collapse;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -19,9 +20,25 @@ $this->params['breadcrumbs'][] = $this->title;
             ['create', 'type'=>$type],
             ['class' => 'btn btn-success']) 
             ;?>
-        </p>        
+        </p>
     </div>
+    <div>
+    <?php
+    $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
 
+    echo Collapse::widget([
+        'items' => [
+            [
+                'label' => $item,
+                'content' => $this->render('_filters', ['model' => $searchModel]),
+                'encode' => false,
+            ],
+        ],
+        'options' => [
+            'class' => 'hidden-print'
+        ]
+    ]); ?>
+    </div>
 
     <?php
     $columns[] = ['class' => 'yii\grid\SerialColumn'];

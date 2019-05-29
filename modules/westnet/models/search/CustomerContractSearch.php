@@ -46,6 +46,9 @@ class CustomerContractSearch extends Customer
     /** @var  $to_date */
     public $to_date;
 
+    public $date_new_from;
+    public $date_new_to;
+
     /**
      * @inheritdoc
      */
@@ -53,7 +56,7 @@ class CustomerContractSearch extends Customer
     {
         return [
             [['server_id', 'node_id', 'product_id', 'customer_category_id', 'company_id', 'discount_id'], 'integer'],
-            [['server_id', 'node_id', 'product_id', 'customer_category_id', 'company_id', 'discount_id', 'from_date', 'to_date'], 'safe'],
+            [['server_id', 'node_id', 'product_id', 'customer_category_id', 'company_id', 'discount_id', 'from_date', 'to_date', 'date_new_from', 'date_new_to'], 'safe'],
         ];
     }
 
@@ -68,6 +71,8 @@ class CustomerContractSearch extends Customer
             'node_id' => Yii::t('westnet', 'Node'),
             'product_id' => Yii::t('westnet', 'Plan'),
             'customer_category_id' => Yii::t('app', 'Customer Category'),
+            'date_new_from' => Yii::t('app', 'Date new customer from'),
+            'date_new_to' => Yii::t('app', 'Date new customer to'),
         ]);
     }
 
@@ -126,6 +131,14 @@ class CustomerContractSearch extends Customer
         // Filtro el Servidor
         if($this->company_id) {
             $query->andFilterWhere(['c.company_id'=>$this->company_id]);
+        }
+
+        if($this->date_new_from) {
+            $query->andFilterWhere(['>=', 'c.date_new', $this->date_new_from]);
+        }
+
+        if($this->date_new_to) {
+            $query->andFilterWhere(['<=', 'c.date_new', $this->date_new_to]);
         }
 
         $query->orderBy(['c.name'=>SORT_ASC]);

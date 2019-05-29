@@ -119,5 +119,36 @@ class TicketTest extends \Codeception\Test\Unit
         expect('Assignation doesnt exists', $assignation_exists)->false();
     }
 
+    public function testDeleteAllAsignations()
+    {
+        $model = new Ticket([
+            'status_id' => 1,
+            'customer_id' => 45900,
+            'title' => 'Ticket1',
+            'content' => 'Content ticket1',
+            'category_id' => 1,
+        ]);
+        $model->save();
+
+        Ticket::assignTicketToUser($model->ticket_id, 1);
+        $assignation_exists = Assignation::find()->where(['ticket_id' => $model->ticket_id, 'user_id' => 1])->exists();
+
+        expect('Assignation exists', $assignation_exists)->true();
+
+        Ticket::assignTicketToUser($model->ticket_id, 2);
+        $assignation_exists = Assignation::find()->where(['ticket_id' => $model->ticket_id, 'user_id' => 2])->exists();
+
+        expect('Assignation exists', $assignation_exists)->true();
+
+        Ticket::deleteAllAssignations($model->ticket_id, [2]);
+
+        $assignation_exists = Assignation::find()->where(['ticket_id' => $model->ticket_id, 'user_id' => 1])->exists();
+        expect('Assignation not exists after deletion', $assignation_exists)->false();
+
+        $assignation_exists = Assignation::find()->where(['ticket_id' => $model->ticket_id, 'user_id' => 2])->exists();
+        expect('Assignation exists after deletion', $assignation_exists)->true();
+
+    }
+
 //    TODO resto funciones anteriores de la clase
 }

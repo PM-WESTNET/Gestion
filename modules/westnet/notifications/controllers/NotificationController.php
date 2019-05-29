@@ -308,6 +308,7 @@ class NotificationController extends Controller {
                 }
             }
         } catch(\Exception $ex) {
+            throw $ex;
             Yii::$app->session->setFlash('error', $ex->getMessage());
         }
 

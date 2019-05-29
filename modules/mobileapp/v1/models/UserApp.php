@@ -190,9 +190,6 @@ class UserApp extends \app\components\db\ActiveRecord
         return $this->getUserAppHasCustomers()->andWhere(['customer_code' => $code])->exists();
     }
 
-
-
-
     public function addCustomer($customer, $set_customer_id = false){
         $uahc= new UserAppHasCustomer([
             'user_app_id' => $this->user_app_id,

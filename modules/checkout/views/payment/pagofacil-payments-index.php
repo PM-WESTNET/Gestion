@@ -1,6 +1,9 @@
 <?php
 
 use yii\helpers\Html;
+use app\modules\checkout\models\PagoFacilTransmitionFile;
+use yii\grid\GridView;
+use yii\helpers\Url;
 
 /**
  * @var $this yii\web\View
@@ -23,16 +26,18 @@ $this->params['breadcrumbs'][]= $this->title;
     </div>
     
     
-    <?= \yii\grid\GridView::widget([
+    <?= GridView::widget([
         'dataProvider'=> $dataProvider,
         'columns' => [
             'upload_date',
             [
                 'label' => Yii::t('app', 'Account'),
-                'value' => function (app\modules\checkout\models\PagoFacilTransmitionFile $model){
-                    $account= app\modules\accounting\models\MoneyBoxAccount::findOne(['money_box_account_id' => $model->money_box_account_id]);
-                    return $account->account->name . ' - ' . $account->moneyBox->name;
-                } 
+                'value' => function (PagoFacilTransmitionFile $model){
+                    if($model->moneyBoxAccount) {
+                        return $model->moneyBoxAccount->account->name . ' - ' . $model->moneyBoxAccount->moneyBox->name;
+                    }
+                    return '';
+                }
             ],
             'total:currency',
             [
@@ -43,10 +48,17 @@ $this->params['breadcrumbs'][]= $this->title;
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template'=>'{view} ',
+                'template'=>'{view} {delete}',
                 'buttons'=>[
                     'view' => function ($url, $model, $key) {
-                        return  Html::a('<span class="glyphicon glyphicon-eye-open"></span>', yii\helpers\Url::toRoute(['payment/pagofacil-payment-view', 'idFile'=>$model->pago_facil_transmition_file_id]), ['class' => 'btn btn-view']);
+                        return  Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::toRoute(['payment/pagofacil-payment-view', 'idFile'=>$model->pago_facil_transmition_file_id]), ['class' => 'btn btn-view']);
+                    },
+                    'delete' => function ($url, $model, $key) {
+                        if($model->getDeletable()) {
+                            return  Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::toRoute(['payment/delete-pago-facil-transmition-file', 'id'=>$model->pago_facil_transmition_file_id]), ['class' => 'btn btn-danger']);
+                        }
+
+                        return '';
                     },
                 ],
             ],

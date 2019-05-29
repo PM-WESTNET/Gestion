@@ -4,20 +4,32 @@ use yii\widgets\ActiveForm;
 use yii\jui\AutoComplete;
 use yii\web\JsExpression;    
 use app\components\widgets\agenda\task\TaskBundle;
+use webvimark\modules\UserManagement\models\User;
+use app\modules\agenda\AgendaModule;
+use app\modules\agenda\models\TaskType;
+use app\modules\agenda\models\Category;
+use yii\helpers\ArrayHelper;
+use yii\jui\DatePicker;
+use kartik\time\TimePicker;
+use app\modules\agenda\models\Task;
+use app\modules\agenda\models\Status;
+use app\modules\agenda\models\UserGroup;
+use yii\helpers\Url;
+use app\modules\agenda\models\EventType;
 
 TaskBundle::register($this);
 
-$user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->id);
+$user = User::findOne(Yii::$app->user->id);
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\agenda\models\Task */
 
-$this->title = \app\modules\agenda\AgendaModule::t('app', 'Update {modelClass}: ', [
+$this->title = AgendaModule::t('app', 'Update {modelClass}: ', [
             'modelClass' => 'Task',
         ]) . ' ' . $model->name;
-$this->params['breadcrumbs'][] = ['label' => \app\modules\agenda\AgendaModule::t('app', 'Tasks'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => AgendaModule::t('app', 'Tasks'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->task_id]];
-$this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Update');
+$this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
 ?>
 <div class="task-update container-fluid">
     
@@ -37,13 +49,13 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
             <div class="row margin-bottom-half">
                 <div class="col-lg-12">
                     <span class="font-bold">
-                        <?= \app\modules\agenda\AgendaModule::t('app', 'Task creator'); ?>: 
+                        <?= AgendaModule::t('app', 'Task creator'); ?>:
                     </span>
                     <span class="label label-primary margin-right-quarter">
                         <?= $model->creator->username; ?>
                     </span>
                     <span class="label label-info">
-                        <?= \app\modules\agenda\AgendaModule::t('app', date('l', $model->datetime))?>, <?=date('d/m/Y H:i', $model->datetime); ?>
+                        <?= AgendaModule::t('app', date('l', $model->datetime))?>, <?=date('d/m/Y H:i', $model->datetime); ?>
                     </span>
                 </div>
             </div>
@@ -51,52 +63,49 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
 
         <div class="row">
             <div class="col-sm-12">
-                <?=
-                $form->field($model, 'name')->textInput([
+                <?= $form->field($model, 'name')->textInput([
                     'maxlength' => 255,
                     'disabled' => ($model->isParent()) ? false : true,
-                ])
-                ?>        
+                ])?>
             </div>
             
         </div>
         <div class="row">
+            <div class="col-sm-12">
+            <?= $form->field($model, 'description')->textarea([
+                'rows' => 2,
+                'disabled' => ($model->isParent()) ? false : true,
+            ])?>
+            </div>
+        </div>
+        <div class="row">
                         
-            <div class="col-sm-6">
+            <div class="col-xs-6">
                 <?=
-                $form->field($model, 'task_type_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\TaskType::find()->all(), 'task_type_id', 'name'), [
+                $form->field($model, 'task_type_id')->dropdownList(ArrayHelper::map(TaskType::find()->all(), 'task_type_id', 'name'), [
                     'encode' => false,
                     'separator' => '<br/>',
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Task type'),
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Task type'),
                     ]),
                 ])
                 ?>
             </div>
-        
-            <div class="col-sm-6">
-                <?= $form->field($model, 'category_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Category::find()->all(), 'category_id', 'name'), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Category'),
+
+            <div class="col-xs-6">
+                <?= $form->field($model, 'category_id')->dropdownList(ArrayHelper::map(Category::find()->all(), 'category_id', 'name'), [
+                    'encode' => false,
+                    'separator' => '<br/>',
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Category'),
                     ]),
                 ]); ?>
             </div>
         </div>
 
         <div class="row">
-            <?=
-            $form->field($model, 'description')->textarea([
-                'rows' => 2,
-                'disabled' => ($model->isParent()) ? false : true,
-            ])
-            ?>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-4">
-                <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), [
+            <div class="col-xs-4">
+                <?= $form->field($model, 'date')->widget(DatePicker::class, [
                     'language' => 'es-AR', 
                     'dateFormat' => 
                     'dd-MM-yyyy', 
@@ -105,16 +114,16 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
                         ]
                     ]) ?>
             </div>
-            <div class="col-sm-4">
-                <?= $form->field($model, 'time')->widget(\kartik\time\TimePicker::classname(), [
+            <div class="col-xs-4">
+                <?= $form->field($model, 'time')->widget(TimePicker::class, [
                     'pluginOptions' => [
                         'showMeridian' => false,
                         'minuteStep' => 15
                     ]
                 ]); ?>
             </div>
-            <div class="col-sm-4">
-                <?= $form->field($model, 'duration')->widget(\kartik\time\TimePicker::classname(), [
+            <div class="col-xs-4">
+                <?= $form->field($model, 'duration')->widget(TimePicker::class, [
                     'pluginOptions' => [
                         'defaultTime' => '02:00:00',
                         'showMeridian' => false,
@@ -125,23 +134,23 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
         </div>
 
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-xs-6">
                 <?=
-                $form->field($model, 'priority')->dropdownList(\app\modules\agenda\models\Task::getPriorities(), [
+                $form->field($model, 'priority')->dropdownList(Task::getPriorities(), [
                     'encode' => false,
                     'separator' => '<br/>',
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Priority'),
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Priority'),
                     ]),
                 ])
                 ?>
             </div>
-            <div class="col-sm-6">
-                <?= $form->field($model, 'status_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Status::find()->all(), 'status_id', 'name'), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Status'),
+            <div class="col-xs-6">
+                <?= $form->field($model, 'status_id')->dropdownList(ArrayHelper::map(Status::find()->all(), 'status_id', 'name'), [
+                    'encode' => false,
+                    'separator' => '<br/>',
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Status'),
                     ]),
                     ]) ?>
             </div>
@@ -149,7 +158,7 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
 
         <!-- Asignacion de usuarios -->
         <?php if($model->isParent()) : ?>
-            <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == \app\modules\agenda\models\TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
+            <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
 
             <div class="panel-heading">
                 <h3 class="panel-title font-bold">Asignar usuarios</h3>
@@ -163,15 +172,14 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
                     $users = $userModel::find()
                             ->select(['username as value', 'username as label', 'id as id'])
                             ->where([
-                                'status' => webvimark\modules\UserManagement\models\User::STATUS_ACTIVE
+                                'status' => User::STATUS_ACTIVE
                             ])
                             ->asArray()
                             ->all();
                     ?>
 
                     <small class="text-muted">Comience a escribir el nombre de usuario para ver las opciones</small>
-                    <?=
-                    AutoComplete::widget([
+                    <?= AutoComplete::widget([
                         'options' => [
                             'id' => 'user-selection-input',
                             'class' => 'form-control',
@@ -185,19 +193,17 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
                                 Task.addUser(event, ui);
                              }")
                         ],
-                    ]);
-                    ?>
-
+                    ]) ?>
                     <div id="alert-already-selected" class="alert alert-warning" style="margin-top: 15px; display: none;">
                         Usuario ya asignado.
                     </div>
 
                     <?= $form->field($model, 'assignAllUsers')->checkbox() ?>
 
-                    <?php $userGroups = \app\modules\agenda\models\UserGroup::find()->all(); ?>
+                    <?php $userGroups = UserGroup::find()->all(); ?>
                     <?php if(!empty($userGroups)) : ?>
                         <div>
-                            <?= $form->field($model, 'userGroups')->checkboxList(yii\helpers\ArrayHelper::map($userGroups, 'group_id', 'name'));?>
+                            <?= $form->field($model, 'userGroups')->checkboxList(ArrayHelper::map($userGroups, 'group_id', 'name'));?>
                         </div>
                     <?php endif; ?>
 
@@ -206,6 +212,9 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
 
             <div class="panel-footer">
                 <label>Usuarios asignados</label>
+                <a class="label label-danger clickable pull-right" data-delete-users>
+                    Eliminar todos los usuarios
+                </a>
 
                 <?php if (empty($model->users)) : ?>
                     <small id="no-users" class="text-muted">No hay usuarios asignados</small>
@@ -223,9 +232,6 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
-                <a class="label label-danger clickable" data-delete-users>
-                    Eliminar todos los usuarios
-                </a>
             </div>
         </div>
         <?php endif; ?>
@@ -246,33 +252,29 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
                     </div>
                 </div>
 
-                <div class="form-group margin-top-half no-margin-bottom">
-                    <button data-event="create-event" data-event-type="<?= \app\modules\agenda\models\EventType::EVENT_NOTE_ADDED; ?>" data-event-user="<?= isset($user) && !empty($user) ? $user->username : ''; ?>" type="button" class="btn btn-info">Crear nota</button>
+                <div class="form-group">
+                    <button data-event="create-event" data-event-type="<?= EventType::EVENT_NOTE_ADDED; ?>" data-event-user="<?= isset($user) && !empty($user) ? $user->username : ''; ?>" type="button" class="btn btn-info btn-xs">Crear nota</button>
                 </div>
             </div>
 
-            <div class="panel-footer">
-                <?php if (count($model->events) > 0) : ?>
-                    <?php foreach ($model->events as $event) : ?>
-                        <?php
-                        echo $this->render('/event/build_note', [
-                            'old' => true,
-                            'username' => $event->user->username,
-                            'body' => $event->body,
-                            'time' => $event->datetime,
-                        ]);
-                        ?>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <small id="no-events" class="text-muted">No hay eventos anteriores</small>  
-                <?php endif; ?>
-            </div>
+            <?php if (count($model->events) > 0) : ?>
+                <div class="panel-footer">
+                <?php foreach ($model->events as $event) : ?>
+                    <?= $this->render('/event/build_note', [
+                        'old' => true,
+                        'username' => $event->user->username,
+                        'body' => $event->body,
+                        'time' => $event->datetime,
+                    ])?>
+                <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
 
         </div>
         <!-- end Creación de eventos -->
 
         <div class="form-group">
-            <?= Html::submitButton($model->isNewRecord ? \app\modules\agenda\AgendaModule::t('app', 'Create') : \app\modules\agenda\AgendaModule::t('app', 'Update'), ['onclick'=> 'parent.closeModal();', 'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+            <?= Html::submitButton($model->isNewRecord ? AgendaModule::t('app', 'Create') : AgendaModule::t('app', 'Update'), ['onclick'=> 'parent.closeModal();', 'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
         </div>
 
 <?php ActiveForm::end(); ?>
@@ -290,13 +292,13 @@ $this->params['breadcrumbs'][] = \app\modules\agenda\AgendaModule::t('app', 'Upd
 <script>
     
     <?= $this->registerJs("Task.init();"); ?>
-    <?= $this->registerJs("Task.setCreateEventInputUrl('" . yii\helpers\Url::to(['/agenda/event/build-note'], true) . "');"); ?>
-    <?= $this->registerJs("Task.setFindCategoryDefaultDurationUrl('". yii\helpers\Url::to(['/agenda/category/fetch-category'], true) ."');"); ?>
-    <?= $this->registerJs("Task.setGetUserByUsernameUrl('". yii\helpers\Url::to(['/agenda/user-group/get-user-by-username'], true) ."');"); ?>
-        
+    <?= $this->registerJs("Task.setCreateEventInputUrl('" . Url::to(['/agenda/event/build-note'], true) . "');"); ?>
+    <?= $this->registerJs("Task.setFindCategoryDefaultDurationUrl('". Url::to(['/agenda/category/fetch-category'], true) ."');"); ?>
+    <?= $this->registerJs("Task.setGetUserByUsernameUrl('". Url::to(['/agenda/user-group/get-user-by-username'], true) ."');"); ?>
+
     <?=
-    $this->registerJs("Task.disableUserInput(parseInt(" . \app\modules\agenda\models\TaskType::findOne([
-                'slug' => \app\modules\agenda\models\TaskType::TYPE_GLOBAL
+    $this->registerJs("Task.disableUserInput(parseInt(" . TaskType::findOne([
+                'slug' => TaskType::TYPE_GLOBAL
             ])->task_type_id . "))");
     ?>
         

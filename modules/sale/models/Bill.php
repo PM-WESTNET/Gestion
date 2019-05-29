@@ -130,7 +130,7 @@ class Bill extends ActiveRecord implements CountableInterface
             [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
         ]);
     }
-    
+
     public function behaviors()
     {
         return [
@@ -139,7 +139,9 @@ class Bill extends ActiveRecord implements CountableInterface
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
                 ],
-                'value' => function(){return date('Y-m-d');},
+                'value' => function(){
+                    return date('Y-m-d');
+                }
             ],
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -162,7 +164,7 @@ class Bill extends ActiveRecord implements CountableInterface
             ],
         ];
     }
-    
+
     /**
      * Inicializa tipo por defecto de factura, tipo por defecto de moneda, y valida estos datos.
      * @throws \yii\web\HttpException
@@ -402,8 +404,10 @@ class Bill extends ActiveRecord implements CountableInterface
         $amount = 0.0;
 
         foreach ($this->billDetails as $detail) {
+            //Verifico que no sea un producto en linea, si es un descuento aplicado al producto (como el recomendado), debo poner el importe de la line_subtotal
+            $is_inline_discount = $detail->discount_id && (!$detail->product_id) ? true : false;
             // Se suma el line_subtotal solo si no es un descuento, ya que si no va a sumar lo que se puso en el descuento que viene en positivo
-            $amount += (float)($detail->discount_id ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
+            $amount += (float)($is_inline_discount ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
         }
         $amount = ($amount - $discountFixedDetail) * $discountPercentDetail;
         $amount = ($amount < 0 ? 0 : $amount);
@@ -1079,8 +1083,16 @@ class Bill extends ActiveRecord implements CountableInterface
             //  pongo la fecha de hoy
             if ($this->point_of_sale_id){
                 if($this->getPointOfSale()->electronic_billing ) {
-                    $date = new \DateTime($this->date);
-                    if ((new \DateTime('now'))->diff($date)->days > 5) {
+                    if($this->date) {
+                        if ($this->date != '<span class="not-set">(no definido)</span>') {
+                            $date = new \DateTime($this->date);
+                            if ((new \DateTime('now'))->diff($date)->days > 5) {
+                                $this->date = (new \DateTime('now'))->format('Y-m-d');
+                            }
+                        } else {
+                            $this->date = (new \DateTime('now'))->format('Y-m-d');
+                        }
+                    } else {
                         $this->date = (new \DateTime('now'))->format('Y-m-d');
                     }
                 }

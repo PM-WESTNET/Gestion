@@ -1,0 +1,9 @@
+Email,Status,StatusChangeDate,DateUpdated,DateAdded,Source,CreatedFromIP,TotalSent,TotalFailed,TotalOpened,TotalClicked,LastSent,LastFailed,LastOpened,LastClicked,ErrorCode,FriendlyErrorMessage,ConsentDate,ConsentIP,ConsentTracking,FirstName,LastName,UnsubscribeReason,UnsubscribeReasonNotes
+jperez@quoma.com.ar,Active,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez2@quoma.com.ar,Inactive,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez3@quoma.com.ar,Active,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez4@quoma.com.ar,Bounced,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez5@quoma.com.ar,Bounced,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez6@quoma.com.ar,Inactive,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez7@quoma.com.ar,Active,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
+jperez8@quoma.com.ar,Active,,5/7/2019 7:00:14 PM,4/26/2019 9:21:16 PM,2,190.15.201.93,0,0,0,0,,,,,,,5/7/2019 7:00:14 PM,190.15.201.93,Unknown,MARIO SANTOS,,none,
