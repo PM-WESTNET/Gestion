@@ -159,7 +159,8 @@ class BankController extends Controller
 
     }
 
-    public function actionCreateExport($bank_id) {
+    public function actionCreateExport($bank_id)
+    {
 
         $bank = Bank::findOne($bank_id);
 
@@ -175,6 +176,17 @@ class BankController extends Controller
         }
 
         return $this->render('create-export', ['export' => $export]);
+    }
+
+    public function actionDownloadExport($export_id)
+    {
+        $export = DirectDebitExport::findOne($export_id);
+
+        if (empty($export)) {
+            throw new NotFoundHttpException('Export not found');
+        }
+
+        return Yii::$app->response->sendFile($export->file);
     }
 
 }

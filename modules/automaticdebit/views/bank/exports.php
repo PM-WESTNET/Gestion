@@ -18,16 +18,19 @@ $this->title = $bank->name. ' - '. Yii::t('app','Exports');
         'columns' => [
             ['class' => \yii\grid\SerialColumn::class],
 
-            'timestamp:datetime',
+            'create_timestamp:datetime',
 
             [
                 'class' => \yii\grid\ActionColumn::class,
                 'buttons' => [
-                    'view',
+                    'view'=> function ($url, $model) {
+                        return \yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
+                            ['/automaticdebit/bank/export-view', 'export_id' => $model->direct_debit_export_id]);
+                    },
                     'download' => function ($url, $model) {
-                        return \yii\helpers\Html::a('<span class="glyphicon-download-alt"></span>',
-                            ['/automaticdebit/bank/dowload', 'export_id' => $model->direct_debit_export_id],
-                            ['class' => 'btn btn-warning']);
+                        return \yii\helpers\Html::a('<span class="glyphicon glyphicon-download-alt"></span>',
+                            ['/automaticdebit/bank/download-export', 'export_id' => $model->direct_debit_export_id],
+                            ['target' => '_blank']);
                     }
                 ],
                 'template' => '{view} {download}'

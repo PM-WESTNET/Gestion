@@ -42,15 +42,16 @@ class BancoFrances implements BankInterface
 
         $this->companyConfig = $companyConfig;
 
-        $file = \Yii::getAlias('@app').'/web/direct_debit/'.time().uniqid().'.txt';
+        $file = \Yii::getAlias('@app').'/web/direct_debit/'.time().uniqid();
 
-        $resource = fopen($file, 'w');
+        $resource = fopen($file.'.txt', 'w');
 
         if ($resource === false) {
             return false;
         }
 
-        $export->file = $file;
+        $export->file = $file.'.txt';
+        $this->fileName = $file;
 
         $export->save();
 
@@ -107,7 +108,7 @@ class BancoFrances implements BankInterface
         $dc= $this->companyConfig->control_digit;
         $divisa = 'ARS';
         $devolucion = '0';
-        $file= $this->fileName.'.txt';
+        $file= $this->fileName;
         $ord = str_pad($this->companyConfig->company->name, 36, ' ');
         $tipoCBU= '20';
         $libre = str_pad(' ', 141, ' ');
@@ -230,10 +231,10 @@ class BancoFrances implements BankInterface
     {
         $bills = Bill::find()
             ->leftJoin('bill_has_export_to_debit bhtd', 'bhtd.bill_id=bill.bill_id')
-            ->andFilterWhere(['>=', 'bill.date', $fromDate])
-            ->andFilterWhere(['<=', 'bill.date', $toDate])
+            ->andFilterWhere(['>=', 'bill.date', \Yii::$app->formatter->asDate($fromDate, 'yyyy-MM-dd')])
+            ->andFilterWhere(['<=', 'bill.date', \Yii::$app->formatter->asDate($toDate, 'yyyy-MM-dd')])
             ->andWhere(['customer_id' => $customer_id])
-            ->andWhere(['IS', 'bhtd.bill_has_export_to_debit', null])
+            ->andWhere(['IS', 'bhtd.bill_id', null])
             ->all();
 
         return $bills;
