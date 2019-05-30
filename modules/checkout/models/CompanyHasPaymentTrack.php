@@ -15,7 +15,11 @@ use app\modules\checkout\models\Track;
  * @property int $company_id
  * @property int $payment_method_id
  * @property int $track_id
- * @property string $status
+ * @property string $payment_status
+ * @property string $track_status
+ * @property string $payment_track_status
+ * @property string $customer_status
+ * @property boolean $default_track
  *
  * @property Company $company
  * @property PaymentMethod $paymentMethod
@@ -38,12 +42,12 @@ class CompanyHasPaymentTrack extends ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'payment_method_id', 'track_id', 'status'], 'required'],
+            [['company_id', 'payment_method_id', 'track_id'], 'required'],
             [['company_id', 'payment_method_id', 'track_id'], 'integer'],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
             [['payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['payment_method_id' => 'payment_method_id']],
             [['track_id'], 'exist', 'skipOnError' => true, 'targetClass' => Track::class, 'targetAttribute' => ['track_id' => 'track_id']],
-            [['status'], 'safe'],
+            [['payment_status', 'track_status', 'payment_track_status', 'customer_status', 'default_track'], 'safe'],
         ];
     }
 
@@ -57,7 +61,6 @@ class CompanyHasPaymentTrack extends ActiveRecord
             'company_id' => Yii::t('app', 'Company ID'),
             'payment_method_id' => Yii::t('app', 'Payment Method ID'),
             'track_id' => Yii::t('app', 'Track ID'),
-            'status' => Yii::t('app', 'Status')
         ];
     }
 

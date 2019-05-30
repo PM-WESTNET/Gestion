@@ -170,40 +170,6 @@ use app\modules\checkout\models\CompanyHasPaymentTrack;
             <?= $form->field($model, 'pagomiscuentas_code')->textInput() ?>
         </div>
 
-        <!-- Medios y canales de pago-->
-        <div class="col-xs-12 well">
-            <div class="form-group field-company-paymenttracks">
-                <label class="control-label">
-                    <?= Yii::t('app', 'Payment methods and tracks')?>
-                </label>
-                <div id="company-paymenttracks">
-                    <?php foreach (PaymentMethod::getAllowedTrackConfigPaymentMethods() as $payment_method) {
-                        $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one(); ?>
-
-                        <div class="row col-sm-12">
-                            <div class="col-sm-6">
-                                <label>
-                                    <?php $checked = $payment_track_config ? ($payment_track_config->status == CompanyHasPaymentTrack::STATUS_ENABLED ? 'checked' : '') : ''; ?>
-                                    <input type="checkbox" name="Company[paymentTracks][Payment_method][<?= $payment_method->payment_method_id ?>]" <?= $checked ?> > <?=$payment_method->name?>
-                                </label>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <?= Select2::widget([
-                                    'data' => ArrayHelper::map(Track::find()->all(), 'track_id', 'name'),
-                                    'name' => "Company[paymentTracks][Track][$payment_method->payment_method_id]",
-                                    'value' => $payment_track_config ? $payment_track_config->track_id : '',
-                                ])?>
-                                <br>
-                            </div>
-                        </div>
-
-                    <?php }?>
-                </div>
-            </div>
-        </div>
-        <!-- Fin medios y canales de pago -->
-
         <div class="col-xs-12">
             <div class="form-group">
                 <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

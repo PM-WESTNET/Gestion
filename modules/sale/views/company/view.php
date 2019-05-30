@@ -42,6 +42,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
         
         <p>
+            <?= Html::a(Yii::t('app', 'Config payment methods and track'),['/checkout/company-has-payment-track/payment-methods', 'company_id' => $model->company_id],[
+                    'class' => 'btn btn-default'
+            ])?>
             <?= Html::a(
                 "<span class='glyphicon glyphicon-plus'></span> " .
                 Yii::t('app', 'Create {modelClass}', ['modelClass' => Yii::t('app', 'Point of Sale')]), 
@@ -106,17 +109,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'web',
                 'portal_web',
                 'pagomiscuentas_code',
-                 [
-                     'attribute' => 'paymentTracks',
-                     'value' => function($model) {
-                        $string = '';
-                        foreach ($model->getPaymentTracks()->where(['status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all() as $payment_tracks) {
-                            $string .= 'Medio: '.$payment_tracks->paymentMethod->name .' - Canal de pago: '. $payment_tracks->track->name ."<br>";
-                        }
-                        return $string;
-                     },
-                     'format' => 'raw'
-                 ],
             ],
         ]) ?>
    </div>
@@ -149,5 +141,39 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]); ?>
+
+    <!--Medios y canales de pago-->
+    <h3 class="font-l margin-top-double margin-bottom-half"><?= Yii::t('app', 'Payment methods and tracks') ?></h3> <br>
+    <div class="panel panel-default">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th> <?= Yii::t('app', 'Payment methods')?></th>
+                    <th> <?= Yii::t('app', 'Payment tracks')?></th>
+                    <th> <?= Yii::t('app', 'Enabled for company')?></th>
+                    <th> <?= Yii::t('app', 'Enabled for customers')?></th>
+                    <th> <?= Yii::t('app', 'Enabled')?></th>
+                    <th> <?= Yii::t('app', 'Default track')?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $last_payment_method_id = 0;
+                $span_ok = '<span class="glyphicon glyphicon-ok" style="color: darkseagreen">';
+                $span_remove = '<span class="glyphicon glyphicon-remove" style="color: indianred">';
+
+                foreach ($model->paymentTracks as $paymentTrack) { ?>
+                    <tr>
+                        <th> <?= $last_payment_method_id == $paymentTrack->payment_method_id ? '' : $paymentTrack->paymentMethod->name ?> </th>
+                        <th> <?= $paymentTrack->track->name ?> </th>
+                        <th> <?= $paymentTrack->payment_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  $span_ok : $span_remove?> </th>
+                        <th> <?= $paymentTrack->customer_status == CompanyHasPaymentTrack::STATUS_ENABLED ? $span_ok : $span_remove?> </th>
+                        <th> <?= $paymentTrack->payment_track_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  $span_ok : $span_remove?> </th>
+                        <th> <?= $paymentTrack->default_track ?  $span_ok : $span_remove?> </th>
+                    </tr>
+                <?php $last_payment_method_id = $paymentTrack->payment_method_id; } ?>
+            </tbody>
+        </table>
+    </div>
 
 </div>

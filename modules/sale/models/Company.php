@@ -3,6 +3,7 @@
 namespace app\modules\sale\models;
 
 use app\modules\checkout\models\CompanyHasPaymentTrack;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\Track;
 use app\modules\partner\models\PartnerDistributionModel;
 use app\modules\westnet\models\AdsPercentagePerCompany;
@@ -187,6 +188,28 @@ class Company extends \app\components\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getPaymentMethodsEnabledForCompany()
+    {
+        return PaymentMethod::find()
+            ->leftJoin('company_has_payment_track chpt', 'chpt.payment_method_id = payment_method.payment_method_id')
+            ->where(['not',['chpt.payment_method_id' => null]])
+            ->andWhere(['payment_status' => CompanyHasPaymentTrack::STATUS_ENABLED]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPaymentMethodsEnabledForCustomers()
+    {
+        return PaymentMethod::find()
+            ->leftJoin('company_has_payment_track chpt', 'chpt.payment_method_id = payment_method.payment_method_id')
+            ->where(['not',['chpt.payment_method_id' => null]])
+            ->andWhere(['customer_status' => CompanyHasPaymentTrack::STATUS_ENABLED]);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getPaymentEnabledTracks()
     {
         return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id'])->where(['status' => 'enabled']);
@@ -256,32 +279,6 @@ class Company extends \app\components\db\ActiveRecord
         };
         $this->on(self::EVENT_AFTER_INSERT, $saveBillTypes);
         $this->on(self::EVENT_AFTER_UPDATE, $saveBillTypes);
-    }
-
-    public function setPaymentTracks($paymentTracks){
-
-        if(empty($paymentTracks)){
-            $paymentTracks = [];
-        }
-
-        $this->_paymentTracks = $paymentTracks;
-
-        $savePaymentTracks = function($event){
-            $this->unlinkAll('paymentTracks', true);
-
-            foreach ($this->_paymentTracks['Track'] as $payment_method_id => $track_id) {
-                $payment_method_status = array_key_exists('Payment_method', $this->_paymentTracks) ? (array_key_exists($payment_method_id, $this->_paymentTracks['Payment_method']) ? CompanyHasPaymentTrack::STATUS_ENABLED : CompanyHasPaymentTrack::STATUS_DISABLED) : CompanyHasPaymentTrack::STATUS_DISABLED;
-                $company_has_payment_track = new CompanyHasPaymentTrack([
-                    'company_id' => $this->company_id,
-                    'payment_method_id' => $payment_method_id,
-                    'status' => $payment_method_status,
-                    'track_id' => $track_id,
-                ]);
-                $company_has_payment_track->save();
-            }
-        };
-        $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);
-        $this->on(self::EVENT_AFTER_UPDATE, $savePaymentTracks);
     }
 
     /**

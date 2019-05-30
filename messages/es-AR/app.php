@@ -1115,4 +1115,15 @@
     'Type code if isnt direct channel' => 'Tipo de código si el canal de pago no es el directo',
     'code_19_digits' => 'Código de 19 dígitos',
     'code_29_digits' => 'Código de 29 dígitos',
+    'Config enabled payment method for this company and customers' => 'Configure los medios de pago disponibles para la empresa y los clientes de la misma',
+    'Enabled for customers' => 'Disponible para clientes',
+    'Payment methods' => 'Medios de pago',
+    'Payment tracks' => 'Canales de pago',
+    'Config enabled payment tracks' => 'Configure los canales de pago disponibles para la empresa',
+    'Finalize' => 'Finalizar',
+    'Config payment methods and track' => 'Configurar medios y canales de pago',
+    'Enable payment tracks and set default' => 'Habilitar los canales de pago y seleccionar el canal por defecto',
+    'Enabled for company' => 'Habilitado para la empresa',
+    'Enabled for customers' => 'Habilitado para los clientes',
+    'Default track' => 'Canal por defecto'
 );

@@ -1,5 +1,7 @@
 <?php
 
+use app\modules\config\models\Config;
+
 $params = require(__DIR__ . '/params.php');
 $db = require(__DIR__ . '/db.php');
 
@@ -51,6 +53,12 @@ $config = [
                     die();
                 }
                 \webvimark\modules\UserManagement\models\UserVisitLog::newVisitor($event->identity->id);
+
+                $unused_payment_card_qty = PaymentCard::getUnusedPaymentCardsQty();
+                $min_qty = Config::getValue('min-unused-payment-cards-qty-notification');
+                if($unused_payment_card_qty <= $min_qty) {
+                    Yii::$app->session->setFlash('info', Yii::t('app', 'The payment cards quantity is lower than the minimun'));
+                }
             }
         ],
         'errorHandler' => [
