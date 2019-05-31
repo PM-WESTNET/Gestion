@@ -403,8 +403,10 @@ class Bill extends ActiveRecord implements CountableInterface
         $amount = 0.0;
 
         foreach ($this->billDetails as $detail) {
+            //Verifico que no sea un producto en linea, si es un descuento aplicado al producto (como el recomendado), debo poner el importe de la line_subtotal
+            $is_inline_discount = $detail->discount_id && (!$detail->product_id) ? true : false;
             // Se suma el line_subtotal solo si no es un descuento, ya que si no va a sumar lo que se puso en el descuento que viene en positivo
-            $amount += (float)($detail->discount_id ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
+            $amount += (float)($is_inline_discount ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
         }
         $amount = ($amount - $discountFixedDetail) * $discountPercentDetail;
         $amount = ($amount < 0 ? 0 : $amount);
