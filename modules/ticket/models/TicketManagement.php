@@ -34,7 +34,7 @@ class TicketManagement extends \yii\db\ActiveRecord
         return [
             [['ticket_id', 'user_id'], 'required'],
             [['ticket_id', 'user_id'], 'integer'],
-            [['date'], 'string', 'max' => 255],
+            [['timestamp'], 'string', 'max' => 255],
         ];
     }
 
@@ -44,11 +44,8 @@ class TicketManagement extends \yii\db\ActiveRecord
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
                 ],
-                'value' => function(){
-                    return (new \DateTime('now'))->format('Y-m-d');
-                }
             ],
         ];
     }
@@ -62,7 +59,7 @@ class TicketManagement extends \yii\db\ActiveRecord
             'ticket_management_id' => Yii::t('app', 'Ticket Management ID'),
             'ticket_id' => Yii::t('app', 'Ticket ID'),
             'user_id' => Yii::t('app', 'User ID'),
-            'date' => Yii::t('app', 'Date'),
+            'timestamp' => Yii::t('app', 'Date'),
         ];
     }
 }

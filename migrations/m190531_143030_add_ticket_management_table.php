@@ -17,7 +17,7 @@ class m190531_143030_add_ticket_management_table extends Migration
             'ticket_management_id' => $this->primaryKey(),
             'ticket_id' => $this->integer(),
             'user_id' => $this->integer(),
-            'date' => $this->string(),
+            'timestamp' => $this->string(),
         ]);
 
         $this->addForeignKey('fk_ticket_management_ticket_id', 'ticket_management', 'ticket_id', 'ticket', 'ticket_id');

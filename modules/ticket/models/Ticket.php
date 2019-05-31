@@ -239,6 +239,13 @@ class Ticket extends \app\components\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getTicketManagements() {
+        return $this->hasMany(TicketManagement::class, ['ticket_id' => 'ticket_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUsers() {
         $userModel = $this->userModelClass;
         $userPK = $this->userModelId;
@@ -817,6 +824,15 @@ class Ticket extends \app\components\db\ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @return int|string
+     * Devuelve la cantidad de gestiones de un ticket
+     */
+    public function getTicketManagementQuantity()
+    {
+        return $this->getTicketManagements()->count();
     }
 
 }

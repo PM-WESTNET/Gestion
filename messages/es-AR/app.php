@@ -1109,5 +1109,6 @@
     'Email 2 status' => 'Estado de email 2',
     'Register ticket management' => 'Registrar gestión de ticket',
     'Are you sure you want to register a ticket management?' => '¿Está seguro que quiere registrar una gestión del ticket?',
-    'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente'
+    'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente',
+    'Ticket management quantity' => 'Cantidad de gestiones',
 );

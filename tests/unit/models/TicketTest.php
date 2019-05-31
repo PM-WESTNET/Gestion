@@ -173,9 +173,8 @@ class TicketTest extends \Codeception\Test\Unit
         $observation->save();
 
         expect('Can add ticket management cause ticket have one observation', $model->canAddTicketManagement())->true();
-
-
     }
+
     public function testAddTicketManagement()
     {
         $model = new Ticket([
@@ -199,6 +198,31 @@ class TicketTest extends \Codeception\Test\Unit
 
         expect('Can add ticket management cause ticket have one observation', $model->addTicketManagement(1))->true();
         expect('Ticket has one observation', count($model->observations))->equals(1);
+    }
+
+    public function testGetTicketManagementQuantity()
+    {
+        $model = new Ticket([
+            'status_id' => 1,
+            'customer_id' => 45900,
+            'title' => 'Ticket1',
+            'content' => 'Content ticket1',
+            'category_id' => 1,
+        ]);
+        $model->save();
+
+        expect('Ticket management total is 0', $model->getTicketManagementQuantity())->equals(0);
+
+        $observation = new Observation([
+            'title' => 'Título de la observación',
+            'description' => 'Descripción de la observación',
+            'user_id' => 1,
+            'ticket_id' => $model->ticket_id
+        ]);
+        $observation->save();
+        $model->addTicketManagement(1);
+
+        expect('Ticket management total is 1', $model->getTicketManagementQuantity())->equals(1);
     }
 
 //    TODO resto funciones anteriores de la clase
