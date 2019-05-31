@@ -1104,8 +1104,10 @@
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
-
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Email 1 status' => 'Estado de email 1',
     'Email 2 status' => 'Estado de email 2',
+    'Register ticket management' => 'Registrar gestión de ticket',
+    'Are you sure you want to register a ticket management?' => '¿Está seguro que quiere registrar una gestión del ticket?',
+    'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente'
 );

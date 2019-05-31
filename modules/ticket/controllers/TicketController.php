@@ -474,4 +474,23 @@ class TicketController extends Controller
         ];
     }
 
+    /**
+     * @param $ticket_id
+     * @return Response
+     * @throws NotFoundHttpException
+     * Crea una gestión para el ticket
+     */
+    public function actionAddTicketManagement($ticket_id)
+    {
+        $ticket = $this->findModel($ticket_id);
+
+        if($ticket->addTicketManagement(Yii::$app->user->id)) {
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Ticket management registered successfully'));
+        } else {
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Ticket management registered successfully'));
+        }
+
+        return $this->redirect(['collection-tickets']);
+    }
+
 }
