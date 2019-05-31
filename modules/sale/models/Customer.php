@@ -443,10 +443,9 @@ class Customer extends ActiveRecord {
 
     public function getPaymentEnabledTracks()
     {
-        $payment_method_ids = (new Query())->select('payment_method_id')->from('company_has_payment_track')->where(['company_id' => $this->company_id, 'status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all();
+        $payment_method_ids = (new Query())->select('payment_method_id')->from('company_has_payment_track')->where(['company_id' => $this->company_id, 'payment_status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all();
         return $this->hasMany(CustomerHasPaymentTrack::class, ['customer_id' => 'customer_id'])->where(['in','payment_method_id', $payment_method_ids]);
     }
-
 
     /**
      * Despues de guardar, guarda los profiles
@@ -951,7 +950,7 @@ class Customer extends ActiveRecord {
     }
 
     public function getAddress() {
-        return $this->hasOne(Address::className(), ['address_id' => 'address_id']);
+        return $this->hasOne(Address::class, ['address_id' => 'address_id']);
     }
 
     public function afterFind() {
@@ -1037,10 +1036,18 @@ class Customer extends ActiveRecord {
                         'track_id' => $track_id
                     ]);
                     $customer_has_payment_track->save();
+
+                    //Si alguno de los canales de pago usa tarjetas de cobro, debe asociarse una tarjeta de cobro
+                    $track = Track::findOne($track_id);
+                    if(!$this->payment_code_19_digits && !$this->payment_code_29_digits && $track->use_payment_card) {
+                        $this->associatePaymentCard();
+                    }
                 }
             } else {
-                //Asociar tarjeta de cobro
-                $this->associatePaymentCard();
+                //Si la empresa usa tarjetas de cobro se le debe asociar una al customer
+                if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_29_digits &&  !$this->payment_code_19_digits) {
+                    $this->associatePaymentCard();
+                }
             }
         };
         $this->on(self::EVENT_AFTER_INSERT, $savePaymentTracks);
@@ -1436,6 +1443,7 @@ class Customer extends ActiveRecord {
      * Asocia los codigos de una tarjeta disponible al cliente solo si la empresa a la que pertenece tiene habilitado un canal de pago con tarjetas de cobro.
      * Marca la tarjeta de cobro como usada
      */
+    //TODO hacer la comunicacion con la api de cobro digital
     public function associatePaymentCard()
     {
         if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_19_digits && !$this->payment_code_29_digits) {
@@ -1473,7 +1481,7 @@ class Customer extends ActiveRecord {
             return $this->getPaymentEnabledTracks();
         }
 
-        return $this->company->getPaymentEnabledTracks();
+        return $this->company->getPaymentEnabledTracks()->where(['default_track' => 1]);
     }
 
     /**

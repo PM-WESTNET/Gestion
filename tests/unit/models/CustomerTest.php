@@ -21,6 +21,7 @@ use app\modules\sale\models\Company;
 use app\tests\fixtures\CompanyHasPaymentTrackFixture;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\CustomerHasPaymentTrack;
+use app\modules\checkout\models\Track;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -461,10 +462,16 @@ class CustomerTest extends \Codeception\Test\Unit
         ]);
         $model->save();
 
+        foreach (Track::find()->all() as $track) {
+            $track->updateAttributes(['use_payment_card' => 0]);
+        }
+
         expect('Cant associate payment card cause company doesnt have a track with payment cards', $model->associatePaymentCard())->false();
 
-        $company_has_payment_track = CompanyHasPaymentTrack::find()->where(['company_id' => 2, 'payment_method_id' => 1, 'track_id' => 1, 'status' => 'disabled'])->one();
-        $company_has_payment_track->updateAttributes(['track_id' => 2]);
+        foreach (Track::find()->all() as $track) {
+            $track->updateAttributes(['use_payment_card' => 1]);
+        }
+
         $unused_payment_cards = count(PaymentCard::find()->where(['used' => 0])->all());
 
         expect('Associate card successfully', $model->associatePaymentCard())->true();

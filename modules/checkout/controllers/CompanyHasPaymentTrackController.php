@@ -145,7 +145,7 @@ class CompanyHasPaymentTrackController extends Controller
 
         if(!$payment_methods) {
             $payment_track_exists = false;
-            $payment_methods = PaymentMethod::getAllowedTrackConfigPaymentMethods();
+            $payment_methods = PaymentMethod::getAllowedAndEnabledPaymentMethods($company_id);
         }
 
         if(array_key_exists('CompanyHasPaymentTrack', Yii::$app->request->post())) {

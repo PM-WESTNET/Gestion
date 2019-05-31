@@ -816,6 +816,7 @@ class CustomerController extends Controller
         $view = $this->renderAjax('_payment-methods', [
             'paymentMethods' => $payment_methods,
             'model' => $model,
+            'company_id' => $company_id,
         ]);
 
         return [

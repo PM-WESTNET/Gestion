@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3882fef293a66ddac4c89b4e8e66e0a6",
+    "content-hash": "a780a421b82adf0e65297eefa81d42df",
     "packages": [
         {
             "name": "2amigos/yii2-chartjs-widget",
@@ -221,7 +221,7 @@
                 "wkhtmltox",
                 "yii2"
             ],
-            "time": "2015-05-14 22:26:21"
+            "time": "2015-05-14T22:26:21+00:00"
         },
         {
             "name": "bower-asset/bootstrap",
@@ -283,8 +283,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/chartjs/Chart.js/zipball/924a66bae23f7e938531024951f7251d46785473",
-                "reference": "924a66bae23f7e938531024951f7251d46785473",
-                "shasum": null
+                "reference": "924a66bae23f7e938531024951f7251d46785473"
             },
             "type": "bower-asset",
             "license": [
@@ -302,8 +301,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/chartjs/Chart.js/zipball/924a66bae23f7e938531024951f7251d46785473",
-                "reference": "924a66bae23f7e938531024951f7251d46785473",
-                "shasum": null
+                "reference": "924a66bae23f7e938531024951f7251d46785473"
             },
             "type": "bower-asset",
             "license": [
@@ -321,8 +319,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/fullcalendar/fullcalendar/zipball/3ddb3c8d1461c6b841aed3487ba07d8ba338adb6",
-                "reference": "3ddb3c8d1461c6b841aed3487ba07d8ba338adb6",
-                "shasum": null
+                "reference": "3ddb3c8d1461c6b841aed3487ba07d8ba338adb6"
             },
             "require": {
                 "bower-asset/jquery": ">=2,<4.0",
@@ -344,8 +341,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/fullcalendar/fullcalendar-scheduler/zipball/6ebc6d1ec1d4cc82481e0c57272b70df80330494",
-                "reference": "6ebc6d1ec1d4cc82481e0c57272b70df80330494",
-                "shasum": null
+                "reference": "6ebc6d1ec1d4cc82481e0c57272b70df80330494"
             },
             "require": {
                 "bower-asset/fullcalendar": "~3.9.0",
@@ -486,8 +482,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/moment/moment/zipball/2e2a5b35439665d4b0200143d808a7c26d6cd30f",
-                "reference": "2e2a5b35439665d4b0200143d808a7c26d6cd30f",
-                "shasum": null
+                "reference": "2e2a5b35439665d4b0200143d808a7c26d6cd30f"
             },
             "type": "bower-asset",
             "license": [
@@ -523,6 +518,24 @@
             }
         },
         {
+            "name": "bower-asset/toastr",
+            "version": "2.1.2",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:johnpapa/toastr-bower.git",
+                "reference": "e648a870a60103bbc3986c1fe2b2de86ea4a9569"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/johnpapa/toastr-bower/zipball/e648a870a60103bbc3986c1fe2b2de86ea4a9569",
+                "reference": "e648a870a60103bbc3986c1fe2b2de86ea4a9569"
+            },
+            "require": {
+                "bower-asset/jquery": ">=1.6.3"
+            },
+            "type": "bower-asset"
+        },
+        {
             "name": "bower-asset/yii2-pjax",
             "version": "2.0.7.1",
             "source": {
@@ -533,8 +546,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/yiisoft/jquery-pjax/zipball/aef7b953107264f00234902a3880eb50dafc48be",
-                "reference": "aef7b953107264f00234902a3880eb50dafc48be",
-                "shasum": null
+                "reference": "aef7b953107264f00234902a3880eb50dafc48be"
             },
             "require": {
                 "bower-asset/jquery": ">=1.8"
@@ -643,7 +655,7 @@
                 "text",
                 "wysiwyg"
             ],
-            "time": "2017-09-13 13:08:14"
+            "time": "2017-09-13T13:08:14+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -2777,6 +2789,52 @@
             "time": "2018-10-09T17:40:19+00:00"
         },
         {
+            "name": "lavrentiev/yii2-toastr",
+            "version": "2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lavrentiev/yii2-toastr.git",
+                "reference": "a5392f09c64285fc15d5be17bb23ae959b3b382d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lavrentiev/yii2-toastr/zipball/a5392f09c64285fc15d5be17bb23ae959b3b382d",
+                "reference": "a5392f09c64285fc15d5be17bb23ae959b3b382d",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/toastr": "^2.1",
+                "yiisoft/yii2": "~2.0"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "lavrentiev\\widgets\\toastr\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Eugene Lavrentiev (RyanTedder)",
+                    "email": "lavrentiev.e@gmail.com",
+                    "homepage": "https://github.com/lavrentiev"
+                }
+            ],
+            "description": "Simple javascript toast notifications",
+            "homepage": "https://github.com/lavrentiev/yii2-toastr",
+            "keywords": [
+                "extension",
+                "jquery",
+                "notification",
+                "toastr",
+                "yii2"
+            ],
+            "time": "2017-10-24T08:49:46+00:00"
+        },
+        {
             "name": "linslin/yii2-curl",
             "version": "1.2.1",
             "source": {
@@ -3040,9 +3098,7 @@
             "version": "2.2.4",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz",
-                "reference": null,
-                "shasum": null
+                "url": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz"
             },
             "type": "npm-asset",
             "license": [

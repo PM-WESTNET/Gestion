@@ -4,7 +4,9 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\Track;
 use kartik\widgets\Select2;
 use yii\helpers\ArrayHelper;
+use app\modules\sale\models\Company;
 
+$company_id = isset($company_id) ? $company_id : ($model->company_id ? $model->company_id : Company::find()->one()->company_id);
 ?>
 <!-- Medios y canales de pago-->
 <div class="col-xs-12 well hidden" id="customer-payment-tracks">
@@ -23,10 +25,9 @@ use yii\helpers\ArrayHelper;
                              <?= $payment_method->name ?>
                         </label>
                     </div>
-
                     <div class="col-sm-6">
                         <?= Select2::widget([
-                            'data' => ArrayHelper::map(Track::find()->all(), 'track_id', 'name'),
+                            'data' => ArrayHelper::map(Company::getEnabledTracksForPaymentMethod($company_id, $payment_method->payment_method_id), 'track_id', 'name'),
                             'name' => "Customer[paymentTracks][Track][$payment_method->payment_method_id]",
                             'value' => $payment_track_config ? $payment_track_config->track_id : ''
                         ])?>

@@ -212,7 +212,7 @@ class Company extends \app\components\db\ActiveRecord
      */
     public function getPaymentEnabledTracks()
     {
-        return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id'])->where(['status' => 'enabled']);
+        return $this->hasMany(CompanyHasPaymentTrack::class, ['company_id' => 'company_id'])->where(['payment_status' => 'enabled']);
     }
 
     /**
@@ -220,7 +220,7 @@ class Company extends \app\components\db\ActiveRecord
      */
     public function getPointsOfSale()
     {
-        return $this->hasMany(PointOfSale::className(), ['company_id' => 'company_id']);
+        return $this->hasMany(PointOfSale::class, ['company_id' => 'company_id']);
     }
     
     /**
@@ -440,7 +440,7 @@ class Company extends \app\components\db\ActiveRecord
 
         if($verify_child_companies) {
             foreach ($this->companies as $company) {
-                if($company->getTracks()->where(['use_payment_card' => 1])->exists()) {
+                if($company->getTracks()->where(['track_status' => CompanyHasPaymentTrack::STATUS_ENABLED, 'use_payment_card' => 1])->exists()) {
                     $has_track_with_payment_card = true;
                 }
             }
@@ -478,5 +478,15 @@ class Company extends \app\components\db\ActiveRecord
         }
 
         return $total_percentage;
+    }
+
+    public static function getEnabledTracksForPaymentMethod($company_id, $payment_method_id) {
+        $track_ids = (new Query())->select('track_id')
+            ->from('company_has_payment_track')
+            ->where(['company_id' => $company_id, 'payment_method_id' => $payment_method_id, 'payment_track_status' => CompanyHasPaymentTrack::STATUS_ENABLED])
+            ->all();
+
+        return Track::find()->where(['in', 'track_id', $track_ids])->all();
+
     }
 }

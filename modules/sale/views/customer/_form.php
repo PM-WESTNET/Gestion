@@ -273,7 +273,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
     </div>
 
-    <!-- Medios y canales de pago-->
+<!--    Medios y canales de pago-->
         <div id="same-company-config" style="padding-bottom: 20px" class="col-sm-12">
             <?php $checked = !$model->hasCustomizedPaymentConfiguration() || $model->isNewRecord ? 'checked' : ''?>
             <label class="control-label">
@@ -281,7 +281,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             </label>
         </div>
         <?= $this->render('_payment-methods', ['model' => $model, 'paymentMethods' => $paymentMethods])?>
-    <!-- Fin medios y canales de pago -->
+<!--    Fin medios y canales de pago -->
 
     <div class="row">
         <div class="col-xs-12">

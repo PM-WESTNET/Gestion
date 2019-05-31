@@ -48,24 +48,29 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
 
                     <div>
-                        <?php foreach ($payment_methods as $payment_method) {
-                            $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
-                            $checked = $payment_track_config ? ($payment_track_config->payment_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  'checked' : '')  : '';
-                            $customer_checked = $payment_track_config ? ($payment_track_config->customer_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  'checked' : '')  : ''; ?>
+                        <?php
+                        $last_payment_method_id = 0;
+                        foreach ($payment_methods as $payment_method) {
+                            if($last_payment_method_id != $payment_method->payment_method_id) {
+                                $payment_track_config = $model->getPaymentTracks()->where(['payment_method_id' => $payment_method->payment_method_id])->one();
+                                $checked = $payment_track_config ? ($payment_track_config->payment_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  'checked' : '')  : '';
+                                $customer_checked = $payment_track_config ? ($payment_track_config->customer_status == CompanyHasPaymentTrack::STATUS_ENABLED ?  'checked' : '')  : ''; ?>
 
-                            <div class="row col-sm-12">
-                                <div class="col-sm-6">
-                                    <?= get_class($payment_method) == PaymentMethod::class ? $payment_method->name : $payment_method->paymentMethod->name?>
+                                <div class="row col-sm-12">
+                                    <div class="col-sm-6">
+                                        <?= get_class($payment_method) == PaymentMethod::class ? $payment_method->name : $payment_method->paymentMethod->name?>
+                                    </div>
+                                    <div class="col-sm-3 text-center">
+                                        <input class="availablility" data-pm-id="customer-availability-<?= $payment_method->payment_method_id ?>" type="checkbox" name="CompanyHasPaymentTrack[payment_status][<?= $payment_method->payment_method_id ?>]" id="availability-<?= $payment_method->payment_method_id ?>" <?= $checked ?> >
+                                    </div>
+                                    <div class="col-sm-3 text-center">
+                                        <input class="customer-availability" data-pm-id="availability-<?= $payment_method->payment_method_id ?>" type="checkbox" name="CompanyHasPaymentTrack[customer_status][<?= $payment_method->payment_method_id ?>]" id="customer-availability-<?= $payment_method->payment_method_id ?>" <?= $customer_checked ?> >
+                                    </div>
                                 </div>
-                                <div class="col-sm-3 text-center">
-                                    <input class="availablility" data-pm-id="customer-availability-<?= $payment_method->payment_method_id ?>" type="checkbox" name="CompanyHasPaymentTrack[payment_status][<?= $payment_method->payment_method_id ?>]" id="availability-<?= $payment_method->payment_method_id ?>" <?= $checked ?> >
-                                </div>
-                                <div class="col-sm-3 text-center">
-                                    <input class="customer-availability" data-pm-id="availability-<?= $payment_method->payment_method_id ?>" type="checkbox" name="CompanyHasPaymentTrack[customer_status][<?= $payment_method->payment_method_id ?>]" id="customer-availability-<?= $payment_method->payment_method_id ?>" <?= $customer_checked ?> >
-                                </div>
-                            </div>
 
-                        <?php } ?>
+                        <?php }
+                        $last_payment_method_id = $payment_method->payment_method_id;
+                        } ?>
                     </div>
                 </div>
             </div>

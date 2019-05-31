@@ -138,7 +138,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
         $payment_method_ids = (new Query())->select('payment_method_id')
             ->from('company_has_payment_track')
             ->where(['company_id' => $company_id])
-            ->andWhere(['status' => CompanyHasPaymentTrack::STATUS_ENABLED])
+            ->andWhere(['payment_status' => CompanyHasPaymentTrack::STATUS_ENABLED])
             ->all();
 
         return PaymentMethod::find()
