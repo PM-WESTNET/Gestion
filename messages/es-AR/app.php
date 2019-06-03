@@ -1111,4 +1111,5 @@
     'Are you sure you want to register a ticket management?' => '¿Está seguro que quiere registrar una gestión del ticket?',
     'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente',
     'Ticket management quantity' => 'Cantidad de gestiones',
+    'Remember: Customers whose debt is on the first bill are excluded' => 'Recuerde: Los clientes cuya deuda es de la primer factura están excluidos'
 );
