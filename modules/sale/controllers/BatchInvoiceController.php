@@ -264,6 +264,7 @@ class BatchInvoiceController  extends Controller
                 } else {
                     $bills_not_closed .= $bill->bill_id .', ';
                 };
+                sleep(1);
             }
         }
 
