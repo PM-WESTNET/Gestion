@@ -214,11 +214,14 @@ class BatchInvoiceController  extends Controller
      * @throws \yii\base\InvalidConfigException
      *
      */
-    public function actionFixDoubleBills($company_id, $date, $limit = null)
+    public function actionFixDoubleBills($company_id, $date, $limit = null, $offset = null)
     {
         set_time_limit(0);
         $bills_not_closed = '';
         $bills_closed = '';
+        $taxIvaInscr = TaxCondition::findOne(['name' => 'IVA Inscripto']);
+        $bill_type_nota_credito_a = BillType::findOne(['name' => 'Nota Crédito A']);
+        $bill_type_nota_credito_b = BillType::findOne(['name' => 'Nota Crédito B']);
 
         $customersDuplicatedBillsQuery= (new Query())
             ->select(['customer_id'])
@@ -227,7 +230,8 @@ class BatchInvoiceController  extends Controller
             ->andWhere(['<>','total', 0])
             ->groupBy(['customer_id'])
             ->having(['>', 'count(*)', 1])
-            ->limit($limit);
+            ->limit($limit)
+            ->offset($offset);
 
         $customersDuplicatedBills = $customersDuplicatedBillsQuery->all();
         $customers_id = array_map(function($customer){ return $customer['customer_id'];}, $customersDuplicatedBills);
@@ -244,12 +248,11 @@ class BatchInvoiceController  extends Controller
         }
 
         foreach ($customers as $customer) {
-            $taxIvaInscr = TaxCondition::findOne(['name' => 'IVA Inscripto']);
 
             if ($customer->tax_condition_id === $taxIvaInscr->tax_condition_id) {
-                $bill_type = BillType::findOne(['name' => 'Nota Crédito A']);
+                $bill_type = $bill_type_nota_credito_a;
             }else {
-                $bill_type = BillType::findOne(['name' => 'Nota Crédito B']);
+                $bill_type = $bill_type_nota_credito_b;
             }
 
             $bills = $customer->getBills()->orderBy(['bill.timestamp' => SORT_DESC])->all();
