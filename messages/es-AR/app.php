@@ -531,7 +531,7 @@
   'Provider Payments' => 'Pagos a proveedor',
   'Providers' => 'Proveedores',
   'Provisioning' => 'Pago indirecto',
-  'Publicity Shape' => '¿Como Conoció a Westnet?',
+  'Publicity Shape' => '¿Como conoció a la empresa?',
   'Qty' => 'Cant.',
   'Quantity' => 'Cantidad',
   'Quantity Payments' => 'Cantidad de pagos',
