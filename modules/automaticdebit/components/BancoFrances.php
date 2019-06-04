@@ -42,7 +42,8 @@ class BancoFrances implements BankInterface
 
         $this->companyConfig = $companyConfig;
 
-        $file = \Yii::getAlias('@app').'/web/direct_debit/'.time().uniqid();
+        $filename = time().uniqid();
+        $file = \Yii::getAlias('@app').'/web/direct_debit/'.$filename;
 
         $resource = fopen($file.'.txt', 'w');
 
@@ -92,9 +93,25 @@ class BancoFrances implements BankInterface
      * Debe importar el archivo con los pagos y crear los pagos correspondientes
      * @return mixed
      */
-    public function import()
+    public function import($resource)
     {
+        $companyConfig = null;
+        while ($line = fgets($resource)){
+            $code_line = substr($line,0,4);
 
+            switch($code_line) {
+                case '4110':
+                    $companyId = substr($line, 4,5);
+
+                    $companyConfig = BankCompanyConfig::findOne(['company_identification' => $companyId]);
+
+                    if (empty($companyConfig)) {
+                        throw new InvalidConfigException('Company not configured');
+                    }
+
+
+            }
+        }
     }
 
     private function addHeader($resource)
