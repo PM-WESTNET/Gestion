@@ -12,8 +12,11 @@ namespace app\modules\automaticdebit\components;
 use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\automaticdebit\models\BankCompanyConfig;
 use app\modules\automaticdebit\models\BillHasExportToDebit;
+use app\modules\automaticdebit\models\DebitDirectImport;
 use app\modules\automaticdebit\models\DirectDebitExport;
+use app\modules\checkout\models\Payment;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\Customer;
 use yii\base\InvalidConfigException;
 
 class BancoFrances implements BankInterface
@@ -96,6 +99,8 @@ class BancoFrances implements BankInterface
     public function import($resource)
     {
         $companyConfig = null;
+        $proccess_timestamp = null;
+        $payments = [];
         while ($line = fgets($resource)){
             $code_line = substr($line,0,4);
 
@@ -109,7 +114,44 @@ class BancoFrances implements BankInterface
                         throw new InvalidConfigException('Company not configured');
                     }
 
+                    $proccess_timestamp = substr($line, 17, 8);
+                    break;
+                case '4210':
+                    $beneficiary_id = substr($line, 11, 22);
 
+                    $import1 = substr($line, 55, 13);
+                    $import2 = substr($line, 68, 2);
+
+                    $code = substr($line, 70, 6);
+
+                    $payments[] = [
+                        'customer_code' => ltrim($beneficiary_id, '0'),
+                        'amount' => (double) ($import1.'.'.$import2),
+                        'date' =>  $this->restoreDate($proccess_timestamp)
+                    ];
+
+                    break;
+            }
+        }
+        $import = new DebitDirectImport([
+            'import_timestamp' => time(),
+            'process_timestamp' => strtotime($this->restoreDate($proccess_timestamp)),
+            'status' => DebitDirectImport::DRAFT_STATUS,
+        ]);
+
+        $import->save();
+        foreach ($payments as $payment) {
+            $customer = Customer::findOne(['code' => $payment['customer_code']]);
+
+            if (!empty($customer)) {
+               $p = new Payment([
+                   'customer_id' => $customer->customer_id,
+                   'amount' => $payment['amount']
+               ]);
+
+               if ($p->save()) {
+
+               }
             }
         }
     }
@@ -267,5 +309,12 @@ class BancoFrances implements BankInterface
             ])->all();
 
         return $debits;
+    }
+
+    private function restoreDate($date)
+    {
+        $restore = substr($date,0,4) .'-'. substr($date, 4,2).'-'.substr($date,6);
+
+        return $restore;
     }
 }

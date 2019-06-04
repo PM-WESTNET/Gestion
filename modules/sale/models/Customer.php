@@ -1289,6 +1289,7 @@ class Customer extends ActiveRecord {
     public static function hasCategoryTicket($customer_code, $category_id, $is_open)
     {
         $customer = Customer::findOne(['code' => $customer_code]);
+
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
