@@ -1288,10 +1288,15 @@ class Customer extends ActiveRecord {
      */
     public static function hasCategoryTicket($customer_code, $category_id, $is_open)
     {
+        $initMonth = (new DateTime())->modify('first day of this month');
+        $lastMonth = (new DateTime())->modify('last day of this month');
+
         $customer = Customer::findOne(['code' => $customer_code]);
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
+            ->andWhere(['>=', 'start_datetime', $initMonth->getTimestamp()])
+            ->andWhere(['<', 'start_datetime', ($lastMonth->getTimestamp() + 86400)])
             ->one();
 
         return [
