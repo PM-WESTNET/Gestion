@@ -770,6 +770,7 @@ class CustomerSearch extends Customer {
             ->from(new Expression('bill b FORCE INDEX(fk_bill_customer1_idx)'))
             ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id' )
             ->where(['b.status'=>['closed', 'completed'], 'b.customer_id'=>$customer_id])
+            ->andWhere(['<>','b.total', 0])
             ->groupBy(['b.customer_id','b.bill_id'])
         ;
 
