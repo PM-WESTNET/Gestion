@@ -429,10 +429,7 @@ $companyData = $model->company;
         </tr>
 
     <?php } ?>
-
-    <?php
-    if($model->billType->invoice_class_id) {
-    ?>
+    <?php if($model->billType->invoice_class_id) { ?>
     <tr>
         <td>
             <table class="table table-bordered">
@@ -453,5 +450,4 @@ $companyData = $model->company;
     <?php } ?>
     </tbody>
 </table>
-<<<<<<< HEAD
 <?php } ?>

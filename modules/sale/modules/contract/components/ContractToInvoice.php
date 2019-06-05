@@ -329,6 +329,7 @@ class ContractToInvoice
 
         $afip_error = false;
 
+        //Se hace el cambio a batch para evitar facturacion de contratos duplicados
         foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
             foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
