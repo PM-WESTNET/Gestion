@@ -103,6 +103,10 @@ class Bank extends \yii\db\ActiveRecord
         return $labels[$this->status];
     }
 
+    /**
+     * @return BankInterface
+     * @throws InvalidConfigException
+     */
     public function getBankInstance()
     {
         if (empty($this->class)) {

@@ -4,11 +4,13 @@ namespace app\modules\automaticdebit\controllers;
 
 use app\components\web\Controller;
 use app\modules\automaticdebit\models\BankCompanyConfig;
+use app\modules\automaticdebit\models\DebitDirectImport;
 use app\modules\automaticdebit\models\DirectDebitExport;
 use Yii;
 use app\modules\automaticdebit\models\Bank;
 use app\modules\automaticdebit\models\BankSearch;
 use yii\data\ActiveDataProvider;
+use yii\db\ActiveRecord;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -187,6 +189,15 @@ class BankController extends Controller
         }
 
         return Yii::$app->response->sendFile($export->file);
+    }
+
+    public function  actionImports($bank_id)
+    {
+        $bank = Bank::findOne($bank_id);
+        $imports = new ActiveDataProvider(['query' => DebitDirectImport::find()->andWhere(['bank_id' => $bank_id])->orderBy(['create_timestamp' => SORT_DESC])]);
+
+        return $this->render('imports', ['dataProvider' => $imports, 'bank' => $bank]);
+
     }
 
 }

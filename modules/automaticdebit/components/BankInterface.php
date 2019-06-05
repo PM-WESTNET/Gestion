@@ -25,5 +25,5 @@ interface BankInterface
      * Debe importar el archivo con los pagos y crear los pagos correspondientes
      * @return mixed
      */
-    public function import($resource);
+    public function import($resource, $import);
 }

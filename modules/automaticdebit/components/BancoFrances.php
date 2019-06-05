@@ -13,8 +13,10 @@ use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\automaticdebit\models\BankCompanyConfig;
 use app\modules\automaticdebit\models\BillHasExportToDebit;
 use app\modules\automaticdebit\models\DebitDirectImport;
+use app\modules\automaticdebit\models\DebitDirectImportHasPayment;
 use app\modules\automaticdebit\models\DirectDebitExport;
 use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Customer;
 use yii\base\InvalidConfigException;
@@ -76,7 +78,7 @@ class BancoFrances implements BankInterface
 
                 $totalRegister = $totalRegister + 4;
                 $totalOperations++;
-                $totalAmount = $totalAmount + $bill->amount;
+                $totalAmount = $totalAmount + $bill->total;
 
                 $bhetd = new BillHasExportToDebit(['bill_id' => $bill->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
 
@@ -96,7 +98,7 @@ class BancoFrances implements BankInterface
      * Debe importar el archivo con los pagos y crear los pagos correspondientes
      * @return mixed
      */
-    public function import($resource)
+    public function import($resource, $import)
     {
         $companyConfig = null;
         $proccess_timestamp = null;
@@ -127,30 +129,45 @@ class BancoFrances implements BankInterface
                     $payments[] = [
                         'customer_code' => ltrim($beneficiary_id, '0'),
                         'amount' => (double) ($import1.'.'.$import2),
-                        'date' =>  $this->restoreDate($proccess_timestamp)
+                        'date' =>  $this->restoreDate($proccess_timestamp),
+                        'cbu' => substr($line, 33,22),
                     ];
 
                     break;
             }
         }
-        $import = new DebitDirectImport([
-            'import_timestamp' => time(),
-            'process_timestamp' => strtotime($this->restoreDate($proccess_timestamp)),
-            'status' => DebitDirectImport::DRAFT_STATUS,
-        ]);
+        $import->proccess_timestamp = strtotime($this->restoreDate($proccess_timestamp));
 
         $import->save();
+
+        $payment_method = PaymentMethod::findOne(['name' => 'Débito Directo']);
+
         foreach ($payments as $payment) {
             $customer = Customer::findOne(['code' => $payment['customer_code']]);
 
             if (!empty($customer)) {
                $p = new Payment([
                    'customer_id' => $customer->customer_id,
-                   'amount' => $payment['amount']
+                   'amont' => $payment['amount'],
+                   'partner_distribution_model_id' => $companyConfig->company->partner_distribution_model_id
                ]);
 
                if ($p->save()) {
+                    $payment_item = [
+                        'amount'=> $payment['amount'],
+                        'description'=> 'Debito Directo cta ' . $payment['cbu'],
+                        'payment_method_id'=> $payment_method->payment_method_id,
+                        'money_box_account_id'=> $import->money_box_account_id,
+                    ];
 
+                    $p->addItem($payment_item);
+
+                    $ddihp= new DebitDirectImportHasPayment([
+                        'debit_direct_import_id' => $import->debit_direct_import_id,
+                        'payment_id' => $p->payment_id
+                    ]);
+
+                    $ddihp->save();
                }
             }
         }
@@ -193,10 +210,10 @@ class BancoFrances implements BankInterface
         $beneficiary_number = $beneficiary->beneficiario_number;
         $cbu = $beneficiary->cbu;
 
-        $intamount = floor($bill->amount);
+        $intamount = floor($bill->total);
 
         $import1 = str_pad('0', 13, $intamount);
-        $import2 = ($bill->amount - $intamount) * 100;
+        $import2 = ($bill->total - $intamount) * 100;
         $code_dev = str_pad(' ', 6, ' ');
         $ref = str_pad(' ', 22, ' ');
         $fecha = date('Ymd', $this->processTimestamp);
