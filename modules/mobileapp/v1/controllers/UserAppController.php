@@ -875,4 +875,18 @@ class UserAppController extends Controller
         ];
     }
 
+    /**
+     * Devuelve la info de contacto para mostrar en la pantalla de login
+     * @return array
+     */
+    public function actionGetContactInfo()
+    {
+        $info = Config::getValue('app_contact_info');
+
+        return [
+            'status' => 'success',
+            'info' => $info
+        ];
+    }
+
 }
