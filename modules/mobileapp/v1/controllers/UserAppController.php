@@ -42,7 +42,8 @@ class UserAppController extends Controller
         'verify-data',
         'set-document-number',
         'create-app-failed-register',
-        'customer-data'
+        'customer-data',
+        'get-contact-info',
     ];
 
     public function actions()
@@ -882,10 +883,16 @@ class UserAppController extends Controller
     public function actionGetContactInfo()
     {
         $info = Config::getValue('app_contact_info');
+        $tecnico = Config::getValue('app_ws_tecnico');
+        $admin = Config::getValue('app_ws_admin');
+        $ventas = Config::getValue('app_ws_ventas');
 
         return [
             'status' => 'success',
-            'info' => $info
+            'info' => $info,
+            'tecnico' => $tecnico,
+            'admin' => $admin,
+            'ventas' => $ventas
         ];
     }
 
