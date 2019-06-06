@@ -63,6 +63,7 @@ class CustomerSearch extends Customer {
     //Email status
     public $email_status;
     public $email2_status;
+    public $exclude_customers_with_one_bill;
 
     public function rules()
     {
@@ -73,7 +74,7 @@ class CustomerSearch extends Customer {
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
-            [['email_status', 'email2_status'], 'safe'],
+            [['email_status', 'email2_status', 'exclude_customers_with_one_bill'], 'safe'],
         ];
     }
 
@@ -583,6 +584,10 @@ class CustomerSearch extends Customer {
 
         if ($this->total_bills_to > 0) {
             $query->andWhere(['<=', 'total_bills', $this->total_bills_to]);
+        }
+
+        if($this->exclude_customers_with_one_bill) {
+            $query->andWhere(['>', 'total_bills', 1]);
         }
 
         $masterSubQuery->andFilterWhere(['customer.status' => $this->customer_status]);

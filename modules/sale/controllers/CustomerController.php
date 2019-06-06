@@ -712,7 +712,10 @@ class CustomerController extends Controller
     public function actionCashingPanel()
     {
         $searchModel = new CustomerSearch;
+        $searchModel->exclude_customers_with_one_bill = true;
         $dataProvider = $searchModel->searchDebtors(Yii::$app->request->getQueryParams(), 100);
+
+        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill are excluded'));
 
         return $this->render('cashing-panel', [
             'dataProvider' => $dataProvider,

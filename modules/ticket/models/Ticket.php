@@ -239,6 +239,13 @@ class Ticket extends \app\components\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getTicketManagements() {
+        return $this->hasMany(TicketManagement::class, ['ticket_id' => 'ticket_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUsers() {
         $userModel = $this->userModelClass;
         $userPK = $this->userModelId;
@@ -784,6 +791,48 @@ class Ticket extends \app\components\db\ActiveRecord {
         }
 
         History::createHistoryEntry(Ticket::findOne($ticket_id), History::TITLE_DELETE_ASSIGNATION);
+    }
+
+    /**
+     * @return bool
+     * Regla de negocio- Indica si al ticket se le puede registrar una gestion.
+     */
+    public function canAddTicketManagement()
+    {
+       if($this->getObservations()->exists()) {
+           return true;
+       }
+
+       return false;
+    }
+
+    /**
+     * @param $ticket_id
+     * @param $user_id
+     * @return bool
+     * Crea una gestion de ticket
+     */
+    public function addTicketManagement($user_id)
+    {
+        if($this->canAddTicketManagement()) {
+            $ticket_management = new TicketManagement([
+                'ticket_id' => $this->ticket_id,
+                'user_id' => $user_id
+            ]);
+
+            return $ticket_management->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * @return int|string
+     * Devuelve la cantidad de gestiones de un ticket
+     */
+    public function getTicketManagementQuantity()
+    {
+        return $this->getTicketManagements()->count();
     }
 
 }
