@@ -227,6 +227,7 @@ class BatchInvoiceController  extends Controller
             ->select(['customer_id'])
             ->from('bill')
             ->andWhere(['date' => \Yii::$app->formatter->asDate($date, 'yyyy-MM-dd')])
+            ->andWhere(['status' => 'closed'])
             ->andWhere(['<>','total', 0])
             ->groupBy(['customer_id'])
             ->having(['>', 'count(*)', 1])

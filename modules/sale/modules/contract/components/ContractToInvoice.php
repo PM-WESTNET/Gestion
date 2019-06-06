@@ -303,6 +303,7 @@ class ContractToInvoice
         $cantidadTotal = $contractSearch->searchForInvoice($params)->count();
         $paginas = ceil($cantidadTotal/100);
         $company = Company::findOne($contractSearch->company_id);
+
         $period = new DateTime( $contractSearch->period );
         if( $contractSearch->invoice_date instanceof DateTime) {
             $invoice_date = $contractSearch->invoice_date;
@@ -327,13 +328,10 @@ class ContractToInvoice
         $mobilepush = $this->createMobilePush();
 
         $afip_error = false;
-        for($r=0; $r<$paginas; $r++) {
-            $contractsList  = $contractSearch->searchForInvoice($params)
-                ->offset(0)
-                ->limit(100)
-                ->all()
-            ;
-            foreach($contractsList as $item) {
+
+        //Se hace el cambio a batch para evitar facturacion de contratos duplicados
+        foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
+            foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
                     if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date) ) {
@@ -358,7 +356,6 @@ class ContractToInvoice
                     $transaction->commit();
                 //}
             }
-
         }
 
         // Envio la notificacion a los clientes facturados
@@ -565,11 +562,13 @@ class ContractToInvoice
 
                 }
 
-                $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
-                $bill->save(false);
-                $bill->fillNumber = false;
-                $bill->complete();
-                $bill->close();
+                if($bill->getBillDetails()->exists()) {
+                    $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
+                    $bill->save(false);
+                    $bill->fillNumber = false;
+                    $bill->complete();
+                    $bill->close();
+                }
 
                 // Si es electronica y no se emitio es por error en AFIP y corto proceso.
                 if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
