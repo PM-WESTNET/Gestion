@@ -151,7 +151,6 @@ class ContractTest extends \Codeception\Test\Unit
 
         foreach ($statuses as $key => $value){
 
-            \Codeception\Util\Debug::debug($value);
             if($value['status'] == 'draft'){
                 $draft = true;
             }
@@ -163,9 +162,9 @@ class ContractTest extends \Codeception\Test\Unit
             }
         }
 
-        $this->assertTrue($draft);
-        $this->assertTrue($active);
-        $this->assertTrue($low);
+        expect('Status draft', $draft)->true();
+        expect('Status active', $active)->true();
+        expect('Status low', $low)->true();
     }
 
     public function testGetStatusesForSelect(){
