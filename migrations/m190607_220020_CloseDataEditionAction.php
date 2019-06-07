@@ -33,16 +33,20 @@ class m190607_220020_CloseDataEditionAction extends Migration
 
         if ($status1) {
             $status1->generate_action = true;
-            $status1->action_id = $actionId;
             $status1->save();
+
+            $sha1= new \app\modules\ticket\models\StatusHasAction(['status_id' => $status1->status_id, 'action_id' => $actionId]);
+            $sha1->save();
         }
 
         $status2 = \app\modules\ticket\models\Status::findOne(['name' => 'Cerrado (sin éxito)']);
 
         if ($status2) {
             $status2->generate_action = true;
-            $status2->action_id = $actionId;
             $status2->save();
+
+            $sha2= new \app\modules\ticket\models\StatusHasAction(['status_id' => $status2->status_id, 'action_id' => $actionId]);
+            $sha2->save();
         }
     }
 
