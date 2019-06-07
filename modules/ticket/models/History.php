@@ -232,7 +232,7 @@ class History extends \app\components\db\ActiveRecord {
 
         $historyEntry = new self;
         $historyEntry->ticket_id = $ticket->ticket_id;
-        $historyEntry->user_id = (Yii::$app instanceof \yii\console\Application || YII_ENV_TEST ? 1 : Yii::$app->user->id);
+        $historyEntry->user_id = (Yii::$app instanceof \yii\console\Application || YII_ENV_TEST || Yii::$app->user->isGuest? 1 :  Yii::$app->user->id );
 
         $historyEntry->datetime = time();
         $historyEntry->date = date("Y-m-d");
