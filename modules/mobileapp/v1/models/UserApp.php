@@ -88,6 +88,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->name .' - '. $customer->code,
+                'showBills' => $customer->showBills,
                 'data' => $customer->getAccount()
             ];
         }
