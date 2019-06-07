@@ -105,7 +105,7 @@ class m190607_204400_app_contact_ticket_category extends Migration
                 'slug' => 'edicion-de-datos',
                 'lft' => $rgt + 1,
                 'rgt' => $rgt + 2,
-                'schema' => $schema_id
+                'schema_id' => $schema_id
             ]);
 
             return true;
