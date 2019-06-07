@@ -11,6 +11,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\models\Contract;
 ?>
 
 <div class="filters-costumer">
@@ -67,7 +68,7 @@ use app\modules\sale\models\Product;
             <?= $form->field($model, 'connection_status')->checkboxList(['enabled'=> 'Habilitada', 'disabled' => 'Deshabilitada', 'forced' => 'Forzada', 'defaulter'=> Yii::t('app', 'Defaulter Connection'), 'clipped' => Yii::t('app', 'Clipped Connection'), 'low' => Yii::t('app', 'Low Account')], ['id' => 'connection_status']) ?>
         </div>
         <div class="col-sm-3">
-            <?= $form->field($model, 'contract_status')->checkboxList(['draft' => 'Borrador', 'active' => 'Activo', 'low-process' =>Yii::t('app', 'Low-process') ,'low' => Yii::t('app', 'Low')], ['id' => 'contract_status'])?>
+            <?= $form->field($model, 'contract_status')->checkboxList(Contract::getStatusesForSelect(), ['id' => 'contract_status'])?>
         </div>
         <div class="col-sm-2">
             <?= $form->field($model, 'email_status')->checkboxList(['valid' => 'Válido', 'invalid' => 'Inválido'], ['id' => 'email_status']) ?>

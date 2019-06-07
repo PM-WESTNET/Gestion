@@ -53,6 +53,9 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'status' => [
                 'class' => TicketStatusFixture::class
+            ],
+            'document_type_id' => [
+                'class' => DocumentTypeFixture::class
             ]
         ];
     }
@@ -69,9 +72,13 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
             'customerClass' => 1
         ]);
+
+        $model->validate();
+        \Codeception\Util\Debug::debug($model->getErrors());
 
         expect('Valid when full and new', $model->validate())->true();
     }
@@ -88,6 +95,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -101,7 +110,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Apellido',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -113,7 +123,7 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -166,7 +176,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '20358752250',
+            'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -182,7 +192,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '2010000000',
+            'document_number' => '20-14978176-6',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -195,7 +205,7 @@ class CustomerTest extends \Codeception\Test\Unit
 
         $updatedModel = Customer::findOne($model2->customer_id);
 
-        $updatedModel->document_number = '35875225';
+        $updatedModel->document_number = '23-29834800-4';
         $updatedModel->_notifications_way = [Customer::getNotificationWays()];
 
         expect('Failed', $updatedModel->save())->true();
@@ -226,21 +236,6 @@ class CustomerTest extends \Codeception\Test\Unit
         ]);
 
         expect('Failed', $model->validateCustomer())->equals(['status' => 'new']);
-    }
-
-    public function testForceCustomerCode()
-    {
-        $model = new Customer([
-            'tax_condition_id' => 1,
-            'publicity_shape' => 'web',
-            'document_number' => '12456789',
-            'customerClass' => 1,
-            '_notifications_way' => [Customer::getNotificationWays()],
-            'code' => 11111
-        ]);
-        $model->save();
-
-        expect('Code cant be forced', $model->code)->notEquals(11111);
     }
 
     public function  testNeedsUpdate()
