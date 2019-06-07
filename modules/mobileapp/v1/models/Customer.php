@@ -28,8 +28,7 @@ class Customer extends \app\modules\sale\models\Customer
             'phone2',
             'phone3',
             'email2',
-
-
+            'payment_code'
         ];
     }
 

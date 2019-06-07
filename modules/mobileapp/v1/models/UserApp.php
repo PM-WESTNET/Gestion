@@ -85,6 +85,8 @@ class UserApp extends \app\components\db\ActiveRecord
         foreach ($this->customers as $key => $customer){
             $accounts[] = [
                 'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->name .' - '. $customer->code,
                 'data' => $customer->getAccount()
             ];
