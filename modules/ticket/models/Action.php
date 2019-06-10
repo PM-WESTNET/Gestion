@@ -19,6 +19,8 @@ class Action extends \app\components\db\ActiveRecord
 
     const TYPE_TICKET = 'ticket';
     const TYPE_EVENT = 'event';
+    const TYPE_DATA_EDITION = 'data-edition';
+
 
     public static function tableName()
     {
@@ -121,7 +123,7 @@ class Action extends \app\components\db\ActiveRecord
     {
         return [
             self::TYPE_EVENT => Yii::t('app', self::TYPE_EVENT),
-            self::TYPE_TICKET => Yii::t('app', self::TYPE_TICKET)
+            self::TYPE_TICKET => Yii::t('app', self::TYPE_TICKET),
         ];
     }
 

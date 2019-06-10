@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\models\search;
 
+use app\modules\ticket\models\Status;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -141,6 +142,16 @@ class TicketSearch extends Ticket {
                 'start_datetime' => SORT_DESC
             ]);
         }
+
+        /**
+         * Esto lo hacemos para limpiar los paneles de tickets erroneos cerrados por sistema
+         */
+        $err_status = Status::findOne(['name' => 'Cerrado por sistema']);
+
+        if ($err_status) {
+            $query->andWhere(['<>','status_id', $err_status->status_id]);
+        }
+
 
         $query->orderBy('ticket.status_id');
 

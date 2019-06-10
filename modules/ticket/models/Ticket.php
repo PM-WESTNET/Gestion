@@ -125,7 +125,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             [['start_date', 'finish_date'], 'date'],
             [['content'], 'string'],
             [['title'], 'string', 'max' => 255],
-            [['start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
+            [['user_id', 'start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
         ];
     }
 
