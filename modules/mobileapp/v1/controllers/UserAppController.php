@@ -15,6 +15,7 @@ use app\modules\mobileapp\v1\components\Controller;
 use app\modules\mobileapp\v1\models\AppFailedRegister;
 use app\modules\mobileapp\v1\models\Customer;
 use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\mobileapp\v1\models\UserAppHasCustomer;
 use app\modules\mobileapp\v1\models\ValidationCode;
 use app\modules\sale\models\Bill;
@@ -192,6 +193,7 @@ class UserAppController extends Controller
         }
 
         if ($customer && $model->load($data, '') && $model->save()){
+            UserAppActivity::createInstallationRegister($model->user_app_id);
             return true;
         }
 
@@ -329,6 +331,7 @@ class UserAppController extends Controller
      */
     public function actionView(){
         $model= $this->getUserApp();
+        UserAppActivity::updateLastActivity($model->user_app_id);
 
         return $model;
     }
