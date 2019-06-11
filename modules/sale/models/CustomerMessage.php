@@ -201,6 +201,13 @@ class CustomerMessage extends \app\components\db\ActiveRecord
                 $response = InfobipService::sendSimpleSMS('Westnet', $number, $message);
                 Yii::info('SMS response: '. print_r($response,1));
                 if ($response['status'] === 'success') {
+                    $chcm = new CustomerHasCustomerMessage([
+                        'customer_id' => $customer->customer_id,
+                        'customer_message_id' => $this->customer_message_id,
+                        'timestamp' => time()
+                    ]);
+
+                    $chcm->save();
                     $alerts[] = [
                         'status' => 'success',
                         'phone' => $number,

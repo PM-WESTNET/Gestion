@@ -7,6 +7,7 @@
  */
 
 namespace app\modules\sale\models;
+use app\components\db\ActiveRecord;
 
 /**
  * @property integer $chcm_id
@@ -17,8 +18,6 @@ namespace app\modules\sale\models;
  * @property Customer $customer
  * @property CustomerMessage $customerMessage
  */
-use app\components\companies\ActiveRecord;
-
 class CustomerHasCustomerMessage extends ActiveRecord
 {
     public static function tableName()

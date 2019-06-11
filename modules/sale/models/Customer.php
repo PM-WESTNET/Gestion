@@ -1336,4 +1336,17 @@ class Customer extends ActiveRecord {
 
         return $results;
     }
+
+    public function getCustomerHasCustomerMessages()
+    {
+        return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
+    }
+
+    public function getSMSCount() {
+
+        $first_day = (new DateTime())->modify('first day of this month')->getTimestamp();
+        $last_day = (new DateTime())->modify('last day of this month')->getTimestamp();
+
+        return $this->getCustomerHasCustomerMessages()->andWhere(['>=', 'timestamp', $first_day])->andWhere(['<', 'timestamp', ($last_day + 86400)])->count();
+    }
 }
