@@ -507,7 +507,9 @@ class Ticket extends \app\components\db\ActiveRecord {
             //Values for new instances ($insert = true means $this is a new record)
             if ($insert) {
                 //Asigno el usuario
-                $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                if (empty($this->user_id)) {
+                    $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                }
                 $this->start_datetime = time();
                 //Assings a color to this ticket
                 $this->assignNumber();

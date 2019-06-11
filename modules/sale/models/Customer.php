@@ -422,6 +422,11 @@ class Customer extends ActiveRecord {
         return $this->hasMany(UserApp::class, ['user_app_id' => 'user_app_id'])->viaTable('user_app_has_customer', ['customer_id' => 'customer_id']);
     }
 
+    public function getCustomerHasCustomerMessages()
+    {
+        return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
+    }
+
     /**
      * Despues de guardar, guarda los profiles
      * @param boolean $insert
@@ -1376,21 +1381,29 @@ class Customer extends ActiveRecord {
     {
         $last_use = '';
 
-        if($this->getUserApps()->exists()) {
+        if ($this->getUserApps()->exists()) {
             $user_app_ids = [];
 
             foreach ($this->userApps as $user_app) {
                 array_push($user_app_ids, $user_app->user_app_id);
             }
 
-            $activity = UserAppActivity::find()->where(['in','user_app_id', $user_app_ids])->orderBy(['last_activity_datetime' => SORT_DESC])->one();
+            $activity = UserAppActivity::find()->where(['in', 'user_app_id', $user_app_ids])->orderBy(['last_activity_datetime' => SORT_DESC])->one();
             $last_use = $activity ? $activity->last_activity_datetime : '';
         }
 
-        if($formated && $last_use) {
+        if ($formated && $last_use) {
             return (new \DateTime())->setTimestamp($last_use)->format('Y-m-d');
         }
 
         return $last_use;
+    }
+
+    public function getSMSCount() {
+
+        $first_day = (new DateTime())->modify('first day of this month')->getTimestamp();
+        $last_day = (new DateTime())->modify('last day of this month')->getTimestamp();
+
+        return $this->getCustomerHasCustomerMessages()->andWhere(['>=', 'timestamp', $first_day])->andWhere(['<', 'timestamp', ($last_day + 86400)])->count();
     }
 }

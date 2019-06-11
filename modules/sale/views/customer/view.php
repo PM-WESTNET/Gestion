@@ -119,7 +119,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php if (User::canRoute('/sale/customer/send-message')):?>
             <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
                 <div class="dropdown">
-                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                     <?php echo ($model->SMSCount >= (int)\app\modules\config\models\Config::getValue('sms_per_customer') ? 'disabled': '')?>>
                         <?php echo '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
                         <span class="caret"></span>
                     </button>
