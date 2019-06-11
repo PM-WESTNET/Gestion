@@ -116,7 +116,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
-            <?php if (User::canRoute('/sale/customer/send-message')):?>
+            <?php if (User::hasPermission('can-send-customer-messages')):?>
             <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
                 <div class="dropdown">
                     <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
