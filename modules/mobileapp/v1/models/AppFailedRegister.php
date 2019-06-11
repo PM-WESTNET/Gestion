@@ -183,10 +183,10 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
                     $ticket->customer_id = $customer->customer_id;
                     $ticket->category_id = $category->category_id;
                     $ticket->status_id = $status_id;
-                    $ticket->userModelId = 1;
+                    $ticket->user_id = 1;
 
-                    if ($ticket->save()) {
-                        Ticket::assignTicketToUser($ticket->ticket_id, $category->responsible_user_id);
+                    if ($ticket->save() && Ticket::assignTicketToUser($ticket->ticket_id, $category->responsible_user_id)) {
+                        //Ticket::assignTicketToUser($ticket->ticket_id, $category->responsible_user_id);
                         $this->updateAttributes(['ticket_id' => $ticket->ticket_id]);
                     }
 
