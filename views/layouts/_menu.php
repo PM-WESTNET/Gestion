@@ -202,6 +202,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports/up-down-variation']],
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
+        ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
     ]];
 
     //Reportes por empresa

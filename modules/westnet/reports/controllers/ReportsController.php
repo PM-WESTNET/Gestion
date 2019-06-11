@@ -3,12 +3,10 @@
 namespace app\modules\westnet\reports\controllers;
 
 use app\modules\config\models\Config;
-use app\modules\ticket\models\Category;
+use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
-use app\modules\westnet\reports\search\CustomerSearch;
 use app\modules\westnet\reports\search\ReportSearch;
-use Codeception\PHPUnit\ResultPrinter\Report;
 use Yii;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
@@ -613,6 +611,23 @@ class ReportsController extends Controller
             'labels_udv' => $labels_udv,
             'datasets_udv' => $datasets_udv
 
+        ]);
+    }
+
+    /**
+     * @return string
+     * Devuelve una vista con la catidad de clientes activos, el procentaje de clientes que tienen intalada la app, y el porcentaje de clientes que hacen uso activo de la app
+     */
+    public function actionMobileApp()
+    {
+        $config_min_last_update = Config::getValue('month-qty-to-declare-app-uninstalled');
+        Yii::$app->session->setFlash('info', "Se considera como desintalada la app cuando el último uso registrado de la app es mayor a $config_min_last_update meses. <br> La cantidad de meses que se tiene en cuenta para este cálculo puede ser configurable desde Home->Aplicación->Mobile app->Meses para declarar la app desintalada");
+        $search = new UserAppActivitySearch();
+        $statistics = $search->searchStatistics(Yii::$app->request->get());
+
+        return $this->render('/reports/mobile-app', [
+            'searchModel' => $search,
+            'statistics' => $statistics
         ]);
     }
 }

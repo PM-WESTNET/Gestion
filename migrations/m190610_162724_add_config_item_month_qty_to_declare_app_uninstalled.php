@@ -5,7 +5,7 @@ use app\modules\config\models\Config;
 use app\modules\config\models\Item;
 use yii\db\Migration;
 
-class m190610_1622724_add_config_item_month_qty_to_declare_app_uninstalled extends Migration
+class m190610_162724_add_config_item_month_qty_to_declare_app_uninstalled extends Migration
 {
 
     public function init()

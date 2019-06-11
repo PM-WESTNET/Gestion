@@ -110,11 +110,22 @@ class UserApp extends \app\components\db\ActiveRecord
      */
     public function getUserAppHasCustomers()
     {
-        return $this->hasMany(UserAppHasCustomer::className(), ['user_app_id' => 'user_app_id']);
+        return $this->hasMany(UserAppHasCustomer::class, ['user_app_id' => 'user_app_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCustomers(){
-        return $this->hasMany(Customer::className(), ['customer_id' => 'customer_id'])->viaTable('user_app_has_customer', ['user_app_id' => 'user_app_id']);
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->viaTable('user_app_has_customer', ['user_app_id' => 'user_app_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActivity()
+    {
+        return $this->hasOne(UserAppActivity::class, ['user_app_id' => 'user_app_id']);
     }
              
     /**
@@ -205,6 +216,4 @@ class UserApp extends \app\components\db\ActiveRecord
 
         return $uahc->save();
     }
-
-
 }

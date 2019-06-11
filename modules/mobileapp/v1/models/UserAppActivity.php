@@ -70,7 +70,8 @@ class UserAppActivity extends \yii\db\ActiveRecord
         if(!$user_app_activity_exists) {
             $user_app_activity = new UserAppActivity([
                 'user_app_id' => $user_app_id,
-                'installation_datetime' => (new \DateTime('now'))->getTimestamp()
+                'installation_datetime' => (new \DateTime('now'))->getTimestamp(),
+                'last_activity_datetime' => (new \DateTime('now'))->getTimestamp(),
             ]);
 
             if($return_model && $user_app_activity->save()) {

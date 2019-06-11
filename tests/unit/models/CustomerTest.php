@@ -19,6 +19,8 @@ use app\tests\fixtures\PaymentFixture;
 use app\modules\config\models\Category;
 use app\modules\ticket\models\Ticket;
 use app\tests\fixtures\TicketStatusFixture;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -337,8 +339,120 @@ class CustomerTest extends \Codeception\Test\Unit
         }
 
         expect('Cant open file', true)->false();
+    }
 
+    public function testHasMobileAppInstalledWhenCustomerDoesntHaveAUserApp()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
 
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
 
+        expect('Doesnt have mobile app installed', $model->hasMobileAppInstalled())->false();
+    }
+
+    public function testHasMobileAppInstalledWhenCustomerHaveAUserApp()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+
+        expect('Has mobile app installed', $model->hasMobileAppInstalled())->true();
+    }
+
+    public function testHasMobileAppInstalledWhenCustomerHaveAUserAppAndPeriodExpired()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled') + 1;
+        $old_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period months")->getTimestamp();
+        $user_app->activity->updateAttributes(['last_activity_datetime' => $old_last_activity]);
+
+        expect('Last mobile app activity its too old to be considered installed', $model->hasMobileAppInstalled())->false();
+    }
+
+    public function testLastMobileAppUse()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        expect('Last use is not defined', $model->lastMobileAppUse())->isEmpty();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+
+        expect('Last use is not empty', $model->lastMobileAppUse(true))->notEmpty();
+        expect('Last use is today', $model->lastMobileAppUse(true))->equals((new \DateTime('now'))->format('Y-m-d'));
     }
 }

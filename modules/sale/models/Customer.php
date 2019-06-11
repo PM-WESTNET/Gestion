@@ -8,6 +8,8 @@ use app\modules\accounting\models\Account;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\config\models\Config;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Vendor;
@@ -414,6 +416,10 @@ class Customer extends ActiveRecord {
 
     public function getContracts() {
         return $this->hasMany(Contract::className(), ['customer_id' => 'customer_id']);
+    }
+
+    public function getUserApps() {
+        return $this->hasMany(UserApp::class, ['user_app_id' => 'user_app_id'])->viaTable('user_app_has_customer', ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -1335,5 +1341,56 @@ class Customer extends ActiveRecord {
         }
 
         return $results;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     * Determina si el cliente tiene la app instalada.
+     * En el caso de tener asignado mas de un UserApp asociado, si al menos uno lo tiene instalado devuelve true;
+     * También verifica que la última actividad sea en el rango de fecha que se detemina con el parametro de configuración
+     */
+    public function hasMobileAppInstalled()
+    {
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+        $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+        $has_mobile_app_installed = false;
+
+        if($this->getUserApps()->exists()) {
+            foreach ($this->userApps as $user_app) {
+
+                if($user_app->activity->last_activity_datetime >= $date_min_last_activity) {
+                    $has_mobile_app_installed = true;
+                }
+            }
+        }
+
+        return $has_mobile_app_installed;
+    }
+
+    /**
+     * @return array|string|\yii\db\ActiveRecord|null
+     * Devuelve el último uso de la aplicación
+     */
+    public function lastMobileAppUse($formated = false)
+    {
+        $last_use = '';
+
+        if($this->getUserApps()->exists()) {
+            $user_app_ids = [];
+
+            foreach ($this->userApps as $user_app) {
+                array_push($user_app_ids, $user_app->user_app_id);
+            }
+
+            $activity = UserAppActivity::find()->where(['in','user_app_id', $user_app_ids])->orderBy(['last_activity_datetime' => SORT_DESC])->one();
+            $last_use = $activity ? $activity->last_activity_datetime : '';
+        }
+
+        if($formated && $last_use) {
+            return (new \DateTime())->setTimestamp($last_use)->format('Y-m-d');
+        }
+
+        return $last_use;
     }
 }

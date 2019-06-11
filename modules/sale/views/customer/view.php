@@ -276,6 +276,22 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ];
 
+    $attributes[] = [
+        'label' => Yii::t('app', 'Has mobile app installed'),
+        'value' => function ($model) {
+            return $model->hasMobileAppInstalled() ? Yii::t('app', 'Yes') : Yii::t('app', 'No');
+        },
+    ];
+
+    if($model->hasMobileAppInstalled()) {
+        $attributes[] = [
+            'label' => Yii::t('app', 'Last app use'),
+            'value' => function ($model) {
+                $last_use = $model->lastMobileAppUse(true);
+                return $last_use ? $last_use : '';
+            },
+        ];
+    }
     
     echo DetailView::widget([
         'model' => $model,
