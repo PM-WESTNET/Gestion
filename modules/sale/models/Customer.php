@@ -1428,13 +1428,17 @@ class Customer extends ActiveRecord {
     {
         $id_customer_message = Config::getValue('link-to-app-customer-message-id');
         $customer_message = CustomerMessage::findOne($id_customer_message);
+        $is_developer_mode = Config::getValue('is_developer_mode');
 
         if($this->canSendSMSMessage() && $customer_message) {
-
-            $result = $customer_message->send($this);
-            if(array_key_exists('status', $result)) {
-                return  $result['status'] == 'success' ? true : false;
+            //Sólo hago el envío de los mensajes con los links de la app si no está en modo de desarrollo
+            if(!$is_developer_mode) {
+                $result = $customer_message->send($this);
+                if (array_key_exists('status', $result)) {
+                    return $result['status'] == 'success' ? true : false;
+                }
             }
+            return true;
         }
 
         return false;

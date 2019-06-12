@@ -279,7 +279,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ];
 
     $attributes[] = [
-        'label' => Yii::t('app', 'Has mobile app installed'),
+        'label' => Yii::t('app', 'Has mobile app installed').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
         'value' => function ($model) {
             return $model->hasMobileAppInstalled() ? Yii::t('app', 'Yes') : Yii::t('app', 'No');
         },
@@ -287,7 +287,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     if($model->hasMobileAppInstalled()) {
         $attributes[] = [
-            'label' => Yii::t('app', 'Last app use'),
+            'label' => Yii::t('app', 'Last app use').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
             'value' => function ($model) {
                 $last_use = $model->lastMobileAppUse(true);
                 return $last_use ? $last_use : '';
