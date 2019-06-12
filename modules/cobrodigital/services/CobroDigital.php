@@ -49,7 +49,11 @@ class CobroDigital
      */
     public static function crearPagador($customer_code, $customer_document_number, $customer_email)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -69,12 +73,15 @@ class CobroDigital
             ])
             ->send();
 
-        if(!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -84,7 +91,11 @@ class CobroDigital
      */
     public static function editarPagadorByCustomerCode($customer_code, $new_customer_document_number, $new_customer_email)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -106,12 +117,15 @@ class CobroDigital
             ])
             ->send();
 
+        $response = $response->getData();
         if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -119,10 +133,13 @@ class CobroDigital
      * @return bool
      * @throws \yii\base\InvalidConfigException
      */
-    //TODO ver si no es necesario el resto de datos en la peticion. Documentacion: Nota: si se desea editar el pagador de asociado a un código de barras de pago abierto “TARJETA DE COBRANZA”. En el campo “identificador” se deberá enviar “codigo_de_barras” y en el campo “buscar” El código en cuestión, en el campo pagador todos los campos de la estructura de clientes. Incluido el campo “TARJETA y COD ELECTRONICO”, estos últimos datos son provistos por CobroDigital.
-    public static function editarPagadorBy19DigitsCode($code, $customer_code, $customer_document_number, $customer_email)
+    public static function editarPagadorBy29DigitsCode($code, $customer_code, $customer_document_number, $customer_email)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -144,12 +161,15 @@ class CobroDigital
             ])
             ->send();
 
+        $response = $response->getData();
         if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -175,7 +195,11 @@ class CobroDigital
      */
     public static function consultarTransacciones($date_from, $date_to, $filtros, $offset, $limit, $tipo)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -196,12 +220,15 @@ class CobroDigital
             ])
             ->send();
 
-        if(!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -220,7 +247,11 @@ class CobroDigital
      */
     public static function generarBoleta($customer_code, $concept, $template, $due_dates, $amount)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -241,12 +272,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -260,7 +294,11 @@ class CobroDigital
      */
     public static function inhabilitarBoleta($numero_de_boleta)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -276,12 +314,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -292,7 +333,11 @@ class CobroDigital
      */
     public static function obtenerCodigoDeBarraDeUnaBoleta($numero_de_boleta)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -308,12 +353,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -324,7 +372,11 @@ class CobroDigital
      */
     public static function obtenerCodigoDeUnPagador($customer_code)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -341,12 +393,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -357,7 +412,11 @@ class CobroDigital
      */
     public static function verificarExistenciaPagador($customer_code)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -374,12 +433,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -393,7 +455,11 @@ class CobroDigital
      */
     public static function consultarActividadMicrositio($customer_code, $date_from, $date_to)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -412,12 +478,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -427,7 +496,11 @@ class CobroDigital
      */
     public static function consultarEstructuraPagadores()
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -442,12 +515,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -466,7 +542,11 @@ class CobroDigital
      */
     public static function consultarBoletas($date_from, $date_to, $filtros)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -484,12 +564,15 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 
     /**
@@ -500,7 +583,11 @@ class CobroDigital
      */
     public static function obtenerBoletaHTML($numero_de_boleta)
     {
-        $client = new Client();
+        $client = new Client([
+            'responseConfig' => [
+                'format' => Client::FORMAT_JSON
+            ],
+        ]);
         $url = Config::getValue('cobrodigital-url');
         $id = Config::getValue('cobrodigital-user');
         $sid = Config::getValue('cobrodigital-password');
@@ -516,11 +603,14 @@ class CobroDigital
             ])
             ->send();
 
-        if (!$response['ejecucion_correcta']) {
+        $response = $response->getData();
+        if($response['ejecucion_correcta']) {
+            return true;
+        } else {
             \Yii::$app->session->setFlash($response['log']);
             return false;
         }
 
-        return $response['datos'];
+        return false;
     }
 }

@@ -11,6 +11,7 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\checkout\models\Track;
 use app\modules\cobrodigital\models\PaymentCard;
+use app\modules\cobrodigital\services\CobroDigital;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
@@ -1464,10 +1465,11 @@ class Customer extends ActiveRecord {
     {
         if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_19_digits && !$this->payment_code_29_digits) {
             $unused_payment_card = PaymentCard::find()->where(['used' => 0])->one();
-
-            $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
-            $unused_payment_card->updateAttributes(['used' => 1]);
-            return true;
+            if(CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
+                $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
+                $unused_payment_card->updateAttributes(['used' => 1]);
+                return true;
+            }
         }
 
         return false;
