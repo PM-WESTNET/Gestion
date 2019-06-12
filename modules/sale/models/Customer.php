@@ -1460,11 +1460,11 @@ class Customer extends ActiveRecord {
      * Asocia los codigos de una tarjeta disponible al cliente solo si la empresa a la que pertenece tiene habilitado un canal de pago con tarjetas de cobro.
      * Marca la tarjeta de cobro como usada
      */
-    //TODO hacer la comunicacion con la api de cobro digital
     public function associatePaymentCard()
     {
         if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_19_digits && !$this->payment_code_29_digits) {
             $unused_payment_card = PaymentCard::find()->where(['used' => 0])->one();
+            //Se edita el pagador "vacío" en cobro digital, para que puedan incluirse los datos del cliente
             if(CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
                 $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
                 $unused_payment_card->updateAttributes(['used' => 1]);

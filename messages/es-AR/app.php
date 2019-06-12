@@ -1143,4 +1143,5 @@
     'Last app use' => 'Último uso de la aplicación',
     'Last activity from' => 'Última actividad desde',
     'Last activity to' => 'Última actividad hasta',
+    'The payment cards quantity is lower than the minimun' => 'La cantidad de tarjetas de cobro disponible es menor al mínimo requerido'
 );
