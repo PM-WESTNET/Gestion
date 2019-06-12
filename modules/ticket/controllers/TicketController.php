@@ -393,7 +393,6 @@ class TicketController extends Controller
         }
 
         $search->category_id = $category->category_id;
-        $search->user_id = Yii::$app->user->id;
 
         $dataProvider = $search->search(Yii::$app->request->getQueryParams());
 
