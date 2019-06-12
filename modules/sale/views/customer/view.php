@@ -116,18 +116,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
+
             <?php if (User::canRoute('/sale/customer/send-message')):?>
             <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
                 <div class="dropdown">
                     <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                     <?php echo ($model->SMSCount >= (int)\app\modules\config\models\Config::getValue('sms_per_customer') ? 'disabled': '')?>>
-                        <?php echo '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
+                     <?= $model->canSendSMSMessage() ? '': 'disabled'?>>
+                        <?= '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="send-message">
                         <?php foreach ($messages as $message):?>
                             <li>
-                                <?php echo \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
+                                <?= \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
                             </li>
                         <?php endforeach;?>
                     </ul>

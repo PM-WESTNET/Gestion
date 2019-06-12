@@ -7,6 +7,7 @@
  */
 
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\CustomerHasCustomerMessage;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\CustomerClassFixture;
@@ -21,6 +22,7 @@ use app\modules\ticket\models\Ticket;
 use app\tests\fixtures\TicketStatusFixture;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
+use app\tests\fixtures\CustomerMessageFixture;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -58,6 +60,9 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'document_type_id' => [
                 'class' => DocumentTypeFixture::class
+            ],
+            'customer_message' => [
+                'class' => CustomerMessageFixture::class
             ]
         ];
     }
@@ -455,4 +460,57 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Last use is not empty', $model->lastMobileAppUse(true))->notEmpty();
         expect('Last use is today', $model->lastMobileAppUse(true))->equals((new \DateTime('now'))->format('Y-m-d'));
     }
+
+    public function testCanSendSMSMessage()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        expect('Customer can send messages', $model->canSendSMSMessage())->true();
+
+        $sms_per_customer = Config::getValue('sms_per_customer');
+
+        for($i=0; $i<$sms_per_customer +1; $i++){
+            $customer_message = new CustomerHasCustomerMessage([
+                'customer_id' => $model->customer_id,
+                'customer_message_id' => 1,
+                'timestamp' => (new \DateTime('now'))->getTimestamp()
+            ]);
+            $customer_message->save();
+        }
+
+        expect('Customer cant send more messages', $model->canSendSMSMessage())->false();
+    }
+
+    public function testSendMobileAppLinkSMSMessage() {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'phone' => '2612575620',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        Config::setValue('link-to-app-customer-message-id', 1);
+
+        expect('Can send SMS message to customer', $model->sendMobileAppLinkSMSMessage())->true();
+    }
+
+    //TODO resto de la clase
 }

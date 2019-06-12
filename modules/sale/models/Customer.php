@@ -1406,4 +1406,37 @@ class Customer extends ActiveRecord {
 
         return $this->getCustomerHasCustomerMessages()->andWhere(['>=', 'timestamp', $first_day])->andWhere(['<', 'timestamp', ($last_day + 86400)])->count();
     }
+
+    /**
+     * @return bool
+     * Indica si se puede enviar mas SMS al cliente.
+     */
+    public function canSendSMSMessage()
+    {
+        if($this->SMSCount <= (int)Config::getValue('sms_per_customer')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     * Envía un mensaje SMS con los links de descarga de la aplicación móvil
+     */
+    public function sendMobileAppLinkSMSMessage()
+    {
+        $id_customer_message = Config::getValue('link-to-app-customer-message-id');
+        $customer_message = CustomerMessage::findOne($id_customer_message);
+
+        if($this->canSendSMSMessage() && $customer_message) {
+
+            $result = $customer_message->send($this);
+            if(array_key_exists('status', $result)) {
+                return  $result['status'] == 'success' ? true : false;
+            }
+        }
+
+        return false;
+    }
 }
