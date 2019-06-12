@@ -3,6 +3,7 @@
 use app\modules\checkout\models\CompanyHasPaymentTrack;
 use app\modules\cobrodigital\models\PaymentCard;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\CustomerHasCustomerMessage;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\CustomerClassFixture;
@@ -22,6 +23,9 @@ use app\tests\fixtures\CompanyHasPaymentTrackFixture;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\CustomerHasPaymentTrack;
 use app\modules\checkout\models\Track;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
+use app\tests\fixtures\CustomerMessageFixture;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -62,6 +66,12 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'company_has_payment_track' => [
                 'class' => CompanyHasPaymentTrackFixture::class
+            ],
+            'document_type_id' => [
+                'class' => DocumentTypeFixture::class
+            ],
+            'customer_message' => [
+                'class' => CustomerMessageFixture::class
             ]
         ];
     }
@@ -79,9 +89,13 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 3,
             'document_type_id' => 2,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
             'customerClass' => 1
         ]);
+
+        $model->validate();
+        \Codeception\Util\Debug::debug($model->getErrors());
 
         expect('Valid when full and new', $model->validate())->true();
     }
@@ -97,7 +111,8 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '27381010673',
+            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -112,7 +127,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Apellido',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -124,7 +140,7 @@ class CustomerTest extends \Codeception\Test\Unit
         $model = new Customer([
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -177,7 +193,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '27381010673',
+            'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -193,7 +209,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
-            'document_number' => '20175137611',
+            'document_number' => '20-14978176-6',
             'document_type_id' => 1,
             'customerClass' => 1,
             'customerCategory' => 1,
@@ -206,7 +222,7 @@ class CustomerTest extends \Codeception\Test\Unit
 
         $updatedModel = Customer::findOne($model2->customer_id);
 
-        $updatedModel->document_number = '20358752250';
+        $updatedModel->document_number = '23-29834800-4';
         $updatedModel->_notifications_way = [Customer::getNotificationWays()];
 
         expect('Failed', $updatedModel->save())->true();
@@ -237,22 +253,6 @@ class CustomerTest extends \Codeception\Test\Unit
         ]);
 
         expect('Failed', $model->validateCustomer())->equals(['status' => 'new']);
-    }
-
-    public function testForceCustomerCode()
-    {
-        $model = new Customer([
-            'tax_condition_id' => 1,
-            'publicity_shape' => 'web',
-            'document_number' => '20175137611',
-            'customerClass' => 1,
-            'document_type_id' => 1,
-            '_notifications_way' => [Customer::getNotificationWays()],
-            'code' => 11111
-        ]);
-        $model->save();
-
-        expect('Code cant be forced', $model->code)->notEquals(11111);
     }
 
     public function  testNeedsUpdate()
@@ -354,7 +354,75 @@ class CustomerTest extends \Codeception\Test\Unit
         }
 
         expect('Cant open file', true)->false();
+    }
 
+    public function testHasMobileAppInstalledWhenCustomerDoesntHaveAUserApp()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        expect('Doesnt have mobile app installed', $model->hasMobileAppInstalled())->false();
+    }
+
+    public function testHasMobileAppInstalledWhenCustomerHaveAUserApp()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+
+        expect('Has mobile app installed', $model->hasMobileAppInstalled())->true();
+    }
+
+    public function testHasMobileAppInstalledWhenCustomerHaveAUserAppAndPeriodExpired()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
     }
 
     public function testAssociateEmptyAds()
@@ -515,5 +583,104 @@ class CustomerTest extends \Codeception\Test\Unit
         }
 
         expect('Payment metod exists in array', $payment_method_name_exists)->true();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled') + 1;
+        $old_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period months")->getTimestamp();
+        $user_app->activity->updateAttributes(['last_activity_datetime' => $old_last_activity]);
+
+        expect('Last mobile app activity its too old to be considered installed', $model->hasMobileAppInstalled())->false();
     }
+
+    public function testLastMobileAppUse()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        $user_app = new UserApp([
+            'email' => 'customer@gmail.com',
+            'status' => 'active',
+            'document_number' => '23-29834800-4',
+        ]);
+        $user_app->save();
+
+        expect('Last use is not defined', $model->lastMobileAppUse())->isEmpty();
+
+        $user_app->addCustomer($model, true);
+        UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
+
+        expect('Last use is not empty', $model->lastMobileAppUse(true))->notEmpty();
+        expect('Last use is today', $model->lastMobileAppUse(true))->equals((new \DateTime('now'))->format('Y-m-d'));
+    }
+
+    public function testCanSendSMSMessage()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        expect('Customer can send messages', $model->canSendSMSMessage())->true();
+
+        $sms_per_customer = Config::getValue('sms_per_customer');
+
+        for($i=0; $i<$sms_per_customer +1; $i++){
+            $customer_message = new CustomerHasCustomerMessage([
+                'customer_id' => $model->customer_id,
+                'customer_message_id' => 1,
+                'timestamp' => (new \DateTime('now'))->getTimestamp()
+            ]);
+            $customer_message->save();
+        }
+
+        expect('Customer cant send more messages', $model->canSendSMSMessage())->false();
+    }
+
+    public function testSendMobileAppLinkSMSMessage() {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'phone' => '2612575620',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        Config::setValue('link-to-app-customer-message-id', 1);
+
+        expect('Can send SMS message to customer', $model->sendMobileAppLinkSMSMessage())->true();
+    }
+
+    //TODO resto de la clase
 }

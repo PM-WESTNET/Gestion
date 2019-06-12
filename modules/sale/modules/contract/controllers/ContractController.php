@@ -776,6 +776,7 @@ class ContractController extends Controller {
             if ($connection->save() && $model->save()) {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
+                    $model->customer->sendMobileAppLinkSMSMessage();
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }

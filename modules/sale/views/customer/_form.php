@@ -1,8 +1,6 @@
 <?php
 
 use app\modules\accounting\models\Account;
-use app\modules\checkout\models\PaymentMethod;
-use app\modules\checkout\models\Track;
 use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -18,6 +16,7 @@ use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
 use app\modules\sale\models\Company;
 use webvimark\modules\UserManagement\models\User;
+
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Customer $model

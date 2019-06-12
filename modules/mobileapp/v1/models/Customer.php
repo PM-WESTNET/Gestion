@@ -10,6 +10,7 @@ namespace app\modules\mobileapp\v1\models;
 
 
 use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\config\models\Config;
 use app\modules\sale\models\search\CustomerSearch;
 
 class Customer extends \app\modules\sale\models\Customer
@@ -28,8 +29,7 @@ class Customer extends \app\modules\sale\models\Customer
             'phone2',
             'phone3',
             'email2',
-
-
+            'payment_code'
         ];
     }
 
@@ -224,5 +224,13 @@ class Customer extends \app\modules\sale\models\Customer
         error_log($clean_document);
 
         return $clean_document;
+    }
+
+    public function getShowBills() {
+        if ($this->company_id != Config::getValue('ecopagos_company_id')) {
+            return true;
+        }
+
+        return false;
     }
 }

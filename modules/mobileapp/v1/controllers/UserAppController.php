@@ -15,6 +15,7 @@ use app\modules\mobileapp\v1\components\Controller;
 use app\modules\mobileapp\v1\models\AppFailedRegister;
 use app\modules\mobileapp\v1\models\Customer;
 use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\mobileapp\v1\models\UserAppHasCustomer;
 use app\modules\mobileapp\v1\models\ValidationCode;
 use app\modules\sale\models\Bill;
@@ -42,7 +43,8 @@ class UserAppController extends Controller
         'verify-data',
         'set-document-number',
         'create-app-failed-register',
-        'customer-data'
+        'customer-data',
+        'get-contact-info',
     ];
 
     public function actions()
@@ -191,6 +193,7 @@ class UserAppController extends Controller
         }
 
         if ($customer && $model->load($data, '') && $model->save()){
+            UserAppActivity::createInstallationRegister($model->user_app_id);
             return true;
         }
 
@@ -328,6 +331,7 @@ class UserAppController extends Controller
      */
     public function actionView(){
         $model= $this->getUserApp();
+        UserAppActivity::updateLastActivity($model->user_app_id);
 
         return $model;
     }
@@ -872,6 +876,26 @@ class UserAppController extends Controller
         return [
           'status' => 'error',
           'errors' => $failed_register->getErrors()
+        ];
+    }
+
+    /**
+     * Devuelve la info de contacto para mostrar en la pantalla de login
+     * @return array
+     */
+    public function actionGetContactInfo()
+    {
+        $info = Config::getValue('app_contact_info');
+        $tecnico = Config::getValue('app_ws_tecnico');
+        $admin = Config::getValue('app_ws_admin');
+        $ventas = Config::getValue('app_ws_ventas');
+
+        return [
+            'status' => 'success',
+            'info' => $info,
+            'tecnico' => $tecnico,
+            'admin' => $admin,
+            'ventas' => $ventas
         ];
     }
 

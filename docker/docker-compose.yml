@@ -36,13 +36,12 @@ services:
         networks:
             - docker-net
 
-    #rex-pdf:
-     #   container_name: rex-pdf
-      #  build: pdf-service
-       # ports:
-        #    - "8184:5001"
-       # networks:
-        #    - docker-net
+    pdf-service:
+        container_name: pdf-service
+        build: pdf-service
+        ports:
+            - "5001:5001"
+        restart: always
 
 networks:
     docker-net:

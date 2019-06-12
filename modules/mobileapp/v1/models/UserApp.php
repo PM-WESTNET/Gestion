@@ -85,7 +85,10 @@ class UserApp extends \app\components\db\ActiveRecord
         foreach ($this->customers as $key => $customer){
             $accounts[] = [
                 'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->name .' - '. $customer->code,
+                'showBills' => $customer->showBills,
                 'data' => $customer->getAccount()
             ];
         }
@@ -107,11 +110,22 @@ class UserApp extends \app\components\db\ActiveRecord
      */
     public function getUserAppHasCustomers()
     {
-        return $this->hasMany(UserAppHasCustomer::className(), ['user_app_id' => 'user_app_id']);
+        return $this->hasMany(UserAppHasCustomer::class, ['user_app_id' => 'user_app_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getCustomers(){
-        return $this->hasMany(Customer::className(), ['customer_id' => 'customer_id'])->viaTable('user_app_has_customer', ['user_app_id' => 'user_app_id']);
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->viaTable('user_app_has_customer', ['user_app_id' => 'user_app_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActivity()
+    {
+        return $this->hasOne(UserAppActivity::class, ['user_app_id' => 'user_app_id']);
     }
              
     /**
@@ -202,6 +216,4 @@ class UserApp extends \app\components\db\ActiveRecord
 
         return $uahc->save();
     }
-
-
 }

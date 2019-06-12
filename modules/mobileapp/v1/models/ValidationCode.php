@@ -6,6 +6,7 @@ use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\mailing\models\EmailTransport;
 use app\modules\sale\models\Company;
+use app\modules\westnet\notifications\components\transports\InfobipService;
 use Yii;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
 
@@ -109,7 +110,7 @@ class ValidationCode extends \app\components\db\ActiveRecord
     }
 
     public function sendCodeSms($destinatary){
-        $response = IntegratechService::sendSMS($destinatary, str_replace('{code}', $this->code, Config::getValue('sms_validation_content')));
+        $response = InfobipService::sendSimpleSMS(Config::getValue('infobip_origin_number'), $destinatary, str_replace('{code}', $this->code, Config::getValue('sms_validation_content')));
 
         if($response['status'] == 'success'){
             return true;

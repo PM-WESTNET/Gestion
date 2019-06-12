@@ -116,17 +116,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
+
             <?php if (User::canRoute('/sale/customer/send-message')):?>
             <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
                 <div class="dropdown">
-                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <?php echo '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
+                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                     <?= $model->canSendSMSMessage() ? '': 'disabled'?>>
+                        <?= '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="send-message">
                         <?php foreach ($messages as $message):?>
                             <li>
-                                <?php echo \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
+                                <?= \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
                             </li>
                         <?php endforeach;?>
                     </ul>
@@ -283,6 +285,22 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ];
 
+    $attributes[] = [
+        'label' => Yii::t('app', 'Has mobile app installed').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+        'value' => function ($model) {
+            return $model->hasMobileAppInstalled() ? Yii::t('app', 'Yes') : Yii::t('app', 'No');
+        },
+    ];
+
+    if($model->hasMobileAppInstalled()) {
+        $attributes[] = [
+            'label' => Yii::t('app', 'Last app use').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+            'value' => function ($model) {
+                $last_use = $model->lastMobileAppUse(true);
+                return $last_use ? $last_use : '';
+            },
+        ];
+    }
     
     echo DetailView::widget([
         'model' => $model,

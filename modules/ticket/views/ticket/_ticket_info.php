@@ -66,7 +66,11 @@ use yii\widgets\LinkPager;
                 <strong><?= $model->getAttributeLabel('user_id'); ?></strong>
             </div>
             <div class="col-lg-10">
-                <?= $model->user->username; ?>
+                <?php
+                    if ($model->user){
+                        echo $model->user->username;
+                    }
+                    ?>
             </div>
         </div>
     </li>

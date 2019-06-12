@@ -94,8 +94,8 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
 
             <div class="col-xs-6">
                 <?= $form->field($model, 'category_id')->dropdownList(ArrayHelper::map(Category::find()->all(), 'category_id', 'name'), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
+                    'encode' => false,
+                    'separator' => '<br/>',
                     'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                         'modelClass' => AgendaModule::t('app', 'Category'),
                     ]),
@@ -147,8 +147,8 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
             </div>
             <div class="col-xs-6">
                 <?= $form->field($model, 'status_id')->dropdownList(ArrayHelper::map(Status::find()->all(), 'status_id', 'name'), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
+                    'encode' => false,
+                    'separator' => '<br/>',
                     'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
                         'modelClass' => AgendaModule::t('app', 'Status'),
                     ]),
@@ -295,7 +295,7 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
     <?= $this->registerJs("Task.setCreateEventInputUrl('" . Url::to(['/agenda/event/build-note'], true) . "');"); ?>
     <?= $this->registerJs("Task.setFindCategoryDefaultDurationUrl('". Url::to(['/agenda/category/fetch-category'], true) ."');"); ?>
     <?= $this->registerJs("Task.setGetUserByUsernameUrl('". Url::to(['/agenda/user-group/get-user-by-username'], true) ."');"); ?>
-        
+
     <?=
     $this->registerJs("Task.disableUserInput(parseInt(" . TaskType::findOne([
                 'slug' => TaskType::TYPE_GLOBAL

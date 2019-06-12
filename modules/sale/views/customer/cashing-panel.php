@@ -12,6 +12,7 @@ use yii\helpers\ArrayHelper;
 use yii\bootstrap\Modal;
 use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
+use app\modules\config\models\Config;
 
 /**
  * @var View $this
@@ -109,6 +110,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <input class="text hidden" name="customer_codes" id="massive-assign-customer-codes">
 
+        <input type="hidden" name="category_id" value="<?php echo \app\modules\config\models\Config::getValue('cobranza_category_id')?>">
+
         <label style="padding-top: 20px"> <?= Yii::t('app', 'Assign to')?> : </label>
         <?= Select2::widget([
             'id' => 'user_id',
@@ -150,7 +153,7 @@ Modal::end();?>
         }
 
         /**
-         * Busca todos los clientes de la página renderizada y verifica que no tengan un ticket creado de la categoria cobranza,
+         * Busca todos los clientes de la página renderizada y verifica que no tengan un ticket creado de la categoria cobranza o de la categoría baja,
          * de tenerlo, desabilita el checkbox
          */
         this.markCustomersWithCobranzaTicket = function () {
@@ -161,9 +164,29 @@ Modal::end();?>
             });
 
             $.ajax({
-                url: '<?= Url::to(['/ticket/ticket/customers-has-cobranza-ticket'])?>',
+                url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
+                data: {customer_codes: codes, category_id: "<?= Config::getValue('cobranza_category_id')?>"},
                 method: 'POST',
-                data: {customer_codes: codes},
+                dataType: 'json',
+
+            }).done(function(data, status){
+                $('#masive-assign').removeAttr('disabled');
+                if (status === 'success') {
+
+                    $.each(data, function( index, value ) {
+                        if(value.has_ticket) {
+                            $('[data-key="'+value.customer_code+'"]').find('input').prop('disabled', 'disabled');
+                        }
+                    });
+                }else{
+                    console.log(data);
+                }
+            });
+
+            $.ajax({
+                url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
+                data: {customer_codes: codes, category_id: "<?= Config::getValue('baja-category-id')?>"},
+                method: 'POST',
                 dataType: 'json',
 
             }).done(function(data, status){

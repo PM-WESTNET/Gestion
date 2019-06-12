@@ -30,6 +30,9 @@ class GenerateActionBehavior extends Behavior
      */
     public function events()
     {
+        /**TODO: Creo que seria mejor que esto se disparase en el AFTER_UPDATE, porque corre el riesgo de generarse la accion y que
+         * el ticket no se actualice por algun problema
+         */
         return [
             ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeUpdate',
         ];

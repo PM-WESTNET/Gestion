@@ -182,7 +182,7 @@ $formatter = Yii::$app->formatter;
     <tr style="">
         <td style="width: 40%; float:left; font-size: 14px; margin-top: 80px; margin-bottom: 30px;">
             <p style="text-align: center;">________________________________________</p>
-	    <?php if($company->company_id !== 4): ?>	
+	    <?php if($company->company_id !== 4): ?>
             	<p style="text-align: center;">por <?=$company->name?></p>
 	    <?php endif;?>
         </td>
@@ -200,7 +200,7 @@ $formatter = Yii::$app->formatter;
     <tr>
         <td style="width: 50%; float:left; font-size: 12px; margin-top: 10px; margin-bottom: 30px;">
             <p style="padding-right: 20px; padding-left: 20px;">Valores que serán acreditados una vez hecho el efectivo.</p>
-	    <p style="padding-right: 20px; padding-left: 20px;">Recuerde que puede retirar su factura en nuestras oficinas.</p>	
+	    <p style="padding-right: 20px; padding-left: 20px;">Recuerde que puede retirar su factura en nuestras oficinas.</p>
         </td>
     </tr>
     </tbody>

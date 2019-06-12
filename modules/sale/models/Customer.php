@@ -12,6 +12,8 @@ use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\checkout\models\Track;
 use app\modules\cobrodigital\models\PaymentCard;
 use app\modules\config\models\Config;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Vendor;
@@ -423,6 +425,15 @@ class Customer extends ActiveRecord {
 
     public function getContracts() {
         return $this->hasMany(Contract::className(), ['customer_id' => 'customer_id']);
+    }
+
+    public function getUserApps() {
+        return $this->hasMany(UserApp::class, ['user_app_id' => 'user_app_id'])->viaTable('user_app_has_customer', ['customer_id' => 'customer_id']);
+    }
+
+    public function getCustomerHasCustomerMessages()
+    {
+        return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -1360,10 +1371,15 @@ class Customer extends ActiveRecord {
      */
     public static function hasCategoryTicket($customer_code, $category_id, $is_open)
     {
+        $initMonth = (new DateTime())->modify('first day of this month');
+        $lastMonth = (new DateTime())->modify('last day of this month');
+
         $customer = Customer::findOne(['code' => $customer_code]);
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
+            ->andWhere(['>=', 'start_datetime', $initMonth->getTimestamp()])
+            ->andWhere(['<', 'start_datetime', ($lastMonth->getTimestamp() + 86400)])
             ->one();
 
         return [
@@ -1501,12 +1517,12 @@ class Customer extends ActiveRecord {
             $use_barcode = true;
 
             //Me fijo si el codigo lo tengo que tomar de payment_code_19_digits o payment_code_29_digits
-            if($type_code) {
-                if($type_code == PaymentMethod::TYPE_CODE_19) {
+            if ($type_code) {
+                if ($type_code == PaymentMethod::TYPE_CODE_19) {
                     $code = $this->payment_code_19_digits;
                     $use_barcode = false;
                 }
-                if($type_code == PaymentMethod::TYPE_CODE_29) {
+                if ($type_code == PaymentMethod::TYPE_CODE_29) {
                     $code = $this->payment_code_29_digits;
                 }
             } else {
@@ -1514,15 +1530,111 @@ class Customer extends ActiveRecord {
             }
 
             //Si llegado a este punto el código está vacio, relleno con el codigo de pago normal
-            if(!$code) {
+            if (!$code) {
                 $code = $this->payment_code;
             }
             array_push($payment_method_and_code, ['payment_method_name' => $config_payment_track->paymentMethod->name, 'code' => $code, 'use_barcode' => $use_barcode]);
         }
 
-        if(empty($payment_method_and_code)) {
+        if (empty($payment_method_and_code)) {
             array_push($payment_method_and_code, ['payment_method_name' => 'Código de pago', 'code' => $this->payment_code, 'use_barcode' => false]);
         }
         return $payment_method_and_code;
+    }
+
+     /**
+     * @return bool
+     * @throws \Exception
+     * Determina si el cliente tiene la app instalada.
+     * En el caso de tener asignado mas de un UserApp asociado, si al menos uno lo tiene instalado devuelve true;
+     * También verifica que la última actividad sea en el rango de fecha que se detemina con el parametro de configuración
+     */
+    public function hasMobileAppInstalled()
+    {
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+        $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+        $has_mobile_app_installed = false;
+
+        if($this->getUserApps()->exists()) {
+            foreach ($this->userApps as $user_app) {
+
+                if($user_app->activity->last_activity_datetime >= $date_min_last_activity) {
+                    $has_mobile_app_installed = true;
+                }
+            }
+        }
+
+        return $has_mobile_app_installed;
+    }
+
+    /**
+     * @return array|string|\yii\db\ActiveRecord|null
+     * Devuelve el último uso de la aplicación
+     */
+    public function lastMobileAppUse($formated = false)
+    {
+        $last_use = '';
+
+        if ($this->getUserApps()->exists()) {
+            $user_app_ids = [];
+
+            foreach ($this->userApps as $user_app) {
+                array_push($user_app_ids, $user_app->user_app_id);
+            }
+
+            $activity = UserAppActivity::find()->where(['in', 'user_app_id', $user_app_ids])->orderBy(['last_activity_datetime' => SORT_DESC])->one();
+            $last_use = $activity ? $activity->last_activity_datetime : '';
+        }
+
+        if ($formated && $last_use) {
+            return (new \DateTime())->setTimestamp($last_use)->format('Y-m-d');
+        }
+
+        return $last_use;
+    }
+
+    public function getSMSCount() {
+
+        $first_day = (new DateTime())->modify('first day of this month')->getTimestamp();
+        $last_day = (new DateTime())->modify('last day of this month')->getTimestamp();
+
+        return $this->getCustomerHasCustomerMessages()->andWhere(['>=', 'timestamp', $first_day])->andWhere(['<', 'timestamp', ($last_day + 86400)])->count();
+    }
+
+    /**
+     * @return bool
+     * Indica si se puede enviar mas SMS al cliente.
+     */
+    public function canSendSMSMessage()
+    {
+        if($this->SMSCount <= (int)Config::getValue('sms_per_customer')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     * Envía un mensaje SMS con los links de descarga de la aplicación móvil
+     */
+    public function sendMobileAppLinkSMSMessage()
+    {
+        $id_customer_message = Config::getValue('link-to-app-customer-message-id');
+        $customer_message = CustomerMessage::findOne($id_customer_message);
+        $is_developer_mode = Config::getValue('is_developer_mode');
+
+        if($this->canSendSMSMessage() && $customer_message) {
+            //Sólo hago el envío de los mensajes con los links de la app si no está en modo de desarrollo
+            if(!$is_developer_mode) {
+                $result = $customer_message->send($this);
+                if (array_key_exists('status', $result)) {
+                    return $result['status'] == 'success' ? true : false;
+                }
+            }
+            return true;
+        }
+
+        return false;
     }
 }

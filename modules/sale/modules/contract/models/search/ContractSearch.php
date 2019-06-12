@@ -249,7 +249,8 @@ class ContractSearch extends Contract {
             $query->andFilterWhere(['<=', 'c.date_new', $this->date_new_to]);
         }
 
-        $query->groupBy($groupBy);
+        //Se ordena la consulta, en MariaDb si la consulta no está ordenada, hay riesgos de que no siempre traiga los registros en el mismo orden
+        $query->groupBy($groupBy)->orderBy('c.customer_id');
 
         return $query;
     }
