@@ -385,15 +385,15 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
+        $search->status_id = null;
 
         $category = Category::findOne(Config::getValue('ticket-category-edicion-de-datos-id'));
 
         if (empty($category)) {
-            throw new BadRequestHttpException('Categoía de Solicitud de edición de datos no encontrada. Verifique configuración');
+            throw new BadRequestHttpException('Categoría de Solicitud de edición de datos no encontrada. Verifique configuración');
         }
 
         $search->category_id = $category->category_id;
-
         $dataProvider = $search->search(Yii::$app->request->getQueryParams());
 
         return $this->render('request-data-edition-tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);

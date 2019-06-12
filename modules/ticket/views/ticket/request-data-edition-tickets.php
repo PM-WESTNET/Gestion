@@ -168,7 +168,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'items' => [
                 [
                     'label' => $item,
-                    'content' => $this->render('_installations_filters', ['model' => $searchModel]),
+                    'content' => $this->render('_request-data-edition-filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
             ],
