@@ -375,6 +375,31 @@ class TicketController extends Controller
 
     }
 
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * Muestra un listado de tickets de  la categoría solicitud de edición de tickets.
+     */
+    public function actionContactEditionTickets()
+    {
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+
+        $category = Category::findOne(Config::getValue('ticket-category-edicion-de-datos-id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoía de Solicitud de edición de datos no encontrada. Verifique configuración');
+        }
+
+        $search->category_id = $category->category_id;
+        $search->user_id = Yii::$app->user->id;
+
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('request-data-edition-tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+    }
+
     public function actionGetObservations($id)
     {
         if (Yii::$app->request->isAjax) {

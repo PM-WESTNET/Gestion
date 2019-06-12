@@ -1012,7 +1012,7 @@
     'Select an user ...' => 'Seleccione un usuario ...',
     'Acept' => 'Aceptar',
     'Create and assing tickets' => 'Crear y asignar tickets',
-    'Cashier Manage Tickets' => 'Tickets de Gestión de Cobranza',
+    'Cashier Manage Tickets' => 'Tickets de gestión de cobranza',
     'Observations' => 'Observaciones',
     'Create Observation' => 'Crear Observación',
     'Schema' => 'Esquema de estados',
@@ -1100,7 +1100,7 @@
     'Invoice Date' => 'Fecha de facturación',
     'An error occurred while importing file: ' => 'Ha ocurrido un error al importar el archivo: ',
     'Customer not found: ' => 'Cliente no encontrado: ',
-    'Installations Manage Tickets' => 'Tickets de Gestión de Instalaciones',
+    'Installations Manage Tickets' => 'Tickets de gestión de instalaciones',
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
@@ -1117,4 +1117,7 @@
     'Last app use' => 'Último uso de la aplicación',
     'Last activity from' => 'Última actividad desde',
     'Last activity to' => 'Última actividad hasta',
+    'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
+    'Mobile app registration tickets' => 'Tickets de registro de aplicación',
+    'Request data edition tickets' => 'Tickets de solicitud de edición de datos'
 );
