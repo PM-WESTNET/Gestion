@@ -7,6 +7,7 @@ use app\modules\cobrodigital\models\PaymentCard;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use Codeception\Util\Debug;
 use Yii;
 use yii\db\Query;
 
@@ -191,6 +192,7 @@ class EmptyAds extends ActiveRecord
     {
         $codes = [];
         $associate_payment_card = false;
+        $available_qty = $qty;
 
         foreach ($parent_company->companies as $company) {
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
@@ -200,27 +202,34 @@ class EmptyAds extends ActiveRecord
             }
 
             for ($i = 0; $i < $percentage_qty; $i++) {
-                $init_value = Customer::getNewCode();
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
-                    str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+                if($available_qty > 0) {
+                    $init_value = Customer::getNewCode();
+                    $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
+                        str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
 
-                $payment_code = $generator->generate($code);
+                    $payment_code = $generator->generate($code);
 
-                $emptyAds = new EmptyAds([
-                    'code' => $init_value,
-                    'payment_code' => $payment_code,
-                    'node_id' => $node->node_id,
-                    'company_id' => $company->company_id,
-                    'used' => false,
-                ]);
-                $emptyAds->save(false);
+                    $emptyAds = new EmptyAds([
+                        'code' => $init_value,
+                        'payment_code' => $payment_code,
+                        'node_id' => $node->node_id,
+                        'company_id' => $company->company_id,
+                        'used' => false,
+                    ]);
+                    $emptyAds->save(false);
 
 
-                if($associate_payment_card) {
-                    $payment_card = $emptyAds->associatePaymentCard();
-                    $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, '', 'barcode_url' => $payment_card->url];
-                } else {
-                    $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+                    if($associate_payment_card) {
+                        $payment_card = $emptyAds->associatePaymentCard();
+                        if($payment_card instanceof PaymentCard) {
+                            $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, '', 'barcode_url' => $payment_card->url];
+                        } else {
+                            $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+                        }
+                    } else {
+                        $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value, ''];
+                    }
+                    $available_qty = $available_qty - 1;
                 }
             }
         }

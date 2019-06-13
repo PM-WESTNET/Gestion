@@ -3,6 +3,7 @@
 use app\modules\westnet\models\AdsPercentagePerCompany;
 use Codeception\Test\Unit;
 use app\tests\fixtures\CompanyFixture;
+use app\tests\fixtures\AdsPercentagePerCompanyFixture;
 
 class AdsPercentagePerCompanyTest extends Unit {
     /**
@@ -25,6 +26,9 @@ class AdsPercentagePerCompanyTest extends Unit {
         return [
             'company' => [
                 'class' => CompanyFixture::class
+            ],
+            'ads_percentage_per_company' => [
+                'class' => AdsPercentagePerCompanyFixture::class
             ]
         ];
     }
@@ -62,5 +66,25 @@ class AdsPercentagePerCompanyTest extends Unit {
         ]);
 
         expect('Saved when full and new', $model->save())->true();
+    }
+
+    public function testVerifyParentCompaniesConfigADSPercentage()
+    {
+        $result = AdsPercentagePerCompany::verifyParentCompaniesConfigADSPercentage();
+        expect('Config ADS its OK', $result['status'])->true();
+
+        AdsPercentagePerCompany::updateAll(['percentage' => 25]);
+
+        $result = AdsPercentagePerCompany::verifyParentCompaniesConfigADSPercentage();
+        expect('Config ADS its OK', $result['status'])->false();
+    }
+
+    public function testGetVerifyParentCompaniesConfigADSPercentageAsString()
+    {
+        expect('Config ADS its empty', AdsPercentagePerCompany::getVerifyParentCompaniesConfigADSPercentageAsString())->isEmpty();
+
+        AdsPercentagePerCompany::updateAll(['percentage' => 25]);
+
+        expect('Config ADS its OK', AdsPercentagePerCompany::getVerifyParentCompaniesConfigADSPercentageAsString())->notEmpty();
     }
 }

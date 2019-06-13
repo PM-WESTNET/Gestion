@@ -1425,11 +1425,17 @@ class Customer extends ActiveRecord {
      * @param $ads_code
      * @return bool
      * Asocia un ADS vacio un cliente, si el ADS tiene asociada una tarjeta de cobro, actualizo ademas los codigos de pago de 19 y 20 digitos
+     * Si la empresa padre del ADS no es la misma del cliente no se puede asociar
      */
     public function associateEmptyADS($ads_code)
     {
         $emptyAds = EmptyAds::findOne(['code' => $ads_code, 'used' => false]);
+
         if ($emptyAds) {
+            //Verifico que la empresa padre del ADS sea la misma que la empresa padre del cliente.
+            if($this->company->parent_id != $emptyAds->company->parent_id) {
+                return false;
+            }
 
             //Si el ADS tiene asociado una tarjeta de cobro, se actualizan los codigos de pago del cliente
             if ($emptyAds->getPaymentCard()->exists()) {
@@ -1464,11 +1470,19 @@ class Customer extends ActiveRecord {
     {
         if($this->company->hasEnabledTrackWithPaymentCards() && !$this->payment_code_19_digits && !$this->payment_code_29_digits) {
             $unused_payment_card = PaymentCard::find()->where(['used' => 0])->one();
-            //Se edita el pagador "vacío" en cobro digital, para que puedan incluirse los datos del cliente
-            if(CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
+
+            //Si no está en entorno de testing me conecto a la api de CobroDigital
+            if(YII_ENV_TEST){
                 $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
                 $unused_payment_card->updateAttributes(['used' => 1]);
                 return true;
+            } else {
+                //Se edita el pagador "vacío" en cobro digital, para que puedan incluirse los datos del cliente
+                if(CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
+                    $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
+                    $unused_payment_card->updateAttributes(['used' => 1]);
+                    return true;
+                }
             }
         }
 

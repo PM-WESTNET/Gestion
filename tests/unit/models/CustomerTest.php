@@ -86,8 +86,8 @@ class CustomerTest extends \Codeception\Test\Unit
     public function testValidWhenFullAndNew()
     {
         $model = new Customer([
-            'tax_condition_id' => 3,
-            'document_type_id' => 2,
+            'tax_condition_id' => 1,
+            'document_type_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
@@ -435,6 +435,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '27381010673',
             'document_type_id' => 1,
             'customerClass' => 1,
+            'company_id' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
         $model->save();
@@ -567,6 +568,8 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_type_id' => 1,
             'customerClass' => 1,
             'company_id' => 1,
+            'email' => 'customer@gmail.com',
+            'status' => 'enabled',
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
         $model->save();

@@ -663,7 +663,7 @@
   'The total must be greater than 0.' => 'El total debe ser mayor a 0.',
   'The total of items is greater than the payment.' => 'El total de items no puede ser mayor que el pago.',
   'Third Phone' => 'Celular 2',
-  'This ADS has been used before or not exist' => 'Este ADS ya ha sido usado o no existe',
+  'The ADS has been used before, its from another parent company or doesnt exist' => 'El ADS ya ha sido usado, es de otra empresa padre o no existe',
   'This account is not a daily box.' => 'Esta cuenta no es una caja diaria.',
   'This bill is completed and ready to be payed. Are you sure you want to open it again?' => 'Este comprobante se encuentra "completado" y listo para ser pagado. ¿Está seguro que desea abrirlo nuevamente?',
   'This is the unique identifier of the product. Generally, it is obtained from a barcode.' => 'Este es el único identificador del producto. Generalmente se obtiene de un código de barras.',

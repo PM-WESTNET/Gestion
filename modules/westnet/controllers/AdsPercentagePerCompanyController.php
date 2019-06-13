@@ -37,6 +37,11 @@ class AdsPercentagePerCompanyController extends Controller
      */
     public function actionIndex()
     {
+        $bad_configuration = AdsPercentagePerCompany::getVerifyParentCompaniesConfigADSPercentageAsString();
+        if($bad_configuration) {
+            Yii::$app->session->setFlash('error', $bad_configuration);
+        }
+
         $child_companies = Company::find()
             ->leftJoin('ads_percentage_per_company appc', 'appc.company_id = company.company_id and appc.parent_company_id = company.parent_id')
             ->where(['not',['company.parent_id' => null]])

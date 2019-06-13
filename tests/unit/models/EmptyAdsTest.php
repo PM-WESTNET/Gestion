@@ -118,7 +118,7 @@ class EmptyAdsTest extends \Codeception\Test\Unit
         $codes = EmptyAds::createEmptyAds($company, $node, 10);
 
         expect('Result is not empty cuase the company param is a parent company', $codes)->notEmpty();
-        expect('Result has 10 items', count($codes))->equals(11);
+        expect('Result has 10 items', count($codes))->equals(10);
         expect('Result has key payment_code', array_key_exists('payment_code',$codes[0]))->true();
         expect('Result has key code', array_key_exists('code',$codes[0]))->true();
         expect('Theres 10 empty ads', count(EmptyAds::find()->all()) >= $previous_empty_ads + 10 );
@@ -139,9 +139,9 @@ class EmptyAdsTest extends \Codeception\Test\Unit
 
         PaymentCard::updateAll(['used' => 0]);
 
-        $payment_card_id = $model->associatePaymentCard();
-        expect('Payment card associated', $payment_card_id > 0)->true();
-        expect('Payment card exist', PaymentCard::findOne($payment_card_id))->isInstanceOf(PaymentCard::class);
-        expect('Payment card id is associated to empty ads', $model->payment_card_id)->equals($payment_card_id->payment_card_id);
+        $payment_card = $model->associatePaymentCard();
+        expect('Payment card associated', $payment_card->payment_card_id > 0)->true();
+        expect('Payment card exist', PaymentCard::findOne($payment_card->payment_card_id))->isInstanceOf(PaymentCard::class);
+        expect('Payment card id is associated to empty ads', $model->payment_card_id)->equals($payment_card->payment_card_id);
     }
 }

@@ -66,7 +66,7 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
      */
     public function getParentCompany()
     {
-        return $this->hasOne(Company::className(), ['company_id' => 'parent_company_id']);
+        return $this->hasOne(Company::class, ['company_id' => 'parent_company_id']);
     }
 
     /**
@@ -84,7 +84,7 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
 
         $percentage = AdsPercentagePerCompany::find()->where(['parent_company_id' => $company->parent_id, 'company_id' => $company->company_id])->one();
 
-        return $percentage ? $percentage->percentage : '0';
+        return $percentage ? $percentage->percentage : '1';
     }
 
     /**
@@ -132,5 +132,46 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
         }
 
         return $percentage->save();
+    }
+
+    /**
+     * @return array
+     * Verifica que la suma del total de porcentaje de las empresas hijas, sea 100
+     * Devuelve un array con la empresa padre y el porcentaje total de las empresas hijas
+     */
+    public static function verifyParentCompaniesConfigADSPercentage() {
+        $bad_configuration_companies = [];
+
+        foreach (Company::getParentCompanies() as $parent) {
+            $total_per_parent_company = 0;
+            foreach ($parent->companies as $company) {
+                $total_per_parent_company += AdsPercentagePerCompany::getCompanyPercentage($company->company_id);
+            }
+            if($total_per_parent_company != 100) {
+                array_push($bad_configuration_companies, ['name' => $parent->name, 'company_id' => $parent->company_id, 'total_percentage' => $total_per_parent_company]);
+            }
+        }
+
+        return [
+            'status' => empty($bad_configuration_companies) ? true : false,
+            'configuration' => $bad_configuration_companies
+        ];
+    }
+
+    /**
+     * @return string
+     * Devuelve las empresas padre que tienen una configuración errónea para el porcentaje de ADS (osea, la suma de las empresas hijas no es 100%) en un string
+     */
+    public static function getVerifyParentCompaniesConfigADSPercentageAsString() {
+        $bad_configuration = AdsPercentagePerCompany::verifyParentCompaniesConfigADSPercentage();
+        if(!$bad_configuration['status']) {
+            $errors = 'Verifique la configuración de las siguientes empresas: ';
+            foreach ($bad_configuration['configuration'] as $configuration) {
+                $errors .= $configuration['name'].': '.$configuration['total_percentage'].'% ';
+            }
+            return $errors;
+        }
+
+        return '';
     }
 }

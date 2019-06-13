@@ -756,7 +756,7 @@ class ContractController extends Controller {
 
             // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
             if(!$customer->associateEmptyADS($ads_code)) {
-                Yii::$app->session->setFlash('error', Yii::t('app', 'This ADS has been used before or not exist'));
+                Yii::$app->session->setFlash('error', Yii::t('app', 'The ADS has been used before, its from another parent company or doesnt exist'));
                 return $this->render('active-contract', [
                     'model' => $model,
                     'connection' => $connection,

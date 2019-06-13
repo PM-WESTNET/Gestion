@@ -135,7 +135,27 @@ class Company extends \app\components\db\ActiveRecord
             'pagomiscuentas_code' => Yii::t('app', 'Pago Mis Cuentas Code'),
             'technical_service_phone' => Yii::t('app', 'Technical service phone')
         ];
-    }    
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes) {
+
+        parent::afterSave($insert, $changedAttributes);
+
+        if ($insert) {
+            //Creo la configuración para la empresa que se está creando
+            if($this->parent_id) {
+                $apc = new AdsPercentagePerCompany([
+                    'parent_company_id' => $this->parent_id,
+                    'company_id' => $this->company_id,
+                    'percentage' => 0
+                ]);
+                $apc->save();
+            }
+        }
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -440,14 +460,18 @@ class Company extends \app\components\db\ActiveRecord
 
         if($verify_child_companies) {
             foreach ($this->companies as $company) {
-                if($company->getTracks()->where(['track_status' => CompanyHasPaymentTrack::STATUS_ENABLED, 'use_payment_card' => 1])->exists()) {
-                    $has_track_with_payment_card = true;
+                foreach ($company->getPaymentTracks()->where(['track_status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all() as $payment_track) {
+                    if($payment_track->track->use_payment_card == 1) {
+                        $has_track_with_payment_card = true;
+                    }
                 }
             }
         }
 
-        if($this->getTracks()->where(['use_payment_card' => 1])->exists()) {
-            $has_track_with_payment_card = true;
+        foreach ($this->getPaymentTracks()->where(['track_status' => CompanyHasPaymentTrack::STATUS_ENABLED])->all() as $payment_track) {
+            if($payment_track->track->use_payment_card == 1) {
+                $has_track_with_payment_card = true;
+            }
         }
 
         return $has_track_with_payment_card;
