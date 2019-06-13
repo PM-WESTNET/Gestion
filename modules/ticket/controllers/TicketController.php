@@ -504,7 +504,7 @@ class TicketController extends Controller
      * @throws NotFoundHttpException
      * Crea una gestión para el ticket
      */
-    public function actionAddTicketManagement($ticket_id)
+    public function actionAddTicketManagement($ticket_id, $redirect)
     {
         $ticket = $this->findModel($ticket_id);
 
@@ -514,7 +514,7 @@ class TicketController extends Controller
             Yii::$app->session->setFlash('error', Yii::t('app', 'Ticket management registered successfully'));
         }
 
-        return $this->redirect(['collection-tickets']);
+        return $this->redirect([$redirect]);
     }
 
 }

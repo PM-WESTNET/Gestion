@@ -129,14 +129,25 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
+            'template' => '{current-account}{observations}{register-management}',
             'buttons' => [
                 'observations' => function ($url, $model) {
                     return Html::a('<span class="glyphicon glyphicon-zoom-in"></span>', '#', [
                        'class' => 'btn btn-info btn-obs',
+                       'title' => Yii::t('app', 'Create observation'),
                        'data' => [
                             'ticket' => $model->ticket_id
                        ]
                     ]);
+                },
+                'register-management' => function ($url, $model) {
+                    if($model->canAddTicketManagement()) {
+                        return Html::a('<span class="glyphicon glyphicon-pushpin"></span>', ['add-ticket-management', 'ticket_id' => $model->ticket_id, 'redirect' => 'installations-tickets'], [
+                            'class' => 'btn btn-primary btn-add-ticket-management',
+                            'title' => Yii::t('app', 'Register ticket management'),
+                            'data-confirm' => Yii::t('app', 'Are you sure you want to register a ticket management?')
+                        ]);
+                    }
                 },
                 'current-account' => function ($url, $model) {
                     return Html::a(Yii::t('app', 'Account'), ['/checkout/payment/current-account', 'customer' => $model->customer_id], [
@@ -144,7 +155,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);
                 },
             ],
-            'template' => '{current-account} {observations}'
         ],
     ];
     ?>
