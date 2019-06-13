@@ -534,6 +534,18 @@ class BillSearch extends Bill
         return $query;
     }
 
+    public function searchPendingToClose($params)
+    {
+        $this->load($params);
+        $query = $this->find()
+            ->where(['status' => 'completed'])
+            ->andFilterWhere(['automatically_generated' => 1])
+            ->andFilterWhere(['company_id' => $this->company_id])
+            ->andFilterWhere(['bill_type_id' => $this->bill_type_id]);
+
+        return $query;
+    }
+
     public function searchBilledByDate($params)
     {
 

@@ -147,7 +147,7 @@ class BatchInvoiceController  extends Controller
     {
         $searchModel = new BillSearch();
         $dataProvider = new ActiveDataProvider([
-            'query' => $searchModel->seachWithOutElectronic(Yii::$app->request->getQueryParams()),
+            'query' => $searchModel->searchPendingToClose(Yii::$app->request->getQueryParams()),
             'pagination' => [
                 'pageSize' => 10
             ]
@@ -171,32 +171,35 @@ class BatchInvoiceController  extends Controller
             ]);
             $i = 1;
             $searchModel = new BillSearch();
-            $query = $searchModel->seachWithOutElectronic(Yii::$app->request->post());
+            $query = $searchModel->searchPendingToClose(Yii::$app->request->post());
             $total = $query->count();
             $retMessages = [];
-            foreach($query->all() as $bill ) {
-                $bill->close();
 
-                $messages = Yii::$app->session->getAllFlashes();
-                $fn = function($messages) {
-                    $rtn = [];
-                    foreach ($messages as $message) {
-                        $rtn[] = Yii::t('afip', $message);
+            foreach ($query->batch() as $bills) {
+                foreach ($bills as $bill) {
+                    $bill->close();
+
+                    $messages = Yii::$app->session->getAllFlashes();
+                    $fn = function ($messages) {
+                        $rtn = [];
+                        foreach ($messages as $message) {
+                            $rtn[] = Yii::t('afip', $message);
+                        }
+                        return $rtn;
+                    };
+                    foreach ($messages as $key => $message) {
+
+                        $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
+                            Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
                     }
-                    return $rtn;
-                };
-                foreach($messages as $key=>$message) {
 
-                    $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '' ) . " - " . Yii::t('app', 'Bill') . ' ' .
-                        Yii::t('app', 'Status') . ' '  . Yii::t('app', $bill->status) .  ' - ' . implode('<br/>', $fn($message) ) ;
+                    Yii::$app->session->set('_invoice_close_', [
+                        'total' => $total,
+                        'qty' => $i
+                    ]);
+                    Yii::$app->session->close();
+                    $i++;
                 }
-
-                Yii::$app->session->set( '_invoice_close_', [
-                    'total' => $total,
-                    'qty'=> $i
-                ]);
-                Yii::$app->session->close();
-                $i++;
             }
 
             return [

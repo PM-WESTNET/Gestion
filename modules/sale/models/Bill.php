@@ -127,7 +127,7 @@ class Bill extends ActiveRecord implements CountableInterface
             [['currency'], 'string', 'max' => 45],
             [['observation'], 'string', 'max' => 250],
             [['company_id', 'user_id', 'partner_distribution_model_id'], 'number'],
-            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
+            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number', 'automatically_generated'], 'safe']
         ]);
     }
 
