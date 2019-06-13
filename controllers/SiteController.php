@@ -2,12 +2,12 @@
 
 namespace app\controllers;
 
+use app\modules\config\models\Config;
 use Yii;
-use yii\filters\AccessControl;
 use app\components\web\Controller;
-use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\modules\cobrodigital\models\PaymentCard;
 
 class SiteController extends Controller
 {
@@ -32,6 +32,12 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
+        $unused_payment_card_qty = PaymentCard::getUnusedPaymentCardsQty();
+        $min_qty = Config::getValue('min-unused-payment-cards-qty-notification');
+        if($unused_payment_card_qty <= $min_qty) {
+            Yii::$app->session->setFlash('info', Yii::t('app', 'The payment cards quantity is lower than the minimun'));
+        }
+
         //Si posee el rol, el  index debe ser la vista de agenda
         if(!Yii::$app->user->isGuest){
             if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
