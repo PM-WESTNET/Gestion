@@ -1012,7 +1012,7 @@
     'Select an user ...' => 'Seleccione un usuario ...',
     'Acept' => 'Aceptar',
     'Create and assing tickets' => 'Crear y asignar tickets',
-    'Cashier Manage Tickets' => 'Tickets de Gestión de Cobranza',
+    'Cashier Manage Tickets' => 'Tickets de gestión de cobranza',
     'Observations' => 'Observaciones',
     'Create Observation' => 'Crear Observación',
     'Schema' => 'Esquema de estados',
@@ -1126,7 +1126,7 @@
     'Enabled for company' => 'Habilitado para la empresa',
     'Enabled for customers' => 'Habilitado para los clientes',
     'Default track' => 'Canal por defecto',
-    'Installations Manage Tickets' => 'Tickets de Gestión de Instalaciones',
+    'Installations Manage Tickets' => 'Tickets de gestión de instalaciones',
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
@@ -1143,5 +1143,9 @@
     'Last app use' => 'Último uso de la aplicación',
     'Last activity from' => 'Última actividad desde',
     'Last activity to' => 'Última actividad hasta',
-    'The payment cards quantity is lower than the minimun' => 'La cantidad de tarjetas de cobro disponible es menor al mínimo requerido'
+    'The payment cards quantity is lower than the minimun' => 'La cantidad de tarjetas de cobro disponible es menor al mínimo requerido',
+    'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
+    'Mobile app registration tickets' => 'Tickets de registro de aplicación',
+    'Request data edition tickets' => 'Tickets de solicitud de edición de datos',
+    'Mobile app status' => 'Estado de la aplicación móvil'
 );

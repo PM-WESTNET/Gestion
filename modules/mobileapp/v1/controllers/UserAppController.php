@@ -350,7 +350,7 @@ class UserAppController extends Controller
         $related_ecopagos = [];
         $customer_ids = UserAppHasCustomer::find()->select('customer_id')->where(['user_app_id' => $userApp->user_app_id])->all();
 
-        if($userApp->getCustomers()->andWhere(['customer.company_id' => Config::getValue('ecopagos_company_id')])->exists()){
+        /*if($userApp->getCustomers()->andWhere(['customer.company_id' => Config::getValue('ecopagos_company_id')])->exists()){
             $contracts = Contract::find()->where(['in', 'customer_id', $customer_ids])->all();
 
             //Relleno related ecopagos
@@ -369,7 +369,7 @@ class UserAppController extends Controller
             foreach ($ecopagos as $ecopago){
                 $all_ecopagos[]= $ecopago->description;
             }
-        }
+        }*/
 
         return  [
             'all-ecopagos' => $all_ecopagos,

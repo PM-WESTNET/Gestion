@@ -8,7 +8,7 @@ use kartik\select2\Select2;
 use webvimark\modules\UserManagement\models\User;
 use kartik\daterange\DateRangePicker;
 use yii\helpers\Url;
-use app\modules\ticket\components\schemas\SchemaCobranza;
+use app\modules\ticket\components\schemas\SchemaEdition;
 
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
@@ -36,7 +36,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
 
         <div class="col-lg-4">
-            <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaCobranza::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
+            <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaEdition::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
 
         <div class="col-lg-4">

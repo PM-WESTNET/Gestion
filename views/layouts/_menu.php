@@ -403,6 +403,8 @@ if (Yii::$app->params['ticket_enabled']) {
             ['label' => Yii::t('app', 'Tickets'), 'url' => ['/ticket/ticket/open-tickets']],
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
             ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
+            ['label' => Yii::t('app', 'Mobile app data edition tickets'), 'url' => ['/ticket/ticket/contact-edition-tickets']],
+//            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',

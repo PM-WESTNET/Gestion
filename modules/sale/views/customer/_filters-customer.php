@@ -68,11 +68,14 @@ use app\modules\sale\modules\contract\models\Contract;
         <div class="col-sm-3">
             <?= $form->field($model, 'contract_status')->checkboxList(Contract::getStatusesForSelect(), ['id' => 'contract_status'])?>
         </div>
-        <div class="col-sm-2">
+        <div class="col-sm-1">
             <?= $form->field($model, 'email_status')->checkboxList(['valid' => 'Válido', 'invalid' => 'Inválido'], ['id' => 'email_status']) ?>
         </div>
-        <div class="col-sm-2">
+        <div class="col-sm-1">
             <?= $form->field($model, 'email2_status')->checkboxList(['valid' => 'Válido', 'invalid' => 'Inválido'], ['id' => 'email2_status']) ?>
+        </div>
+        <div class="col-sm-2">
+            <?= $form->field($model, 'mobile_app_status')->checkboxList(['uninstalled' => 'Desintalada', 'installed' => 'Instalada'], ['id' => 'mobile_app_status']) ?>
         </div>
     </div>
 
@@ -101,9 +104,10 @@ use app\modules\sale\modules\contract\models\Contract;
                 e.preventDefault();
                 var customerStatus = '';
                 var connectionStatus = '';
-                var contractStatus= '';
-                var emailStatus= '';
-                var email2Status= '';
+                var contractStatus = '';
+                var emailStatus = '';
+                var email2Status = '';
+                var mobileAppStatus = '';
 
                 // Para los campos del form que son checkboxList recorro cada checkbox y si esta checkeado agrego el valor a la url
                 $.each($('#customer_status input'), function(i, c){
@@ -136,6 +140,12 @@ use app\modules\sale\modules\contract\models\Contract;
                     }
                 });
 
+                $.each($('#mobile_app_status input'), function(i, c){
+                    if ($(c).is(':checked')) {
+                        mobileAppStatus = mobileAppStatus + '&CustomerSearch%5Bmobile_app_status%5D%5B%5D=' + $(c).val();
+                    }
+                });
+
                 // Si en los campos de checkboxList no hay ningun checkbox seleccionado, agrego los campos vacíos
                 if (customerStatus === '') {
                     customerStatus= '&CustomerSearch%5Bcustomer_status%5D=';
@@ -157,6 +167,9 @@ use app\modules\sale\modules\contract\models\Contract;
                     email2Status = '&CustomerSearch%5Bemail2_status%5D=';
                 }
 
+                if (email2Status === '') {
+                    mobileAppStatus = '&CustomerSearch%5BmobileAppStatus%5D=';
+                }
 
                 // Remuevo todos los campos ocultos del formulario, esto campos se generan por cada vez que se filtra pero los
                 //del filtro anterior no se eliminan y es eso lo que produce que la url crezca
@@ -173,6 +186,7 @@ use app\modules\sale\modules\contract\models\Contract;
                 $('CustomerSearch[document_number]').remove();
                 $('CustomerSearch[email_status]').remove();
                 $('CustomerSearch[email2_status]').remove();
+                $('CustomerSearch[mobile_app_status]').remove();
 
                 //Creo la cadena de parametros de la url, con los valores seteados en los campos del filtro
                 var params= 'CustomerSearch%5Bcustomer_id%5D='+ $('#customersearch-customer_id').val() +
@@ -187,7 +201,8 @@ use app\modules\sale\modules\contract\models\Contract;
                     connectionStatus +
                     contractStatus +
                     emailStatus +
-                    email2Status;
+                    email2Status +
+                    mobileAppStatus;
 
                 //re direcciono a la misma pagina enviando los parametros ingresados
                 location.href= '<?= yii\helpers\Url::to(['/sale/customer/index'])?>'+'&'+ params;

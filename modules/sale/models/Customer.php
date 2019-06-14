@@ -1573,9 +1573,10 @@ class Customer extends ActiveRecord {
 
         if($this->getUserApps()->exists()) {
             foreach ($this->userApps as $user_app) {
-
-                if($user_app->activity->last_activity_datetime >= $date_min_last_activity) {
-                    $has_mobile_app_installed = true;
+                if($user_app->activity){
+                    if($user_app->activity->last_activity_datetime >= $date_min_last_activity) {
+                        $has_mobile_app_installed = true;
+                    }
                 }
             }
         }

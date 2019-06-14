@@ -17,7 +17,7 @@ use kartik\editable\Editable;
 
 \app\assets\BootBoxAsset::register($this);
 
-$this->title = Yii::t('app', 'Installations Manage Tickets');
+$this->title = Yii::t('app', 'Request data edition tickets');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="ticket-index padding-full">
@@ -98,8 +98,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         'title',
-        'start_date',
-        'finish_date',
+        'content',
+        [
+            'label' => Yii::t('app', 'Ticket management quantity'),
+            'value' => function($model) {
+                return $model->getTicketManagementQuantity();
+            }
+        ],
         [
             'label' => Yii::t('app', 'Assignated users'),
             'value' => function($model) {
@@ -129,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
-            'template' => '{current-account}{observations}{register-management}',
+            'template' => '{current-account} {observations}{register-management}',
             'buttons' => [
                 'observations' => function ($url, $model) {
                     return Html::a('<span class="glyphicon glyphicon-zoom-in"></span>', '#', [
@@ -142,7 +147,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'register-management' => function ($url, $model) {
                     if($model->canAddTicketManagement()) {
-                        return Html::a('<span class="glyphicon glyphicon-pushpin"></span>', ['add-ticket-management', 'ticket_id' => $model->ticket_id, 'redirect' => 'installations-tickets'], [
+                        return Html::a('<span class="glyphicon glyphicon-pushpin"></span>', ['add-ticket-management', 'ticket_id' => $model->ticket_id, 'redirect' => 'contact-edition-tickets'], [
                             'class' => 'btn btn-primary btn-add-ticket-management',
                             'title' => Yii::t('app', 'Register ticket management'),
                             'data-confirm' => Yii::t('app', 'Are you sure you want to register a ticket management?')
@@ -165,7 +170,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'items' => [
                 [
                     'label' => $item,
-                    'content' => $this->render('_installations_filters', ['model' => $searchModel]),
+                    'content' => $this->render('_request-data-edition-filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
             ],

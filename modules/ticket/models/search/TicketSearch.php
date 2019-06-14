@@ -83,9 +83,15 @@ class TicketSearch extends Ticket {
             'desc' => ['customer.name' => SORT_DESC],
         ];
 
-        $this->load($params); 
-        
-        
+        $this->load($params);
+
+        if($this->ticket_management_qty) {
+            $query
+                ->leftJoin('ticket_management tm', 'tm.ticket_id = ticket.ticket_id')
+                ->where(['not',['tm.ticket_management_id' => null]])
+                ->groupBy('ticket_id')
+                ->having("count(tm.ticket_id) = $this->ticket_management_qty");
+        }
 
         //Date Ranges
         if (!is_null($this->start_date) && strpos($this->start_date, ' al ') !== false) {
@@ -129,13 +135,7 @@ class TicketSearch extends Ticket {
             $query->andFilterWhere(['like', 'user.id', $this->user_id]);
         }
 
-        if($this->ticket_management_qty) {
-            $query
-                ->leftJoin('ticket_management tm', 'tm.ticket_id = ticket.ticket_id')
-                ->where(['not',['tm.ticket_management_id' => null]])
-                ->groupBy('ticket_id')
-                ->having("count(tm.ticket_id) = $this->ticket_management_qty");
-        }
+
         
         if (empty($params['sort'])) {
             $query->orderBy([
