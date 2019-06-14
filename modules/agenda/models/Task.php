@@ -4,6 +4,8 @@ namespace app\modules\agenda\models;
 
 use Yii;
 use app\modules\config\models\Config;
+use app\modules\agenda\AgendaModule;
+use app\components\db\ActiveRecord;
 
 /**
  * This is the model class for table "task".
@@ -29,7 +31,7 @@ use app\modules\config\models\Config;
  * @property User $creator_id
  * @property Category $category
  */
-class Task extends \app\components\db\ActiveRecord {
+class Task extends ActiveRecord {
 
     const PRIORITY_LOW = '1';
     const PRIORITY_MEDIUM = '2';
@@ -327,10 +329,10 @@ class Task extends \app\components\db\ActiveRecord {
     public static function getPriorities() {
 
         return [
-            self::PRIORITY_LOW => \app\modules\agenda\AgendaModule::t('app', 'Low priority'),
-            self::PRIORITY_MEDIUM => \app\modules\agenda\AgendaModule::t('app', 'Medium priority'),
-            self::PRIORITY_HIGH => \app\modules\agenda\AgendaModule::t('app', 'High priority'),
-            self::PRIORITY_HIGHEST => \app\modules\agenda\AgendaModule::t('app', 'Highest priority'),
+            self::PRIORITY_LOW => AgendaModule::t('app', 'Low priority'),
+            self::PRIORITY_MEDIUM => AgendaModule::t('app', 'Medium priority'),
+            self::PRIORITY_HIGH => AgendaModule::t('app', 'High priority'),
+            self::PRIORITY_HIGHEST => AgendaModule::t('app', 'Highest priority'),
         ];
     }
 
@@ -771,4 +773,11 @@ class Task extends \app\components\db\ActiveRecord {
         }
     }
 
+    public function getVisualPriority() {
+        $visual_priority = '';
+        for ($i = 0; $i <= $this->priority; $i++) {
+            $visual_priority .= '*';
+        }
+        return $visual_priority;
+    }
 }

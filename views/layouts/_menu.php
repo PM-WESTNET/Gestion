@@ -9,6 +9,8 @@ use app\modules\sale\components\BillExpert;
 use app\modules\westnet\reports\ReportsModule;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\westnet\notifications\NotificationsModule;
+use app\modules\westnet\models\Vendor;
+use app\modules\sale\models\BillType;
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
@@ -19,7 +21,7 @@ $alwaysVisibleItems = [];
 //Home
 $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 
-if (app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()) {
+if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
                 'label' => Yii::t('westnet', 'Ecopago'),
                 'url' => ['/westnet/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
@@ -30,14 +32,14 @@ if (app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()) {
 //Vendedores
 $vendorItems = [
     ['label' => Yii::t('app', 'Create {modelClass}', ['modelClass' => Yii::t('app', 'Customer')]), 'url' => ['/sale/customer/sell']],
-    ['label' => Yii::t('app', 'My Sales'), 'url' => ['/sale/contract/contract/vendor-list'], 'visible' => app\modules\westnet\models\Vendor::vendorExists(Yii::$app->user->id)]
+    ['label' => Yii::t('app', 'My Sales'), 'url' => ['/sale/contract/contract/vendor-list'], 'visible' => Vendor::vendorExists(Yii::$app->user->id)]
 ];
 $items[] = ['label' => Yii::t('app', 'Sellers'), 'items' => $vendorItems];
 
 
 
 //Vender
-$billTypes2Create = app\modules\sale\models\BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->where(['startable' => 1])->all();
+$billTypes2Create = BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->where(['startable' => 1])->all();
 $billItems = [];
 $lastClass = null;
 foreach ($billTypes2Create as $item) {
@@ -50,11 +52,12 @@ foreach ($billTypes2Create as $item) {
 // Agrego Facturacion masiva
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice'), 'url' => ['/sale/batch-invoice/index']];
+$billItems[] = ['label' => Yii::t('app', 'Batch Invoice with filters'), 'url' => ['/sale/batch-invoice/index-with-filters']];
 $billItems[] = ['label' => Yii::t('app','Close Pending Batch Invoices'), 'url' => ['/sale/batch-invoice/close-invoices-index']];
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Customer Invoice'), 'url' => ['/sale/bill/invoice-customer']];
 
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Billing'), 'items'=>$billItems];
 }
 
@@ -75,7 +78,7 @@ $billIndexItems = [
     ], 'visible' => Yii::$app->user->isSuperadmin],
 
 ];
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $billIndexItems = array_merge($billIndexItems, [
         ['label' => Yii::t('app', 'Bills summary'), 'url' => ['/sale/bill/history']],
         ['label' => Yii::t('app', 'My Bills'), 'url' => ['/sale/bill', 'BillSearch[user_id]' => Yii::$app->user->id]],
@@ -85,7 +88,7 @@ if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) 
 }
 
 //En este menu debemos mostrar un index por cada tipo de comprobante
-$billTypes2Index = app\modules\sale\models\BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->all();
+$billTypes2Index = BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->all();
 if($billTypes2Index){
     $billIndexItems[] ='<li class="divider"></li>';
 }
@@ -101,7 +104,7 @@ if (!User::hasRole('seller')) {
     }
 }
 
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $billIndexItems = array_merge($billIndexItems, [
         ['label' => Yii::t('app', 'All Invoices'), 'url' => ['/sale/bill', 'BillSearch[class]' => 'Bill']],
     ]);
@@ -134,10 +137,11 @@ if (Yii::$app->getModule('afip')) {
         ['label'=>'<li class="divider"></li>', 'encode'=>false],
         ['label'=>Yii::t('app','Document Types'), 'url'=>['/sale/document-type/index']],
         ['label'=>Yii::t('app','Tax Conditions'), 'url'=>['/sale/tax-condition/index']],
+        ['label'=>Yii::t('app','Customer Hour range'), 'url'=>['/sale/hour-range/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Customer Classes'), 'url'=>['/sale/customer-class/index']],
         ['label'=>Yii::t('app','Customer Categories'), 'url'=>['/sale/customer-category/index']],
-        ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => !User::canRoute(['/zone/zone/index'])],
+        ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
         '<li class="divider"></li>',
@@ -145,6 +149,7 @@ if (Yii::$app->getModule('afip')) {
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
         ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
+        ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
     ]];
 //}
 
@@ -182,10 +187,6 @@ if (Yii::$app->getModule('checkout')) {
             '<li class="divider"></li>',
             ['label'=>Yii::t('pagomiscuentas','Export Pagomiscuentas'), 'url'=>['/pagomiscuentas/export/index']],
             ['label'=>Yii::t('pagomiscuentas','Import Pagomiscuentas'), 'url'=>['/pagomiscuentas/import/index']],
-            '<li class="divider"></li>',
-            ['label'=>Yii::t('app','Banks for Automatic Debit'), 'url'=>['/automaticdebit/bank/index']],
-            ['label'=>Yii::t('app','Automatic Debit'), 'url'=>['/automaticdebit/automatic-debit/index']],
-
     ]];
 }
 
@@ -202,6 +203,18 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports/up-down-variation']],
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
+        ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
+    ]];
+
+    //Reportes por empresa
+    $items[] = ['label' => ReportsModule::t('app', 'Company Reports'), 'items' => [
+        ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports-company/customers-per-month']],
+        ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports-company/custumer-variation-per-month']],
+        ['label' => ReportsModule::t('app', 'Debt Bills'), 'url' => ['/reports/reports-company/debt-bills']],
+        ['label' => ReportsModule::t('app', 'Low By Month'), 'url' => ['/reports/reports-company/low-by-month']],
+        ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
+        ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
+        ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
     ]];
 }
 
@@ -254,7 +267,7 @@ if (Yii::$app->getModule('accounting')) {
     }
 }
 $appMenu = [];
-if (webvimark\modules\UserManagement\models\User::canRoute('/log/index')) {
+if (User::canRoute('/log/index')) {
     $appMenu = [
         ['label' => Yii::t('app', 'Logs'), 'url' => ['/log/log/index']]
     ];
@@ -277,7 +290,7 @@ if (Yii::$app->user->isSuperadmin) {
 }
 
 //App
-if(webvimark\modules\UserManagement\models\User::hasRole('admin')) {
+if(User::hasRole('admin')) {
     $items[] = ['label' => Yii::t('app', 'Application'), 'items' => $config];
 }
 
@@ -346,6 +359,14 @@ if (Yii::$app->getModule('westnet')) {
                 'label' => NotificationsModule::t('app', 'Integratech received sms'), 'url' => ['/westnet/notifications/integratech-received-sms'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             '<li class="divider"></li>',
+            ['label' => Yii::t('app', 'Infobip'), 'visible' => Yii::$app->user->isSuperadmin],
+            [
+                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
+            ],
+            [
+                'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
+            ],
+            '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Batch Process'), 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
             ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
@@ -381,6 +402,9 @@ if (Yii::$app->params['ticket_enabled']) {
         'items' => [
             ['label' => Yii::t('app', 'Tickets'), 'url' => ['/ticket/ticket/open-tickets']],
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
+            ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
+            ['label' => Yii::t('app', 'Mobile app data edition tickets'), 'url' => ['/ticket/ticket/contact-edition-tickets']],
+//            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',
@@ -408,10 +432,10 @@ if (Yii::$app->params['agenda_enabled']) {
                 'data-task' => 'create',
             ],
         ],
-        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/category/*')],
-        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/task-type/*')],
-        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'],'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/status/*')],
-        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'],'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible'=> User::canRoute('/agenda/category/*')],
+        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible'=> User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'],'visible'=> User::canRoute('/agenda/status/*')],
+        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'],'visible'=> User::canRoute('/agenda/task-type/*')],
     ];
 
     $items[] = [
@@ -419,7 +443,7 @@ if (Yii::$app->params['agenda_enabled']) {
         'items' => $array_items,
     ];
 
-    if (webvimark\modules\UserManagement\models\User::canRoute('/agenda')) {
+    if (User::canRoute('/agenda')) {
 
         echo \app\components\widgets\agenda\notification\Notification::widget();
 
@@ -436,7 +460,6 @@ if (Yii::$app->params['agenda_enabled']) {
         ];
     }
 }
-
 
 //Usuarios
 $items[] = [

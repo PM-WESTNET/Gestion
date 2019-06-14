@@ -67,7 +67,7 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
         /** @var ActiveQuery $query */
         $query = (new Query());
         $query
-            ->select("b.bill_id")
+            ->select("b.bill_id, b.total")
             ->from('bill b')
             ->leftJoin('pagomiscuentas_file_has_bill pfhb', 'b.bill_id = pfhb.bill_id')
             ->where('pfhb.bill_id is null')

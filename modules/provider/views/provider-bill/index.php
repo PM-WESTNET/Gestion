@@ -3,12 +3,14 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use kartik\export\ExportMenu;
+use yii\bootstrap\Collapse;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Provider Bills') . ( $provider!==null ?  " - " . $provider->name : "" ) ;
+$this->title = Yii::t('app', 'Provider Bills') . ( $provider !== null ?  " - " . $provider->name : "" ) ;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="provider-bill-index">
@@ -21,13 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]), ['provider-bill/create', 'provider'=>($provider ? $provider->provider_id : null )], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
-    <?php
-        $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
-
-        echo \yii\bootstrap\Collapse::widget([
+    <?= Collapse::widget([
             'items' => [
                 [
-                    'label' => $item,
+                    'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
                     'content' => $this->render('_provider-bill-filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
@@ -61,6 +60,9 @@ $this->params['breadcrumbs'][] = $this->title;
             return Yii::t('app', ucfirst($model->status));
         }
     ];
+
+    $export_columns = $columns;
+
     $columns[] = [
         'class' => 'app\components\grid\ActionColumn',
         'template'=>'{view} {update} {delete} {items}',
@@ -81,6 +83,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ];
     ?>
+
+    <!-- Modulo Export -->
+    <?= ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
+        'columns' => $export_columns,
+        'showConfirmAlert'=>false
+    ]);
+    ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'options' => ['class' => 'table-responsive'],

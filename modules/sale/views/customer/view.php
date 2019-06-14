@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use webvimark\modules\UserManagement\models\User;
+
  /**
  * @var View $this
  * @var Customer $model
@@ -116,17 +117,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
+
             <?php if (User::canRoute('/sale/customer/send-message')):?>
             <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
                 <div class="dropdown">
-                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <?php echo '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
+                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                     <?= $model->canSendSMSMessage() ? '': 'disabled'?>>
+                        <?= '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="send-message">
                         <?php foreach ($messages as $message):?>
                             <li>
-                                <?php echo \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
+                                <?= \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
                             </li>
                         <?php endforeach;?>
                     </ul>
@@ -170,8 +173,20 @@ $this->params['breadcrumbs'][] = $this->title;
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
         ],
-        'email:email',
-        'email2:email',
+        [
+            'attribute' => 'email',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email). ' ('. Yii::t('app',ucfirst($model->email_status)). ')';
+            },
+            'format' => 'raw'
+        ],
+        [
+            'attribute' => 'email2',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email2). ' ('. Yii::t('app',ucfirst($model->email2_status)). ')';
+            },
+            'format' => 'raw'
+        ],
         'phone',
         'phone2',
         'phone3',
@@ -220,7 +235,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ];
     }
     
-    $profileClasses = \app\modules\sale\models\Customer::getEnabledProfileClasses();
+    $profileClasses = Customer::getEnabledProfileClasses();
     
     foreach($profileClasses as $class){
         $attributes[] = $class->attr;
@@ -264,6 +279,22 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ];
 
+    $attributes[] = [
+        'label' => Yii::t('app', 'Has mobile app installed').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+        'value' => function ($model) {
+            return $model->hasMobileAppInstalled() ? Yii::t('app', 'Yes') : Yii::t('app', 'No');
+        },
+    ];
+
+    if($model->hasMobileAppInstalled()) {
+        $attributes[] = [
+            'label' => Yii::t('app', 'Last app use').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+            'value' => function ($model) {
+                $last_use = $model->lastMobileAppUse(true);
+                return $last_use ? $last_use : '';
+            },
+        ];
+    }
     
     echo DetailView::widget([
         'model' => $model,

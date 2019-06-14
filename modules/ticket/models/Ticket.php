@@ -13,6 +13,7 @@ use yii\httpclient\Client;
 use app\modules\ticket\TicketModule;
 use app\modules\ticket\models\query\TicketQuery;
 use app\modules\agenda\models\Task;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "ticket".
@@ -125,7 +126,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             [['start_date', 'finish_date'], 'date'],
             [['content'], 'string'],
             [['title'], 'string', 'max' => 255],
-            [['start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
+            [['user_id', 'start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
         ];
     }
 
@@ -239,6 +240,13 @@ class Ticket extends \app\components\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getTicketManagements() {
+        return $this->hasMany(TicketManagement::class, ['ticket_id' => 'ticket_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUsers() {
         $userModel = $this->userModelClass;
         $userPK = $this->userModelId;
@@ -263,7 +271,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             $allUsers = $userClass::findAll([
                         'status' => $userClass::STATUS_ACTIVE
             ]);
-            $users = \yii\helpers\ArrayHelper::map($allUsers, 'id', 'id');
+            $users = ArrayHelper::map($allUsers, 'id', 'id');
         }
 
         //Si vienen grupos de usuarios, buscamos sus integrantes
@@ -500,7 +508,9 @@ class Ticket extends \app\components\db\ActiveRecord {
             //Values for new instances ($insert = true means $this is a new record)
             if ($insert) {
                 //Asigno el usuario
-                $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                if (empty($this->user_id)) {
+                    $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                }
                 $this->start_datetime = time();
                 //Assings a color to this ticket
                 $this->assignNumber();
@@ -765,4 +775,66 @@ class Ticket extends \app\components\db\ActiveRecord {
         History::createHistoryEntry($this, History::TITLE_DELETE_ASSIGNATION);
     }
 
+    /**
+     * @param $ticket_id
+     * @param $exclude_users_id
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * Elimina todas las asignaciones de un ticket dando la posiblidad de excluir a ciertas asignaciones de usuarios
+     */
+    public static function deleteAllAssignations($ticket_id, $exclude_users_id = [])
+    {
+        $query = Assignation::find()->where(['ticket_id' => $ticket_id]);
+        if($exclude_users_id) {
+            $query->andWhere(['not', ['in', 'user_id', $exclude_users_id]]);
+        }
+        $assignations = $query->all();
+        foreach ($assignations as $assignation) {
+            $assignation->delete();
+        }
+
+        History::createHistoryEntry(Ticket::findOne($ticket_id), History::TITLE_DELETE_ASSIGNATION);
+    }
+
+    /**
+     * @return bool
+     * Regla de negocio- Indica si al ticket se le puede registrar una gestion.
+     */
+    public function canAddTicketManagement()
+    {
+       if($this->getObservations()->exists()) {
+           return true;
+       }
+
+       return false;
+    }
+
+    /**
+     * @param $ticket_id
+     * @param $user_id
+     * @return bool
+     * Crea una gestion de ticket
+     */
+    public function addTicketManagement($user_id)
+    {
+        if($this->canAddTicketManagement()) {
+            $ticket_management = new TicketManagement([
+                'ticket_id' => $this->ticket_id,
+                'user_id' => $user_id
+            ]);
+
+            return $ticket_management->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * @return int|string
+     * Devuelve la cantidad de gestiones de un ticket
+     */
+    public function getTicketManagementQuantity()
+    {
+        return $this->getTicketManagements()->count();
+    }
 }

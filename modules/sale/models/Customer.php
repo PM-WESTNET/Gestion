@@ -8,6 +8,8 @@ use app\modules\accounting\models\Account;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\config\models\Config;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Vendor;
@@ -80,8 +82,6 @@ class Customer extends ActiveRecord {
     public $_sms_fields_notifications;
     public $_email_fields_notifications;
     public $_notifications_way;
-    
-        
 
     /**
      * @inheritdoc
@@ -106,7 +106,7 @@ class Customer extends ActiveRecord {
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
-            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update' ], 'safe'],
+            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges' ], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -351,7 +351,8 @@ class Customer extends ActiveRecord {
             'parent_company_id' => Yii::t('app', 'Parent Company'),
             'needs_bill' => Yii::t('app', 'Needs Bill'),
             'phone4' => Yii::t('app', 'Cellphone 4'),
-            'last_update' => Yii::t('app', 'Last update')
+            'last_update' => Yii::t('app', 'Last update'),
+            'hourRanges' => Yii::t('app', 'Customer Hour range')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -368,6 +369,13 @@ class Customer extends ActiveRecord {
      */
     public function getBills() {
         return $this->hasMany(Bill::className(), ['customer_id' => 'customer_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getHourRanges() {
+        return $this->hasMany(HourRange::class, ['hour_range_id' => 'hour_range_id'])->viaTable('customer_has_hour_range', ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -410,6 +418,15 @@ class Customer extends ActiveRecord {
         return $this->hasMany(Contract::className(), ['customer_id' => 'customer_id']);
     }
 
+    public function getUserApps() {
+        return $this->hasMany(UserApp::class, ['user_app_id' => 'user_app_id'])->viaTable('user_app_has_customer', ['customer_id' => 'customer_id']);
+    }
+
+    public function getCustomerHasCustomerMessages()
+    {
+        return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
+    }
+
     /**
      * Despues de guardar, guarda los profiles
      * @param boolean $insert
@@ -433,9 +450,18 @@ class Customer extends ActiveRecord {
             } else {
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4') {
+                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
                         }
+
+                        if ($attr === 'email') {
+                            $this->updateAttributes(['email_status' => 'invalid']);
+                        }
+
+                        if ($attr === 'email2') {
+                            $this->updateAttributes(['email2_status' => 'invalid']);
+                        }
+
                         switch ($attr){
                             case 'address_id':
                                 $oldAddress= Address::findOne(['address_id' => $oldValue]);
@@ -657,6 +683,7 @@ class Customer extends ActiveRecord {
             foreach ($logs as $p)
                 $p->delete();
 
+            $this->unlinkAll('hourRanges', $this);
             return true;
         } else {
             return false;
@@ -858,6 +885,30 @@ class Customer extends ActiveRecord {
                 $this->on(self::EVENT_AFTER_INSERT, $saveCategories);
                 $this->on(self::EVENT_AFTER_UPDATE, $saveCategories);
             }
+        }
+    }
+
+    /**
+     * @param $hour_ranges
+     * Crea la relacion para guardar los horarios disponibles del cliente
+     */
+    public function setHourRanges($hour_ranges) {
+        if($hour_ranges) {
+            //Borro relaciones anteriores
+            $this->unlinkAll('hourRanges', $this);
+            //Creo las nuevas relaciones
+            $setRange = function () use ($hour_ranges) {
+                foreach ($hour_ranges as $hour_range) {
+                    $customer_has_hour_range = new CustomerHasHourRange([
+                        'customer_id' => $this->customer_id,
+                        'hour_range_id' => $hour_range
+                    ]);
+                    $customer_has_hour_range->save();
+                    }
+            };
+
+            $this->on(ActiveRecord::EVENT_AFTER_INSERT, $setRange);
+            $this->on(ActiveRecord::EVENT_AFTER_UPDATE, $setRange);
         }
     }
 
@@ -1247,10 +1298,15 @@ class Customer extends ActiveRecord {
      */
     public static function hasCategoryTicket($customer_code, $category_id, $is_open)
     {
+        $initMonth = (new DateTime())->modify('first day of this month');
+        $lastMonth = (new DateTime())->modify('last day of this month');
+
         $customer = Customer::findOne(['code' => $customer_code]);
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
+            ->andWhere(['>=', 'start_datetime', $initMonth->getTimestamp()])
+            ->andWhere(['<', 'start_datetime', ($lastMonth->getTimestamp() + 86400)])
             ->one();
 
         return [
@@ -1258,5 +1314,133 @@ class Customer extends ActiveRecord {
             'has_ticket' => $ticket ? true : false,
             'ticket_status' => $ticket ? $ticket->status->name : ''
         ];
+    }
+
+    public static function verifyEmails($data, $field = "email")
+    {
+        $row_index = 0;
+        $results = [
+            'total' => 0,
+            'active' => 0,
+            'inactive' => 0,
+            'bounced' => 0
+        ];
+        while (($row = fgetcsv($data)) !== false) {
+            Yii::info(print_r($row, 1), 'data');
+            if ($row_index > 0) {
+                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+
+                foreach ($customers as $customer) {
+                    $status_field = $field.'_status';
+                    $customer->$status_field = strtolower($row[1]);
+                    $customer->updateAttributes([$status_field]);
+
+                    $results['total']++;
+                    $results[strtolower($row[1])]++;
+
+                }
+            }
+
+            $row_index++;
+        }
+
+        return $results;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     * Determina si el cliente tiene la app instalada.
+     * En el caso de tener asignado mas de un UserApp asociado, si al menos uno lo tiene instalado devuelve true;
+     * También verifica que la última actividad sea en el rango de fecha que se detemina con el parametro de configuración
+     */
+    public function hasMobileAppInstalled()
+    {
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+        $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+        $has_mobile_app_installed = false;
+
+        if($this->getUserApps()->exists()) {
+            foreach ($this->userApps as $user_app) {
+                if($user_app->activity){
+                    if($user_app->activity->last_activity_datetime >= $date_min_last_activity) {
+                        $has_mobile_app_installed = true;
+                    }
+                }
+            }
+        }
+
+        return $has_mobile_app_installed;
+    }
+
+    /**
+     * @return array|string|\yii\db\ActiveRecord|null
+     * Devuelve el último uso de la aplicación
+     */
+    public function lastMobileAppUse($formated = false)
+    {
+        $last_use = '';
+
+        if ($this->getUserApps()->exists()) {
+            $user_app_ids = [];
+
+            foreach ($this->userApps as $user_app) {
+                array_push($user_app_ids, $user_app->user_app_id);
+            }
+
+            $activity = UserAppActivity::find()->where(['in', 'user_app_id', $user_app_ids])->orderBy(['last_activity_datetime' => SORT_DESC])->one();
+            $last_use = $activity ? $activity->last_activity_datetime : '';
+        }
+
+        if ($formated && $last_use) {
+            return (new \DateTime())->setTimestamp($last_use)->format('Y-m-d');
+        }
+
+        return $last_use;
+    }
+
+    public function getSMSCount() {
+
+        $first_day = (new DateTime())->modify('first day of this month')->getTimestamp();
+        $last_day = (new DateTime())->modify('last day of this month')->getTimestamp();
+
+        return $this->getCustomerHasCustomerMessages()->andWhere(['>=', 'timestamp', $first_day])->andWhere(['<', 'timestamp', ($last_day + 86400)])->count();
+    }
+
+    /**
+     * @return bool
+     * Indica si se puede enviar mas SMS al cliente.
+     */
+    public function canSendSMSMessage()
+    {
+        if($this->SMSCount <= (int)Config::getValue('sms_per_customer')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     * Envía un mensaje SMS con los links de descarga de la aplicación móvil
+     */
+    public function sendMobileAppLinkSMSMessage()
+    {
+        $id_customer_message = Config::getValue('link-to-app-customer-message-id');
+        $customer_message = CustomerMessage::findOne($id_customer_message);
+        $is_developer_mode = Config::getValue('is_developer_mode');
+
+        if($this->canSendSMSMessage() && $customer_message) {
+            //Sólo hago el envío de los mensajes con los links de la app si no está en modo de desarrollo
+            if(!$is_developer_mode) {
+                $result = $customer_message->send($this);
+                if (array_key_exists('status', $result)) {
+                    return $result['status'] == 'success' ? true : false;
+                }
+            }
+            return true;
+        }
+
+        return false;
     }
 }

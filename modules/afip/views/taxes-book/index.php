@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\bootstrap\Collapse;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -19,9 +21,25 @@ $this->params['breadcrumbs'][] = $this->title;
             ['create', 'type'=>$type],
             ['class' => 'btn btn-success']) 
             ;?>
-        </p>        
+        </p>
     </div>
+    <div>
+    <?php
+    $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
 
+    echo Collapse::widget([
+        'items' => [
+            [
+                'label' => $item,
+                'content' => $this->render('_filters', ['model' => $searchModel]),
+                'encode' => false,
+            ],
+        ],
+        'options' => [
+            'class' => 'hidden-print'
+        ]
+    ]); ?>
+    </div>
 
     <?php
     $columns[] = ['class' => 'yii\grid\SerialColumn'];
@@ -47,14 +65,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'buttons'=>[
             'view' => function ($url, $model, $key) {
                 return $model->status === 'draft' ? Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, ['class' => 'btn btn-view']) :
-                    Html::a('<span class="glyphicon glyphicon-eye-open"></span>', yii\helpers\Url::toRoute(['add-'.$model->type."-bills", 'id'=>$key]), ['class' => 'btn btn-view']);
+                    Html::a('<span class="glyphicon glyphicon-eye-open"></span>', Url::toRoute(['add-'.$model->type."-bills", 'id'=>$key]), ['class' => 'btn btn-view']);
             },
             'update' => function ($url, $model, $key) {
                 return $model->status === 'draft' ? Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, ['class' => 'btn btn-primary']) : '';
             },
             'delete' => function ($url, $model, $key) {
                 if($model->getDeletable()){
-                    return Html::a('<span class="glyphicon glyphicon-trash"></span>', yii\helpers\Url::toRoute(['taxes-book/delete', 'id'=>$key]), [
+                    return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::toRoute(['taxes-book/delete', 'id'=>$key]), [
                         'title' => Yii::t('yii', 'Delete'),
                         'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
                         'data-method' => 'post',

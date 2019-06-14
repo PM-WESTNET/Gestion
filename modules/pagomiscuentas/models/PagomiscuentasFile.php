@@ -17,6 +17,7 @@ use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use Yii;
 use yii\web\UploadedFile;
+use app\modules\sale\models\Bill;
 
 /**
  * This is the model class for table "partner".
@@ -59,7 +60,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
             [['status'], 'default', 'value'=>'draft'],
             [['type'], 'in', 'range' => ['payment', 'bill']],
             [['date', 'from_date'], 'date'],
-            [['from_date'], 'safe'],
+            [['from_date', 'total'], 'safe'],
             ['path', 'string'],
             ['file', 'unique'],
             [['file'],'file']
@@ -100,6 +101,15 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     public function getPayments()
     {
         return $this->hasMany(Payment::class, ['payment_id' => 'payment_id'])->viaTable('pagomiscuentas_file_has_payment',['pagomiscuentas_file_id' => 'pagomiscuentas_file_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * Devuelve los bill asociados a un archivo
+     */
+    public function getBills()
+    {
+        return $this->hasMany(Bill::class, ['bill_id' => 'bill_id'])->viaTable('pagomiscuentas_file_has_bill',['pagomiscuentas_file_id' => 'pagomiscuentas_file_id']);
     }
 
     /**
@@ -225,17 +235,19 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
         if($datas) {
             $trans = Yii::$app->db->beginTransaction();
             try {
+                $total = 0;
                 foreach ($datas as $data) {
                     $customer = Customer::findOne(['code' => $data['customer_id']]);
                     $date = (new \DateTime($data['fecha_cobro']))->format('Y-m-d');
                     $amount = ((float)$data['importe']) / 100;
-
+                    $total = $total + $amount;
                     $payment = $this->createPayment($customer->customer_id, $date, $amount, $data['canal'], $payment_method_id);
                     $payment->applyToBill($data['bill_id']);
                     $this->createRelationWithPayment($payment->payment_id);
                     $payment->close();
                 }
-                $this->updateAttributes(['status' => self::STATUS_CLOSED]);
+
+                $this->updateAttributes(['status' => self::STATUS_CLOSED, 'total' => $total]);
                 $trans->commit();
                 return true;
             }catch(\Exception $ex) {
@@ -258,12 +270,18 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
             $query = (new PagomiscuentasFileSearch())->findBills($this->pagomiscuentas_file_id);
 
             $transaction = Yii::$app->db->beginTransaction();
+            $total = 0 ;
 
             foreach($query->batch(500) as $models){
                 $this->batchPagomiscuentasFileHasBillInsert($models);
+
+                foreach ($models as $model) {
+                    $total = $total + $model['total'];
+                }
             }
 
             $this->status = self::STATUS_CLOSED;
+            $this->total = $total;
             $this->update(false);
             $transaction->commit();
             return true;

@@ -30,14 +30,18 @@ $form= ActiveForm::begin(['method' => 'GET']);
     </div>
 
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <?=$form->field($model, 'color_id')->dropDownList(ArrayHelper::map(Color::find()->orderBy('order')->all(), 'color_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
 
-
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaCobranza::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
+
+        <div class="col-lg-4">
+            <?= $form->field($model, 'ticket_management_qty')->textInput() ?>
+        </div>
+
     </div>
 
     <div class="row">
@@ -92,7 +96,6 @@ $form= ActiveForm::begin(['method' => 'GET']);
                     'opens' => 'left'
                 ]])?>
         </div>
-
     </div>
 
     <div class="row">

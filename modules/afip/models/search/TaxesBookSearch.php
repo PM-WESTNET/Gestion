@@ -27,9 +27,10 @@ class TaxesBookSearch extends ProviderBill
 
     public $fromDate;
     public $toDate;
-
+    public $period;
+    public $status;
     public $totals;
-
+    public $number;
     public $company_id;
 
     public $provider_id;
@@ -45,7 +46,7 @@ class TaxesBookSearch extends ProviderBill
     {
         return [
             [['provider_id', 'company_id', 'taxes_book_item_id'], 'integer'],
-            [['toDate', 'fromDate', 'for_print', 'bill_types'], 'safe'],
+            [['toDate', 'fromDate', 'for_print', 'bill_types', 'period', 'status', 'number'], 'safe'],
             [['fromDate'], 'default', 'value'=> date('Y-m-01')],
             [['toDate'], 'default', 'value'=> date('Y-m-t')]
         ];
@@ -57,7 +58,40 @@ class TaxesBookSearch extends ProviderBill
             'fromDate' => Yii::t('app', 'From Date'),
             'toDate' => Yii::t('app', 'To Date'),
             'provider_id' => Yii::t('app', 'Provider'),
+            'company_id' => Yii::t('app', 'Company'),
+            'period' => Yii::t('app', 'Period'),
+            'status' => Yii::t('app', 'Status'),
+            'number' => Yii::t('app', 'Number'),
         ];
+    }
+
+    public function search($params)
+    {
+        $this->load($params);
+
+        $query = TaxesBook::find();
+
+        if($this->company_id) {
+            $query->andFilterWhere(['company_id' => $this->company_id]);
+        }
+
+        if($this->status) {
+            $query->andFilterWhere(['status' => $this->status]);
+        }
+
+        if($this->period) {
+            $query->andFilterWhere(['period' => $this->period .'-01']);
+        }
+
+        if($this->number) {
+            $query->andFilterWhere(['number' => $this->number]);
+        }
+
+        if($this->type) {
+            $query->andFilterWhere(['type' => $this->type]);
+        }
+
+        return $query;
     }
 
     public function findBillSale()

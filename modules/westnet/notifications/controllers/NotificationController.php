@@ -15,6 +15,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\westnet\notifications\models\search\NotificationSearch;
 use app\modules\westnet\notifications\NotificationsModule;
+use yii\web\Response;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -122,7 +123,7 @@ class NotificationController extends Controller {
         
         //Si es ajax, la rta es en json
         if(Yii::$app->request->isAjax){
-            Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            Yii::$app->response->format = Response::FORMAT_JSON;
         }
         
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
@@ -130,7 +131,7 @@ class NotificationController extends Controller {
             if ($model->save()) {
                 
                 if(Yii::$app->request->isAjax){
-                    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+                    Yii::$app->response->format = Response::FORMAT_JSON;
                     return [
                         'status' => 'success',
                         'model' => $model
@@ -308,6 +309,7 @@ class NotificationController extends Controller {
                 }
             }
         } catch(\Exception $ex) {
+            throw $ex;
             Yii::$app->session->setFlash('error', $ex->getMessage());
         }
 

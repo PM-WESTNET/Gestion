@@ -26,12 +26,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
-            <?=
-            Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
+            <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
                         'modelClass' => 'Ticket',
                     ]), ['create'], ['class' => 'btn btn-success'])
-            ;
-            ?>
+            ;?>
         </p>
     </div>
 
@@ -85,11 +83,11 @@ $this->params['breadcrumbs'][] = $this->title;
                          echo '<div class="task_date_div hidden">';
                              $widget->model->task_date = (new \DateTime('now'))->format('Y-m-d');
                              echo $form->field($widget->model, 'task_date')->widget(DatePicker::class, [
-                                'options'=>['placeholder'=>'To date'],
+                                'options'=>['placeholder'=>'To date', 'id' => 'task-date-'.$widget->model->ticket_id],
                                 'pluginOptions' => [
                                     'autoclose'=>true,
                                     'format' => 'yyyy-mm-dd'
-                                ]
+                                ],
                             ])->label(false);
                         echo '</div>';
                     },
@@ -98,8 +96,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         'title',
-        'start_date',
-        'finish_date',
+        [
+            'label' => Yii::t('app', 'Ticket management quantity'),
+            'value' => function($model) {
+                return $model->getTicketManagementQuantity();
+            }
+        ],
         [
             'label' => Yii::t('app', 'Assignated users'),
             'value' => function($model) {
@@ -129,14 +131,25 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
+            'template' => '{current-account} {observations}{register-management}',
             'buttons' => [
                 'observations' => function ($url, $model) {
                     return Html::a('<span class="glyphicon glyphicon-zoom-in"></span>', '#', [
                        'class' => 'btn btn-info btn-obs',
+                       'title' => Yii::t('app', 'Create observation'),
                        'data' => [
                             'ticket' => $model->ticket_id
                        ]
                     ]);
+                },
+                'register-management' => function ($url, $model) {
+                    if($model->canAddTicketManagement()) {
+                        return Html::a('<span class="glyphicon glyphicon-pushpin"></span>', ['add-ticket-management', 'ticket_id' => $model->ticket_id, 'redirect' => 'collection-tickets'], [
+                            'class' => 'btn btn-primary btn-add-ticket-management',
+                            'title' => Yii::t('app', 'Register ticket management'),
+                            'data-confirm' => Yii::t('app', 'Are you sure you want to register a ticket management?')
+                        ]);
+                    }
                 },
                 'current-account' => function ($url, $model) {
                     return Html::a(Yii::t('app', 'Account'), ['/checkout/payment/current-account', 'customer' => $model->customer_id], [
@@ -148,13 +161,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ];
     ?>
-    <?php
-        $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
-        
-        echo Collapse::widget([
+    <?= Collapse::widget([
             'items' => [
                 [
-                    'label' => $item,
+                    'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
                     'content' => $this->render('_collection_filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
@@ -166,8 +176,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
 
     <div class="container-fluid no-padding no-margin">
-        <?=
-        GridView::widget([
+        <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'columns' => $columns,
             'id' => 'grid',
@@ -207,6 +216,16 @@ $this->params['breadcrumbs'][] = $this->title;
             $('.status-class').on('change', function() {
                 Tickets.statusAllowToSetDate($(this).val());
             });
+            $('.close').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            });
+            $('.kv-editable-reset').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            })
+            $('.kv-editable-submit').on('click', function () {
+                $('.task_date_div').addClass('hidden');
+            })
+            $('.task_date_div').addClass('hidden');
         };
 
         this.statusAllowToSetDate = function(status_id) {
@@ -282,8 +301,6 @@ $this->params['breadcrumbs'][] = $this->title;
             });
         }
     };
-
-
 
 </script>
 

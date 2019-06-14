@@ -8,6 +8,9 @@
 
 namespace app\modules\sale\models;
 
+use app\components\db\ActiveRecord;
+use Yii;
+
 /**
  * @property integer $chcm_id
  * @property integer $customer_id
@@ -17,7 +20,6 @@ namespace app\modules\sale\models;
  * @property Customer $customer
  * @property CustomerMessage $customerMessage
  */
-use app\components\companies\ActiveRecord;
 
 class CustomerHasCustomerMessage extends ActiveRecord
 {

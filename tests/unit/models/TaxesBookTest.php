@@ -156,4 +156,13 @@ class TaxesBookTest extends \Codeception\Test\Unit
 
         expect('Taxes book closed', $model2->status == TaxesBook::STATE_CLOSED)->true();
     }
+
+    public function testGetStatusesForSelect()
+    {
+        $select = TaxesBook::getStatusesForSelect();
+
+        expect('close exists', array_key_exists(TaxesBook::STATE_CLOSED, $select))->true();
+        expect('draft exists', array_key_exists(TaxesBook::STATE_DRAFT, $select))->true();
+
+    }
 }

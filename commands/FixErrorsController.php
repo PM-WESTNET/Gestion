@@ -7,8 +7,15 @@
  */
 namespace app\commands;
 
+use app\modules\config\models\Config;
 use app\modules\provider\models\ProviderBill;
+use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\BillType;
+use app\modules\sale\models\Customer;
+use app\modules\sale\models\PointOfSale;
+use app\modules\sale\models\TaxCondition;
+use yii\db\Query;
 
 class FixErrorsController extends \yii\console\Controller
 {

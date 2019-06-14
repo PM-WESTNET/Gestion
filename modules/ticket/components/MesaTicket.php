@@ -65,9 +65,11 @@ class MesaTicket
                     if(!$external_id) {
                         throw new \Exception($api->error);
                     }
+                    if($external_id) {
+                        $assign->external_id = $external_id;
+                        $assign->save(false);
+                    }
                 }
-                $assign->external_id = $external_id;
-                $assign->save(false);
             }
             return true;
         } catch (\Exception $ex){

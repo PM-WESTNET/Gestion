@@ -3,12 +3,14 @@
 use app\modules\ticket\models\Color;
 use app\modules\ticket\models\Status;
 use app\modules\ticket\models\Category;
+use kartik\select2\Select2;
+use webvimark\modules\UserManagement\models\User;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\jui\DatePicker;
 use yii\widgets\ActiveForm;
-
-
+use \kartik\daterange\DateRangePicker;
+use yii\helpers\Url;
 
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
@@ -50,7 +52,13 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-lg-6">
-            <?= $form->field($model, 'assignations')->textInput()?>
+            <?= $form->field($model, 'assignations')->widget(Select2::class, [
+                'data' => ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username'),
+                'options' => ['placeholder' => Yii::t('app','Select')],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ],
+            ])?>
         </div>
 
 
@@ -58,7 +66,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
     <div class="row">
         <div class="col-lg-6">
-            <?= $form->field($model, 'start_date')->widget(\kartik\daterange\DateRangePicker::className(), [
+            <?= $form->field($model, 'start_date')->widget(DateRangePicker::class, [
                 'convertFormat' => true,
                 'useWithAddon' => false,
                 'model' => $model,
@@ -75,7 +83,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-lg-6">
-            <?=$form->field($model, 'finish_date')->widget(\kartik\daterange\DateRangePicker::className(), [
+            <?=$form->field($model, 'finish_date')->widget(DateRangePicker::class, [
                 'convertFormat' => true,
                 'useWithAddon' => false,
                 'model' => $model,
@@ -100,7 +108,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
         </div>
         <dvi class="col-lg-1">
-            <?= \yii\bootstrap\Html::a('Borrar Filtros', yii\helpers\Url::to(['index']), ['class' =>'btn btn-default'])?>
+            <?= \yii\bootstrap\Html::a('Borrar Filtros', Url::to(['index']), ['class' =>'btn btn-default'])?>
         </dvi>
     </div>
 
