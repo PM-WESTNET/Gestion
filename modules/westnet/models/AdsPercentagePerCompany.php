@@ -35,8 +35,8 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
             [['parent_company_id', 'company_id', 'percentage'], 'required'],
             [['parent_company_id', 'company_id'], 'integer'],
             [['percentage'], 'number', 'max' => 100 ],
-            [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['company_id' => 'company_id']],
-            [['parent_company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['parent_company_id' => 'company_id']],
+            [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
+            [['parent_company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['parent_company_id' => 'company_id']],
         ];
     }
 
@@ -84,7 +84,7 @@ class AdsPercentagePerCompany extends \yii\db\ActiveRecord
 
         $percentage = AdsPercentagePerCompany::find()->where(['parent_company_id' => $company->parent_id, 'company_id' => $company->company_id])->one();
 
-        return $percentage ? $percentage->percentage : '1';
+        return $percentage ? $percentage->percentage : '0';
     }
 
     /**

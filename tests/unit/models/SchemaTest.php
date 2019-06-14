@@ -77,13 +77,9 @@ class SchemaTest extends \Codeception\Test\Unit
     {
         $select = Schema::getStatusesForSelect();
 
-        expect('Get for select', $select[1])->equals('nuevo');
-        expect('Get for select', $select[2])->equals('en curso (asignado]');
-        expect('Get for select', $select[3])->equals('en curso (planificado]');
-        expect('Get for select', $select[4])->equals('en espera');
-        expect('Get for select', $select[5])->equals('cerrado (resuelto]');
-        expect('Get for select', $select[6])->equals('cerrado (no resuelto]');
-        expect('Get for select', count($select))->equals(6);
+        $status_qty = count(Status::find()->all());
+
+        expect('Get for select', count($select))->equals($status_qty);
     }
 
     public function testGetStatusesBySchema()

@@ -39,7 +39,7 @@ class PaymentTest extends \Codeception\Test\Unit
         $model->customer_id = 1;
         $model->company_id = 1;
         $model->amount = 1;
-        $model->date = '2018-11-02';
+        $model->date = (new \DateTime('now'))->format('Y-m-d');
         $model->validate();
 
         $this->assertTrue($model->validate());

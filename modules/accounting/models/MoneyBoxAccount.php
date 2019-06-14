@@ -121,7 +121,7 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
      */
     public function getCheckbooks()
     {
-        return $this->hasMany(Checkbook::className(), ['money_box_account_id' => 'money_box_account_id']);
+        return $this->hasMany(Checkbook::class, ['money_box_account_id' => 'money_box_account_id']);
     }
 
     /**
@@ -129,7 +129,7 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
      */
     public function getMoneyBox()
     {
-        return $this->hasOne(MoneyBox::className(), ['money_box_id' => 'money_box_id']);
+        return $this->hasOne(MoneyBox::class, ['money_box_id' => 'money_box_id']);
     }
 
 
@@ -138,7 +138,7 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
      */
     public function getAccount()
     {
-        return $this->hasOne(Account::className(), ['account_id' => 'account_id']);
+        return $this->hasOne(Account::class, ['account_id' => 'account_id']);
     }
 
     /**
@@ -146,7 +146,7 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
      */
     public function getCurrency()
     {
-        return $this->hasOne(Currency::className(), ['currency_id' => 'currency_id']);
+        return $this->hasOne(Currency::class, ['currency_id' => 'currency_id']);
     }
 
     /**

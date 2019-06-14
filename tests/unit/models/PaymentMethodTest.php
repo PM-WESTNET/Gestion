@@ -70,13 +70,13 @@ class PaymentMethodTest extends Unit
     }
 
     public function testGetAllowedAndEnabledPaymentMethods() {
-        $company_has_payment_tracks = CompanyHasPaymentTrack::findOne(57);
-        $company_has_payment_tracks->updateAttributes(['status' => 'enabled']);
+        $company_has_payment_tracks = CompanyHasPaymentTrack::findOne(408);
+        $company_has_payment_tracks->updateAttributes(['payment_status' => 'enabled']);
         $payment_method = PaymentMethod::find()->where(['payment_method_id' => $company_has_payment_tracks->payment_method_id])->one();
         $payment_method->updateAttributes(['allow_track_config' => 1]);
 
         $payment_methods_qty = count(PaymentMethod::getAllowedAndEnabledPaymentMethods(1));
 
-        expect('Payment method qty is 1', $payment_methods_qty)->equals(1);
+        expect('Payment method qty is 5', $payment_methods_qty)->equals(5);
     }
 }

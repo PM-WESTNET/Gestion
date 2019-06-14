@@ -94,7 +94,7 @@ class SmallBox extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getMoneyBoxAccount() {
-        return $this->hasOne(MoneyBoxAccount::className(), ['money_box_account_id' => 'money_box_account_id']);
+        return $this->hasOne(MoneyBoxAccount::class, ['money_box_account_id' => 'money_box_account_id']);
     }
 
     /**

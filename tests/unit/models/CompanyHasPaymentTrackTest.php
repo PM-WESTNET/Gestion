@@ -45,7 +45,6 @@ class CompanyHasPaymentCompanyHasPaymentTrackTest extends \Codeception\Test\Unit
             'company_id' => 1,
             'payment_method_id' => 1,
             'track_id' => 1,
-            'status' => CompanyHasPaymentTrack::STATUS_ENABLED
         ]);
 
         expect('CompanyHasPaymentTrack valid when full and new', $model->validate())->true();
@@ -64,7 +63,6 @@ class CompanyHasPaymentCompanyHasPaymentTrackTest extends \Codeception\Test\Unit
             'company_id' => 1,
             'payment_method_id' => 1,
             'track_id' => 1,
-            'status' => CompanyHasPaymentTrack::STATUS_ENABLED
         ]);
 
         expect('CompanyHasPaymentTrack saved when full and new', $model->save())->true();
