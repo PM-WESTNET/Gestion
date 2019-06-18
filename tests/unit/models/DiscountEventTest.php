@@ -11,16 +11,6 @@ use app\tests\fixtures\ProductFixture;
 class DiscountEventTest extends \Codeception\Test\Unit
 {
 
-    public function _fixtures()
-    {
-        return [
-            'product' => [
-                'class' => ProductFixture::class
-            ],
-        ];
-    }
-
-
     public function testValidWhenFullAndNew()
     {
         $model = new DiscountEvent([
