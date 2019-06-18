@@ -57,7 +57,7 @@ class BancoFrances implements BankInterface
         }
 
         $export->file = $file.'.txt';
-        $this->fileName = $file;
+        $this->fileName = $filename;
 
         $export->save();
 
@@ -213,7 +213,7 @@ class BancoFrances implements BankInterface
         $intamount = floor($bill->total);
 
         $import1 = str_pad('0', 13, $intamount);
-        $import2 = ($bill->total - $intamount) * 100;
+        $import2 = round(($bill->total - $intamount), 2) * 100;
         $code_dev = str_pad(' ', 6, ' ');
         $ref = str_pad(' ', 22, ' ');
         $fecha = date('Ymd', $this->processTimestamp);
@@ -307,10 +307,14 @@ class BancoFrances implements BankInterface
     {
         $bills = Bill::find()
             ->leftJoin('bill_has_export_to_debit bhtd', 'bhtd.bill_id=bill.bill_id')
+            ->innerJoin('bill_type bt', 'bill_type_id=bill.bill_type_id')
             ->andFilterWhere(['>=', 'bill.date', \Yii::$app->formatter->asDate($fromDate, 'yyyy-MM-dd')])
             ->andFilterWhere(['<=', 'bill.date', \Yii::$app->formatter->asDate($toDate, 'yyyy-MM-dd')])
             ->andWhere(['customer_id' => $customer_id])
             ->andWhere(['IS', 'bhtd.bill_id', null])
+            ->andWhere(['bill.status' => 'closed'])
+            ->andWhere(['bt.multiplier' => 1])
+            ->andWhere(['bt.class' => \app\modules\sale\models\bills\Bill::class])
             ->all();
 
         return $bills;

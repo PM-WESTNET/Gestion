@@ -3,6 +3,7 @@
 namespace app\modules\automaticdebit\controllers;
 
 use app\components\web\Controller;
+use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\automaticdebit\models\BankCompanyConfig;
 use app\modules\automaticdebit\models\DebitDirectImport;
 use app\modules\automaticdebit\models\DirectDebitExport;
@@ -11,6 +12,7 @@ use app\modules\automaticdebit\models\Bank;
 use app\modules\automaticdebit\models\BankSearch;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -198,6 +200,34 @@ class BankController extends Controller
 
         return $this->render('imports', ['dataProvider' => $imports, 'bank' => $bank]);
 
+    }
+
+    public function actionImportView($import_id)
+    {
+        $import = DebitDirectImport::findOne($import_id);
+
+        return $this->render('import-view', ['import' => $import]);
+
+    }
+
+    public function actionCreateImport($bank_id)
+    {
+
+        $bank = Bank::findOne($bank_id);
+
+        if (empty($bank)) {
+            throw new BadRequestHttpException('Bank not found');
+        }
+
+        $import = new DebitDirectImport();
+
+        if ($import->load(Yii::$app->request->post()) && $import->import()) {
+            $this->redirect(['view', 'import_id' => $import->debit_direct_import_id]);
+        }
+
+        $moneyBoxAccount = ArrayHelper::map(MoneyBoxAccount::find()->all(), 'money_box_account_id', 'number');
+
+        return $this->render('create-import', ['import' => $import, 'moneyBoxAccount' => $moneyBoxAccount]);
     }
 
 }
