@@ -100,7 +100,7 @@ class Discount extends \app\components\db\ActiveRecord
      */
     public function getBillDetails()
     {
-        return $this->hasMany(BillDetail::className(), ['discount_id' => 'discount_id']);
+        return $this->hasMany(BillDetail::class, ['discount_id' => 'discount_id']);
     }
 
     /**
@@ -108,7 +108,7 @@ class Discount extends \app\components\db\ActiveRecord
      */
     public function getCustomerHasDiscounts()
     {
-        return $this->hasMany(CustomerHasDiscount::className(), ['discount_id' => 'discount_id']);
+        return $this->hasMany(CustomerHasDiscount::class, ['discount_id' => 'discount_id']);
     }
 
     /**
@@ -116,7 +116,7 @@ class Discount extends \app\components\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
+        return $this->hasOne(Product::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -124,7 +124,7 @@ class Discount extends \app\components\db\ActiveRecord
      */
     public function getProductToInvoices()
     {
-        return $this->hasMany(ProductToInvoice::className(), ['discount_id' => 'discount_id']);
+        return $this->hasMany(ProductToInvoice::class, ['discount_id' => 'discount_id']);
     }
 
     /**
@@ -140,10 +140,12 @@ class Discount extends \app\components\db\ActiveRecord
                 'product_id'   => $product_id,
                 'status'       => Discount::STATUS_ENABLED,
                 'apply_to'     => $apply_to
-            ])->andFilterWhere([ 'and',
+            ])
+            ->andFilterWhere([ 'and',
                 ['<=', "from_date", (new \DateTime('now'))->format('Y-m-d')],
                 ['>=', "to_date", (new \DateTime('now'))->format('Y-m-d')]
-            ])->all();
+            ])
+            ->all();
     }
     
     /**

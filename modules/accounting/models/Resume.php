@@ -123,7 +123,7 @@ class Resume extends \app\components\companies\ActiveRecord
      */
     public function getMoneyBoxAccount()
     {
-        return $this->hasOne(MoneyBoxAccount::className(), ['money_box_account_id' => 'money_box_account_id']);
+        return $this->hasOne(MoneyBoxAccount::class, ['money_box_account_id' => 'money_box_account_id']);
     }
 
     /**
@@ -131,7 +131,7 @@ class Resume extends \app\components\companies\ActiveRecord
      */
     public function getResumeItems()
     {
-        return $this->hasMany(ResumeItem::className(), ['resume_id' => 'resume_id']);
+        return $this->hasMany(ResumeItem::class, ['resume_id' => 'resume_id']);
     }
 
     /**
