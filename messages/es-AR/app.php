@@ -1012,7 +1012,7 @@
     'Select an user ...' => 'Seleccione un usuario ...',
     'Acept' => 'Aceptar',
     'Create and assing tickets' => 'Crear y asignar tickets',
-    'Cashier Manage Tickets' => 'Tickets de Gestión de Cobranza',
+    'Cashier Manage Tickets' => 'Tickets de gestión de cobranza',
     'Observations' => 'Observaciones',
     'Create Observation' => 'Crear Observación',
     'Schema' => 'Esquema de estados',
@@ -1100,7 +1100,7 @@
     'Invoice Date' => 'Fecha de facturación',
     'An error occurred while importing file: ' => 'Ha ocurrido un error al importar el archivo: ',
     'Customer not found: ' => 'Cliente no encontrado: ',
-    'Installations Manage Tickets' => 'Tickets de Gestión de Instalaciones',
+    'Installations Manage Tickets' => 'Tickets de gestión de instalaciones',
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
@@ -1112,5 +1112,13 @@
     'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente',
     'Ticket management quantity' => 'Cantidad de gestiones',
     'Remember: Customers whose debt is on the first bill are excluded' => 'Recuerde: Los clientes cuya deuda es de la primer factura están excluidos',
-    'active' => 'Activo'
+    'active' => 'Activo',
+    'Has mobile app installed' => '¿Tiene la app instalada?',
+    'Last app use' => 'Último uso de la aplicación',
+    'Last activity from' => 'Última actividad desde',
+    'Last activity to' => 'Última actividad hasta',
+    'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
+    'Mobile app registration tickets' => 'Tickets de registro de aplicación',
+    'Request data edition tickets' => 'Tickets de solicitud de edición de datos',
+    'Mobile app status' => 'Estado de la aplicación móvil'
 );

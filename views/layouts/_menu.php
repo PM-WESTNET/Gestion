@@ -202,6 +202,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports/up-down-variation']],
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
+        ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
     ]];
 
     //Reportes por empresa
@@ -401,6 +402,8 @@ if (Yii::$app->params['ticket_enabled']) {
             ['label' => Yii::t('app', 'Tickets'), 'url' => ['/ticket/ticket/open-tickets']],
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
             ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
+            ['label' => Yii::t('app', 'Mobile app data edition tickets'), 'url' => ['/ticket/ticket/contact-edition-tickets']],
+//            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',

@@ -7,7 +7,9 @@
  */
 
 namespace app\modules\sale\models;
+
 use app\components\db\ActiveRecord;
+use Yii;
 
 /**
  * @property integer $chcm_id

@@ -6,6 +6,7 @@ use app\modules\ticket\models\Category;
 use app\modules\ticket\models\Schema;
 use app\modules\ticket\models\Ticket;
 use Yii;
+use app\modules\sale\models\Customer;
 
 /**
  * This is the model class for table "app_failed_register".
@@ -166,7 +167,7 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
 
         if ($insert) {
 
-            $customer = \app\modules\sale\models\Customer::findOne(['code' => $this->customer_code]);
+            $customer = Customer::findOne(['code' => $this->customer_code]);
 
             if ($customer) {
                 $category = Category::findOne(['slug' => 'edicion-de-datos']);
@@ -179,7 +180,7 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
 
                     $ticket= new Ticket();
                     $ticket->title = 'Solicitud de Edición de Datos';
-                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos';
+                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos:' . ($this->text ? $this->text : '');
                     $ticket->customer_id = $customer->customer_id;
                     $ticket->category_id = $category->category_id;
                     $ticket->status_id = $status_id;

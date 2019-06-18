@@ -15,6 +15,7 @@ use app\modules\mobileapp\v1\components\Controller;
 use app\modules\mobileapp\v1\models\AppFailedRegister;
 use app\modules\mobileapp\v1\models\Customer;
 use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\mobileapp\v1\models\UserAppHasCustomer;
 use app\modules\mobileapp\v1\models\ValidationCode;
 use app\modules\sale\models\Bill;
@@ -192,6 +193,7 @@ class UserAppController extends Controller
         }
 
         if ($customer && $model->load($data, '') && $model->save()){
+            UserAppActivity::createInstallationRegister($model->user_app_id);
             return true;
         }
 
@@ -329,6 +331,7 @@ class UserAppController extends Controller
      */
     public function actionView(){
         $model= $this->getUserApp();
+        UserAppActivity::updateLastActivity($model->user_app_id);
 
         return $model;
     }
@@ -347,7 +350,7 @@ class UserAppController extends Controller
         $related_ecopagos = [];
         $customer_ids = UserAppHasCustomer::find()->select('customer_id')->where(['user_app_id' => $userApp->user_app_id])->all();
 
-        if($userApp->getCustomers()->andWhere(['customer.company_id' => Config::getValue('ecopagos_company_id')])->exists()){
+        /*if($userApp->getCustomers()->andWhere(['customer.company_id' => Config::getValue('ecopagos_company_id')])->exists()){
             $contracts = Contract::find()->where(['in', 'customer_id', $customer_ids])->all();
 
             //Relleno related ecopagos
@@ -366,7 +369,7 @@ class UserAppController extends Controller
             foreach ($ecopagos as $ecopago){
                 $all_ecopagos[]= $ecopago->description;
             }
-        }
+        }*/
 
         return  [
             'all-ecopagos' => $all_ecopagos,

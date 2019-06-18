@@ -751,7 +751,7 @@ class ContractController extends Controller {
         }
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
-            $code=$_POST['Contract']['customerCodeADS'];
+            $code = $_POST['Contract']['customerCodeADS'];
             $customer = Customer::findOne(['customer_id' => $model->customer_id]);
             // Busco el ADS vacio
             $emptyAds = EmptyAds::findOne(['code' => $code , 'used' => false]);
@@ -772,11 +772,7 @@ class ContractController extends Controller {
                 ]);
             }
         }
-        
-        
-        /* if ($model->from_date == Yii::t('app', 'Undetermined time')){
-          $model->from_date = Yii::$app->formatter->asDate(new \DateTime());
-          } */
+
         $model->from_date = Yii::$app->formatter->asDate(new DateTime());
         $model->setScenario('invoice');
         if ($model->load(Yii::$app->request->post()) && $connection->load(Yii::$app->request->post()) && $model->validate()) {
@@ -788,6 +784,7 @@ class ContractController extends Controller {
             if ($connection->save() && $model->save()) {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
+                    $model->customer->sendMobileAppLinkSMSMessage();
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }

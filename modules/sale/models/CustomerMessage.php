@@ -180,7 +180,7 @@ class CustomerMessage extends \app\components\db\ActiveRecord
         return false;
     }
 
-    public function send($customer, $phones = ['phone', 'phone2', 'phone3', 'phone4'])
+    public function send(Customer $customer, $phones = ['phone', 'phone2', 'phone3', 'phone4'])
     {
         $fields =  self::availablesFields();
         $template = $this->message;
