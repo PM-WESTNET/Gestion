@@ -25,8 +25,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             [
-                'attribute' => 'name',
-                'filter' => \yii\bootstrap\Html::textInput('AppFailedRegisterSearch[name])', $searchModel->name, ['class' => 'form-control']),
+                'attribute' => 'customer_code',
+                'value' => function ($model) {
+                    if($model->customer_code) {
+                        $customer = Customer::findOne(['code' => $model->customer_code]);
+                        return Html::a($model->customer_code .' - '. $customer->fullName, ['/sale/customer/view', 'id' => $customer->customer_id]);
+                    }
+                    return '';
+                },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'document_number',
@@ -51,23 +58,23 @@ $this->params['breadcrumbs'][] = $this->title;
                             ])
             ],
             [
-                'attribute' => 'customer_code',
-                'value' => function ($model) {
-                    if($model->customer_code) {
-                        $customer = Customer::findOne(['code' => $model->customer_code]);
-                        return Html::a($model->customer_code .' - '. $customer->fullName, ['/sale/customer/view', 'id' => $customer->customer_id]);
-                    }
-                    return '';
-                },
-                'format' => 'raw'
-            ],
-            [
                 'attribute' => 'text',
                 'value' => function ($model) {
                     return $model->text;
                 },
                 'filter' => \yii\bootstrap\Html::textInput('AppFailedRegisterSearch[text])', $searchModel->text, ['class' => 'form-control']),
                 'format' => 'text'
+            ],
+            [
+                'attribute' => 'created_at',
+                'format' => 'datetime',
+                'filter' => \kartik\date\DatePicker::widget([
+                    'name' => 'AppFailedRegisterSearch[created_at]',
+                    'pickerButton' => false,
+                    'pluginOptions' => [
+                        'format' => 'dd-m-yyyy'
+                    ]
+                ])
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',

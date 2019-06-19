@@ -621,7 +621,7 @@ class ReportsController extends Controller
     public function actionMobileApp()
     {
         $config_min_last_update = Config::getValue('month-qty-to-declare-app-uninstalled');
-        Yii::$app->session->setFlash('info', "Se considera como desintalada la app cuando el último uso registrado de la app es mayor a $config_min_last_update meses. <br> La cantidad de meses que se tiene en cuenta para este cálculo puede ser configurable desde Home->Aplicación->Mobile app->Meses para declarar la app desintalada");
+        Yii::$app->session->setFlash('info', "Se considera como desinstalada la app cuando el último uso registrado de la app es mayor a $config_min_last_update meses. <br> La cantidad de meses que se tiene en cuenta para este cálculo puede ser configurable desde Home->Aplicación->Mobile app->Meses para declarar la app desinstalada");
         $search = new UserAppActivitySearch();
         $statistics = $search->searchStatistics(Yii::$app->request->get());
 

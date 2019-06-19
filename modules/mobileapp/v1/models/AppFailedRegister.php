@@ -20,6 +20,7 @@ use app\modules\sale\models\Customer;
  * @property string $email
  * @property string $phone
  * @property string $status
+ * @property integer $created_at
  */
 class AppFailedRegister extends \app\components\db\ActiveRecord
 {
@@ -38,17 +39,18 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    /*
+
     public function behaviors()
     {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
                 ],
+                'createdAtAttribute' => 'created_at'
             ],
-            'date' => [
+            /**'date' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
@@ -61,10 +63,10 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
                 ],
                 'value' => function(){return date('h:i');},
-            ],
+            ],**/
         ];
     }
-    */
+
 
     /**
      * @inheritdoc
@@ -97,6 +99,7 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
             'type' => Yii::t('app', 'Type'),
             'text' => Yii::t('app','Text'),
             'customer_code' => Yii::t('app', 'Customer code'),
+            'created_at' => Yii::t('app', 'Created At'),
         ];
     }    
 
