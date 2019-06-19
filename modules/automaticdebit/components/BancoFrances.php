@@ -124,15 +124,16 @@ class BancoFrances implements BankInterface
                     $import1 = substr($line, 55, 13);
                     $import2 = substr($line, 68, 2);
 
-                    $code = substr($line, 70, 6);
+                    $code = substr($line, 73, 2);
 
-                    $payments[] = [
-                        'customer_code' => ltrim($beneficiary_id, '0'),
-                        'amount' => (double) ($import1.'.'.$import2),
-                        'date' =>  $this->restoreDate($proccess_timestamp),
-                        'cbu' => substr($line, 33,22),
-                    ];
-
+                    if  ($code === '00') {
+                        $payments[] = [
+                            'customer_code' => ltrim($beneficiary_id, '0'),
+                            'amount' => (double) ($import1.'.'.$import2),
+                            'date' =>  $this->restoreDate($proccess_timestamp),
+                            'cbu' => substr($line, 33,22),
+                        ];
+                    }
                     break;
             }
         }
