@@ -25,7 +25,7 @@ $this->title = $bank->name. ' - '. Yii::t('app','Imports');
                 'buttons' => [
                     'view'=> function ($url, $model) {
                         return \yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
-                            ['/automaticdebit/bank/import-view', 'import_id' => $model->direct_debit_export_id]);
+                            ['/automaticdebit/bank/import-view', 'import_id' => $model->debit_direct_import_id]);
                     },
 
                 ],

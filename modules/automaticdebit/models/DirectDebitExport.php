@@ -71,6 +71,9 @@ class DirectDebitExport extends \yii\db\ActiveRecord
             'file' => Yii::t('app', 'File'),
             'create_timestamp' => Yii::t('app', 'Create Timestamp'),
             'bank_id' => Yii::t('app', 'Bank ID'),
+            'from_date' => Yii::t('app','From Date'),
+            'to_date' => Yii::t('app','To Date'),
+            'debit_date' => Yii::t('app','Debit Date')
         ];
     }
 

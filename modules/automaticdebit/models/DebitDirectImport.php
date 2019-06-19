@@ -3,6 +3,7 @@
 namespace app\modules\automaticdebit\models;
 
 use app\modules\accounting\models\MoneyBoxAccount;
+use app\modules\checkout\models\Payment;
 use app\modules\sale\models\Company;
 use Yii;
 use yii\behaviors\TimestampBehavior;
@@ -112,6 +113,11 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         return $this->hasMany(DebitDirectImportHasPayment::className(), ['debit_direct_import_id' => 'debit_direct_import_id']);
     }
 
+    public function getPayments()
+    {
+        return $this->hasMany(Payment::class, ['payment_id' => 'payment_id'])->viaTable('debit_direct_import_has_payment', ['debit_direct_import_id' => 'debit_direct_import_id']);
+    }
+
     public function import() {
 
         $bank_instance = $this->bank->getBankInstance();
@@ -122,7 +128,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         }
 
 
-        $fileName = Yii::getAlias('@web').'/direct_debit_import/'.$file->name.'.'.$file->extension;
+        $fileName = Yii::getAlias('@app/web').'/direct_debit_import/'.$file->baseName.'.'.$file->extension;
         $file->saveAs($fileName);
 
         $resource = fopen($fileName, 'r');

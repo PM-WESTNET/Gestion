@@ -93,3 +93,4 @@ web/index.php
 /mysql/
 /westnet/mysql/
 web/direct_debit/
+web/direct_debit_import/

@@ -108,7 +108,7 @@ class BancoFrances implements BankInterface
 
             switch($code_line) {
                 case '4110':
-                    $companyId = substr($line, 4,5);
+                    $companyId = substr($line, 4,2);
 
                     $companyConfig = BankCompanyConfig::findOne(['company_identification' => $companyId]);
 
@@ -116,7 +116,7 @@ class BancoFrances implements BankInterface
                         throw new InvalidConfigException('Company not configured');
                     }
 
-                    $proccess_timestamp = substr($line, 17, 8);
+                    $process_timestamp = substr($line, 17, 8);
                     break;
                 case '4210':
                     $beneficiary_id = substr($line, 11, 22);
@@ -137,9 +137,12 @@ class BancoFrances implements BankInterface
                     break;
             }
         }
-        $import->proccess_timestamp = strtotime($this->restoreDate($proccess_timestamp));
+        $import->process_timestamp = strtotime($this->restoreDate($process_timestamp));
+
 
         $import->save();
+
+        \Yii::info(print_r($import->getErrors(),1));
 
         $payment_method = PaymentMethod::findOne(['name' => 'Débito Directo']);
 
@@ -150,7 +153,8 @@ class BancoFrances implements BankInterface
                $p = new Payment([
                    'customer_id' => $customer->customer_id,
                    'amont' => $payment['amount'],
-                   'partner_distribution_model_id' => $companyConfig->company->partner_distribution_model_id
+                   'partner_distribution_model_id' => $companyConfig->company->partner_distribution_model_id,
+                   'company_id' => $companyConfig->company_id
                ]);
 
                if ($p->save()) {
@@ -159,6 +163,7 @@ class BancoFrances implements BankInterface
                         'description'=> 'Debito Directo cta ' . $payment['cbu'],
                         'payment_method_id'=> $payment_method->payment_method_id,
                         'money_box_account_id'=> $import->money_box_account_id,
+                        'payment_id' => $p->payment_id
                     ];
 
                     $p->addItem($payment_item);

@@ -70,7 +70,7 @@ class AutomaticDebit extends ActiveRecord
     {
         return [
             'automatic_debit_id' => Yii::t('app', 'Automatic Debit ID'),
-            'customer_id' => Yii::t('app', 'Customer ID'),
+            'customer_id' => Yii::t('app', 'Customer'),
             'bank_id' => Yii::t('app', 'Bank ID'),
             'cbu' => Yii::t('app', 'Cbu'),
             'beneficiario_number' => Yii::t('app', 'Beneficiario Number'),
