@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php if ($model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
         <div class="alert alert-warning">
-            <?php echo Yii::t('accountingResume','Money Box has undefined code operation')?>
+            <?php echo Yii::t('accounting','Money Box has undefined code operation')?>
         </div>
     <?php endif;?>
 

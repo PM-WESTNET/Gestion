@@ -79,7 +79,7 @@ class ResumeImporter extends AbstractCsvImport
                 'money_box_id' => $this->resume->moneyBoxAccount->money_box_id,
                 'code' => $data['Código'],
                 'money_box_account_id' => $this->_params['money_box_account_id'],
-                //'account_id' => $this->_params['money_box_account_id']
+                'account_id' => $this->resume->moneyBoxAccount->account_id
             ]);
 
             $MBHOT->save();
