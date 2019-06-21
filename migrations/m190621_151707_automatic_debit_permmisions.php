@@ -12,6 +12,8 @@ class m190621_151707_automatic_debit_permmisions extends Migration
      */
     public function safeUp()
     {
+        \webvimark\modules\UserManagement\models\rbacDB\Role::create('Direct Debit Manager', 'Debito Directo');
+
         \webvimark\modules\UserManagement\models\rbacDB\Role::assignRoutesViaPermission('Direct Debit Manager', 'Can manage direct debit', [
             '/automaticdebit/bank/index',
             '/automaticdebit/bank/create',
