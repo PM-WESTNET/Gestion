@@ -1487,4 +1487,22 @@ class Bill extends ActiveRecord implements CountableInterface
         $this->ein_expiration = $ein_expiration;
         return $this->save(['ein' => $ein, 'ein_expiration' => $ein_expiration]);
     }
+
+    /**
+     * @param bool $update_amounts
+     * @return bool
+     * Verifica que los importes del comprobantes estén correctos, tiene opción para volver a calcularlos en caso de que estén erróneos.
+     * //TODO hacer verificaciones de los detalles e importes de los mismos. Verificaciones para evitar errores en afip.
+     */
+    public function verifyAmounts($update_amounts = false) {
+
+        if($this->amount == 0 || $this->taxes == 0 || $this->total == 0 || ($this->amount + $this->taxes != $this->total)) {
+            if($update_amounts) {
+                $this->updateAmounts();
+            }
+            return false;
+        }
+
+        return true;
+    }
 }

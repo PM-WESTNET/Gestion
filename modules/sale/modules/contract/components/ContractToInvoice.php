@@ -568,6 +568,7 @@ class ContractToInvoice
                     $bill->save(false);
                     $bill->fillNumber = false;
                     $bill->complete();
+                    $bill->verifyAmounts(true);
                     if($close_bill) {
                         $bill->close();
                     }
