@@ -44,6 +44,12 @@ use yii\web\Application;
 class ContractDetail extends ActiveRecord
 {
 
+    const STATUS_ACTIVE = 'active';
+    const STATUS_DRAFT = 'draft';
+    const STATUS_CANCELLED = 'canceled';
+    const STATUS_LOW = 'low';
+    const STATUS_LOW_PROCESS = 'low-process';
+
     public $tmp_discount_id;
 
     public function __construct($config = array()) {

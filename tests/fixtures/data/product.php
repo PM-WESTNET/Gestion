@@ -38,6 +38,27 @@ $product = [
         'account_id' => NULL,
         'product_commission_id' => NULL
     ],
+    [
+        'product_id' => 4,
+        'name' => 'NO-USAR-MAS-Hogar-WiFi-6144 Kbps',
+        'system' => '',
+        'code' => '',
+        'description' => 'ALQUILER MENSUAL EQUIPOS RADIO-ANTENA-FUENTE-ROUTER WIFI  Y ABONO MENSUAL DE ENLACE DE DATOS HASTA 6144 kbps',
+        'status' => 'enabled',
+        'balance' => NULL,
+        'secondary_balance' => NULL,
+        'create_timestamp' => '1486065542',
+        'update_timestamp' => '1559401387',
+        'unit_id' => '1',
+        'secondary_unit_id' => NULL,
+        'type' => 'plan',
+        'uid' => NULL,
+        'account_id' => NULL,
+        'product_commission_id' => NULL,
+        'company_id' => 8,
+        'show_in_ads' => 1,
+        'ads_name' => '6 Mb'
+    ]
 ];
 
 return $product;
