@@ -1177,6 +1177,8 @@ class Bill extends ActiveRecord implements CountableInterface
         //Si se debe forzar la utilizacion de la empresa asignada al cliente:
         if($customer->company && \app\modules\config\models\Config::getValue('force_customer_company')){
             $this->company_id = $customer->company_id;
+            //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+            $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
         }
 
         $defaultBillType = $customer->defaultBillType;
@@ -1195,6 +1197,8 @@ class Bill extends ActiveRecord implements CountableInterface
             if(!$this->company->checkBillType($defaultBillType)){
                 if($customer->company){
                     $this->company_id = $customer->company_id;
+                    //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+                    $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
                 }
 
             }else{

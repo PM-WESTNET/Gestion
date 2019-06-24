@@ -511,18 +511,16 @@ class PaymentController extends Controller {
 
         if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
             $import = $transmition_file->import();
-            if($import['status']) {
-                Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
-                return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
-            } else {
-                unlink(Yii::getAlias('@webroot') . '/'.$transmition_file->file_name);
-                $transmition_file->delete();
-                $string_error = '';
-                foreach ($import['errors'] as $error) {
-                    $string_error .= $error . "<br>";
+                if(array_key_exists('errors', $import)) {
+                    $string_error = '';
+                    foreach ($import['errors'] as $error) {
+                        $string_error .= $error . "<br>";
+                    }
+                    Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
+                } else {
+                    Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
                 }
-                Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
-            }
+                return $this->redirect(['pagofacil-payment-view', 'idFile' => $transmition_file->pago_facil_transmition_file_id]);
         }
 
         return $this->render('pagofacil-payments-import', ['model'=> $transmition_file]);

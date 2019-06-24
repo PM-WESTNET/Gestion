@@ -17,6 +17,7 @@ use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
+use app\modules\config\models\Config;
 
 /**
  * CustomerSearch represents the model behind the search form about app\modules\sale\models\Customer.
@@ -65,6 +66,9 @@ class CustomerSearch extends Customer {
     public $email2_status;
     public $exclude_customers_with_one_bill;
 
+    //Estado de la app
+    public $mobile_app_status;
+
     public function rules()
     {
         return [
@@ -74,7 +78,7 @@ class CustomerSearch extends Customer {
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
-            [['email_status', 'email2_status', 'exclude_customers_with_one_bill'], 'safe'],
+            [['email_status', 'email2_status', 'exclude_customers_with_one_bill', 'mobile_app_status'], 'safe'],
         ];
     }
 
@@ -106,6 +110,7 @@ class CustomerSearch extends Customer {
             'geocode' => Yii::t('westnet', 'Geocode'),
             'email_status' => Yii::t('app', 'Email 1 status'),
             'email2_status' => Yii::t('app', 'Email 2 status'),
+            'mobile_app_status' => Yii::t('app', 'Mobile app status')
         ]);
     }
 
@@ -243,6 +248,7 @@ class CustomerSearch extends Customer {
         $this->filterByPlan($query);
         $this->filterByIssetGeocode($query);
         $this->filterEmailStatus($query);
+        $this->filterMobileAppStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -761,6 +767,39 @@ class CustomerSearch extends Customer {
 
         if ($this->email2_status) {
             $query->andWhere(['customer.email2_status' => $this->email2_status]);
+        }
+    }
+
+    /**
+     * @param $query
+     * @throws \Exception
+     * Filtra por el estado de la aplicación móvil
+     */
+    private function filterMobileAppStatus($query){
+        if($this->mobile_app_status) {
+            $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+            $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+
+            $query->leftJoin('user_app_has_customer uahc', 'uahc.customer_id = customer.customer_id')
+                ->leftJoin('user_app ua', 'ua.user_app_id = uahc.user_app_id')
+                ->leftJoin('user_app_activity uaa', 'uaa.user_app_id = ua.user_app_id');
+
+            if(count($this->mobile_app_status) > 1) {
+                $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                    ->andFilterWhere(['not',['uaa.user_app_id' => null]]);
+            } else {
+                if($this->mobile_app_status[0] == 'uninstalled') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['<=','uaa.last_activity_datetime', $date_min_last_activity]);
+                }
+
+                if($this->mobile_app_status[0] == 'installed') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['>=','uaa.last_activity_datetime', $date_min_last_activity]);
+                }
+            };
         }
     }
 

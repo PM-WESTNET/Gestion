@@ -210,7 +210,8 @@ class PagoFacilTransmitionFile extends ActiveRecord {
                     'errors' => $newPayments['errors']
                 ];
             } else {
-                $transaction->rollBack();
+                //Se modifica para que se creen los pagos a pesar de que se hayan detectado errores en la importacion (como un cliente no encontrado por ejemplo)
+                $transaction->commit(); // Finaliza transaccion
                 return [
                     'status' => false,
                     'errors' => $newPayments['errors']

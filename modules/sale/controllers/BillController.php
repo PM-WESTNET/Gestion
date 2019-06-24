@@ -205,8 +205,14 @@ class BillController extends Controller
 
         //Al cambiar de clase, necesitamos reinstanciar y se informa al objeto del cambio
         $previousClass = $model->class;
+        $company_id = $model->company_id ? $model->company_id : '';
 
         if ($model->load(Yii::$app->request->post())) {
+
+            //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+            if($company_id != $model->company_id) {
+                $model->point_of_sale_id = $model->company->getDefaultPointOfSale() ? $model->company->getDefaultPointOfSale()->point_of_sale_id : '';
+            }
 
             //Fecha manual
             if (key_exists('Bill', Yii::$app->request->post())) {
