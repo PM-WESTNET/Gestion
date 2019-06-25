@@ -512,11 +512,13 @@ class PaymentController extends Controller {
         if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
             $import = $transmition_file->import();
                 if(array_key_exists('errors', $import)) {
-                    $string_error = '';
-                    foreach ($import['errors'] as $error) {
-                        $string_error .= $error . "<br>";
+                    if($import['errors'] != '') {
+                        $string_error = '';
+                        foreach ($import['errors'] as $error) {
+                            $string_error .= $error . "<br>";
+                        }
+                        Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
                     }
-                    Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
                 } else {
                     Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
                 }
