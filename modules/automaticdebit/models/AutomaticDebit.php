@@ -18,6 +18,7 @@ use yii\behaviors\TimestampBehavior;
  * @property int $status
  * @property int $created_at
  * @property int $updated_at
+ * @property string $customer_type
  *
  * @property Bank $bank
  * @property Customer $customer
@@ -57,7 +58,8 @@ class AutomaticDebit extends ActiveRecord
         return [
             [['customer_id', 'bank_id', 'cbu', 'status'], 'required'],
             [['customer_id', 'bank_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['cbu', 'beneficiario_number'], 'string', 'max' => 255],
+            [['cbu', 'beneficiario_number'], 'string', 'length' => 22],
+            [['customer_type'], 'string'],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::class, 'targetAttribute' => ['bank_id' => 'bank_id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
         ];
@@ -77,6 +79,7 @@ class AutomaticDebit extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'customer_type' => Yii::t('app', 'Customer Type'),
         ];
     }
 

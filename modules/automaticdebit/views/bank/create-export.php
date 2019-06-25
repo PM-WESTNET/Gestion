@@ -38,6 +38,11 @@ $this->title = Yii::t('app','Create new export for direct debit');
         ]
     ])?>
 
+    <?php echo $form->field($export, 'type')->dropDownList([
+        'own' => Yii::t('app','Bank Customers'),
+        'other' => Yii::t('app','Other Customers')
+    ])?>
+
     <?php echo \yii\helpers\Html::submitButton(Yii::t('app','Create'), ['class' => 'btn btn-success'])?>
 
     <?php \yii\bootstrap\ActiveForm::end()?>

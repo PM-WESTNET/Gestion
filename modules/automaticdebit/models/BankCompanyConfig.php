@@ -19,6 +19,9 @@ use yii\behaviors\TimestampBehavior;
  * @property int $bank_id
  * @property int $created_at
  * @property int $updated_at
+ * @property string $service_code
+ * @property string $other_service_code
+ * @property string $other_company_identification
  *
  * @property Bank $bank
  * @property Company $company
@@ -41,7 +44,8 @@ class BankCompanyConfig extends ActiveRecord
         return [
             [['company_id', 'bank_id'], 'required'],
             [['company_id', 'bank_id', 'created_at', 'updated_at'], 'integer'],
-            [['company_identification', 'branch', 'control_digit', 'account_number'], 'string', 'max' => 45],
+            [['control_digit'], 'string', 'length' => 2],
+            [['company_identification', 'branch', 'account_number', 'service_code', 'other_service_code', 'other_company_identification'], 'string', 'max' => 45],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::class, 'targetAttribute' => ['bank_id' => 'bank_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
         ];

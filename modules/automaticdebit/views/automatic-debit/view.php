@@ -48,6 +48,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->getStatusLabel();
                 }
             ],
+            [
+                'attribute' => 'customer_type',
+                'value' => function($model) {
+                    if ($model->customer_type === 'own') {
+                        return Yii::t('app','Bank Customer');
+                    }else {
+                        return Yii::t('app','Other Customer');
+                    }
+                }
+            ],
             'created_at:datetime',
             'updated_at:datetime',
         ],

@@ -30,7 +30,9 @@ class BancoFrances implements BankInterface
     public $paymentsData;
     public $periodFrom;
     public $periodTo;
+    public $type;
     private $fileName;
+
 
     /**
      *  Debe exportar el archivo para debito directo
@@ -47,7 +49,8 @@ class BancoFrances implements BankInterface
 
         $this->companyConfig = $companyConfig;
 
-        $filename = time().uniqid();
+        $d= (($this->type === 'own') ? 1 : 0);
+        $filename = rand(1000000,9999999). $d;
         $file = \Yii::getAlias('@app').'/web/direct_debit/'.$filename;
 
         $resource = fopen($file.'.txt', 'w');
@@ -57,7 +60,7 @@ class BancoFrances implements BankInterface
         }
 
         $export->file = $file.'.txt';
-        $this->fileName = $filename;
+        $this->fileName = $filename.'.txt';
 
         $export->save();
 
@@ -87,6 +90,7 @@ class BancoFrances implements BankInterface
 
         }
 
+        $totalRegister++;
         $resource = $this->addFooterLine($resource, $totalAmount, $totalOperations, $totalRegister);
 
         fclose($resource);
@@ -182,12 +186,14 @@ class BancoFrances implements BankInterface
     private function addHeader($resource)
     {
         $register_code = '4110';
-        $companyId = $this->companyConfig->company_identification;
+        $companyId = $this->getCompanyIdentification();
         $createDate = date('Ymd');
         $processDate = date('Ymd', $this->processTimestamp);
         $bank = '0017';
         $branch = $this->companyConfig->branch;
         $dc= $this->companyConfig->control_digit;
+        $account= $this->companyConfig->account_number;
+        $service = $this->getServiceCode();
         $divisa = 'ARS';
         $devolucion = '0';
         $file= $this->fileName;
@@ -195,7 +201,7 @@ class BancoFrances implements BankInterface
         $tipoCBU= '20';
         $libre = str_pad(' ', 141, ' ');
 
-        $line = $register_code.$companyId.$createDate.$processDate.$bank.$branch.$dc.$divisa.$devolucion.$file.$ord.$tipoCBU.$libre;
+        $line = $register_code.$companyId.$createDate.$processDate.$bank.$branch.$dc.$account.$service.$divisa.$devolucion.$file.$ord.$tipoCBU.$libre;
 
         fwrite($resource, $line.PHP_EOL);
 
@@ -211,20 +217,20 @@ class BancoFrances implements BankInterface
     private function addFirstLine($resource, $beneficiary, $bill)
     {
         $register_code = '4210';
-        $companyId = $this->companyConfig->company_identification;
+        $companyId = $this->getCompanyIdentification();
         $free1= str_pad(' ', 2, ' ');
         $beneficiary_number = $beneficiary->beneficiario_number;
         $cbu = $beneficiary->cbu;
 
         $intamount = floor($bill->total);
 
-        $import1 = str_pad('0', 13, $intamount);
+        $import1 = str_pad($intamount, 13, '0', STR_PAD_LEFT);
         $import2 = round(($bill->total - $intamount), 2) * 100;
         $code_dev = str_pad(' ', 6, ' ');
         $ref = str_pad(' ', 22, ' ');
         $fecha = date('Ymd', $this->processTimestamp);
         $free2 = str_pad(' ', 2, ' ');
-        $bill_number = str_pad('0', 15, $bill->number);
+        $bill_number = str_pad($bill->number, 15, '0', STR_PAD_LEFT);
         $status_dev = str_pad(' ', 1, ' ');
         $descr_dev = str_pad(' ', 40, ' ');
         $free3 = str_pad(' ', 86, ' ');
@@ -240,10 +246,10 @@ class BancoFrances implements BankInterface
     private function addSecondLine ($resource, $beneficiary) {
 
         $register_code = '4220';
-        $companyId = $this->companyConfig->company_identification;
+        $companyId = $this->getCompanyIdentification();
         $free1= str_pad(' ', 2, ' ');
         $beneficiary_number = $beneficiary->beneficiario_number;
-        $beneficiary_name = $beneficiary->customer->fullName;
+        $beneficiary_name = str_pad($beneficiary->customer->fullName, 36, ' ');
 
         $dom1 = str_pad(' ', 36, ' ');
         $dom2 = str_pad(' ', 36, ' ');
@@ -278,10 +284,10 @@ class BancoFrances implements BankInterface
     private function addConceptLine($resource, $beneficiary)
     {
         $register_code = '4240';
-        $companyId = $this->companyConfig->company_identification;
+        $companyId = $this->getCompanyIdentification();
         $free1= str_pad(' ', 2, ' ');
         $beneficiary_number = $beneficiary->beneficiario_number;
-        $concept = $beneficiary->customer->company->name;
+        $concept = str_pad($beneficiary->customer->company->name, 40, ' ');
         $free2 = str_pad(' ', 177, ' ');
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$concept.$free2;
@@ -294,14 +300,15 @@ class BancoFrances implements BankInterface
     private function addFooterLine ($resource, $total, $countOp, $countTotal)
     {
         $register_code = '4910';
-        $companyId = $this->companyConfig->company_identification;
-
+        $companyId = $this->getCompanyIdentification();
         $totalint = floor($total);
-        $import1 = str_pad('0', 13, $totalint);
-        $import2 = ($total - $totalint) * 100;
+        $import1 = str_pad($totalint, 13, '0', STR_PAD_LEFT);
+        $import2 = round(($total - $totalint),2) * 100;
         $free =  str_pad(' ', 208, ' ');
+        $op = str_pad($countOp, 8, '0', STR_PAD_LEFT);
+        $total = str_pad($countTotal, 10, '0', STR_PAD_LEFT);
 
-        $line = $register_code.$companyId.$import1.$import2.$countOp.$countTotal.$free;
+        $line = $register_code.$companyId.$import1.$import2.$op.$total.$free;
 
         fwrite($resource, $line.PHP_EOL);
 
@@ -332,7 +339,8 @@ class BancoFrances implements BankInterface
             ->andWhere([
                 'bank_id' => $bank_id,
                 'c.company_id' => $company_id,
-                'automatic_debit.status' => AutomaticDebit::ENABLED_STATUS
+                'automatic_debit.status' => AutomaticDebit::ENABLED_STATUS,
+                'automatic_debit.customer_type' => $this->type
             ])->all();
 
         return $debits;
@@ -343,5 +351,23 @@ class BancoFrances implements BankInterface
         $restore = substr($date,0,4) .'-'. substr($date, 4,2).'-'.substr($date,6);
 
         return $restore;
+    }
+
+    private function getCompanyIdentification()
+    {
+        if ($this->type === 'own') {
+            return $this->companyConfig->company_identification;
+        }else {
+            return $this->companyConfig->other_company_identification;
+        }
+    }
+
+    private function getServiceCode()
+    {
+        if ($this->type === 'own') {
+            return str_pad($this->companyConfig->service_code, 10, ' ');
+        }else {
+            return str_pad($this->companyConfig->other_service_code, 10, ' ');
+        }
     }
 }

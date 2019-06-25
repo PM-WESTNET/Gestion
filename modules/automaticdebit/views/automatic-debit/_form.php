@@ -24,6 +24,11 @@ use yii\widgets\ActiveForm;
         AutomaticDebit::DISABLED_STATUS => Yii::t('app','Inactive')
     ]) ?>
 
+    <?= $form->field($model, 'customer_type')->dropDownList([
+        'own' => Yii::t('app','Bank Customer'),
+        'other' => Yii::t('app','Other Customer')
+    ]) ?>
+
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

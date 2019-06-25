@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property int $create_timestamp
  * @property int $bank_id
  * @property int $company_id
+ * @property string $type
  *
  * @property BillHasExportToDebit[] $billHasExportToDebits
  * @property Bank $bank
@@ -53,7 +54,7 @@ class DirectDebitExport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id'], 'required'],
+            [['company_id', 'type'], 'required'],
             [['create_timestamp', 'bank_id', 'company_id'], 'integer'],
             [['file'], 'string', 'max' => 255],
             [['from_date', 'to_date', 'debit_date'], 'safe'],
@@ -73,7 +74,8 @@ class DirectDebitExport extends \yii\db\ActiveRecord
             'bank_id' => Yii::t('app', 'Bank ID'),
             'from_date' => Yii::t('app','From Date'),
             'to_date' => Yii::t('app','To Date'),
-            'debit_date' => Yii::t('app','Debit Date')
+            'debit_date' => Yii::t('app','Debit Date'),
+            'type' => Yii::t('app','Type')
         ];
     }
 
@@ -100,6 +102,7 @@ class DirectDebitExport extends \yii\db\ActiveRecord
         $bankInstance->processTimestamp = strtotime(Yii::$app->formatter->asDate($this->debit_date, 'yyyy-MM-dd'));
         $bankInstance->periodFrom = strtotime(Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd'));
         $bankInstance->periodTo = strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'));
+        $bankInstance->type = $this->type;
 
         return $bankInstance->export($this);
     }

@@ -16,9 +16,15 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'account_number')->textInput(['maxlength' => true]) ?>
 
+    <?= $form->field($model, 'service_code')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'other_service_code')->textInput(['maxlength' => true]) ?>
+
     <?= $form->field($model, 'branch')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'company_identification')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'other_company_identification')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'control_digit')->textInput(['maxlength' => true]) ?>
 
