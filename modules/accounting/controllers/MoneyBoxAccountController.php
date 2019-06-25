@@ -46,8 +46,12 @@ class MoneyBoxAccountController extends Controller
             'query' => MoneyBoxAccount::find(),
         ]);
 
+        $searchModel = new MoneyBoxAccountSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
         return $this->render('index', [
             'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
         ]);
     }
 
@@ -163,11 +167,21 @@ class MoneyBoxAccountController extends Controller
             $searchModel->account_id_to = $account->rgt;
             $searchModel->account_id = $account->account_id;
 
-            $dataProvider = $searchModel->search($params, 1);
+            if (!$searchModel->toDate) {
+                $searchModel->toDate = (new \DateTime('now'))->format('Y-m-d');
+            }
+
+            if (!$searchModel->fromDate) {
+                $searchModel->fromDate = (new \DateTime('now'))->modify('-1 month')->format('Y-m-d');
+            }
+
+            $data = $searchModel->search($params, 1);
+            $dataProvider = $searchModel->search($params, 0);
             
             return $this->render('movements', [
                 'model'         => $model,
-                'data'  => $dataProvider,
+                'data'  => $data,
+                'dataProvider' => $dataProvider,
                 'searchModel'   => $searchModel,
                 'fromMoneyBox'  => $fromMoneyBox,
                 'init' => $init
