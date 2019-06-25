@@ -19,9 +19,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <p>
             <?php
-            if($model->canClose()) {
-                echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_payment_id], ['class' => 'btn btn-primary']);
+            if ($model->canClose()) {
                 echo Html::a("<span class='glyphicon glyphicon-repeat'></span> " . Yii::t('app', 'Close'), ['close', 'id' => $model->provider_payment_id], ['class' => 'btn btn-warning']);
+                if ($model->getUpdatable()) {
+                    echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_payment_id], ['class' => 'btn btn-primary']);
+                }
             }
 
             if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_payment_id], [

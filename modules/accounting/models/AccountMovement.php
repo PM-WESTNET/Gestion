@@ -236,11 +236,15 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getWorkflowCreateLog(){}
 
+    /**
+     * @return bool
+     * Cambia el estado a cerrado de account_movement
+     */
     public function close()
     {
         try {
             if ($this->can(AccountMovement::STATE_CLOSED)) {
-                foreach($this->accountMovementItems as $item) {
+                foreach ($this->accountMovementItems as $item) {
                     $item->changeState(AccountMovement::STATE_CLOSED);
                 }
                 return $this->changeState(AccountMovement::STATE_CLOSED);
@@ -249,7 +253,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
             }
 
             return true;
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             return false;
         }
     }
@@ -316,5 +320,24 @@ class AccountMovement extends \app\components\companies\ActiveRecord
 
         return $total;
 
+    }
+
+    /**
+     * @return bool
+     * Cierra el movimiento actual y los posteriores a éste, cerrando tambien todos los items
+     */
+    public function closeThisAndPreviousMovements()
+    {
+
+        if ($this->can(AccountMovement::STATE_CLOSED)) {
+            foreach ($this->accountMovementItems as $item) {
+                $item->changeState(AccountMovement::STATE_CLOSED);
+            }
+            return $this->changeState(AccountMovement::STATE_CLOSED);
+        } else {
+            throw new \Exception('Cant Close');
+        }
+
+        return true;
     }
 }

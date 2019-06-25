@@ -66,9 +66,11 @@ $this->params['breadcrumbs'][] = $this->title;
     $columns[] = [
         'class' => 'app\components\grid\ActionColumn',
         'template'=>'{view} {update} {delete} {items}',
-        'buttons'=>[
+        'buttons' => [
             'update' => function ($url, $model, $key) {
-                return '<a href="'.Url::toRoute(['provider-bill/update', 'id'=>$model->provider_bill_id]).'" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>';
+                if ($model->getUpdatable()) {
+                    return '<a href="' . Url::toRoute(['provider-bill/update', 'id' => $model->provider_bill_id]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>';
+                }
             },
             'view' => function ($url, $model, $key) {
                 return '<a href="'.Url::toRoute(['provider-bill/view', 'id'=>$model->provider_bill_id]).'" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>';
