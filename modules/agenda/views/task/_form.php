@@ -7,6 +7,8 @@ use yii\web\JsExpression;
 use app\components\widgets\agenda\task\TaskBundle;
 use \app\modules\agenda\AgendaModule;
 use webvimark\modules\UserManagement\models\User;
+use \app\modules\agenda\models\EventType;
+use \kartik\time\TimePicker;
 
 TaskBundle::register($this);
 
@@ -111,7 +113,7 @@ $user = User::findOne(Yii::$app->user->id);
 
     <div class="row">
         <div class="col-sm-4">
-            <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), [
+            <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::class, [
                 'language' => 'es-AR', 
                 'dateFormat' => 
                 'dd-MM-yyyy', 
@@ -121,7 +123,7 @@ $user = User::findOne(Yii::$app->user->id);
                 ]) ?>
         </div>
         <div class="col-sm-4">
-            <?= $form->field($model, 'time')->widget(\kartik\time\TimePicker::classname(), [
+            <?= $form->field($model, 'time')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'showMeridian' => false,
                     'minuteStep' => 15
@@ -129,7 +131,7 @@ $user = User::findOne(Yii::$app->user->id);
             ]); ?>
         </div>
         <div class="col-sm-4">
-            <?= $form->field($model, 'duration')->widget(\kartik\time\TimePicker::classname(), [
+            <?= $form->field($model, 'duration')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'defaultTime' => '02:00:00',
                     'showMeridian' => false,
@@ -141,7 +143,7 @@ $user = User::findOne(Yii::$app->user->id);
 
     <!-- Asignacion de usuarios -->
     <?php if($model->isParent()) : ?>
-        <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == \app\modules\agenda\models\TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
+        <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
 
         <div class="panel-heading">
             <h3 class="panel-title font-bold">Asignar usuarios</h3>

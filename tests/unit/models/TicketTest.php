@@ -224,6 +224,5 @@ class TicketTest extends \Codeception\Test\Unit
 
         expect('Ticket management total is 1', $model->getTicketManagementQuantity())->equals(1);
     }
-
 //    TODO resto funciones anteriores de la clase
 }

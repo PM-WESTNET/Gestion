@@ -24,7 +24,6 @@ $this->params['breadcrumbs'][]= $this->title;
             ]), ['pagofacil-payments-import'], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
-    
 
     <?= GridView::widget([
         'dataProvider'=> $dataProvider,

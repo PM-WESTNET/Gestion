@@ -268,6 +268,9 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit',
+        ],
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

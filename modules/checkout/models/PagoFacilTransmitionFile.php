@@ -134,6 +134,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * Strong relations: None.
      */
     public function getDeletable() {
+
         if($this->status == self::STATUS_DRAFT && (!$this->getPayments()->exists())) {
             return true;
         }

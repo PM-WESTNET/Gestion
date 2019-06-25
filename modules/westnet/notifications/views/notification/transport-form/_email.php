@@ -8,13 +8,13 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 ?>
 
 <?= $form->field($model, 'subject')->textInput(['maxlength' => 255]) ?>
+
 <?= $form->field($model, 'content')->widget(CKEditor::class, [
     'options' => ['rows' => 6, 'id' => 'content'],
     'clientOptions' => [
         'toolbar' => "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
     ]
-]);
-?>
+]); ?>
 
 <div class="row">
     <div class="col-sm-3">

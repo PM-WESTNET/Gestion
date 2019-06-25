@@ -234,12 +234,10 @@ class CustomerMessage extends \app\components\db\ActiveRecord
     public function getStatusLabel()
     {
         $labels =[
-            \app\modules\sale\models\CustomerMessage::STATUS_ENABLED => Yii::t('app','Enabled'),
-            \app\modules\sale\models\CustomerMessage::STATUS_DISABLED => Yii::t('app','Disabled')
+            self::STATUS_ENABLED => Yii::t('app','Enabled'),
+            self::STATUS_DISABLED => Yii::t('app','Disabled')
         ];
 
         return $labels[$this->status];
     }
-
-
 }

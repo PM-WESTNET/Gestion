@@ -34,7 +34,6 @@ $form= ActiveForm::begin(['method' => 'GET']);
             <?=$form->field($model, 'color_id')->dropDownList(ArrayHelper::map(Color::find()->orderBy('order')->all(), 'color_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
 
-
         <div class="col-lg-4">
             <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaCobranza::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>

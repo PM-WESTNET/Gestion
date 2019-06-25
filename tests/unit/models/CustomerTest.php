@@ -84,9 +84,6 @@ class CustomerTest extends \Codeception\Test\Unit
             'customerClass' => 1
         ]);
 
-        $model->validate();
-        \Codeception\Util\Debug::debug($model->getErrors());
-
         expect('Valid when full and new', $model->validate())->true();
     }
 

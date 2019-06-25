@@ -8,7 +8,6 @@
 
 namespace app\modules\mobileapp\v1\models;
 
-
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\config\models\Config;
 use app\modules\sale\models\search\CustomerSearch;

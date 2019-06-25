@@ -9,6 +9,8 @@ use app\modules\sale\components\BillExpert;
 use app\modules\westnet\reports\ReportsModule;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\westnet\notifications\NotificationsModule;
+use app\modules\westnet\models\Vendor;
+use app\modules\sale\models\BillType;
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
@@ -19,7 +21,7 @@ $alwaysVisibleItems = [];
 //Home
 $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 
-if (app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()) {
+if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
                 'label' => Yii::t('westnet', 'Ecopago'),
                 'url' => ['/westnet/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
@@ -30,14 +32,14 @@ if (app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()) {
 //Vendedores
 $vendorItems = [
     ['label' => Yii::t('app', 'Create {modelClass}', ['modelClass' => Yii::t('app', 'Customer')]), 'url' => ['/sale/customer/sell']],
-    ['label' => Yii::t('app', 'My Sales'), 'url' => ['/sale/contract/contract/vendor-list'], 'visible' => app\modules\westnet\models\Vendor::vendorExists(Yii::$app->user->id)]
+    ['label' => Yii::t('app', 'My Sales'), 'url' => ['/sale/contract/contract/vendor-list'], 'visible' => Vendor::vendorExists(Yii::$app->user->id)]
 ];
 $items[] = ['label' => Yii::t('app', 'Sellers'), 'items' => $vendorItems];
 
 
 
 //Vender
-$billTypes2Create = app\modules\sale\models\BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->where(['startable' => 1])->all();
+$billTypes2Create = BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->where(['startable' => 1])->all();
 $billItems = [];
 $lastClass = null;
 foreach ($billTypes2Create as $item) {
@@ -55,7 +57,7 @@ $billItems[] = ['label' => Yii::t('app','Close Pending Batch Invoices'), 'url' =
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Customer Invoice'), 'url' => ['/sale/bill/invoice-customer']];
 
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Billing'), 'items'=>$billItems];
 }
 
@@ -76,7 +78,7 @@ $billIndexItems = [
     ], 'visible' => Yii::$app->user->isSuperadmin],
 
 ];
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $billIndexItems = array_merge($billIndexItems, [
         ['label' => Yii::t('app', 'Bills summary'), 'url' => ['/sale/bill/history']],
         ['label' => Yii::t('app', 'My Bills'), 'url' => ['/sale/bill', 'BillSearch[user_id]' => Yii::$app->user->id]],
@@ -86,7 +88,7 @@ if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) 
 }
 
 //En este menu debemos mostrar un index por cada tipo de comprobante
-$billTypes2Index = app\modules\sale\models\BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->all();
+$billTypes2Index = BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->all();
 if($billTypes2Index){
     $billIndexItems[] ='<li class="divider"></li>';
 }
@@ -102,7 +104,7 @@ if (!User::hasRole('seller')) {
     }
 }
 
-if (webvimark\modules\UserManagement\models\User::hasRole('batch-invoice-rol')) {
+if (User::hasRole('batch-invoice-rol')) {
     $billIndexItems = array_merge($billIndexItems, [
         ['label' => Yii::t('app', 'All Invoices'), 'url' => ['/sale/bill', 'BillSearch[class]' => 'Bill']],
     ]);
@@ -184,7 +186,6 @@ if (Yii::$app->getModule('checkout')) {
             '<li class="divider"></li>',
             ['label'=>Yii::t('pagomiscuentas','Export Pagomiscuentas'), 'url'=>['/pagomiscuentas/export/index']],
             ['label'=>Yii::t('pagomiscuentas','Import Pagomiscuentas'), 'url'=>['/pagomiscuentas/import/index']],
-
     ]];
 }
 
@@ -265,7 +266,7 @@ if (Yii::$app->getModule('accounting')) {
     }
 }
 $appMenu = [];
-if (webvimark\modules\UserManagement\models\User::canRoute('/log/index')) {
+if (User::canRoute('/log/index')) {
     $appMenu = [
         ['label' => Yii::t('app', 'Logs'), 'url' => ['/log/log/index']]
     ];
@@ -288,7 +289,7 @@ if (Yii::$app->user->isSuperadmin) {
 }
 
 //App
-if(webvimark\modules\UserManagement\models\User::hasRole('admin')) {
+if(User::hasRole('admin')) {
     $items[] = ['label' => Yii::t('app', 'Application'), 'items' => $config];
 }
 
@@ -430,10 +431,10 @@ if (Yii::$app->params['agenda_enabled']) {
                 'data-task' => 'create',
             ],
         ],
-        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/category/*')],
-        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/task-type/*')],
-        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'],'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/status/*')],
-        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'],'visible'=> webvimark\modules\UserManagement\models\User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible'=> User::canRoute('/agenda/category/*')],
+        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible'=> User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'],'visible'=> User::canRoute('/agenda/status/*')],
+        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'],'visible'=> User::canRoute('/agenda/task-type/*')],
     ];
 
     $items[] = [
@@ -441,7 +442,7 @@ if (Yii::$app->params['agenda_enabled']) {
         'items' => $array_items,
     ];
 
-    if (webvimark\modules\UserManagement\models\User::canRoute('/agenda')) {
+    if (User::canRoute('/agenda')) {
 
         echo \app\components\widgets\agenda\notification\Notification::widget();
 

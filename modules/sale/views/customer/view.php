@@ -234,7 +234,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ];
     }
     
-    $profileClasses = \app\modules\sale\models\Customer::getEnabledProfileClasses();
+    $profileClasses = Customer::getEnabledProfileClasses();
     
     foreach($profileClasses as $class){
         $attributes[] = $class->attr;

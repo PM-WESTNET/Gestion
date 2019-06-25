@@ -623,7 +623,6 @@ class CustomerController extends Controller
         $dataProvider= new ActiveDataProvider(['query' => $installations]);
         $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
 
-
         $this->layout= '//fluid';
         return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
     }

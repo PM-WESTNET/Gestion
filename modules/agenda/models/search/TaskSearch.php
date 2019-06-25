@@ -112,12 +112,6 @@ class TaskSearch extends Task {
             $query->andFilterWhere(['<=', 'date', $this->to_date]);
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        \Yii::trace($query->createCommand()->getRawSql());
-//        return $dataProvider;
         return $query->all();
     }
 

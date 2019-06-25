@@ -17,16 +17,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
-            <p>
-                <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_bill_id], ['class' => 'btn btn-primary']) ?>
-                <?php if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_bill_id], [
-                    'class' => 'btn btn-danger',
-                    'data' => [
-                        'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
-                        'method' => 'post',
-                    ],
-                ]) ?>
-            </p>
+        <p>
+            <?php if ($model->getUpdatable()) {
+                echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_bill_id], ['class' => 'btn btn-primary']);
+            } ?>
+            <?php if ($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_bill_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    'method' => 'post',
+                ],
+            ]) ?>
+        </p>
     </div>
 
     <?php

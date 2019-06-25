@@ -199,5 +199,4 @@ class AppFailedRegister extends \app\components\db\ActiveRecord
             }
         }
     }
-
 }

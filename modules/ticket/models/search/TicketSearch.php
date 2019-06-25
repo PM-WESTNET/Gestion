@@ -251,7 +251,7 @@ class TicketSearch extends Ticket {
         $query->joinWith('customerProfiles', false);
 
         //Profiles habilitados para busqueda
-        $profileClasses = \app\modules\agenda\models\Ticket::getSearchableProfileClasses();
+        $profileClasses = Ticket::getSearchableProfileClasses();
         foreach ($profileClasses as $class) {
 
             /* El query debe ser armado asi para que funcione coorectamente. Pasando profile_class_id como parametro :profile_class_id no funciona.

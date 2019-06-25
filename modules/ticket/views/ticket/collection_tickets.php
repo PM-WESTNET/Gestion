@@ -26,12 +26,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
-            <?=
-            Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
+            <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
                         'modelClass' => 'Ticket',
                     ]), ['create'], ['class' => 'btn btn-success'])
-            ;
-            ?>
+            ;?>
         </p>
     </div>
 
@@ -159,16 +157,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]);
                 },
             ],
+            'template' => '{current-account} {observations}'
         ],
     ];
     ?>
-    <?php
-        $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
-        
-        echo Collapse::widget([
+    <?= Collapse::widget([
             'items' => [
                 [
-                    'label' => $item,
+                    'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
                     'content' => $this->render('_collection_filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
@@ -180,8 +176,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ?>
 
     <div class="container-fluid no-padding no-margin">
-        <?=
-        GridView::widget([
+        <?= GridView::widget([
             'dataProvider' => $dataProvider,
             'columns' => $columns,
             'id' => 'grid',
@@ -306,8 +301,6 @@ $this->params['breadcrumbs'][] = $this->title;
             });
         }
     };
-
-
 
 </script>
 

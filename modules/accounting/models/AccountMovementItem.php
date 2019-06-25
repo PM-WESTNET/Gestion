@@ -100,7 +100,7 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
      */
     public function getAccount()
     {
-        return $this->hasOne(Account::className(), ['account_id' => 'account_id']);
+        return $this->hasOne(Account::class, ['account_id' => 'account_id']);
     }
 
     /**
