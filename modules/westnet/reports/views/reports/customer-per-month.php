@@ -6,7 +6,8 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
-use yiier\chartjs\ChartJs;
+use yii\jui\DatePicker;
+use dosamigos\chartjs\ChartJs;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
@@ -26,8 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_from'); ?>
-                        <?php
-                        echo yii\jui\DatePicker::widget([
+                        <?= DatePicker::widget([
                             'language' => Yii::$app->language,
                             'model' => $model,
                             'attribute' => 'date_from',
@@ -43,8 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_to'); ?>
-                        <?php
-                        echo yii\jui\DatePicker::widget([
+                        <?= DatePicker::widget([
                             'language' => Yii::$app->language,
                             'model' => $model,
                             'attribute' => 'date_to',
@@ -60,7 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
+                    <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success pull-right']) ?>
                 </div>
             </div>
             <?php ActiveForm::end(); ?>
@@ -69,8 +68,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="row">
             <div class="col-md-12 text-center">
-                <?php
-                echo \dosamigos\chartjs\ChartJs::widget([
+                <?= ChartJs::widget([
                     'type' => 'line',
                     'options' => [
                         'width' => 800,

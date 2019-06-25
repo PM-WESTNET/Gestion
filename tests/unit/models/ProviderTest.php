@@ -58,6 +58,6 @@ class ProviderTest extends \Codeception\Test\Unit
             'tax_identification' => '124567898'
         ]);
 
-        expect('Valid when full and new', $model->validate())->true();
+        expect('Valid when full and new', $model->save())->true();
     }
 }

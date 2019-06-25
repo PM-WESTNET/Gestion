@@ -3,15 +3,16 @@
 namespace app\modules\ticket\models;
 
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\ticket\behaviors\GenerateActionBehavior;
 use app\modules\ticket\components\MesaTicket;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\ticket\components\TicketId;
-use app\modules\ticket\models\History;
-use app\modules\ticket\models\Category;
 use app\modules\sale\models\Customer;
 use yii\httpclient\Client;
-
+use app\modules\ticket\TicketModule;
+use app\modules\ticket\models\query\TicketQuery;
+use app\modules\agenda\models\Task;
 
 /**
  * This is the model class for table "ticket".
@@ -52,6 +53,7 @@ class Ticket extends \app\components\db\ActiveRecord {
     public $userModelId;
     public $assignAllUsers = false;
     public $userGroups = [];
+    public $assigned_user;
     private $_users;
     private $_observations;
     //Stores old attributes so we can compare against them before save
@@ -60,6 +62,8 @@ class Ticket extends \app\components\db\ActiveRecord {
     //Sets this ticket prepared for an external change, making beforeSave and afterSave less functional
     private $_isExternal = false;
 
+    //Fecha que debe ser seteada si el estado del ticket genera una tarea.
+    public $task_date;
     /**
      * @inheritdoc
      */
@@ -100,6 +104,18 @@ class Ticket extends \app\components\db\ActiveRecord {
 
     /**
      * @inheritdoc
+     *      GeneratedActionBehavior Analiza si el ticket ha cambiado de estado, si ha cambiado, verifica que el cambio de estado
+     * desencadene o no una acción, por ejemplo, la creación de un ticket o una tarea.
+     */
+    public function behaviors() {
+        $behaviors = parent::getBehaviors();
+
+        $behaviors[] = GenerateActionBehavior::class;
+        return $behaviors;
+    }
+
+    /**
+     * @inheritdoc
      */
     public function rules() {
         return [
@@ -108,7 +124,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             [['start_date', 'finish_date'], 'date'],
             [['content'], 'string'],
             [['title'], 'string', 'max' => 255],
-            [['start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract'], 'safe'],
+            [['user_id', 'start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
         ];
     }
 
@@ -117,25 +133,25 @@ class Ticket extends \app\components\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'ticket_id' => \app\modules\ticket\TicketModule::t('app', 'Ticket'),
-            'status_id' => \app\modules\ticket\TicketModule::t('app', 'Status'),
-            'customer_id' => \app\modules\ticket\TicketModule::t('app', 'Customer'),
-            'task_id' => \app\modules\ticket\TicketModule::t('app', 'Task'),
-            'color_id' => \app\modules\ticket\TicketModule::t('app', 'Color'),
-            'category_id' => \app\modules\ticket\TicketModule::t('app', 'Category'),
-            'start_date' => \app\modules\ticket\TicketModule::t('app', 'Start date'),
-            'finish_date' => \app\modules\ticket\TicketModule::t('app', 'Finish date'),
-            'title' => \app\modules\ticket\TicketModule::t('app', 'Title'),
-            'content' => \app\modules\ticket\TicketModule::t('app', 'Content'),
-            'number' => \app\modules\ticket\TicketModule::t('app', 'Number'),
-            'assignations' => \app\modules\ticket\TicketModule::t('app', 'Assignations'),
-            'observations' => \app\modules\ticket\TicketModule::t('app', 'Observations'),
-            'status' => \app\modules\ticket\TicketModule::t('app', 'Status'),
-            'task' => \app\modules\ticket\TicketModule::t('app', 'Task'),
-            'category' => \app\modules\ticket\TicketModule::t('app', 'Category'),
-            'contract_id' => \app\modules\ticket\TicketModule::t('app', 'Contract'),
-            'user_id' => \app\modules\ticket\TicketModule::t('app', 'User'),
-            'external_tag_id' => \app\modules\ticket\TicketModule::t('app', 'Tag'),
+            'ticket_id' => TicketModule::t('app', 'Ticket'),
+            'status_id' => TicketModule::t('app', 'Status'),
+            'customer_id' => TicketModule::t('app', 'Customer'),
+            'task_id' => TicketModule::t('app', 'Task'),
+            'color_id' => TicketModule::t('app', 'Color'),
+            'category_id' => TicketModule::t('app', 'Category'),
+            'start_date' => TicketModule::t('app', 'Start date'),
+            'finish_date' => TicketModule::t('app', 'Finish date'),
+            'title' => TicketModule::t('app', 'Title'),
+            'content' => TicketModule::t('app', 'Content'),
+            'number' => TicketModule::t('app', 'Number'),
+            'assignations' => TicketModule::t('app', 'Assignations'),
+            'observations' => TicketModule::t('app', 'Observations'),
+            'status' => TicketModule::t('app', 'Status'),
+            'task' => TicketModule::t('app', 'Task'),
+            'category' => TicketModule::t('app', 'Category'),
+            'contract_id' => TicketModule::t('app', 'Contract'),
+            'user_id' => TicketModule::t('app', 'User'),
+            'external_tag_id' => TicketModule::t('app', 'Tag'),
         ];
     }
 
@@ -144,21 +160,21 @@ class Ticket extends \app\components\db\ActiveRecord {
      * @return \app\modules\ticket\models\query\TicketQuery the active query used by this AR class.
      */
     public static function find() {
-        return new \app\modules\ticket\models\query\TicketQuery(get_called_class());
+        return new TicketQuery(get_called_class());
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getAssignations() {
-        return $this->hasMany(Assignation::className(), ['ticket_id' => 'ticket_id']);
+        return $this->hasMany(Assignation::class, ['ticket_id' => 'ticket_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getCompleteHistory() {
-        return $this->hasMany(History::className(), ['ticket_id' => 'ticket_id'])
+        return $this->hasMany(History::class, ['ticket_id' => 'ticket_id'])
                         ->orderBy(['datetime' => SORT_DESC]);
     }
 
@@ -166,7 +182,7 @@ class Ticket extends \app\components\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getObservations() {
-        return $this->hasMany(Observation::className(), ['ticket_id' => 'ticket_id'])
+        return $this->hasMany(Observation::class, ['ticket_id' => 'ticket_id'])
                         ->orderBy(['datetime' => SORT_DESC]);
     }
 
@@ -174,49 +190,56 @@ class Ticket extends \app\components\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getStatus() {
-        return $this->hasOne(Status::className(), ['status_id' => 'status_id']);
+        return $this->hasOne(Status::class, ['status_id' => 'status_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getCategory() {
-        return $this->hasOne(Category::className(), ['category_id' => 'category_id']);
+        return $this->hasOne(Category::class, ['category_id' => 'category_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getCustomer() {
-        return $this->hasOne(Customer::className(), ['customer_id' => 'customer_id']);
+        return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getTask() {
-        return $this->hasOne(\app\modules\agenda\models\Task::className(), ['task_id' => 'task_id']);
+        return $this->hasOne(Task::class, ['task_id' => 'task_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getColor() {
-        return $this->hasOne(Color::className(), ['color_id' => 'color_id']);
+        return $this->hasOne(Color::class, ['color_id' => 'color_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getUser() {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getContract() {
-        return $this->hasOne(Contract::className(), ['contract_id' => 'contract_id']);
+        return $this->hasOne(Contract::class, ['contract_id' => 'contract_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTicketManagements() {
+        return $this->hasMany(TicketManagement::class, ['ticket_id' => 'ticket_id']);
     }
 
     /**
@@ -483,7 +506,9 @@ class Ticket extends \app\components\db\ActiveRecord {
             //Values for new instances ($insert = true means $this is a new record)
             if ($insert) {
                 //Asigno el usuario
-                $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                if (empty($this->user_id)) {
+                    $this->user_id = (Yii::$app instanceof \yii\console\Application ? 1 : Yii::$app->user->id) ;
+                }
                 $this->start_datetime = time();
                 //Assings a color to this ticket
                 $this->assignNumber();
@@ -714,4 +739,100 @@ class Ticket extends \app\components\db\ActiveRecord {
         return $tag_id;
     }
 
+    /**
+     * @param $ticket_id
+     * @param $user_id
+     * @return bool
+     * Asigna el ticket dado al usuario indicado.
+     */
+    public static function assignTicketToUser($ticket_id, $user_id) {
+        $assignation = new Assignation([
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+            'time' => (new \DateTime('now'))->format('H:m:i'),
+            'user_id' => $user_id,
+            'ticket_id' => $ticket_id,
+            'external_id' => null
+        ]);
+        History::createHistoryEntry(Ticket::findOne($ticket_id), History::TITLE_NEW_ASSIGNATION);
+
+        return $assignation->save();
+    }
+
+    /**
+     * @param $user_id
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * Elimina las asignaciones de un ticket a un usuario
+     */
+    public function deleteAssignedUser($user_id) {
+        $assignations = Assignation::find()->where(['ticket_id' => $this->ticket_id, 'user_id' => $user_id])->all();
+        foreach ($assignations as $assignation) {
+            $assignation->delete();
+        }
+
+        History::createHistoryEntry($this, History::TITLE_DELETE_ASSIGNATION);
+    }
+
+    /**
+     * @param $ticket_id
+     * @param $exclude_users_id
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     * Elimina todas las asignaciones de un ticket dando la posiblidad de excluir a ciertas asignaciones de usuarios
+     */
+    public static function deleteAllAssignations($ticket_id, $exclude_users_id = [])
+    {
+        $query = Assignation::find()->where(['ticket_id' => $ticket_id]);
+        if($exclude_users_id) {
+            $query->andWhere(['not', ['in', 'user_id', $exclude_users_id]]);
+        }
+        $assignations = $query->all();
+        foreach ($assignations as $assignation) {
+            $assignation->delete();
+        }
+
+        History::createHistoryEntry(Ticket::findOne($ticket_id), History::TITLE_DELETE_ASSIGNATION);
+    }
+
+    /**
+     * @return bool
+     * Regla de negocio- Indica si al ticket se le puede registrar una gestion.
+     */
+    public function canAddTicketManagement()
+    {
+       if($this->getObservations()->exists()) {
+           return true;
+       }
+
+       return false;
+    }
+
+    /**
+     * @param $ticket_id
+     * @param $user_id
+     * @return bool
+     * Crea una gestion de ticket
+     */
+    public function addTicketManagement($user_id)
+    {
+        if($this->canAddTicketManagement()) {
+            $ticket_management = new TicketManagement([
+                'ticket_id' => $this->ticket_id,
+                'user_id' => $user_id
+            ]);
+
+            return $ticket_management->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * @return int|string
+     * Devuelve la cantidad de gestiones de un ticket
+     */
+    public function getTicketManagementQuantity()
+    {
+        return $this->getTicketManagements()->count();
+    }
 }

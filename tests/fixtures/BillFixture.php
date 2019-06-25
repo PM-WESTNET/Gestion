@@ -16,9 +16,9 @@ class BillFixture extends ActiveFixture
 {
     public $modelClass = Bill::class;
     public $depends = [
-       PartnerDistributionModelFixture::class,
-       CustomerFixture::class,
-       UserFixture::class,
-       CurrencyFixture::class
+        PartnerDistributionModelFixture::class,
+        CustomerFixture::class,
+        UserFixture::class,
+        CurrencyFixture::class,
     ];
 }

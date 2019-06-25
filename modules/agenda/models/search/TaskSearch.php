@@ -16,6 +16,8 @@ class TaskSearch extends Task {
     public $user_id;
     public $create_option;
     public $user_option;
+    public $from_date;
+    public $to_date;
 
     public function init() {
         parent::init();
@@ -26,9 +28,16 @@ class TaskSearch extends Task {
     public function rules() {
         return [
             [['task_id'], 'integer'],
-            [['name', 'date', 'status_id', 'task_type_id', 'priority', 'category_id', 'creator_id', 'user_id'], 'safe'],
+            [['name', 'date', 'status_id', 'task_type_id', 'priority', 'category_id', 'creator_id', 'user_id', 'from_date', 'to_date'], 'safe'],
             [['search_text', 'create_option', 'user_option'], 'safe'],
         ];
+    }
+
+    public function attributeLabels() {
+        return array_merge(parent::attributeLabels(), [
+            'from_date' => Yii::t('app', 'From Date'),
+            'to_date' => Yii::t('app', 'To Date'),
+        ]);
     }
 
     public function scenarios() {
@@ -72,8 +81,7 @@ class TaskSearch extends Task {
     public function searchAgenda() {
 
         $query = Task::find();
-
-        $query->innerJoin('notifications');
+        $query->leftJoin('notification n', 'n.task_id = task.task_id');
 
         $query->andFilterWhere([
             'task_id' => $this->task_id,
@@ -87,24 +95,30 @@ class TaskSearch extends Task {
         if ($this->create_option == 'others') {
             $query->andFilterWhere(['<>', 'creator_id', Yii::$app->user->id]);
         } elseif ($this->create_option == 'me') {
-            $query->andFilterWhere(['=', 'creator_id', $this->creator_id]);
+            $query->andFilterWhere(['creator_id' => $this->creator_id]);
         }
 
         if ($this->user_option == 'others') {
-           $query->andFilterWhere(['<>', 'user_id', Yii::$app->user->id]);
+           $query->andFilterWhere(['<>', 'n.user_id', Yii::$app->user->id]);
         } elseif ($this->user_option == 'me') {
-            
-            $query->andFilterWhere(['=', 'user_id', Yii::$app->user->id]);
+
+            $query->andFilterWhere(['n.user_id' => Yii::$app->user->id]);
         }
 
-
-        //$query->andFilterWhere(['like', 'name', $this->name]);
+        if($this->from_date) {
+            $query->andFilterWhere(['>=', 'date', $this->from_date]);
+        }
+        if($this->to_date) {
+            $query->andFilterWhere(['<=', 'date', $this->to_date]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-        error_log($query->createCommand()->getSql());
-        return $dataProvider;
+
+        \Yii::trace($query->createCommand()->getRawSql());
+//        return $dataProvider;
+        return $query->all();
     }
 
     public function searchText($params) {

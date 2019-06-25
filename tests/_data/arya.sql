@@ -3214,7 +3214,7 @@ CREATE TABLE `migration` (
 
 INSERT INTO `migration` (`version`, `apply_time`) VALUES
 ('m000000_000000_base', 1464379186),
-('m150804_184839_accounts', 1467228978),
+('m160201000003_accounts', 1467228978),
 ('m150818_129999_config_create_database', 1465480206),
 ('m150818_130000_create_task_type_table', 1465480221),
 ('m150818_130001_create_status_table', 1465480221),

@@ -383,8 +383,12 @@ var Ticket = new function () {
         this.externalUsersUrl = url;
     }
 
+    this.setGetCategoryResponsibleUserUrl = function (url) {
+        this.categoryResponsibleUser = url;
+    }
+
     this.bindCategoryChange = function() {
-        $(document).off('change', "#category_id").on('change', "#category_id", function(){
+        $(document).off('change', "#category_id").on('change', "#category_id", function(event){
             var external_user_id = $(this).find('option:selected').data('notify');
             if(external_user_id) {
                 $('#user-selection').hide();
@@ -392,9 +396,25 @@ var Ticket = new function () {
                 $('#div-mesa-user').show();
                 $('#mesa-user').html(self.getExternalUser(external_user_id));
             } else {
+                self.setCategoryResponsibleUser(event,$(this).val());
                 $('#user-selection').show();
                 //$('#user-selection input').removeAttr('disabled');
                 $('#div-mesa-user').hide();
+            }
+        });
+    }
+
+    this.setCategoryResponsibleUser = function(event,category_id) {
+        $.ajax({
+            url: self.categoryResponsibleUser,
+            data: {category_id: category_id},
+            method: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                console.log(data);
+                if(data.status == 'success') {
+                    Ticket.addUser(event, data);
+                }
             }
         });
     }

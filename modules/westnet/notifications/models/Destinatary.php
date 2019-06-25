@@ -13,6 +13,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Node;
+use app\modules\westnet\notifications\components\transports\EmailTransport;
 use app\modules\westnet\notifications\NotificationsModule;
 use Yii;
 use yii\db\ActiveQuery;
@@ -591,8 +592,8 @@ class Destinatary extends ActiveRecord {
                 ->leftJoin(DbHelper::getDbName(Yii::$app->dbnotifications).".notification n", "im.notification_id = n.notification_id")
                 ->where("n.status = 'enabled' AND im.status = 'pending' ");
 
-        $query->from['b']->addSelect(['connection.ip4_1 as ipv4', 'customer.email', 'customer.phone2',
-            'customer.phone3', 'n.name as node', 'customer.payment_code', 'company.code as company_code',
+        $query->from['b']->addSelect(['connection.ip4_1 as ipv4', 'customer.email', 'customer.email_status', 'customer.phone2',
+            'customer.phone3', 'customer.phone4', 'n.name as node', 'customer.payment_code', 'company.code as company_code',
             'connection.status_account as status', 'cc.name as category', 'customer.lastname']);
 
         $query->leftJoin(['n' => $subquery], 'b.customer_id = n.customer_integratech');
@@ -636,12 +637,14 @@ class Destinatary extends ActiveRecord {
         //Obtenemos la query de deudores y le agregamos una condicion
         $query = $this->getCustomersQuery();
         $query->andWhere('email IS NOT NULL');
-
+        if ($this->notification->transport->class === EmailTransport::class) {
+            $query->andWhere(['email_status' => 'active']);
+        }
         $emails = [];
 
         //Batch para obtener emails
         foreach($query->each() as $customer){
-            $emails[$customer['email']] = $customer['name'].' '.$customer['lastname'];
+            $emails[$customer['email']] = $customer;
         }
 
         return $emails;

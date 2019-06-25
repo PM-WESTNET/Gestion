@@ -14,7 +14,7 @@ if(empty($model->dailyMoneyBoxAccount)){
     $this->params['breadcrumbs'][] = ['label' => $model->dailyMoneyBoxAccount->account->name, 'url' => ['money-box-account/daily-box-movements', 'id' => $model->daily_money_box_account_id]];
 }
 $this->params['breadcrumbs'][] = $this->title;
-$diferencia = $model->getDebt() - $model->getCredit();
+$diferencia = round($model->getDebt(), 2) - round($model->getCredit(),2);
 ?>
 <div class="account-movement-view">
 

@@ -4811,7 +4811,7 @@ INSERT INTO `invoice_class` (`invoice_class_id`,`class`,`name`) VALUES
 -- TABLE DATA migration
 -- -------------------------------------------
 INSERT INTO `migration` (`version`,`apply_time`) VALUES
-('m150804_184839_accounts','1439234292');
+('m160201000003_accounts','1439234292');
 
 
 
@@ -5796,7 +5796,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('58','Silla Cyrene Air Back C/asyncro Negra','silla-cyrene-air-back-casyncro-negra','559d480550110','Tapizados en Tela / Respaldos en tela de red gris perla, naranja, negro, rojo y visón
 Respaldo en tela de Red, Estrella Inyectada, sin brazos','enabled','','1436370949','1436370949','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('59','Silla Cyrene Air Back fija Negra','silla-cyrene-air-back-fija-negra','559d48aaeed87','Respaldo en tela de Red; Respaldo fijo; Estrella inyectada negra; Sin brazos 
+('59','Silla Cyrene Air Back fija Negra','silla-cyrene-air-back-fija-negra','559d48aaeed87','Respaldo en tela de Red; Respaldo fijo; Estrella inyectada negra; Sin brazos
 Tapizados en Tela / Respaldos en tela de red gris perla, naranja, negro, rojo y visón','enabled','','1436371114','1436371114','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('60','Silla SP 110 ','silla-sp-110','559d63eab783b','Sistema basculante, s/brazos, reg.Gas; ','enabled','','1436378090','1436378090','1','product','');
@@ -5877,7 +5877,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('85','Silla Tyson C/Perm.','silla-tyson-cperm','559fd4dd483d2','Giratoria, S/brazos, Reg Altura
 Con Contacto Permanente.','enabled','','1436538077','1436538077','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('86','Silla Tyson 39 Ovalina','silla-tyson-39-ovalina','559fd59a62c62','Giratoria, S/brazos, Regulacion de altura 
+('86','Silla Tyson 39 Ovalina','silla-tyson-39-ovalina','559fd59a62c62','Giratoria, S/brazos, Regulacion de altura
 ','enabled','','1436538266','1436538266','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('87','Silla Diva 210 Basculante','silla-diva-210-basculante','559fd622c5d16','Giratoria, S/brazos, Reg. de altura (basculante)','enabled','','1436538402','1436538402','1','product','');
@@ -6033,7 +6033,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('142','Tandem Ap base curva 4A','tandem-ap-base-curva-4a','55a00c43a1a0f','Base curva - Asiento y respaldo tapizado 
 4 Puestos ','enabled','','1436552259','1436552259','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('143','Tandem Ap base curva 5A','tandem-ap-base-curva-5a','55a00c664edef','Base curva - Asiento y respaldo tapizado 
+('143','Tandem Ap base curva 5A','tandem-ap-base-curva-5a','55a00c664edef','Base curva - Asiento y respaldo tapizado
 5 Puestos ','enabled','','1436552294','1436552294','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('144','Tandem Ap Fisso 2A','tandem-ap-fisso-2a','55a00ce779bb1','Estructura fija recta negra - 2 Puestos ','enabled','','1436552423','1436552423','1','product','');
@@ -6137,7 +6137,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('180','Apoya brazos Golf P','apoya-brazos-golf-p','55a01a9ae1545','Poliamida inyectado','enabled','','1436555930','1436555930','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('181','Apoya brazos 851','apoya-brazos-851','55a01afe3bd99','Poliamida inyectado - 
+('181','Apoya brazos 851','apoya-brazos-851','55a01afe3bd99','Poliamida inyectado -
 Exclusivo para linea Fly','enabled','','1436556030','1436556030','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('182','Apoya brazos 550','apoya-brazos-550','55a01b25861a2','Poliamida inyectado','enabled','','1436556069','1436556069','1','product','');
@@ -6361,7 +6361,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('281','Sillon Mediterraneo mediano','sillon-mediterraneo-mediano-2','55a41afd3b9fa','SILLON MEDIANO NEUMÁTICO CON BRAZOS (ESTRELLA Y BRAZOS INYECTADOS)
 ','enabled','','1436818173','1436818248','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('282','Sillon Mediterraneo mediano Visitor','sillon-mediterraneo-mediano-visitor','55a41b3651e66','SILLON MEDIANO VISITOR(BASE TRINEO PINTADA NEGRO) CON BRAZOS INYECTADOS 
+('282','Sillon Mediterraneo mediano Visitor','sillon-mediterraneo-mediano-visitor','55a41b3651e66','SILLON MEDIANO VISITOR(BASE TRINEO PINTADA NEGRO) CON BRAZOS INYECTADOS
 ','enabled','','1436818230','1436818230','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('283','Sillon Gaudi alto ','sillon-gaudi-alto','55a41b8ace1e9','SILLON ALTO NEUMÁTICO BASCULANTE CON BRAZOS (ESTRELLA Y BRAZOS INYECTADOS)','enabled','','1436818314','1436818314','1','product','');
@@ -6472,7 +6472,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('323','Silla Freda S','silla-freda-s','55a55d69aac95','FREDA S - Respaldo Alto, gas y Syncron
 ','enabled','','1436900713','1436900713','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('324','Silla Godiva 223 R','silla-godiva-223-r','55a55de1bc50d','GODIVA 223R - Respaldo Bajo, gas y contacto permanente 
+('324','Silla Godiva 223 R','silla-godiva-223-r','55a55de1bc50d','GODIVA 223R - Respaldo Bajo, gas y contacto permanente
 ','enabled','','1436900833','1436900833','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('325','Silla Godiva 323 R','silla-godiva-323-r','55a55e1a71ca5','GODIVA 323R - Respaldo Alto, gas y contacto permanente ','enabled','','1436900890','1436900890','1','product','');
@@ -6575,7 +6575,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('404','Adicional cabezal Passion Net ','adicional-cabezal-passion-net','55a57c7a7df7f','Solo para la silla Passion Net, tapizado ','enabled','','1436908666','1436908666','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('405','Silla Greta 4P Pintada','silla-greta-4p-pintada','55a57d8c5256e',' Silla Fija 4 patas pintada, respaldo plástico blanco o negro - asiento tapizado 
+('405','Silla Greta 4P Pintada','silla-greta-4p-pintada','55a57d8c5256e',' Silla Fija 4 patas pintada, respaldo plástico blanco o negro - asiento tapizado
 ','enabled','','1436908940','1436908940','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('406','Silla Greta 4P Cromada','silla-greta-4p-cromada','55a57dd2e73a6',' Silla Fija 4 patas cromada, respaldo plástico blanco o negro - asiento tapizado ','enabled','','1436909010','1436909010','1','product','');
@@ -6583,8 +6583,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('407','Silla Greta GN','silla-greta-gn','55a57e822264e','GNGR Silla regulación neumática, sin brazos, estrella inyectada
 ','enabled','','1436909186','1436909186','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('408','Silla Greta GN Flexor','silla-greta-gn-flexor','55a57f1127020','GNFGR Silla regulación neumática con flexor, estrella inyectada, sin brazos 
-
+('408','Silla Greta GN Flexor','silla-greta-gn-flexor','55a57f1127020','GNFGR Silla regulación neumática con flexor, estrella inyectada, sin brazos
 ','enabled','','1436909329','1436909329','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('409','Taburete Greta Pintada','taburete-greta-pintada','55a58174b45c0','Banqueta alta, estructura pintada, respaldo inyectado blanco o negro, asiento tapizado ','enabled','','1436909940','1436909940','1','product','');
@@ -6594,7 +6593,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('411','Silla Greta Visitor pintada','silla-greta-visitor-pintada','55a5824663f24','VPGR Silla base visitor pintada, base trineo
 ','enabled','','1436910150','1436910150','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('412','Silla Greta Visitor Cromada','silla-greta-visitor-cromada','55a587a94a9f4','VCGR Silla base visitor cromada; base trineo 
+('412','Silla Greta Visitor Cromada','silla-greta-visitor-cromada','55a587a94a9f4','VCGR Silla base visitor cromada; base trineo
 ','enabled','','1436911529','1436911529','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('413','Adicional por cambio a base cromada A','adicional-por-cambio-a-base-cromada-a','55a589827cf5b','Para todo silla giratoria de (alubase)','enabled','','1436912002','1436912002','1','product','');
@@ -6694,7 +6693,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('906','Armario metálico de 1.80 x 0.50 x 0.45 c/estantes ','armario-metalico-de-180-x-050-x-045-cestantes','55acfc90595fe','Armario metálico de 1.80 x 0.50 x 0.45 con 3 estante
 con 1 puerta batiente y cerradura','enabled','-7','1437400208','1437400208','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('920','Biblioteca metálica de 1.80 x 1.50 x 0.45 c/estante ','biblioteca-metalica-de-180-x-150-x-045-cestante','55ad413878c3c','Biblioteca de 1.80 x 1.50 x 0.45 con 6 estantes 
+('920','Biblioteca metálica de 1.80 x 1.50 x 0.45 c/estante ','biblioteca-metalica-de-180-x-150-x-045-cestante','55ad413878c3c','Biblioteca de 1.80 x 1.50 x 0.45 con 6 estantes
 Puertas corredizas y cerradura','enabled','-21','1437417784','1437417784','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('921','Adicional estante metálico de biblioteca','adicional-estante-metalico-de-biblioteca','55ad41cd495b4','Estantes metálico para biblioteca ','enabled','','1437417933','1437417933','1','product','');
@@ -6739,7 +6738,7 @@ INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status
 ('939','Guarda bolsos metálico 20 puertas 1.85 x 1.28 x 0.52  ','guarda-bolsos-metalico-20-puertas-185-x-128-x-052','55ad542d80561','Guarda bolsos de 20 puertas chicas 0.41 x 0.22 con dispositivo porta candado 
 opción cerradura recargo ','enabled','-11','1437422637','1437422659','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
-('940','Guarda bolsos metálico 24 puertas 1.85 x 1.54 x 0.52  ','guarda-bolsos-metalico-24-puertas-185-x-154-x-052','55ad546dabe14','Guarda bolsos de 8 puertas chicas 0.41 x 0.22 con dispositivo porta candado 
+('940','Guarda bolsos metálico 24 puertas 1.85 x 1.54 x 0.52  ','guarda-bolsos-metalico-24-puertas-185-x-154-x-052','55ad546dabe14','Guarda bolsos de 8 puertas chicas 0.41 x 0.22 con dispositivo porta candado
 opción cerradura recargo ','enabled','','1437422701','1437422701','1','product','');
 INSERT INTO `product` (`product_id`,`name`,`system`,`code`,`description`,`status`,`balance`,`create_timestamp`,`update_timestamp`,`unit_id`,`type`,`uid`) VALUES
 ('944','Adicional flete','adicional-flete','55afbb28511b7','Clientes que abonan flete','enabled','-8','1437580072','1437580072','1','product','');

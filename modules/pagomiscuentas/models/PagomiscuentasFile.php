@@ -17,6 +17,7 @@ use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use Yii;
 use yii\web\UploadedFile;
+use app\modules\sale\models\Bill;
 
 /**
  * This is the model class for table "partner".
@@ -59,7 +60,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
             [['status'], 'default', 'value'=>'draft'],
             [['type'], 'in', 'range' => ['payment', 'bill']],
             [['date', 'from_date'], 'date'],
-            [['from_date'], 'safe'],
+            [['from_date', 'total'], 'safe'],
             ['path', 'string'],
             ['file', 'unique'],
             [['file'],'file']
@@ -100,6 +101,15 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     public function getPayments()
     {
         return $this->hasMany(Payment::class, ['payment_id' => 'payment_id'])->viaTable('pagomiscuentas_file_has_payment',['pagomiscuentas_file_id' => 'pagomiscuentas_file_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     * Devuelve los bill asociados a un archivo
+     */
+    public function getBills()
+    {
+        return $this->hasMany(Bill::class, ['bill_id' => 'bill_id'])->viaTable('pagomiscuentas_file_has_bill',['pagomiscuentas_file_id' => 'pagomiscuentas_file_id']);
     }
 
     /**
@@ -192,81 +202,171 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     }
 
     /**
-     *
+     * @return bool
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     * Cierra el archivo. Crea los pagos o las relaciones con bill dependiendo de su tipo.
+     * No permite el cerrado de un archivo que no esté en borrador
      */
     public function close()
     {
-            if($this->status == self::STATUS_DRAFT) {
-                if($this->type == self::TYPE_PAYMENT) {
+        if($this->status == self::STATUS_DRAFT) {
+            if($this->type == self::TYPE_PAYMENT) {
+                $this->closeImport();
+            } else {
+                $this->closeExport();
+            }
+        }
+        return false;
+    }
 
+    /**
+     * @return bool
+     * @throws \yii\db\Exception
+     * Crea los pagos y cierra el archivo
+     */
+    private function closeImport()
+    {
+        $cobranza = new CobranzaReader();
+        $datas = $cobranza->parse($this);
+        $payment_method_id = Config::getValue('pagomiscuentas-payment-method');
 
-                    $cobranza = new CobranzaReader();
-                    $datas = $cobranza->parse($this);
-                    $payment_method_id = Config::getValue('pagomiscuentas-payment-method');
-                    $company = Company::findOne(['company_id'=> $this->company_id]);
+        // Guardo
+        if($datas) {
+            $trans = Yii::$app->db->beginTransaction();
+            try {
+                $total = 0;
+                foreach ($datas as $data) {
+                    $customer = Customer::findOne(['code' => $data['customer_id']]);
+                    $date = (new \DateTime($data['fecha_cobro']))->format('Y-m-d');
+                    $amount = ((float)$data['importe']) / 100;
+                    $total = $total + $amount;
+                    $payment = $this->createPayment($customer->customer_id, $date, $amount, $data['canal'], $payment_method_id);
+                    $payment->applyToBill($data['bill_id']);
+                    $this->createRelationWithPayment($payment->payment_id);
+                    $payment->close();
+                }
+                $this->updateAttributes(['status' => self::STATUS_CLOSED, 'total' => $total]);
+                $trans->commit();
+                return true;
+            }catch(\Exception $ex) {
+                $trans->rollBack();
+                Yii::debug($ex->getFile() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
+                error_log($ex->getMessage());
+                throw $ex;
+            }
+        }
+    }
 
-                    // Guardo
-                    if($datas) {
-                        $trans = Yii::$app->db->beginTransaction();
-                        try {
-                            foreach ($datas as $data) {
-                                $payment = new Payment();
-                                $payment->company_id = $this->company_id;
-                                $payment->partner_distribution_model_id = $company->partner_distribution_model_id;
-                                $customer = Customer::findOne(['code' => $data['customer_id']]);
-                                $payment->customer_id = $customer->customer_id;
-                                $payment->status = 'draft';
-                                $payment->date = (new \DateTime($data['fecha_cobro']))->format('Y-m-d');
-                                $payment->amount = ((float)$data['importe']) / 100;
-                                $payment->save();
+    /**
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     * Crea la relacion de bill y pagomiscuentas_file cambia el estado a pagomiscuentas_file.
+     */
+    private function closeExport()
+    {
+        try{
+            $query = (new PagomiscuentasFileSearch())->findBills($this->pagomiscuentas_file_id);
 
-                                $paymentItem = new PaymentItem();
-                                $paymentItem->payment_id = $payment->payment_id;
-                                $paymentItem->amount = ((float)$data['importe']) / 100;
-                                $paymentItem->description = $data['canal'];
-                                $paymentItem->payment_method_id = $payment_method_id;
-                                $paymentItem->save();
+            $transaction = Yii::$app->db->beginTransaction();
+            $total = 0 ;
 
-                                $payment->applyToBill($data['bill_id']);
+            foreach($query->batch(500) as $models){
+                $this->batchPagomiscuentasFileHasBillInsert($models);
 
-                                $pfhp = new PagomiscuentasFileHasPayment();
-                                $pfhp->pagomiscuentas_file_id = $this->pagomiscuentas_file_id;
-                                $pfhp->payment_id = $payment->payment_id;
-                                $pfhp->save();
-                                $payment->close();
-                            }
-                            $this->status = self::STATUS_CLOSED;
-                            $this->update(false);
-                            $trans->commit();
-                        }catch(\Exception $ex) {
-                            $trans->rollBack();
-                            Yii::debug($ex->getFile() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
-                            error_log($ex->getMessage());
-                            throw $ex;
-                        }
-                    }
-
-                } else {
-                    try{
-                        $query = (new PagomiscuentasFileSearch())->findBills($this->pagomiscuentas_file_id);
-                        foreach ($query->all() as $bill) {
-                            $pfhb = new PagomiscuentasFileHasBill();
-                            $pfhb->pagomiscuentas_file_id = $this->pagomiscuentas_file_id;
-                            $pfhb->bill_id = $bill['bill_id'];
-                            $pfhb->save();
-                        }
-
-                        $this->status = self::STATUS_CLOSED;
-                        $this->update(false);
-                    } catch(\Exception $ex) {
-                        Yii::debug($ex->getFile() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
-                        error_log($ex->getMessage());
-                        throw $ex;
-                    }
-
+                foreach ($models as $model) {
+                    $total = $total + $model['total'];
                 }
             }
 
+            $this->status = self::STATUS_CLOSED;
+            $this->total = $total;
+            $this->update(false);
+            $transaction->commit();
+            return true;
 
+        } catch(\Exception $ex) {
+            $transaction->rollBack();
+            Yii::debug($ex->getFile() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
+            error_log($ex->getMessage());
+            throw $ex;
+        }
+    }
+
+    /**
+     * @param $payment_id
+     * @return bool
+     * Crea la relacion entre el arhivo y un pago
+     */
+    public function createRelationWithPayment($payment_id)
+    {
+        if($this->type == self::TYPE_PAYMENT) {
+            $pfhp = new PagomiscuentasFileHasPayment();
+            $pfhp->pagomiscuentas_file_id = $this->pagomiscuentas_file_id;
+            $pfhp->payment_id = $payment_id;
+            return $pfhp->save();
+        }
+        return false;
+    }
+
+    /**
+     * @param $partner_distribution_model_id
+     * @param $customer_id
+     * @param $date
+     * @param $amount
+     * @param $item_description
+     * @param $payment_method_id
+     * @return bool
+     * Crea un pago y su correspondiente item
+     */
+    public function createPayment($customer_id, $date, $amount, $item_description, $payment_method_id)
+    {
+        if($this->type == self::TYPE_PAYMENT) {
+            $transaction = Yii::$app->db->beginTransaction();
+            $payment = new Payment([
+                'company_id' => $this->company_id,
+                'partner_distribution_model_id' => $this->company->partner_distribution_model_id,
+                'customer_id' => $customer_id,
+                'status' => 'draft',
+                'date' => $date,
+                'amount' => $amount
+            ]);
+
+            if($payment->save()){
+                $paymentItem = new PaymentItem([
+                    'payment_id' => $payment->payment_id,
+                    'amount' => $amount,
+                    'description' => $item_description,
+                    'payment_method_id' => $payment_method_id
+                ]);
+                if($paymentItem->save()) {
+                    $transaction->commit();
+                    return $payment;
+                }
+                $transaction->rollBack();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param $models
+     * @throws \yii\db\Exception
+     * Inserta por lotes los modelos de la relacion PagomiscuentasFileHasBill.
+     */
+    private function batchPagomiscuentasFileHasBillInsert($models)
+    {
+        $data = [];
+        foreach ($models as $bill) {
+
+            $data[] = [
+                $this->pagomiscuentas_file_id,
+                $bill['bill_id']
+            ];
+
+        }
+
+        Yii::$app->db->createCommand()->batchInsert('pagomiscuentas_file_has_bill', ['pagomiscuentas_file_id', 'bill_id'], $data)->execute();
     }
 }

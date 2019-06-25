@@ -250,7 +250,7 @@ class ProviderPaymentSearch extends ProviderPayment
             ])
             ->from('provider as p')
             ->leftJoin(['b'=> $qSaldo], 'b.provider_id = p.provider_id')
-            ->where('b.provider_id IS NOT NULL');
+            ->where('b.provider_id IS NOT NULL')->orderBy('b.date DESC');
 
         // Busco el saldo inicial
         $saldoInicial = (new Query())

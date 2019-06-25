@@ -13,7 +13,6 @@ use app\modules\accounting\models\Account;
 use app\modules\config\models\Config;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
-use Codeception\PHPUnit\ResultPrinter\Report;
 use yii\base\Model;
 use yii\db\Expression;
 use yii\db\Query;
@@ -22,6 +21,7 @@ class ReportSearch extends Model
 {
     public $date_from;
     public $date_to;
+    public $company_id;
 
     public function init()
     {
@@ -37,7 +37,7 @@ class ReportSearch extends Model
     {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to'], 'safe']
+            [['date_from', 'date_to', 'company_id'], 'safe']
         ];
     }
 
@@ -208,6 +208,11 @@ class ReportSearch extends Model
         if ($this->date_to) {
             $query->andWhere(['<=', 'date_format(c.to_date, \'%Y%m\')', (new \DateTime($this->date_to))->format('Ym')]);
         }
+
+        if ($this->company_id) {
+            $query->andWhere(['company_id' => $this->company_id]);
+        }
+
         return $query->all();
     }
 
@@ -341,6 +346,10 @@ class ReportSearch extends Model
 
         if ($this->date_to) {
             $queryPaymentCobrado->andWhere(['<=', 'p.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
+        }
+
+        if($this->company_id) {
+            $queryPaymentCobrado->andWhere(['p.company_id' => $this->company_id]);
         }
 
         return $queryPaymentCobrado->all();

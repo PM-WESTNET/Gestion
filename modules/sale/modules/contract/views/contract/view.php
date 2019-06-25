@@ -69,9 +69,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             
             <?php
             if ($model->status == Contract::STATUS_ACTIVE) {
-                if(!$model->low_date) {
-                    echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
-                }
+                echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
             }
             if ($model->status == Contract::STATUS_LOW_PROCESS) {
                 echo UserA::a(Yii::t('app', 'Definitive Low'), ['cancel-contract', 'id' => $model->contract_id], ['class' => 'btn btn-danger', 'id' => 'btn-definitive-low' ]);
@@ -335,7 +333,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
 </div>
 <!-- Modal -->
-<div class="modal fade" id="connection-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="top:25%">
+<div class="modal fade" id="connection-modal" role="dialog" aria-labelledby="myModalLabel" style="top:25%">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -366,7 +364,38 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                     <label for="due_date" class="control-label"><?php echo Yii::t('app', 'Reason') ?></label>
                     <textarea cols="35" rows="5" id="reason" class="form-control"></textarea>
                 </div>
-                
+
+                <div class="form-group">
+                    <?php echo Html::checkbox('create_product_to_invoice', false, ['id' => 'create_product'])?> <label
+                            for="create_product"><?php echo Yii::t('app','Create Product to Invoice')?></label>
+
+                </div>
+                <div class="form-group">
+                    <label for="extend_payment_product_id"><?php echo Yii::t('app','Product to Invoice for Extend Payment')?></label>
+                    <?php
+                        echo Select2::widget([
+                            'name' => 'extend_payment_product_id',
+                            'value' => Config::getValue('extend_payment_product_id'),
+                            'data' => $products,
+                            'pluginOptions' => [
+                                'allowClear' => false,
+                            ],
+                            'options' => ['placeholder' => Yii::t('app','Select a Product'), 'id' => 'extend_product_id']
+                    ])?>
+                </div>
+                <div class="form-group">
+                    <label for="vendor_id"><?php echo Yii::t('app','Vendor')?></label>
+                    <?php
+                        echo Select2::widget([
+                            'name' => 'vendor_id',
+                            'value' => $model->vendor_id,
+                            'data' => $vendors,
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                            ],
+                            'options' => ['placeholder' => Yii::t('app','Select a Vendor'), 'id' => 'vendor_id']
+                    ])?>
+                </div>
 
             </div>
             <div class="modal-footer">
@@ -684,6 +713,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 $('#force-connection').button('reset');
                 $('#enable-connection').button('reset');
                 $('#message-con').empty();
+            });
+
+            $('#create_product').change(function () {
+                if (!$('#create_product').is(':checked')) {
+
+                    $('#extend_product_id').prop('disabled', 'disabled');
+                    $('#vendor_id').prop('disabled', 'disabled');
+                }else{
+
+                    $('#extend_product_id').removeAttr('disabled');
+                    $('#vendor_id').removeAttr('disabled');
+
+                }
             })
             $('#node-modal').removeAttr('tabindex');
             ContractView.map();
@@ -725,7 +767,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 if ($('#due_date').kvDatepicker('getDate') != null) {
                     var vDate = $('#due_date').kvDatepicker('getDate');
                     ContractView.execute('<?php echo \yii\helpers\Url::to(['/westnet/connection/force', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>', {
-                    '   due_date': vDate.getFullYear() + "-" + (vDate.getMonth() + 1) + "-" + vDate.getDate(), reason: $('#reason').val()
+                    due_date: $('#due_date').val(), reason: $('#reason').val(), create_product: $('#create_product').is(':checked'),
+                        product_id: $('#extend_product_id').val(), vendor_id: $('#vendor_id').val()
                     });
                 }
             }else{

@@ -11,18 +11,24 @@ use app\modules\invoice\components\einvoice\ApiFactory;
 use app\modules\sale\models\Address;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\CustomerMessage;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
 use app\modules\ticket\models\Ticket;
 use Hackzilla\BarcodeBundle\Utility\Barcode;
 use PHPExcel_Style_NumberFormat;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\web\BadRequestHttpException;
+use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use SoapClient;
+use yii\web\UploadedFile;
+use yii2fullcalendar\yii2fullcalendar;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -88,10 +94,14 @@ class CustomerController extends Controller
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['document_number', Yii::t('app', 'Document Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'D' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'E' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'F' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'G' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            
+            'E' => ['phone2', Yii::t('app', 'Second Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'F' => ['phone3', Yii::t('app', 'Third Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'G' => ['phone4', Yii::t('app', 'Cellphone 4'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+	        'H' => ['email', Yii::t('app', 'Email'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'I' => ['email2', Yii::t('app', 'Secondary Email'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'J' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'K' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'L' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
         ])->createHeader();       
         
         foreach ($customers as $c) {
@@ -100,6 +110,11 @@ class CustomerController extends Controller
                 'name'=> (!($c instanceof Customer) ? $c['name'] : $c->fullName),
                 'document_number' => $c['document_number'],
                 'phone' => $c['phone'],
+                'phone2' => $c['phone2'],
+                'phone3' => $c['phone3'],
+                'phone4' => $c['phone4'],
+                'email' => $c['email'],
+                'email2' => $c['email2'],
                 'class' => (!($c instanceof Customer) ? $c['class'] : $c->customerClass->name),
                 'category' => (!($c instanceof Customer) ? $c['category'] : $c->customerCategory->name),
                 'company' => (!($c instanceof Customer) ? $c['company'] : $c->company->name),
@@ -145,18 +160,26 @@ class CustomerController extends Controller
         $model = $this->findModel($id);
         $address = $model->address;
         if($model->canView()){
-        if(Yii::$app->request->isAjax){
-            Yii::$app->response->format = Response::FORMAT_JSON;
-            return [
-                'status' => 'success',
-                'model' => $model
-            ];
-        }
-        
-        return $this->render('view', [
-            'model' => $model,
-            'address'=> $address,
-        ]);
+            if(Yii::$app->request->isAjax){
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                return [
+                    'status' => 'success',
+                    'model' => $model
+                ];
+            }
+
+            if($model->needsUpdate) {
+                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data'));
+            }
+            $contracts = ContractSearch::getdataProviderContract($model->customer_id);
+            $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
+
+            return $this->render('view', [
+                'model' => $model,
+                'address'=> $address,
+                'contracts' => $contracts,
+                'messages' => $messages
+            ]);
         }else{
            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
         }
@@ -596,13 +619,13 @@ class CustomerController extends Controller
         $billsQuery= $customer_search->searchAllBills();
         $ticketQuery =$customer_search->getTicketsCount();
         $installations= $contract_search->getInstallations($params, $billsQuery, $ticketQuery);
-        
-        
-        
-        $dataProvider= new ActiveDataProvider(['query' => $installations]);        
-        
+
+        $dataProvider= new ActiveDataProvider(['query' => $installations]);
+        $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
+
+
         $this->layout= '//fluid';
-        return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search]);
+        return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
     }
 
     public function actionAfipValidation($document)
@@ -656,5 +679,117 @@ class CustomerController extends Controller
             'status' => $valid_data ? true : false,
             'data' => $final_data
         ];
+    }
+
+    public function actionValidateCustomer()
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $customer = new Customer();
+
+            if ($customer->load(Yii::$app->request->post())) {
+                $validate = $customer->validateCustomer();
+                if ($validate !== false) {
+                    return $validate;
+                }
+            }
+
+            return [
+                'status' => 'error',
+            ];
+        }
+
+        throw new NotFoundHttpException('Page Not Found');
+    }
+
+    /**
+     * @return string
+     * Renderiza el panel de cobranza
+     */
+    public function actionCashingPanel()
+    {
+        $searchModel = new CustomerSearch;
+        $searchModel->exclude_customers_with_one_bill = true;
+        $dataProvider = $searchModel->searchDebtors(Yii::$app->request->getQueryParams(), 100);
+
+        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill are excluded'));
+
+        return $this->render('cashing-panel', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
+
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * Envía mensajes sms predeterminados al cliente.
+     */
+    public function actionSendMessage() {
+        $data = Yii::$app->request->get();
+
+        if (!isset($data['customer_id']) || !isset($data['customer_message_id'])) {
+            throw new BadRequestHttpException('Customer ID and Customer Message ID are required');
+        }
+
+        $customer = $this->findModel($data['customer_id']);
+        $message = CustomerMessage::findOne($data['customer_message_id']);
+
+        if (empty($message)) {
+            throw new BadRequestHttpException('Message not found');
+        }
+
+        if (isset($data['phones']) && !empty($data['phones'])) {
+            $response = $message->send($customer, $data['phones']);
+        }else{
+            $response = $message->send($customer);
+        }
+
+
+        foreach ($response['alerts'] as $alert) {
+            if ($alert['status'] === 'success'){
+                Yii::$app->session->addFlash('success', Yii::t('app','Message sended to phone {phone} successfull', ['phone' => $alert['phone']]));
+            }else {
+                Yii::$app->session->addFlash('error', Yii::t('app','Can`t send message to phone {phone}', ['phone' => $alert['phone']]));
+            }
+        }
+
+        return $this->redirect(['view', 'id' => $customer->customer_id]);
+    }
+
+    public function actionVerifyEmails()
+    {
+        $results = [];
+
+        if (Yii::$app->request->isPost) {
+            $files = UploadedFile::getInstancesByName('files');
+            if (empty($files)) {
+                Yii::$app->session->addFlash('error', Yii::t('app','You must select at least a file'));
+                return $this->render('verify-emails', ['results' => $results]);
+            }
+
+
+            foreach ($files as $file) {
+                $resource = fopen($file->tempName, 'r');
+
+                if ($resource === false) {
+                    Yii::$app->session->addFlash('error', Yii::t('app','Cant open files'));
+                    return $this->render('verify-emails', ['results' => $results]);
+                }
+
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+
+                foreach ($partial_result as $key => $r) {
+                    if (isset($results[$key])) {
+                        $results[$key] = $results[$key] + $r;
+                    }else {
+                        $results[$key] = $r;
+                    }
+                }
+            }
+        }
+
+        return $this->render('verify-emails', ['results' => $results]);
     }
 }

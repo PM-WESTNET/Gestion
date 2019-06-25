@@ -8,6 +8,7 @@ use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\modules\ticket\models\StatusHasAction;
 
 /**
  * StatusController implements the CRUD actions for Status model.
@@ -50,12 +51,23 @@ class StatusController extends Controller
     public function actionCreate()
     {
         $model = new Status();
+        $status_has_action = new StatusHasAction();
+        $post = Yii::$app->request->post();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->status_id]);
+        if ($model->load($post) && $status_has_action->load($post)) {
+            if($model->save()){
+                if($model->generate_action) {
+                    $status_has_action->status_id = $model->status_id;
+                    if($status_has_action->save()) {
+                        return $this->redirect(['view', 'id' => $model->status_id]);
+                    }
+                }
+                return $this->redirect(['view', 'id' => $model->status_id]);
+            }
         } else {
             return $this->render('create', [
                 'model' => $model,
+                'status_has_action' => $status_has_action
             ]);
         }
     }
@@ -69,12 +81,21 @@ class StatusController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $status_has_action = $model->generate_action ? $model->actionConfig : new StatusHasAction();
+        $post = Yii::$app->request->post();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load($post) && $status_has_action->load($post) && $model->save()){
+            if($model->generate_action) {
+                $status_has_action->status_id = $model->status_id;
+                if($status_has_action->save()) {
+                    return $this->redirect(['view', 'id' => $model->status_id]);
+                }
+            }
             return $this->redirect(['view', 'id' => $model->status_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'status_has_action' => $status_has_action
             ]);
         }
     }

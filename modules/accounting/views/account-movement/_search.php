@@ -7,6 +7,8 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Currency;
+use app\components\companies\CompanySelector;
+use yii\jui\DatePicker;
 
 /**
  * @var yii\web\View $this
@@ -31,22 +33,23 @@ use app\modules\sale\models\Currency;
             ], ['separator' => '<br>']) ?>
         </div>
         <div class="col-sm-7">
-            <?= app\components\companies\CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')]]) ?>
+            <?= CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')]]) ?>
 
+            <?= $form->field($model, 'account_id')->widget(Select2::class, [
+                'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+                'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ]
+            ]);
+            ?>
 
-                    <?= $form->field($model, 'account_id')->widget(Select2::class, [
-                        'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
-                        'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
-                        'pluginOptions' => [
-                            'allowClear' => true
-                        ]
-                    ]);
-                    ?>
+            <?php echo $form->field($model, 'account_movement_id')->textInput()->label(Yii::t('app','Number'))?>
 
         </div>
         <div class="row">
             <div class="col-sm-6">
-                <?= $form->field($model, 'fromDate')->widget(yii\jui\DatePicker::className(), [
+                <?= $form->field($model, 'fromDate')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
                     'model' => $model,
                     'attribute' => 'date',
@@ -59,7 +62,7 @@ use app\modules\sale\models\Currency;
                 ?>
             </div>
             <div class="col-sm-6">
-                <?= $form->field($model, 'toDate')->widget(yii\jui\DatePicker::className(), [
+                <?= $form->field($model, 'toDate')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
                     'model' => $model,
                     'attribute' => 'date',

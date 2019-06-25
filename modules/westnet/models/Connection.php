@@ -6,8 +6,11 @@ use app\components\db\ActiveRecord;
 use app\modules\config\models\Config;
 use app\modules\sale\models\CustomerLog;
 use app\modules\sale\modules\contract\components\CompanyByNode;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
+use Codeception\Util\Debug;
 use Yii;
 use yii\console\Exception;
 use yii\db\ActiveQuery;
@@ -210,10 +213,10 @@ class Connection extends ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
 
         try {
-            if ($insert) {
+            if (!YII_ENV_TEST && $insert) {
                 $log = new CustomerLog();
                 $log->createInsertLog($this->contract->customer_id, 'Connection', $this->connection_id);
-            } else {
+            } else if (!YII_ENV_TEST){
 
                 foreach ($changedAttributes as $attr => $oldValue) {
                     $newValue = $this[$attr];
@@ -374,4 +377,61 @@ class Connection extends ActiveRecord {
         }
     }
 
+    /**
+     * Fuerza la conexion. Crea el contractDetail con el recargo y crea el producto a facturar
+     * @param $data
+     */
+    public function force($due_date, $product_id, $vendor_id, $create_product = true)
+    {
+        $this->status_account = self::STATUS_ACCOUNT_FORCED;
+        $this->due_date = $due_date;
+
+        $trasanction = Yii::$app->db->beginTransaction();
+
+        if ($this->save(true)) {
+            if ($create_product){
+
+                if ($this->createExtendPaymentCD($product_id, $vendor_id)){
+                    Debug::debug('NO crea el detalle');
+                    $trasanction->rollBack();
+                    return false;
+                }
+
+                $cti = new ContractToInvoice();
+                if (!$cti->updateContract($this->contract)) {
+                    Debug::debug('No actualiza contrato');
+                    $trasanction->rollBack();
+                    return false;
+                }
+            }
+
+            $trasanction->commit();
+            return true;
+        }
+
+        Yii::info(print_r($this->getErrors(), 1));
+        Debug::debug('No update transaction');
+
+        $trasanction->rollBack();
+        return false;
+    }
+
+    /**
+     * Create el Contract Detail del recargo por forzar conexion
+     * @param $product_id
+     * @return bool
+     * @throws \Exception
+     */
+    private function createExtendPaymentCD($product_id, $vendor_id)
+    {
+        $contract_detail = new ContractDetail();
+        $contract_detail->contract_id = $this->contract->contract_id;
+        $contract_detail->product_id = $product_id;
+        $contract_detail->count = 1;
+        $contract_detail->from_date = (new \DateTime())->modify('first day of next month')->format('d-m-Y');
+        $contract_detail->to_date = (new \DateTime())->modify('last day of next month')->format('d-m-Y');
+        $contract_detail->vendor_id = $vendor_id;
+
+        return !$contract_detail->save(false);
+    }
 }

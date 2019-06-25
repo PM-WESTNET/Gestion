@@ -41,6 +41,9 @@ class EcopagoTest extends \Codeception\Test\Unit
             ],
             'collector' => [
                 'class' => CollectorFixture::class
+            ],
+            'ecopago' => [
+                'class' => \app\tests\fixtures\EcopagoFixture::class
             ]
         ];
     }
@@ -123,6 +126,20 @@ class EcopagoTest extends \Codeception\Test\Unit
         $model->save();
 
         //TODO Test y fixture de cashiers
+    }
+
+    public function testFailDisableEcopago()
+    {
+        $model = Ecopago::findOne(2);
+
+        expect('Failed', $model->disable())->false();
+    }
+
+    public function testSuccessDisableEcopago()
+    {
+        $model = Ecopago::findOne(1);
+
+        expect('Failed', $model->disable())->true();
     }
 }
 

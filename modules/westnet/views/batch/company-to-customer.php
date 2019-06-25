@@ -86,6 +86,26 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_from')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_from,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                        <div class="col-sm-6">
+                            <?= $form->field($searchModel, 'date_new_to')->widget(DatePicker::class, [
+                                'value' => $searchModel->date_new_to,
+                                'pluginOptions' => [
+                                    'autoclose' => true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ])?>
+                        </div>
+                    </div>
+                    <div class="row">
 
                         <div class="col-sm-3">
                             <div class="form-group field-button">
@@ -214,6 +234,8 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign compa
                 'CustomerContractSearch[node_id]': $('#customercontractsearch-node_id').val(),
                 'CustomerContractSearch[new_company_id]': $('#customercontractsearch-new_company_id').val(),
                 'CustomerContractSearch[company_id]': $('#customercontractsearch-company_id').val(),
+                'CustomerContractSearch[date_new_from]': $('#customercontractsearch-date_new_from').val(),
+                'CustomerContractSearch[date_new_to]': $('#customercontractsearch-date_new_to').val(),
             };
             return postdata;
         }

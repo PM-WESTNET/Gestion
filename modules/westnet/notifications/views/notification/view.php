@@ -5,6 +5,8 @@ use yii\widgets\DetailView;
 use app\modules\westnet\notifications\NotificationsModule;
 use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 use app\modules\westnet\notifications\models\Notification;
+use app\modules\westnet\notifications\models\Transport;
+use app\modules\media\components\view\Preview;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\notifications\models\Notification */
@@ -53,10 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Html::a('<span class="glyphicon glyphicon-off"></span> ' . NotificationsModule::t('app', 'Abort send'), ['notification/abort-send', 'notification_id' => $model->notification_id], ['class' => 'btn btn-danger pull-right']) ?>
         </p>
 
-    <?=
-    DetailView::widget([
-        'model' => $model,
-        'attributes' => [
+    <?php $attributes = [
             'notification_id',
             'create_timestamp:datetime',
             'update_timestamp:datetime',
@@ -87,15 +86,27 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'last_sent',
                 'value' => Yii::$app->formatter->asDate($model->last_sent),
                 'format' => 'html'
-            ]
-        ],
-    ]);
-            
-    foreach($model->media as $media){
-        echo app\modules\media\components\view\Preview::widget(['media' => $media]);
-    }
-            
-    ?>
-    
+            ],
+    ];
 
+    $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
+    if($model->transport_id == $integratech_transport->transport_id) {
+        array_push($attributes, 'test_phone');
+        array_push($attributes, [
+            'attribute' => 'test_phone_frecuency',
+            'value' => function ($model) {
+                return 'Envío de mensaje a teléfono de prueba cada ' .$model->test_phone_frecuency. ' mensajes.';
+            }
+        ]);
+    } ?>
+
+    <?= DetailView::widget([
+        'model' => $model,
+        'attributes' => $attributes
+    ]);
+
+    foreach($model->media as $media){
+        echo Preview::widget(['media' => $media]);
+    }
+    ?>
 </div>

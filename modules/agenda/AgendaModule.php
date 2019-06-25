@@ -36,7 +36,7 @@ class AgendaModule extends \yii\base\Module implements BootstrapInterface {
 
     //Habilita las traducciones
     public static function t($category, $message, $params = [], $language = null) {
-        return \Yii::t('modules/agenda/' . $category, $message, $params, $language);
+        return \Yii::t( $category, $message, $params, $language);
     }
 
 }

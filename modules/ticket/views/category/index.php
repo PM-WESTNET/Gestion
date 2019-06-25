@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
+        'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -38,6 +39,8 @@ $this->params['breadcrumbs'][] = $this->title;
             'name',
             [
                 'header'=> TicketModule::t('app', 'Notify'),
+                'attribute' => 'notify',
+                'filter' => [0 => Yii::t('yii', 'No'), 1 => Yii::t('yii', 'Yes')],
                 'value'=>function($model){
                     return Yii::t('app', ($model->notify ?  'Yes' : 'No' ));
                 }

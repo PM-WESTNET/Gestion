@@ -31,13 +31,23 @@ class m160407_184147_payment_methods extends Migration
 
         $category = Category::findOne(['name' => 'General']);
 
+        if (empty($category)) {
+            $this->insert('category', [
+                'name' => 'General',
+                'status' => 'enabled'
+            ]);
+            $category_id = $this->db->lastInsertID;
+        }else{
+            $category_id = $category->category_id;
+        }
+
         $this->insert('item', [
             'attr' => 'payment_method_paycheck',
             'type' => 'textInput',
             'label' => 'Metodo de pago - Cheque',
             'description' => '',
             'multiple' => 0,
-            'category_id' => $category->category_id,
+            'category_id' => $category_id,
             'superadmin' => 0,
             'default' => 0
         ]);

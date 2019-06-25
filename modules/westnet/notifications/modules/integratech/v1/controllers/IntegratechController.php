@@ -13,7 +13,9 @@ class IntegratechController extends ActiveController
 
     public function actions()
     {
-        \Yii::$app->response->format = Response::FORMAT_JSON;
+        if (!Yii::$app->request->isConsoleRequest){
+            \Yii::$app->response->format = Response::FORMAT_JSON;
+        }
 
         $actions = parent::actions();
 

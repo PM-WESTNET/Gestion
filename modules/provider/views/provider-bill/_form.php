@@ -34,7 +34,7 @@ use yii\widgets\ActiveForm;
     <?php if (!$model->provider) { ?>
         <div class="input-group" style="z-index:0;">
             <?= $form->field($model, 'provider_id')->widget(Select2::className(),[
-                'data' => yii\helpers\ArrayHelper::map(Provider::find()->all(), 'provider_id', 'name' ),
+                'data' => yii\helpers\ArrayHelper::map(Provider::find()->all(), 'provider_id', 'fullname'),
                 'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                 'pluginOptions' => [
                     'allowClear' => true

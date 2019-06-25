@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'items' => [
             [
                 'label' => $item,
-                'content' => $this->render('_filters-debtors', ['searchModel' => $searchModel]),
+                'content' => $this->render('_filters-debtors', ['searchModel' => $searchModel, 'action' => 'debtors']),
                 'encode' => false,
             ],
         ],

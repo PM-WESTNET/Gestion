@@ -108,7 +108,6 @@ class ResumeItem extends \app\components\db\ActiveRecord
      */
     public function validateAmount($attribute,$params)
     {
-
         if($this->moneyBoxHasOperationType->operationType && $attribute == 'debit') {
             if($this->moneyBoxHasOperationType->operationType->is_debit && $this->debit === 0) {
                 $this->addError($attribute, Yii::t('accounting', 'The amount must be greater than 0.'));

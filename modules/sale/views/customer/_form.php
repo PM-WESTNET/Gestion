@@ -14,6 +14,9 @@ use app\modules\sale\models\CustomerClass;
 use app\modules\sale\models\CustomerCategory;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\HourRange;
+use app\modules\sale\models\search\CompanySearch;
+
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Customer $model
@@ -24,7 +27,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 ?>
 
 <div class="customer-form">
-
     <?php $form = ActiveForm::begin([
         'id' => 'customer-form'
     ]); ?>
@@ -44,7 +46,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
         <div class="col-sm-6 col-xs-6">
             <?php
-            $search = new \app\modules\sale\models\search\CompanySearch();
+            $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
                 $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
@@ -62,7 +64,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
     </div>
     <div class="row">
-        
         <div class="col-sm-12">
             <?= $form->field($model, 'tax_condition_id')->dropDownList(
                 ArrayHelper::map(TaxCondition::find()->orderBy(['name'=>SORT_ASC])->all(), 'tax_condition_id', 'name' )) ?>
@@ -93,7 +94,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 , ['id' => 'document_type', 'prompt' => Yii::t('app', 'Select {modelClass}', ['modelClass' => Yii::t('app','Document Type')])] ) ?>
         </div>
         <div class="col-sm-4 col-xs-6">
-            <?= $form->field($model, 'document_number')->textInput(['maxlength' => 45]) ?>
+            <?= $form->field($model, 'document_number')->textInput(['maxlength' => 45, 'id' => 'document_number_input']) ?>
         </div>
         <div class="col-sm-4 col-xs-6 form-group">
             <label class="control-label">&nbsp;</label>
@@ -107,6 +108,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <span id="validation-afip-informer-ok" class="btn glyphicon glyphicon-ok hidden" style="color: green;"></span>
             <span id="validation-afip-informer-error" class="btn glyphicon glyphicon-remove hidden" style="color: red;"></span>
         </div>
+    </div>
+
+    <!-- Div para la validación del cliente y deuda-->
+    <div class="customer_validation hidden">
+
+    </div>
+
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
@@ -139,6 +147,10 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         <div class="col-sm-6 col-xs-12">
 
             <?= $form->field($model, 'phone3')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+
+        </div>
+        <div class="col-sm-6 col-xs-12">
+            <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
@@ -234,7 +246,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <?php
         if ($model->isNewRecord) {
             $model->_notifications_way = ['screen', 'sms', 'email'];
-            $model->_sms_fields_notifications = ['phone', 'phone2', 'phone3'];
+            $model->_sms_fields_notifications = ['phone', 'phone2', 'phone3', 'phone4'];
             $model->_email_fields_notifications= ['email', 'email2'];
         }    
     ?>    
@@ -252,6 +264,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, '_email_fields_notifications')->checkboxList(Customer::getEmailNotificationWays(), ['id' => 'email_fields'])?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-xs-12">
 
@@ -347,6 +365,10 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 self.afipValidation();
             });
 
+            $(document).on('change', '#document_number_input', function(e){
+                Customer.validateCustomer();
+            });
+
             self.changeDocumentType();
         }
 
@@ -415,6 +437,50 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 document.getElementById("customer-tax_condition_id").value = data.tax_id;
             }
         };
+
+        /**
+         * Verifica si el documento ingresado corresponde a un cliente existente o no.
+         * Muestra un mensaje indicando si existe, tiene deuda o es nuevo cliente
+         */
+        this.validateCustomer = function () {
+            $.ajax({
+                url: "<?php echo Url::to(['validate-customer'])?>",
+                data: {Customer:{document_number: $('#document_number_input').val()}},
+                method: 'POST',
+                dataType: 'json'
+            }).done(function (response) {
+                switch (response.status) {
+                    case 'debt':
+                        $('.customer_validation').html('<div class="alert alert-danger">'+
+                            '<?php echo Yii::t("app","The customer exists in database but he has debt.").' '. Yii::t("app","Debt"). ":"?>'+
+                                response.debt +
+                            '</div>');
+                        $('.customer_validation').removeClass('hidden');
+                        break;
+                    case 'no_debt' :
+                        $('.customer_validation').html('<div class="alert alert-info">'+
+                            '<?php echo Yii::t("app","The customer exists in database")?>'+
+                            '</div>');
+                        $('.customer_validation').removeClass('hidden');
+                        break;
+                    case 'new':
+                        $('.customer_validation').html('<div class="alert alert-success">'+
+                            '<?php echo Yii::t("app","The customer not exists in database")?>'+
+                            '</div>');
+                        $('.customer_validation').removeClass('hidden');
+                        break;
+                    case 'invalid':
+                        $('.customer_validation').html('<div class="alert alert-danger">'+
+                            '<?php echo Yii::t("app","Invalid Document Number")?>'+
+                            '</div>');
+                        $('.customer_validation').removeClass('hidden');
+                        break;
+                    default:
+                        console.log(response);
+                        break;
+                }
+            });
+        }
     };
 </script>
 <?php $this->registerJs('Customer.init();') ?>

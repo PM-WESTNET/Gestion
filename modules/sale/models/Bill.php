@@ -130,7 +130,7 @@ class Bill extends ActiveRecord implements CountableInterface
             [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
         ]);
     }
-    
+
     public function behaviors()
     {
         return [
@@ -139,7 +139,9 @@ class Bill extends ActiveRecord implements CountableInterface
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
                 ],
-                'value' => function(){return date('Y-m-d');},
+                'value' => function(){
+                    return date('Y-m-d');
+                }
             ],
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
@@ -162,7 +164,7 @@ class Bill extends ActiveRecord implements CountableInterface
             ],
         ];
     }
-    
+
     /**
      * Inicializa tipo por defecto de factura, tipo por defecto de moneda, y valida estos datos.
      * @throws \yii\web\HttpException
@@ -297,7 +299,13 @@ class Bill extends ActiveRecord implements CountableInterface
 
     }
 
-    private function getFixedDiscountPerDetail($withTax=true)
+    /**
+     * @param bool $withTax
+     * @param bool $perDetail
+     * @return float|int
+     * variable perDetail indica si la funcion devuelve el descuento que seria aplicado a cada item o el descuento total
+     */
+    private function getFixedDiscountPerDetail($withTax = true, $perDetail = true)
     {
         $discount = 0;
         $cantDiscount = 0;
@@ -317,9 +325,9 @@ class Bill extends ActiveRecord implements CountableInterface
 
                         $discount += $taxes;
                     } else {
-                        $taxRate = TaxRate::findOne(['code'=>Config::getValue('default_tax_rate_code')]);
+                        $taxRate = TaxRate::findOne(['code' => Config::getValue('default_tax_rate_code')]);
                         if($taxRate) {
-                            $discount +=( $detail->unit_net_discount / (1+($withTax ? $taxRate->pct : 0 )));
+                            $discount +=( $detail->unit_net_discount / (1 + ($withTax ? $taxRate->pct : 0 )));
                         } else {
                             $discount += $detail->unit_net_discount;
                         }
@@ -331,7 +339,11 @@ class Bill extends ActiveRecord implements CountableInterface
                 $cantItems++;
             }
         }
-        return ($cantDiscount ? ($discount / ($cantItems)) : 0);
+
+        if($perDetail){
+            return($cantDiscount ? ($discount / ($cantItems)) : 0);
+        }
+        return ($cantDiscount ? $discount : 0);
     }
 
     private function getPercentageDiscountPerDetail($withTax=true)
@@ -386,14 +398,16 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateAmount()
     {
-        $discountFixedDetail = $this->getFixedDiscountPerDetail(true);
+        $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(true);
 
         $amount = 0.0;
 
         foreach ($this->billDetails as $detail) {
+            //Verifico que no sea un producto en linea, si es un descuento aplicado al producto (como el recomendado), debo poner el importe de la line_subtotal
+            $is_inline_discount = $detail->discount_id && (!$detail->product_id) ? true : false;
             // Se suma el line_subtotal solo si no es un descuento, ya que si no va a sumar lo que se puso en el descuento que viene en positivo
-            $amount += (float)($detail->discount_id ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
+            $amount += (float)($is_inline_discount ? 0 : $detail->line_subtotal);//($detail->line_subtotal - $discountFixedDetail) * $discountPercentDetail );
         }
         $amount = ($amount - $discountFixedDetail) * $discountPercentDetail;
         $amount = ($amount < 0 ? 0 : $amount);
@@ -407,7 +421,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateTotal()
     {
-        $discountFixedDetail = $this->getFixedDiscountPerDetail(false);
+        $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(false);
         $total = 0.0;
         foreach ($this->billDetails as $detail){
@@ -878,47 +892,79 @@ class Bill extends ActiveRecord implements CountableInterface
 
     /**
      * Retorna un array con todos los impuestos aplicados a los items
-     *
+     * Analiza si el detalle tiene un producto, es un descuento o un detalle manual, y crea el array de impuestos según el caso.
+     * Tiene en cuenta descuentos aplicados.
      * @return array
      */
     public function getTaxesApplied()
     {
         $taxesApplied = [];
-        $fixedDiscount = $this->getFixedDiscountPerDetail();
+        $discount = $this->getFixedDiscountPerDetail() ;
+        $fixedDiscount = $discount ? $discount : 0;
+
         foreach ($this->billDetails as $detail) {
             if (isset($detail->product)) {
-                // Obtengo los impuestos
-                foreach ($detail->product->taxRates as $taxRate) {
-                    $taxesApplied[$taxRate->tax_rate_id] = [
-                        'tax_id' => $taxRate->tax_rate_id,
-                        'amount' => round((array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['amount'] : 0) + ($detail->product->calculateTaxAmount('iva', ($detail->line_subtotal-$fixedDiscount) )), 2),
-                        'base' =>    round((array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['base'] : 0) + ($detail->line_subtotal - $fixedDiscount) , 2)
-                    ];
-                }
+
+                $this->getProductTaxes($taxesApplied, $detail, $fixedDiscount);
+
             } else {
                 if($detail->unit_net_discount != 0 ) {
-                    $tax_rate = TaxRate::findTaxRateByPct(0);
-                    $taxesApplied[$tax_rate->tax_rate_id] = [
-                        'tax_id' => $tax_rate->tax_rate_id,
-                        'amount' => round((array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['amount'] : 0) + ($detail->line_total - $detail->subtotal), 2),
-                        'base' => round((array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['base'] : 0) + $detail->line_subtotal, 2)
-                    ];
-                } else  if($detail->unit_net_price != 0) {
 
-                    $pct = abs(1 - ($detail->unit_final_price / $detail->unit_net_price));
-                    $tax_rate = TaxRate::findTaxRateByPct($pct);
-                    if(!$tax_rate) {
-                        $tax_rate = TaxRate::findOne(['code'=>Config::getValue('default_tax_rate_code')]);
-                    }
-                    $taxesApplied[$tax_rate->tax_rate_id] = [
-                        'tax_id' => $tax_rate->tax_rate_id,
-                        'amount' => round((array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['amount'] : 0) + ($detail->line_total - $detail->subtotal), 2),
-                        'base' => round((array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['base'] : 0) + $detail->line_subtotal, 2)
-                    ];
+                    $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+
+                } elseif($detail->unit_net_price != 0) {
+
+                    $this->getManualDetailTaxes($taxesApplied, $detail, $fixedDiscount);
                 }
             }
         }
         return $taxesApplied;
+    }
+
+    private function getProductTaxes(&$taxesApplied, $detail, $fixedDiscount)
+    {
+        foreach ($detail->product->taxRates as $taxRate) {
+            $amount = array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['amount'] : 0;
+            $base = array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['base'] : 0;
+
+            $taxesApplied[$taxRate->tax_rate_id] = [
+                'tax_id' => $taxRate->tax_rate_id,
+                'amount' => round($amount + ($detail->product->calculateTaxAmount('iva', ($detail->line_subtotal - $fixedDiscount) )), 2),
+                'base' => round($base + ($detail->line_subtotal - $fixedDiscount) , 2)
+            ];
+        }
+    }
+
+    private function getDiscountTaxes(&$taxesApplied, $detail, $fixedDiscount) {
+        $tax_rate = TaxRate::findTaxRateByPct(0);
+        $amount = array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['amount'] : 0;
+        $base = array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['base'] : 0;
+
+        $taxesApplied[$tax_rate->tax_rate_id] = [
+            'tax_id' => $tax_rate->tax_rate_id,
+            'amount' => round($amount + ($detail->line_total - $detail->subtotal), 2),
+            'base' => round($base + $detail->line_subtotal, 2)
+        ];
+    }
+
+    private function getManualDetailTaxes(&$taxesApplied, $detail, $fixedDiscount)
+    {
+        $pct = abs(1 - ($detail->unit_final_price / $detail->unit_net_price));
+        $tax_rate = TaxRate::findTaxRateByPct($pct);
+
+        if(!$tax_rate) {
+            $code = Config::getValue('default_tax_rate_code');
+            $tax_rate = TaxRate::findOne(['code' => $code]);
+        }
+
+        $amount = array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['amount'] : 0;
+        $base = array_key_exists($tax_rate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$tax_rate->tax_rate_id]['base'] : 0;
+
+        $taxesApplied[$tax_rate->tax_rate_id] = [
+            'tax_id' => $tax_rate->tax_rate_id,
+            'amount' => round($amount + (($detail->line_subtotal - $fixedDiscount)*$pct), 2),
+            'base' => round($base + $detail->line_subtotal - $fixedDiscount , 2)
+        ];
     }
 
     /**
@@ -1037,8 +1083,16 @@ class Bill extends ActiveRecord implements CountableInterface
             //  pongo la fecha de hoy
             if ($this->point_of_sale_id){
                 if($this->getPointOfSale()->electronic_billing ) {
-                    $date = new \DateTime($this->date);
-                    if ((new \DateTime('now'))->diff($date)->days > 5) {
+                    if($this->date) {
+                        if ($this->date != '<span class="not-set">(no definido)</span>') {
+                            $date = new \DateTime($this->date);
+                            if ((new \DateTime('now'))->diff($date)->days > 5) {
+                                $this->date = (new \DateTime('now'))->format('Y-m-d');
+                            }
+                        } else {
+                            $this->date = (new \DateTime('now'))->format('Y-m-d');
+                        }
+                    } else {
                         $this->date = (new \DateTime('now'))->format('Y-m-d');
                     }
                 }
@@ -1123,6 +1177,8 @@ class Bill extends ActiveRecord implements CountableInterface
         //Si se debe forzar la utilizacion de la empresa asignada al cliente:
         if($customer->company && \app\modules\config\models\Config::getValue('force_customer_company')){
             $this->company_id = $customer->company_id;
+            //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+            $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
         }
 
         $defaultBillType = $customer->defaultBillType;
@@ -1141,6 +1197,8 @@ class Bill extends ActiveRecord implements CountableInterface
             if(!$this->company->checkBillType($defaultBillType)){
                 if($customer->company){
                     $this->company_id = $customer->company_id;
+                    //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+                    $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
                 }
 
             }else{

@@ -10,6 +10,7 @@ use yii\helpers\Json;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\modules\sale\models\search\DiscountSearch;
 
 /**
  * DiscountController implements the CRUD actions for Discount model.
@@ -27,8 +28,12 @@ class DiscountController extends Controller
             'query' => Discount::find(),
         ]);
 
+        $searchModel = new DiscountSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
         return $this->render('index', [
             'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
         ]);
     }
 

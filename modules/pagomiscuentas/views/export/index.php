@@ -98,9 +98,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'label' => Yii::t('app', 'Total'),
+                'value' => function ($model) {
+                    return $model->total ? $model->total : 0;
+                },
+                'format' => 'currency'
+            ],
+            [
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>' {view} {delete} {export}',
-                'buttons'=>[
+                'buttons'=> [
                     'export' => function ($url, $model, $key) {
                         return $model->status === 'closed' ? Html::a('<span class="glyphicon glyphicon-download" data-toggle="tooltip" title="'.Yii::t('pagomiscuentas', 'Download File').'"></span>', $url, ['target'=>'_blank', 'class' => 'btn btn-print']) : '';
                     },

@@ -7,6 +7,10 @@ RUN cd /tmp \
 		xfonts-base \
 		xfonts-75dpi \
 		xserver-common \
+	&& curl -SLO "http://security.debian.org/debian-security/pool/updates/main/o/openssl/libssl1.0.0_1.0.1t-1+deb8u11_amd64.deb" \
+	&& dpkg -i libssl1.0.0_1.0.1t-1+deb8u11_amd64.deb \
+	&& curl -SLO "http://ftp.br.debian.org/debian/pool/main/libp/libpng/libpng12-0_1.2.50-2+deb8u3_amd64.deb" \
+	&& dpkg -i libpng12-0_1.2.50-2+deb8u3_amd64.deb \
 	&& curl -SLO "https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.2.1/wkhtmltox-0.12.2.1_linux-jessie-amd64.deb" \
 	&& dpkg -i wkhtmltox-0.12.2.1_linux-jessie-amd64.deb
 

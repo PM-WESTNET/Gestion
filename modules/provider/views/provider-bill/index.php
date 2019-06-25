@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use kartik\export\ExportMenu;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
@@ -61,6 +62,9 @@ $this->params['breadcrumbs'][] = $this->title;
             return Yii::t('app', ucfirst($model->status));
         }
     ];
+
+    $export_columns = $columns;
+
     $columns[] = [
         'class' => 'app\components\grid\ActionColumn',
         'template'=>'{view} {update} {delete} {items}',
@@ -81,6 +85,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ];
     ?>
+
+    <!-- Modulo Export -->
+    <?= ExportMenu::widget([
+        'dataProvider' => $dataProvider,
+        'options' => ['class' => 'table-responsive'],
+        'columns' => $export_columns,
+        'showConfirmAlert'=>false
+    ]);
+    ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'options' => ['class' => 'table-responsive'],

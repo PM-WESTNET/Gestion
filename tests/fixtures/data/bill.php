@@ -53,4 +53,30 @@ return [
       'user_id' => 1,
       'partner_distribution_model_id' => 1
   ],
+  [
+      'bill_id' => 5,
+      'date' => '2018-01-20',
+      'time' => null,
+      'timestamp' => 1516406400,
+      'number' => null,
+      'currency' => 1,
+      'amount' => 1000,
+      'customer_id' => 45901,
+      'observation' => 'XXXXX',
+      'user_id' => 1,
+      'partner_distribution_model_id' => 1
+  ],
+  [
+      'bill_id' => 6,
+      'date' => '2018-02-20',
+      'time' => null,
+      'timestamp' => 1516406400,
+      'number' => null,
+      'currency' => 1,
+      'amount' => 1000,
+      'customer_id' => 45901,
+      'observation' => 'XXXXX',
+      'user_id' => 1,
+      'partner_distribution_model_id' => 1
+  ],
 ];

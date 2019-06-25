@@ -6,6 +6,7 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use kartik\export\ExportMenu;
 
 /* @var $this View */
 /* @var $dataProvider ActiveDataProvider */
@@ -57,7 +58,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         'showConfirmAlert'=>false
     ]);**/
-
         
     ?>
     <table class="kv-grid-table table table-bordered table-striped kv-table-wrap" >

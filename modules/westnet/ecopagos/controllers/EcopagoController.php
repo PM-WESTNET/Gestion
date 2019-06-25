@@ -150,4 +150,15 @@ class EcopagoController extends Controller {
         }
     }
 
+    public function actionDisable($id) {
+        $model = $this->findModel($id);
+
+        if ($model->disable()){
+            Yii::$app->session->addFlash('success', Yii::t('app','Ecopago disabled successfull'));
+        }else {
+            Yii::$app->session->addFlash('error', Yii::t('app','Can`t disable this Ecopago'));
+        }
+
+        return $this->redirect(['view', 'id' => $model->ecopago_id]);
+    }
 }

@@ -80,7 +80,6 @@ $this->params['breadcrumbs'][] = 'Pago Fácil - ' . $model->upload_date;
                 return Yii::t('app', ucfirst($model->paymentPayment->status));
             },
         ],
-        
         [
             'class' => 'app\components\grid\ActionColumn',
             'template'=>'{view} {update} {delete} {pdf}',

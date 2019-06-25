@@ -11,6 +11,8 @@ use yii\web\View;
 use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use app\components\helpers\UserA;
+use webvimark\modules\UserManagement\models\User;
+
  /**
  * @var View $this
  * @var Customer $model
@@ -22,7 +24,6 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
 <div class="customer-view">
-
 
     <?php if(Yii::$app->params['class_customer_required']): ?>
     <?php 
@@ -56,7 +57,9 @@ $this->params['breadcrumbs'][] = $this->title;
             <p>
                 <?php
                     if($model->canUpdate()){
-                        echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->customer_id], ['class' => 'btn btn-primary']);
+                        echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->customer_id], [
+                                'class' => 'btn btn-primary'
+                        ]);
                     }
                 ?>
                 
@@ -80,11 +83,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?>
                 <?php endif; ?>
                 <?= UserA::a(Yii::t('app', 'Customer Log'), ['/sale/customer-log/index', 'customer_id' => $model->customer_id], ['class' => 'btn btn-info']) ?>
-
-                
             </p>
         </div>
     </div>
+
     <div class="row">
         <div class="col-lg-12 noPadding">
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Tickets'), ['customer/customer-tickets', 'id' => $model->customer_id], [
@@ -95,8 +97,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => 'btn btn-warning',
                         'id'=>'customer-tickets',
                     ])?>
-            
-            <?php if(\webvimark\modules\UserManagement\models\User::canRoute('/sale/customer/change-company')): ?>
+
+            <?php if(User::canRoute('/sale/customer/change-company')): ?>
             <?= Html::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('westnet', 'Change Company'), null, [
                         'class' => 'btn btn-warning',
                         'id'=>'change-company',
@@ -107,18 +109,51 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Discounts'), ['/sale/customer-has-discount/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Products to Invoice'), ['/sale/product-to-invoice/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Payment Plan'), ['/checkout/payment-plan/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
-            
-            <?php if(\webvimark\modules\UserManagement\models\User::canRoute('/sale/bill/index')): ?>
+
+            <?php if(User::canRoute('/sale/bill/index')): ?>
             <div class="pull-right" style="margin-right: -10px;">
                 <?= $this->render('_bills-dropdown', ['model' => $model, 'class' => 'btn btn-primary']); //Lista de comprobantes de cliente ?>
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
             <?php endif; ?>
-            
+
+            <?php if (User::canRoute('/sale/customer/send-message')):?>
+            <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
+                <div class="dropdown">
+                    <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                     <?= $model->canSendSMSMessage() ? '': 'disabled'?>>
+                        <?= '<span class="glyphicon glyphicon-send"></span> '.Yii::t('app','Send...')?>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="send-message">
+                        <?php foreach ($messages as $message):?>
+                            <li>
+                                <?= \yii\bootstrap\Html::a($message->name, '#', ['class' => 'select_msj', 'data-message_id' => $message->customer_message_id])?>
+                            </li>
+                        <?php endforeach;?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif;?>
         </div>
     </div>
-    <?php
+
+    <!--Contratos-->
+
+    <?php if($contracts->getTotalCount() >= 1) {
+        echo $this->render('_customer-contracts', [
+            'model' => $model,
+            'contracts' => $contracts
+        ]);
+    } else { ?>
+        <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
+    <?php } ?>
     
+    <!--Fin Contratos-->
+
+    <h2> <?= Yii::t('app', 'Customer data')?>  </h2>
+
+    <?php
     $attributes = 
     [
         'code',
@@ -137,11 +172,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
         ],
-        'email:email',
-        'email2:email',
+        [
+            'attribute' => 'email',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email). ' ('. Yii::t('app',ucfirst($model->email_status)). ')';
+            },
+            'format' => 'raw'
+        ],
+        [
+            'attribute' => 'email2',
+            'value' => function ($model) {
+                return Yii::$app->formatter->asEmail($model->email2). ' ('. Yii::t('app',ucfirst($model->email2_status)). ')';
+            },
+            'format' => 'raw'
+        ],
         'phone',
         'phone2',
         'phone3',
+        'phone4',
         //'address',
         [
             'label'=>$model->getAttributeLabel('status'),
@@ -154,7 +202,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => Yii::t('app','Publicity Shape'),
             'value' => Yii::t('app', $model->publicity_shape)
-            ],
+        ],
      ];
    
     $attributes[] = [
@@ -222,7 +270,31 @@ $this->params['breadcrumbs'][] = $this->title;
         'label' => Yii::t('app', 'Notifications Way'),
         'value' => $notifications_way      
     ];
-    
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Last update'),
+        'value' => function ($model) {
+            return $model->last_update;
+        }
+    ];
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Has mobile app installed').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+        'value' => function ($model) {
+            return $model->hasMobileAppInstalled() ? Yii::t('app', 'Yes') : Yii::t('app', 'No');
+        },
+    ];
+
+    if($model->hasMobileAppInstalled()) {
+        $attributes[] = [
+            'label' => Yii::t('app', 'Last app use').' '.'<span class="glyphicon glyphicon-phone"></span>' ,
+            'value' => function ($model) {
+                $last_use = $model->lastMobileAppUse(true);
+                return $last_use ? $last_use : '';
+            },
+        ];
+    }
+
     echo DetailView::widget([
         'model' => $model,
         'attributes' => $attributes,
@@ -232,67 +304,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php //Está habilitado manejo de planes?
         if(Yii::$app->params['plan_product']):
     ?>
-    <hr>
-    <div class="title">
-        <h2><?php echo Yii::t('app', 'Contracts')?></h2>
-        <?php
-        //Está habilitado manejo de planes?
-        if(Yii::$app->params['plan_product']): ?>
-        <p>
-            <?= UserA::a(Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success']) ?>
-        </p>
-        
-        <?php endif; ?>
-    </div>
-
-
-    <?= GridView::widget([
-                'dataProvider' =>\app\modules\sale\modules\contract\models\search\ContractSearch::getdataProviderContract($model->customer_id),
-                //'filterModel' => $searchModel,
-                'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
-
-                    'contract_id',
-                    'from_date',
-                    [
-                        'label'=> Yii::t('app', 'Status Account'),
-                        'value'=>  function($model){ 
-                            $con = app\modules\westnet\models\Connection::findOne(['contract_id' => $model->contract_id]);
-                            return (!empty($con) ? Yii::t('app', ucfirst($con->status_account). ' Account'): null);
-        
-                        }
-                    ],
-                    [
-                        'label'=> Yii::t('app', 'Address'),
-                        'value'=> function($model){
-                            return $model->address ? $model->address->shortAddress : '';
-                        }
-                    ],
-                    [
-                        'label' => Yii::t('app', 'Plan'),
-                        'value' => function ( $model){
-                            return $model->getPlan()->name;
-                        }
-                    ],     
-                    ['class' => 'yii\grid\ActionColumn',
-                        'template'=>'{view} {update}',
-                        'buttons'=>[
-                        'view' => function ($url, $model) {
-                                if($model->canView()){
-                                  return UserA::a('<span class="glyphicon glyphicon-eye-open"></span>',['/sale/contract/contract/view',  'id' => $model->contract_id], ['title' => Yii::t('yii', 'View'), 'class' => 'btn btn-view']);
-                                }    
-                            },
-                        'update' => function ($url, $model) {
-                                if ($model->canUpdate()){
-                                    return Html::a('<span class="glyphicon glyphicon-pencil"></span>',['/sale/contract/contract/update',  'id' => $model->contract_id], ['title' => Yii::t('yii', 'Update'), 'class' => 'btn btn-primary']);
-                              
-                                }
-                           },
-                        ],
-                    ],
-                ],
-            ]);
-     ?>
 
     <?php endif;?>
 </div>
@@ -330,6 +341,40 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
     </div>
+
+<div class="modal fade" id="phoneModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo Yii::t('app','Select the phones to send message')?></h4>
+            </div>
+            <div class="modal-body">
+                <?php if ($model->phone):?>
+                    <?php echo Html::checkbox('phone', true, ['class' => 'phone-check','data-attr' => 'phone']) . $model->phone?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone2):?>
+                    <?php echo Html::checkbox('phone2', true, ['class' => 'phone-check', 'data-attr' => 'phone2']) . $model->phone2?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone3):?>
+                    <?php echo Html::checkbox('phone3', true, ['class' => 'phone-check', 'data-attr' => 'phone3']) . $model->phone3?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone4):?>
+                    <?php echo Html::checkbox('phone4', true, ['class' => 'phone-check', 'data-attr' => 'phone4']) . $model->phone4?>
+                    <br>
+                <?php endif;?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo Yii::t('app','Close')?></button>
+                <button type="button" class="btn btn-primary" id="send-message-btn"> <?php echo Yii::t('app','Send Message')?></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script>
     var CustomerView= new function(){
         
@@ -339,7 +384,15 @@ $this->params['breadcrumbs'][] = $this->title;
             });
             $(document).on('click', '#btn-change-company', function(){
                 CustomerView.changeCompany();
+            });
+            $(document).on('click', '.select_msj', function (e) {
+                e.preventDefault();
+                CustomerView.selectPhones($(this));
             })
+            $(document).on('click', '#send-message-btn', function (e) {
+                e.preventDefault();
+                CustomerView.sendMessage($('#send-message-btn').data('message_id'))
+            });
         }
 
         this.changeCompany= function(){
@@ -355,6 +408,26 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             });
+        }
+        
+        this.selectPhones = function (opt) {
+            $('#send-message-btn').data('message_id', $(opt).data('message_id'))
+            $('#phoneModal').modal('show');
+        }
+
+        this.sendMessage = function (message) {
+            var phones = [];
+
+
+            var url = "<?php echo Url::to(['/sale/customer/send-message', 'customer_id' => $model->customer_id])?>&customer_message_id="+message;
+
+            $.each($('.phone-check'), function (i, ch) {
+                if ($(ch).is(':checked')) {
+                    url = url + '&phones['+i+']='+$(ch).data('attr');
+                }
+            });
+
+            location.replace(url);
         }
 
     }

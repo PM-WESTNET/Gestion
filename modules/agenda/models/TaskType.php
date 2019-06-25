@@ -3,6 +3,7 @@
 namespace app\modules\agenda\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "task_type".
@@ -129,4 +130,8 @@ class TaskType extends \app\components\db\ActiveRecord {
         }
     }
 
+    public static function getForSelect()
+    {
+        return ArrayHelper::map(self::find()->all(), 'task_type_id', 'name');
+    }
 }

@@ -31,11 +31,18 @@ if(!$model->company_id) {
     <?= Html::hiddenInput('Payment[status]', $model->status, ['id'=>'payment_status']) ?>
     <?= Html::hiddenInput('Payment[payment_id]', $model->payment_id, ['id'=>'payment_id']) ?>
 
-    <?= app\components\companies\CompanySelector::widget( ['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app', 'Company')]).'...']]) ?>
-
-    <?php
-        echo $this->render('@app/modules/partner/views/partner-distribution-model/_selector', ['model' => $model, 'form'=>$form]);
-    ?>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-6"  style="padding: 0px;">
+                <?= app\components\companies\CompanySelector::widget( ['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app', 'Company')]).'...']]) ?>
+            </div>
+            <div class="col-md-6"  style="padding: 0px 10px;">
+                <?php
+                echo $this->render('@app/modules/partner/views/partner-distribution-model/_selector', ['model' => $model, 'form'=>$form]);
+                ?>
+            </div>
+        </div>
+    </div>
 
     <?php
         if (!$model->customer) {
@@ -46,25 +53,29 @@ if(!$model->company_id) {
         <?= Html::hiddenInput('Payment[customer_id]', $model->customer_id, ['id'=>'customer_id']) ?>
     <?php }  ?>
 
-
     <div class="form-group">
-        <?= Html::activeLabel($model, 'date'); ?>
-        <?php
-        echo yii\jui\DatePicker::widget([
-            'language' => Yii::$app->language,
-            'model' => $model,
-            'attribute' => 'date',
-            'dateFormat' => 'dd-MM-yyyy',
-            'options'=>[
-                'class'=>'form-control filter dates',
-                'placeholder'=>Yii::t('app','Date'),
-                'autocomplete' => "off"
-            ]
-        ]);
-        ?>
+        <div class="row">
+            <div class="col-md-6"  style="padding: 0px;">
+                <?= $form->field($model, 'amount') ?>
+            </div>
+            <div class="col-md-6"  style="padding: 0px 10px;">
+                <?= Html::activeLabel($model, 'date'); ?>
+                <?php
+                echo yii\jui\DatePicker::widget([
+                    'language' => Yii::$app->language,
+                    'model' => $model,
+                    'attribute' => 'date',
+                    'dateFormat' => 'dd-MM-yyyy',
+                    'options'=>[
+                        'class'=>'form-control filter dates',
+                        'placeholder'=>Yii::t('app','Date'),
+                        'autocomplete' => "off"
+                    ]
+                ]);
+                ?>
+            </div>
+        </div>
     </div>
-
-    <?= $form->field($model, 'amount') ?>
 
     <?= $form->field($model, 'concept')->textInput(['maxlength' => 255]) ?>
 

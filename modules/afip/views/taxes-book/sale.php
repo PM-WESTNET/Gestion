@@ -7,6 +7,8 @@ use kartik\export\ExportMenu;
 use app\modules\sale\models\BillType;
 use yii\bootstrap\Modal;
 use yii\widgets\ActiveForm;
+use app\components\companies\CompanySelector;
+use yii\jui\DatePicker;
 
 /**
  * @var yii\web\View $this
@@ -26,13 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'get',
             ]); ?>
 
-            <?= app\components\companies\CompanySelector::widget(['model'=>$searchModel]); ?>
+            <?= CompanySelector::widget(['model'=>$searchModel]); ?>
         </div>
     </div>
     
     <div class="row">
         <div class="col-sm-6">
-            <?= $form->field($searchModel, 'fromDate')->widget(yii\jui\DatePicker::className(), [
+            <?= $form->field($searchModel, 'fromDate')->widget(DatePicker::class, [
                 'language' => 'es',
                 'model' => $searchModel,
                 'dateFormat' => 'dd-MM-yyyy',
@@ -44,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ?>
         </div>
         <div class="col-sm-6">
-            <?= $form->field($searchModel, 'toDate')->widget(yii\jui\DatePicker::className(), [
+            <?= $form->field($searchModel, 'toDate')->widget(DatePicker::class, [
                 'language' => 'es',
                 'model' => $searchModel,
                 'dateFormat' => 'dd-MM-yyyy',

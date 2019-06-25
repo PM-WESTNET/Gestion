@@ -6,8 +6,10 @@ use app\components\helpers\DbHelper;
 use app\modules\config\models\Config;
 use app\modules\westnet\mesa\components\models\Usuario;
 use app\modules\westnet\mesa\components\request\UsuarioRequest;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\ticket\TicketModule;
+use app\modules\ticket\models\Schema;
 
 /**
  * This is the model class for table "category".
@@ -21,13 +23,16 @@ use app\modules\ticket\TicketModule;
  * @property integer $rgt
  * @property integer $notify
  * @property integer $external_user_id
+ * @property integer $responsible_user_id //Responde al usuario de gestion al cual se le autoasignará el ticket que pertenezca a esta categoría
  *
  * @property Category $parent
  * @property Category[] $categories
  * @property Ticket[] $tickets
+ * @property integer $schema_id
  */
 class Category extends \app\components\db\ActiveRecord {
 
+    public $_statuses;
     /**
      * @inheritdoc
      */
@@ -49,10 +54,11 @@ class Category extends \app\components\db\ActiveRecord {
         return [
             [['name', 'slug'], 'required'],
             [['description'], 'string'],
-            [['parent_id', 'lft', 'rgt', 'notify', 'external_user_id'], 'integer'],
+            [['parent_id', 'lft', 'rgt', 'notify', 'external_user_id', 'responsible_user_id', 'schema_id'], 'integer'],
             [['parent'], 'safe'],
             [['name'], 'string', 'max' => 100],
-            [['slug'], 'string', 'max' => 45]
+            [['slug'], 'string', 'max' => 45],
+            [['external_user_id', 'responsible_user_id'], 'validateResponsibleUsers'],
         ];
     }
 
@@ -70,7 +76,16 @@ class Category extends \app\components\db\ActiveRecord {
             'tickets' => TicketModule::t('app', 'Tickets'),
             'notify' => TicketModule::t('app', 'Notify'),
             'external_user_id' => TicketModule::t('app', 'External User'),
+            'responsible_user_id' => Yii::t('app', 'Responsible user'),
+            'schema_id' => Yii::t('app', 'Schema'),
         ];
+    }
+
+    public function validateResponsibleUsers($attribute, $params, $validator)
+    {
+        if($this->external_user_id && $this->responsible_user_id) {
+            $this->addError($attribute, Yii::t('app', 'Cant set as responsible an external user and a gestion user at the same time'));
+        }
     }
 
     /**
@@ -78,14 +93,14 @@ class Category extends \app\components\db\ActiveRecord {
      */
     public function getParent()
     {
-        return $this->hasOne(Category::className(), ['category_id' => 'parent_id']);
+        return $this->hasOne(Category::class, ['category_id' => 'parent_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getTickets() {
-        return $this->hasMany(Ticket::className(), ['category_id' => 'category_id']);
+        return $this->hasMany(Ticket::class, ['category_id' => 'category_id']);
     }
 
     /**
@@ -93,7 +108,7 @@ class Category extends \app\components\db\ActiveRecord {
      */
     public function getCategories()
     {
-        return $this->hasMany(Category::className(), ['parent_id' => 'category_id']);
+        return $this->hasMany(Category::class, ['parent_id' => 'category_id']);
     }
 
 
@@ -107,10 +122,33 @@ class Category extends \app\components\db\ActiveRecord {
     }
 
     /**
+     * @return Usuario
+     */
+    public function getResponsibleUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'responsible_user_id']);
+    }
+
+    /**
+     * @return Usuario
+     */
+    public function getSchema()
+    {
+        return $this->hasOne(Schema::class, ['schema_id' => 'schema_id']);
+    }
+
+    /**
      * @inheritdoc
      * Strong relations: None.
      */
     public function getDeletable() {
+
+        if($this->getTickets()->exists()){
+            return false;
+        }
+        if($this->getCategories()->exists()){
+            return false;
+        }
         return true;
     }
 

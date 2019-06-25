@@ -24,7 +24,7 @@ class AccountMovementSearch extends AccountMovement {
     // Fechas
     public $toDate;
     public $fromDate;
-    //public $date;
+    public $date;
     public $initStatusDate;
     // Cuentas
     public $account_id_from;
@@ -48,7 +48,8 @@ class AccountMovementSearch extends AccountMovement {
             [['toDate', 'fromDate', 'date'], 'default', 'value' => null],
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
-            ['company_id', 'integer']
+            ['company_id', 'integer'],
+            [['account_movement_id'], 'safe']
         ];
     }
 
@@ -277,7 +278,7 @@ class AccountMovementSearch extends AccountMovement {
             ->leftJoin('account_movement_item ami', 'account_movement.account_movement_id = ami.account_movement_id')
             ->leftJoin('account', 'ami.account_id = account.account_id')
             ->groupBy(['ami.account_movement_item_id', 'account_movement.account_movement_id', 'account.name'])
-            ->orderBy(['account_movement.account_movement_id'=>SORT_ASC, 'account_movement.date'=>SORT_ASC, 'debit'=>SORT_DESC]);
+            ->orderBy(['account_movement.date'=>SORT_DESC, 'account_movement.account_movement_id'=>SORT_DESC, 'debit'=>SORT_DESC]);
         $mainQuery->where(['IN', 'account_movement.account_movement_id', $query]);
 
         $dataProvider = new ActiveDataProvider([
@@ -304,6 +305,8 @@ class AccountMovementSearch extends AccountMovement {
         $this->filterDates($query);
 
         $this->filterBalance($query);
+
+        $query->andFilterWhere(['account_movement.account_movement_id' => $this->account_movement_id]);
 
         // Totales
         $queryTotals = clone $mainQuery;

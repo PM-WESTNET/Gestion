@@ -3,12 +3,18 @@
 namespace app\modules\agenda\controllers;
 
 use app\components\web\Controller;
-use app\modules\agenda\helpers\Task;
 use app\modules\agenda\models\search\TaskSearch;
+use Yii;
+use app\modules\config\models\Config;
+use yii\helpers\Html;
+use yii\helpers\Url;
+use yii\web\Response;
+use app\modules\agenda\models\Task;
+use yii2fullcalendar\models\Event;
 
 class DefaultController extends Controller {
 
-    public $layout = '@app/views/layouts/agenda';
+    public $layout = '/fluid';
 
     /**
      * Renderiza la vista principal de agenda
@@ -16,58 +22,32 @@ class DefaultController extends Controller {
      */
     public function actionIndex($taskSearch = []) {
 
-        if (\Yii::$app->user->isGuest) {
+        if (Yii::$app->user->isGuest) {
             return $this->redirect(['/user-management/auth/login'], true);
         }
 
-        /*
-          \app\modules\agenda\components\AgendaAPI::createTask([
-          'users' => [
-          'sebamza',
-          'superadmin',
-          ],
-          'status_id' => 1,
-          'date' => '2015-10-20',
-          'duration' => '10:00'
-          ]);
-         */
-
-        /*
-          \app\modules\agenda\components\AgendaAPI::postponeTask(\app\modules\agenda\models\Task::findOne(344), '2015-10-15', array());
-         */
-
-        //Obtenemos usuario logueado
-        $user = \Yii::$app->user;
         $searchModel = new TaskSearch();
+        $searchModel->load(Yii::$app->request->get());
 
-        if (!empty(\Yii::$app->request->get()['TaskSearch'])) {
-            $searchModel->load(\Yii::$app->request->get(), 'TaskSearch');
-            if (empty($searchModel->create_option)) {
-                $searchModel->create_option = 'all';
-            }
-
-            if (empty($searchModel->user_option)) {
-                $searchModel->user_option = 'all';
-            }
-            $searchModel->user_id = $user->id;
-
-
-
-            $tasks = \app\modules\agenda\models\Task::getFilteredTasks($searchModel->searchAgenda(), $searchModel);
-            $events = $this->buildEvents($tasks);
-            //$events = $this->getFilterEvents($searchModel->searchAgenda(), $searchModel);
-        } else {
-            $searchModel->create_option = 'all';
-            $searchModel->user_option = 'all';
-            $searchModel->user_id = $user->id;
-
-            $tasks = \app\modules\agenda\models\Task::getFilteredTasks($searchModel->searchAgenda(), $searchModel);
-            $events = $this->buildEvents($tasks);
-            //$events = $this->getFilterEvents($searchModel->searchAgenda(), $searchModel);
+        if(!$searchModel->from_date) {
+            $searchModel->from_date = (new \DateTime('now'))->modify('-1 months')->format('Y-m-01');
         }
 
+        if(!$searchModel->to_date) {
+            $searchModel->to_date = (new \DateTime('now'))->modify('last day of this month')->format('Y-m-d');
+        }
 
-       
+        if(!$searchModel->create_option) {
+            $searchModel->create_option = 'all';
+        }
+
+        if(!$searchModel->user_option) {
+            $searchModel->user_option = 'all';
+        }
+
+        $tasks = $searchModel->searchAgenda();
+        $events = $this->buildEvents($tasks);
+
         return $this->render('index', [
                     'events' => $events,
                     'model' => $searchModel
@@ -79,9 +59,9 @@ class DefaultController extends Controller {
      * @return type
      * @throws NotFoundHttpException
      */
-    public function actionUpdateAgenda() {
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    public function actionUpdateAgenda()
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
 
         $json = [];
 
@@ -134,11 +114,9 @@ class DefaultController extends Controller {
 
         if (!empty($tasks)) {
             foreach ($tasks as $task) {
-
-                $Event = new Task();
+                $Event = new Event();
                 $Event->id = $task->task_id;
-                $Event->title = $task->name;
-
+                $Event->title = $task->visualPriority .' '.$task->name;
                 $Event->start = date('Y-m-d H:i:s', strtotime($task->date . ' ' . $task->time));
 
                 $startDatetime = new \DateTime($task->date . ' ' . $task->time);
@@ -147,13 +125,11 @@ class DefaultController extends Controller {
                 $Event->end = $startDatetime->format('Y-m-d H:i:s');
 
                 //Si dura igual o mas de lo que dura el dia, es de "todo el dia"
-                if ($task->duration >= \app\modules\config\models\Config::getConfig('work_hours_quantity')->value)
+                if ($task->duration >= Config::getConfig('work_hours_quantity')->value) {
                     $Event->allDay = true;
-
-                $classNames = $this->createCssClasses($task, $user_id);
-
-                $Event->className = $classNames;
-                $Event->url = \yii\helpers\Url::to(['/agenda/task/update', 'id' => $task->task_id], true);
+                }
+                $this->setColors($task, $Event);
+                $Event->url = Url::to(['/agenda/task/update', 'id' => $task->task_id, 'agenda' => true], true);
                 $events[] = $Event;
             }
         }
@@ -167,31 +143,30 @@ class DefaultController extends Controller {
      * @param \webvimark\modules\UserManagement\models\User $user
      * @return string cssClasses
      */
-    protected function createCssClasses(\app\modules\agenda\models\Task $task, $user_id = 0) {
+    protected function setColors(Task $task, Event &$event) {
 
-        //Estado, prioridad y ID
-        $task_id = $task->task_id;
-        $status = $task->status->slug;
-        $priority = $task->priority;
+        $status = $task->status->color;
+        $event->color = 'white';
 
-        //Enfasis del creador de la tarea
-        if ($task->creator_id == $user_id)
-            $ownerClass = 'task-is-owner';
-        else
-            $ownerClass = 'task-is-assigned';
+        if($status == 'normal') {
+            $event->backgroundColor = '#777';
+        }
 
-        //Tarea diferente si es parent_id = 0
-        if ($task->taskType->slug == \app\modules\agenda\models\TaskType::TYPE_BY_USER && empty($task->parent_id))
-            $parentClass = 'task-is-parent';
-        else
-            $parentClass = 'task-is-child';
+        if($status == 'warning') {
+            $event->backgroundColor = '#f0ad4e';
+        }
 
-        if ($ownerClass == 'task-is-assigned' && $parentClass == 'task-is-parent')
-            $visibility = 'display-none';
-        else
-            $visibility = '';
+        if($status == 'info') {
+            $event->backgroundColor = '#5bc0de';
+        }
 
-        return "task id-$task_id scheduled task-$status priority-$priority $ownerClass $parentClass $visibility";
+        if($status == 'danger') {
+            $event->backgroundColor = '#d9534f';
+        }
+
+        if($status == 'success') {
+            $event->backgroundColor = '#5cb85c;';
+        }
     }
 
 }
