@@ -512,7 +512,7 @@ class PaymentController extends Controller {
         if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
             $import = $transmition_file->import();
                 if(array_key_exists('errors', $import)) {
-                    if($import['errors'] != '') {
+                    if(!empty($import['errors'])) {
                         $string_error = '';
                         foreach ($import['errors'] as $error) {
                             $string_error .= $error . "<br>";
