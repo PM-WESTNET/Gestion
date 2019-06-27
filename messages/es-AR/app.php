@@ -1128,5 +1128,11 @@
     'Branch' => 'Sucursal',
     'Company Identification' => 'Nro Identificación de Empresa',
     'Control Digit' => 'Dígito de Control',
-    'Bank ID' => 'Banco'
+    'Bank ID' => 'Banco',
+    'Company added successfull' => 'Empresa agregada con éxito',
+    'Company updated successfull' => 'Configuración de Empresa actualizada con éxito',
+    'Bank Customers' => 'Clientes del Banco',
+    'Bank Customer' => 'Cliente del Banco',
+    'Other Customers' => 'Otros Clientes',
+    'Other Customer' => 'Otro Cliente'
 );

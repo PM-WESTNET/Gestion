@@ -74,7 +74,7 @@ class BancoFrances implements BankInterface
             $bills = $this->getCustomerBills($debit->customer_id, $this->periodFrom, $this->periodTo);
 
             foreach ($bills as $bill) {
-                $resource = $this->addFirstLine($resource, $debit, $bill);
+                $resource = $this->addFirstLine($resource, $debit, $bill, $export->concept);
                 $resource = $this->addSecondLine($resource, $debit);
                 $resource = $this->addThirdLine($resource, $debit);
                 $resource = $this->addConceptLine($resource, $debit);
@@ -203,7 +203,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$createDate.$processDate.$bank.$branch.$dc.$account.$service.$divisa.$devolucion.$file.$ord.$tipoCBU.$libre;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
 
@@ -214,7 +214,7 @@ class BancoFrances implements BankInterface
      * @param AutomaticDebit $beneficiary
      * @param Bill $bill
      */
-    private function addFirstLine($resource, $beneficiary, $bill)
+    private function addFirstLine($resource, $beneficiary, $bill, $concept)
     {
         $register_code = '4210';
         $companyId = $this->getCompanyIdentification();
@@ -227,7 +227,7 @@ class BancoFrances implements BankInterface
         $import1 = str_pad($intamount, 13, '0', STR_PAD_LEFT);
         $import2 = round(($bill->total - $intamount), 2) * 100;
         $code_dev = str_pad(' ', 6, ' ');
-        $ref = str_pad(' ', 22, ' ');
+        $ref = str_pad($concept, 22, ' ');
         $fecha = date('Ymd', $this->processTimestamp);
         $free2 = str_pad(' ', 2, ' ');
         $bill_number = str_pad($bill->number, 15, '0', STR_PAD_LEFT);
@@ -237,7 +237,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$cbu.$import1.$import2.$code_dev.$ref.$fecha.$free2.$bill_number.$status_dev.$descr_dev.$free3;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
 
@@ -257,7 +257,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$beneficiary_name.$dom1.$dom2.$free2;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -276,7 +276,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$loc.$prov.$cp.$free2;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -292,7 +292,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$concept.$free2;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -310,7 +310,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$import1.$import2.$op.$total.$free;
 
-        fwrite($resource, $line.PHP_EOL);
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }

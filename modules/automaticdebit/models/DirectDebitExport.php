@@ -16,6 +16,7 @@ use yii\db\ActiveRecord;
  * @property int $bank_id
  * @property int $company_id
  * @property string $type
+ * @property string $concept
  *
  * @property BillHasExportToDebit[] $billHasExportToDebits
  * @property Bank $bank
@@ -54,8 +55,9 @@ class DirectDebitExport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'type'], 'required'],
+            [['company_id', 'type', 'concept'], 'required'],
             [['create_timestamp', 'bank_id', 'company_id'], 'integer'],
+            [['concept'], 'string', 'max' => 22 ],
             [['file'], 'string', 'max' => 255],
             [['from_date', 'to_date', 'debit_date'], 'safe'],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::className(), 'targetAttribute' => ['bank_id' => 'bank_id']],
@@ -75,7 +77,8 @@ class DirectDebitExport extends \yii\db\ActiveRecord
             'from_date' => Yii::t('app','From Date'),
             'to_date' => Yii::t('app','To Date'),
             'debit_date' => Yii::t('app','Debit Date'),
-            'type' => Yii::t('app','Type')
+            'type' => Yii::t('app','Type'),
+            'concept' => Yii::t('app','Concept')
         ];
     }
 

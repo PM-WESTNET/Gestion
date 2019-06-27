@@ -38,6 +38,8 @@ $this->title = Yii::t('app','Create new export for direct debit');
         ]
     ])?>
 
+    <?php echo $form->field($export, 'concept')->textInput(['maxlength' => true])?>
+
     <?php echo $form->field($export, 'type')->dropDownList([
         'own' => Yii::t('app','Bank Customers'),
         'other' => Yii::t('app','Other Customers')
