@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <p>
             <?php
-            if ($model->status =='draft') {
+            if ($model->getUpdatable()) {
                 echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " .Yii::t('app', 'Update'), ['update', 'id' => $model->payment_id], ['class' => 'btn btn-primary']);
             }
             if ($model->status !== 'draft'){
@@ -38,16 +38,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]);
             }
-            //if($model->deletable){
-                echo Html::a("<span class='glyphicon glyphicon-remove'></span> " .Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
+            if ($model->deletable) {
+                echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
                     'class' => 'btn btn-danger',
                     'data' => [
                         'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]);
-            //}
-                echo Html::a("<span class='glyphicon glyphicon-user'></span> " .Yii::t('app', 'Change Customer'), '#', ['class' => 'btn btn-warning', 'id' => 'change-customer']);
+
+                echo Html::a("<span class='glyphicon glyphicon-user'></span> " . Yii::t('app', 'Change Customer'), '#', [
+                    'class' => 'btn btn-warning',
+                    'id' => 'change-customer'
+                ]);
+            }
             ?>
         </p>
     </div>
@@ -59,10 +63,6 @@ $this->params['breadcrumbs'][] = $this->title;
             $attributes[] = [
                 'label' => Yii::t('app', 'Company'),
                 'value' => $model->company_id ? $model->company->name: ''
-            ];
-            $attributes[] = [
-                'label' => Yii::t('partner', 'Partner Distribution Model'),
-                'value' => $model->partnerDistributionModel ? $model->partnerDistributionModel->name: ''
             ];
         }
         $attributes = array_merge($attributes, [

@@ -151,7 +151,7 @@ class CustomerLog extends ActiveRecord {
         $this->date = (new DateTime('now'))->format('Y-m-d H:i:s');
         $this->action = 'Actualizacion de Datos de ' . Yii::t('app', $class_name) . ': ' . $attributeChanged;
         $this->customer_id = $customer_id;
-        if ( Yii::$app instanceof \yii\console\Application || (Yii::$app->controller->module->id === 'mobileapp' || Yii::$app->controller->module->id === 'v1' )) {
+        if ( YII_ENV_TEST || Yii::$app instanceof \yii\console\Application || (Yii::$app->controller->module->id === 'mobileapp' || Yii::$app->controller->module->id === 'v1' )) {
             $this->user_id = User::findOne(['username'=>'superadmin'])->id;
         } else {
             $this->user_id = Yii::$app->user->identity->id;

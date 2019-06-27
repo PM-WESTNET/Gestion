@@ -42,13 +42,20 @@ class TaxesBookController extends \app\components\web\Controller
      */
     public function actionBuy()
     {
+        $searchModel = new TaxesBookSearch();
+        $searchModel->type = 'buy';
+
+        $query = $searchModel->search(Yii::$app->request->queryParams);
+        $query->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
+
         $dataProvider = new ActiveDataProvider([
-            'query' => TaxesBook::find()->andWhere(['type'=>'buy'])->orderBy(['period' => SORT_DESC]),
+            'query' => $query,
         ]);
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'type' => 'buy'
+            'type' => 'buy',
+            'searchModel' => $searchModel
         ]);
     }
 
@@ -58,9 +65,11 @@ class TaxesBookController extends \app\components\web\Controller
      */
     public function actionSale()
     {
-        $query = TaxesBook::find()
-            ->andWhere(['type'=>'sale'])
-            ->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
+        $searchModel = new TaxesBookSearch();
+        $searchModel->type = 'sale';
+
+        $query = $searchModel->search(Yii::$app->request->queryParams);
+        $query->orderBy(['period' => SORT_DESC, 'company_id' => SORT_ASC]);
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -68,7 +77,8 @@ class TaxesBookController extends \app\components\web\Controller
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
-            'type' => 'sale'
+            'type' => 'sale',
+            'searchModel' => $searchModel
         ]);
     }
 
@@ -177,34 +187,32 @@ class TaxesBookController extends \app\components\web\Controller
         ];
 
         if (!$model->getTaxesBookItems()->exists()) {
-            $searchModel = new TaxesBookSearch();
-            $searchModel->fromDate = $model->period;
-            $searchModel->company_id = $model->company_id;
-            $searchModel->bill_types = ArrayHelper::getColumn( $model->company->billTypes, 'bill_type_id');
+            $searchModel = new TaxesBookSearch([
+                'fromDate' => $model->period,
+                'company_id' => $model->company_id,
+                'bill_types' => ArrayHelper::getColumn( $model->company->billTypes, 'bill_type_id'),
+            ]);
             $dataProvider = new ActiveDataProvider([
                 'query' => $searchModel->findBillSale(),
             ]);
-            foreach ($searchModel->findBillSale()->all() as $item) {
-                $totals['amount'] += $item->amount;
-                $totals['taxes'] += $item->taxes;
-                $totals['total'] += $item->total;
-            }
+
+            $query = $searchModel->findBillSale()->addSelect(['(bill.amount*bt.multiplier) as amount', new Expression('bill.total*bt.multiplier as total'), '(bill.taxes*bt.multiplier) as taxes'])
+                ->leftJoin('bill_type bt', 'bill.bill_type_id = bt.bill_type_id');
         } else {
             $dataProvider = new ActiveDataProvider([
                 'query' => $model->getTaxesBookItems()
             ]);
+
             $query = $model->getTaxesBookItems()
                 ->addSelect(['(b.amount*bt.multiplier) as amount', new Expression('b.total*bt.multiplier as total'), '(b.taxes*bt.multiplier) as taxes'])
                 ->leftJoin('bill b', 'taxes_book_item.bill_id = b.bill_id')
-                ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id')
-            ;
-
-            $mainquery = new Query();
-            $mainquery->select(['sum(amount) as amount', 'sum(total) as total', 'sum(taxes) as taxes'])
-                ->from(['p'=>$query])
-            ;
-            $totals = $mainquery->one();
+                ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id');
         }
+
+        $mainquery = new Query();
+        $mainquery->select(['sum(amount) as amount', 'sum(total) as total', 'sum(taxes) as taxes'])
+            ->from(['p'=>$query]);
+        $totals = $mainquery->one();
 
         return $this->render('add-sale-bills', [
             'model'         => $model,

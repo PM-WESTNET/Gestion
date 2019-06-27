@@ -11,6 +11,7 @@ namespace app\tests\fixtures;
 
 use yii\test\ActiveFixture;
 use app\modules\sale\models\TaxRate;
+use app\tests\fixtures\TaxFixture;
 
 class TaxRateFixture extends ActiveFixture
 {
@@ -18,5 +19,6 @@ class TaxRateFixture extends ActiveFixture
     public $modelClass = TaxRate::class;
 
     public $depends = [
+        TaxFixture::class
     ];
 }

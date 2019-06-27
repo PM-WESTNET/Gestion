@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
+use app\components\companies\CompanySelector;
+use yii\jui\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -30,12 +32,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="row hidden-print">
             <div class="col-sm-4">
-                <?= app\components\companies\CompanySelector::widget(['model'=>$searchModel]); ?>
+                <?= CompanySelector::widget(['model' => $searchModel]); ?>
             </div>
 
             <div class="col-sm-4">
                 <?php
-                echo $form->field($searchModel, 'from')->widget(yii\jui\DatePicker::className(), [
+                echo $form->field($searchModel, 'from')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
                     'model' => $searchModel,
                     'attribute' => 'date',
@@ -49,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="col-sm-4">
                 <?php
-                echo $form->field($searchModel, 'to')->widget(yii\jui\DatePicker::className(), [
+                echo $form->field($searchModel, 'to')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
                     'model' => $searchModel,
                     'attribute' => 'date',
@@ -98,9 +100,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'label' => Yii::t('app', 'Total'),
+                'value' => function ($model) {
+                    return $model->total ? $model->total : 0;
+                },
+                'format' => 'currency'
+            ],
+            [
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>' {view} {delete} {export}',
-                'buttons'=>[
+                'buttons'=> [
                     'export' => function ($url, $model, $key) {
                         return $model->status === 'closed' ? Html::a('<span class="glyphicon glyphicon-download" data-toggle="tooltip" title="'.Yii::t('pagomiscuentas', 'Download File').'"></span>', $url, ['target'=>'_blank', 'class' => 'btn btn-print']) : '';
                     },

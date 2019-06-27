@@ -163,9 +163,6 @@ abstract class AbstractCsvImport
                     continue;
                 }
 
-                Yii::debug('Fila: '.print_r($row, 1), 'Conciliacion');
-                Yii::debug('Columnas: '.print_r($this->_columns, 1), 'Conciliacion');
-
                 $data = [];
                 foreach ($row as $k => $value) {
                     $fieldName = $this->_columns[$k];

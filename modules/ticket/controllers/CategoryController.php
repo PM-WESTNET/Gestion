@@ -3,13 +3,16 @@
 namespace app\modules\ticket\controllers;
 
 use app\modules\config\models\Config;
+use app\modules\ticket\models\search\CategorySearch;
 use app\modules\westnet\mesa\components\request\UsuarioRequest;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\ticket\models\Category;
 use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\Json;
 
 /**
  * CategoryController implements the CRUD actions for Category model.
@@ -27,8 +30,12 @@ class CategoryController extends Controller
             'query' => Category::find(),
         ]);
 
+        $searchModel = new CategorySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
         return $this->render('index', [
             'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel
         ]);
     }
 
@@ -124,5 +131,49 @@ class CategoryController extends Controller
         $response = $api->findAll();
 
         return $response;
+    }
+
+    /**
+     * @param $category_id
+     * @return array
+     * Devuelve el usuario de gestion que esta asignado como responsable de una categoría
+     */
+    public function actionGetResponsibleUserByCategory($category_id)
+    {
+        Yii::$app->response->format = 'json';
+        $category = Category::findOne($category_id);
+        if($category->responsible_user_id) {
+            return [
+                'item' => [
+                    'id' => $category->responsibleUser->id,
+                    'value' => $category->responsibleUser->username
+                ],
+                'status' => 'success',
+            ];
+        }
+
+        return [
+            'item' => [],
+            'status' => 'error',
+        ];
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     * Devuelve un json con 'id' => id de estado, 'name' =>  nombre de estado
+     */
+    public function actionGetStatusFromSchema()
+    {
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+            if ($parents != null && $parents[0]) {
+                $category = $this->findModel($parents[0]);
+                $out = $category->schema->getStatusesBySchema();
+                echo Json::encode(['output' => $out, 'selected' => '']);
+                return;
+            }
+        }
+        echo Json::encode(['output' => '', 'selected' => '']);
     }
 }

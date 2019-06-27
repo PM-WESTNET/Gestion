@@ -25,6 +25,7 @@ use DateTime;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\ForbiddenHttpException;
 use yii\web\HttpException;
@@ -88,9 +89,18 @@ class ContractController extends Controller {
      */
     public function actionView($id) {
         $model= $this->findModel($id);
+        $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+        $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+            ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+            ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+            ->all(), 'vendor_id', 'fullName');
+
         if($model->canView()){
             return $this->render('view', [
-                    'model' => $model
+                'model' => $model,
+                'products' => $products,
+                'vendors' => $vendors
             ]);
         }else{
             throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
@@ -561,6 +571,7 @@ class ContractController extends Controller {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $contractDetail = new ContractDetail();
         $contract_detail_id = Yii::$app->request->post('ContractDetail')['contract_detail_id'];
+        $product_id_activated_automaticaly = Config::getValue('id-product_id-extension-de-pago');
 
         // Si estoy actualizando el item, busco el anterior para ver si tengo que crear log.
         // Solo se crea el log en caso de que el estado no sea draft.
@@ -578,6 +589,11 @@ class ContractController extends Controller {
                 $contractDetail->funding_plan_id = null;
             }
             if($contractDetail->validate()){
+                //Si el producto es "Extension de pago", este debe agregarse en estado activo directamente
+                if($product_id_activated_automaticaly == $contractDetail->product_id) {
+                    $contractDetail->status = 'active';
+                }
+
                 $contractDetail->update(false);
                 return [
                         'status' => 'success',
@@ -592,10 +608,15 @@ class ContractController extends Controller {
         } else {
             //if(User::hasRole('seller') || Yii::$app->request->post()['ContractDetail']['vendor_id']){
                 $contractDetail->load(Yii::$app->request->post());
-                ;
                 $contractDetail->discount_id = ($contractDetail->tmp_discount_id ? $contractDetail->tmp_discount_id : null);
                 if ($contractDetail->validate()) {
                     $model = $this->findModel($id);
+                    $status = 'draft';
+
+                    //Si el producto es "Extension de pago", este debe agregarse en estado activo directamente
+                    if($product_id_activated_automaticaly == $contractDetail->product_id) {
+                        $status = 'active';
+                    }
 
                     $contractDetail = $model->addContractDetail([
                         'contract_id' => $id,
@@ -607,8 +628,10 @@ class ContractController extends Controller {
                         'from_date' => $contractDetail->from_date,
                         'discount_id' => $contractDetail->tmp_discount_id,
                         'count' => $contractDetail->count,
-                        'vendor_id' => $contractDetail->vendor_id
+                        'vendor_id' => $contractDetail->vendor_id,
+                        'status' => $status
                     ]);
+
                     return [
                         'status' => 'success',
                         'detail' => $contractDetail,
@@ -619,12 +642,6 @@ class ContractController extends Controller {
                         'errors' => ActiveForm::validate($contractDetail)
                     ];
                 }
-            /**}else{
-                return [
-                        'status' => 'error',
-                        'errors' => Yii::t('app', 'Select a Vendor'),
-                    ];
-            }**/
         }
     }
 
@@ -734,7 +751,7 @@ class ContractController extends Controller {
         }
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
-            $code=$_POST['Contract']['customerCodeADS'];
+            $code = $_POST['Contract']['customerCodeADS'];
             $customer = Customer::findOne(['customer_id' => $model->customer_id]);
             // Busco el ADS vacio
             $emptyAds = EmptyAds::findOne(['code' => $code , 'used' => false]);
@@ -755,11 +772,7 @@ class ContractController extends Controller {
                 ]);
             }
         }
-        
-        
-        /* if ($model->from_date == Yii::t('app', 'Undetermined time')){
-          $model->from_date = Yii::$app->formatter->asDate(new \DateTime());
-          } */
+
         $model->from_date = Yii::$app->formatter->asDate(new DateTime());
         $model->setScenario('invoice');
         if ($model->load(Yii::$app->request->post()) && $connection->load(Yii::$app->request->post()) && $model->validate()) {
@@ -771,6 +784,7 @@ class ContractController extends Controller {
             if ($connection->save() && $model->save()) {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
+                    $model->customer->sendMobileAppLinkSMSMessage();
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }

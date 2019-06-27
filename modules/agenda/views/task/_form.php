@@ -5,10 +5,14 @@ use yii\widgets\ActiveForm;
 use yii\jui\AutoComplete;
 use yii\web\JsExpression;
 use app\components\widgets\agenda\task\TaskBundle;
+use \app\modules\agenda\AgendaModule;
+use webvimark\modules\UserManagement\models\User;
+use \app\modules\agenda\models\EventType;
+use \kartik\time\TimePicker;
 
 TaskBundle::register($this);
 
-$user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->id);
+$user = User::findOne(Yii::$app->user->id);
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\agenda\models\Task */
@@ -23,13 +27,13 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
         <div class="row margin-bottom-half">
             <div class="col-lg-12">
                 <span class="font-bold">
-                    <?= \app\modules\agenda\AgendaModule::t('app', 'Task creator'); ?>: 
+                    <?= AgendaModule::t('app', 'Task creator'); ?>:
                 </span>
                 <span class="label label-primary margin-right-quarter">
                     <?= $model->creator->username; ?>
                 </span>
                 <span class="label label-info">
-                    <?= \app\modules\agenda\AgendaModule::t('app', date('l', $model->datetime))?>, <?=date('d/m/Y H:i', $model->datetime); ?>
+                    <?= AgendaModule::t('app', date('l', $model->datetime))?>, <?=date('d/m/Y H:i', $model->datetime); ?>
                 </span>
             </div>
         </div>
@@ -44,10 +48,10 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
         
         <div class="col-sm-6">
             <?= $form->field($model, 'task_type_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\TaskType::find()->all(), 'task_type_id', 'name'), [
-                'encode' => false, 
-                'separator' => '<br/>', 
-                'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                    'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Task type'),
+                'encode' => false,
+                'separator' => '<br/>',
+                'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                    'modelClass' => AgendaModule::t('app', 'Task type'),
                 ]),
                 'disabled' => ($model->isParent()) ? false : true,
                 ]) ?>
@@ -55,10 +59,10 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
         
         <div class="col-sm-6">
             <?= $form->field($model, 'category_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Category::find()->all(), 'category_id', 'name'), [
-                'encode' => false, 
-                'separator' => '<br/>', 
-                'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                    'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Category'),
+                'encode' => false,
+                'separator' => '<br/>',
+                'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                    'modelClass' => AgendaModule::t('app', 'Category'),
                 ]),
             ]); ?>
         </div>
@@ -75,19 +79,19 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
         <div class="col-sm-12">
             <?php if($model->isNewRecord) : ?>
                 <?= $form->field($model, 'priority')->dropdownList(\app\modules\agenda\models\Task::getPriorities(), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Priority'),
+                    'encode' => false,
+                    'separator' => '<br/>',
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Priority'),
                     ]),
                     'disabled' => ($model->isParent()) ? false : true,
                     ]) ?>
             <?php else : ?>
                 <?= $form->field($model, 'priority')->dropdownList(\app\modules\agenda\models\Task::getPriorities(), [
-                    'encode' => false, 
-                    'separator' => '<br/>', 
-                    'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                        'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Priority'),
+                    'encode' => false,
+                    'separator' => '<br/>',
+                    'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                        'modelClass' => AgendaModule::t('app', 'Priority'),
                     ]),
                     'disabled' => ($model->isParent()) ? false : true,
                     ]) ?>
@@ -97,10 +101,10 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
     <div class="row">
         <div class="col-sm-12">
             <?= $form->field($model, 'status_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\agenda\models\Status::find()->all(), 'status_id', 'name'), [
-                'encode' => false, 
-                'separator' => '<br/>', 
-                'prompt' => \app\modules\agenda\AgendaModule::t('app', 'Select {modelClass}', [
-                    'modelClass' => \app\modules\agenda\AgendaModule::t('app', 'Status'),
+                'encode' => false,
+                'separator' => '<br/>',
+                'prompt' => AgendaModule::t('app', 'Select {modelClass}', [
+                    'modelClass' => AgendaModule::t('app', 'Status'),
                 ]),
             ]) 
             ?>
@@ -109,7 +113,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
 
     <div class="row">
         <div class="col-sm-4">
-            <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), [
+            <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::class, [
                 'language' => 'es-AR', 
                 'dateFormat' => 
                 'dd-MM-yyyy', 
@@ -119,7 +123,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
                 ]) ?>
         </div>
         <div class="col-sm-4">
-            <?= $form->field($model, 'time')->widget(\kartik\time\TimePicker::classname(), [
+            <?= $form->field($model, 'time')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'showMeridian' => false,
                     'minuteStep' => 15
@@ -127,7 +131,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
             ]); ?>
         </div>
         <div class="col-sm-4">
-            <?= $form->field($model, 'duration')->widget(\kartik\time\TimePicker::classname(), [
+            <?= $form->field($model, 'duration')->widget(TimePicker::class, [
                 'pluginOptions' => [
                     'defaultTime' => '02:00:00',
                     'showMeridian' => false,
@@ -139,7 +143,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
 
     <!-- Asignacion de usuarios -->
     <?php if($model->isParent()) : ?>
-        <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == \app\modules\agenda\models\TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
+        <div class="panel panel-default <?= (isset($model->taskType) && $model->taskType->slug == TaskType::TYPE_BY_USER) ? '' : 'disabled'; ?>" id="user-selection">
 
         <div class="panel-heading">
             <h3 class="panel-title font-bold">Asignar usuarios</h3>
@@ -153,7 +157,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
                 $users = $userModel::find()
                         ->select(['username as value', 'username as label', 'id as id'])
                         ->where([
-                            'status' => webvimark\modules\UserManagement\models\User::STATUS_ACTIVE
+                            'status' => User::STATUS_ACTIVE
                         ])
                         ->asArray()
                         ->all();
@@ -260,7 +264,7 @@ $user = webvimark\modules\UserManagement\models\User::findOne(Yii::$app->user->i
     <!-- end Creación de eventos -->
 
     <div class="form-group">
-        <?= Html::submitButton($model->isNewRecord ? \app\modules\agenda\AgendaModule::t('app', 'Create') : \app\modules\agenda\AgendaModule::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
+        <?= Html::submitButton($model->isNewRecord ? AgendaModule::t('app', 'Create') : AgendaModule::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>

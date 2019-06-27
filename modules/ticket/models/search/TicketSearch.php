@@ -2,11 +2,13 @@
 
 namespace app\modules\ticket\models\search;
 
+use app\modules\ticket\models\Status;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\ticket\models\Ticket;
 use app\components\helpers\DbHelper;
+use app\modules\sale\models\Customer;
 
 /**
  * TicketSearch represents the model behind the search form about `app\modules\agenda\models\Ticket`.
@@ -23,6 +25,7 @@ class TicketSearch extends Ticket {
     public $document;
     public $assignations;
     public $start_date_label;
+    public $ticket_management_qty;
 
     public function init() {
         parent::init();
@@ -33,7 +36,7 @@ class TicketSearch extends Ticket {
             [['ticket_id'], 'integer'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text'], 'safe'],
+            [['search_text', 'ticket_management_qty'], 'safe'],
         ];
     }
     
@@ -41,7 +44,8 @@ class TicketSearch extends Ticket {
         return array_merge(parent::attributeLabels(), [
             'document' => Yii::t('app', 'Document Number'),
             'customer' => Yii::t('app', 'Customer'),
-            'customer_number'=> Yii:: t('app', 'Customer Number'),
+            'customer_number' => Yii:: t('app', 'Customer Number'),
+            'ticket_management_qty' => Yii::t('app', 'Ticket management quantity'),
         ]);
     }
 
@@ -60,7 +64,7 @@ class TicketSearch extends Ticket {
 
         $query->joinWith([
             'customer' => function($query) {
-                return $query->from(DbHelper::getDbName(Yii::$app->db) . '.' . \app\modules\sale\models\Customer::tableName());
+                return $query->from(DbHelper::getDbName(Yii::$app->db) . '.' . Customer::tableName());
             },
             'users' => function($query) {
                 $userTableName = $this->userModelClass;
@@ -79,9 +83,15 @@ class TicketSearch extends Ticket {
             'desc' => ['customer.name' => SORT_DESC],
         ];
 
-        $this->load($params); 
-        
-        
+        $this->load($params);
+
+        if($this->ticket_management_qty) {
+            $query
+                ->leftJoin('ticket_management tm', 'tm.ticket_id = ticket.ticket_id')
+                ->where(['not',['tm.ticket_management_id' => null]])
+                ->groupBy('ticket_id')
+                ->having("count(tm.ticket_id) = $this->ticket_management_qty");
+        }
 
         //Date Ranges
         if (!is_null($this->start_date) && strpos($this->start_date, ' al ') !== false) {
@@ -114,15 +124,34 @@ class TicketSearch extends Ticket {
         $query->andFilterWhere(['like', 'number', $this->number]);
         $query->andFilterWhere(['like', 'customer.name', $this->customer]);
         $query->andFilterWhere(['like', 'customer.document_number', $this->document]);
-        $query->andFilterWhere(['like', 'user.username', $this->assignations]);
         $query->andFilterWhere(['like', 'customer.code', $this->customer_number]);
-        
+
+        if($this->assignations) {
+            $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
+                ->andFilterWhere(['assig.user_id' => $this->assignations]);
+        }
+
+        if($this->user_id) {
+            $query->andFilterWhere(['like', 'user.id', $this->user_id]);
+        }
         
         if (empty($params['sort'])) {
             $query->orderBy([
                 'start_datetime' => SORT_DESC
             ]);
         }
+
+        /**
+         * Esto lo hacemos para limpiar los paneles de tickets erroneos cerrados por sistema
+         */
+        $err_status = Status::findOne(['name' => 'Cerrado por sistema']);
+
+        if ($err_status) {
+            $query->andWhere(['<>','status_id', $err_status->status_id]);
+        }
+
+
+        $query->orderBy('ticket.status_id');
 
         $dataProvider->query = $query;
 
@@ -222,7 +251,7 @@ class TicketSearch extends Ticket {
         $query->joinWith('customerProfiles', false);
 
         //Profiles habilitados para busqueda
-        $profileClasses = \app\modules\agenda\models\Ticket::getSearchableProfileClasses();
+        $profileClasses = Ticket::getSearchableProfileClasses();
         foreach ($profileClasses as $class) {
 
             /* El query debe ser armado asi para que funcione coorectamente. Pasando profile_class_id como parametro :profile_class_id no funciona.

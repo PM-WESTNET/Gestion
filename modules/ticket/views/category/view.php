@@ -43,8 +43,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => Yii::t('app', ($model->notify ?  'Yes' : 'No' ))
             ],
             [
+                'attribute' => 'schema_id',
+                'value' => function ($model) {
+                    return $model->schema->name;
+                }
+            ],
+            [
                 'label' => TicketModule::t('app', 'External User'),
                 'value' => ($external_user ? $external_user->nombre : '' )
+            ],
+            [
+                'label' => Yii::t('app', 'Responsible user'),
+                'value' => function ($model) {
+                    return $model->responsible_user_id ? $model->responsibleUser->username : '';
+                }
             ],
             'description:ntext',
             'slug',

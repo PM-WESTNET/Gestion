@@ -308,10 +308,35 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     {
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
     }
-    
-    public function getDeletable(){
-        return count($this->providerBillHasProviderPayments) == 0;
 
+    /**
+     * @return bool
+     * Indica si el modelo puede eliminarse
+     */
+    public function getDeletable()
+    {
+        if (count($this->providerBillHasProviderPayments) != 0) {
+            return false;
+        };
+
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -322,6 +347,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
         $this->unlinkAll('providerPayments', true);
         $this->unlinkAll('providerBillHasTaxRates', true);
         $this->unlinkAll('providerBillItems', true);
+        AccountMovementRelationManager::delete($this);
     }
 
     /**

@@ -1,5 +1,8 @@
 <?php
-use yii\widgets\LinkPager; 
+
+use yii\widgets\LinkPager;
+use app\modules\ticket\TicketModule;
+
 ?>
 <ul class="list-group">
 
@@ -66,7 +69,11 @@ use yii\widgets\LinkPager;
                 <strong><?= $model->getAttributeLabel('user_id'); ?></strong>
             </div>
             <div class="col-lg-10">
-                <?= $model->user->username; ?>
+                <?php
+                    if ($model->user){
+                        echo $model->user->username;
+                    }
+                    ?>
             </div>
         </div>
     </li>
@@ -107,8 +114,8 @@ use yii\widgets\LinkPager;
                             </div>
                             <div class="panel-footer">
                                 <small class="text-muted">
-                                    <?= \app\modules\ticket\TicketModule::t('app', 'Created on'); ?> <?= Yii::$app->formatter->asDatetime($obs->datetime); ?>
-                                    <?= \app\modules\ticket\TicketModule::t('app', 'by'); ?> <?= $obs->user->username; ?>
+                                    <?= TicketModule::t('app', 'Created on'); ?> <?= Yii::$app->formatter->asDatetime($obs->datetime); ?>
+                                    <?= TicketModule::t('app', 'by'); ?> <?= $obs->user->username; ?>
                                 </small>
                             </div>
                         </div>

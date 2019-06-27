@@ -24,7 +24,7 @@ class AccountMovementSearch extends AccountMovement {
     // Fechas
     public $toDate;
     public $fromDate;
-    //public $date;
+    public $date;
     public $initStatusDate;
     // Cuentas
     public $account_id_from;
@@ -37,6 +37,8 @@ class AccountMovementSearch extends AccountMovement {
     public $account_movement_item_id;
     public $account;
     public $account_id;
+    //Tiempo
+    public $toTime;
         
     public function rules() {
         $statuses = ['draft', 'closed', 'conciled', 'broken'];
@@ -48,7 +50,8 @@ class AccountMovementSearch extends AccountMovement {
             [['toDate', 'fromDate', 'date'], 'default', 'value' => null],
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
-            ['company_id', 'integer']
+            ['company_id', 'integer'],
+            [['account_movement_id', 'toTime'], 'safe']
         ];
     }
 
@@ -94,6 +97,7 @@ class AccountMovementSearch extends AccountMovement {
                     'am.account_movement_id',
                     'am.description',
                     'am.date',
+                    'am.time',
                     'IF(isnull(ami.debit), 0, ami.debit) as debit',
                     'IF(isnull(ami.credit), 0, ami.credit) as credit',
                     'ami.account_movement_item_id',
@@ -108,13 +112,14 @@ class AccountMovementSearch extends AccountMovement {
                 ->leftJoin('account ac2', 'ami2.account_id = ac2.account_id')
                 ->where('ac.lft between ' . $this->account_id_from . ' and ' . $this->account_id_to)
                 ->groupBy(['am.date', 'ami.account_movement_item_id', 'ami.status'])
-                ->orderBy('am.date');
+                ->orderBy('am.date, am.time');
         /**
         $queryTotals = new Query();
         $queryTotals->select(['sum(c.debit) as debit', 'sum(c.credit) as credit']);
         $queryTotals->from(['c' => $subQuery]);
          **/
         $this->filterDates($subQuery, 'am');
+        $this->filterTimes($subQuery, 'am');
         $rsTotals = $this->statusAccount(true);
 
         $this->totalDebit = $rsTotals['debit'];
@@ -277,7 +282,7 @@ class AccountMovementSearch extends AccountMovement {
             ->leftJoin('account_movement_item ami', 'account_movement.account_movement_id = ami.account_movement_id')
             ->leftJoin('account', 'ami.account_id = account.account_id')
             ->groupBy(['ami.account_movement_item_id', 'account_movement.account_movement_id', 'account.name'])
-            ->orderBy(['account_movement.account_movement_id'=>SORT_ASC, 'account_movement.date'=>SORT_ASC, 'debit'=>SORT_DESC]);
+            ->orderBy(['account_movement.date'=>SORT_DESC, 'account_movement.account_movement_id'=>SORT_DESC, 'debit'=>SORT_DESC]);
         $mainQuery->where(['IN', 'account_movement.account_movement_id', $query]);
 
         $dataProvider = new ActiveDataProvider([
@@ -304,6 +309,8 @@ class AccountMovementSearch extends AccountMovement {
         $this->filterDates($query);
 
         $this->filterBalance($query);
+
+        $query->andFilterWhere(['account_movement.account_movement_id' => $this->account_movement_id]);
 
         // Totales
         $queryTotals = clone $mainQuery;
@@ -368,6 +375,18 @@ class AccountMovementSearch extends AccountMovement {
                 $query->andFilterWhere(['>=', 'account_movement.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
                 $query->andFilterWhere(['<=', 'account_movement.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
             }
+        }
+    }
+
+    /**
+     * Agrega queries para filtrar por tiempo
+     * @param type $query
+     */
+    private function filterTimes($query, $alias = null)
+    {
+        $table = $alias ? $alias : 'account_movement';
+        if ($this->toTime) {
+            $query->andFilterWhere(['<=', "$table.time", $this->toTime]);
         }
     }
 

@@ -30,13 +30,23 @@ class m160425_174229_config_contract_days_for_invoice_next_month extends Migrati
 
         $category = Category::findOne(['name' => 'Westnet']);
 
+        if (empty($category)) {
+            $this->insert('category', [
+                'name' => 'Westnet',
+                'status' => 'enabled'
+            ]);
+            $category_id = $this->db->lastInsertID;
+        }else{
+            $category_id = $category->category_id;
+        }
+
         $this->insert('item', [
             'attr' => 'contract_days_for_invoice_next_month',
             'type' => 'textInput',
             'label' => 'Dias a fin de mes que postergan facturacion.',
             'description' => '',
             'multiple' => 0,
-            'category_id' => $category->category_id,
+            'category_id' => $category_id,
             'superadmin' => 0,
             'default' => 0
         ]);

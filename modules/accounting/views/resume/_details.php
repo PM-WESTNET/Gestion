@@ -293,7 +293,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
                         </div>
                         <?php \yii\widgets\Pjax::end(); ?>
                     </div>
-
         </div>
 
     </div>

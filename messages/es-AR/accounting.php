@@ -187,5 +187,5 @@
   'Money Box has undefined code operations' => 'La entidad monetaria tiene códigos de operaciones no definidos',
   'Code' => 'Código',
   'The balance of account is not equals to balance of resume' => 'El saldo de la cuenta no es igual al saldo del resumen',
-
+  'Includes account' => 'Incluye cuenta'
 );

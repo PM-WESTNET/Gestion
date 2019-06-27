@@ -7,5 +7,6 @@
  */
 
 return [
-        ['status_id' => 1, 'name' => 'Ecopago1', 'account_id' => 1, 'provider_id' => 149]
+        ['status_id' => 1, 'name' => 'Ecopago1', 'account_id' => 1, 'provider_id' => 149],
+        ['status_id' => 2, 'name' => 'Ecopago1', 'account_id' => 1, 'provider_id' => 150]
 ];

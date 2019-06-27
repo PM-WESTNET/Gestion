@@ -116,4 +116,13 @@ class CheckbookController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    public function actionGetLastNumberUsed($checkbook_id)
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $checkbook = Checkbook::findOne($checkbook_id);
+        $last_number = $checkbook->lastNumberUsed;
+        return $last_number;
+    }
 }

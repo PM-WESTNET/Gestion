@@ -205,7 +205,6 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
     var AddSaleBills = new function() {
         this.init = function (){
             $(document).off('click', '#btnClose').on('click', '#btnClose', function(){
-                $(this).button('loading');
                 AddSaleBills.close();
             });
 
@@ -243,7 +242,8 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
         };
 
         this.close = function() {
-            if (confirm("<?=Yii::t('afip', 'Close the book generates marks in bills where you can not go back, you sure?')?>")) {
+            if (confirm("<?= Yii::t('afip', 'Close the book generates marks in bills where you can not go back, you sure?')?>")) {
+                $('#btnClose').button('loading');
                 $.ajax({
                     url: '<?=Url::toRoute(['/afip/taxes-book/close', 'id' => $model->taxes_book_id])?>',
                     method: 'POST',

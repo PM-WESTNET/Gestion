@@ -68,11 +68,11 @@ class NotificationSearch extends Notification {
         }
 
         $query->andFilterWhere([
-            'notification_id' => $this->notification_id,
-            'status' => $this->status,
+            'notification.notification_id' => $this->notification_id,
+            'notification.status' => $this->status,
             'notification.transport_id' => $this->transport_id,
-            'from_date' => $this->from_date,
-            'to_date' => $this->to_date,
+            'notification.from_date' => $this->from_date,
+            'notification.to_date' => $this->to_date,
         ]);
         $query->andFilterWhere(['like', 'name', $this->name]);
         $query->andFilterWhere(['like', 'subject', $this->subject]);

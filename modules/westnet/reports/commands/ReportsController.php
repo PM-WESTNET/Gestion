@@ -59,6 +59,9 @@ class ReportsController extends Controller
                 $date = new \DateTime($theDate);
             } else {
                 $date = new \DateTime('last day of this month'); //new \DateTime('2010-01-31');
+                if(!$this->isLastDayOfMonth()){
+                    return;
+                }
             }
             try {
                 $rs->saveConexionesActivas($date);
@@ -165,6 +168,9 @@ class ReportsController extends Controller
                 $date = new \DateTime($theDate);
             } else {
                 $date = new \DateTime('last day of this month'); //new \DateTime('2010-01-31');
+                if(!$this->isLastDayOfMonth()){
+                    return;
+                }
             }
             try {
                 $rs->savePasivo($date);
@@ -506,6 +512,9 @@ class ReportsController extends Controller
                 $date = new \DateTime($theDate);
             } else {
                 $date = new \DateTime('last day of this month'); //new \DateTime('2010-01-31');
+                if(!$this->isLastDayOfMonth()){
+                    return;
+                }
             }
             try {
                 $rs->saveDebtBills($date, ReportData::REPORT_DEBT_BILLS_1);
@@ -537,6 +546,9 @@ class ReportsController extends Controller
                 $date = new \DateTime($theDate);
             } else {
                 $date = new \DateTime('last day of this month'); //new \DateTime('2010-01-31');
+                if(!$this->isLastDayOfMonth()){
+                    return;
+                }
             }
             try {
                 $rs->saveUpDown($date);
@@ -545,5 +557,10 @@ class ReportsController extends Controller
                 error_log($ex->getMessage());
             }
         }
+    }
+
+    private function isLastDayOfMonth()
+    {
+        return (new \DateTime('last day of this month'))->format('Ymd') == (new \DateTime('now'))->format('Ymd');
     }
 }

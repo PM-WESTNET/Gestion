@@ -7,10 +7,11 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\jui\Dialog;
+use yii\widgets\Pjax;
 
 ?>
 
-<?php \yii\widgets\Pjax::begin(['id' => 'r_items'])?>
+<?php Pjax::begin(['id' => 'r_items'])?>
 <div class="row">
     <div class="col-sm-6 text-center">
         <strong><?= Yii::t('accounting', 'Initial Balance'); ?></strong>
@@ -116,4 +117,4 @@ if ($resumeItemsCreditDataProvider) {
         'columns' => $cols
     ]);
 }
-\yii\widgets\Pjax::end();
+Pjax::end();

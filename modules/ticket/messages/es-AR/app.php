@@ -97,4 +97,6 @@ return array(
     'External User' => 'Usuario Externo',
     'Mesa User' => 'Usuario de Mesa',
     'Observation from Mesa.' => 'Observacion de Mesa.',
+    'New assignation' => 'Nueva asignación',
+    'Delete assignation' => 'Borrado de asignación',
 );

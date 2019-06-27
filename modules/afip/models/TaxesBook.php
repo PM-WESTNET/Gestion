@@ -9,6 +9,8 @@ use Yii;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use app\modules\afip\models\search\TaxesBookSearch;
+use yii\data\ActiveDataProvider;
 
 /**
  * This is the model class for table "taxes_book".
@@ -96,7 +98,7 @@ class TaxesBook extends \app\components\companies\ActiveRecord
      */
     public function getTaxesBookItems()
     {
-        return $this->hasMany(TaxesBookItem::className(), ['taxes_book_id' => 'taxes_book_id']);
+        return $this->hasMany(TaxesBookItem::class, ['taxes_book_id' => 'taxes_book_id']);
     }
 
     /**
@@ -119,7 +121,7 @@ class TaxesBook extends \app\components\companies\ActiveRecord
      */
     public function getDeletable()
     {
-        return $this->status==TaxesBook::STATE_DRAFT;
+        return $this->status == TaxesBook::STATE_DRAFT;
     }
     
     /**
@@ -153,9 +155,7 @@ class TaxesBook extends \app\components\companies\ActiveRecord
      */
     public function deleteTaxesBookItems()
     {
-        foreach ($this->taxesBookItems as $item) {
-            $item->delete();
-        }
+        TaxesBookItem::deleteAll(['taxes_book_id' => $this->taxes_book_id]);
     }
 
     /**
@@ -279,25 +279,46 @@ class TaxesBook extends \app\components\companies\ActiveRecord
      */
     private function updateItemsSaleBook()
     {
-        $searchModel = new BillSearch([
-            'fromDate' => $this->period,
-            'toDate' => (new \DateTime($this->period))->format('Y-m-t'),
-            'status' => 'closed',
-            'company_id' => $this->company_id,
-            'bill_types' => ArrayHelper::getColumn( $this->company->billTypes, 'bill_type_id'),
+        $searchModel = new TaxesBookSearch();
+        $searchModel->fromDate = $this->period;
+        $searchModel->company_id = $this->company_id;
+        $searchModel->bill_types = ArrayHelper::getColumn( $this->company->billTypes, 'bill_type_id');
+        $dataProvider = new ActiveDataProvider([
+            'query' => $searchModel->findBillSale(),
         ]);
 
-        $dataProvider = $searchModel->search([]);
-        $bills = $dataProvider->query->all();
+        $query = $dataProvider->query;
+
+        foreach($query->batch(500) as $bills) {
+            $this->batchSaleTaxesBookItems($bills);
+        }
+    }
+
+    /**
+     * @param $models
+     * @throws \yii\db\Exception
+     * Inserta los item del libro de iva por lotes
+     */
+    private function batchSaleTaxesBookItems($models)
+    {
+        $data = [];
         $lastPage = $this->getNextPage();
         $i = 0;
-        foreach($bills as $key=>$bill) {
-            $this->addTaxesBookItem($bill->bill_id, $lastPage);
+
+        foreach ($models as $bill) {
+
+            $data[] = [
+                $lastPage,
+                $bill['bill_id'],
+                $this->taxes_book_id
+            ];
             $i++;
             if(($i%30)==0) {
                 $lastPage++;
             }
         }
+
+        Yii::$app->db->createCommand()->batchInsert('taxes_book_item', ['page', 'bill_id', 'taxes_book_id'], $data)->execute();
     }
 
     /**
@@ -360,4 +381,15 @@ class TaxesBook extends \app\components\companies\ActiveRecord
         return false;
     }
 
+    /**
+     * @return array
+     * Devuelve un listado de los estados posibles, para ser listados en un desplegable
+     */
+    public static function getStatusesForSelect()
+    {
+        return [
+            self::STATE_DRAFT => Yii::t('app', self::STATE_DRAFT),
+            self::STATE_CLOSED => Yii::t('app', self::STATE_CLOSED)
+        ];
+    }
 }

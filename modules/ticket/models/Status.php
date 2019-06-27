@@ -4,6 +4,7 @@ namespace app\modules\ticket\models;
 
 use Yii;
 use app\modules\ticket\TicketModule;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "status".
@@ -12,16 +13,15 @@ use app\modules\ticket\TicketModule;
  * @property string $name
  * @property string $description
  * @property integer $is_open
+ * @property integer $generate_action
  *
  * @property Ticket[] $tickets
  */
 class Status extends \app\components\db\ActiveRecord
 {
-    const  STATUS_CLOSED= '0';
-    const  STATUS_ACTIVE= '1';
-    /**
-     * @inheritdoc
-     */
+    const  STATUS_CLOSED = '0';
+    const  STATUS_ACTIVE = '1';
+
     public static function tableName()
     {
         return 'status';
@@ -44,7 +44,7 @@ class Status extends \app\components\db\ActiveRecord
         return [
             [['name'], 'required'],
             [['description'], 'string'],
-            [['is_open'], 'integer'],
+            [['is_open', 'generate_action'], 'integer'],
             [['name'], 'string', 'max' => 45]
         ];
     }
@@ -60,6 +60,8 @@ class Status extends \app\components\db\ActiveRecord
             'description' => TicketModule::t('app', 'Description'),
             'is_open' => TicketModule::t('app', 'Is Open'),
             'tickets' => TicketModule::t('app', 'Tickets'),
+            'generate_action' => TicketModule::t('app', 'Genera una acción?'),
+            'action_id' => Yii::t('app', 'Action'),
         ];
     }    
 
@@ -69,10 +71,24 @@ class Status extends \app\components\db\ActiveRecord
      */
     public function getTickets()
     {
-        return $this->hasMany(Ticket::className(), ['status_id' => 'status_id']);
+        return $this->hasMany(Ticket::class, ['status_id' => 'status_id']);
     }
-    
-        
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAction()
+    {
+        return $this->hasOne(Action::class, ['action_id' => 'action_id'])->viaTable('status_has_action', ['status_id' => 'status_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getActionConfig()
+    {
+        return $this->hasOne(StatusHasAction::class, ['status_id' => 'status_id']);
+    }
              
     /**
      * @inheritdoc
@@ -91,6 +107,10 @@ class Status extends \app\components\db\ActiveRecord
      * Weak relations: None.
      */
     protected function unlinkWeakRelations(){
+        //Elimino las configuraciones de una accion generada que pueda llegar a tener asociada
+        if($this->actionConfig) {
+            $this->actionConfig->delete();
+        };
     }
     
     /**
@@ -106,5 +126,29 @@ class Status extends \app\components\db\ActiveRecord
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return array
+     * Devuelve los estados existentes para un desplegable
+     */
+    public static function getForSelect()
+    {
+        return ArrayHelper::map(self::find()->all(), 'status_id', 'name');
+    }
+
+    /**
+     * @return bool
+     * Indica si el estado esta asociado a una accion de tipo event
+     */
+    public function hasEventAction()
+    {
+        if($this->action) {
+            if($this->action->type == Action::TYPE_EVENT) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

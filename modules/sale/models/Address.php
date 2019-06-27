@@ -5,6 +5,7 @@ namespace app\modules\sale\models;
 use app\modules\config\models\Config;
 use app\modules\zone\models\Zone;
 use Yii;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * This is the model class for table "address".
@@ -96,13 +97,25 @@ class Address extends \app\components\db\ActiveRecord {
 //        return $rules;
     }
 
-    public function geocodeValidation($attributeName, $params) {
+    /**
+     * @param $attributeName
+     * @param $params
+     * @return bool
+     * Se asegura que la geolocalizacion sea requerida y distinta al valor por defecto.
+     * Esto solo afecta a aquellos usuarios que tengan el rol vendedor
+     */
+    public function geocodeValidation($attributeName, $params)
+    {
         $geo = explode(',', str_replace(' ', '', $this->geocode));
-        if(empty($this->geocode) || array_search( $this->geocode, [ '-34.66352,-68.35941,17', '-32.8988839,-68.8194614']) !== false ||
-            count($geo) != 2 || ( count($geo) == 2 &&  (!is_numeric($geo[0]) || !is_numeric($geo[1])) )
-        ) {
-            $this->addError($attributeName, Yii::t('app', 'The geocode can\'t be empty or they have to be different.'));
-            return false;
+
+        if (User::hasRole('seller')) {
+            if (empty($this->geocode) || array_search($this->geocode, ['-34.66352,-68.35941,17', '-32.8988839,-68.8194614']) !== false ||
+                count($geo) != 2 || (count($geo) == 2 && (!is_numeric($geo[0]) || !is_numeric($geo[1])))
+            ) {
+
+                $this->addError($attributeName, Yii::t('app', 'The geocode can\'t be empty or they have to be different.'));
+                return false;
+            }
         }
         return true;
     }

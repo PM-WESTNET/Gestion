@@ -124,6 +124,13 @@ $config = [
                         'modules/user-management/front' => 'modules/user-management/front.php',
                     ],
                 ],
+                'log' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'fileMap' => [
+                        'app' => 'modules/log/messages/app.php',
+                        'log' => 'modules/log/messages/log.php'
+                    ],
+                ],
             ],
         ],
         'formatter' => [
@@ -211,6 +218,9 @@ $config = [
         'reports' => [
             'class' => 'app\modules\westnet\reports\ReportsModule',
         ],
+        'log' => [
+            'class' => 'app\modules\log\LogModule',
+        ],
         'user-management' => [
             'class' => 'webvimark\modules\UserManagement\UserManagementModule',
             // Here you can set your handler to change layout for any controller or action
@@ -254,7 +264,13 @@ $config = [
                     'class' => 'app\modules\westnet\notifications\integratech\v1\V1Module',
                 ],
             ]
-        ]
+        ],
+        'instructive' => [
+            'class' => 'app\modules\instructive\InstructiveModule',
+        ],
+        'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit',
+        ],
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

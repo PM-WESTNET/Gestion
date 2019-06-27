@@ -4,6 +4,7 @@ namespace app\modules\paycheck\models;
 
 use app\modules\accounting\models\MoneyBoxAccount;
 use Yii;
+use yii\db\Query;
 
 /**
  * This is the model class for table "checkbook".
@@ -112,7 +113,7 @@ class Checkbook extends \app\components\db\ActiveRecord
      */
     public function getMoneyBoxAccount()
     {
-        return $this->hasOne(MoneyBoxAccount::className(), ['money_box_account_id' => 'money_box_account_id']);
+        return $this->hasOne(MoneyBoxAccount::class, ['money_box_account_id' => 'money_box_account_id']);
     }
 
     /**
@@ -120,13 +121,15 @@ class Checkbook extends \app\components\db\ActiveRecord
      */
     public function getPaychecks()
     {
-        return $this->hasMany(Paycheck::className(), ['checkbook_id' => 'checkbook_id']);
+        return $this->hasMany(Paycheck::class, ['checkbook_id' => 'checkbook_id']);
     }
     
         
     public function afterFind()
     {
-        $this->money_box_id = $this->moneyBoxAccount->money_box_id;
+        if($this->money_box_account_id) {
+            $this->money_box_id = $this->moneyBoxAccount->money_box_id;
+        }
     }
                  
     /**
@@ -163,13 +166,15 @@ class Checkbook extends \app\components\db\ActiveRecord
         }
     }
 
-    public function findActive($money_box_account_id)
+    public static function findActive($money_box_account_id)
     {
-        return Checkbook::find()
-            ->where(['money_box_account_id'=>$money_box_account_id])
+        $query = Checkbook::find()->select('*')
+            ->from('checkbook')
+            ->where(['money_box_account_id' => $money_box_account_id])
             ->andWhere(['=', 'enabled', true ])
             ->andWhere('end_number > last_used');
-            ;
+
+        return $query;
     }
 
     public function getLastNumberUsed()

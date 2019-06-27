@@ -68,26 +68,31 @@ class ConnectionController extends Controller
      */
     public function actionForce($id)
     {
+        Yii::$app->response->format = 'json';
         /** @var Connection $model */
         $model = $this->findModel($id);
         $result = true;
         if(Yii::$app->request->isAjax && Yii::$app->request->isPost) {
+            $data = Yii::$app->request->post();
+            $create_pti= $data['create_product'] === 'true' ? 1 : 0;
             if($model->canForce()){
-                $model->due_date = (new \DateTime(Yii::$app->request->post('due_date')))->format('d-m-Y');
-                $model->status_account = Connection::STATUS_ACCOUNT_FORCED;
-                $result = $model->update();                
+                if ($model->force($data['due_date'], $data['product_id'], $data['vendor_id'], $create_pti)) {
+                   return [
+                        'status' => 'success'
+                   ];
+                }
             }else{
-                Yii::$app->response->format = 'json';
                 return [
                     'status' =>'error',
                     'message' =>  Yii::t('westnet', 'Can`t force this connection becouse this connection has exceeded the limit forced in the month')
                 ];
             }
+
+            return [
+                'status' => 'error',
+                'message' => Yii::t('app','Can`t force this connection')
+            ];
         }
-        Yii::$app->response->format = 'json';
-        return [
-            'status' => ($result ? 'success' : 'error')
-        ];
     }
 
 

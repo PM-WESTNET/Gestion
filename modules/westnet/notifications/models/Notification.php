@@ -27,6 +27,8 @@ use app\modules\westnet\notifications\NotificationsModule;
  * @property integer $times_per_day
  * @property string $status
  * @property integer $email_transport_id
+ * @property string $test_phone
+ * @property integer $test_phone_frecuency
  *
  * @property Destinatary[] $destinataries
  * @property Transport $transport
@@ -92,10 +94,11 @@ class Notification extends ActiveRecord {
     public function rules() {
         return [
             [['transport_id', 'name'], 'required', 'on' => 'create'],
-            [['transport_id', 'email_transport_id', 'company_id'], 'integer'],
-            [['content', 'layout'], 'string'],
+            [['transport_id', 'email_transport_id', 'company_id', 'test_phone_frecuency'], 'integer'],
+            [['content', 'layout', 'test_phone'], 'string'],
             [['status'], 'in', 'range' => ['created', 'enabled', 'disabled', 'error', 'sent', 'cancelled'], 'on' => 'update-status'],
             [['status'], 'safe'],
+            [['test_phone_frecuency'], 'default' , 'value' => 1000],
             [['from_date', 'from_time', 'to_date', 'to_time', 'times_per_day', 'transport'], 'safe', 'on' => 'update'],
             [['from_date', 'to_date'], 'date', 'on' => 'update'],
             [['from_date', 'to_date'], 'default', 'value' => null, 'on' => 'update'],
@@ -137,7 +140,8 @@ class Notification extends ActiveRecord {
             'create_timestamp' => Yii::t('app', 'Created'),
             'update_timestamp' => Yii::t('app', 'Updated'),
             'email_transport_id' => MailingModule::t('Email transport'),
-
+            'test_phone' => Yii::t('app', 'Test phone'),
+            'test_phone_frecuency' => Yii::t('app', 'Test phone frecuency')
         ];
     }
 

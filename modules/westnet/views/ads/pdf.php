@@ -869,15 +869,13 @@ try {
 
 <table id="container" style="width:860px;">
     <tr>
-        <td colspan="6" style="color:white; background-color: black">LUGARES DE PAGO</td>
+        <td colspan="6" style="color:white; background-color: black">MEDIOS DE PAGO</td>
     </tr>
-    <?php foreach($node->ecopagos  as $ecopago) { ?>
         <tr>
             <td colspan="6" style="width:100%; border: 1px solid black; font-size: 0.3cm">
-                <?= $ecopago->description;?>
+                <?= Config::getValue('ads_payment_methods') ?>
             </td>
         </tr>
-    <?php } ?>
 </table>
 
  <?php if(count($codes)> 1 && $key !== (count($codes)-1)){?>

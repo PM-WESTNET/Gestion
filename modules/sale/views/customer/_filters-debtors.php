@@ -14,7 +14,7 @@ use app\modules\sale\models\Company;
 <div class="debtors-filters">
 
     <?php $form = ActiveForm::begin([
-        'action' => ['debtors'],
+        'action' => [$action],
         'method' => 'get',
     ]); ?>
     
@@ -119,7 +119,4 @@ use app\modules\sale\models\Company;
     </div>
     
     <?php ActiveForm::end(); ?>
-
-
 </div>
-<?php $this->registerJs('ZoneCombo.init();')?>

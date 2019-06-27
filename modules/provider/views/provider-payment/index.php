@@ -4,6 +4,7 @@ use app\modules\paycheck\models\Paycheck;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use app\modules\provider\models\ProviderPayment;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\provider\models\search\ProviderPaymentSearch */
@@ -72,12 +73,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     },
                     'update' => function ($url, $model, $key) {
-                        return ( $model['status'] != 'created' ? '' :  '<a href="'.Url::toRoute(['provider-payment/update', 'id'=>$model['provider_payment_id']]).'" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
+                        $provider_payment = ProviderPayment::findOne($model['provider_payment_id']);
+                        if ($provider_payment->getUpdatable()) {
+                            return ($model['status'] != 'created' ? '' : '<a href="' . Url::toRoute(['provider-payment/update', 'id' => $model['provider_payment_id']]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
+                        }
 
                     },
                     'delete' => function ($url, $model, $key) {
-                        return '<a href="'.Url::toRoute(['provider-payment/delete', 'id'=>$model['provider_payment_id']]).
-                        '" title="'.Yii::t('app','Delete').'" data-confirm="'.Yii::t('yii','Are you sure you want to delete this item?').'" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>';
+                        $provider_payment = ProviderPayment::findOne($model['provider_payment_id']);
+                        if ($provider_payment->getDeletable()) {
+                            return '<a href="' . Url::toRoute(['provider-payment/delete', 'id' => $model['provider_payment_id']]) .
+                                '" title="' . Yii::t('app', 'Delete') . '" data-confirm="' . Yii::t('yii', 'Are you sure you want to delete this item?') . '" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>';
+                        }
                     },
                 ]
             ];
