@@ -68,6 +68,9 @@ use app\modules\ticket\models\Ticket;
  */
 class Customer extends ActiveRecord {
 
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+    const STATUS_BLOCKED = 'blocked';
 
     protected static $companyRequired = false;
     
