@@ -2,9 +2,11 @@
 
 namespace app\modules\mobileapp\v1\models;
 
+use app\modules\config\models\Config;
+use app\modules\mobileapp\v1\models\Customer;
+use app\modules\sale\models\Product;
 use Yii;
 use yii\web\ServerErrorHttpException;
-use app\modules\mobileapp\v1\models\Customer;
 
 /**
  * This is the model class for table "user_app".
@@ -76,7 +78,43 @@ class UserApp extends \app\components\db\ActiveRecord
 
     public function extraFields()
     {
-        return  ['accounts'];
+        return  ['accounts', 'paymentExtensionInfo'];
+    }
+
+    public function getPaymentExtensionInfo() {
+        \Yii::trace('paymentExtensioninfo');
+
+        $payment_extension_info = [];
+        $payment_extension_product = Product::findOne(Config::getValue('id-product_id-extension-de-pago'));
+        $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
+        $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+
+        foreach ($this->customers as $key => $customer){
+            $contracts = [];
+            $payment_extension_requested = $customer->getPaymentExtensionQtyRequest();
+            $duration_days = $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days;
+
+            foreach ($customer->contracts as $contract) {
+                $contracts[] = [
+                    'contract_id' => $contract->contract_id,
+                    'service_address' => $contract->address ? $contract->address->fullAddress : $customer->address,
+                ];
+            }
+
+            $payment_extension_info[] = [
+                'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
+                'customer_name' => $customer->name .' - '. $customer->code,
+                'contracts' => $contracts,
+                'can_request_payment_extension' => true,//$customer->canRequestPaymentExtension(),
+                'price' => $payment_extension_requested < 1 ? 0 : $payment_extension_product->finalPrice,
+                'duration_days' => $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days,
+                'date_available_to' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
+            ];
+        }
+
+        return $payment_extension_info;
     }
 
     public function getAccounts(){

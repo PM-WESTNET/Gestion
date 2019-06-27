@@ -11,7 +11,9 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\models\EmptyAds;
 use Codeception\Util\Debug;
@@ -1446,5 +1448,58 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @param $customer_id
+     * Devuelve la cantidad de facturas que adeuda un cliente.
+     */
+    public static function getOwedBills($customer_id)
+    {
+        $customer_search = new CustomerSearch();
+        $owed_bills = $customer_search->searchDebtBills($customer_id);
+        if(!$owed_bills) {
+            return 0;
+        }
+        return $owed_bills['debt_bills'];
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     * Devuelve la cantidad de extensiones de pago pedidas en el período
+     */
+    public function getPaymentExtensionQtyRequest()
+    {
+        $payment_extension_qty = 0;
+
+        foreach ($this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
+            $payment_extension_qty += $contract->getActivePaymentExtensionQtyPerPeriod((new \DateTime('first day of this month'))->modify('+1 month')->format('Y-m-d'));
+        }
+
+        return $payment_extension_qty;
+    }
+
+    /**
+     * @param $customer_id
+     * @param null $period
+     * @return bool
+     * @throws \Exception
+     * Indica si el cliente puede pedir una eztension de pago
+     */
+    public function canRequestPaymentExtension($period = null)
+    {
+//        $period = $period ? $period : (new \DateTime('now'))->format('Y-m-01');
+
+        //Sólo si el cliente no debe mas de una factura
+        if(Customer::getOwedBills($this->customer_id) > 1) {
+            return false;
+        }
+
+        //Y si no ha solicitado el máximo de extensiones de pago permitidas.
+        $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
+        $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
+
+        return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }
 }
