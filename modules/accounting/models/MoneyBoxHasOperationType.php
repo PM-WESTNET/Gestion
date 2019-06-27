@@ -69,7 +69,8 @@ class MoneyBoxHasOperationType extends \app\components\db\ActiveRecord
     {
         return [
             [['money_box_id', 'account_id'], 'required'],
-            [['operation_type_id', 'money_box_id', 'account_id', 'money_box_account_id', 'code'], 'integer'],
+            [['operation_type_id', 'money_box_id', 'account_id', 'money_box_account_id'], 'integer'],
+            [['code'], 'string'],
             [['moneyBox', 'operationType', 'account', 'moneyBoxAccount','operation_type_id', 'code'], 'safe'],
             /**[['operation_type_id', 'money_box_id', 'account_id'], 'unique',
                 'targetAttribute' => ['operation_type_id', 'money_box_id', 'account_id'],
