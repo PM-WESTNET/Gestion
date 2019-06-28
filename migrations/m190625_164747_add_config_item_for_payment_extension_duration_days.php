@@ -18,16 +18,16 @@ class m190625_164747_add_config_item_for_payment_extension_duration_days extends
     {
         $category = Category::findOne(['name' => 'Mobile App']);
 //
-//        $this->insert('item', [
-//            'attr' => 'payment_extension_duration_days',
-//            'type' => 'textInput',
-//            'label' =>"Cantidad de días de extensión de pago",
-//            'description' => "Indica la cantidad de días que durará la extension de pago que se solicite desde la aplicación",
-//            'multiple' => 0,
-//            'category_id' => $category->category_id,
-//            'superadmin' => 0,
-//            'default' => 5
-//        ]);
+        $this->insert('item', [
+            'attr' => 'payment_extension_duration_days',
+            'type' => 'textInput',
+            'label' =>"Cantidad de días de extensión de pago",
+            'description' => "Indica la cantidad de días que durará la extension de pago que se solicite desde la aplicación",
+            'multiple' => 0,
+            'category_id' => $category->category_id,
+            'superadmin' => 0,
+            'default' => 5
+        ]);
 
         $this->insert('item', [
                     'attr' => 'payment_extension_duration_days_free',
@@ -40,16 +40,16 @@ class m190625_164747_add_config_item_for_payment_extension_duration_days extends
                     'default' => 5
                 ]);
 //
-//        $this->insert('item', [
-//            'attr' => 'payment_extension_qty_per_month',
-//            'type' => 'textInput',
-//            'label' =>"Cantidad extensiones de pago por mes",
-//            'description' => "Indica la cantidad de extensiones de pago que el cliente puede solicitar desde la aplicación",
-//            'multiple' => 0,
-//            'category_id' => $category->category_id,
-//            'superadmin' => 0,
-//            'default' => 2
-//        ]);
+        $this->insert('item', [
+            'attr' => 'payment_extension_qty_per_month',
+            'type' => 'textInput',
+            'label' =>"Cantidad extensiones de pago por mes",
+            'description' => "Indica la cantidad de extensiones de pago que el cliente puede solicitar desde la aplicación",
+            'multiple' => 0,
+            'category_id' => $category->category_id,
+            'superadmin' => 0,
+            'default' => 2
+        ]);
     }
 
 

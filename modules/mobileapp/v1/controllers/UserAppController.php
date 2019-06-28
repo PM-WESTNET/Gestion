@@ -919,4 +919,36 @@ class UserAppController extends Controller
             'ventas' => $ventas
         ];
     }
+
+    public function actionForceConnection() {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['customer_id']) || !isset($data['contract_id'])||!isset($data['reason'])){
+            throw new BadRequestHttpException('Customer ID and Reason are required');
+        }
+
+        $customer = Customer::findOne($data['customer_id']);
+
+        if (empty($customer)) {
+            throw new BadRequestHttpException('Customer not found');
+        }
+
+        $contract = $customer->getContracts()->andWhere(['contract_id' => $data['contract_id']])->one();
+
+        if (empty($contract)) {
+            throw new BadRequestHttpException('Contract not found');
+        }
+
+        $connection = $contract->connection;
+
+        if (empty($connection)) {
+            throw new BadRequestHttpException('Connection not found');
+        }
+
+        if ($connection->canForce()) {
+            $payment_extension_product = Product::findOne(Config::getValue('id-product_id-extension-de-pago'));
+            $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
+            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+        }
+    }
 }
