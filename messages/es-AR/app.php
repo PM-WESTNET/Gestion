@@ -1123,5 +1123,6 @@
     'Mobile app status' => 'Estado de la aplicación móvil',
     'Destinatary' => 'Destinatario',
     'Infobip Sended Messages' => 'Mensajes Enviados por Infobip',
-    'Sent Date and Time' => 'Fecha y hora de envío'
+    'Sent Date and Time' => 'Fecha y hora de envío',
+    'Infobip sended sms' => 'SMS enviados por Infobip'
 );

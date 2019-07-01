@@ -363,7 +363,7 @@ if (Yii::$app->getModule('westnet')) {
                 'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             [
-                'label' => Yii::t('app', 'Infobip sended sms'), 'url' => ['/westnet/notifications/infobip/default/sended-messages'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => Yii::t('app', 'Infobip sended sms'), 'url' => ['/westnet/notifications/infobip/default/sended-messages']
             ],
             [
                 'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
