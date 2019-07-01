@@ -79,7 +79,6 @@ class InfobipService
             if ($data->messages) {
                 foreach ($data->messages as $sms) {
                     $msj = new InfobipMessage([
-                        'bulkId' => $data->bulkId,
                         'messageId' => $sms->messageId,
                         'to' => $sms->to,
                         'status' => $sms->status->name,

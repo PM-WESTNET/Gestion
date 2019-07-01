@@ -36,7 +36,7 @@ class InfobipMessage extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['bulkId', 'messageId', 'to', 'status', 'sent_timestamp'], 'required'],
+            [['messageId', 'to', 'status', 'sent_timestamp'], 'required'],
             [['sent_timestamp', 'customer_id'], 'integer'],
             [['bulkId', 'status_description'], 'string', 'max' => 255],
             [['messageId', 'to', 'status'], 'string', 'max' => 45],
