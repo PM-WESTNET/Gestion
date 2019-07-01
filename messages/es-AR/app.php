@@ -1120,5 +1120,8 @@
     'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
     'Mobile app registration tickets' => 'Tickets de registro de aplicación',
     'Request data edition tickets' => 'Tickets de solicitud de edición de datos',
-    'Mobile app status' => 'Estado de la aplicación móvil'
+    'Mobile app status' => 'Estado de la aplicación móvil',
+    'Destinatary' => 'Destinatario',
+    'Infobip Sended Messages' => 'Mensajes Enviados por Infobip',
+    'Sent Date and Time' => 'Fecha y hora de envío'
 );

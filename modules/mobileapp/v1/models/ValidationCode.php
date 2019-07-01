@@ -110,7 +110,8 @@ class ValidationCode extends \app\components\db\ActiveRecord
     }
 
     public function sendCodeSms($destinatary){
-        $response = InfobipService::sendSimpleSMS(Config::getValue('infobip_origin_number'), $destinatary, str_replace('{code}', $this->code, Config::getValue('sms_validation_content')));
+        $text = $this->getSmsText();
+        $response = InfobipService::sendSimpleSMS(Config::getValue('infobip_origin_number'), $destinatary, $text, $this->userAppHasCustomer->customer_id);
 
         if($response['status'] == 'success'){
             return true;
@@ -130,6 +131,10 @@ class ValidationCode extends \app\components\db\ActiveRecord
                     'image' => $company->getLogoWebPath(),
                 ]
             ]);
+    }
+
+    private function getSmsText() {
+        return str_replace('{code}', $this->code, Config::getValue('sms_validation_content'));
     }
 
 }
