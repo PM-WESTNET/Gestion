@@ -512,5 +512,16 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Can send SMS message to customer', $model->sendMobileAppLinkSMSMessage())->true();
     }
 
+    public function testGetStatusEmailForSelect()
+    {
+        $seleccion = Customer::getStatusEmailForSelect();
+
+        expect('Get status email for select is an array', is_array($seleccion))->true();
+        expect('Active is in array', array_key_exists( Customer::EMAIL_STATUS_ACTIVE, $seleccion))->true();
+        expect('Invalid is in array', array_key_exists(Customer::EMAIL_STATUS_INVALID, $seleccion))->true();
+        expect('Inactive is in array', array_key_exists(Customer::EMAIL_STATUS_INACTIVE, $seleccion))->true();
+        expect('Bounced is in array', array_key_exists( Customer::EMAIL_STATUS_BOUNCED, $seleccion))->true();
+    }
+
     //TODO resto de la clase
 }

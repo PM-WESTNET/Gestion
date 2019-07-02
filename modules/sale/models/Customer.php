@@ -72,6 +72,12 @@ class Customer extends ActiveRecord {
     const STATUS_DISABLED = 'disabled';
     const STATUS_BLOCKED = 'blocked';
 
+    //Email status
+    const EMAIL_STATUS_ACTIVE = 'active';
+    const EMAIL_STATUS_BOUNCED = 'bounced';
+    const EMAIL_STATUS_INACTIVE = 'inactive';
+    const EMAIL_STATUS_INVALID = 'invalid';
+
     protected static $companyRequired = false;
     
     private $_profiles = [];
@@ -1446,5 +1452,19 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @return array
+     * Devuelve los estados posibles para ser listados en un desplegable o similar.
+     */
+    public static function getStatusEmailForSelect()
+    {
+        return [
+            Customer::EMAIL_STATUS_ACTIVE => Yii::t('app', Customer::EMAIL_STATUS_ACTIVE),
+            Customer::EMAIL_STATUS_BOUNCED => Yii::t('app', Customer::EMAIL_STATUS_BOUNCED),
+            Customer::EMAIL_STATUS_INACTIVE => Yii::t('app', Customer::EMAIL_STATUS_INACTIVE),
+            Customer::EMAIL_STATUS_INVALID => Yii::t('app', Customer::EMAIL_STATUS_INVALID)
+        ];
     }
 }
