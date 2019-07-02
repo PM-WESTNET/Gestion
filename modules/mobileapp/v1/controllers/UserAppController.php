@@ -21,8 +21,10 @@ use app\modules\mobileapp\v1\models\ValidationCode;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\DocumentType;
+use app\modules\sale\models\Product;
 use app\modules\sale\models\TaxCondition;
 use app\modules\westnet\ecopagos\models\Ecopago;
+use app\modules\westnet\models\ConnectionForcedHistorial;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\db\Exception;
@@ -923,17 +925,12 @@ class UserAppController extends Controller
     public function actionForceConnection() {
         $data = Yii::$app->request->post();
 
-        if (!isset($data['customer_id']) || !isset($data['contract_id'])||!isset($data['reason'])){
-            throw new BadRequestHttpException('Customer ID and Reason are required');
+        if (!isset($data['contract_id'])||!isset($data['reason'])){
+            throw new BadRequestHttpException('Contract ID and Reason are required');
         }
 
-        $customer = Customer::findOne($data['customer_id']);
 
-        if (empty($customer)) {
-            throw new BadRequestHttpException('Customer not found');
-        }
-
-        $contract = $customer->getContracts()->andWhere(['contract_id' => $data['contract_id']])->one();
+        $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
 
         if (empty($contract)) {
             throw new BadRequestHttpException('Contract not found');
@@ -949,6 +946,27 @@ class UserAppController extends Controller
             $payment_extension_product = Product::findOne(Config::getValue('id-product_id-extension-de-pago'));
             $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
             $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+            $create_pti = true;
+
+            if(ConnectionForcedHistorial::find()->andWhere(['connection_id' => $connection->connection_id])->exists()) {
+                $due_date = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
+            }else{
+                $due_date = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+                $create_pti = false;
+            }
+
+            if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
+                return [
+                  'status' => 'success',
+                    'msj' => Yii::t('app','Payment Extension created successfull')
+                ];
+            }
         }
+
+        Yii::$app->response->setStatusCode(400);
+        return [
+            'status' => 'error',
+            'error' => Yii::t('app','Can`t create payment extension')
+        ];
     }
 }

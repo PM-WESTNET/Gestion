@@ -107,7 +107,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->name .' - '. $customer->code,
                 'contracts' => $contracts,
-                'can_request_payment_extension' => true,//$customer->canRequestPaymentExtension(),
+                'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
                 'price' => $payment_extension_requested < 1 ? 0 : $payment_extension_product->finalPrice,
                 'duration_days' => $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days,
                 'date_available_to' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
