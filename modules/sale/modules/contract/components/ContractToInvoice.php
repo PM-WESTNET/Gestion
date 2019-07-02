@@ -334,7 +334,7 @@ class ContractToInvoice
             foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
                         $afip_error = true;
                     }
                     Yii::$app->session->set('_invoice_all_', [
@@ -374,7 +374,7 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true)
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false)
     {
 
         try{
@@ -389,7 +389,9 @@ class ContractToInvoice
                 $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
-                $bill->automatically_generated = true;
+                if($automatically_generated) {
+                    $bill->automatically_generated = true;
+                }
                 $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
@@ -567,9 +569,9 @@ class ContractToInvoice
                     $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
                     $bill->save(false);
                     $bill->fillNumber = false;
-                    $bill->complete();
                     $bill->verifyAmounts(true);
                     if($close_bill) {
+                        $bill->complete();
                         $bill->close();
                     }
                 }

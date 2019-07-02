@@ -50,6 +50,44 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
 
                     <div class="row">
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'fromDate')->widget(DatePicker::class, [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'period',
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'format' => 'yyyy-mm-dd',
+                                ],
+                                'options'=>[
+                                    'class'=>'form-control filter dates',
+                                    'placeholder'=>Yii::t('app','Date')
+                                ]
+                            ]);
+                            ?>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'toDate')->widget(DatePicker::class, [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'period',
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'format' => 'yyyy-mm-dd',
+                                ],
+                                'options'=>[
+                                    'class'=>'form-control filter dates',
+                                    'placeholder'=>Yii::t('app','Date')
+                                ]
+                            ]);
+                            ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-sm-offset-6 col-sm-3">
                             <div class="form-group field-button">
                                 <label>&nbsp;</label>
@@ -197,6 +235,8 @@ $this->params['breadcrumbs'][] = $this->title;
             var postdata = {
                 'BillSearch[company_id]': $('#billsearch-company_id').val(),
                 'BillSearch[bill_type_id]': $('#billsearch-bill_type_id').val(),
+                'BillSearch[fromDate]' : $('#billsearch-fromdate').val(),
+                'BillSearch[toDate]' : $('#billsearch-todate').val(),
             };
             try {
                 var date = $('#billsearch-period').kvDatepicker('getDate');

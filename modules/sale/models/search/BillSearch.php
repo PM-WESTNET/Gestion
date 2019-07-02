@@ -538,10 +538,18 @@ class BillSearch extends Bill
     {
         $this->load($params);
         $query = $this->find()
-            ->where(['status' => 'completed'])
+            ->where(['in','status',['draft', 'completed']])
             ->andFilterWhere(['automatically_generated' => 1])
             ->andFilterWhere(['company_id' => $this->company_id])
             ->andFilterWhere(['bill_type_id' => $this->bill_type_id]);
+
+        if($this->fromDate) {
+            $query->andFilterWhere(['>=','date',$this->fromDate]);
+        }
+
+        if($this->toDate) {
+            $query->andFilterWhere(['<=','date',$this->toDate]);
+        }
 
         return $query;
     }
