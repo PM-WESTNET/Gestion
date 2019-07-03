@@ -35,12 +35,12 @@ class PaymentTest extends \Codeception\Test\Unit
 
     public function testValidWhenFullAndNew()
     {
-        $model = new Payment();
-        $model->customer_id = 1;
-        $model->company_id = 1;
-        $model->amount = 1;
-        $model->date = '2018-11-02';
-        $model->validate();
+        $model = new Payment([
+            'customer_id' => 1,
+            'company_id' => 1,
+            'amount' => 1,
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+        ]);
 
         $this->assertTrue($model->validate());
     }

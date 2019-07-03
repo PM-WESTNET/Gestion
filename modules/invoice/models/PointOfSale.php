@@ -37,6 +37,7 @@ class PointOfSale extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
+            [['number'], 'required'],
             [['number', 'blocked'], 'integer'],
             [['dateto'], 'safe'],
             [['type'], 'string', 'max' => 50]
