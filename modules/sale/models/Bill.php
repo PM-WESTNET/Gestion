@@ -40,6 +40,10 @@ use app\modules\mailing\components\sender\MailSender;
  */
 class Bill extends ActiveRecord implements CountableInterface
 {
+    const STATUS_DRAFT = 'draft';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CLOSED = 'closed';
+
     public $fillNumber = true;
 
     public $pointOfSale;
