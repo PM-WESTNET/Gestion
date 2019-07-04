@@ -1120,5 +1120,7 @@
     'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
     'Mobile app registration tickets' => 'Tickets de registro de aplicación',
     'Request data edition tickets' => 'Tickets de solicitud de edición de datos',
-    'Mobile app status' => 'Estado de la aplicación móvil'
+    'Mobile app status' => 'Estado de la aplicación móvil',
+    'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
+    'Can`t create payment extension' => 'No se puede crear la extensión de pago'
 );

@@ -11,6 +11,7 @@ use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use Codeception\Util\Debug;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\console\Exception;
 use yii\db\ActiveQuery;
@@ -242,7 +243,15 @@ class Connection extends ActiveRecord {
                                     $forcedHistory->date= date('Y-m-d');
                                     $forcedHistory->reason = Yii::$app->request->post('reason');
                                     $forcedHistory->connection_id= $this->connection_id;
-                                    $forcedHistory->user_id = Yii::$app->user->identity->id;
+
+                                    if (!empty(Yii::$app->user->identity)){
+                                        $forcedHistory->user_id = Yii::$app->user->identity->id;
+                                    }else{
+                                        $superadmin = User::findOne(['username' => 'superadmin']);
+                                        $forcedHistory->user_id = $superadmin->id;
+                                    }
+
+
                                     $forcedHistory->save(false);
                                 }elseif ($attr == 'status_account' || $attr == 'status' ) {
                                     $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()[$attr], Yii::t('westnet', ucfirst($oldValue)), Yii::t('westnet', ucfirst($newValue)), 'Conexion', $this->connection_id);

@@ -13,6 +13,7 @@ use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\models\EmptyAds;
@@ -1469,12 +1470,31 @@ class Customer extends ActiveRecord {
      * @throws \Exception
      * Devuelve la cantidad de extensiones de pago pedidas en el período
      */
-    public function getPaymentExtensionQtyRequest()
+    public function getPaymentExtensionQtyRequest($from = null, $to = null)
     {
         $payment_extension_qty = 0;
 
+        if (empty($from)) {
+            $from = (new \DateTime('first day of this month'))->getTimestamp();
+        }
+
+        if (empty($to)) {
+            $to = (new \DateTime('last day of this month'))->getTimestamp() + 86400;
+        }
+
         foreach ($this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
-            $payment_extension_qty += $contract->getActivePaymentExtensionQtyPerPeriod((new \DateTime('first day of this month'))->modify('+1 month')->format('Y-m-d'));
+            $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+            if ($connection) {
+                $extension_qty = ConnectionForcedHistorial::find()
+                    ->andWhere(['connection_id' => $connection->connection_id])
+                    ->andWhere(['>=', 'create_timestamp', $from])
+                    ->andWhere(['<', 'create_timestamp', $to])
+                    ->count();
+
+                $payment_extension_qty += $extension_qty;
+            }
+
         }
 
         return $payment_extension_qty;
@@ -1492,7 +1512,7 @@ class Customer extends ActiveRecord {
 //        $period = $period ? $period : (new \DateTime('now'))->format('Y-m-01');
 
         //Sólo si el cliente no debe mas de una factura
-        if(Customer::getOwedBills($this->customer_id) > 1) {
+        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
             return false;
         }
 

@@ -942,16 +942,18 @@ class UserAppController extends Controller
             throw new BadRequestHttpException('Connection not found');
         }
 
-        if ($connection->canForce()) {
+        if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
             $payment_extension_product = Product::findOne(Config::getValue('id-product_id-extension-de-pago'));
             $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
             $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
             $create_pti = true;
 
-            if(ConnectionForcedHistorial::find()->andWhere(['connection_id' => $connection->connection_id])->exists()) {
-                $due_date = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
+            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
+                $due_date = date('d-m-Y', $due_timestamp);
             }else{
-                $due_date = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+                $due_date = date('d-m-Y', $due_timestamp);
                 $create_pti = false;
             }
 
