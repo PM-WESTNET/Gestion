@@ -177,11 +177,13 @@ class BatchInvoiceController  extends Controller
 
             foreach ($query->batch() as $bills) {
                 foreach ($bills as $bill) {
+                    $bill->verifyNumberAndDate();
                     $bill->close();
 
-                    $messages = Yii::$app->session->getAllFlashes();
+                   /*$messages = Yii::$app->session->getAllFlashes();
                     $fn = function ($messages) {
                         $rtn = [];
+
                         foreach ($messages as $message) {
                             $rtn[] = Yii::t('afip', $message);
                         }
@@ -191,7 +193,7 @@ class BatchInvoiceController  extends Controller
 
                         $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
                             Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
-                    }
+                    }*/
 
                     Yii::$app->session->set('_invoice_close_', [
                         'total' => $total,

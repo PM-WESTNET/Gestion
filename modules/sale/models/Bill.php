@@ -1513,4 +1513,21 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return true;
     }
+
+    public function verifyNumberAndDate()
+    {
+        $lastNumber = Bill::find()->where([
+            'bill_type_id' => $this->bill_type_id,
+            'status' => 'closed',
+            'company_id' => $this->company_id
+        ])->orderBy(['number' => SORT_DESC])
+            ->limit(1)->one();
+
+        $today = (new \DateTime('now'))->format('Y-m-d');
+
+        if($this->date != $today || $this->number != $lastNumber){
+            $this->updateAttributes(['number' => (int) $lastNumber->number + 1, 'date' => $today]);
+        }
+
+    }
 }
