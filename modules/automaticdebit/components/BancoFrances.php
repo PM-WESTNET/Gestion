@@ -18,6 +18,7 @@ use app\modules\automaticdebit\models\DirectDebitExport;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use yii\base\InvalidConfigException;
 
@@ -51,6 +52,9 @@ class BancoFrances implements BankInterface
 
         $d= (($this->type === 'own') ? 1 : 0);
         $filename = rand(1000000,9999999). $d;
+        if(!file_exists(\Yii::getAlias('@app').'/web/direct_debit/')) {
+            mkdir(\Yii::getAlias('@app').'/web/direct_debit/', 0777);
+        }
         $file = \Yii::getAlias('@app').'/web/direct_debit/'.$filename;
 
         $resource = fopen($file.'.txt', 'w');
@@ -112,6 +116,7 @@ class BancoFrances implements BankInterface
 
             switch($code_line) {
                 case '4110':
+                    //TODO seleccionar del id de select2
                     $companyId = substr($line, 4,2);
 
                     $companyConfig = BankCompanyConfig::findOne(['company_identification' => $companyId]);
@@ -130,7 +135,8 @@ class BancoFrances implements BankInterface
 
                     $code = substr($line, 73, 2);
 
-                    if  ($code === '00') {
+                    //TODO por texto de archivo
+                    if($code === '00') {
                         $payments[] = [
                             'customer_code' => ltrim($beneficiary_id, '0'),
                             'amount' => (double) ($import1.'.'.$import2),
@@ -142,26 +148,29 @@ class BancoFrances implements BankInterface
             }
         }
         $import->process_timestamp = strtotime($this->restoreDate($process_timestamp));
-
-
         $import->save();
 
-        \Yii::info(print_r($import->getErrors(),1));
+        $this->createPayments($payments, $companyConfig->company, $import);
 
+//        \Yii::info(print_r($import->getErrors(),1));
+    }
+
+    private function createPayments($payments, Company $company, $import)
+    {
         $payment_method = PaymentMethod::findOne(['name' => 'Débito Directo']);
 
         foreach ($payments as $payment) {
             $customer = Customer::findOne(['code' => $payment['customer_code']]);
 
             if (!empty($customer)) {
-               $p = new Payment([
-                   'customer_id' => $customer->customer_id,
-                   'amont' => $payment['amount'],
-                   'partner_distribution_model_id' => $companyConfig->company->partner_distribution_model_id,
-                   'company_id' => $companyConfig->company_id
-               ]);
+                $p = new Payment([
+                    'customer_id' => $customer->customer_id,
+                    'amont' => $payment['amount'],
+                    'partner_distribution_model_id' => $company->partner_distribution_model_id,
+                    'company_id' => $company->company_id
+                ]);
 
-               if ($p->save()) {
+                if ($p->save()) {
                     $payment_item = [
                         'amount'=> $payment['amount'],
                         'description'=> 'Debito Directo cta ' . $payment['cbu'],
@@ -172,15 +181,19 @@ class BancoFrances implements BankInterface
 
                     $p->addItem($payment_item);
 
-                    $ddihp= new DebitDirectImportHasPayment([
-                        'debit_direct_import_id' => $import->debit_direct_import_id,
-                        'payment_id' => $p->payment_id
-                    ]);
-
-                    $ddihp->save();
-               }
+                    $this->createDebitDirectRelation($import->debit_direct_import_id, $p->payment_id);
+                }
             }
         }
+    }
+
+    private function createDebitDirectRelation($import_id, $payment_id) {
+        $ddihp= new DebitDirectImportHasPayment([
+            'debit_direct_import_id' => $import_id,
+            'payment_id' => $payment_id
+        ]);
+
+        return $ddihp->save();
     }
 
     private function addHeader($resource)

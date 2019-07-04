@@ -3,6 +3,7 @@
 namespace app\modules\automaticdebit\models;
 
 use Yii;
+use app\modules\checkout\models\Payment;
 
 /**
  * This is the model class for table "debit_direct_import_has_payment".
@@ -32,8 +33,8 @@ class DebitDirectImportHasPayment extends \yii\db\ActiveRecord
         return [
             [['payment_id', 'debit_direct_import_id'], 'required'],
             [['payment_id', 'debit_direct_import_id'], 'integer'],
-            [['debit_direct_import_id'], 'exist', 'skipOnError' => true, 'targetClass' => DebitDirectImport::className(), 'targetAttribute' => ['debit_direct_import_id' => 'debit_direct_import_id']],
-            [['payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payment::className(), 'targetAttribute' => ['payment_id' => 'payment_id']],
+            [['debit_direct_import_id'], 'exist', 'skipOnError' => true, 'targetClass' => DebitDirectImport::class, 'targetAttribute' => ['debit_direct_import_id' => 'debit_direct_import_id']],
+            [['payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payment::class, 'targetAttribute' => ['payment_id' => 'payment_id']],
         ];
     }
 

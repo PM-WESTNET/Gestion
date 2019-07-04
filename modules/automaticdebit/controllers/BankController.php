@@ -138,6 +138,12 @@ class BankController extends Controller
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
 
+    /**
+     * @param $bank_id
+     * @return string
+     * @throws BadRequestHttpException
+     * Muestra un listado de las importaciones del banco
+     */
     public function actionExports($bank_id)
     {
         $bank = Bank::findOne($bank_id);
@@ -155,14 +161,24 @@ class BankController extends Controller
         return $this->render('exports', ['dataProvider' => $dataProvider, 'bank' => $bank]);
     }
 
+    /**
+     * @param $export_id
+     * @return string
+     * Muestra los detalles de una exportación
+     */
     public function actionExportView($export_id)
     {
         $export = DirectDebitExport::findOne($export_id);
 
         return $this->render('export-view', ['export' => $export]);
-
     }
 
+    /**
+     * @param $bank_id
+     * @return string
+     * @throws BadRequestHttpException
+     * Crea una nueva exportación
+     */
     public function actionCreateExport($bank_id)
     {
 
@@ -182,6 +198,12 @@ class BankController extends Controller
         return $this->render('create-export', ['export' => $export]);
     }
 
+    /**
+     * @param $export_id
+     * @return \yii\console\Response|\yii\web\Response
+     * @throws NotFoundHttpException
+     * Descarga una exportación
+     */
     public function actionDownloadExport($export_id)
     {
         $export = DirectDebitExport::findOne($export_id);
@@ -193,6 +215,11 @@ class BankController extends Controller
         return Yii::$app->response->sendFile($export->file);
     }
 
+    /**
+     * @param $bank_id
+     * @return string
+     * Muestra un listado de las importaciones
+     */
     public function  actionImports($bank_id)
     {
         $bank = Bank::findOne($bank_id);
@@ -202,6 +229,11 @@ class BankController extends Controller
 
     }
 
+    /**
+     * @param $import_id
+     * @return string
+     * Muestra el detalle de una importación
+     */
     public function actionImportView($import_id)
     {
         $import = DebitDirectImport::findOne($import_id);
@@ -210,6 +242,12 @@ class BankController extends Controller
 
     }
 
+    /**
+     * @param $bank_id
+     * @return string
+     * @throws BadRequestHttpException
+     * Crea una importación
+     */
     public function actionCreateImport($bank_id)
     {
 
@@ -231,6 +269,12 @@ class BankController extends Controller
         return $this->render('create-import', ['import' => $import, 'moneyBoxAccount' => $moneyBoxAccount]);
     }
 
+    /**
+     * @param $import_id
+     * @return \yii\web\Response
+     * @throws NotFoundHttpException
+     * Cierra una importación
+     */
     public function actionCloseImport($import_id)
     {
         $import = DebitDirectImport::findOne($import_id);
@@ -239,21 +283,14 @@ class BankController extends Controller
             throw new NotFoundHttpException('Import not found');
         }
 
-        $payments = $import->getPayments()->andWhere(['status' => 'draft'])->all();
-
-        foreach ($payments as $payment) {
-            if (!$payment->close()){
-                Yii::$app->session->addFlash('error', Yii::t('app','Can close any payments'));
-                return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
-            }
+        if($import->closePayments()){
+            Yii::$app->session->addFlash('error', Yii::t('app','Can close payment') .': '. $payment->payment_id);
+            return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
         }
-
-        $import->status = DebitDirectImport::SUCCESS_STATUS;
-
-        $import->updateAttributes(['status']);
 
         Yii::$app->session->addFlash('success', Yii::t('app','Payments has been closed successfull'));
         return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
+
     }
 
 

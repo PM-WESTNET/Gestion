@@ -265,6 +265,9 @@ $config = [
                 ],
             ]
         ],
+        'automaticdebit' => [
+            'class' => 'app\modules\automaticdebit\AutomaticDebitModule'
+        ],
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],

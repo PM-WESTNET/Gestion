@@ -102,7 +102,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
      */
     public function getCompany()
     {
-        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 
     /**
@@ -110,7 +110,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
      */
     public function getDebitDirectImportHasPayments()
     {
-        return $this->hasMany(DebitDirectImportHasPayment::className(), ['debit_direct_import_id' => 'debit_direct_import_id']);
+        return $this->hasMany(DebitDirectImportHasPayment::class, ['debit_direct_import_id' => 'debit_direct_import_id']);
     }
 
     public function getPayments()
@@ -129,6 +129,9 @@ class DebitDirectImport extends \yii\db\ActiveRecord
 
 
         $fileName = Yii::getAlias('@app/web').'/direct_debit_import/'.$file->baseName.'.'.$file->extension;
+        if(!file_exists(Yii::getAlias('@app/web').'/direct_debit_import/')) {
+            mkdir(Yii::getAlias('@app/web').'/direct_debit_import/', 0777);
+        }
         $file->saveAs($fileName);
 
         $resource = fopen($fileName, 'r');
@@ -144,5 +147,45 @@ class DebitDirectImport extends \yii\db\ActiveRecord
             Yii::$app->session->addFlash('error', $ex->getMessage());
             return false;
         }
+    }
+
+    /**
+     * @param $payment_id
+     * @return bool
+     * Crea la relación entre el import y un pago a través del modelo DebitDirectImportHasPayment
+     */
+    public function createPaymentRelation($payment_id)
+    {
+        $ddihp = new DebitDirectImportHasPayment([
+            'payment_id' => $payment_id,
+            'debit_direct_import_id' => $this->debit_direct_import_id
+        ]);
+
+        return $ddihp->save();
+    }
+
+    /**
+     * @return array
+     * Cierra los pagos de una importación, de no poder cerrar un pago continúa, e informa en errors los pagos que no ha podido cerrar.
+     */
+    public function closePayments()
+    {
+        $payments = $this->getPayments()->andWhere(['status' => 'draft'])->all();
+        $errors = [];
+
+        foreach ($payments as $payment) {
+            if (!$payment->close()){
+                array_push($errors, Yii::t('app', "Can't close payment"). ': '.$payment->payment_id);
+            }
+        }
+
+        if(empty($errors)) {
+            $this->updateAttributes(['status' => DebitDirectImport::SUCCESS_STATUS]);
+        }
+
+        return [
+            'status' => empty($errors) ? true : false,
+            'errors' => $errors
+        ];
     }
 }
