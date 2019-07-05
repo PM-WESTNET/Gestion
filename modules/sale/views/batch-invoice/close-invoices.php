@@ -164,7 +164,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ['class' => 'kartik\grid\SerialColumn'],
                                 [
                                     'header'=>Yii::t('app', 'Customer'),
-                                    'attribute'=>'customer.name',
+                                    'value' => function($model) {
+                                        return $model->customer->lastname .', '.$model->customer->name;
+                                    }
                                 ],
                                 [
                                     'header'=>Yii::t('app', 'Bill'),
