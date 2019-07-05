@@ -631,7 +631,8 @@ class Bill extends ActiveRecord implements CountableInterface
 
     /**
      * Genera la factura electronica en base a la clase del tipo de factura.
-     *
+     * IMPORTANTE No quitar los \Yii::info con categoria facturación, ya que están para realizar un log de los errores que se puedan presentar
+     * los errores se pueden ver desde la carpeta runtime/logs/app_facturacion.log
      * @return bool
      */
     public function invoice()
@@ -662,6 +663,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             $retValue = true;
                         } else {
                             $retValue = false;
+                            \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
                             Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
                         }
                     } else {
@@ -692,14 +694,17 @@ class Bill extends ActiveRecord implements CountableInterface
                     }
 
                     foreach ($result['errors'] as $msg) {
+                        \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                         Yii::$app->session->addFlash('error', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
                     foreach ($result['observations'] as $msg) {
+                        \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                         Yii::$app->session->addFlash('info', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
 
                     return ($retValue || empty($result['errors']));
                 } catch (\Exception $ex) {
+                    \Yii::info($ex, 'facturacion');
                     Yii::$app->session->setFlash("error", Yii::t('app', $ex->getMessage()));
                     return false;
                 }
@@ -1525,7 +1530,7 @@ class Bill extends ActiveRecord implements CountableInterface
 
         $today = (new \DateTime('now'))->format('Y-m-d');
 
-        if($this->date != $today || $this->number != $lastNumber){
+        if($this->date != $today || $this->number != $lastNumber->number){
             $this->updateAttributes(['number' => (int) $lastNumber->number + 1, 'date' => $today]);
         }
 
