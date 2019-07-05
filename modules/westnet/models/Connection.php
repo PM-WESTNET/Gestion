@@ -238,21 +238,7 @@ class Connection extends ActiveRecord {
                                 if ($attr == 'status_account' && $this->status_account == 'forced') {
                                     $obs = 'Motivo: ' . Yii::$app->request->post('reason');
                                     $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()[$attr], Yii::t('westnet', ucfirst($oldValue)), Yii::t('westnet', ucfirst($newValue)), 'Conexion', $this->connection_id, $obs);
-                                    //Registro el forzado para poder restringir posibles forzados en el futuro
-                                    $forcedHistory= new ConnectionForcedHistorial();
-                                    $forcedHistory->date= date('Y-m-d');
-                                    $forcedHistory->reason = Yii::$app->request->post('reason');
-                                    $forcedHistory->connection_id= $this->connection_id;
 
-                                    if (!empty(Yii::$app->user->identity)){
-                                        $forcedHistory->user_id = Yii::$app->user->identity->id;
-                                    }else{
-                                        $superadmin = User::findOne(['username' => 'superadmin']);
-                                        $forcedHistory->user_id = $superadmin->id;
-                                    }
-
-
-                                    $forcedHistory->save(false);
                                 }elseif ($attr == 'status_account' || $attr == 'status' ) {
                                     $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()[$attr], Yii::t('westnet', ucfirst($oldValue)), Yii::t('westnet', ucfirst($newValue)), 'Conexion', $this->connection_id);
                                 }elseif($attr == 'ip4_1' || $attr == 'ip4_2' || $attr == 'ip4_public'){
@@ -399,6 +385,7 @@ class Connection extends ActiveRecord {
         $trasanction = Yii::$app->db->beginTransaction();
 
         if ($this->save(true)) {
+            $this->createForcedHistorial();
             if ($create_product){
 
                 if ($this->createExtendPaymentCD($product_id, $vendor_id)){
@@ -443,6 +430,23 @@ class Connection extends ActiveRecord {
         $contract_detail->vendor_id = $vendor_id;
 
         return !$contract_detail->save(false);
+    }
+
+    private function createForcedHistorial() {
+        $forcedHistory= new ConnectionForcedHistorial();
+        $forcedHistory->date= date('Y-m-d');
+        $forcedHistory->reason = Yii::$app->request->post('reason');
+        $forcedHistory->connection_id= $this->connection_id;
+
+        if (!empty(Yii::$app->user->identity)){
+            $forcedHistory->user_id = Yii::$app->user->identity->id;
+        }else{
+            $superadmin = User::findOne(['username' => 'superadmin']);
+            $forcedHistory->user_id = $superadmin->id;
+        }
+
+
+        $forcedHistory->save(false);
     }
 
 }

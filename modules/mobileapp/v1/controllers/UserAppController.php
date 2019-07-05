@@ -943,7 +943,7 @@ class UserAppController extends Controller
         }
 
         if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
-            $payment_extension_product = Product::findOne(Config::getValue('id-product_id-extension-de-pago'));
+            $payment_extension_product = Config::getValue('extend_payment_product_id');
             $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
             $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
             $create_pti = true;
