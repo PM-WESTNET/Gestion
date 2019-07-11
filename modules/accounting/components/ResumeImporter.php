@@ -47,6 +47,14 @@ class ResumeImporter extends AbstractCsvImport
     public function persist($data)
     {
         /**
+         * No siempre pero en algunos archivos sabe devolver la ultima fila vacia, lo que hace que despues falle, por eso
+         * en este caso devuelvo true para que siga con el proceso
+         */
+        if (empty($data['Fecha']) && empty($data['Código'] && (empty($data['Crédito']) || empty($data['Débito'])))){
+            return true;
+        }
+
+        /**
          * Si el tipo de operación no fue encontrada, se crea y se la asigna al money box del resumen
         **/
         if (empty($data['Código-new'])) {
