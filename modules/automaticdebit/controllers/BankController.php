@@ -260,8 +260,18 @@ class BankController extends Controller
         $import = new DebitDirectImport();
         $import->bank_id = $bank->bank_id;
 
-        if ($import->load(Yii::$app->request->post()) && $import->import()) {
-            $this->redirect(['view', 'import_id' => $import->debit_direct_import_id]);
+        if ($import->load(Yii::$app->request->post())) {
+            $result_import = $import->import();
+            if($result_import['status']){
+                if($result_import['errors']) {
+                    \Yii::$app->session->addFlash('error', $result_import['errors']);
+                }
+                $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
+            } else {
+                \Yii::$app->session->setFlash('error', $result_import['errors']);
+                var_dump($result_import);
+                var_dump($result_import);
+            }
         }
 
         $moneyBoxAccount = ArrayHelper::map(MoneyBoxAccount::find()->all(), 'money_box_account_id', 'number');
@@ -283,14 +293,14 @@ class BankController extends Controller
             throw new NotFoundHttpException('Import not found');
         }
 
-        if($import->closePayments()){
-            Yii::$app->session->addFlash('error', Yii::t('app','Can close payment') .': '. $payment->payment_id);
+        $close_payments = $import->closePayments();
+        if(!$close_payments['status']){
+            Yii::$app->session->addFlash('error', $close_payments['errors']);
             return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
         }
 
-        Yii::$app->session->addFlash('success', Yii::t('app','Payments has been closed successfull'));
+        Yii::$app->session->addFlash('success', Yii::t('app','Payments has been closed successfully'));
         return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
-
     }
 
 

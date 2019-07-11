@@ -1134,5 +1134,7 @@
     'Bank Customers' => 'Clientes del Banco',
     'Bank Customer' => 'Cliente del Banco',
     'Other Customers' => 'Otros Clientes',
-    'Other Customer' => 'Otro Cliente'
+    'Other Customer' => 'Otro Cliente',
+    'You must select a file' => 'Debe seleccionar un archivo',
+    'Failed payments' => 'Pagos fallidos'
 );

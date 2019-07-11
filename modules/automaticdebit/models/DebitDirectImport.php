@@ -94,7 +94,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
      */
     public function getBank()
     {
-        return $this->hasOne(Bank::className(), ['bank_id' => 'bank_id']);
+        return $this->hasOne(Bank::class, ['bank_id' => 'bank_id']);
     }
 
     /**
@@ -118,6 +118,16 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         return $this->hasMany(Payment::class, ['payment_id' => 'payment_id'])->viaTable('debit_direct_import_has_payment', ['debit_direct_import_id' => 'debit_direct_import_id']);
     }
 
+    public function getFailedPayments()
+    {
+        return $this->hasMany(DebitDirectFailedPayment::class, ['import_id' => 'debit_direct_import_id']);
+    }
+
+    /**
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
+     * Importa el archivo y genera los pagos correspondientes.
+     */
     public function import() {
 
         $bank_instance = $this->bank->getBankInstance();
@@ -126,7 +136,6 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         if (empty($file)) {
             $this->addError('fileUploaded', Yii::t('app','You must select a file'));
         }
-
 
         $fileName = Yii::getAlias('@app/web').'/direct_debit_import/'.$file->baseName.'.'.$file->extension;
         if(!file_exists(Yii::getAlias('@app/web').'/direct_debit_import/')) {
@@ -141,12 +150,27 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         }
 
         try {
-            $bank_instance->import($resource, $this);
-            return true;
+            $result = $bank_instance->import($resource, $this);
         }catch (\Exception $ex) {
-            Yii::$app->session->addFlash('error', $ex->getMessage());
-            return false;
+            \Yii::trace($ex);
+            Yii::$app->session->addFlash('error', $ex->getMessage(). $ex->getTraceAsString());
+            return [
+                'status' => false,
+                'errors' => $ex->getMessage(),
+                'payments_created' => 0,
+                'failed_payments' => 0,
+                'failed_payments' => 0,
+                'rejected_payment_register_created' => 0,
+            ];
         }
+
+        return [
+            'status' => $result['status'],
+            'errors' => $result['errors'],
+            'payments_created' => $result['created_payments'],
+            'failed_payments' => $result['failed_payments'],
+            'rejected_payment_register_created' => $result['rejected_payment_register_created'],
+        ];
     }
 
     /**
@@ -185,7 +209,45 @@ class DebitDirectImport extends \yii\db\ActiveRecord
 
         return [
             'status' => empty($errors) ? true : false,
-            'errors' => $errors
+            'errors' => $this->getErrorsAsString($errors)
         ];
+    }
+
+    /**
+     * @param $errors
+     * @return string
+     * Devuelve un array de errores en un solo string con saltos de línea
+     */
+    private function getErrorsAsString($errors)
+    {
+        $error_string = '';
+        foreach ($errors as $error) {
+            $error_string .= "\n" . $error;
+        }
+
+        return $error_string;
+    }
+
+    /**
+     * @param $customer_code
+     * @param $amount
+     * @param $date
+     * @param $cbu
+     * @param $import_id
+     * @return bool
+     * Crea un registro en de pago fallido y guarda la descripción del error
+     */
+    public static function createFailedPayment($customer_code, $amount, $date, $cbu, $import_id, $error)
+    {
+        $failed_payment = new DebitDirectFailedPayment([
+            'customer_code' => $customer_code,
+            'amount' => $amount,
+            'date' => $date,
+            'import_id' => $import_id,
+            'cbu' => $cbu,
+            'error' => $error
+        ]);
+
+        return $failed_payment->save();
     }
 }

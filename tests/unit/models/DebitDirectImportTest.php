@@ -8,7 +8,8 @@ use app\tests\fixtures\MoneyBoxAccountFixture;
 use app\modules\checkout\models\Payment;
 use app\tests\fixtures\CustomerFixture;
 use app\tests\fixtures\PartnerDistributionModelFixture;
-
+use app\modules\automaticdebit\models\DebitDirectImportHasPayment;
+use app\modules\automaticdebit\models\DebitDirectFailedPayment;
 
 class DebitDirectImportTest extends Unit
 {
@@ -98,29 +99,44 @@ class DebitDirectImportTest extends Unit
 
         expect('Close payments successfully', $close_payment_result['status'])->true();
         expect('Close payments successfully without errors', $close_payment_result['errors'])->isEmpty();
-
-
     }
-    /*
-     public function closePayments()
+
+    public function testCreatePaymentRelation()
     {
-        $payments = $this->getPayments()->andWhere(['status' => 'draft'])->all();
-        $errors = [];
+        $payment = new Payment([
+            'customer_id' => 45900,
+            'company_id' => 1,
+            'amount' => 100,
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+            'partner_distribution_model_id' => 1,
+        ]);
+        $payment->save();
 
-        foreach ($payments as $payment) {
-            if (!$payment->close()){
-                array_push($errors, Yii::t('app', "Can't close payment"). ': '.$payment->payment_id);
-            }
-        }
+        $model = new DebitDirectImport([
+            'company_id' => 1 ,
+            'bank_id' => 1,
+            'money_box_account_id' => 42,
+        ]);
+        $model->save();
 
-        if(empty($errors)) {
-            $this->updateAttributes(['status' => DebitDirectImport::SUCCESS_STATUS]);
-        }
+        expect('Create relation return true', $model->createPaymentRelation($payment->payment_id))->true();
 
-        return [
-            'status' => empty($errors) ? true : false,
-            'errors' => $errors
-        ];
+        expect('Has one relation', count(DebitDirectImportHasPayment::find()->all()))->equals(1);
     }
-     */
+
+    public function testCreateFailedPayment()
+    {
+        $model = new DebitDirectImport([
+            'company_id' => 1 ,
+            'bank_id' => 1,
+            'money_box_account_id' => 42,
+        ]);
+        $model->save();
+
+        $failed_payment = DebitDirectImport::createFailedPayment('123', 123, (new \DateTime('now'))->format('Y-m-d'), '123456789', $model->debit_direct_import_id, 'error');
+
+        expect('Create failed payment return true', $failed_payment)->true();
+        expect('Failed payment created', count(DebitDirectFailedPayment::find()->all()))->equals(1);
+    }
+
 }

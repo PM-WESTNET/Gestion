@@ -413,7 +413,6 @@ class Payment extends  ActiveRecord  implements CountableInterface
         $debt = $query->sum('(bill.total * bill_type.multiplier)');
 
         return abs($debt) > 0.0 ? $debt : 0.0;
-
     }
 
     /**
@@ -478,12 +477,21 @@ class Payment extends  ActiveRecord  implements CountableInterface
             ]);
         }
         if(empty($item)) {
+            \Yii::trace('no encuentra');
             $item = new PaymentItem();
             $item->setAttributes($item_payment);
-            $this->link('paymentItems', $item);
+            \Yii::trace($item);
+            $item->save();
+            $a = $this->link('paymentItems', $item);
+
+            \Yii::trace($item->getErrors());
         } else {
+            \Yii::trace('encuentra');
+            \Yii::trace($item);
             $item->save();
         }
+
+        \Yii::trace($item->getErrors());
 
         return $item;
     }
