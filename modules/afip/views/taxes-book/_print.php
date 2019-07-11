@@ -222,7 +222,7 @@ class Book {
                     $col++;
                 }
             }
-            $this->columns[$col] = ['net', Yii::t('app', 'Total'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00 ];
+            $this->columns[$col] = ['total', Yii::t('app', 'Total'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00 ];
             $this->excel->create('IVA-'.($this->model->type == 'buy' ? 'Compras': 'Ventas' ), $this->columns);
         }
         $models = $this->data->getModels();
