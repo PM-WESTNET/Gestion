@@ -277,6 +277,14 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'ivr' =>  [
+            'class' => 'app\modules\ivr\IvrModule',
+            'modules' => [
+                'v1' => [
+                    'class' => 'app\modules\ivr\v1\V1Module'
+                ]
+            ]
+        ]
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
