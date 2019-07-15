@@ -7,7 +7,11 @@ class AuthCest
     }
 
     // tests
-    public function tryToTest(IvrapiTester $I)
+    public function testTokenOK(IvrapiTester $I)
     {
+        $I->amOnRoute('/auth/token');
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContains('access_token');
+
     }
 }

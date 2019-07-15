@@ -9,6 +9,8 @@
 namespace app\modules\ivr\v1\components;
 
 
+use app\modules\ivr\v1\models\User;
+
 class Controller extends \yii\rest\Controller
 {
 
@@ -18,6 +20,7 @@ class Controller extends \yii\rest\Controller
             // performs authorization by token
             'tokenAuth' => [
                 'class' => \conquer\oauth2\TokenAuth::className(),
+                'identityClass' => User::class
             ],
         ]);
     }

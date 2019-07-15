@@ -2,6 +2,8 @@
 
 namespace app\modules\ivr;
 
+use app\modules\ivr\v1\models\User;
+
 /**
  * ivr module definition class
  */
@@ -19,6 +21,9 @@ class IvrModule extends \yii\base\Module
     {
         parent::init();
 
-        // custom initialization code goes here
+        \Yii::$app->set('user',[
+                'class' => 'yii\web\User',
+                'identityClass' => User::class
+            ]);
     }
 }
