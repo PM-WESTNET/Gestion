@@ -177,6 +177,19 @@ $config = [
                 'load-media-error-handling' => 'ignore'
             ],
         ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'ivr' => [
+                    'class' => 'yii\authclient\OAuth2',
+                    'clientId' => 'unique client_id',
+                    'clientSecret' => 'client_secret',
+                    'tokenUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/token',
+                    'authUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/login',
+                    'apiBaseUrl' => 'http://localhost:8180/web/index.php?r=ivr',
+                ],
+            ],
+        ],
     ],
     'modules' => [
         'sale' => [

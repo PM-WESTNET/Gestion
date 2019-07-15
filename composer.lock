@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "3882fef293a66ddac4c89b4e8e66e0a6",
+    "content-hash": "fac63a89f317481ed80c117fedb88ff0",
     "packages": [
         {
             "name": "2amigos/yii2-chartjs-widget",
@@ -421,7 +421,7 @@
             "version": "3.2.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jquery/jquery-dist.git",
+                "url": "git@github.com:jquery/jquery-dist.git",
                 "reference": "77d2a51d0520d2ee44173afdf4e40a9201f5964e"
             },
             "dist": {
@@ -480,7 +480,7 @@
             "version": "2.22.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/moment/moment.git",
+                "url": "git@github.com:moment/moment.git",
                 "reference": "2e2a5b35439665d4b0200143d808a7c26d6cd30f"
             },
             "dist": {
@@ -644,6 +644,58 @@
                 "wysiwyg"
             ],
             "time": "2017-09-13 13:08:14"
+        },
+        {
+            "name": "conquer/oauth2",
+            "version": "1.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/borodulin/yii2-oauth2-server.git",
+                "reference": "28be1ea3caabdd0387349f3176aa91b8d68ffa99"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/borodulin/yii2-oauth2-server/zipball/28be1ea3caabdd0387349f3176aa91b8d68ffa99",
+                "reference": "28be1ea3caabdd0387349f3176aa91b8d68ffa99",
+                "shasum": ""
+            },
+            "require": {
+                "jakeasmith/http_build_url": ">=1.0.1",
+                "yiisoft/yii2": "^2.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "^2.5",
+                "yiisoft/yii2-coding-standards": "^2.0"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.8.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "conquer\\oauth2\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Borodulin",
+                    "email": "borodulin@gmail.com"
+                }
+            ],
+            "description": "The Oauth2 Server extension for the Yii2 framework",
+            "homepage": "https://github.com/borodulin/yii2-oauth2-server",
+            "keywords": [
+                "oauth2",
+                "oauth2-server",
+                "yii2"
+            ],
+            "time": "2018-12-05T13:00:44+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -888,6 +940,39 @@
                 "image processing"
             ],
             "time": "2013-07-10T17:25:36+00:00"
+        },
+        {
+            "name": "jakeasmith/http_build_url",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jakeasmith/http_build_url.git",
+                "reference": "93c273e77cb1edead0cf8bcf8cd2003428e74e37"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jakeasmith/http_build_url/zipball/93c273e77cb1edead0cf8bcf8cd2003428e74e37",
+                "reference": "93c273e77cb1edead0cf8bcf8cd2003428e74e37",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/http_build_url.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jake A. Smith",
+                    "email": "theman@jakeasmith.com"
+                }
+            ],
+            "description": "Provides functionality for http_build_url() to environments without pecl_http.",
+            "time": "2017-05-01T15:36:40+00:00"
         },
         {
             "name": "joshtronic/php-loremipsum",
@@ -1391,7 +1476,7 @@
                 "popover-x",
                 "widget"
             ],
-            "time": "2018-11-05T10:59:51+00:00"
+            "time": "2018-11-05 10:59:51"
         },
         {
             "name": "kartik-v/yii2-export",
@@ -2599,7 +2684,7 @@
                 "widget",
                 "yii2"
             ],
-            "time": "2018-11-05T12:33:04+00:00"
+            "time": "2018-11-05 12:33:04"
         },
         {
             "name": "kartik-v/yii2-widget-touchspin",

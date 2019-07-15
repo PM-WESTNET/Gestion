@@ -1,0 +1,4 @@
+actor: IvrapiTester
+modules:
+    enabled:
+        - \Helper\Ivrapi

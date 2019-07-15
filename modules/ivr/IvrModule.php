@@ -5,7 +5,7 @@ namespace app\modules\ivr;
 /**
  * ivr module definition class
  */
-class IvtModule extends \yii\base\Module
+class IvrModule extends \yii\base\Module
 {
     /**
      * {@inheritdoc}
