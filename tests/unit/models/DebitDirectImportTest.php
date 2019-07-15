@@ -139,4 +139,29 @@ class DebitDirectImportTest extends Unit
         expect('Failed payment created', count(DebitDirectFailedPayment::find()->all()))->equals(1);
     }
 
+    public function testArePaymentPendingToClose()
+    {
+        $model = new DebitDirectImport([
+            'company_id' => 1 ,
+            'bank_id' => 1,
+            'money_box_account_id' => 42,
+        ]);
+        $model->save();
+
+        $payment = new Payment([
+            'customer_id' => 45900,
+            'company_id' => 1,
+            'amount' => 100,
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+            'partner_distribution_model_id' => 1,
+            'status' => Payment::PAYMENT_DRAFT
+        ]);
+        $payment->save();
+
+        expect('Import doesnt have any pending payment', $model->arePaymentPendingToClose())->false();
+
+        $model->createPaymentRelation($payment->payment_id);
+
+        expect('Import have one pending payment to close', $model->arePaymentPendingToClose())->true();
+    }
 }

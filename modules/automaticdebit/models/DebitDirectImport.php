@@ -86,6 +86,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'company_id' => Yii::t('app', 'Company ID'),
             'bank_id' => Yii::t('app', 'Bank ID'),
+            'create_timestamp' => Yii::t('app', 'Create timestamp'),
         ];
     }
 
@@ -150,9 +151,8 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         }
 
         try {
-            $result = $bank_instance->import($resource, $this);
+            $result = $bank_instance->import($resource, $this, $fileName);
         }catch (\Exception $ex) {
-            \Yii::trace($ex);
             Yii::$app->session->addFlash('error', $ex->getMessage(). $ex->getTraceAsString());
             return [
                 'status' => false,
@@ -249,5 +249,14 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         ]);
 
         return $failed_payment->save();
+    }
+
+    /**
+     * @return bool
+     * Indica si la importación no tiene pagos pendientes para cerrar
+     */
+    public function arePaymentPendingToClose()
+    {
+        return $this->getPayments()->where(['status' => Payment::PAYMENT_DRAFT])->exists();
     }
 }

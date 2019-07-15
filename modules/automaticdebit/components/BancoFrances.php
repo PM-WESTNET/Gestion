@@ -103,7 +103,7 @@ class BancoFrances implements BankInterface
      * Debe importar el archivo con los pagos y crear los pagos correspondientes
      * @return mixed
      */
-    public function import($resource, $import)
+    public function import($resource, $import, $fileName)
     {
         $companyConfig = null;
         $proccess_timestamp = null;
@@ -132,8 +132,6 @@ class BancoFrances implements BankInterface
                     $code = substr($line, 70, 2);
                     $cbu = substr($line, 33,22);
                     $code_description = substr($line, 124,40);
-                    \Yii::trace('$code');
-                    \Yii::trace($code);
 
                     if($code === '00') {
                         $payments[] = [
@@ -150,6 +148,7 @@ class BancoFrances implements BankInterface
             }
         }
         $import->process_timestamp = strtotime($this->restoreDate($process_timestamp));
+        $import->file = $fileName;
         $import->save();
         $this->createFailedPayments($failed_payments, $import->debit_direct_import_id);
 
@@ -194,7 +193,6 @@ class BancoFrances implements BankInterface
         foreach ($payments as $payment) {
             $customer = Customer::findOne(['code' => $payment['customer_code']]);
             $transaction = Yii::$app->db->beginTransaction();
-            $transaction->begin();
 
             if (!empty($customer)) {
                 $p = new Payment([
@@ -209,8 +207,7 @@ class BancoFrances implements BankInterface
                     $this->createItemAndRelation($payment['amount'], 'Debito Directo cta ' . $payment['cbu'], $payment_method->payment_method_id, $import->money_box_account_id, $p, $import);
                     $payments_created ++;
                 } else {
-//                    $transaction->rollBack();
-                    \Yii::trace($p->getErrors());
+                    $transaction->rollBack();
                     array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'], 'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Cant create payment. Customer code: ').$payment['customer_code']]);
                 }
             } else {

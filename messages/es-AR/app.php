@@ -1104,7 +1104,6 @@
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Infobip Response Messages' => 'Respuestas de Infobip',
     'Infobip received sms' => 'Mensajes recibidos de Infobip',
-
     'Customer not found: ' => 'Cliente no encontrado: ',
     'Email 1 status' => 'Estado de email 1',
     'Email 2 status' => 'Estado de email 2',
@@ -1136,5 +1135,10 @@
     'Other Customers' => 'Otros Clientes',
     'Other Customer' => 'Otro Cliente',
     'You must select a file' => 'Debe seleccionar un archivo',
-    'Failed payments' => 'Pagos fallidos'
+    'Failed payments' => 'Pagos fallidos',
+    'Import' => 'Importación',
+    'No payments created' => 'Sin pagos creados',
+    'Close all payments' => 'Cerrar todos los pagos',
+    'Payments has been closed successfully' => 'Los pagos han sido cerrados exitosamente',
+    'Create timestamp' => 'Fecha de creación'
 );

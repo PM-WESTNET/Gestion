@@ -1,5 +1,13 @@
 <?php
-$this->title = $bank->name. ' - '. Yii::t('app','Imports');
+use yii\helpers\Html;
+use yii\grid\GridView;
+use yii\grid\ActionColumn;
+use yii\grid\SerialColumn;
+
+$this->title = Yii::t('app','Imports');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app','Banks for Automatic Debit'), 'url' => ['/automaticdebit/bank/index']];
+$this->params['breadcrumbs'][] = ['label' => $bank->name, 'url' => ['/automaticdebit/bank/view', 'id' => $bank->bank_id]];
+
 ?>
 
 <div class="bank_import">
@@ -7,24 +15,22 @@ $this->title = $bank->name. ' - '. Yii::t('app','Imports');
     <h1><?php echo $this->title ?></h1>
 
     <p>
-        <?php echo \yii\helpers\Html::a(
+        <?= Html::a(
             '<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app','New Import'),
             ['/automaticdebit/bank/create-import', 'bank_id' => $bank->bank_id], ['class' => 'btn btn-success'])?>
     </p>
 
 
-    <?php echo \yii\grid\GridView::widget([
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
-            ['class' => \yii\grid\SerialColumn::class],
-
+            ['class' => SerialColumn::class],
             'create_timestamp:datetime',
-
             [
-                'class' => \yii\grid\ActionColumn::class,
+                'class' => ActionColumn::class,
                 'buttons' => [
                     'view'=> function ($url, $model) {
-                        return \yii\helpers\Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>',
                             ['/automaticdebit/bank/import-view', 'import_id' => $model->debit_direct_import_id]);
                     },
 
