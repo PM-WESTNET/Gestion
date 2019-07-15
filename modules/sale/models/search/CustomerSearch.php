@@ -812,7 +812,7 @@ class CustomerSearch extends Customer {
                 new Expression('sum(b.total * bt.multiplier) AS amount')])
             ->from(new Expression('bill b FORCE INDEX(fk_bill_customer1_idx)'))
             ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id' )
-            ->where(['b.status'=>['closed', 'completed'], 'b.customer_id'=>$customer_id])
+            ->where(['b.status' => 'closed', 'b.customer_id'=>$customer_id])
             ->andWhere(['<>','b.total', 0])
             ->groupBy(['b.customer_id','b.bill_id'])
         ;
@@ -820,7 +820,7 @@ class CustomerSearch extends Customer {
         $queryPayment = (new Query())
             ->select(['p.customer_id', 'p.date as date', new Expression('0 AS i'), new Expression('-p.amount')])
             ->from('payment as p')
-            ->where(['p.status'=>'closed', 'p.customer_id'=>$customer_id])
+            ->where(['p.status' => 'closed', 'p.customer_id'=>$customer_id])
         ;
 
         $subQuery = (new Query());

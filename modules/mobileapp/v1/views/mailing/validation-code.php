@@ -2,8 +2,13 @@
     <table width="600">
         <tr>
             <td style="height:80px; width: 50%; padding-bottom: 20px; padding-top: 20px; border-bottom: 1px solid gray; text-align: center">
-                <img style="height: 100%; display: inline-block;"
-                     src="<?= $message->embed(Yii::$app->view->params['image'], ['contentType' => 'image/jpeg']) ?>" alt="Logo">
+                <?php if(!empty(Yii::$app->view->params['image'])):?>
+                    <img style="height: 100%; display: inline-block;"
+                         src="<?= $message->embed(Yii::$app->view->params['image'], ['contentType' => 'image/jpeg']) ?>" alt="Logo">
+                <?php else:?>
+                    <img style="height: 100%; display: inline-block;"
+                         src="<?= $message->embed(Yii::getAlias('@app/web/images/').'logo-westnet.jpg', ['contentType' => 'image/jpeg']) ?>" alt="Logo">
+                <?php endif;?>
             </td>
         </tr>
         <!-- Contenido -->

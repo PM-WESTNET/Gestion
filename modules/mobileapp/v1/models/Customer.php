@@ -134,11 +134,7 @@ class Customer extends \app\modules\sale\models\Customer
         }
 
         $response['account']= $movements;
-
-
-        $cs = new CustomerSearch();
-        $rs = $cs->searchDebtBills($this->customer_id);
-        $response['debt_bills'] = (!$rs ? 0 : $rs['debt_bills'] );
+        $response['debt_bills'] = 0 ;
         $response['balance'] = $balance;
 
         return $response;

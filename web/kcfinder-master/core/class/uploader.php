@@ -109,12 +109,7 @@ class uploader {
         if (count($_FILES))
             $this->file = &$_FILES[key($_FILES)];
 
-
-        if (YII_ENV_DEV) {
-            $file = '/var/www/html/web/kcfinder-master/conf/config.php';
-        }else {
-            $file = '/var/www/arya2/web/kcfinder-master/conf/config.php';
-        }
+        $file = '/var/www/arya2/web/kcfinder-master/conf/config.php';
 
         // CONFIG & SESSION SETUP
         $session = new session($file);

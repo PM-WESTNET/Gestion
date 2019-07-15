@@ -229,9 +229,9 @@ class UserAppController extends Controller
             $isEmail = false;
 
             if(filter_var($data['destinatary'], FILTER_VALIDATE_EMAIL) !== false){
-                if(!$model->email){
+                //if(!$model->email){
                     $model->updateAttributes(['email' => $data['destinatary']]);
-                }
+                //}
                 $isEmail = true;
             }
 

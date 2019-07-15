@@ -16,11 +16,7 @@
    even if you are using session configuration.
    See http://kcfinder.sunhater.com/install for setting descriptions */
 
-if (YII_ENV_DEV) {
-    $dir = '/var/www/html/web/kcfinder-master/upload';
-} else {
-    $dir = '/var/www/arya2/web/kcfinder-master/upload';
-}
+$dir = '/var/www/arya2/web/kcfinder-master/upload';
 
 return array(
 

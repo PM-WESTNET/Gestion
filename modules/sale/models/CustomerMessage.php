@@ -5,6 +5,7 @@ namespace app\modules\sale\models;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\westnet\notifications\components\transports\InfobipService;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
+use app\modules\westnet\notifications\components\transports\SMSInfobipTransport;
 use Yii;
 
 /**
@@ -136,24 +137,29 @@ class CustomerMessage extends \app\components\db\ActiveRecord
 
     public static function availablesFields()
     {
+        $charsLength = SMSInfobipTransport::getMaxLengthReplacement();
+
         return [
             'customer_name' => [
                 'description' => 'Nombre del Cliente',
                 'value' => function (Customer $customer) {
                     return $customer->fullName;
-                }
+                },
+                'length' => $charsLength['@Nombre']
             ],
             'payment_code' =>  [
                 'description' => 'Código de Pago',
                 'value' => function (Customer $customer) {
                     return $customer->payment_code;
-                }
+                },
+                'length' => $charsLength['@CodigoDePago']
             ],
             'code' =>  [
                 'description' => 'Número de Cliente',
                 'value' => function (Customer $customer) {
                     return $customer->code;
-                }
+                },
+                'length' => $charsLength['@Codigo']
             ],
             'debt' => [
                 'description' => 'Deuda del Cliente',
@@ -162,7 +168,8 @@ class CustomerMessage extends \app\components\db\ActiveRecord
                     $paymentSearch->customer_id = $customer->customer_id;
 
                     return Yii::$app->formatter->asCurrency($paymentSearch->accountTotal());
-                }
+                },
+                'length' => $charsLength['@Saldo']
             ]
         ];
     }

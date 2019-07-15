@@ -8,6 +8,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
+use app\modules\sale\models\Bill;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -37,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php $form = ActiveForm::begin(['id'=>'bill-form', 'method' => 'get']); ?>
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= CompanySelector::widget(['model'=>$searchModel, 'id'=>'company_id']); ?>
+                            <?= CompanySelector::widget(['model' => $searchModel, 'id' => 'company_id']); ?>
                         </div>
 
                         <div class="col-sm-6">
@@ -46,6 +48,44 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'encode'=>false,
                                 'separator'=>'<br/>',
                             ])->label(Yii::t('app','Bill Type')) ?>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'fromDate')->widget(DatePicker::class, [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'period',
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'format' => 'yyyy-mm-dd',
+                                ],
+                                'options'=>[
+                                    'class'=>'form-control filter dates',
+                                    'placeholder'=>Yii::t('app','Date')
+                                ]
+                            ]);
+                            ?>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <?=$form->field($searchModel, 'toDate')->widget(DatePicker::class, [
+                                'type' => 1,
+                                'language' => Yii::$app->language,
+                                'model' => $searchModel,
+                                'attribute' => 'period',
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'format' => 'yyyy-mm-dd',
+                                ],
+                                'options'=>[
+                                    'class'=>'form-control filter dates',
+                                    'placeholder'=>Yii::t('app','Date')
+                                ]
+                            ]);
+                            ?>
                         </div>
                     </div>
 
@@ -110,8 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     <h3 class="panel-title"><?= Yii::t('app', 'Bills') ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php
-                    \yii\widgets\Pjax::begin(
+                    <?php Pjax::begin(
                         [
                             'id' => 'contracts',
                             'enablePushState'=>FALSE
@@ -125,12 +164,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 ['class' => 'kartik\grid\SerialColumn'],
                                 [
                                     'header'=>Yii::t('app', 'Customer'),
-                                    'attribute'=>'customer.name',
+                                    'value' => function($model) {
+                                        return $model->customer->lastname .', '.$model->customer->name;
+                                    }
                                 ],
                                 [
                                     'header'=>Yii::t('app', 'Bill'),
                                     'value' => function($model){
-                                        return $model->billType->name . ' - ' . $model->number;
+                                        $number = $model->status == Bill::STATUS_CLOSED ? ' - '.$model->number : '';
+                                        return $model->billType->name . $number;
                                     }
                                 ],
                                 [
@@ -148,7 +190,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     }
 
-                    \yii\widgets\Pjax::end() ?>
+                    Pjax::end() ?>
                 </div>
             </div> <!-- Fin Seleccion de datos para filtro de facturas -->
 
@@ -197,6 +239,8 @@ $this->params['breadcrumbs'][] = $this->title;
             var postdata = {
                 'BillSearch[company_id]': $('#billsearch-company_id').val(),
                 'BillSearch[bill_type_id]': $('#billsearch-bill_type_id').val(),
+                'BillSearch[fromDate]' : $('#billsearch-fromdate').val(),
+                'BillSearch[toDate]' : $('#billsearch-todate').val(),
             };
             try {
                 var date = $('#billsearch-period').kvDatepicker('getDate');

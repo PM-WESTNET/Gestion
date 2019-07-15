@@ -355,6 +355,43 @@ class BillTest extends \Codeception\Test\Unit
         expect('Base is correct', $taxesApplied[5]['base'])->equals(191);
     }
 
+    public function testVerifyAmounts()
+    {
+        $model = BillExpert::createBill(1);
+        $model->company_id = 1;
+        $model->status = 'draft';
+        $model->partner_distribution_model_id = 1;
+        $model->save();
+
+        expect('Verify detect empty amounts', $model->verifyAmounts())->false();
+
+        //Detalle manual
+        $detail = [
+            'concept' => 'xxx',
+            'unit_net_price' => 100,
+            'unit_final_price' => 121,
+            'unit_id' => 1,
+        ];
+        $detail = $model->addDetail($detail);
+        $detail->updateAttributes([
+            'line_total' =>  121,
+            'line_subtotal' => 100
+        ]);
+
+        $model->close();
+
+        $model->updateAttributes(['total' => 200]);
+
+        expect('Verify detect bad total', $model->verifyAmounts())->false();
+        expect('Verify detect bad total', $model->verifyAmounts(true))->false();
+        expect('Verify update total correctly', $model->total)->equals(121);
+
+        $model->updateAttributes(['amount' => 0]);
+        expect('Verify detect bad amount', $model->verifyAmounts())->false();
+        expect('Verify detect bad amount', $model->verifyAmounts(true))->false();
+        expect('Verify update amount correctly', $model->amount)->equals(100);
+    }
+
     public function testBillWithDiscountPorRecomendado()
     {
         $model = new Customer([

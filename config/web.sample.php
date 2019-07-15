@@ -61,12 +61,21 @@ $config = [
             'useFileTransport' => true,
         ],
         'log' => [
+            'flushInterval' => 1,
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['facturacion'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_facturacion.log'
+                ]
             ],
         ],
         'db' => $db['db'],
