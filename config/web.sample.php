@@ -177,6 +177,19 @@ $config = [
                 'load-media-error-handling' => 'ignore'
             ],
         ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'ivr' => [
+                    'class' => 'yii\authclient\OAuth2',
+                    'clientId' => 'unique client_id',
+                    'clientSecret' => 'client_secret',
+                    'tokenUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/token',
+                    'authUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/login',
+                    'apiBaseUrl' => 'http://localhost:8180/web/index.php?r=ivr',
+                ],
+            ],
+        ],
     ],
     'modules' => [
         'sale' => [
@@ -277,6 +290,14 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'ivr' =>  [
+            'class' => 'app\modules\ivr\IvrModule',
+            'modules' => [
+                'v1' => [
+                    'class' => 'app\modules\ivr\v1\V1Module'
+                ]
+            ]
+        ]
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
