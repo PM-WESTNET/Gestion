@@ -369,39 +369,64 @@ class TaxesBookSearch extends ProviderBill
         ]);
     }
 
+    /**
+     * @param $params
+     * @return SqlDataProvider
+     * Primer bloque de CASE WHEN : Es necesario que se tenga en cuenta los importes de los impuestos que no son iva en los campos que están destinado a ello
+     * Segundo bloque de CASE WHEN : Se determina el importe del impuesto por cada tipo de iva
+     * Tercer bloque de CASE WHEN : Se suma 1 por cada tipo de iva que está presente en el comprobante, ya que de esa manera se puede determinar la cantidad de alicuotas. (tener presente que por cada tipo de iva, se debe enviar una alicuota)
+     * Cuarto bloque de CASE WHEN : Código de cada tipo de iva, en caso de que se incluya en el comprobante
+     */
     public function findBuyTxt($params)
     {
-
         $this->load($params);
 
         $sql = "SELECT
                     date,
-                    bill_type                                 as tipo_comprobante,
-                    number                                    as numero_comprobante,
-                    0                                         as numero_importacion,
-                    tipo_documento                            as tipo_documento,
-                    tax_identification                        as numero_documento,
-                    business_name                             as empresa,
-                    ' '                                       as codigo_operacion,
-                    total,
-                    0                                         as conceptos_no_incluido_neto,
-                    0                                         as exento,
-                    0                                         as percepciones_a_cuenta_iva,
-                    0                                         as percepciones_a_cuenta_otros,
-                    0                                         as iibb,
-                    0                                         as municipales,
-                    0                                         as internos,
-                    'PES'                                     as codigo_moneda,
-                    1                                         as tipo_de_cambio,
-                    1                                         as cantidad_iva,
-                    (total - net)                             as credito_fiscal,
-                    0                                         as otros_tributos,
-                    0                                         as cuit_emisor,
-                    ''                                        as emisor,
-                    0                                         as iva_comision,
-                    net                                       as neto,
-                    code                                      as tipo_de_iva,
-                    (total -net)                              as impuesto_liquidado
+                    bill_type                                                                   as tipo_comprobante,
+                    number                                                                      as numero_comprobante,
+                    0                                                                           as numero_importacion,
+                    tipo_documento                                                              as tipo_documento,
+                    tax_identification                                                          as numero_documento,
+                    business_name                                                               as empresa,
+                    ' '                                                                         as codigo_operacion,
+                    total,  
+                    conceptos_no_gravados                                                       as conceptos_no_incluido_neto, 
+                    0                                                                           as exento,
+                    0                                                                           as percepciones_a_cuenta_iva, 
+                    retencion_ganancias                                                         as percepciones_a_cuenta_otros,
+                    (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos))  as iibb,
+                    0                                                                           as municipales,
+                    0                                                                           as internos,
+                    'PES'                                                                       as codigo_moneda,
+                    1                                                                           as tipo_de_cambio,
+                    (SUM(cant_iva_105) + SUM(cant_iva_21) + SUM(cant_iva_27) + SUM(cant_iva_06) + SUM(cant_iva_05) + SUM(cant_iva_025)) as cantidad_iva,
+                    (total - net - (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos)) - retencion_ganancias - conceptos_no_gravados) as credito_fiscal,
+                    0                                                                           as otros_tributos,
+                    0                                                                           as cuit_emisor,
+                    ''                                                                          as emisor,
+                    0                                                                           as iva_comision,
+                    net                                                                         as neto,
+                    code                                                                        as tipo_de_iva,
+                    (total - net - (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos)) - retencion_ganancias - conceptos_no_gravados) as impuesto_liquidado,
+                    SUM(code_iva_105)                                                           as code_iva_105,
+                    SUM(code_iva_21)                                                            as code_iva_21,
+                    SUM(code_iva_27)                                                            as code_iva_27,
+                    SUM(code_iva_06)                                                            as code_iva_06,
+                    SUM(code_iva_05)                                                            as code_iva_05,
+                    SUM(code_iva_025)                                                           as code_iva_025,
+                    SUM(iva_105)                                                                as iva_105,
+                    SUM(iva_21)                                                                 as iva_21,
+                    SUM(iva_27)                                                                 as iva_27,
+                    SUM(iva_06)                                                                 as iva_06,
+                    SUM(iva_05)                                                                 as iva_05,
+                    SUM(iva_025)                                                                as iva_025,
+                    SUM(net_iva_105)                                                            as net_iva_105,
+                    SUM(net_iva_21)                                                             as net_iva_21,
+                    SUM(net_iva_27)                                                             as net_iva_27,
+                    SUM(net_iva_06)                                                             as net_iva_06,
+                    SUM(net_iva_05)                                                             as net_iva_05,
+                    SUM(net_iva_025)                                                            as net_iva_025
                 FROM (SELECT
                         pb.provider_bill_id,
                         tbi.taxes_book_item_id,
@@ -416,11 +441,50 @@ class TaxesBookSearch extends ProviderBill
                         (pb.total * bt.multiplier)     AS total,
                         tr.pct,
                         coalesce(tr.code, 5) as code,
-                        (pbhtr.amount * bt.multiplier) AS amount
+                        (pbhtr.amount * bt.multiplier) AS amount,
+                        
+                        CASE WHEN tx.slug = 'ingresos-brutos' THEN pbhtr.amount ELSE 0 END as ingresos_brutos,
+                        CASE WHEN tx.slug = 'cptos-no-grav' THEN pbhtr.amount ELSE 0 END as conceptos_no_gravados,
+                        CASE WHEN tx.slug = 'percep-iva' THEN pbhtr.amount ELSE 0 END as percepcion_iva,
+                        CASE WHEN tx.slug = 'percep-ing-b' THEN pbhtr.amount ELSE 0 END as percepcion_ingresos_brutos,
+                        CASE WHEN tx.slug = 'retenc-iva' THEN pbhtr.amount ELSE 0 END as retencion_iva,
+                        CASE WHEN tx.slug = 'retenc-ing-b' THEN pbhtr.amount ELSE 0 END as retencion_ingresos_brutos,
+                        CASE WHEN tx.slug = 'retenc-gan' THEN pbhtr.amount ELSE 0 END as retencion_ganancias,
+                        CASE WHEN tx.slug = 'iva-otros' THEN pbhtr.amount ELSE 0 END as iva_otros,
+                        
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.105' THEN pbhtr.amount ELSE 0 END as iva_105,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.21' THEN pbhtr.amount ELSE 0 END as iva_21,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.27' THEN pbhtr.amount ELSE 0 END as iva_27,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.06' THEN pbhtr.amount ELSE 0 END as iva_06,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.05' THEN pbhtr.amount ELSE 0 END as iva_05,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.025' THEN pbhtr.amount ELSE 0 END as iva_025,
+                        
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.105' THEN pbhtr.net ELSE 0 END as net_iva_105,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.21' THEN pbhtr.net ELSE 0 END as net_iva_21,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.27' THEN pbhtr.net ELSE 0 END as net_iva_27,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.06' THEN pbhtr.net ELSE 0 END as net_iva_06,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.05' THEN pbhtr.net ELSE 0 END as net_iva_05,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.025' THEN pbhtr.net ELSE 0 END as net_iva_025,
+                        
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.105' THEN 1 ELSE 0 END as cant_iva_105,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.21' THEN 1 ELSE 0 END as cant_iva_21,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.27' THEN 1 ELSE 0 END as cant_iva_27,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.06' THEN 1 ELSE 0 END as cant_iva_06,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.05' THEN 1 ELSE 0 END as cant_iva_05,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.025' THEN 1 ELSE 0 END as cant_iva_025,
+                        
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.105' THEN tr.code ELSE 0 END as code_iva_105,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.21' THEN tr.code ELSE 0 END as code_iva_21,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.27' THEN tr.code ELSE 0 END as code_iva_27,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.06' THEN tr.code ELSE 0 END as code_iva_06,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.05' THEN tr.code ELSE 0 END as code_iva_05,
+                        CASE WHEN tx.slug =  'iva' AND tr.pct = '0.025' THEN tr.code ELSE 0 END as code_iva_025
+                                                
                       FROM provider_bill pb LEFT JOIN provider p ON pb.provider_id = p.provider_id
                         LEFT JOIN bill_type bt ON pb.bill_type_id = bt.bill_type_id
                         LEFT JOIN provider_bill_has_tax_rate pbhtr ON pb.provider_bill_id = pbhtr.provider_bill_id
                         LEFT JOIN tax_rate tr ON pbhtr.tax_rate_id = tr.tax_rate_id
+                        LEFT JOIN tax tx ON tx.tax_id = tr.tax_id
                         LEFT JOIN taxes_book_item tbi ON pb.provider_bill_id = tbi.provider_bill_id
                       WHERE
                       ((pb.status = 'closed') AND (pb.company_id = :company_id)) AND (tbi.taxes_book_id = :taxes_book_id) AND bt.applies_to_buy_book = 1) c

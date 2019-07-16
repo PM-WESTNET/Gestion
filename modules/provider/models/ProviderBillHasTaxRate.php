@@ -67,7 +67,7 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
             [['provider_bill_id', 'tax_rate_id', 'amount'], 'required'],
             [['provider_bill_id', 'tax_rate_id'], 'integer'],
             [['amount'], 'number'],
-            [['providerBill', 'taxRate'], 'safe']
+            [['providerBill', 'taxRate', 'net'], 'safe']
         ];
     }
 
@@ -82,6 +82,7 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
             'amount' => Yii::t('app', 'Amount'),
             'providerBill' => Yii::t('app', 'Provider Bill'),
             'taxRate' => Yii::t('app', 'Tax Rate'),
+            'net' => Yii::t('app', 'Net')
         ];
     }    
 
