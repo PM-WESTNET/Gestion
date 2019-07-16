@@ -19,7 +19,7 @@ class Controller extends \yii\rest\Controller
         return array_merge(parent::behaviors(),[
             // performs authorization by token
             'tokenAuth' => [
-                'class' => \conquer\oauth2\TokenAuth::className(),
+                'class' => \conquer\oauth2\TokenAuth::class,
                 'identityClass' => User::class
             ],
         ]);
