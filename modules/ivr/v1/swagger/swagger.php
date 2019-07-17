@@ -5,7 +5,7 @@ namespace api\modules\v1\swagger;
 /**
  * @SWG\Swagger(
  *     schemes={"https"},
- *     host="gestion.westnet.com.ar",
+ *     host="https://gestion.westnet.com.ar",
  *     basePath="/index.php?r=ivr/v1",
  *     @SWG\Info(
  *         version="1.0.0",
@@ -16,8 +16,24 @@ namespace api\modules\v1\swagger;
  * )
  *
  * @SWG\Tag(
- *   name="user",
- *   description="用户相关操作",
+ *   name="Auth",
+ *   description="Autenticación en la api",
+ *   @SWG\ExternalDocumentation(
+ *     description="Find out more about our store",
+ *     url="http://swagger.io"
+ *   )
+ *)
+ * @SWG\Tag(
+ *   name="Customer",
+ *   description="Endpoints con datos del cliente",
+ *   @SWG\ExternalDocumentation(
+ *     description="Find out more about our store",
+ *     url="http://swagger.io"
+ *   )
+ * )
+ * @SWG\Tag(
+ *   name="Info",
+ *   description="Información varia",
  *   @SWG\ExternalDocumentation(
  *     description="Find out more about our store",
  *     url="http://swagger.io"

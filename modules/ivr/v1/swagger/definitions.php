@@ -30,22 +30,57 @@ namespace app\models\v1\swagger;
  * ),
  * @SWG\Definition(
  *      definition="Error2",
- *      required={"error"},
  *      @SWG\Property(
- *          property="error",
+ *          property="name",
  *          type="string",
  *          format="string",
- *          example= "Parámetro 'value' es obligatorio"
- *      )
+ *          example= "Unauthorized"
+ *      ),
+ *     @SWG\Property(
+ *          property="message",
+ *          type="string",
+ *          format="string",
+ *          example= "The access token provided is invalid."
+ *      ),
+ *     @SWG\Property(
+ *          property="code",
+ *          type="integer",
+ *          format="int32",
+ *          example= 0
+ *      ),
+ *     @SWG\Property(
+ *          property="status",
+ *          type="integer",
+ *          format="int32",
+ *          example= 401
+ *      ),
+ *      @SWG\Property(
+ *          property="type",
+ *          type="string",
+ *          format="string",
+ *          example= "yii\\web\\UnauthorizedHttpException"
+ *      ),
+ *
  * ),
  * @SWG\Definition(
- *      definition="Error3",
- *      required={"error"},
+ *      definition="PaymentMethod",
  *      @SWG\Property(
- *          property="error",
+ *          property="payment_method_id",
+ *          type="integer",
+ *          format="int32",
+ *          example= "1"
+ *      ),
+ *     @SWG\Property(
+ *          property="name",
  *          type="string",
  *          format="string",
- *          example= "Parámetros 'field' y 'value' son obligatorios"
+ *          example= "Pago Facil"
+ *      ),
+ *     @SWG\Property(
+ *          property="status",
+ *          type="string",
+ *          format="string",
+ *          example= "enabled"
  *      )
  * )
  */
