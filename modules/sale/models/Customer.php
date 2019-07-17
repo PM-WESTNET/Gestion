@@ -122,6 +122,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
+            [['last_calculation_current_account_balance', 'current_account_balance'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
