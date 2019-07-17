@@ -1129,5 +1129,6 @@
     'Infobip sended sms' => 'SMS enviados por Infobip',
     'Mobile app status' => 'Estado de la aplicación móvil',
     'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
-    'Can`t create payment extension' => 'No se puede crear la extensión de pago'
+    'Can`t create payment extension' => 'No se puede crear la extensión de pago',
+    'Send to Ivr' => 'Informar a IVR'
 );
