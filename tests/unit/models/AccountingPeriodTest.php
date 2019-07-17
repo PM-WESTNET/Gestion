@@ -109,4 +109,34 @@ class AccountingPeriodTest extends \Codeception\Test\Unit {
         expect('close return true', $model->close())->true();
         expect('Status is changed', $model->status)->equals(AccountingPeriod::STATE_CLOSED);
     }
+
+    public function testGetWorkFlowAttr()
+    {
+        $model = new AccountingPeriod([
+            'name' => 'Period',
+            'status' => AccountingPeriod::STATE_OPEN
+        ]);
+        $model->save();
+
+        $attribute = $model->getWorkflowAttr();
+        expect('Return is a string', property_exists(get_class($model) , $attribute))->true();
+    }
+
+    public function testGetWorkFlowStates()
+    {
+        $model = new AccountingPeriod([
+            'name' => 'Period',
+            'status' => AccountingPeriod::STATE_OPEN
+        ]);
+        $model->save();
+
+        $return_some_status = false;
+        foreach ($model->getWorkFlowStates() as $workFlowState => $value) {
+            if($workFlowState == AccountingPeriod::STATE_OPEN || $workFlowState == AccountingPeriod::STATE_CLOSED) {
+
+            }
+        }
+
+        expect('Get workflow states function return some state', $return_some_status)->true();
+    }
 }

@@ -12,6 +12,7 @@ use Yii;
  * @property string $reason
  * @property integer $connection_id
  * @property integer $user_id
+ * @property integer $create_timestamp
  *
  * @property Connection $connection
  */
@@ -30,17 +31,17 @@ class ConnectionForcedHistorial extends \app\components\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    /*
+
     public function behaviors()
     {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['create_timestamp'],
                 ],
             ],
-            'date' => [
+            /**'date' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
@@ -53,10 +54,10 @@ class ConnectionForcedHistorial extends \app\components\db\ActiveRecord
                     yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
                 ],
                 'value' => function(){return date('h:i');},
-            ],
+            ],**/
         ];
     }
-    */
+
 
     /**
      * @inheritdoc

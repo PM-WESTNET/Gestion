@@ -61,12 +61,21 @@ $config = [
             'useFileTransport' => true,
         ],
         'log' => [
+            'flushInterval' => 1,
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['facturacion'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_facturacion.log'
+                ]
             ],
         ],
         'db' => $db['db'],
@@ -166,6 +175,19 @@ $config = [
                 'page-size' => 'A4',
                 'load-error-handling' => 'ignore',
                 'load-media-error-handling' => 'ignore'
+            ],
+        ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'ivr' => [
+                    'class' => 'yii\authclient\OAuth2',
+                    'clientId' => 'unique client_id',
+                    'clientSecret' => 'client_secret',
+                    'tokenUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/token',
+                    'authUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/login',
+                    'apiBaseUrl' => 'http://localhost:8180/web/index.php?r=ivr',
+                ],
             ],
         ],
     ],
@@ -271,6 +293,14 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'ivr' =>  [
+            'class' => 'app\modules\ivr\IvrModule',
+            'modules' => [
+                'v1' => [
+                    'class' => 'app\modules\ivr\v1\V1Module'
+                ]
+            ]
+        ]
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

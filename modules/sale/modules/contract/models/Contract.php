@@ -8,12 +8,15 @@ use app\modules\sale\models\Address;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerLog;
 use app\modules\sale\models\Product;
+use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\modules\contract\components\CompanyByNode;
 use app\modules\ticket\models\Category;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\Vendor;
 use webvimark\modules\UserManagement\models\User;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
@@ -499,16 +502,20 @@ class Contract extends ActiveRecord {
     }
 
     public static function getStatuses(){
-        $statuses = (new \yii\db\Query())
-            ->select(['status'])
-            ->from('contract')
-            ->groupBy('status')
-            ->all();
-        return $statuses;
+        return [
+            ['status' => Contract::STATUS_DRAFT ],
+            ['status' => Contract::STATUS_ACTIVE ],
+            ['status' => Contract::STATUS_CANCELED ],
+            ['status' => Contract::STATUS_INACTIVE ],
+            ['status' => Contract::STATUS_LOW ],
+            ['status' => Contract::STATUS_LOW_PROCESS ],
+            ['status' => Contract::STATUS_NEGATIVE_SURVEY ],
+            ['status' => Contract::STATUS_NO_WANT ],
+        ];
     }
 
     public static function getStatusesForSelect(){
-        $status_array = \yii\helpers\ArrayHelper::map(Contract::getStatuses(), 'status', 'status');
+        $status_array = ArrayHelper::map(Contract::getStatuses(), 'status', 'status');
         foreach($status_array as $key => $value){
             $status_array[$key] = Yii::t('app',$value);
         }
@@ -527,5 +534,37 @@ class Contract extends ActiveRecord {
         } else {
             $this->updateAttributes(['status' => 'draft']);
         }
+    }
+
+    /**
+     * @param $period
+     * @return int
+     * @throws \Exception
+     * Devuelve la cantidad de productos a facturar de extension de pago para el período dado (en caso de estar vacío, utiliza el período corriente) que aún no han sido facturados.
+     * Regla de negocio: Para consultar las extensiones pedidas el mes corriente es necesario que el $period sea correspondiente al primer dia del mes siguiente, ya que las extensiones
+     * de pago se agregan para la facturación del próximo mes.
+     */
+    public function getActivePaymentExtensionQtyPerPeriod($period = null)
+    {
+        $end_period = (new \DateTime($period))->modify('+1 month')->format('Y-m-01');
+        $payment_extension_product_id = Config::getValue('id-product_id-extension-de-pago');
+
+        if(!$period) {
+            $period = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $contract_detail_ids = (new Query())
+            ->select('contract_detail_id')
+            ->from('contract_detail')
+            ->where(['contract_id' => $this->contract_id])
+            ->andWhere(['product_id' => $payment_extension_product_id])
+            ->all();
+
+        return count(ProductToInvoice::find()
+            ->where(['status' => ProductToInvoice::STATUS_ACTIVE])
+            ->andWhere(['>=','period', $period])
+            ->andWhere(['<', 'period', $end_period])
+            ->andWhere(['in','contract_detail_id', $contract_detail_ids])
+            ->all());
     }
 }

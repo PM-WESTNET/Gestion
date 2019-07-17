@@ -375,6 +375,30 @@ class TicketController extends Controller
 
     }
 
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * Muestra un listado de tickets de  la categoría solicitud de edición de tickets.
+     */
+    public function actionContactEditionTickets()
+    {
+        $this->layout = '/fluid';
+        $search = new TicketSearch();
+        $search->setScenario('wideSearch');
+        $search->status_id = null;
+
+        $category = Category::findOne(Config::getValue('ticket-category-edicion-de-datos-id'));
+
+        if (empty($category)) {
+            throw new BadRequestHttpException('Categoría de Solicitud de edición de datos no encontrada. Verifique configuración');
+        }
+
+        $search->category_id = $category->category_id;
+        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('request-data-edition-tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
+    }
+
     public function actionGetObservations($id)
     {
         if (Yii::$app->request->isAjax) {
@@ -472,6 +496,25 @@ class TicketController extends Controller
             'status' => $status ? 'success' : 'error',
             'has_event_action' => $status ? $status->hasEventAction() : false
         ];
+    }
+
+    /**
+     * @param $ticket_id
+     * @return Response
+     * @throws NotFoundHttpException
+     * Crea una gestión para el ticket
+     */
+    public function actionAddTicketManagement($ticket_id, $redirect)
+    {
+        $ticket = $this->findModel($ticket_id);
+
+        if($ticket->addTicketManagement(Yii::$app->user->id)) {
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Ticket management registered successfully'));
+        } else {
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Ticket management registered successfully'));
+        }
+
+        return $this->redirect([$redirect]);
     }
 
 }

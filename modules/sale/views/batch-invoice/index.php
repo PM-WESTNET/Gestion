@@ -218,13 +218,12 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             try {
                 var date = $('#contractsearch-period').kvDatepicker('getDate');
                 date =  "01-" +  (date.getMonth() + 1) + "-" + date.getFullYear();
-                var invoice_date = $('#contractsearch-invoice_date').kvDatepicker('getDate');
-                invoice_date = invoice_date.getDate() + '-' + (invoice_date.getMonth() + 1) + "-" + invoice_date.getFullYear();
 
                 postdata['ContractSearch[period]'] = date;
-                postdata['ContractSearch[invoice_date]'] = invoice_date;
                 postdata['bill_observation'] = $('#bill-observation').val();
-            } catch(e){}
+            } catch(e){
+                console.log(e);
+            }
 
             return postdata;
         }

@@ -21,10 +21,9 @@ use Yii;
 class CustomerHasDiscount extends \app\components\db\ActiveRecord
 {
 
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
 
-    /**
-     * @inheritdoc
-     */
     public static function tableName()
     {
         return 'customer_has_discount';

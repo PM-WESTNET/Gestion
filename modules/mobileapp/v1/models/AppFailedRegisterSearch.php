@@ -19,7 +19,7 @@ class AppFailedRegisterSearch extends AppFailedRegister
     {
         return [
             [['app_failed_register_id'], 'integer'],
-            [['name', 'document_type', 'document_number', 'email', 'phone', 'status', 'type', 'text', 'customer_code'], 'safe'],
+            [['name', 'document_type', 'document_number', 'email', 'phone', 'status', 'type', 'text', 'customer_code', 'created_at'], 'safe'],
         ];
     }
 
@@ -61,13 +61,12 @@ class AppFailedRegisterSearch extends AppFailedRegister
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'document_type', $this->document_type])
-            ->andFilterWhere(['like', 'document_number', $this->document_number])
-            ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'text', $this->text])
-            ->andFilterWhere(['like', 'customer_code', $this->customer_code])
-            ->andFilterWhere(['like', 'status', 'pending']);
+            ->andFilterWhere(['like', 'text', $this->text]);
+
+
+        $query->andFilterWhere(['customer_code' => $this->customer_code]);
+        $query->andFilterWhere(['document_number' => $this->document_number]);
+        $query->andFilterWhere(['like', 'status', 'pending']);
 
         $query->orderBy(['app_failed_register_id' => SORT_DESC]);
 

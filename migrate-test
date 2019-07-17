@@ -16,4 +16,6 @@ tests/bin/yii migrate --migrationPath=modules/westnet/migrations #--interactive=
 tests/bin/yii migrate --migrationPath=modules/westnet/notifications/migrations #--interactive=0
 tests/bin/yii migrate --migrationPath=modules/mobileapp/migrations
 tests/bin/yii migrate --migrationPath=modules/pagomiscuentas/migrations #--interactive=0
+tests/bin/yii migrate --migrationPath=vendor/conquer/oauth2/src/migrations
+tests/bin/yii migrate --migrationPath=modules/ivr/v1/migrations
 

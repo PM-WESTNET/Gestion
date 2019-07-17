@@ -5,6 +5,8 @@ use kartik\grid\GridView;
 use kartik\export\ExportMenu;
 use app\modules\sale\models\BillType;
 use yii\bootstrap\Modal;
+use yii\jui\DatePicker;
+use app\modules\sale\models\Bill;
 
 /**
  * @var yii\web\View $this
@@ -127,8 +129,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
             <form class="form-inline" role="form">
                 <div class="form-group">
                     <?= Html::activeLabel($searchModel, 'fromDate', ['class'=>'sr-only']); ?>
-                    <?php 
-                    echo yii\jui\DatePicker::widget([
+                    <?= DatePicker::widget([
                         'language' => Yii::$app->language,
                         'model' => $searchModel,
                         'attribute' => 'fromDate',
@@ -143,8 +144,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                 </div>
                 <div class="form-group">
                     <?= Html::activeLabel($searchModel, 'toDate', ['class'=>'sr-only']); ?>
-                    <?php 
-                    echo yii\jui\DatePicker::widget([
+                    <?= DatePicker::widget([
                         'language' => Yii::$app->language,
                         'model' => $searchModel,
                         'attribute' => 'toDate',
@@ -203,7 +203,12 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                 'value' => function($model){ return $model->billType ? $model->billType->name : null; },
                 'filter' => $typeFilter
             ],
-            'number',
+            [
+                'attribute' => 'number',
+                'value' => function($model) {
+                    return $model->status == Bill::STATUS_CLOSED ? $model->number : '';
+                },
+            ],
             [
                 'header'=>Yii::t('app','Customer'),
                 'value' => function ($model) {

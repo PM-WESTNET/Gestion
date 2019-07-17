@@ -58,7 +58,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label'=>Yii::t('app','Type'),
                 'value'=>function($model){
-                    return Yii::t('app', $model['type']) . " - " . $model['number'] ;
+                    $number = $model['status'] == Bill::STATUS_CLOSED ? ' - '.$model['number'] : '';
+                    return Yii::t('app', $model['type']) . $number;
                 }
             ],            [
                 'label'=>Yii::t('app','Status'),

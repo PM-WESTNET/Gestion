@@ -12,6 +12,7 @@ use yii\helpers\ArrayHelper;
 use yii\bootstrap\Modal;
 use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
+use app\modules\config\models\Config;
 
 /**
  * @var View $this
@@ -152,7 +153,7 @@ Modal::end();?>
         }
 
         /**
-         * Busca todos los clientes de la página renderizada y verifica que no tengan un ticket creado de la categoria cobranza,
+         * Busca todos los clientes de la página renderizada y verifica que no tengan un ticket creado de la categoria cobranza o de la categoría baja,
          * de tenerlo, desabilita el checkbox
          */
         this.markCustomersWithCobranzaTicket = function () {
@@ -164,7 +165,27 @@ Modal::end();?>
 
             $.ajax({
                 url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
-                data: {customer_codes: codes, category_id: "<?php echo \app\modules\config\models\Config::getValue('cobranza_category_id')?>"},
+                data: {customer_codes: codes, category_id: "<?= Config::getValue('cobranza_category_id')?>"},
+                method: 'POST',
+                dataType: 'json',
+
+            }).done(function(data, status){
+                $('#masive-assign').removeAttr('disabled');
+                if (status === 'success') {
+
+                    $.each(data, function( index, value ) {
+                        if(value.has_ticket) {
+                            $('[data-key="'+value.customer_code+'"]').find('input').prop('disabled', 'disabled');
+                        }
+                    });
+                }else{
+                    console.log(data);
+                }
+            });
+
+            $.ajax({
+                url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
+                data: {customer_codes: codes, category_id: "<?= Config::getValue('baja-category-id')?>"},
                 method: 'POST',
                 dataType: 'json',
 

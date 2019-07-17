@@ -15,6 +15,7 @@ use app\modules\sale\models\CustomerCategory;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\HourRange;
+use app\modules\sale\models\search\CompanySearch;
 
 /**
  * @var yii\web\View $this
@@ -45,7 +46,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
         <div class="col-sm-6 col-xs-6">
             <?php
-            $search = new \app\modules\sale\models\search\CompanySearch();
+            $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
                 $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');

@@ -17,6 +17,7 @@ use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
+use app\modules\config\models\Config;
 
 /**
  * CustomerSearch represents the model behind the search form about app\modules\sale\models\Customer.
@@ -63,6 +64,10 @@ class CustomerSearch extends Customer {
     //Email status
     public $email_status;
     public $email2_status;
+    public $exclude_customers_with_one_bill;
+
+    //Estado de la app
+    public $mobile_app_status;
 
     public function rules()
     {
@@ -73,7 +78,7 @@ class CustomerSearch extends Customer {
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
-            [['email_status', 'email2_status'], 'safe'],
+            [['email_status', 'email2_status', 'exclude_customers_with_one_bill', 'mobile_app_status'], 'safe'],
         ];
     }
 
@@ -105,7 +110,7 @@ class CustomerSearch extends Customer {
             'geocode' => Yii::t('westnet', 'Geocode'),
             'email_status' => Yii::t('app', 'Email 1 status'),
             'email2_status' => Yii::t('app', 'Email 2 status'),
-
+            'mobile_app_status' => Yii::t('app', 'Mobile app status')
         ]);
     }
 
@@ -243,6 +248,7 @@ class CustomerSearch extends Customer {
         $this->filterByPlan($query);
         $this->filterByIssetGeocode($query);
         $this->filterEmailStatus($query);
+        $this->filterMobileAppStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -426,6 +432,7 @@ class CustomerSearch extends Customer {
             ->from(new Expression('bill b FORCE INDEX(fk_bill_customer1_idx)'))
             ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id' )
             ->where(['<>','b.status','draft'])
+            ->andWhere(['<>','b.total',0])
             ->groupBy(['b.customer_id','b.bill_id'])
         ;
 
@@ -583,6 +590,10 @@ class CustomerSearch extends Customer {
 
         if ($this->total_bills_to > 0) {
             $query->andWhere(['<=', 'total_bills', $this->total_bills_to]);
+        }
+
+        if($this->exclude_customers_with_one_bill) {
+            $query->andWhere(['>', 'total_bills', 1]);
         }
 
         $masterSubQuery->andFilterWhere(['customer.status' => $this->customer_status]);
@@ -759,6 +770,39 @@ class CustomerSearch extends Customer {
         }
     }
 
+    /**
+     * @param $query
+     * @throws \Exception
+     * Filtra por el estado de la aplicación móvil
+     */
+    private function filterMobileAppStatus($query){
+        if($this->mobile_app_status) {
+            $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+            $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+
+            $query->leftJoin('user_app_has_customer uahc', 'uahc.customer_id = customer.customer_id')
+                ->leftJoin('user_app ua', 'ua.user_app_id = uahc.user_app_id')
+                ->leftJoin('user_app_activity uaa', 'uaa.user_app_id = ua.user_app_id');
+
+            if(count($this->mobile_app_status) > 1) {
+                $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                    ->andFilterWhere(['not',['uaa.user_app_id' => null]]);
+            } else {
+                if($this->mobile_app_status[0] == 'uninstalled') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['<=','uaa.last_activity_datetime', $date_min_last_activity]);
+                }
+
+                if($this->mobile_app_status[0] == 'installed') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['>=','uaa.last_activity_datetime', $date_min_last_activity]);
+                }
+            };
+        }
+    }
+
     public function searchDebtBills($customer_id)
     {
         Yii::$app->db->createCommand('set @saldo := 0; set @customer_ant= 0;')->execute();
@@ -768,14 +812,15 @@ class CustomerSearch extends Customer {
                 new Expression('sum(b.total * bt.multiplier) AS amount')])
             ->from(new Expression('bill b FORCE INDEX(fk_bill_customer1_idx)'))
             ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id' )
-            ->where(['b.status'=>['closed', 'completed'], 'b.customer_id'=>$customer_id])
+            ->where(['b.status' => 'closed', 'b.customer_id'=>$customer_id])
+            ->andWhere(['<>','b.total', 0])
             ->groupBy(['b.customer_id','b.bill_id'])
         ;
 
         $queryPayment = (new Query())
             ->select(['p.customer_id', 'p.date as date', new Expression('0 AS i'), new Expression('-p.amount')])
             ->from('payment as p')
-            ->where(['p.status'=>'closed', 'p.customer_id'=>$customer_id])
+            ->where(['p.status' => 'closed', 'p.customer_id'=>$customer_id])
         ;
 
         $subQuery = (new Query());

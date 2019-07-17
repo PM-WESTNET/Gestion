@@ -303,6 +303,7 @@ class ContractToInvoice
         $cantidadTotal = $contractSearch->searchForInvoice($params)->count();
         $paginas = ceil($cantidadTotal/100);
         $company = Company::findOne($contractSearch->company_id);
+
         $period = new DateTime( $contractSearch->period );
         if( $contractSearch->invoice_date instanceof DateTime) {
             $invoice_date = $contractSearch->invoice_date;
@@ -327,16 +328,13 @@ class ContractToInvoice
         $mobilepush = $this->createMobilePush();
 
         $afip_error = false;
-        for($r=0; $r<$paginas; $r++) {
-            $contractsList  = $contractSearch->searchForInvoice($params)
-                ->offset(0)
-                ->limit(100)
-                ->all()
-            ;
-            foreach($contractsList as $item) {
+
+        //Se hace el cambio a batch para evitar facturacion de contratos duplicados
+        foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
+            foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
                         $afip_error = true;
                     }
                     Yii::$app->session->set('_invoice_all_', [
@@ -358,7 +356,6 @@ class ContractToInvoice
                     $transaction->commit();
                 //}
             }
-
         }
 
         // Envio la notificacion a los clientes facturados
@@ -377,7 +374,7 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null)
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false)
     {
 
         try{
@@ -392,6 +389,9 @@ class ContractToInvoice
                 $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
+                if($automatically_generated) {
+                    $bill->automatically_generated = true;
+                }
                 $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
@@ -565,17 +565,22 @@ class ContractToInvoice
 
                 }
 
-                $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
-                $bill->save(false);
-                $bill->fillNumber = false;
-                $bill->complete();
-                $bill->close();
+                if($bill->getBillDetails()->exists()) {
+                    $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
+                    $bill->save(false);
+                    $bill->fillNumber = false;
+                    $bill->verifyAmounts(true);
+                    if($close_bill) {
+                        $bill->complete();
+                        $bill->close();
+                    }
+                }
 
                 // Si es electronica y no se emitio es por error en AFIP y corto proceso.
-                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
-                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
-                    return false;
-                }
+//                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
+//                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
+//                    return false;
+//                }
                 $this->addMessage($bill);
             }
 

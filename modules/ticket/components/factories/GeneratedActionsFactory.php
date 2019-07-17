@@ -8,6 +8,7 @@
 
 namespace app\modules\ticket\components\factories;
 
+use app\modules\ticket\components\actions\ActionCloseDataEdition;
 use app\modules\ticket\components\actions\ActionEvent;
 use app\modules\ticket\components\actions\ActionTicket;
 use app\modules\ticket\models\Action;
@@ -26,6 +27,10 @@ class GeneratedActionsFactory {
 
             if($action->type == Action::TYPE_TICKET) {
                 ActionTicket::generate($ticket);
+            }
+
+            if($action->type == Action::TYPE_DATA_EDITION) {
+                ActionCloseDataEdition::generate($ticket);
             }
         }
     }
