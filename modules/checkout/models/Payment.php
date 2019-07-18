@@ -399,7 +399,8 @@ class Payment extends  ActiveRecord  implements CountableInterface
         $query = Bill::find();
         $query->leftJoin("bill_type", 'bill.bill_type_id = bill_type.bill_type_id' );
         $query->where([
-            'bill.customer_id'=>$this->customer_id,
+            'bill.customer_id' => $this->customer_id,
+            'bill.status' => Bill::STATUS_CLOSED
         ]);
         
         if($fromDate !== null){
