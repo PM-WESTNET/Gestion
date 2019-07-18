@@ -1,5 +1,8 @@
 <?php
 $this->title = $bank->name. ' - '. Yii::t('app','Exports');
+$this->params['breadcrumbs'][] = ['url' => ['/automaticdebit/bank/index'], 'label' => Yii::t('app', 'Banks for Automatic Debit')];
+$this->params['breadcrumbs'][] = ['url' => ['/automaticdebit/bank/view', 'id' => $bank->bank_id], 'label' => $bank->name];
+$this->params['breadcrumbs'][] = Yii::t('app','Exports');
 ?>
 
 <div class="bank_export">
@@ -18,6 +21,22 @@ $this->title = $bank->name. ' - '. Yii::t('app','Exports');
         'columns' => [
             ['class' => \yii\grid\SerialColumn::class],
 
+            [
+                'attribute' => 'company_id',
+                'value' => function ($model){
+                    return $model->company->name;
+                }
+            ],
+            [
+                'attribute' => 'type',
+                'value' => function ($model){
+                    if ($model->type == 'own') {
+                        return  Yii::t('app','Bank Customers');
+                    }else {
+                        return Yii::t('app','Other Customers');
+                    }
+                }
+            ],
             'create_timestamp:datetime',
 
             [

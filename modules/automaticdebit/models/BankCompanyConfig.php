@@ -74,6 +74,7 @@ class BankCompanyConfig extends ActiveRecord
         return [
             'bank_company_config_id' => Yii::t('app', 'Bank Company Config ID'),
             'company_identification' => Yii::t('app', 'Company Identification'),
+            'other_company_identification' => Yii::t('app', 'Other Company Identification'),
             'branch' => Yii::t('app', 'Branch'),
             'control_digit' => Yii::t('app', 'Control Digit'),
             'account_number' => Yii::t('app', 'Account Number'),
@@ -81,6 +82,8 @@ class BankCompanyConfig extends ActiveRecord
             'bank_id' => Yii::t('app', 'Bank ID'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'service_code' => Yii::t('app','Service Code'),
+            'other_service_code' => Yii::t('app','Other Service Code'),
         ];
     }
 
