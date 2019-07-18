@@ -41,6 +41,9 @@ class ContractTest extends \Codeception\Test\Unit
             ],
             'node' => [
                 'class' => NodeFixture::class
+            ],
+            'details' => [
+                'class' => \app\tests\fixtures\ContractDetailFixture::class
             ]
         ];
     }
@@ -276,5 +279,20 @@ class ContractTest extends \Codeception\Test\Unit
         expect('Contract dont have any payment extension', $model->getActivePaymentExtensionQtyPerPeriod())->equals(1);
 
 
+    }
+
+    public function testCalculateAmountNextBill()
+    {
+        $contract = Contract::findOne(1);
+
+        if (empty($contract)) {
+            expect('Contract not found', false)->true();
+        }
+
+        $period = (new DateTime())->modify('2019-06-25');
+
+        $amount = $contract->getAmountNextBill($period);
+
+        expect('Fail calculate amount', $amount)->equals(660);
     }
 }

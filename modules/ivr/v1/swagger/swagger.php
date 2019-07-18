@@ -5,7 +5,7 @@ namespace api\modules\v1\swagger;
 /**
  * @SWG\Swagger(
  *     schemes={"https"},
- *     host="https://gestion.westnet.com.ar",
+ *     host="gestion.westnet.com.ar",
  *     basePath="/index.php?r=ivr/v1",
  *     @SWG\Info(
  *         version="1.0.0",

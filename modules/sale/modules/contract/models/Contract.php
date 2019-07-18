@@ -567,4 +567,13 @@ class Contract extends ActiveRecord {
             ->andWhere(['in','contract_detail_id', $contract_detail_ids])
             ->all());
     }
+
+
+    /**
+     * Devuelve el precio tentativo de la proxima factura. El saldo tentativo lo calcula con el precio del plan
+     * y lo productos a facturar que tiene el contrato en el momento del calculo
+     */
+    public function getAmountNextBill(){
+
+    }
 }
