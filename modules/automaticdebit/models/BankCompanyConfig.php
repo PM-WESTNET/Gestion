@@ -81,6 +81,9 @@ class BankCompanyConfig extends ActiveRecord
             'bank_id' => Yii::t('app', 'Bank ID'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'service_code' => Yii::t('app', 'Service code'),
+            'other_service_code' => Yii::t('app', 'Other service code'),
+            'other_company_identification' => Yii::t('app', 'Other company identification')
         ];
     }
 
@@ -89,7 +92,7 @@ class BankCompanyConfig extends ActiveRecord
      */
     public function getBank()
     {
-        return $this->hasOne(Bank::className(), ['bank_id' => 'bank_id']);
+        return $this->hasOne(Bank::class, ['bank_id' => 'bank_id']);
     }
 
     /**
@@ -97,6 +100,6 @@ class BankCompanyConfig extends ActiveRecord
      */
     public function getCompany()
     {
-        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 }

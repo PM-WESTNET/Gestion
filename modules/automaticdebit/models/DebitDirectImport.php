@@ -81,12 +81,14 @@ class DebitDirectImport extends \yii\db\ActiveRecord
         return [
             'debit_direct_import_id' => Yii::t('app', 'Debit Direct Import ID'),
             'file' => Yii::t('app', 'File'),
+            'fileUploaded' => Yii::t('app', 'File'),
             'import_timestamp' => Yii::t('app', 'Import Timestamp'),
             'process_timestamp' => Yii::t('app', 'Process Timestamp'),
             'status' => Yii::t('app', 'Status'),
             'company_id' => Yii::t('app', 'Company ID'),
             'bank_id' => Yii::t('app', 'Bank ID'),
             'create_timestamp' => Yii::t('app', 'Create timestamp'),
+            'money_box_account_id' => Yii::t('app', 'Money box account')
         ];
     }
 

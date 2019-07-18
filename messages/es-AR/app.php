@@ -1165,4 +1165,10 @@
     'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
     'Can`t create payment extension' => 'No se puede crear la extensión de pago',
     'Send to Ivr' => 'Informar a IVR',
+    'Add Company to {bank}' => 'Agregar empresa a {bank}',
+    'Service code' => 'Código del servicio',
+    'Other service code' => 'Código del servicio alternativo',
+    'Other company identification' => 'Identificación de la empresa alternativa',
+    'Create new import' => 'Crear nueva importación',
+    'Money box account' => 'Cuenta monetaria'
 );
