@@ -121,49 +121,53 @@ class SMSInfobipTransport implements TransportInterface
             foreach($notification->destinataries as $destinataries){
                 /** @var Query $query */
                 $query = $destinataries->getCustomersQuery(false);
-                foreach($query->each() as $customer) {
-                    $phones = [];
-                    $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
-                    $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
-                    $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
-                    $p4 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone4']));
 
-                    if(strlen($p1) > 7 ) {
-                        $phones[] = (string)$p1;
-                    }
 
-                    if(strlen($p2) > 7 && $p1 != $p2 ) {
-                        $phones[] = (string)$p2;
-                    }
-
-                    if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
-                        $phones[] = (string)$p3;
-                    }
-
-                    if(strlen($p4) > 7 && $p4 != $p1 && $p4 != $p2  && $p4 != $p3) {
-                        $phones[] = (string)$p4;
-                    }
-
-                    foreach($phones as $phone) {
+                foreach($query->batch(1000) as $customers) {
+                    foreach ($customers as $customer) {
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
                         $company = Company::findOne($customer['customer_company']);
-                        $line = [
-                            $customer['name'],
-                            $phone,
-                            $customer['code'],
-                            (isset($customer['node']) ? $customer['node'] : ''),
-                            (isset($customer['saldo']) ? $customer['saldo'] : ''),
-                            '',
-                            ($company ? $company->code : $customer['company_code']),
-                            (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ),
-                            Yii::t('westnet', ucfirst($customer['status'])),
-                            $customer['category'],
-                            ($plan ? $plan->name : ''),
-                            ($future_price ? Yii::$app->formatter->asCurrency($future_price) : '')
-                        ];
-                        fputcsv($resource, $line, ';');
+                        $phones = [];
+                        $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
+                        $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
+                        $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
+                        $p4 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone4']));
 
+                        if(strlen($p1) > 7 ) {
+                            $phones[] = (string)$p1;
+                        }
+
+                        if(strlen($p2) > 7 && $p1 != $p2 ) {
+                            $phones[] = (string)$p2;
+                        }
+
+                        if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
+                            $phones[] = (string)$p3;
+                        }
+
+                        if(strlen($p4) > 7 && $p4 != $p1 && $p4 != $p2  && $p4 != $p3) {
+                            $phones[] = (string)$p4;
+                        }
+
+                        foreach($phones as $phone) {
+                            $line = [
+                                $customer['name'],
+                                $phone,
+                                $customer['code'],
+                                (isset($customer['node']) ? $customer['node'] : ''),
+                                (isset($customer['saldo']) ? $customer['saldo'] : ''),
+                                '',
+                                ($company ? $company->code : $customer['company_code']),
+                                (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ),
+                                Yii::t('westnet', ucfirst($customer['status'])),
+                                $customer['category'],
+                                ($plan ? $plan->name : ''),
+                                ($future_price ? Yii::$app->formatter->asCurrency($future_price) : '')
+                            ];
+                            fputcsv($resource, $line, ';');
+
+                        }
                     }
                 }
 
@@ -172,6 +176,7 @@ class SMSInfobipTransport implements TransportInterface
            fclose($resource);
 
         }catch (\Exception $ex){
+
             error_log($ex->getMessage());
         }
 
