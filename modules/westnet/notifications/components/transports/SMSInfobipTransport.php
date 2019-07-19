@@ -86,10 +86,10 @@ class SMSInfobipTransport implements TransportInterface
 
         //Nombre de archivo
         try{
-            $fileName = 'sms-contacts.xls';
+            $fileName = 'sms-contacts.csv';
 
             ob_start();
-            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Type: text/csv');
             header('Content-Disposition: attachment;filename="'.$fileName.'"');
             header('Cache-Control: max-age=0');
             header('Cache-Control: max-age=1');
@@ -171,7 +171,7 @@ class SMSInfobipTransport implements TransportInterface
                     ->getNumberFormat()
                     ->setFormatCode();
             }
-            $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+            $objWriter = PHPExcel_IOFactory::createWriter($excel, 'CSV');
             $objWriter->save('php://output');
         }catch (\Exception $ex){
             error_log($ex->getMessage());
