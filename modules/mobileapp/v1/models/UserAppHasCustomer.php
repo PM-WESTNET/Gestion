@@ -3,6 +3,7 @@
 namespace app\modules\mobileapp\v1\models;
 
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "user_app_has_customer".
@@ -16,7 +17,7 @@ use Yii;
  * @property UserApp $userApp
  * @property ValidationCode[] $validationCodes
  */
-class UserAppHasCustomer extends \app\components\db\ActiveRecord
+class UserAppHasCustomer extends ActiveRecord
 {
 
 

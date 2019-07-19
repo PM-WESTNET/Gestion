@@ -2,9 +2,10 @@
 
 namespace app\modules\mobileapp\v1\models;
 
-use app\components\db\ActiveRecord;
+
 use app\modules\config\models\Config;
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "mobile_push".
@@ -20,7 +21,7 @@ use Yii;
  * @property MobilePushHasUserApp[] $mobilePushHasUserApps
  * @property UserApp[] $userApps
  */
-class MobilePush extends \app\components\db\ActiveRecord
+class MobilePush extends ActiveRecord
 {
 
     public $extra_data;

@@ -9,6 +9,7 @@ use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\components\transports\InfobipService;
 use Yii;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
+use yii\db\ActiveRecord;
 use yii\helpers\Inflector;
 
 /**
@@ -21,7 +22,7 @@ use yii\helpers\Inflector;
  *
  * @property UserAppHasCustomer $userAppHasCustomer
  */
-class ValidationCode extends \app\components\db\ActiveRecord
+class ValidationCode extends ActiveRecord
 {
 
 

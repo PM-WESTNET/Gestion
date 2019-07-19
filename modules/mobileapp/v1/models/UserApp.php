@@ -6,6 +6,7 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\Customer;
 use app\modules\sale\models\Product;
 use Yii;
+use yii\db\ActiveRecord;
 use yii\web\ServerErrorHttpException;
 
 /**
@@ -20,7 +21,7 @@ use yii\web\ServerErrorHttpException;
  * @property AuthToken[] $authTokens
  * @property UserAppHasCustomer[] $userAppHasCustomers
  */
-class UserApp extends \app\components\db\ActiveRecord
+class UserApp extends ActiveRecord
 {
 
 
