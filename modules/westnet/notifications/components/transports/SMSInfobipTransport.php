@@ -10,6 +10,7 @@ namespace app\modules\westnet\notifications\components\transports;
 
 
 use app\components\helpers\EmptyLogger;
+use app\components\helpers\Inflector;
 use app\modules\config\models\Config;
 use app\modules\sale\models\Company;
 use app\modules\sale\modules\contract\models\Plan;
@@ -217,7 +218,9 @@ class SMSInfobipTransport implements TransportInterface
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
 
-        return $replaced_text;
+        $inflector = new \yii\helpers\Inflector();
+
+        return $inflector->transliterate($replaced_text, \yii\helpers\Inflector::TRANSLITERATE_MEDIUM);
 
     }
 

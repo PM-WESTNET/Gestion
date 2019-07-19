@@ -7,6 +7,7 @@ use app\modules\westnet\notifications\components\transports\InfobipService;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
 use app\modules\westnet\notifications\components\transports\SMSInfobipTransport;
 use Yii;
+use yii\helpers\Inflector;
 
 /**
  * This is the model class for table "customer_message".
@@ -199,6 +200,8 @@ class CustomerMessage extends \app\components\db\ActiveRecord
             }
         }
 
+        $inflector = new Inflector();
+        $message = $inflector->transliterate($message, \yii\helpers\Inflector::TRANSLITERATE_MEDIUM);
         $alerts = [];
         $errors = 0;
         foreach ($phones as $phone) {
