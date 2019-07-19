@@ -9,7 +9,6 @@
 namespace app\modules\ivr\v1\models;
 
 
-use app\modules\checkout\models\Payment;
 
 class Customer extends \app\modules\sale\models\Customer
 {
@@ -26,11 +25,19 @@ class Customer extends \app\modules\sale\models\Customer
     }
 
     public function accountInfo() {
+        $data = [];
+
         $current_balance = $this->current_account_balance;
 
         $lastPayment = Payment::find()->andWhere(['customer_id' => $this->customer_id])->orderBy(['timestamp' => SORT_DESC])->one();
 
+        $data['balance'] = ($current_balance !== null ? $current_balance : 0);
 
+        if($lastPayment) {
+            $data['last_payment'] = $lastPayment;
+        }
+
+        return $data;
     }
 
 }

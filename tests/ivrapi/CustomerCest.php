@@ -13,6 +13,9 @@ class CustomerCest
             ],
             'customers' =>  [
                 'class' => \app\tests\fixtures\CustomerFixture::class
+            ],
+            'payments' => [
+                'class' => \app\tests\fixtures\PaymentFixture::class
             ]
         ];
     }
@@ -119,11 +122,14 @@ class CustomerCest
         $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
         $I->haveHttpHeader('client_id', 'ivr_user');
         $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
-        $I->sendPOST(['/customer/balance-account', 'code' => 45900]);
+        $I->sendPOST('/customer/balance-account', ['code' => 59809]);
         $I->seeResponseCodeIs(200);
         $I->seeResponseContainsJson([
             'balance' => 1500,
-            'last_balance' => 1563408000
+            'last_payment' => [
+                'amount' => 200,
+                'date' => '30-01-2019'
+            ]
         ]);
     }
 
