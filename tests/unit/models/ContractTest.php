@@ -281,18 +281,4 @@ class ContractTest extends \Codeception\Test\Unit
 
     }
 
-    public function testCalculateAmountNextBill()
-    {
-        $contract = Contract::findOne(1);
-
-        if (empty($contract)) {
-            expect('Contract not found', false)->true();
-        }
-
-        $period = (new DateTime())->modify('2019-06-25');
-
-        $amount = $contract->getAmountNextBill($period);
-
-        expect('Fail calculate amount', $amount)->equals(660);
-    }
 }

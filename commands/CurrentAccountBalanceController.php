@@ -22,14 +22,14 @@ class CurrentAccountBalanceController extends Controller
      */
     public function actionUpdateCurrentAccountBalance()
     {
-        $today = (new \DateTime('now'))->format('Y-m-d');
+        $today = time();
 
         $customers_to_update = Customer::find()
             ->leftJoin('contract con', 'con.customer_id = customer.customer_id')
             ->leftJoin('connection conn', 'conn.contract_id = con.contract_id')
             ->where(['con.status' => 'active'])
             ->where(['in','conn.status', ['enabled', 'forced']])
-            ->andWhere(['or',['<','customer.last_calculation_current_account_balance', $today], ['customer.last_calculation_current_account_balance' => null]])
+            ->andWhere(['or',['<','customer.last_balance', $today], ['customer.last_balance' => null]])
             ->all();
 
         echo "Clientes con conexiones activas que no han sido actualizados hoy: ". count($customers_to_update) ."\n";
@@ -38,22 +38,22 @@ class CurrentAccountBalanceController extends Controller
 
             $new_payments = Payment::find()
                 ->where(['customer_id' => $customer->customer_id])
-                ->andWhere(['>', 'date', $customer->last_calculation_current_account_balance])
+                ->andWhere(['>', 'date', date('Y-m-d', $customer->last_balance)])
                 ->andWhere(['status' => Payment::PAYMENT_CLOSED])
                 ->exists();
 
             $new_bills = Bill::find()
                 ->where(['customer_id' => $customer->customer_id])
-                ->andWhere(['>', 'date', $customer->last_calculation_current_account_balance])
+                ->andWhere(['>', 'date', date('Y-m-d', $customer->last_balance)])
                 ->andWhere(['status' => Bill::STATUS_CLOSED])
                 ->exists();
 
-            if($new_payments || $new_bills || $customer->last_calculation_current_account_balance == null) {
+            if($new_payments || $new_bills || $customer->last_balance == null) {
                 $searchModel = new PaymentSearch();
                 $searchModel->customer_id = $customer->customer_id;
                 $total = $searchModel->accountTotal();
 
-                $customer->updateAttributes(['current_account_balance' => $total, 'last_calculation_current_account_balance' => $today]);
+                $customer->updateAttributes(['current_account_balance' => $total, 'last_balance' => $today]);
             }
         }
     }
