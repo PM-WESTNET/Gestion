@@ -18,6 +18,7 @@ use PHPExcel;
 use PHPExcel_Cell_DataType;
 use PHPExcel_IOFactory;
 use Yii;
+use yii\db\Query;
 
 class SMSInfobipTransport implements TransportInterface
 {
@@ -81,43 +82,44 @@ class SMSInfobipTransport implements TransportInterface
      */
     public function export($notification)
     {
-        //Para evitar que la memoria alcance el limite
         Yii::setLogger(new EmptyLogger());
 
         //Nombre de archivo
         try{
-            $fileName = 'sms-contacts.csv';
+            $fileName = 'sms-contacts.xls';
 
             ob_start();
-            header('Content-Type: text/csv');
+            header('Content-Type: application/vnd.ms-excel');
             header('Content-Disposition: attachment;filename="'.$fileName.'"');
             header('Cache-Control: max-age=0');
             header('Cache-Control: max-age=1');
             header ('Cache-Control: cache, must-revalidate');
             header ('Pragma: public');
 
-            $resource = fopen('php://output', 'w');
+            $excel = new PHPExcel();
 
-            $header = [
-                 Yii::t('app', 'Name'),
-                 Yii::t('app', 'Phone1'),
-                 Yii::t('app', 'Phone2'),
-                 Yii::t('app', 'Code'),
-                 Yii::t('app', 'Payment Code'),
-                 Yii::t('app', 'Node ID'),
-                 Yii::t('app', 'Balance'),
-                 Yii::t('app', 'Exp Datetime'),
-                 Yii::t('app', 'Company'),
-                 Yii::t('app', 'Debt Bills'),
-                 Yii::t('app', 'Status'),
-                 Yii::t('app', 'Category'),
-                 Yii::t('app', 'Plan'),
-                 Yii::t('app', 'Valor futuro del plan'),
-            ];
+            $excel->getProperties()
+                ->setCreator("Arya By Quoma S.A.")
+                ->setTitle("SMS Contacts");
 
-            fputcsv($resource, $header, ";");
+            $excel->setActiveSheetIndex(0)
+                ->setCellValue('A1', Yii::t('app', 'Name'))
+                ->setCellValue('B1', Yii::t('app', 'Phone1'))
+                ->setCellValue('C1', Yii::t('app', 'Phone2'))
+                ->setCellValue('D1', Yii::t('app', 'Code'))
+                ->setCellValue('E1', Yii::t('app', 'Payment Code'))
+                ->setCellValue('F1', Yii::t('app', 'Node ID'))
+                ->setCellValue('G1', Yii::t('app', 'Balance'))
+                ->setCellValue('H1', Yii::t('app', 'Exp Datetime'))
+                ->setCellValue('I1', Yii::t('app', 'Company'))
+                ->setCellValue('J1', Yii::t('app', 'Debt Bills'))
+                ->setCellValue('K1', Yii::t('app', 'Status'))
+                ->setCellValue('L1', Yii::t('app', 'Category'))
+                ->setCellValue('M1', Yii::t('app', 'Plan'))
+                ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'));
 
             $i = 2;
+
             foreach($notification->destinataries as $destinataries){
                 /** @var Query $query */
                 $query = $destinataries->getCustomersQuery(false);
@@ -151,34 +153,41 @@ class SMSInfobipTransport implements TransportInterface
                         }
 
                         foreach($phones as $phone) {
-                            $line = [
-                                $customer['name'],
-                                $phone,
-                                $customer['code'],
-                                (isset($customer['node']) ? $customer['node'] : ''),
-                                (isset($customer['saldo']) ? $customer['saldo'] : ''),
-                                '',
-                                ($company ? $company->code : $customer['company_code']),
-                                (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ),
-                                Yii::t('westnet', ucfirst($customer['status'])),
-                                $customer['category'],
-                                ($plan ? $plan->name : ''),
-                                ($future_price ? Yii::$app->formatter->asCurrency($future_price) : '')
-                            ];
-                            fputcsv($resource, $line, ';');
+                            $excel->setActiveSheetIndex(0)
+                                ->setCellValue('A' .$i, $customer['name'])
+                                ->setCellValueExplicit('B' .$i, $phone, PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('C' .$i, '')
+                                ->setCellValueExplicit('D' .$i, $customer['code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValueExplicit('E' .$i, $customer['payment_code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('F' .$i, (isset($customer['node']) ? $customer['node'] : ''))
+                                ->setCellValue('G' .$i, (isset($customer['saldo']) ? $customer['saldo'] : ''))
+                                ->setCellValue('H' .$i, '')
+                                ->setCellValueExplicit('I' .$i, $company ? $company->code : $customer['company_code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('J' .$i, (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ))
+                                ->setCellValue('K' .$i, Yii::t('westnet', ucfirst($customer['status'])))
+                                ->setCellValue('L' .$i, $customer['category'])
+                                ->setCellValue('M' .$i, $plan ? $plan->name : '')
+                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '');
+                            $i++;
 
                         }
                     }
+                    $excel->getActiveSheet()->getStyle('A1:A'.$i)
+                        ->getNumberFormat()
+                        ->setFormatCode();
+
                 }
 
             }
 
-           fclose($resource);
+            $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+            $objWriter->save('php://output');
 
         }catch (\Exception $ex){
 
             error_log($ex->getMessage());
         }
+
 
     }
 
