@@ -9,9 +9,12 @@
 namespace app\modules\ivr\v1\controllers;
 
 
+use app\modules\config\models\Config;
 use app\modules\ivr\v1\components\Controller;
 use app\modules\ivr\v1\models\Customer;
 use app\modules\ivr\v1\models\search\CustomerSearch;
+use app\modules\sale\modules\contract\models\Contract;
+use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 
@@ -37,6 +40,15 @@ class CustomerController extends Controller
      *     summary="",
      *     description="Devuelve un array con los clientes encontrados segun el criterio usado",
      *     produces={"application/json"},
+     *     @SWG\SecurityScheme(
+     *         securityDefinition="auth",
+     *          type="oauth2",
+     *          authorizationUrl="http://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token",
+     *          flow="implicit",
+     *          scopes={
+     *
+     *          }
+     *     ),
      *     @SWG\Parameter(
      *        in = "formData",
      *        name = "field",
@@ -169,5 +181,166 @@ class CustomerController extends Controller
 
         return $customer->accountInfo();
 
+    }
+
+
+    /**
+     * @SWG\Post(path="/customer/can-force",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Si el cliente puede solicitar una extension de pago devuelve monto, fecha desde y fecha hasta y ademas
+           los contratos que tiene activo con el domicilio de cada uno, de lo contrario devuelve error",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *        in = "formData",
+     *        name = "code",
+     *        description = "Código del cliente",
+     *        required = true,
+     *        type = "integer"
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "El cliente puede solicitar extensión de pago. Devuelve los contratos activos, el precio de la extension,
+     *         fecha de inicio y fecha de fin de la extension "
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "El cliente no puede solicitar extension de  pago, parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Parámetro 'code' es obligatorio
+     *              El cliente a excedido el límite de extensiones de pago del mes
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionCanForce()
+    {
+        $data = \Yii::$app->request->post();
+
+        if (!isset($data['code']) || empty($data['code'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','"code" param is required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        if (!$customer->canRequestPaymentExtension()) {
+            \Yii::$app->response->setStatusCode(400);
+
+            return [
+                'error' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
+            ];
+        }
+
+        return $customer->extendConnetionInfo();
+    }
+
+    /**
+     * @SWG\Post(path="/customer/force-connection",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Realiza una extensión de pago",
+     *     produces={"application/json"},
+     *     @SWG\Parameter(
+     *        in = "formData",
+     *        name = "contract_id",
+     *        description = "ID del contrato de la conexion que se va a forzar",
+     *        required = true,
+     *        type = "integer"
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "Devuelve la fecha limite"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "El cliente no puede solicitar extension de  pago, parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              No se encuentra la conexión para la extensión de pago
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionForceConnection()
+    {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['contract_id'])){
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+            ];
+        }
+
+
+        $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
+
+        if (empty($contract)) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+            ];
+        }
+
+        $connection = $contract->connection;
+
+        if (empty($connection)) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+            ];
+        }
+
+        if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
+            $payment_extension_product = Config::getValue('extend_payment_product_id');
+            $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
+            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+            $create_pti = true;
+
+            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
+                $due_date = date('d-m-Y', $due_timestamp);
+            }else{
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+                $due_date = date('d-m-Y', $due_timestamp);
+                $create_pti = false;
+            }
+
+            if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
+                return [
+                    'to_date' => $due_date,
+                    'msj' => Yii::t('ivrapi','Payment Extension created successfull')
+                ];
+            }
+        }
+
+        Yii::$app->response->setStatusCode(400);
+        return [
+            'status' => 'error',
+            'error' => Yii::t('ivrapi','Can`t create payment extension')
+        ];
     }
 }

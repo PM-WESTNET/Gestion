@@ -10,6 +10,9 @@ namespace app\modules\ivr\v1\models;
 
 
 
+use app\modules\config\models\Config;
+use app\modules\sale\models\Product;
+
 class Customer extends \app\modules\sale\models\Customer
 {
 
@@ -38,6 +41,41 @@ class Customer extends \app\modules\sale\models\Customer
         }
 
         return $data;
+    }
+
+    public function extendConnetionInfo()
+    {
+        $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
+        $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
+        $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+
+        $contracts = [];
+        $payment_extension_requested = $this->getPaymentExtensionQtyRequest();
+        $duration_days = $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days;
+
+        foreach ($this->contracts as $contract) {
+            $contracts[] = [
+                'contract_id' => $contract->contract_id,
+                'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
+            ];
+        }
+
+
+        if (empty($payment_extension_product)) {
+            $price = 0;
+        }else {
+            $price = round($payment_extension_product->finalPrice, 2);
+        }
+
+        $payment_extension_info = [
+            'code' => $this->code,
+            'contracts' => $contracts,
+            'price' => $payment_extension_requested < 1 ? 0 : $price,
+            'from_date' => (new \DateTime('now'))->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
+        ];
+
+        return $payment_extension_info;
     }
 
 }

@@ -10,9 +10,9 @@
 
 /**
  * @SWG\SecurityScheme(
- *   securityDefinition="petstore_auth",
+ *   securityDefinition="auth",
  *   type="oauth2",
- *   authorizationUrl="http://petstore.swagger.io/oauth/dialog",
+ *   authorizationUrl="http://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token",
  *   flow="implicit",
  *   scopes={
  *     "read:pets": "read your pets",

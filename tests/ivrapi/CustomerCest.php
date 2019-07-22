@@ -16,6 +16,9 @@ class CustomerCest
             ],
             'payments' => [
                 'class' => \app\tests\fixtures\PaymentFixture::class
+            ],
+            'forced' => [
+                'class' => \app\tests\fixtures\ConnectionForcedHistorialFixture::class
             ]
         ];
     }
@@ -131,6 +134,52 @@ class CustomerCest
                 'date' => '30-01-2019'
             ]
         ]);
+    }
+
+    public function canForceConnectionSuccess(IvrapiTester $I)
+    {
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/can-force', ['code' => 59809]);
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson([
+            'code' => 59809,
+            'contracts' => [
+                [
+                    'contract_id' => 1,
+                    'service_address' => ' (RODRIGUEZ PE\u00d1A 2411,  GUTIERREZ-MAIPU-MENDOZA)'
+                ]
+            ],
+            'price' => 0,
+            'from_date' => '22-07-2019',
+            'to_date' => '27-07-2019'
+        ]);
+    }
+
+    public function canForceConnectionFailToExccedLimit(IvrapiTester $I)
+    {
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/can-force', ['code' => 59810]);
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseContainsJson([
+            'error' => Yii::t('ivrapi','The customer exceeded the payment extension limit')
+        ]);
+    }
+
+    public function forceConnection(IvrapiTester $I)
+    {
+
+        \app\modules\config\models\Config::setValue('extend_payment_product_id', 3);
+
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/force-connection', ['contract_id' => 1]);
+        $I->seeResponseCodeIs(200);
+
     }
 
 }
