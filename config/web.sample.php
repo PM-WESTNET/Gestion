@@ -182,11 +182,11 @@ $config = [
             'clients' => [
                 'ivr' => [
                     'class' => 'yii\authclient\OAuth2',
-                    'clientId' => 'unique client_id',
-                    'clientSecret' => 'client_secret',
-                    'tokenUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/token',
-                    'authUrl' => 'http://localhost:8180/web/index.php?r=ivr/auth/login',
-                    'apiBaseUrl' => 'http://localhost:8180/web/index.php?r=ivr',
+                    'clientId' => 'ivr_user',
+                    'clientSecret' => '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe',
+                    'tokenUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token',
+                    'authUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/login',
+                    'apiBaseUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/',
                 ],
             ],
         ],

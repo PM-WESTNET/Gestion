@@ -34,7 +34,7 @@ class InfoController extends Controller
      *     summary="",
      *     description="Devuelve un array con los metodos de pagos habilitados",
      *     produces={"application/json"},
-     *
+     *     security={{"auth":{}}},
      *
      *     @SWG\Response(
      *         response = 200,

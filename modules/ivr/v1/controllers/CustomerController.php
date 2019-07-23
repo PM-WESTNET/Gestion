@@ -40,28 +40,17 @@ class CustomerController extends Controller
      *     summary="",
      *     description="Devuelve un array con los clientes encontrados segun el criterio usado",
      *     produces={"application/json"},
-     *     @SWG\SecurityScheme(
-     *         securityDefinition="auth",
-     *          type="oauth2",
-     *          authorizationUrl="http://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token",
-     *          flow="implicit",
-     *          scopes={
+     *     security={{"auth":{}}},
      *
-     *          }
-     *     ),
      *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "field",
-     *        description = "Campo por el cual buscar al cliente. Puede ser 'document_number' para el documento y 'code' para el código de cliente'",
+     *        in = "body",
+     *        name = "body",
      *        required = true,
-     *        type = "string"
-     *     ),
-     *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "value",
-     *        description = "El valor para el campo a buscar",
-     *        required = true,
-     *        type = "string"
+     *        type = "string",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="field", type="string", description="Campo por el cual buscar al cliente. Puede ser 'document_number' para el documento y 'code' para el código de cliente"),
+     *          @SWG\Property(property="value", type="string", description="El valor para el campo a buscar"),
+     *        )
      *     ),
      *
      *
@@ -132,12 +121,16 @@ class CustomerController extends Controller
      *     summary="",
      *     description="Devuelve  el saldo del cliente, y la info del último pago",
      *     produces={"application/json"},
+     *     security={{"auth":{}}},
      *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "code",
+     *        in = "body",
+     *        name = "body",
      *        description = "Código del cliente",
      *        required = true,
-     *        type = "integer"
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="string", description="Código del cliente"),
+     *        )
      *     ),
      *
      *
@@ -191,12 +184,16 @@ class CustomerController extends Controller
      *     description="Si el cliente puede solicitar una extension de pago devuelve monto, fecha desde y fecha hasta y ademas
            los contratos que tiene activo con el domicilio de cada uno, de lo contrario devuelve error",
      *     produces={"application/json"},
+     *     security={{"auth":{}}},
      *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "code",
+     *        in = "body",
+     *        name = "body",
      *        description = "Código del cliente",
      *        required = true,
-     *        type = "integer"
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="string", description="Código del cliente"),
+     *        )
      *     ),
      *
      *
@@ -257,12 +254,16 @@ class CustomerController extends Controller
      *     summary="",
      *     description="Realiza una extensión de pago",
      *     produces={"application/json"},
+     *     security={{"auth":{}}},
      *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "contract_id",
+     *        in = "body",
+     *        name = "body",
      *        description = "ID del contrato de la conexion que se va a forzar",
      *        required = true,
-     *        type = "integer"
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="contract_id", type="integer", description="ID del contrato de la conexion que se va a forzar"),
+     *        )
      *     ),
      *
      *

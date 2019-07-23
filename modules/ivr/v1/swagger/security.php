@@ -13,10 +13,17 @@
  *   securityDefinition="auth",
  *   type="oauth2",
  *   authorizationUrl="http://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token",
- *   flow="implicit",
+ *   flow="password",
  *   scopes={
- *     "read:pets": "read your pets",
- *     "write:pets": "modify pets in your account"
+ *
  *   }
+ * )
+ */
+
+/**
+ * @SWG\SecurityScheme(
+ *   securityDefinition="auth2",
+ *   type="basic",
+ *
  * )
  */

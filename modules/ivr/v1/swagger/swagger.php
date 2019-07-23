@@ -13,7 +13,9 @@ namespace api\modules\v1\swagger;
  *         description="Version: __1.0.0__",
  *         @SWG\Contact(name = "Quoma", email = "info@quoma.com.ar")
  *     ),
- * )
+ *
+ * ),
+ *
  *
  * @SWG\Tag(
  *   name="Auth",

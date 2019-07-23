@@ -29,13 +29,15 @@ class AuthController extends Controller
         ];
     }
 
+
+
     /**
      * @SWG\Post(path="/auth/token",
      *     tags={"Auth"},
      *     summary="",
      *     description="Devuelve el token de acceso a la api.
      *      Se debe de enviar en el cuerpo del request:
-     *          username: username del usuario de IVR de gestion. Usuario IVR: ivr_user
+     *          username: username del usuario de IVR de gestion. Usuario IVR: ivruser
      *          password: contraseña del usuario de IVR de gestion. Contraseña: aT63A7eYRv8wwAsv
      *          client_id: ivr_user,
      *          client_secret: 4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe
@@ -43,34 +45,20 @@ class AuthController extends Controller
      *     En el resto de endpoints de la api se debe enviar la cabecera Authorization: bearer 'token' y
      *     ademas las cabeceras client_id y client_secret
      *     ",
+     *     security={{"auth2":{}}},
      *     produces={"application/json"},
      *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "username",
-     *        description = "Username de gestion",
+     *        in = "body",
+     *        name = "body",
      *        required = true,
-     *        type = "string"
-     *     ),
-     *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "password",
-     *        description = "Contraseña de gestion",
-     *        required = true,
-     *        type = "string"
-     *     ),
-     *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "client_id",
-     *        description = "ID del cliente de OAuth2",
-     *        required = true,
-     *        type = "string"
-     *     ),
-     *     @SWG\Parameter(
-     *        in = "formData",
-     *        name = "client_secret",
-     *        description = "Secret key de OAuth2",
-     *        required = true,
-     *        type = "string"
+     *        type = "string",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="username", type="string"),
+     *          @SWG\Property(property="password", type="string"),
+     *          @SWG\Property(property="client_id", type="string"),
+     *          @SWG\Property(property="client_secret", type="string"),
+     *          @SWG\Property(property="grant_type", type="string"),
+     *        )
      *     ),
      *
      *
