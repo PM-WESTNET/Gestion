@@ -78,11 +78,10 @@ class UserApp extends \app\components\db\ActiveRecord
 
     public function extraFields()
     {
-        return  ['accounts', 'paymentExtensionInfo'];
+        return  ['accounts', 'paymentExtensionInfo', 'bills', 'payments'];
     }
 
     public function getPaymentExtensionInfo() {
-        \Yii::trace('paymentExtensioninfo');
 
         $payment_extension_info = [];
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
@@ -124,21 +123,63 @@ class UserApp extends \app\components\db\ActiveRecord
         return $payment_extension_info;
     }
 
+    /**
+     * Devuelve información basica de las cuentas de los clientes asociados al user app
+     */
     public function getAccounts(){
-        $accounts= [];
+        $accounts = [];
 
         foreach ($this->customers as $key => $customer){
             $accounts[] = [
                 'customer_code' => $customer->customer_id,
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
-                'customer_name' => $customer->name .' - '. $customer->code,
-                'showBills' => $customer->showBills,
-                'data' => $customer->getAccount()
+                'customer_name' => $customer->fullName,
+                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
             ];
         }
 
         return $accounts;
+    }
+
+    /**
+     * Devuelve 10 comprobantes por cliente asociado al user app
+     */
+    public function getBills(){
+        $bills = [];
+
+        foreach ($this->customers as $key => $customer){
+            $bills[] = [
+                'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
+                'customer_name' => $customer->fullName,
+                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                'bills' => $customer->getBillsToShow()
+            ];
+        }
+
+        return $bills;
+    }
+
+    /**
+     * Devuelve 10 comprobantes por cliente asociado al user app
+     */
+    public function getPayments(){
+        $payments = [];
+
+        foreach ($this->customers as $key => $customer){
+            $payments[] = [
+                'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
+                'customer_name' => $customer->fullName,
+                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                'payments' => $customer->getPaymentsToShow(),
+            ];
+        }
+
+        return $payments;
     }
 
 
