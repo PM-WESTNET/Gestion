@@ -58,7 +58,7 @@ class Customer extends \app\modules\sale\models\Customer
     public function getBillsToShow()
     {
         $excluded_bill_type = BillType::findOne(['name' => 'Cupón de Pago']);
-        $all_bills = $this->getBills()->where(['status' => Bill::STATUS_CLOSED])->andWhere(['not',['bill_type_id' => $excluded_bill_type->bill_type_id]])->orderBy('date', SORT_DESC)->limit(10)->all();
+        $all_bills = $this->getBills()->where(['status' => Bill::STATUS_CLOSED])->andWhere(['not',['bill_type_id' => $excluded_bill_type->bill_type_id]])->orderBy('timestamp', SORT_DESC)->limit(10)->all();
         $bills = [];
 
         foreach ($all_bills as $bill) {
