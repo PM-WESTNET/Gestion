@@ -13,6 +13,7 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use app\modules\checkout\models\PagoFacilTransmitionFile;
@@ -37,11 +38,14 @@ class PaymentController extends Controller {
             $searchModel->from_date= date('Y-m').'-01';
             $searchModel->to_date= (new \DateTime())->modify('last day of this month')->format('Y-m-d');
         }
+
+        $paymentMethods = ArrayHelper::map(PaymentMethod::getPaymentMethods(), 'payment_method_id', 'name');
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'paymentMethods' => $paymentMethods
         ]);
     }
 
