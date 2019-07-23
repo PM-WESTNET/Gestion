@@ -169,7 +169,13 @@ abstract class AbstractCsvImport
                     if (array_key_exists($fieldName, $valueFunctions)!==false) {
                         $data[$fieldName."-new"] = utf8_decode($valueFunctions[$fieldName]($value));
                     }
-                    $data[$fieldName] = utf8_decode($value);
+
+                    if ($fieldName === 'Débito' || $fieldName === 'Crédito') {
+                        $data[$fieldName] = (double)$value;
+                    }else {
+                        $data[$fieldName] = utf8_decode($value);
+                    }
+
                 }
                 try {
                     if (!$this->persist($data)) {
