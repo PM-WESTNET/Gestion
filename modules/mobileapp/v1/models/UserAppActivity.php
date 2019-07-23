@@ -94,7 +94,7 @@ class UserAppActivity extends \yii\db\ActiveRecord
         $user_app_activity = UserAppActivity::findOne(['user_app_id' => $user_app_id]);
 
         if(!$user_app_activity) {
-            $user_app_activity = UserAppActivity::createInstallationRegister($user_app_id);
+            $user_app_activity = UserAppActivity::createInstallationRegister($user_app_id, true);
         }
 
         $user_app_activity->last_activity_datetime = (new \DateTime('now'))->getTimestamp();
