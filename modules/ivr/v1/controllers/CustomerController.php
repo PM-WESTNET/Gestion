@@ -344,4 +344,23 @@ class CustomerController extends Controller
             'error' => Yii::t('ivrapi','Can`t create payment extension')
         ];
     }
+
+
+    public function actionCpeStatus()
+    {
+        /**
+         * Yii::$app->request->get() Acceso a parametros get
+         * Yii::$app->request->post() Accesso a parametros post
+         *
+         * Respuesta
+         *  Yii::$app->response->setStatusCode(400) Define el codigo de la respuesta, por defecto si no se especifica es 200
+         *  return [] Se debe devolver un array de php el cual sera parseado a JSON
+         *
+         **/
+    }
+
+    public function actionDevicesStatus()
+    {
+
+    }
 }
