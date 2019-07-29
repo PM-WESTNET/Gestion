@@ -26,6 +26,13 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
+            <?php if (User::hasRole('collection_manager')):?>
+                <?=
+                Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', Yii::t('app','Close tickets by period')),
+                    '#', ['class' => 'btn btn-warning', 'id' => 'close-all-btn'])
+                ;
+                ?>
+            <?php endif;?>
             <?=
             Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
                         'modelClass' => 'Ticket',
@@ -307,8 +314,67 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     };
 
-
-
 </script>
 
 <?php $this->registerJs('Tickets.init()')?>
+
+<?php if (User::hasRole('collection_manager')):?>
+    <script>
+
+        var CollectionManager = new function() {
+            this.init = function () {
+                $(document).on('click', '#close-all-btn', function(e){
+                    e.preventDefault();
+                    bootbox.dialog({
+                        title: "<?php echo Yii::t('app','Close Tickets by Period')?>",
+                        className: 'close-modal',
+                        message:
+                            '<div class="row">'+
+                                '<div class="col-lg-12">' +
+                                '<div="form-group">' +
+                                    '<label>'+ "<?php echo Yii::t('app','From Date')?>" +'</label>'+
+                                    '<?php echo DatePicker::widget([
+                                        'name' => 'TicketSearch[close_to_date]',
+                                        'pluginOptions' => [
+                                            'autoclose' => true,
+                                            'format' => 'dd-mm-yyyy'
+                                        ]
+                                    ])?>'+
+                                 '</div>'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="row">'+
+                            '<div class="col-lg-12">' +
+                                 '<div="form-group">' +
+                                    '<label>'+ "<?php echo Yii::t('app','To Date')?>" +'</label>'+
+                                    '<?php echo DatePicker::widget([
+                                        'name' => 'TicketSearch[close_to_date]',
+                                        'pluginOptions' => [
+                                            'autoclose' => true,
+                                            'format' => 'dd-M-yyyy'
+                                        ]
+                                    ])?>'+
+                                 '</div>'+
+                            '</div>'+
+                            '</div>',
+                        buttons: {
+                            close: {
+                                label: "<?php echo Yii::t('app','Close Tickets')?>",
+                                className: 'btn btn-primary',
+                                callback: function() {
+
+                                }
+                            }
+                        }
+                    }).on('shown.bs.modal', function () {
+                        $('.close-modal').removeAttr('tabindex')
+                    });
+                })
+            }
+        }
+
+    </script>
+
+    <?php $this->registerJs('CollectionManager.init()')?>
+<?php endif;?>
+
