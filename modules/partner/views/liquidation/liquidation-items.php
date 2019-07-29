@@ -44,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app', 'Date'),
                 'value' => function($model){
-                    return Yii::$app->formatter->asDate($model['date']);
+                    return $model['date'] ? Yii::$app->formatter->asDate($model['date']) : '';
                 },
             ],
             [
