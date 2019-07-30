@@ -520,15 +520,10 @@ class TicketController extends Controller
 
     public function actionCloseCollectionTicketsByPeriod(){
 
-        $data = Yii::$app->request->post();
-
-        if (!isset($data['TicketSearch']['category_id']) || empty($data['TicketSearch']['category_id'])) {
-            Yii::$app->session->addFlash('error', Yii::t('app','Ticket Category is required'));
-            return $this->redirect(['collection-tickets']);
-        }
+        $data = Yii::$app->request->get();
 
         $search = new TicketSearch();
-
+        $search->category_id = Config::getValue('cobranza_category_id');
         $query = $search->searchClosedByPeriodAndStatus($data);
 
 
@@ -536,7 +531,7 @@ class TicketController extends Controller
             $count = $query->count();
             $status = Status::findOne(['name' => 'Cerrado (Por Jefe de Cobranza)']);
 
-            foreach ($query->each() as $ticket) {
+            foreach ($query->all() as $ticket) {
                 $ticket->updateAttributes(['status_id' => $status->status_id]);
             }
 
