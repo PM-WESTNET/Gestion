@@ -344,4 +344,89 @@ class CustomerController extends Controller
             'error' => Yii::t('ivrapi','Can`t create payment extension')
         ];
     }
+
+    /**
+     * @SWG\Post(path="/customer/clipped-for-debt",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Indica si el cliente esta cortado por mora",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "ID del contrato de la conexion que se va a forzar",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "Devuelve si el cliente esta cortado por deuda"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionClippedForDebt() {
+        $data = Yii::$app->post();
+
+        if (!isset($data['code']) || empty($data['code'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','"code" param is required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        if ($customer->hasClippedForDebt()) {
+            return [
+                'clipped' => true,
+            ];
+        }
+
+        return [
+            'clipped' => false,
+        ];
+
+    }
+
+    public function actionCpeStatus()
+    {
+        /**
+         * Yii::$app->request->get() Acceso a parametros get
+         * Yii::$app->request->post() Accesso a parametros post
+         *
+         * Respuesta
+         *  Yii::$app->response->setStatusCode(400) Define el codigo de la respuesta, por defecto si no se especifica es 200
+         *  return [] Se debe devolver un array de php el cual sera parseado a JSON
+         *
+         **/
+    }
+
+    public function actionDevicesStatus()
+    {
+
+    }
 }

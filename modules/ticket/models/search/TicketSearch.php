@@ -27,6 +27,9 @@ class TicketSearch extends Ticket {
     public $start_date_label;
     public $ticket_management_qty;
 
+    public $close_from_date;
+    public $close_to_date;
+
     public function init() {
         parent::init();
     }
@@ -36,7 +39,7 @@ class TicketSearch extends Ticket {
             [['ticket_id'], 'integer'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text', 'ticket_management_qty'], 'safe'],
+            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id'], 'safe'],
         ];
     }
     
@@ -276,5 +279,26 @@ class TicketSearch extends Ticket {
             ->where('a.external_id is not null and s.is_open = 1')
         ;
         return $query->all();
+    }
+
+    public function searchClosedByPeriodAndStatus($params) {
+        $query = Ticket::find();
+
+        $this->load($params);
+
+        $query->innerJoin('status st', 'st.status_id=ticket.status_id');
+
+        $query->andWhere(['st.is_open' => 0]);
+        $query->andWhere(['category_id' => $this->category_id]);
+
+        if (!empty($this->close_from_date)) {
+            $query->andFilterWhere(['>=', 'start_datetime', strtotime(Yii::$app->formatter->asDate($this->close_from_date, 'yyyy-MM-dd'))]);
+        }
+
+        if (!empty($this->close_to_date)) {
+            $query->andFilterWhere(['<', 'start_datetime', (strtotime(Yii::$app->formatter->asDate($this->close_to_date, 'yyyy-MM-dd')) + 86400)]);
+        }
+
+        return $query;
     }
 }

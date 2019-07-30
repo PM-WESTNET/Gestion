@@ -517,4 +517,30 @@ class TicketController extends Controller
         return $this->redirect([$redirect]);
     }
 
+
+    public function actionCloseCollectionTicketsByPeriod(){
+
+        $data = Yii::$app->request->get();
+
+        $search = new TicketSearch();
+        $search->category_id = Config::getValue('cobranza_category_id');
+        $query = $search->searchClosedByPeriodAndStatus($data);
+
+
+        if ($query->exists()) {
+            $count = $query->count();
+            $status = Status::findOne(['name' => 'Cerrado (Por Jefe de Cobranza)']);
+
+            foreach ($query->all() as $ticket) {
+                $ticket->updateAttributes(['status_id' => $status->status_id]);
+            }
+
+            Yii::$app->session->addFlash('success', '{count} tickets hass been closed', ['count' => $count]);
+        }
+
+        Yii::$app->session->addFlash('warning', Yii::t('app','Can`t found tickets to close'));
+
+        return $this->redirect(['collection-tickets']);
+    }
+
 }
