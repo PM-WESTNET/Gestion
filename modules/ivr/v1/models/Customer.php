@@ -12,6 +12,7 @@ namespace app\modules\ivr\v1\models;
 
 use app\modules\config\models\Config;
 use app\modules\sale\models\Product;
+use app\modules\westnet\models\Connection;
 
 class Customer extends \app\modules\sale\models\Customer
 {
@@ -30,7 +31,7 @@ class Customer extends \app\modules\sale\models\Customer
     public function accountInfo() {
         $data = [];
 
-        $current_balance = $this->current_account_balance;
+        $current_balance = round($this->current_account_balance, 2);
 
         $lastPayment = Payment::find()->andWhere(['customer_id' => $this->customer_id])->orderBy(['timestamp' => SORT_DESC])->one();
 
@@ -76,6 +77,20 @@ class Customer extends \app\modules\sale\models\Customer
         ];
 
         return $payment_extension_info;
+    }
+
+    public function hasClippedForDebt() {
+
+        $clipped = false;
+        $contracts = $this->contracts;
+
+        foreach ($contracts as $contract) {
+            if ($contract->connection->status === Connection::STATUS_ACCOUNT_CLIPPED) {
+                $clipped = true;
+            }
+        }
+
+        return $clipped;
     }
 
 }
