@@ -1,23 +1,29 @@
 <?php
+use yii\bootstrap\ActiveForm;
+use app\components\companies\CompanySelector;
+use kartik\select2\Select2;
+use yii\helpers\Html;
 
-$this->title = Yii::t('app','Create new import for direct debit');
+$this->title = Yii::t('app','Create new import');
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app','Banks for Automatic Debit'), 'url' => ['/automaticdebit/bank/index']];
+$this->params['breadcrumbs'][] = ['label' => $import->bank->name, 'url' => ['/automaticdebit/bank/view', 'id' => $import->bank->bank_id]];
+
 ?>
 
 <div class="create-import">
 
     <h1 class="title">
-        <?php echo $this->title?>
+        <?= $this->title?>
     </h1>
 
+    <?php $form = ActiveForm::begin()?>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin()?>
-
-    <?php echo \app\components\companies\CompanySelector::widget([
+    <?= CompanySelector::widget([
         'form' => $form,
         'model' => $import
     ])?>
 
-    <?php echo $form->field($import,'money_box_account_id')->widget(\kartik\select2\Select2::class, [
+    <?= $form->field($import,'money_box_account_id')->widget(Select2::class, [
         'data' => $moneyBoxAccount,
         'pluginOptions' => [
             'allowClear' => true,
@@ -25,11 +31,11 @@ $this->title = Yii::t('app','Create new import for direct debit');
         'options' => ['placeholder' => Yii::t('app','Select an option')]
     ])?>
 
-    <?php echo $form->field($import, 'fileUploaded')->fileInput(['class' => 'form-control'])?>
+    <?= $form->field($import, 'fileUploaded')->fileInput(['class' => 'form-control'])?>
 
-    <?php echo \yii\helpers\Html::submitButton(Yii::t('app','Create'), ['class' => 'btn btn-success'])?>
+    <?= Html::submitButton(Yii::t('app','Create'), ['class' => 'btn btn-success'])?>
 
-    <?php \yii\bootstrap\ActiveForm::end()?>
+    <?php ActiveForm::end()?>
 
 </div>
 

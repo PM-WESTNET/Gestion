@@ -74,7 +74,7 @@ $dataProviderFailedPayments = new ActiveDataProvider(['query' => $import->getFai
                             ]);
                         },
                         'delete' => function ($url, $model, $key) {
-                            if ($model->getDeletable() && $model->status != 'cancelled') {
+                            if ($model->getDeletable() && $model->status != 'closed') {
                                 return Html::a('<span class="glyphicon glyphicon-trash"></span>', Url::toRoute(['/checkout/payment/cancel-payment', 'id' => $key]), [
                                     'title' => Yii::t('yii', 'Delete'),
                                     'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
