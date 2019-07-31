@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\BankCompanyConfig */
 
-$this->title = $model->bank_company_config_id;
+$this->title = $model->company->name;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Bank Company Configs'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -30,13 +30,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'attributes' => [
             'bank_company_config_id',
             'company_identification',
+            'other_company_identification',
+            'service_code',
+            'other_service_code',
             'branch',
             'control_digit',
             'account_number',
-            'company_id',
-            'bank_id',
-            'created_at',
-            'updated_at',
+            [
+                'label' => Yii::t('app','Company'),
+                'value' => function ($model){
+                    return $model->company->name;
+                }
+            ],
+            'created_at:datetime',
+            'updated_at:datetime',
         ],
     ]) ?>
 
