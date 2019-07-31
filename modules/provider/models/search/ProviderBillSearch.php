@@ -119,7 +119,9 @@ class ProviderBillSearch extends ProviderBill
         ]);
 
         $query->addSelect(['provider_bill.*', 'sum(coalesce(pbhpp.amount, 0)) as amountApplied'])
-            ->leftJoin('provider_bill_has_provider_payment pbhpp', 'pbhpp.provider_bill_id = provider_bill.provider_bill_id');
+            ->joinWith(['billType'])
+            ->leftJoin('provider_bill_has_provider_payment pbhpp', 'provider_bill.provider_bill_id = pbhpp.provider_bill_id')
+            ->where(['pbhpp.provider_bill_id' => null]);
 
         $this->load($params);
 
@@ -129,12 +131,15 @@ class ProviderBillSearch extends ProviderBill
         }
 
         if($this->provider_id) {
-            $query->andFilterWhere(['provider_bill.provider_id' => $this->provider_id]);
+            $query->andFilterWhere([
+                'provider_bill.provider_id' => $this->provider_id,
+                'bill_type.multiplier' => [-1, 1]
+            ]);
         }
 
         //Fix pagination
         $query->groupBy('provider_bill.provider_bill_id');
-        $query->having("sum(coalesce(pbhpp.amount, 0))< provider_bill.balance");
+        $query->having("sum(coalesce(pbhpp.amount, 0)) < provider_bill.total");
 
         return $dataProvider;
     }

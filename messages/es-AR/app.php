@@ -1128,4 +1128,7 @@
     'Sent Date and Time' => 'Fecha y hora de envío',
     'Infobip sended sms' => 'SMS enviados por Infobip',
     'Apply to bill' => 'Aplicar a comprobante',
+    'Applied bills' => 'Comprobantes aplicados',
+    'One or more provider bills cant be applied correctly' => 'Uno o mas comprobantes de proveedor no pueden ser asociados correctamente',
+    'One or more provider bills cant be disassociated' => 'Uno o mas comprobantes de proveedor no pueden ser desasociados correctamente',
 );

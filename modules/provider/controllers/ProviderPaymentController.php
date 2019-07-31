@@ -13,6 +13,7 @@ use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * ProviderPaymentController implements the CRUD actions for ProviderPayment model.
@@ -205,7 +206,7 @@ class ProviderPaymentController extends Controller {
      * @return json
      */
     public function actionAddBill($id) {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         $bill = new ProviderBillHasProviderPayment();
         $bill->load(Yii::$app->request->post());
@@ -389,4 +390,49 @@ class ProviderPaymentController extends Controller {
         ]);
     }
 
+    /**
+     * Agrega un item al pago
+     *
+     * @param int $id
+     * @return json
+     */
+    public function actionAsociateProviderBill($id) {
+        $status = 'success';
+        $message = '';
+        Yii::$app->response->format = 'json';
+
+        $bills_ids = Yii::$app->request->post('bills');
+        $model = $this->findModel($id);
+        if (!$model->associateProviderBills($bills_ids)) {
+            $message = Yii::t('app', 'One or more provider bills cant be applied correctly');
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Agrega un item al pago
+     *
+     * @param int $id
+     * @return json
+     */
+    public function actionRemoveAssociationWithProviderBill($id) {
+        $status = 'success';
+        $message = '';
+        Yii::$app->response->format = 'json';
+
+        $bills_ids = Yii::$app->request->post('bills');
+        $model = $this->findModel($id);
+        if (!$model->disassociateProviderBills($bills_ids)) {
+            $message = Yii::t('app', 'One or more provider bills cant be disassociated');
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
 }

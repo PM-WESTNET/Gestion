@@ -31,6 +31,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     <br/>
                     <?= $model->date ?>
                 </div>
+                <div class="col-sm-4 text-center">
+                    <strong><?= Yii::t('app', 'Description'); ?></strong>
+                    <br/>
+                    <?= $model->description ?>
+                </div>
                 <div class="col-sm-2 text-center">
                     <strong><?= Yii::t('app', 'Amount'); ?></strong>
                     <br/>
@@ -99,7 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="panel panel-default">
             <div class="panel-heading">
                 <strong>
-                    <?= Yii::t('app', 'Applied Bills') ?>
+                    <?= Yii::t('app', 'Applied bills') ?>
                 </strong>
                 <div class="btn-group btn-group-xs pull-right" role="group">
                     <button type="button" id="btnDisengage" class="btn btn-warning"><?=Yii::t('app', 'Disengage');?></button>
@@ -164,13 +169,13 @@ $this->params['breadcrumbs'][] = $this->title;
             var url = "";
             if (type=='apply') {
                 data.bills = $('#grid_bills').yiiGridView('getSelectedRows');
-                url = '<?=Url::toRoute(['/checkout/payment/add-bill', 'id'=>$model->provider_payment_id])?>';
+                url = '<?=Url::toRoute(['asociate-provider-bill', 'id' => $model->provider_payment_id])?>';
             } else {
                 data.bills = $('#grid_applied_bills').yiiGridView('getSelectedRows');
-                url = '<?=Url::toRoute(['/checkout/payment/remove-bill', 'id'=>$model->provider_payment_id])?>';
+                url = '<?=Url::toRoute(['remove-association-with-provider-bill', 'id'=>$model->provider_payment_id])?>';
             }
 
-            if (data.bills.length>0) {
+            if (data.bills.length > 0) {
                 $.ajax({
                     url: url,
                     method: 'POST',
@@ -178,6 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     data: data,
                     success: function(data){
                         if (data.status!="success") {
+                            console.log(data.errors);
                             alert("<?=Yii::t('app', 'This resource could not be applied.')?>");
 
                         } else {
