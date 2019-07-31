@@ -4,6 +4,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\modules\provider\models\ProviderPayment;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\provider\models\ProviderPayment */
@@ -22,6 +23,10 @@ $this->params['breadcrumbs'][] = $this->title;
             if($model->canClose()) {
                 echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_payment_id], ['class' => 'btn btn-primary']);
                 echo Html::a("<span class='glyphicon glyphicon-repeat'></span> " . Yii::t('app', 'Close'), ['close', 'id' => $model->provider_payment_id], ['class' => 'btn btn-warning']);
+            }
+
+            if ($model->status == ProviderPayment::STATUS_CLOSED){
+                echo Html::a("<span class='glyphicon glyphicon-indent-right'></span> " .Yii::t('app', 'Apply to bill'), ['apply', 'provider_payment_id' => $model->provider_payment_id], ['class' => 'btn btn-warning']);
             }
 
             if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_payment_id], [

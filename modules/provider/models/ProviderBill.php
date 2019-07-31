@@ -551,4 +551,41 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             return $this->save();
         }
     }
+
+    /**
+     * Devuelve el importe restante de la factura. Si aun no hay ningun pago,
+     * devolvera el importe total de la factura.
+     * @return real
+     */
+    public function getDebt(){
+
+        $payedAmount = $this->getPayedAmount(true);
+
+        $total = $this->total;
+
+        if(abs($total - $payedAmount) > $total * Yii::$app->params['payment_tolerance']){
+            return $total - $payedAmount;
+        }else{
+            return 0.0;
+        }
+
+    }
+
+    /**
+     * Devuelve el monto que ha sido pagado del comprobante
+     * @return type
+     */
+    public function getPayedAmount($includeDraft=false)
+    {
+
+        $payedAmount = 0.0;
+        foreach($this->providerPayments as $payment){
+            if ( ($includeDraft && $payment->status=='draft') || ($payment->status!='draft')) {
+                $payedAmount += $payment->amount;
+            }
+        }
+
+        return $payedAmount;
+
+    }
 }

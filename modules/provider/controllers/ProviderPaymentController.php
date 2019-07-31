@@ -5,6 +5,7 @@ namespace app\modules\provider\controllers;
 use app\modules\provider\models\ProviderBill;
 use app\modules\provider\models\ProviderBillHasProviderPayment;
 use app\modules\provider\models\ProviderPaymentItem;
+use app\modules\provider\models\search\ProviderBillSearch;
 use Yii;
 use app\modules\provider\models\ProviderPayment;
 use app\modules\provider\models\search\ProviderPaymentSearch;
@@ -360,6 +361,32 @@ class ProviderPaymentController extends Controller {
                 'date' => (new \DateTime($model->date))->format('d-m-Y')
             ];
         }
+    }
+
+    /**
+     * Vista que permite aplicar el pago a un comprobante
+     * @param $payment_id
+     * @return array
+     * @throws NotFoundHttpException
+     */
+    public function actionApply($provider_payment_id) {
+        $model = ProviderPayment::findOne($provider_payment_id);
+        $searchModel = new ProviderBillSearch();
+        $searchModel->provider_id = $model->provider_id;
+        $billDataProvider = $searchModel->searchWithDebt([]);
+
+        $appliedDataProvider = new ActiveDataProvider([
+            'query' => $model->getProviderBills(),
+            'sort' => [
+                //'defaultOrder' => ['bill.date'=>SORT_ASC]
+            ]
+        ]);
+
+        return $this->render('apply', [
+            'model' => $model,
+            'billDataProvider' => $billDataProvider,
+            'appliedDataProvider' => $appliedDataProvider
+        ]);
     }
 
 }

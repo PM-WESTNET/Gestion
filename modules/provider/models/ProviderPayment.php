@@ -38,6 +38,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     private $_providerBills;
     private $_oldBills;
 
+    const STATUS_CREATED = 'created';
+    const STATUS_CLOSED = 'closed';
+    const STATUS_CONCILED = 'conciled';
+
     public function __construct($config = array()) {
         parent::__construct($config);
 
@@ -109,7 +113,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getProviderBillHasProviderPayments()
     {
-        return $this->hasMany(ProviderBillHasProviderPayment::className(), ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(ProviderBillHasProviderPayment::class, ['provider_payment_id' => 'provider_payment_id']);
     }
 
     /**
@@ -117,7 +121,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getProviderBills()
     {
-        return $this->hasMany(ProviderBill::className(), ['provider_bill_id' => 'provider_bill_id'])->viaTable('provider_bill_has_provider_payment', ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(ProviderBill::class, ['provider_bill_id' => 'provider_bill_id'])->viaTable('provider_bill_has_provider_payment', ['provider_payment_id' => 'provider_payment_id']);
     }
 
 

@@ -1126,5 +1126,6 @@
     'Destinatary' => 'Destinatario',
     'Infobip Sended Messages' => 'Mensajes Enviados por Infobip',
     'Sent Date and Time' => 'Fecha y hora de envío',
-    'Infobip sended sms' => 'SMS enviados por Infobip'
+    'Infobip sended sms' => 'SMS enviados por Infobip',
+    'Apply to bill' => 'Aplicar a comprobante',
 );
