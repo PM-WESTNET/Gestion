@@ -32,7 +32,7 @@ class InfoController extends Controller
      * @SWG\Get(path="/info/payment-methods",
      *     tags={"Info"},
      *     summary="",
-     *     description="Devuelve un array con los metodos de pagos habilitados",
+     *     description="(D-2) Devuelve un array con los metodos de pagos habilitados",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *

@@ -13,6 +13,7 @@ use app\modules\config\models\Config;
 use app\modules\ivr\v1\components\Controller;
 use app\modules\ivr\v1\models\Customer;
 use app\modules\ivr\v1\models\search\CustomerSearch;
+use app\modules\sale\models\Bill;
 use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -38,7 +39,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/search",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Devuelve un array con los clientes encontrados segun el criterio usado",
+     *     description="(A-3) Devuelve un array con los clientes encontrados segun el criterio usado",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *
@@ -119,7 +120,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/balance-account",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Devuelve  el saldo del cliente, y la info del último pago",
+     *     description="(C-5) Devuelve  el saldo del cliente, y la info del último pago",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -181,7 +182,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/can-force",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Si el cliente puede solicitar una extension de pago devuelve monto, fecha desde y fecha hasta y ademas
+     *     description="(A-33) Si el cliente puede solicitar una extension de pago devuelve monto, fecha desde y fecha hasta y ademas
            los contratos que tiene activo con el domicilio de cada uno, de lo contrario devuelve error",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
@@ -252,7 +253,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/force-connection",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Realiza una extensión de pago",
+     *     description="(A-42)Realiza una extensión de pago",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -349,7 +350,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/clipped-for-debt",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Indica si el cliente esta cortado por mora",
+     *     description="(A-5 / B-2) Indica si el cliente esta cortado por mora",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -428,5 +429,84 @@ class CustomerController extends Controller
     public function actionDevicesStatus()
     {
 
+    }
+
+    public function actionEmail($id, $from = 'all_bills')
+    {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['code']) || empty($data['code'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','"code" param is required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+        if (trim($model->customer->email) == "") {
+            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
+            return $this->redirect(['index']);
+        }
+
+        if ($model->sendEmail($fileName)) {
+            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+        } else {
+            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
+        };
+
+        if ($from === 'all_bills') {
+            return $this->redirect(['index']);
+        } else {
+            return $this->redirect(['/checkout/payment/current-account', 'customer' => $model->customer_id]);
+        }
+    }
+
+    public function actionPdf($id)
+    {
+
+        $response = Yii::$app->getResponse();
+        $response->format = \yii\web\Response::FORMAT_RAW;
+        $response->headers->set('Content-type: application/pdf');
+        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+
+        $model = $this->findModel($id);
+        $this->layout = '//pdf';
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $model->getBillDetails(),
+            'pagination' => false
+        ]);
+
+        $view = $this->render('pdf', [
+            'model' => $model,
+            'dataProvider' => $dataProvider
+        ]);
+
+        $pdf = ' ';
+
+        try{
+            $pdf = \app\components\helpers\PDFService::makePdf($view);
+        } catch (\Exception $ex){
+            \Yii::trace($ex);
+        }
+
+        return $pdf;
     }
 }
