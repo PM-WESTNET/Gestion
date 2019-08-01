@@ -38,7 +38,11 @@ $this->title = Yii::t('app','Create new export for direct debit');
         ]
     ])?>
 
-    <?php echo $form->field($export, 'concept')->textInput(['maxlength' => true])?>
+    <?php echo $form->field($export, 'concept')->textInput([
+        'maxlength' => true,
+        'value' => ($export->isNewRecord ? \app\modules\config\models\Config::getValue('direct_debit_default_concept') : $export->concept)
+
+    ])?>
 
     <?php echo $form->field($export, 'type')->dropDownList([
         'own' => Yii::t('app','Bank Customers'),
