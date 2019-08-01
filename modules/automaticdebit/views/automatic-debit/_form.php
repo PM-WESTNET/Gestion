@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'bank_id')->dropDownList($banks) ?>
 
-    <?= $form->field($model, 'cbu')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'cbu')->textInput(['maxlength' => 22]) ?>
 
     <?= $form->field($model, 'status')->dropDownList([
         AutomaticDebit::ENABLED_STATUS => Yii::t('app','Active'),

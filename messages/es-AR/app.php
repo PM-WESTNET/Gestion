@@ -1171,5 +1171,7 @@
     'Create new import' => 'Crear nueva importación',
     'Money box account' => 'Cuenta monetaria',
     'Other Service Code' => 'Código de Servicio (Clientes externos)',
-    'Add Company to {bank}' =>  'Agregar Empresa a {bank}'
+    'Add Company to {bank}' =>  'Agregar Empresa a {bank}',
+    'Update Automatic Debit: {customer}' => 'Actualizar Débito Directo: {customer}',
+    'Beneficiario Number' => 'Número de Beneficiario'
 );
