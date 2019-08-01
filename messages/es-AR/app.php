@@ -1173,5 +1173,6 @@
     'Other Service Code' => 'Código de Servicio (Clientes externos)',
     'Add Company to {bank}' =>  'Agregar Empresa a {bank}',
     'Update Automatic Debit: {customer}' => 'Actualizar Débito Directo: {customer}',
-    'Beneficiario Number' => 'Número de Beneficiario'
+    'Beneficiario Number' => 'Número de Beneficiario',
+    'Company not configured' => 'Empresa no configurada'
 );

@@ -43,7 +43,8 @@ class BancoFrances implements BankInterface
         $companyConfig = BankCompanyConfig::findOne(['company_id' => $export->company_id, 'bank_id' => $export->bank_id]);
 
         if (empty($companyConfig)) {
-            throw new InvalidConfigException('Company not configured for bank');
+            Yii::$app->session->addFlash('error', Yii::t('app','Company not configured'));
+            return false;
         }
 
         $this->companyConfig = $companyConfig;
@@ -119,7 +120,8 @@ class BancoFrances implements BankInterface
                     $companyConfig = BankCompanyConfig::findOne(['company_id' => $import->company_id]);
 
                     if (empty($companyConfig)) {
-                        throw new InvalidConfigException('Company not configured');
+                        Yii::$app->session->addFlash('error', Yii::t('app','Company not configured'));
+                        return false;
                     }
 
                     $process_timestamp = substr($line, 17, 8);
