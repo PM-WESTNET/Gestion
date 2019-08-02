@@ -58,6 +58,8 @@ class Customer extends \app\modules\sale\models\Customer
 
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $this->customer_id;
+        $searchModel->only_closed_bills = true;
+        $searchModel->only_closed_payments = true;
         $dataProvider = $searchModel->searchAccount($this->customer_id, []);
         $dataProvider->pagination = false;
         $accounts = $dataProvider->getModels();
@@ -88,7 +90,6 @@ class Customer extends \app\modules\sale\models\Customer
 
                 // Incluyo las facturas
                 if ($account['bill_id'] != '0') {
-
                     $response['bill'][] = [
                         'bill_id' => $account['bill_id'],
                         'type'  => \Yii::t('app', $account['type']) ,

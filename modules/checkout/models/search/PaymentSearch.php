@@ -37,6 +37,8 @@ class PaymentSearch extends Payment
     public $to;
 
     public $paymentMethods;
+    public $only_closed_bills;
+    public $only_closed_payments;
 
     /**
      * @inheritdoc
@@ -64,7 +66,9 @@ class PaymentSearch extends Payment
                 '_status',
                 'from_amount',
                 'to_amount',
-                'paymentMethods'
+                'paymentMethods',
+                'only_closed_bills',
+                'only_closed_payments'
             ], 'safe'],
         ];
     }
@@ -213,6 +217,8 @@ class PaymentSearch extends Payment
     public function searchAccount($customer_id, $params)
     {
         $queryPayments = $this->searchPayment($params);
+        $this->load($params);
+
         $queryPayments->select([
             new Expression("'Payment' AS type"), "customer.customer_id", "concat(customer.lastname, ', ', customer.name) AS name",
             new Expression('0 as bill_id'), "payment.payment_id", "payment.date", "payment.time", "payment.number",
@@ -237,7 +243,14 @@ class PaymentSearch extends Payment
             'bill_type.multiplier' => [-1,1]
         ]);
 
-        $this->load($params);
+        if($this->only_closed_bills) {
+            $queryBills->andWhere(['bill.status' => Bill::STATUS_CLOSED]);
+        }
+
+        if($this->only_closed_payments) {
+            $queryPayments->andWhere(['payment.status' => Payment::PAYMENT_CLOSED]);
+        }
+
         $desde = (new \DateTime('now -800 month'))->format('Y-m').'-01'; // Get bills from begining TODO improve query
         if(!empty($this->from)) {
             $desde = Yii::$app->formatter->asDate($this->from, 'Y-M-dd');
