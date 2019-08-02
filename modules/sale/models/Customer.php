@@ -11,7 +11,10 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\Connection;
+use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\models\EmptyAds;
 use Codeception\Util\Debug;
@@ -119,6 +122,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
+            [['last_calculation_current_account_balance', 'current_account_balance'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
@@ -1466,5 +1470,77 @@ class Customer extends ActiveRecord {
             Customer::EMAIL_STATUS_INACTIVE => Yii::t('app', Customer::EMAIL_STATUS_INACTIVE),
             Customer::EMAIL_STATUS_INVALID => Yii::t('app', Customer::EMAIL_STATUS_INVALID)
         ];
+    }
+
+    /**
+     * @param $customer_id
+     * Devuelve la cantidad de facturas que adeuda un cliente.
+     */
+    public static function getOwedBills($customer_id)
+    {
+        $customer_search = new CustomerSearch();
+        $owed_bills = $customer_search->searchDebtBills($customer_id);
+        if(!$owed_bills) {
+            return 0;
+        }
+        return $owed_bills['debt_bills'];
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     * Devuelve la cantidad de extensiones de pago pedidas en el período
+     */
+    public function getPaymentExtensionQtyRequest($from = null, $to = null)
+    {
+        $payment_extension_qty = 0;
+
+        if (empty($from)) {
+            $from = (new \DateTime('first day of this month'))->getTimestamp();
+        }
+
+        if (empty($to)) {
+            $to = (new \DateTime('last day of this month'))->getTimestamp() + 86400;
+        }
+
+        foreach ($this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
+            $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+            if ($connection) {
+                $extension_qty = ConnectionForcedHistorial::find()
+                    ->andWhere(['connection_id' => $connection->connection_id])
+                    ->andWhere(['>=', 'create_timestamp', $from])
+                    ->andWhere(['<', 'create_timestamp', $to])
+                    ->count();
+
+                $payment_extension_qty += $extension_qty;
+            }
+
+        }
+
+        return $payment_extension_qty;
+    }
+
+    /**
+     * @param $customer_id
+     * @param null $period
+     * @return bool
+     * @throws \Exception
+     * Indica si el cliente puede pedir una eztension de pago
+     */
+    public function canRequestPaymentExtension($period = null)
+    {
+//        $period = $period ? $period : (new \DateTime('now'))->format('Y-m-01');
+
+        //Sólo si el cliente no debe mas de una factura
+        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
+            return false;
+        }
+
+        //Y si no ha solicitado el máximo de extensiones de pago permitidas.
+        $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
+        $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
+
+        return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }
 }

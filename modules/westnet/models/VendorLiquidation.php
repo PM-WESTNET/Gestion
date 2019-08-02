@@ -206,6 +206,9 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
         return Yii::$app->formatter->asDate($this->period, 'MM-yyyy');
     }
 
+    /**
+     * Crea una nueva liquidacion para el vendedor y periodos indicados
+     */
     public static function create($vendor, $period)
     {
         $liq = new self;
@@ -328,5 +331,15 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
             ->count();
             
         return $count != null ? $count : 0.0;
+    }
+
+    /**
+     * Inserta en batch los items de liquidación
+     */
+    public static function batchInsertLiquidationItems($liquidation_items)
+    {
+        Yii::$app->db->createCommand()->batchInsert('vendor_liquidation_item', [
+            'contract_detail_id', 'description', 'vendor_liquidation_id', 'amount'
+        ], $liquidation_items)->execute();
     }
 }

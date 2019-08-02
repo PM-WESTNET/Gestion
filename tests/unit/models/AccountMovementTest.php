@@ -197,4 +197,89 @@ class AccountMovementTest extends \Codeception\Test\Unit
         expect('Validate movement', AccountMovement::getTotal([$item_2], 'debit'))->equals(300);
         expect('Validate movement', AccountMovement::getTotal([$item_2], 'credit'))->equals(0);
     }
+
+    /*
+      public function getWorkflowAttr()
+    {
+        return "status";
+    }
+
+    public function getWorkflowStates()
+    {
+        return [
+            self::STATE_DRAFT => [
+                self::STATE_CLOSED,
+                self::STATE_BROKEN
+            ],
+            self::STATE_BROKEN => [
+                self::STATE_DRAFT,
+            ],
+        ];
+    }
+    public function getWorkflowCreateLog(){}
+
+    public function close()
+    {
+        try {
+            if ($this->can(AccountMovement::STATE_CLOSED)) {
+                foreach($this->accountMovementItems as $item) {
+                    $item->changeState(AccountMovement::STATE_CLOSED);
+                }
+                return $this->changeState(AccountMovement::STATE_CLOSED);
+            } else {
+                throw new \Exception('Cant Close');
+            }
+
+            return true;
+        } catch(\Exception $ex) {
+            return false;
+        }
+    }
+
+    public function getDebt()
+    {
+        $total = 0;
+        foreach($this->accountMovementItems as $item) {
+            $total += $item->debit;
+        }
+
+        return $total;
+    }
+    public function getCredit()
+    {
+        $total = 0;
+        foreach($this->accountMovementItems as $item) {
+            $total += $item->credit;
+        }
+
+        return $total;
+    }
+
+    public function validateMovement()
+    {
+        if(empty($this->accountMovementItems)) {
+            return false;
+        }
+        $debit = 0;
+        $credit = 0;
+        foreach ($this->accountMovementItems as $item) {
+            $debit += $item->debit;
+            $credit += $item->credit;
+        }
+
+        return (round($debit,2)==round($credit,2));
+    }
+
+    public static function getTotal($models, $attribute)
+    {
+        $total = 0;
+
+        foreach ($models as $model) {
+            $total += $model[$attribute];
+        }
+
+        return $total;
+
+    }
+     */
 }

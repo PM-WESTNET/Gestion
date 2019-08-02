@@ -175,8 +175,14 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
      */
     private function formatDatesBeforeSave()
     {
-        $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
-        $this->from_date = Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd');
+
+        if (!empty($this->date)) {
+            $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
+        }
+
+        if (!empty($this->from_date)) {
+            $this->from_date = Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd');
+        }
     }
 
     public function upload()

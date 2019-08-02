@@ -3,6 +3,7 @@
 namespace app\modules\partner\models;
 
 use Yii;
+use app\modules\partner\models\PartnerMovement;
 
 /**
  * This is the model class for table "partner_liquidation".
@@ -93,9 +94,16 @@ class PartnerLiquidation extends \app\components\db\ActiveRecord
      */
     public function getPartnerDistributionModelHasPartner()
     {
-        return $this->hasOne(PartnerDistributionModelHasPartner::className(), ['partner_distribution_model_has_partner_id' => 'partner_distribution_model_has_partner_id']);
+        return $this->hasOne(PartnerDistributionModelHasPartner::class, ['partner_distribution_model_has_partner_id' => 'partner_distribution_model_has_partner_id']);
     }
-    
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPartnerLiquidationMovements()
+    {
+        return $this->hasMany(PartnerLiquidationMovement::class, ['partner_liquidation_id' => 'partner_liquidation_id']);
+    }
         
         
     /**

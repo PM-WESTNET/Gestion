@@ -10,6 +10,7 @@ namespace app\modules\westnet\notifications\components\transports;
 
 
 use app\components\helpers\EmptyLogger;
+use app\components\helpers\Inflector;
 use app\modules\config\models\Config;
 use app\modules\sale\models\Company;
 use app\modules\sale\modules\contract\models\Plan;
@@ -17,6 +18,7 @@ use PHPExcel;
 use PHPExcel_Cell_DataType;
 use PHPExcel_IOFactory;
 use Yii;
+use yii\db\Query;
 
 class SMSInfobipTransport implements TransportInterface
 {
@@ -80,7 +82,6 @@ class SMSInfobipTransport implements TransportInterface
      */
     public function export($notification)
     {
-        //Para evitar que la memoria alcance el limite
         Yii::setLogger(new EmptyLogger());
 
         //Nombre de archivo
@@ -118,63 +119,75 @@ class SMSInfobipTransport implements TransportInterface
                 ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'));
 
             $i = 2;
+
             foreach($notification->destinataries as $destinataries){
                 /** @var Query $query */
                 $query = $destinataries->getCustomersQuery(false);
-                foreach($query->all() as $customer) {
-                    $phones = [];
-                    $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
-                    $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
-                    $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
-                    $p4 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone4']));
 
-                    if(strlen($p1) > 7 ) {
-                        $phones[] = (string)$p1;
-                    }
 
-                    if(strlen($p2) > 7 && $p1 != $p2 ) {
-                        $phones[] = (string)$p2;
-                    }
-
-                    if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
-                        $phones[] = (string)$p3;
-                    }
-
-                    if(strlen($p4) > 7 && $p4 != $p1 && $p4 != $p2  && $p4 != $p3) {
-                        $phones[] = (string)$p4;
-                    }
-
-                    foreach($phones as $phone) {
+                foreach($query->batch(1000) as $customers) {
+                    foreach ($customers as $customer) {
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
                         $company = Company::findOne($customer['customer_company']);
-                        $excel->setActiveSheetIndex(0)
-                            ->setCellValue('A' .$i, $customer['name'])
-                            ->setCellValueExplicit('B' .$i, $phone, PHPExcel_Cell_DataType::TYPE_STRING)
-                            ->setCellValue('C' .$i, '')
-                            ->setCellValueExplicit('D' .$i, $customer['code'], PHPExcel_Cell_DataType::TYPE_STRING)
-                            ->setCellValueExplicit('E' .$i, $customer['payment_code'], PHPExcel_Cell_DataType::TYPE_STRING)
-                            ->setCellValue('F' .$i, (isset($customer['node']) ? $customer['node'] : ''))
-                            ->setCellValue('G' .$i, (isset($customer['saldo']) ? $customer['saldo'] : ''))
-                            ->setCellValue('H' .$i, '')
-                            ->setCellValueExplicit('I' .$i, $company ? $company->code : $customer['company_code'], PHPExcel_Cell_DataType::TYPE_STRING)
-                            ->setCellValue('J' .$i, (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ))
-                            ->setCellValue('K' .$i, Yii::t('westnet', ucfirst($customer['status'])))
-                            ->setCellValue('L' .$i, $customer['category'])
-                            ->setCellValue('M' .$i, $plan ? $plan->name : '')
-                            ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '');
-                        $i++;
+                        $phones = [];
+                        $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
+                        $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
+                        $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
+                        $p4 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone4']));
+
+                        if(strlen($p1) > 7 ) {
+                            $phones[] = (string)$p1;
+                        }
+
+                        if(strlen($p2) > 7 && $p1 != $p2 ) {
+                            $phones[] = (string)$p2;
+                        }
+
+                        if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
+                            $phones[] = (string)$p3;
+                        }
+
+                        if(strlen($p4) > 7 && $p4 != $p1 && $p4 != $p2  && $p4 != $p3) {
+                            $phones[] = (string)$p4;
+                        }
+
+                        foreach($phones as $phone) {
+                            $excel->setActiveSheetIndex(0)
+                                ->setCellValue('A' .$i, $customer['name'])
+                                ->setCellValueExplicit('B' .$i, $phone, PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('C' .$i, '')
+                                ->setCellValueExplicit('D' .$i, $customer['code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValueExplicit('E' .$i, $customer['payment_code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('F' .$i, (isset($customer['node']) ? $customer['node'] : ''))
+                                ->setCellValue('G' .$i, (isset($customer['saldo']) ? $customer['saldo'] : ''))
+                                ->setCellValue('H' .$i, '')
+                                ->setCellValueExplicit('I' .$i, $company ? $company->code : $customer['company_code'], PHPExcel_Cell_DataType::TYPE_STRING)
+                                ->setCellValue('J' .$i, (isset($customer['debt_bills']) ? $customer['debt_bills'] : '' ))
+                                ->setCellValue('K' .$i, Yii::t('westnet', ucfirst($customer['status'])))
+                                ->setCellValue('L' .$i, $customer['category'])
+                                ->setCellValue('M' .$i, $plan ? $plan->name : '')
+                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '');
+                            $i++;
+
+                        }
                     }
+                    $excel->getActiveSheet()->getStyle('A1:A'.$i)
+                        ->getNumberFormat()
+                        ->setFormatCode();
+
                 }
-                $excel->getActiveSheet()->getStyle('A1:A'.$i)
-                    ->getNumberFormat()
-                    ->setFormatCode();
+
             }
+
             $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
             $objWriter->save('php://output');
+
         }catch (\Exception $ex){
+
             error_log($ex->getMessage());
         }
+
 
     }
 
@@ -217,7 +230,9 @@ class SMSInfobipTransport implements TransportInterface
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
 
-        return $replaced_text;
+        $inflector = new \yii\helpers\Inflector();
+
+        return $inflector->transliterate($replaced_text, \yii\helpers\Inflector::TRANSLITERATE_MEDIUM);
 
     }
 

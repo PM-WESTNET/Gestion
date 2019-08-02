@@ -1131,4 +1131,8 @@
     'Applied bills' => 'Comprobantes aplicados',
     'One or more provider bills cant be applied correctly' => 'Uno o mas comprobantes de proveedor no pueden ser asociados correctamente',
     'One or more provider bills cant be disassociated' => 'Uno o mas comprobantes de proveedor no pueden ser desasociados correctamente',
+    'Mobile app status' => 'Estado de la aplicación móvil',
+    'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
+    'Can`t create payment extension' => 'No se puede crear la extensión de pago',
+    'Send to Ivr' => 'Informar a IVR',
 );

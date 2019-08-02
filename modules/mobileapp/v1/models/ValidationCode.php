@@ -9,6 +9,8 @@ use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\components\transports\InfobipService;
 use Yii;
 use app\modules\westnet\notifications\components\transports\IntegratechService;
+use yii\db\ActiveRecord;
+use yii\helpers\Inflector;
 
 /**
  * This is the model class for table "validation_code".
@@ -20,7 +22,7 @@ use app\modules\westnet\notifications\components\transports\IntegratechService;
  *
  * @property UserAppHasCustomer $userAppHasCustomer
  */
-class ValidationCode extends \app\components\db\ActiveRecord
+class ValidationCode extends ActiveRecord
 {
 
 
@@ -140,7 +142,8 @@ class ValidationCode extends \app\components\db\ActiveRecord
     }
 
     public function getSmsText() {
-        return str_replace('{code}', $this->code, Config::getValue('sms_validation_content'));
+        $inflector = new Inflector();
+        return $inflector->transliterate( str_replace('{code}', $this->code, Config::getValue('sms_validation_content')), Inflector::TRANSLITERATE_MEDIUM);
     }
 
 }

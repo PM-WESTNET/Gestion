@@ -31,18 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
             ?>
             <div class="panel panel-default" id="panel_operation_type">
                 <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-items" aria-expanded="true" aria-controls="panel-body-items">
-                    <h3 class="panel-title"><?php echo $value['name'] ?></h3>
+                    <h3 class="panel-title"><?= $value['name'] ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
                     <div class="row">
-                        <div class="col-sm-4 text-center"><?php echo Yii::t('app', 'Debit')?></div>
-                        <div class="col-sm-4 text-center"><?php echo Yii::t('app', 'Credit')?></div>
-                        <div class="col-sm-4 text-center"><?php echo Yii::t('partner', 'Withdraw pending')?></div>
+                        <div class="col-sm-4 text-center"><?= Yii::t('app', 'Debit')?></div>
+                        <div class="col-sm-4 text-center"><?= Yii::t('app', 'Credit')?></div>
+                        <div class="col-sm-4 text-center"><?= Yii::t('partner', 'Withdraw pending')?></div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-4 text-center"><?php echo Yii::$app->formatter->asCurrency($value['debit']) ?></div>
-                        <div class="col-sm-4 text-center"><?php echo Yii::$app->formatter->asCurrency($value['credit']) ?></div>
-                        <div class="col-sm-4 text-center <?php echo ( $value['balance'] < 0 ? 'label label-danger' : '') ?>"><?php echo Yii::$app->formatter->asCurrency($value['balance']) ?></div>
+                        <div class="col-sm-4 text-center"><?= Yii::$app->formatter->asCurrency($value['debit']) ?></div>
+                        <div class="col-sm-4 text-center"><?= Yii::$app->formatter->asCurrency($value['credit']) ?></div>
+                        <div class="col-sm-4 text-center <?= ( $value['balance'] < 0 ? 'label label-danger' : '') ?>"><?= Yii::$app->formatter->asCurrency($value['balance']) ?></div>
                     </div>
                 </div>
             </div>
@@ -52,22 +52,22 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="row">
         <div class="panel panel-default" id="panel_operation_type">
             <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-items" aria-expanded="true" aria-controls="panel-body-items">
-                <h3 class="panel-title"><?php echo Yii::t('app', 'Total') ?></h3>
+                <h3 class="panel-title"><?= Yii::t('app', 'Total') ?></h3>
             </div>
             <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
                 <div class="row">
-                    <div class="col-sm-4 text-center"><?php echo Yii::t('app', 'Debit')?></div>
-                    <div class="col-sm-4 text-center"><?php echo Yii::t('app', 'Credit')?></div>
-                    <div class="col-sm-4 text-center"><?php echo Yii::t('partner', 'Withdraw pending')?></div>
+                    <div class="col-sm-4 text-center"><?= Yii::t('app', 'Debit')?></div>
+                    <div class="col-sm-4 text-center"><?= Yii::t('app', 'Credit')?></div>
+                    <div class="col-sm-4 text-center"><?= Yii::t('partner', 'Withdraw pending')?></div>
                     <div class="col-xs-12">
                         <hr>                        
                     </div>
 
                 </div>
                 <div class="row">
-                    <div class="col-sm-4 text-center"><?php echo Yii::$app->formatter->asCurrency($totalDebit) ?></div>
-                    <div class="col-sm-4 text-center"><?php echo Yii::$app->formatter->asCurrency($totalCredit) ?></div>
-                    <div class="col-sm-4 text-center"><?php echo Yii::$app->formatter->asCurrency(abs($totalBalance)) ?></div>
+                    <div class="col-sm-4 text-center"><?= Yii::$app->formatter->asCurrency($totalDebit) ?></div>
+                    <div class="col-sm-4 text-center"><?= Yii::$app->formatter->asCurrency($totalCredit) ?></div>
+                    <div class="col-sm-4 text-center <?= ( $value['balance'] < 0 ? 'label label-danger' : '') ?>"> <?= Yii::$app->formatter->asCurrency($totalBalance) ?></div>
                 </div>
             </div>
         </div>

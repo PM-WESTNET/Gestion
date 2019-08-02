@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use app\modules\partner\models\PartnerLiquidation;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -33,9 +34,20 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             [
-                'header' => Yii::t('partner','Partner'),
+                'header' => Yii::t('partner','Partner distribution model'),
                 'value' => function($model){
                     return $model['name'];
+                }
+            ],
+            [
+                'header' => Yii::t('partner','Partner'),
+                'value' => function($model){
+                    $model = PartnerLiquidation::findOne($model['partner_liquidation_id']);
+                    if($model) {
+                        $partner = $model->partnerDistributionModelHasPartner->partner;
+                        return $partner? $partner->name : '';
+                    }
+                    return '';
                 }
             ],
             [
@@ -53,8 +65,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'html',
                 'value' => function($model){
-                    return Html::a('<span class="glyphicon glyphicon-show"></span> '.Yii::t('partner','Items'),
-                        ['liquidation/liquidation-items','PartnerLiquidationSearch[partner_liquidation_id]'=>$model['partner_liquidation_id']], ['class'=>'btn btn-width btn-default']); }
+                    $model = PartnerLiquidation::findOne($model['partner_liquidation_id']);
+                    if ($model->getPartnerLiquidationMovements()->exists()) {
+                        return Html::a('<span class="glyphicon glyphicon-show"></span> '.Yii::t('partner','Items'),
+                            ['liquidation/liquidation-items','PartnerLiquidationSearch[partner_liquidation_id]'=>$model['partner_liquidation_id']], ['class'=>'btn btn-width btn-default']);
+                    }
+
+                    return '';
+                }
             ]
         ],
     ]); ?>

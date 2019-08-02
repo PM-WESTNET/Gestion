@@ -18,6 +18,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'register_number')->checkbox() ?>
 
+    <?= $form->field($model, 'send_ivr')->checkbox() ?>
+
     <?php
     $disabled = $model->isNewRecord ? [] : ['disabled'=>'disabled'];
     echo $form->field($model, 'type')->dropDownList([ 'exchanging' => Yii::t('app','Exchanging'), 'provisioning' => Yii::t('app','Provisioning'), 'account' => Yii::t('app','Account') ], $disabled) ?>

@@ -127,7 +127,9 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * @brief Format dates as database requieres it
      */
     private function formatDatesBeforeSave() {
-        $this->upload_date = Yii::$app->formatter->asDate($this->upload_date, 'yyyy-MM-dd');
+        if (!empty($this->upload_date)) {
+            $this->upload_date = Yii::$app->formatter->asDate($this->upload_date, 'yyyy-MM-dd');
+        }
     }
 
     /**

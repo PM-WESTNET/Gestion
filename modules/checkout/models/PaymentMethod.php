@@ -11,6 +11,7 @@ use Yii;
  * @property string $name
  * @property string $status
  * @property integer $register_number
+ * @property boolean $send_ivr
  *
  * @property Payment[] $payments
  */
@@ -31,7 +32,8 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['register_number'], 'boolean'],
+            [['register_number', 'send_ivr'], 'boolean'],
+            [['send_ivr'], 'default', 'value' => false],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
             [['name'], 'string', 'max' => 45],
@@ -49,6 +51,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'register_number' => Yii::t('app', 'Register Number?'),
             'type' => Yii::t('app', 'Tipo de pago'),
+            'send_ivr' => Yii::t('app', 'Send to Ivr'),
         ];
     }
 
