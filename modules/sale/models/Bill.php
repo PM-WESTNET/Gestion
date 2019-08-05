@@ -5,6 +5,8 @@ namespace app\modules\sale\models;
 use app\components\companies\ActiveRecord;
 use app\components\db\ModifierBehavior;
 use app\modules\accounting\components\CountableInterface;
+use app\modules\automaticdebit\models\AutomaticDebit;
+use app\modules\automaticdebit\models\BillHasExportToDebit;
 use app\modules\checkout\models\BillHasPayment;
 use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
@@ -1534,5 +1536,21 @@ class Bill extends ActiveRecord implements CountableInterface
             $this->updateAttributes(['number' => (int) $lastNumber->number + 1, 'date' => $today]);
         }
 
+    }
+
+
+    /**
+     * Indica si la factura se abonara por debito directo
+     */
+    public function hasDirectDebit() {
+        if ($this->customer) {
+            $hasDebit = AutomaticDebit::find()->andWhere(['customer_id' => $this->customer_id, 'status' => AutomaticDebit::ENABLED_STATUS])->one();
+
+            if ($hasDebit && $hasDebit->created_at < $this->timestamp) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
