@@ -11,6 +11,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use app\components\companies\CompanySelector;
+use yii\widgets\Pjax;
+use yii\jui\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\provider\models\ProviderBill */
@@ -24,7 +27,7 @@ use yii\widgets\ActiveForm;
     <?= Html::hiddenInput('ProviderBill[status]', $model->status, ['id'=>'bill_status']) ?>
     <?= Html::hiddenInput('pay_after_save', 'false', ['id'=>'pay_after_save']) ?>
 
-    <?= app\components\companies\CompanySelector::widget(['model'=>$model]); ?>
+    <?= CompanySelector::widget(['model'=>$model]); ?>
 
     <?php
         echo $this->render('@app/modules/partner/views/partner-distribution-model/_selector', ['model' => $model, 'form'=>$form]);
@@ -33,8 +36,8 @@ use yii\widgets\ActiveForm;
     <div class="form-group">
     <?php if (!$model->provider) { ?>
         <div class="input-group" style="z-index:0;">
-            <?= $form->field($model, 'provider_id')->widget(Select2::className(),[
-                'data' => yii\helpers\ArrayHelper::map(Provider::find()->all(), 'provider_id', 'fullname'),
+            <?= $form->field($model, 'provider_id')->widget(Select2::class,[
+                'data' => ArrayHelper::map(Provider::find()->all(), 'provider_id', 'fullname'),
                 'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -46,7 +49,7 @@ use yii\widgets\ActiveForm;
     </div>
 
     <div class="form-group">
-        <?= $form->field($model, 'date')->widget(yii\jui\DatePicker::className(),[
+        <?= $form->field($model, 'date')->widget(DatePicker::class,[
             'language' => Yii::$app->language,
             'dateFormat' => 'dd-MM-yyyy',
             'options'=>[
@@ -84,7 +87,7 @@ use yii\widgets\ActiveForm;
                 echo $this->render('_form-items', ['model'=>$model,'dataProvider'=>$itemsDataProvider, 'item'=>new ProviderBillItem()]);
 
                 // Listado de Items
-                \yii\widgets\Pjax::begin(['id'=>'items']);
+                Pjax::begin(['id'=>'items']);
                 echo GridView::widget([
                     'id'=>'grid',
                     'dataProvider' => $itemsDataProvider,
@@ -123,7 +126,7 @@ use yii\widgets\ActiveForm;
                     <label><?= Yii::$app->formatter->asCurrency($model->calculateItems())?></label>
                 </div>
             </div>
-            <?php \yii\widgets\Pjax::end();?>
+            <?php Pjax::end();?>
         </div>
     </div>
 
@@ -137,7 +140,7 @@ use yii\widgets\ActiveForm;
             echo $this->render('_form-taxes', ['model'=>$model,'dataProvider'=>$dataProvider, 'pbt'=>new ProviderBillHasTaxRate()]);
 
             // Listado de impuestos
-            \yii\widgets\Pjax::begin(['id'=>'taxes']);
+            Pjax::begin(['id'=>'taxes']);
             echo GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => $dataProvider,
@@ -149,6 +152,7 @@ use yii\widgets\ActiveForm;
                             return $model->taxRate->tax->name . " " . $model->taxRate->name;
                         }
                     ],
+                    'net:currency',
                     'amount:currency',
                     [
                         'class' => 'app\components\grid\ActionColumn',
@@ -172,16 +176,16 @@ use yii\widgets\ActiveForm;
                 </div>
                 <div class="col-sm-9 col-md-3">
                     <label><?= Yii::$app->formatter->asCurrency($model->calculateTaxes())?></label>
-                    <input type="hidden" id="total_taxes" value="<?= $model->calculateTaxes() + $model->calculateTaxesWithZeroPercentage() ?>"/>
+                    <input type="hidden" id="total_taxes" value="<?= $model->calculateTaxes()?>"/>
                 </div>
             </div>
-            <?php \yii\widgets\Pjax::end();?>
+            <?php Pjax::end();?>
         </div>
     </div>
     <?php    } ?>
 
     <?php if (!$model->isNewRecord) { ?>
-    <?php \yii\widgets\Pjax::begin(['id'=>'totals']); ?>
+    <?php Pjax::begin(['id'=>'totals']); ?>
     <div class="row">
         <div class="col-sm-9 col-md-3">
             <label><?=Yii::t("app", "Total of Invoice")?></label>
@@ -190,7 +194,7 @@ use yii\widgets\ActiveForm;
             <label><?= Yii::$app->formatter->asCurrency($model->calculateTotal())?></label>
         </div>
     </div>
-    <?php \yii\widgets\Pjax::end();?>
+    <?php Pjax::end();?>
     <?php } ?>
 
     <div class="col-sm-12 col-xs-12 no-padding row">

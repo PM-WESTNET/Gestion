@@ -381,7 +381,7 @@ class Customer extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getBills() {
-        return $this->hasMany(Bill::className(), ['customer_id' => 'customer_id']);
+        return $this->hasMany(Bill::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -1543,5 +1543,21 @@ class Customer extends ActiveRecord {
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
 
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
+    }
+
+    /**
+     * Verifica que el cliente tenga comprobantes en estado borrador
+     */
+    public function hasDraftBills()
+    {
+        return $this->getBills()->where(['status' => Bill::STATUS_DRAFT])->exists();
+    }
+
+    /**
+     * Verifica que el cliente tenga pagos en estado borrador
+     */
+    public function hasDraftPayments()
+    {
+        return $this->getPayments()->where(['status' => Payment::PAYMENT_DRAFT])->exists();
     }
 }

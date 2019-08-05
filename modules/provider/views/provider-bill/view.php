@@ -121,6 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->taxRate->tax->name . " " . $model->taxRate->name;
                         }
                     ],
+                    'net:currency',
                     'amount:currency'
                 ],
                 'options'=>[

@@ -320,4 +320,29 @@ class ProviderPaymentTest extends  \Codeception\Test\Unit
 
         $this->assertTrue($provider_payment->verifyItems());
     }
+
+    public function testAssociateProviderBills()
+    {
+        $count_pbhpp = count(ProviderBillHasProviderPayment::find()->all());
+        $model = ProviderPayment::findOne(59726);
+        $result = $model->associateProviderBills([51819]);
+
+        expect('Associate provider bill result is true', $result)->true();
+        expect('ProviderBillHasProviderPayment has been created', count(ProviderBillHasProviderPayment::find()->all()))->equals($count_pbhpp +1);
+    }
+
+    public function testDisassociateProviderBills()
+    {
+        $count_pbhpp = count(ProviderBillHasProviderPayment::find()->all());
+        $model = ProviderPayment::findOne(59726);
+        $result = $model->associateProviderBills([51819]);
+
+        expect('Associate provider bill result is true', $result)->true();
+        expect('ProviderBillHasProviderPayment has been created', count(ProviderBillHasProviderPayment::find()->all()))->equals($count_pbhpp +1);
+
+        $result = $model->disassociateProviderBills([51819]);
+
+        expect('Disassociate provider bill result is true', $result)->true();
+        expect('ProviderBillHasProviderPayment has been deleted', count(ProviderBillHasProviderPayment::find()->all()))->equals($count_pbhpp);
+    }
 }

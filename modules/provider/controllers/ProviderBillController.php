@@ -213,7 +213,8 @@ class ProviderBillController extends Controller
             $tax = $model->addTax([
                 'provider_bill_id'  => $tax->provider_bill_id,
                 'tax_rate_id'       => $tax->tax_rate_id,
-                'amount'            => $tax->amount
+                'amount'            => $tax->amount,
+                'net'            => $tax->net
             ]);
         }
 

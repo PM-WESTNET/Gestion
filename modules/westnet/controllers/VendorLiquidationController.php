@@ -15,6 +15,8 @@ use yii\data\ActiveDataProvider;
 use app\components\helpers\EmptyLogger;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use yii\data\ArrayDataProvider;
+use app\modules\westnet\models\VendorLiquidationItem;
+use app\modules\checkout\models\search\PaymentSearch;
 
 /**
  * VendorLiquidationController implements the CRUD actions for VendorLiquidation model.
@@ -131,6 +133,7 @@ class VendorLiquidationController extends Controller
     public function actionBatch()
     {
         Yii::setLogger(new EmptyLogger());
+        set_time_limit(0);
         
         $model = new BatchLiquidationModel();
         
@@ -147,23 +150,24 @@ class VendorLiquidationController extends Controller
             try{
             
                 //Por cada vendedor
-                foreach($query->each() as $vendor){
-                    
-                    $liq = VendorLiquidation::create($vendor, $model->period);
+                foreach($query->batch() as $vendors){
+                    foreach ($vendors as $vendor) {
+                        $liq = VendorLiquidation::create($vendor, $model->period);
 
-                    //Clonamos la query para agregar vendor_id a la condicion de busqueda
-                    $cdq = clone($contractDetailsQuery);
-                    $cdq->andWhere(['vendor_id' => $vendor->vendor_id]);
+                        //Clonamos la query para agregar vendor_id a la condicion de busqueda
+                        $cdq = clone($contractDetailsQuery);
+                        $cdq->andWhere(['vendor_id' => $vendor->vendor_id]);
 
-                    $details = $cdq->all();
+                        $details = $cdq->all();
 
-                    if($details){
-                        $this->liquidateVendorItems($liq, $details);
-                    }
-                    
-                    //Si el total es 0, lo borramos
-                    if(!($liq->total>0)){
-                        $liq->delete();
+                        if ($details) {
+                            $this->liquidateVendorItems($liq, $details);
+                        }
+
+                        //Si el total es 0, lo borramos
+                        if (!($liq->total > 0)) {
+                            $liq->delete();
+                        }
                     }
                 }
                 
@@ -188,10 +192,9 @@ class VendorLiquidationController extends Controller
      */
     private function liquidateVendorItems($liq, $details)
     {
-        $vendor = $liq->vendor;
-        
+        $vendor_liquidation_items = [];
+
         foreach($details as $detail){
-            
             $price = $detail->product->getPriceFromDate($detail->date)->one();
             
             //Si el precio del producto es mayor a 0
@@ -202,33 +205,33 @@ class VendorLiquidationController extends Controller
                 //Por problemas con datos migrados, agregamos esta cond de customer_id > 22200
                 if($customer->customer_id > 22200 && $contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
 
-                    $liqItem = new \app\modules\westnet\models\VendorLiquidationItem();
-                    $liqItem->contract_detail_id = $detail->contract_detail_id;
-                    $liqItem->description = $detail->product->name;
-                    $liqItem->vendor_liquidation_id = $liq->vendor_liquidation_id;
+                    $product = $detail->product;
+                    $amount = 0.0;
 
                     //Si es un plan, la comision se calcula por vendedor (VendorCommission
-                    if($detail->product->type == 'plan'){
-                        
-                        $liqItem->amount = $vendor->commission->calculateCommission($price->finalPrice);
+                    if($product->type == 'plan'){
+                        $amount = $liq->vendor->commission->calculateCommission($price->finalPrice);
 
                     //Si es un producto, la comision se calcula por producto (solo si el producto tiene asociada una comision)
                     }else{
-                        if($detail->product->commission){
-                            $liqItem->amount = $detail->product->commission->calculateCommission($price->finalPrice);
+                        if($product->commission){
+                            $amount = $product->commission->calculateCommission($price->finalPrice);
                         }
                     }
 
-                    //Las comisiones para productos con precio, pero con valor 0 (por config de comision), se deben registrar
-                    if(empty($liqItem->amount)){
-                        $liqItem->amount = 0.0;
-                    }
+                    $liqItem = [
+                        'contract_detail_id' => $detail->contract_detail_id,
+                        'description' => $product->name,
+                        'vendor_liquidation_id' => $liq->vendor_liquidation_id,
+                        'amount' => $amount
+                    ];
 
-                    $liqItem->save();
-
+                    array_push($vendor_liquidation_items, $liqItem);
                 }
             }
         }
+
+        VendorLiquidation::batchInsertLiquidationItems($vendor_liquidation_items);
     }
     
     
@@ -341,7 +344,7 @@ class VendorLiquidationController extends Controller
     private function hasPayedFirstBill($customer, $contractDetail, $liquidation)
     {
         
-        $paymentModel = new \app\modules\checkout\models\search\PaymentSearch();
+        $paymentModel = new PaymentSearch();
         $paymentModel->customer_id = $customer->customer_id;
         
         //Consideramos el saldo hasta el ultimo dia habil del mes que se esta liquidando

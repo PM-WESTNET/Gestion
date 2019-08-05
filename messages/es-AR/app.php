@@ -1162,6 +1162,10 @@
     'Infobip Sended Messages' => 'Mensajes Enviados por Infobip',
     'Sent Date and Time' => 'Fecha y hora de envío',
     'Infobip sended sms' => 'SMS enviados por Infobip',
+    'Apply to bill' => 'Aplicar a comprobante',
+    'Applied bills' => 'Comprobantes aplicados',
+    'One or more provider bills cant be applied correctly' => 'Uno o mas comprobantes de proveedor no pueden ser asociados correctamente',
+    'One or more provider bills cant be disassociated' => 'Uno o mas comprobantes de proveedor no pueden ser desasociados correctamente',
     'Mobile app status' => 'Estado de la aplicación móvil',
     'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
     'Can`t create payment extension' => 'No se puede crear la extensión de pago',
@@ -1174,5 +1178,8 @@
     'Add Company to {bank}' =>  'Agregar Empresa a {bank}',
     'Update Automatic Debit: {customer}' => 'Actualizar Débito Directo: {customer}',
     'Beneficiario Number' => 'Número de Beneficiario',
-    'Company not configured' => 'Empresa no configurada'
+    'Company not configured' => 'Empresa no configurada',
+    'Send to Ivr' => 'Informar a IVR',
+    'This customer has draft payments' => 'El cliente posee pagos en estado borrador',
+    'This customer has draft bills' => 'El cliente posee comprobantes en estado borrador',
 );

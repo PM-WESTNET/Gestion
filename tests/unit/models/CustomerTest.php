@@ -23,6 +23,8 @@ use app\tests\fixtures\TicketStatusFixture;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\tests\fixtures\CustomerMessageFixture;
+use app\modules\sale\models\Bill;
+use app\modules\checkout\models\Payment;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -521,6 +523,52 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Invalid is in array', array_key_exists(Customer::EMAIL_STATUS_INVALID, $seleccion))->true();
         expect('Inactive is in array', array_key_exists(Customer::EMAIL_STATUS_INACTIVE, $seleccion))->true();
         expect('Bounced is in array', array_key_exists( Customer::EMAIL_STATUS_BOUNCED, $seleccion))->true();
+    }
+
+    public function testHasDraftBills()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $bill = Bill::findOne(1);
+        $bill->updateAttributes(['customer_id' => $model->customer_id, 'status' => Bill::STATUS_CLOSED]);
+
+        expect('Customer doesnt have any draft bill', $model->hasDraftBills())->false();
+
+        $bill->updateAttributes(['status' => Bill::STATUS_DRAFT]);
+
+        expect('Customer has one draft bill', $model->hasDraftBills())->true();
+    }
+
+    public function testHasDraftPayments()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $payment = Payment::findOne(1);
+        $payment->updateAttributes(['customer_id' => $model->customer_id, 'status' => Payment::PAYMENT_CLOSED]);
+
+        expect('Customer doesnt have any draft payment', $model->hasDraftPayments())->false();
+
+        $payment->updateAttributes(['status' => Payment::PAYMENT_DRAFT]);
+
+        expect('Customer has one draft payment', $model->hasDraftPayments())->true();
     }
 
     //TODO resto de la clase
