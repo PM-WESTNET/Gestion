@@ -67,4 +67,18 @@ class PaymentTest extends \Codeception\Test\Unit
         expect('Last number is the last inserted', $last_number)->equals('10');
         expect('Last number + 1 not exists', Payment::find()->where(['company_id' => $company_id, 'number' => $last_number + 1])->exists())->false();
     }
+
+    public function testClosePayment()
+    {
+        $payment = new Payment([
+            'customer_id' => 45900,
+            'company_id' => 1,
+            'amount' => 100,
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+            'partner_distribution_model_id' => 1,
+        ]);
+        $payment->save();
+
+        expect('Close payment', $payment->close())->true();
+    }
 }

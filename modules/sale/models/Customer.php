@@ -1316,6 +1316,7 @@ class Customer extends ActiveRecord {
         $lastMonth = (new DateTime())->modify('last day of this month');
 
         $customer = Customer::findOne(['code' => $customer_code]);
+
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])

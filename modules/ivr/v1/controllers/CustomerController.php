@@ -350,13 +350,13 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/clipped-for-debt",
      *     tags={"Customer"},
      *     summary="",
-     *     description="(A-5 / B-2) Indica si el cliente esta cortado por mora",
+     *     description="(F-1) Indica si el cliente esta cortado por mora",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
      *        in = "body",
      *        name = "body",
-     *        description = "ID del contrato de la conexion que se va a forzar",
+     *        description = "Codigo del cliente por el que se consulta",
      *        required = true,
      *        type = "integer",
      *        @SWG\Schema(
@@ -383,7 +383,7 @@ class CustomerController extends Controller
      *
      */
     public function actionClippedForDebt() {
-        $data = Yii::$app->post();
+        $data = \Yii::$app->request->post();
 
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
@@ -431,7 +431,44 @@ class CustomerController extends Controller
 
     }
 
-    public function actionEmail($id, $from = 'all_bills')
+    /**
+     * @SWG\Post(path="/customer/send-bill-email",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="(C-3) Envia la última factura del cliente por email",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "Devuelve un mensaje sactifactorio si se pudo enviar el email"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, cliente sin facturas, No hay email registrado del cliente
+                   no se pudo enviar ,o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionSendBillEmail()
     {
         $data = Yii::$app->request->post();
 
@@ -453,7 +490,14 @@ class CustomerController extends Controller
 
         $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
 
-        $pdf = $this->actionPdf($id);
+        if(empty($model)) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'The customer haven`t any bill'
+            ];
+        }
+
+        $pdf = $this->actionPdf($model);
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
         $file = fopen($fileName, "w+");
@@ -461,32 +505,37 @@ class CustomerController extends Controller
         fclose($file);
 
         if (trim($model->customer->email) == "") {
-            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
-            return $this->redirect(['index']);
+
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => Yii::t("app", "The Client don't have email.")
+            ];
         }
 
-        if ($model->sendEmail($fileName)) {
-            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
-        } else {
-            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
-        };
-
-        if ($from === 'all_bills') {
-            return $this->redirect(['index']);
-        } else {
-            return $this->redirect(['/checkout/payment/current-account', 'customer' => $model->customer_id]);
+        if (!$model->sendEmail($fileName)) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => Yii::t('app', 'The email could not be sent.')
+            ];
         }
+
+        return [
+            'msj' => Yii::t('app', 'The email is sended succesfully.')
+        ];
+
+
+
     }
 
-    public function actionPdf($id)
+    public function actionPdf($model)
     {
 
-        $response = Yii::$app->getResponse();
-        $response->format = \yii\web\Response::FORMAT_RAW;
-        $response->headers->set('Content-type: application/pdf');
-        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+//        $response = Yii::$app->getResponse();
+//        $response->format = \yii\web\Response::FORMAT_RAW;
+//        $response->headers->set('Content-type: application/pdf');
+//        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
-        $model = $this->findModel($id);
+
         $this->layout = '//pdf';
 
         $dataProvider = new \yii\data\ActiveDataProvider([
@@ -494,7 +543,7 @@ class CustomerController extends Controller
             'pagination' => false
         ]);
 
-        $view = $this->render('pdf', [
+        $view = $this->render('@app/modules/sale/views/bill/pdf.php', [
             'model' => $model,
             'dataProvider' => $dataProvider
         ]);

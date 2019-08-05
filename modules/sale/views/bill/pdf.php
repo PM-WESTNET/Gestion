@@ -375,19 +375,27 @@ $companyData = $model->company;
             Puede retirar su factura en: <?php echo $model->company->address  ?>
         </td>
     </tr>
-    <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
-        <td>
-            Medios de Pago:
-        </td>
-    </tr>
-    <tr style=" display: block; padding-bottom: 4px;padding-top: 4px;padding-left: 30px; font-size: 0.2cm">
-        <td>
-            <ul>
-                <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>;
-            </ul>
-        </td>
-    </tr>
-
+    <?php if (!$model->hasDirectDebit()):?>
+        <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
+            <td>
+                Medios de Pago:
+            </td>
+        </tr>
+        <tr style=" display: block; padding-bottom: 4px;padding-top: 4px;padding-left: 30px; font-size: 0.2cm">
+            <td>
+                <ul>
+                    <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>;
+                </ul>
+            </td>
+        </tr>
+    <?php else: ?>
+        <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 10pt;
+        font-weight: bold; background-color: #D7D7D7">
+            <td>
+                <?php echo Config::getValue('direct_debit_bill_text')?>
+            </td>
+        </tr>
+    <?php endif;?>
     <tr style=" display: block; border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px;">
         <td>
             <img width="100%" src="<?=Url::toRoute(['/sale/customer/barcode', 'code'=>$model->customer->payment_code], true) ?>"/>
