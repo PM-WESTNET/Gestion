@@ -17,6 +17,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use app\modules\checkout\models\PagoFacilTransmitionFile;
+use \app\modules\accounting\models\search\AccountMovementSearch;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -201,7 +202,7 @@ class PaymentController extends Controller {
         // Si se utiliza cuentas sacar la deuda con las cuentas
         if (Yii::$app->getModule("accounting")) {
             if ($customer->account !== null) {
-                $searchModelAccount = new \app\modules\accounting\models\search\AccountMovementSearch();
+                $searchModelAccount = new AccountMovementSearch();
                 $searchModelAccount->account_id_from = $customer->account->lft;
                 $searchModelAccount->account_id_to = $customer->account->rgt;
                 $dataModelAccount = $searchModelAccount->search(Yii::$app->request->queryParams);
@@ -219,6 +220,14 @@ class PaymentController extends Controller {
         ];
         $retVals['dataModelAccount'] = $dataModelAccount;
         $retVals['searchModelAccount'] = $searchModelAccount;
+
+        if($customer->hasDraftBills()) {
+            Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft bills'));
+        }
+
+        if($customer->hasDraftPayments()) {
+            Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft payments'));
+        }
 
         return $this->render('account', $retVals);
     }

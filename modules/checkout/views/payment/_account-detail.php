@@ -1,6 +1,6 @@
 <?php
 $debt = $searchModel->accountTotalCredit();
-$payed = $searchModel->accountPayed();
+$payed = $searchModel->accountPayed(null, null, true);
 
 $total = $searchModel->accountTotal();
 

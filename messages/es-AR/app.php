@@ -1135,4 +1135,6 @@
     'Payment Extension created successfull' => 'Extensión de pago creada con éxito',
     'Can`t create payment extension' => 'No se puede crear la extensión de pago',
     'Send to Ivr' => 'Informar a IVR',
+    'This customer has draft payments' => 'El cliente posee pagos en estado borrador',
+    'This customer has draft bills' => 'El cliente posee comprobantes en estado borrador',
 );
