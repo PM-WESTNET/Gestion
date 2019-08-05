@@ -18,6 +18,7 @@ use Yii;
  * @property string $status
  * @property string $date
  * @property integer $money_box_has_operation_type_id
+ * @property boolean $ready
  *
  * @property ConciliationItem[] $conciliationItems
  * @property MoneyBoxHasOperationType $moneyBoxHasOperationType
@@ -81,7 +82,7 @@ class ResumeItem extends \app\components\db\ActiveRecord
             [['resume_id', 'date', 'money_box_has_operation_type_id'], 'required'],
             [['resume_id', 'money_box_has_operation_type_id'], 'integer'],
             [['debit', 'credit'], 'double'],
-            [['debit', 'credit'], 'default', 'value'=> 0],
+            [['debit', 'credit', 'ready'], 'default', 'value'=> 0],
             [['status'], 'in', 'range' => ['draft', 'conciled']],
             [['status'], 'default', 'value'=>'draft'],
             [['date', 'moneyBoxHasOperationType', 'resume'], 'safe'],
@@ -91,6 +92,7 @@ class ResumeItem extends \app\components\db\ActiveRecord
             [['reference', 'code'], 'string', 'max' => 45],
             [['date'], 'validateDate'],
             [['debit', 'credit'], 'validateAmount'],
+            [['ready'], 'boolean']
             /*['debit', 'required', 'when' => function($model) {
                 return ($model->moneyBoxHasOperationType->getOperationType()->one()->is_debit && $model->debit == 0);
             }],

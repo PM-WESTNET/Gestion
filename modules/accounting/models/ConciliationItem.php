@@ -13,6 +13,7 @@ use Yii;
  * @property string $date
  * @property string $description
  *
+ *
  * @property Conciliation $conciliation
  * @property ConciliationItemHasAccountMovementItem[] $conciliationItemHasAccountMovementItems
  * @property ConciliationItemHasResumeItem[] $conciliationItemHasResumeItems
@@ -115,6 +116,16 @@ class ConciliationItem extends \app\components\db\ActiveRecord
     public function getConciliationItemHasResumeItems()
     {
         return $this->hasMany(ConciliationItemHasResumeItem::className(), ['conciliation_item_id' => 'conciliation_item_id']);
+    }
+
+    public function getResumeItems()
+    {
+        return $this->hasMany(ResumeItem::class, ['resume_item_id' => 'resume_item_id'])->viaTable('conciliation_item_has_resume_item', ['conciliation_item_id' => 'conciliation_item_id']);
+    }
+
+    public function getAccountMovementItems()
+    {
+        return $this->hasMany(AccountMovementItem::class, ['account_movement_id' => 'account_movement_id'])->viaTable('conciliation_item_has_account_movement_item', ['conciliation_item_id' => 'conciliation_item_id']);
     }
     
         

@@ -70,6 +70,15 @@ if ($resumeItemsDebitDataProvider) {
         //'layout'=> '{items}',
         'id'=> 'w_resume_items_debit',
         'dataProvider' => $resumeItemsDebitDataProvider,
+        'rowOptions' => function ($model) {
+            if ($model->ready) {
+                return [
+                    'style' => 'background-color: #7FFFB2'
+                ];
+            }
+
+            return [];
+        },
         'columns' => $cols
     ]);
 

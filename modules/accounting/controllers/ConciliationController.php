@@ -237,6 +237,7 @@ class ConciliationController extends Controller
                     $item->save();
                     $item->addResumeItem($resModel->resume_item_id);
                     $item->save();
+                    $resModel->updateAttributes(['ready' => true]);
                     $status = "success";
                 }
             }
@@ -259,11 +260,13 @@ class ConciliationController extends Controller
                 // Asocio los movmientos
                 foreach($mMovements as $mov) {
                     $item->addAccountItem($mov->account_movement_item_id);
+                    $mov->updateAttributes(['ready' => true]);
                 }
 
                 // Asocio los items del resumen
                 foreach($mResumeItems as $res) {
                     $item->addResumeItem($res->resume_item_id);
+                    $res->updateAttributes(['ready' => true]);
                 }
 
                 $item->save();
@@ -293,6 +296,16 @@ class ConciliationController extends Controller
         if (count($keys)>0) {
             foreach ($keys as $key=>$value ) {
                 $model = ConciliationItem::findOne($value);
+
+                foreach ($model->resumeItems as $item){
+                    $item->updateAttributes(['ready' => false]);
+                }
+
+                foreach ($model->accountMovementItems as $item) {
+                    $item->updateAttributes(['ready' => false]);
+                }
+
+
                 $model->delete();
             }
             $status = 'success';

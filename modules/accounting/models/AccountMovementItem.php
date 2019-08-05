@@ -16,6 +16,7 @@ use Yii;
  * @property double $credit
  * @property string $status
  * @property integer $check
+ * @property boolean $ready
  * 
  *
  * @property Account $account
@@ -74,6 +75,8 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
                     }
                 }
             ],
+            [['ready'], 'boolean'],
+            [['ready'], 'default', 'value' => false]
                     
         ];
     }
