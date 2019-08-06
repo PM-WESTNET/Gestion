@@ -29,20 +29,26 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'customer_id',
                 'value' => function ($model) {
                     return $model->customer->fullName;
-                }
+                },
+                'filter' => $this->render('../../../sale/views/customer/_find-with-autocomplete', ['form' => null, 'model' => $searchModel, 'attribute' => 'customer_id', 'label' => Yii::t('app','Customer')])
             ],
             [
                 'attribute' => 'bank_id',
                 'value' => function ($model) {
                     return $model->bank->name;
-                }
+                },
+                'filter' => \yii\helpers\ArrayHelper::map(\app\modules\automaticdebit\models\Bank::find()->all(), 'bank_id', 'name')
             ],
             'cbu',
             [
                 'attribute' => 'status',
                 'value' => function($model) {
                     return $model->getStatusLabel();
-                }
+                },
+                'filter' => [
+                    \app\modules\automaticdebit\models\AutomaticDebit::ENABLED_STATUS => Yii::t('app','Enabled'),
+                    \app\modules\automaticdebit\models\AutomaticDebit::DISABLED_STATUS => Yii::t('app','Disabled')
+                ]
             ],
 
             ['class' => 'app\components\grid\ActionColumn'],

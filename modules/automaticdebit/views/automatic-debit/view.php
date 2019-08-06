@@ -6,13 +6,13 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\AutomaticDebit */
 
-$this->title = Yii::t('app','Automatic Debit'). ': '.$model->customer->fullName;
+$this->title = Yii::t('app','Automatic Debit'). ': '. Html::a($model->customer->fullName. ' ('.$model->customer->code.')', ['/sale/customer/view', 'id' => $model->customer_id], ['target' => '_blank']);
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Automatic Debits'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = Yii::t('app','Automatic Debit'). ': '.$model->customer->fullName;
 ?>
 <div class="automatic-debit-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h1><?= $this->title ?></h1>
 
     <p>
         <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->automatic_debit_id], ['class' => 'btn btn-primary']) ?>
