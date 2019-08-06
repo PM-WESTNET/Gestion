@@ -56,7 +56,7 @@ class BancoFrances implements BankInterface
         }
         $file = \Yii::getAlias('@app').'/web/direct_debit/'.$filename;
 
-        $resource = fopen($file.'.txt', 'w');
+        $resource = fopen($file.'.txt', 'w+');
 
         if ($resource === false) {
             return false;
