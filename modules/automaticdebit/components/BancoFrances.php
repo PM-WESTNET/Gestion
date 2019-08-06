@@ -431,13 +431,13 @@ class BancoFrances implements BankInterface
         $bills = Bill::find()
             ->leftJoin('bill_has_export_to_debit bhtd', 'bhtd.bill_id=bill.bill_id')
             ->innerJoin('bill_type bt', 'bt.bill_type_id=bill.bill_type_id')
-            ->andFilterWhere(['>=', 'bill.date', \Yii::$app->formatter->asDate($fromDate, 'yyyy-MM-dd')])
-            ->andFilterWhere(['<=', 'bill.date', \Yii::$app->formatter->asDate($toDate, 'yyyy-MM-dd')])
+            ->andFilterWhere(['>=', 'bill.timestamp', strtotime(\Yii::$app->formatter->asDate($fromDate, 'yyyy-MM-dd'))])
+            ->andFilterWhere(['<=', 'bill.timestamp', strtotime(\Yii::$app->formatter->asDate($toDate, 'yyyy-MM-dd'))+86400])
             ->andWhere(['customer_id' => $customer_id])
             ->andWhere(['IS', 'bhtd.bill_id', null])
             ->andWhere(['bill.status' => 'closed'])
             ->andWhere(['bt.multiplier' => 1])
-            ->andWhere(['bt.class' => Bill::class])
+            ->andWhere(['LIKE', 'bt.class', 'app\modules\sale\models\bills\Bill'])
             ->all();
 
         return $bills;
