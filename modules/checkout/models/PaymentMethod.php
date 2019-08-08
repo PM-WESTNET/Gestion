@@ -17,9 +17,9 @@ use Yii;
  */
 class PaymentMethod extends \app\components\db\ActiveRecord
 {
-    /**
-     * @inheritdoc
-     */
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+
     public static function tableName()
     {
         return 'payment_method';
@@ -34,6 +34,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             [['name'], 'required'],
             [['register_number', 'send_ivr'], 'boolean'],
             [['send_ivr'], 'default', 'value' => false],
+            [['show_in_app'], 'default', 'value' => false],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
             [['name'], 'string', 'max' => 45],
@@ -52,6 +53,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'register_number' => Yii::t('app', 'Register Number?'),
             'type' => Yii::t('app', 'Tipo de pago'),
             'send_ivr' => Yii::t('app', 'Send to Ivr'),
+            'show_in_app' => Yii::t('app', 'Show in app'),
         ];
     }
 
@@ -60,7 +62,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
      */
     public function getPayments()
     {
-        return $this->hasMany(PaymentItem::className(), ['payment_method_id' => 'payment_method_id']);
+        return $this->hasMany(PaymentItem::class, ['payment_method_id' => 'payment_method_id']);
     }
 
     /**
@@ -115,6 +117,11 @@ class PaymentMethod extends \app\components\db\ActiveRecord
 
         return true;
         
+    }
+
+    public static function getPaymentMethodsAvailableForApp()
+    {
+        return PaymentMethod::find()->where(['show_in_app' => true, 'status' => PaymentMethod::STATUS_ENABLED])->all();
     }
     
 }
