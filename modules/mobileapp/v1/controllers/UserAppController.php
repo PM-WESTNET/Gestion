@@ -9,6 +9,7 @@
 namespace app\modules\mobileapp\v1\controllers;
 
 
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\mobileapp\v1\components\Controller;
@@ -25,6 +26,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\TaxCondition;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use app\modules\westnet\models\ConnectionForcedHistorial;
+use app\modules\westnet\models\NotifyPayment;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\db\Exception;
@@ -970,5 +972,42 @@ class UserAppController extends Controller
             'status' => 'error',
             'error' => Yii::t('app','Can`t create payment extension')
         ];
+    }
+
+
+    /**
+     * Devuelve un listado de los medios de pagos disponibles para ser mostrados en la app
+     */
+    public function actionPaymentMethods()
+    {
+        $payment_methods = [];
+
+        foreach(PaymentMethod::getPaymentMethodsAvailableForApp() as $payment_method){
+            array_push($payment_methods, [
+                'payment_method_id' => $payment_method->payment_method_id,
+                'name' => $payment_method->name,
+            ]);
+        };
+
+        return $payment_methods;
+    }
+
+    /**
+     * TODO verificar como manejarlo con mas de un user.
+     */
+    public function actionCanNotifyPayment()
+    {
+
+    }
+
+    public function actionCreateNotifyPayment()
+    {
+        $data = Yii::$app->request->post();
+
+        $notify_payment = new NotifyPayment([
+
+        ]);
+
+        \Yii::trace($data);
     }
 }
