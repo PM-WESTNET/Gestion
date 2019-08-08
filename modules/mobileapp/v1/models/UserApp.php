@@ -136,6 +136,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->fullName,
                 'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                'can_notify_payment' => $customer->canNotifyPayment
             ];
         }
 

@@ -15,6 +15,7 @@ use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\ConnectionForcedHistorial;
+use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\models\EmptyAds;
 use Codeception\Util\Debug;
@@ -440,6 +441,10 @@ class Customer extends ActiveRecord {
         return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
     }
 
+    public function getNotifyPayments()
+    {
+        return $this->hasMany(NotifyPayment::class, ['customer_id' => 'customer_id']);
+    }
     /**
      * Despues de guardar, guarda los profiles
      * @param boolean $insert
@@ -1542,5 +1547,11 @@ class Customer extends ActiveRecord {
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
 
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
+    }
+
+    public function getCanNotifyPayment()
+    {
+        return true;
+//        return $this->getNotifyPayments()->where();
     }
 }
