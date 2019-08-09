@@ -1552,7 +1552,6 @@ class Customer extends ActiveRecord {
         //Y si no ha solicitado el máximo de extensiones de pago permitidas.
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
-        \Yii::trace($payment_extension_qty);
 
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }

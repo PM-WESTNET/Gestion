@@ -1128,7 +1128,7 @@
     'Sent Date and Time' => 'Fecha y hora de envío',
     'Infobip sended sms' => 'SMS enviados por Infobip',
     'Mobile app status' => 'Estado de la aplicación móvil',
-    'Payment Extension created successfully. The amount will be included in your next bill.' => 'Extensión de pago creada con éxito. El importe será incluido en su próxima factura',
+    'Payment Extension created successfully. The amount will be included in your next bill. In about 30 minutes your connection will be restored' => 'Extensión de pago creada con éxito. El importe será incluido en su próxima factura. En aproximadamente 30 minutos su conexión será reestablecida',
     'Can`t create payment extension' => 'No se puede crear la extensión de pago',
     'Send to Ivr' => 'Informar a IVR',
     'Show in app' => 'Mostar en aplicación',

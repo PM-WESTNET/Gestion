@@ -938,7 +938,7 @@ class UserAppController extends Controller
             Yii::$app->response->setStatusCode(200);
             return [
                 'status' => 'success',
-                'msj' => Yii::t('app','Payment Extension created successfully. The amount will be included in your next bill.')
+                'msj' => Yii::t('app','Payment Extension created successfully. The amount will be included in your next bill. In about 30 minutes your connection will be restored')
             ];
         }
 
