@@ -1495,17 +1495,19 @@ class Customer extends ActiveRecord {
      * @return int
      * @throws \Exception
      * Devuelve la cantidad de extensiones de pago pedidas en el período
+     * Si se indica que cuente los informes de pago(que tambien generan que la conexion sea forzada) se restará 1 al
+     * total de conexiones forzadas siempre que sean mayor a 1.
      */
-    public function getPaymentExtensionQtyRequest($from = null, $to = null)
+    public function getPaymentExtensionQtyRequest($from = null, $to = null, $count_notify_payments = true)
     {
         $payment_extension_qty = 0;
 
         if (empty($from)) {
-            $from = (new \DateTime('first day of this month'))->getTimestamp();
+            $from = (new \DateTime('first day of this month'));
         }
 
         if (empty($to)) {
-            $to = (new \DateTime('last day of this month'))->getTimestamp() + 86400;
+            $to = (new \DateTime('last day of this month'));
         }
 
         foreach ($this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
@@ -1514,13 +1516,20 @@ class Customer extends ActiveRecord {
             if ($connection) {
                 $extension_qty = ConnectionForcedHistorial::find()
                     ->andWhere(['connection_id' => $connection->connection_id])
-                    ->andWhere(['>=', 'create_timestamp', $from])
-                    ->andWhere(['<', 'create_timestamp', $to])
+                    ->andWhere(['>=', 'create_timestamp', $from->getTimestamp()])
+                    ->andWhere(['<', 'create_timestamp', $to->getTimestamp() + 86400])
                     ->count();
 
                 $payment_extension_qty += $extension_qty;
             }
 
+            if($count_notify_payments){
+                //Si se tienen en cuenta los informes de pago, se debe restar 1 a la cantidad total. Si no puede
+                // realizar un informe de pago, es porque ya se ha realizado el correspondiente a este mes
+                if(!$this->canNotifyPayment() && $payment_extension_qty > 1) {
+                    $payment_extension_qty -= 1;
+                }
+            }
         }
 
         return $payment_extension_qty;
@@ -1531,12 +1540,10 @@ class Customer extends ActiveRecord {
      * @param null $period
      * @return bool
      * @throws \Exception
-     * Indica si el cliente puede pedir una eztension de pago
+     * Indica si el cliente puede pedir una extension de pago
      */
-    public function canRequestPaymentExtension($period = null)
+    public function canRequestPaymentExtension()
     {
-//        $period = $period ? $period : (new \DateTime('now'))->format('Y-m-01');
-
         //Sólo si el cliente no debe mas de una factura
         if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
             return false;
@@ -1545,13 +1552,20 @@ class Customer extends ActiveRecord {
         //Y si no ha solicitado el máximo de extensiones de pago permitidas.
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
+        \Yii::trace($payment_extension_qty);
 
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }
 
-    public function getCanNotifyPayment()
+    /**
+     * Indica si el cliente puede informar de un pago.
+     * Sólo puede informar de un nuevo pago si no ha hecho el informe de un pago este mes
+     */
+    public function canNotifyPayment()
     {
-        return true;
-//        return $this->getNotifyPayments()->where();
+        $date = (new \DateTime('first day of this month'))->format('Y-m-d');
+        $date_to = (new \DateTime('last day of this month'))->format('Y-m-d');
+
+        return !$this->getNotifyPayments()->where(['>','date', $date])->andWhere(['<', 'date', $date_to])->exists();
     }
 }

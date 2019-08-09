@@ -86,12 +86,10 @@ class UserApp extends \app\components\db\ActiveRecord
         $payment_extension_info = [];
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
         $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
-        $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
 
         foreach ($this->customers as $key => $customer){
             $contracts = [];
-            $payment_extension_requested = $customer->getPaymentExtensionQtyRequest();
-            $duration_days = $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days;
+            $duration_days = $payment_extension_duration_days;
 
             foreach ($customer->contracts as $contract) {
                 $contracts[] = [
@@ -114,9 +112,10 @@ class UserApp extends \app\components\db\ActiveRecord
                 'customer_name' => $customer->name .' - '. $customer->code,
                 'contracts' => $contracts,
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
-                'price' => $payment_extension_requested < 1 ? 0 : $price,
-                'duration_days' => $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days,
+                'price' => $price,
+                'duration_days' => $payment_extension_duration_days,
                 'date_available_to' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
+                'can_notify_payment' => $customer->canNotifyPayment(),
             ];
         }
 
@@ -136,7 +135,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->fullName,
                 'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
-                'can_notify_payment' => $customer->canNotifyPayment
+                'can_notify_payment' => $customer->canNotifyPayment()
             ];
         }
 

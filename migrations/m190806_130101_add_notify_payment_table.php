@@ -15,9 +15,11 @@ class m190806_130101_add_notify_payment_table extends Migration
             'amount' => $this->float(),
             'payment_method_id' => $this->integer(),
             'image_receipt' => $this->text(),
+            'contract_id' => $this->integer(),
             'created_at' => $this->integer(),
         ]);
 
+        $this->addForeignKey('fk_notify_payment_contract_id', 'notify_payment', 'contract_id', 'contract', 'contract_id');
         $this->addForeignKey('fk_notify_payment_customer_id', 'notify_payment', 'customer_id', 'customer', 'customer_id');
         $this->addForeignKey('fk_notify_payment_payment_method_id', 'notify_payment', 'payment_method_id', 'payment_method', 'payment_method_id');
 

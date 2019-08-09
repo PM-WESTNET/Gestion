@@ -389,7 +389,6 @@ class Connection extends ActiveRecord {
             if ($create_product){
 
                 if ($this->createExtendPaymentCD($product_id, $vendor_id)){
-                    Debug::debug('NO crea el detalle');
                     $trasanction->rollBack();
                     return false;
                 }

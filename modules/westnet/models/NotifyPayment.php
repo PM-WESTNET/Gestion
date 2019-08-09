@@ -2,6 +2,7 @@
 
 namespace app\modules\westnet\models;
 
+use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\Customer;
@@ -36,11 +37,12 @@ class NotifyPayment extends \yii\db\ActiveRecord
         return [
             [['date'], 'safe'],
             [['amount'], 'number'],
-            [['payment_method_id', 'created_at', 'customer_id'], 'integer'],
+            [['payment_method_id', 'created_at', 'customer_id', 'contract_id'], 'integer'],
             [['image_receipt'], 'string'],
             [['payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['payment_method_id' => 'payment_method_id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
-            [['amount', 'payment_method_id', 'image_receipt', 'date', 'customer_id'], 'required']
+            [['contract_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contract::class, 'targetAttribute' => ['contract_id' => 'contract_id']],
+            [['amount', 'payment_method_id', 'date', 'customer_id', 'contract_id'], 'required']
         ];
     }
 
@@ -57,6 +59,7 @@ class NotifyPayment extends \yii\db\ActiveRecord
             'image_receipt' => Yii::t('app', 'Image Receipt'),
             'created_at' => Yii::t('app', 'Created At'),
             'customer_id' => Yii::t('app', 'Customer'),
+            'contract_id' => Yii::t('app', 'Contract'),
         ];
     }
 
@@ -79,4 +82,31 @@ class NotifyPayment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(PaymentMethod::className(), ['payment_method_id' => 'payment_method_id']);
     }
+
+    /**
+     * Sube una imagen
+     * @return boolean
+     */
+    public function upload()
+    {
+        $filename = \Yii::getAlias('@webroot/uploads/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
+        \Yii::trace($filename);
+
+        if ($this->image_receipt->saveAs($filename)) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Obtiene la url de la imagen
+     */
+    public function getUrlImage()
+    {
+        $url = \Yii::getAlias('uploads/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
+        return $url;
+    }
+
 }

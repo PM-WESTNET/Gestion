@@ -8,7 +8,6 @@
 
 namespace app\modules\mobileapp\v1\controllers;
 
-
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
@@ -35,6 +34,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use app\modules\sale\modules\contract\models\Contract;
+use yii\web\UploadedFile;
 
 class UserAppController extends Controller
 {
@@ -924,6 +924,9 @@ class UserAppController extends Controller
         ];
     }
 
+    /**
+     * Crea una extension de pago y fuerza la conexion
+     */
     public function actionForceConnection() {
         $data = Yii::$app->request->post();
 
@@ -931,40 +934,12 @@ class UserAppController extends Controller
             throw new BadRequestHttpException('Contract ID and Reason are required');
         }
 
-
-        $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
-
-        if (empty($contract)) {
-            throw new BadRequestHttpException('Contract not found');
-        }
-
-        $connection = $contract->connection;
-
-        if (empty($connection)) {
-            throw new BadRequestHttpException('Connection not found');
-        }
-
-        if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
-            $payment_extension_product = Config::getValue('extend_payment_product_id');
-            $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
-            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
-            $create_pti = true;
-
-            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
-                $due_date = date('d-m-Y', $due_timestamp);
-            }else{
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
-                $due_date = date('d-m-Y', $due_timestamp);
-                $create_pti = false;
-            }
-
-            if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
-                return [
-                  'status' => 'success',
-                    'msj' => Yii::t('app','Payment Extension created successfull')
-                ];
-            }
+        if($this->createPaymentExtensionAndForce($data['contract_id'], false)){
+            Yii::$app->response->setStatusCode(200);
+            return [
+                'status' => 'success',
+                'msj' => Yii::t('app','Payment Extension created successfully. The amount will be included in your next bill.')
+            ];
         }
 
         Yii::$app->response->setStatusCode(400);
@@ -993,21 +968,112 @@ class UserAppController extends Controller
     }
 
     /**
-     * TODO verificar como manejarlo con mas de un user.
+     * Crea una notificación de pago, una extension de pago gratuita y fuerza la conexión
      */
-    public function actionCanNotifyPayment()
-    {
-
-    }
-
     public function actionCreateNotifyPayment()
     {
         $data = Yii::$app->request->post();
 
         $notify_payment = new NotifyPayment([
-
+            'customer_id' => $data['customer'],
+            'date' => $data['date'],
+            'amount' => $data['amount'],
+            'payment_method_id' => $data['payment_method_id'],
+            'contract_id' => $data['contract'],
         ]);
 
-        \Yii::trace($data);
+        if($notify_payment->save()){
+            if($this->createPaymentExtensionAndForce($data['contract'])) {
+                return [
+                    'status' => true,
+                    'notify_payment_id' => $notify_payment->notify_payment_id
+                ];
+            }
+        }
+
+        return [
+            'status' => false,
+            'notify_payment_id' => null
+        ];
     }
+
+    /**
+     * Sube la imagen correspondiente al comprobante del informe de pago
+     */
+    public function actionUploadNotifyPaymentImage()
+    {
+
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $data = Yii::$app->request->post();
+
+        $notify_payment = NotifyPayment::findOne($data['notify_payment_id']);
+        $notify_payment->image_receipt = UploadedFile::getInstanceByName('imageFile');
+
+        if ($notify_payment->upload()) {
+            $notify_payment->image_receipt = $notify_payment->getUrlImage();
+            if ($notify_payment->save()) {
+                \Yii::$app->response->setStatusCode(200);
+                return [
+                    'status' => true,
+                ];
+            }
+        }
+
+        \Yii::$app->response->setStatusCode(400);
+        return [
+            'status' => false,
+            'error' => Yii::t('app', 'Notify payment not found or failed to handle image'),
+        ];
+    }
+
+    /**
+     * Crea una extensión de pago (gratuita o paga) y fuerza la conexion
+     */
+    private function createPaymentExtensionAndForce($contract_id, $free = true)
+    {
+        $contract = Contract::find()->andWhere(['contract_id' => $contract_id])->one();
+
+        if (empty($contract)) {
+            throw new BadRequestHttpException('Contract not found');
+            return false;
+        }
+
+        $connection = $contract->connection;
+
+        if (empty($connection)) {
+            return false;
+            throw new BadRequestHttpException('Connection not found');
+        }
+
+        //Si es gratuito significa que viene de un informe de pago
+        if($free) {
+            if($connection->canForce()) {
+                $payment_extension_product = Config::getValue('extend_payment_product_id');
+                $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+                $due_date = date('d-m-Y', $due_timestamp);
+
+                if($connection->force($due_date, $payment_extension_product, null, false)){
+                    return true;
+                }
+            }
+        //Si no es gratuito, se está solicitando una extension de pago
+        } else {
+            if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
+                $payment_extension_product = Config::getValue('extend_payment_product_id');
+                $payment_extension_duration_days = Config::getValue('payment_extension_real_duration_days');
+
+                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
+                $due_date = date('d-m-Y', $due_timestamp);
+
+                if($connection->force($due_date, $payment_extension_product, null, true)){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 }
