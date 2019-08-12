@@ -1553,6 +1553,13 @@ class Customer extends ActiveRecord {
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
 
+        /**
+         * Si ha no puede informar mas pagos es porque ya ha hecho uno este mes, y ese debe descontarse de las extensiones de pago normales.
+         */
+        if(!$this->canNotifyPayment() && $payment_extension_qty > 0) {
+            $payment_extension_qty -= 1;
+        }
+
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }
 
