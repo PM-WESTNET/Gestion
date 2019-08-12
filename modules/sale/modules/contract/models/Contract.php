@@ -567,4 +567,14 @@ class Contract extends ActiveRecord {
             ->andWhere(['in','contract_detail_id', $contract_detail_ids])
             ->all());
     }
+
+    /**
+     * Devuelve el importe de el producto extensión de pago
+     */
+    public function getAmountPaymentExtension()
+    {
+        $product = Product::findOne(Config::getValue('extend_payment_product_id'));
+
+        return round($product->finalPrice,2);
+    }
 }

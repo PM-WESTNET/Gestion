@@ -934,11 +934,14 @@ class UserAppController extends Controller
             throw new BadRequestHttpException('Contract ID and Reason are required');
         }
 
+        $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
+
         if($this->createPaymentExtensionAndForce($data['contract_id'], false)){
             Yii::$app->response->setStatusCode(200);
             return [
                 'status' => 'success',
-                'msj' => Yii::t('app','Payment Extension created successfully. The amount will be included in your next bill. In about 30 minutes your connection will be restored')
+                'title' => Yii::t('app','Payment Extension created successfully'),
+                'msj' => Yii::t('app','In about 30 minutes your connection will be restored. For this operation will be added ${amount} in your next bill', ['amount' => $contract->getAmountPaymentExtension()]),
             ];
         }
 
