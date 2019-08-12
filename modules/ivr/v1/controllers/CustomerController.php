@@ -403,17 +403,25 @@ class CustomerController extends Controller
             ];
         }
 
-        if ($customer->hasClippedForDebt()) {
+        try {
+
+            if ($customer->hasClippedForDebt()) {
+                return [
+                    'error' => false,
+                    'clipped' => 'disable',
+                ];
+            }
+
             return [
                 'error' => false,
-                'clipped' => 'disable',
+                'clipped' => 'enable',
+            ];
+        }catch (\Exception $ex) {
+            return [
+                'error' => "true",
+                'msg' => $ex->getMessage()
             ];
         }
-
-        return [
-            'error' => false,
-            'clipped' => 'enable',
-        ];
 
     }
 
