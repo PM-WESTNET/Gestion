@@ -321,7 +321,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$cbu.$import1.$import2.$code_dev.$ref.$fecha.$free2.$bill_number.$status_dev.$descr_dev.$free3;
 
-        fwrite($resource, iconv(mb_detect_encoding($line.PHP_EOL), 'Windows-1252//TRANSLIT', $line.PHP_EOL));
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
 
@@ -347,7 +347,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$beneficiary_name.$dom1.$dom2.$free2;
 
-        fwrite($resource, iconv(mb_detect_encoding($line.PHP_EOL), 'Windows-1252//TRANSLIT', $line.PHP_EOL));
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -371,7 +371,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$loc.$prov.$cp.$free2;
 
-        fwrite($resource, iconv(mb_detect_encoding($line.PHP_EOL), 'Windows-1252//TRANSLIT', $line.PHP_EOL));
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -393,7 +393,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$free1.$beneficiary_number.$concept.$free2;
 
-        fwrite($resource, iconv(mb_detect_encoding($line.PHP_EOL), 'Windows-1252//TRANSLIT', $line.PHP_EOL));
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
@@ -424,7 +424,7 @@ class BancoFrances implements BankInterface
 
         $line = $register_code.$companyId.$import1.$import2.$op.$total.$free;
 
-        fwrite($resource, iconv(mb_detect_encoding($line.PHP_EOL), 'Windows-1252//TRANSLIT', $line.PHP_EOL));
+        fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
     }
