@@ -406,13 +406,13 @@ class CustomerController extends Controller
         if ($customer->hasClippedForDebt()) {
             return [
                 'error' => false,
-                'clipped' => 'enable',
+                'clipped' => 'disable',
             ];
         }
 
         return [
             'error' => false,
-            'clipped' => 'disable',
+            'clipped' => 'enable',
         ];
 
     }
