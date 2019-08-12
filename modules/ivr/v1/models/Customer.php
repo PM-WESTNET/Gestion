@@ -85,7 +85,7 @@ class Customer extends \app\modules\sale\models\Customer
         $contracts = $this->contracts;
 
         foreach ($contracts as $contract) {
-            if ($contract->connection->status === Connection::STATUS_ACCOUNT_CLIPPED) {
+            if ($contract->connection->status_account === Connection::STATUS_ACCOUNT_CLIPPED) {
                 $clipped = true;
             }
         }

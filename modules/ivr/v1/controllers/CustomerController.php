@@ -388,7 +388,8 @@ class CustomerController extends Controller
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"code" param is required')
+                'error' => true,
+                'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
 
@@ -397,18 +398,21 @@ class CustomerController extends Controller
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','Customer not found')
+                'error' => true,
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
         if ($customer->hasClippedForDebt()) {
             return [
-                'clipped' => true,
+                'error' => false,
+                'clipped' => 'enable',
             ];
         }
 
         return [
-            'clipped' => false,
+            'error' => false,
+            'clipped' => 'disable',
         ];
 
     }
