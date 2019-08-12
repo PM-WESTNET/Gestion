@@ -83,7 +83,8 @@ class CustomerController extends Controller
         if (empty($data['field']) && empty($data['value']) ) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"field" and "value" params are required')
+                'error' => "true",
+                'msg' => \Yii::t('ivrapi','"field" and "value" params are required')
             ];
         }
 
@@ -91,14 +92,16 @@ class CustomerController extends Controller
         if (empty($data['field'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"field" param is required')
+                'error' => "true",
+                'msg' => \Yii::t('ivrapi','"field" param is required')
             ];
         }
 
         if (empty($data['value'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"value" param is required')
+                'error' => "true",
+                'msg' => \Yii::t('ivrapi','"value" param is required')
             ];
         }
 
@@ -108,11 +111,15 @@ class CustomerController extends Controller
         if ($dataProvider->count === 0 ) {
             \Yii::$app->response->setStatusCode(400);
             return  [
-                'error' => \Yii::t('ivrapi','Customer not found')
+                'error' => "true",
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
-        return $dataProvider;
+        return [
+            'error' => 'false',
+            'data' => $dataProvider->getModels()
+        ];
 
     }
 
@@ -160,7 +167,8 @@ class CustomerController extends Controller
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"code" param is required')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
 
@@ -169,11 +177,15 @@ class CustomerController extends Controller
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','Customer not found')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
-        return $customer->accountInfo();
+        return [
+            'error' => 'false',
+            'data' => $customer->accountInfo(),
+        ];
 
     }
 
@@ -234,7 +246,8 @@ class CustomerController extends Controller
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','Customer not found')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
@@ -242,11 +255,15 @@ class CustomerController extends Controller
             \Yii::$app->response->setStatusCode(400);
 
             return [
-                'error' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
             ];
         }
 
-        return $customer->extendConnetionInfo();
+        return [
+            'error' => 'false',
+            'data' => $customer->extendConnetionInfo()
+        ];
     }
 
     /**
@@ -293,7 +310,8 @@ class CustomerController extends Controller
         if (!isset($data['contract_id'])){
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+                'error' => 'true',
+                'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
 
@@ -303,7 +321,8 @@ class CustomerController extends Controller
         if (empty($contract)) {
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+                'error' => 'true',
+                'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
 
@@ -312,7 +331,8 @@ class CustomerController extends Controller
         if (empty($connection)) {
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => Yii::t('ivrapi','Connection to payment extension not found')
+                'error' => 'true',
+                'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
 
@@ -333,16 +353,17 @@ class CustomerController extends Controller
 
             if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
                 return [
+                    'error' => 'false',
                     'to_date' => $due_date,
-                    'msj' => Yii::t('ivrapi','Payment Extension created successfull')
+                    'msg' => Yii::t('ivrapi','Payment Extension created successfull')
                 ];
             }
         }
 
         Yii::$app->response->setStatusCode(400);
         return [
-            'status' => 'error',
-            'error' => Yii::t('ivrapi','Can`t create payment extension')
+            'error' => 'true',
+            'msg' => Yii::t('ivrapi','Can`t create payment extension')
         ];
     }
 
@@ -487,7 +508,8 @@ class CustomerController extends Controller
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"code" param is required')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
 
@@ -496,7 +518,8 @@ class CustomerController extends Controller
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','Customer not found')
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
@@ -505,7 +528,8 @@ class CustomerController extends Controller
         if(empty($model)) {
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => 'The customer haven`t any bill'
+                'error' => 'true',
+                'msg' => 'The customer haven`t any bill'
             ];
         }
 
@@ -520,19 +544,22 @@ class CustomerController extends Controller
 
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => Yii::t("app", "The Client don't have email.")
+                'error' => 'true',
+                'msg' => Yii::t("app", "The Client don't have email.")
             ];
         }
 
         if (!$model->sendEmail($fileName)) {
             Yii::$app->response->setStatusCode(400);
             return [
-                'error' => Yii::t('app', 'The email could not be sent.')
+                'error' => 'true',
+                'msg' => Yii::t('app', 'The email could not be sent.')
             ];
         }
 
         return [
-            'msj' => Yii::t('app', 'The email is sended succesfully.')
+            'error' => 'false',
+            'msg' => Yii::t('app', 'The email is sended succesfully.')
         ];
 
 

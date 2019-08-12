@@ -54,7 +54,10 @@ class InfoController extends Controller
     {
         $search= new PaymentMethodSearch();
 
-        return $search->search();
+        return [
+            'error' => 'false',
+            'data' => $search->search()->getModels(),
+        ];
     }
 
 
