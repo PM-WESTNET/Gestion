@@ -3,6 +3,7 @@
 namespace app\modules\checkout\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "payment_method".
@@ -119,9 +120,19 @@ class PaymentMethod extends \app\components\db\ActiveRecord
         
     }
 
+    /**
+     * Devuelve un listado de medios de pago que están disponibles para ser mostrados en la app
+     */
     public static function getPaymentMethodsAvailableForApp()
     {
         return PaymentMethod::find()->where(['show_in_app' => true, 'status' => PaymentMethod::STATUS_ENABLED])->all();
     }
-    
+
+    /**
+     * Devuelve los medios de pago para ser listados en un desplegable
+     */
+    public static function getPaymentMethodForSelect()
+    {
+        return ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name');
+    }
 }

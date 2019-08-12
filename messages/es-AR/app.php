@@ -1132,5 +1132,9 @@
     'Can`t create payment extension' => 'No se puede crear la extensión de pago',
     'Send to Ivr' => 'Informar a IVR',
     'Show in app' => 'Mostar en aplicación',
-    'Your notify payment cant be saved.' => 'Su informe de pago no pudo ser guardado.'
+    'Your notify payment cant be saved.' => 'Su informe de pago no pudo ser guardado.',
+    'Notify payments' => 'Informes de pago',
+    'Notify Payment' => 'Informe de pago',
+    'Created At' => 'Creado el',
+    'Image Receipt' => 'Imagen de recibo',
 );

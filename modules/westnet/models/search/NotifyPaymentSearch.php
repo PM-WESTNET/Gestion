@@ -12,6 +12,9 @@ use app\modules\westnet\models\NotifyPayment;
  */
 class NotifyPaymentSearch extends NotifyPayment
 {
+    public $from_date;
+    public $to_date;
+
     /**
      * {@inheritdoc}
      */
@@ -19,9 +22,17 @@ class NotifyPaymentSearch extends NotifyPayment
     {
         return [
             [['notify_payment_id', 'payment_method_id', 'created_at'], 'integer'],
-            [['date', 'image_receipt'], 'safe'],
+            [['date', 'image_receipt', 'from_date', 'to_date', 'customer_id'], 'safe'],
             [['amount'], 'number'],
         ];
+    }
+
+    public function attributeLabels()
+    {
+        return array_merge(parent::attributeLabels(), [
+            'to_date' => Yii::t('app', 'To Date'),
+            'from_date' => Yii::t('app', 'From Date'),
+        ]);
     }
 
     /**
@@ -65,7 +76,16 @@ class NotifyPaymentSearch extends NotifyPayment
             'amount' => $this->amount,
             'payment_method_id' => $this->payment_method_id,
             'created_at' => $this->created_at,
+            'customer_id' => $this->customer_id,
         ]);
+
+        if($this->from_date) {
+            $query->andFilterWhere(['>=', 'date', $this->from_date]);
+        }
+
+        if($this->to_date) {
+            $query->andFilterWhere(['<=', 'date', $this->to_date]);
+        }
 
         $query->andFilterWhere(['like', 'image_receipt', $this->image_receipt]);
 

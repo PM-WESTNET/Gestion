@@ -52,10 +52,10 @@ class NotifyPayment extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'notify_payment_id' => Yii::t('app', 'Notify Payment ID'),
+            'notify_payment_id' => Yii::t('app', 'ID'),
             'date' => Yii::t('app', 'Date'),
             'amount' => Yii::t('app', 'Amount'),
-            'payment_method_id' => Yii::t('app', 'Payment Method ID'),
+            'payment_method_id' => Yii::t('app', 'Payment Method'),
             'image_receipt' => Yii::t('app', 'Image Receipt'),
             'created_at' => Yii::t('app', 'Created At'),
             'customer_id' => Yii::t('app', 'Customer'),
@@ -80,7 +80,15 @@ class NotifyPayment extends \yii\db\ActiveRecord
      */
     public function getPaymentMethod()
     {
-        return $this->hasOne(PaymentMethod::className(), ['payment_method_id' => 'payment_method_id']);
+        return $this->hasOne(PaymentMethod::class, ['payment_method_id' => 'payment_method_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCustomer()
+    {
+        return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -90,7 +98,6 @@ class NotifyPayment extends \yii\db\ActiveRecord
     public function upload()
     {
         $filename = \Yii::getAlias('@webroot/uploads/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
-        \Yii::trace($filename);
 
         if ($this->image_receipt->saveAs($filename)) {
             return true;

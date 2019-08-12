@@ -2,6 +2,9 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\jui\DatePicker;
+use kartik\select2\Select2;
+use app\modules\checkout\models\PaymentMethod;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\search\NotifyPaymentSearch */
@@ -15,23 +18,41 @@ use yii\widgets\ActiveForm;
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'notify_payment_id') ?>
-
-    <?= $form->field($model, 'date') ?>
-
-    <?= $form->field($model, 'amount') ?>
-
-    <?= $form->field($model, 'payment_method_id') ?>
-
-    <?= $form->field($model, 'customer_id') ?>
-
-    <?= $form->field($model, 'image_receipt') ?>
-
-    <?php // echo $form->field($model, 'created_at') ?>
+    <div class="row">
+        <div class="col-sm-6">
+            <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
+        </div>
+        <div class="col-sm-6">
+            <?= $form->field($model,'payment_method_id')->widget(Select2::class, [
+                'data' => PaymentMethod::getPaymentMethodForSelect()
+            ]);?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <?= $form->field($model, 'from_date')->widget(DatePicker::class, [
+                'language' => Yii::$app->language,
+                'dateFormat' => 'yyyy-MM-dd',
+                'options'=>[
+                    'class'=>'form-control filter dates',
+                    'placeholder'=>Yii::t('app','Date')
+                ]
+            ]);?>
+        </div>
+        <div class="col-sm-6">
+            <?= $form->field($model, 'to_date')->widget(DatePicker::class, [
+                'language' => Yii::$app->language,
+                'dateFormat' => 'yyyy-MM-dd',
+                'options'=>[
+                    'class'=>'form-control filter dates',
+                    'placeholder'=>Yii::t('app','Date')
+                ]
+            ]);?>
+        </div>
+    </div>
 
     <div class="form-group">
-        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-primary']) ?>
-        <?= Html::resetButton(Yii::t('app', 'Reset'), ['class' => 'btn btn-default']) ?>
+        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-primary pull-right']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
