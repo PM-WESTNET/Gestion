@@ -26,9 +26,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
-            <?php if (false && User::hasRole('collection_manager')):?>
+            <?php if (User::hasRole('collection_manager')):?>
                 <?=
-                Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', Yii::t('app','Close tickets by period')),
+                Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', Yii::t('app','Close Tickets by Period')),
                     '#', ['class' => 'btn btn-warning', 'id' => 'close-all-btn'])
                 ;
                 ?>

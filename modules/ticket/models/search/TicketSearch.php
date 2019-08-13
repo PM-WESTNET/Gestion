@@ -288,7 +288,7 @@ class TicketSearch extends Ticket {
 
         $query->innerJoin('status st', 'st.status_id=ticket.status_id');
 
-        $query->andWhere(['st.is_open' => 0]);
+        $query->andWhere(['st.is_open' => 1]);
         $query->andWhere(['category_id' => $this->category_id]);
 
         if (!empty($this->close_from_date)) {

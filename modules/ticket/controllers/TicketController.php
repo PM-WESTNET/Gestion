@@ -535,7 +535,8 @@ class TicketController extends Controller
                 $ticket->updateAttributes(['status_id' => $status->status_id]);
             }
 
-            Yii::$app->session->addFlash('success', '{count} tickets hass been closed', ['count' => $count]);
+            Yii::$app->session->addFlash('success', Yii::t('app','{count} tickets has been closed', ['count' => $count]));
+            return $this->redirect(['collection-tickets']);
         }
 
         Yii::$app->session->addFlash('warning', Yii::t('app','Can`t found tickets to close'));
