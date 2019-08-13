@@ -5,9 +5,9 @@ namespace app\modules\westnet\controllers;
 use Yii;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\components\web\Controller;
 
 /**
  * NotifyPaymentController implements the CRUD actions for NotifyPayment model.
@@ -19,14 +19,14 @@ class NotifyPaymentController extends Controller
      */
     public function behaviors()
     {
-        return [
+        return array_merge(parent::behaviors(),[
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-        ];
+        ]);
     }
 
     /**
