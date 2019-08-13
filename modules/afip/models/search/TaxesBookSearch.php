@@ -433,7 +433,10 @@ class TaxesBookSearch extends ProviderBill
                     SUM(net_iva_27)                                                             as net_iva_27,
                     SUM(net_iva_06)                                                             as net_iva_06,
                     SUM(net_iva_05)                                                             as net_iva_05,
-                    SUM(net_iva_025)                                                            as net_iva_025
+                    SUM(net_iva_025)                                                            as net_iva_025,
+                    page                                                                        AS page,
+                    retencion_iva                                                               AS retencion_iva,
+                    retencion_ingresos_brutos                                                   AS retencion_ingresos_brutos
                 FROM (SELECT
                         pb.provider_bill_id,
                         tbi.taxes_book_item_id,
