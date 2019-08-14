@@ -935,8 +935,8 @@ class UserAppController extends Controller
         }
 
         $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
-
-        if($this->createPaymentExtensionAndForce($data['contract_id'], false)){
+        $result = $this->createPaymentExtensionAndForce($data['contract_id'], false);
+        if($result['status']){
             Yii::$app->response->setStatusCode(200);
             return [
                 'status' => 'success',
@@ -948,7 +948,9 @@ class UserAppController extends Controller
         Yii::$app->response->setStatusCode(400);
         return [
             'status' => 'error',
-            'error' => Yii::t('app','Can`t create payment extension')
+            'error' => Yii::t('app','Can`t create payment extension'),
+            'title' => Yii::t('app','Payment extension can`t be created'),
+            'msj' => Yii::t('app',''),
         ];
     }
 
@@ -985,18 +987,24 @@ class UserAppController extends Controller
             'contract_id' => $data['contract'],
         ]);
 
-        if($notify_payment->save()){
-            if($this->createPaymentExtensionAndForce($data['contract'])) {
-                return [
-                    'status' => true,
-                    'notify_payment_id' => $notify_payment->notify_payment_id
-                ];
-            }
+        $trasanction = Yii::$app->db->beginTransaction();
+
+        $result = $this->createPaymentExtensionAndForce($data['contract']);
+        if($notify_payment->save() && $result['status']) {
+            $trasanction->commit();
+            return [
+                'status' => true,
+                'notify_payment_id' => $notify_payment->notify_payment_id,
+                'message' => Yii::t('app', 'Your notify payment was created successfully')
+            ];
         }
+
+        $trasanction->rollBack();
 
         return [
             'status' => false,
-            'notify_payment_id' => null
+            'notify_payment_id' => null,
+            'message' => array_key_exists('message', $result) ? $result['message'] : Yii::t('app', 'Your notify payment can`t be created')
         ];
     }
 
@@ -1038,14 +1046,20 @@ class UserAppController extends Controller
 
         if (empty($contract)) {
             throw new BadRequestHttpException('Contract not found');
-            return false;
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Contract not found'),
+            ];
         }
 
         $connection = $contract->connection;
 
         if (empty($connection)) {
-            return false;
             throw new BadRequestHttpException('Connection not found');
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Connection not found'),
+            ];
         }
 
         //Si es gratuito significa que viene de un informe de pago
@@ -1058,8 +1072,20 @@ class UserAppController extends Controller
                 $due_date = date('d-m-Y', $due_timestamp);
 
                 if($connection->force($due_date, $payment_extension_product, null, false)){
-                    return true;
+                    return [
+                        'status' => true,
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => Yii::t('app', 'An error occurred. Your connection can`t be restored.')
+                    ];
                 }
+            } else {
+                return [
+                    'status' => false,
+                    'message' => Yii::t('app', 'Your connection can`t be restored.')
+                ];
             }
         //Si no es gratuito, se está solicitando una extension de pago
         } else {
@@ -1071,12 +1097,22 @@ class UserAppController extends Controller
                 $due_date = date('d-m-Y', $due_timestamp);
 
                 if($connection->force($due_date, $payment_extension_product, null, true)){
-                    return true;
+                    return [
+                        'status' => true,
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => Yii::t('app', 'Your connection can`t be restored.')
+                    ];
                 }
+            } else {
+                return [
+                    'status' => false,
+                    'message' => Yii::t('app', 'Your connection can`t be restored or you can`t request a new payment extension this month.')
+                ];
             }
         }
-
-        return false;
     }
 
 }

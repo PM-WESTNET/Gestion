@@ -360,9 +360,9 @@ class Connection extends ActiveRecord {
      * @return boolean
      */
     public function canForce(){
-        $forcedHistoralSearch= new ConnectionForcedHistorialSearch();        
-        $forced_param=Config::getValue('times_forced_conn_month');        
-        $times= $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);
+        $forcedHistoralSearch = new ConnectionForcedHistorialSearch();
+        $forced_param = Config::getValue('times_forced_conn_month');
+        $times = $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);
         
                 
         if ((int)$times < (int)$forced_param) {
