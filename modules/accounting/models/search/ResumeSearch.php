@@ -3,6 +3,7 @@
 namespace app\modules\accounting\models\search;
 
 use app\modules\accounting\models\Resume;
+use app\modules\accounting\models\ResumeItem;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -24,6 +25,9 @@ class ResumeSearch extends Resume
 
     public $money_box_id;
 
+    public $description;
+    public $operation_type;
+
     //public $money_box_account_id;
 
     public function rules()
@@ -32,7 +36,7 @@ class ResumeSearch extends Resume
 
         return [
             [['company_id', 'money_box_id', 'money_box_account_id'], 'integer'],
-            [['toDate', 'fromDate'], 'safe'],
+            [['toDate', 'fromDate', 'operation_type', 'description', 'resume_id', 'date'], 'safe'],
             [['toDate', 'fromDate'], 'default', 'value'=>null],
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]]
@@ -159,5 +163,25 @@ class ResumeSearch extends Resume
         if($this->money_box_account_id!=0){
             $query->andFilterWhere(['resume.money_box_account_id'=>$this->money_box_account_id]);
         }
+    }
+
+    public function searchForConciliation($params){
+        $query = ResumeItem::find();
+
+        $this->load($params);
+
+        $query->leftJoin('conciliation_item_has_resume_item ciri', 'ciri.resume_item_id =  resume_item.resume_item_id ');
+        $query->leftJoin('money_box_has_operation_type mbhot', 'mbhot.money_box_has_operation_type_id=resume_item.money_box_has_operation_type_id');
+
+        $query->andWhere(['resume_item.resume_id'=> $this->resume_id]);
+        $query->andWhere('ciri.conciliation_item_id IS NULL');
+
+        $query->andFilterWhere(['mbhot.operation_type_id' => $this->operation_type]);
+
+        if ($this->date) {
+            $query->andFilterWhere(['date' => Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd')]);
+        }
+
+        return $query;
     }
 }

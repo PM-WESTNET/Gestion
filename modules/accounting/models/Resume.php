@@ -238,17 +238,13 @@ class Resume extends \app\components\companies\ActiveRecord
      *
      * @param $resume_id
      */
-    public function getResumeItemsEnabled($resume_id, $is_debit)
+    public function getResumeItemsEnabled($resume_id)
     {
         $query = ResumeItem::find()
             ->leftJoin('conciliation_item_has_resume_item ciri', 'ciri.resume_item_id =  resume_item.resume_item_id ')
             ->andWhere(['resume_item.resume_id'=>$resume_id])
             ->andWhere('ciri.conciliation_item_id IS NULL');
-        if($is_debit) {
-            $query->andFilterWhere(['>', 'resume_item.debit', 0]);
-        } else {
-            $query->andFilterWhere(['>', 'resume_item.credit', 0]);
-        }
+
         return $query;
     }
 

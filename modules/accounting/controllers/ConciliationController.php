@@ -6,13 +6,16 @@ use app\modules\accounting\components\CountableMovement;
 use app\modules\accounting\models\AccountMovementItem;
 use app\modules\accounting\models\ConciliationItem;
 use app\modules\accounting\models\ConciliationItemHasResumeItem;
+use app\modules\accounting\models\OperationType;
 use app\modules\accounting\models\Resume;
 use app\modules\accounting\models\ResumeItem;
 use app\modules\accounting\models\search\AccountMovementSearch;
+use app\modules\accounting\models\search\ResumeSearch;
 use Yii;
 use app\modules\accounting\models\Conciliation;
 use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -137,14 +140,10 @@ class ConciliationController extends Controller
         $searchModel->account_id_to = $model->moneyBoxAccount->account->rgt;
         $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
         $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
-        $searchModel->balance = 'credit';
 
-        $creditDataProvider = $searchModel->searchForConciliation([]);
+        $movementsDataProvider = $searchModel->searchForConciliation([]);
 
         $totalAccountCredit = $searchModel->totalCredit;
-
-        $searchModel->balance = 'debit';
-        $debitDataProvider = $searchModel->searchForConciliation([]);
         $totalAccountDebit = $searchModel->totalDebit;
 
         $conciliatedDataProvider = new ActiveDataProvider([
@@ -153,41 +152,38 @@ class ConciliationController extends Controller
 
         $totales = $model->getTotals();
 
+        $operationTypes = ArrayHelper::map(OperationType::find()->all(), 'operation_type_id', 'name');
+
         $this->layout = '/fluid';
         return $this->render( 'conciliate',[
             'model' => $model,
             'conciliatedDataProvider' => $conciliatedDataProvider,
-            'creditDataProvider' => $creditDataProvider,
-            'debitDataProvider' => $debitDataProvider,
+            'movementsDataProvider' => $movementsDataProvider,
             'totalAccountDebit' => $totalAccountDebit,
             'totalAccountCredit' => $totalAccountCredit,
             'totalConciliationDebit' => $totales['debit'],
             'totalConciliationCredit' => $totales['credit'],
-            'readOnly' =>$readOnly
+            'readOnly' =>$readOnly,
+            'operationTypes' => $operationTypes
         ]);
     }
 
-    public function actionGetResumeItems($resume_id = 0, $readOnly=false)
+    public function actionGetResumeItems($readOnly=false)
     {
-        $resumeItemsDebitDataProvider = null;
-        if ($resume_id != 0){
-            $resumeItemsDebitDataProvider = new ActiveDataProvider([
-                'query' => Resume::getResumeItemsEnabled($resume_id, true)
-            ]);
-        }
+        $resumeItemsDataProvider = null;
+        $resumeSearch = new ResumeSearch();
+        $params = Yii::$app->request->post();
 
-        $resumeItemsCreditDataProvider = null;
-        if ($resume_id != 0){
-            $resumeItemsCreditDataProvider = new ActiveDataProvider([
-                'query' => Resume::getResumeItemsEnabled($resume_id, false)
-            ]);
-        }
+        $resumeItemsDataProvider = new ActiveDataProvider([
+            'query' => $resumeSearch->searchForConciliation($params)
+        ]);
 
-        $model = Resume::findOne(["resume_id"=>$resume_id]);
 
+
+        $model = Resume::findOne(['resume_id' => $params['ResumeSearch']['resume_id']]);
+        $resumeItemsDataProvider->setPagination(false);
         return $this->renderAjax('_resume_items', [
-            'resumeItemsDebitDataProvider' => $resumeItemsDebitDataProvider,
-            'resumeItemsCreditDataProvider' => $resumeItemsCreditDataProvider,
+            'resumeItemsDataProvider' => $resumeItemsDataProvider,
             'model' => $model,
             'readOnly' => $readOnly
         ]);

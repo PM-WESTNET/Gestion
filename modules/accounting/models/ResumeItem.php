@@ -289,4 +289,10 @@ class ResumeItem extends \app\components\db\ActiveRecord
      * @return mixed
      */
     public function getWorkflowCreateLog(){}
+
+
+
+    public function getOperationType() {
+        return $this->hasOne(OperationType::class, ['operation_type_id' => 'operation_type_id'])->viaTable('money_box_has_operation_type', ['money_box_has_operation_type_id' => 'money_box_has_operation_type_id']);
+    }
 }

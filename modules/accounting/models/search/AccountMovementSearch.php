@@ -261,6 +261,8 @@ class AccountMovementSearch extends AccountMovement {
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
 
+        $dataProvider->setPagination(false);
+
         return $dataProvider;
     }
     

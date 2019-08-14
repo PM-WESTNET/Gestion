@@ -340,4 +340,23 @@ class AccountMovement extends \app\components\companies\ActiveRecord
 
         return true;
     }
+
+    public function getAccountMovementHasRelations(){
+        return $this->hasMany(AccountMovementRelation::class, ['account_movement_id' => 'account_movement_id']);
+    }
+
+
+    public function getCustomer() {
+        $relations = $this->accountMovementHasRelations;
+
+        foreach ($relations as $relation) {
+            $model= $relation->model;
+
+            if (!empty($model) && !empty($model->customer)){
+                return $model->customer;
+            }
+        }
+
+        return null;
+    }
 }

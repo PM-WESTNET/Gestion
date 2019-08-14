@@ -99,14 +99,13 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
 
     <div class="row">
 
-        <div class="col-sm-6">
-            <?php \yii\widgets\Pjax::begin(['id'=>'w_movements']);?>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
+        <div class="col-sm-6" style="padding: 0px;">
+            <div class="panel panel-primary" style="padding: 0px;">
+                <div class="panel-heading text-center">
                     <strong>
                         <?=Yii::t('accounting', 'Account Movements')?>
                     </strong>
-                    <?php if (!$readOnly) { ?>
+                    <?php if (false) { ?>
                         <!-- <div class="pull-right" role="group"> -->
                             <button type="button" data-type="btnDeconciliate" class="btn btn-warning btnDeconciliate pull-right">
                                 <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-triangle-right"></span>
@@ -114,119 +113,54 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                         <!-- </div> -->
                     <?php } ?>
                 </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-sm-6 text-center">
-                            <strong><?= Yii::t('accounting', 'Debit to Conciliate'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalConciliationDebit) ?>
-                        </div>
-                        <div class="col-sm-6 text-center">
-                            <strong><?= Yii::t('accounting', 'Credit to Conciliate'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalConciliationCredit) ?>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">&nbsp;</div>
-                    </div>
+                <div class="panel-body" style="overflow-y: scroll; height: 500px">
+
                     <?php
-                        $cols = [];
-                        if(!$readOnly) {
-                            $cols[] = [
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'checkboxOptions' => function($model, $key, $index, $column) {
-                                    return ['value' => $model->conciliation_item_id];
-                                }
-                            ];
-                        }
-                        $cols = array_merge($cols, [[
+                    $cols = [];
+                    if (!$readOnly) {
+                        $cols[] = [
+                            'class' => 'yii\grid\CheckboxColumn',
+                            'checkboxOptions' => function($model, $key, $index, $column) {
+                                return ['value' => $model->account_movement_item_id];
+                            }
+                        ];
+                    }
+                    $cols = array_merge($cols, [
+                        [
                             'header'=>Yii::t('app', 'Date'),
                             'value' => function ($model) {
                                 return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
                             }
-                        ],[
-                            'header'=>Yii::t('app', 'Description'),
-                            'attribute'=>'description',
-                        ],[
-                            'header'=>Yii::t('app', 'Amount'),
-                            'value' => function ($model) {
-                                return Yii::$app->formatter->asCurrency($model->amount);
-                            }
-                        ]]);
-
-                    echo GridView::widget([
-                        //'layout'=> '{items}',
-                        'id'=> 'wConciliated',
-                        'caption' => Yii::t('accounting', 'Conciliated'),
-                        'dataProvider' => $conciliatedDataProvider,
-                        'columns' => $cols,
-                    ]);?>
-
-
-                    <?php
-
-                    $cols = [];
-                    if (!$readOnly) {
-                        $cols[] = [
-                            'class' => 'yii\grid\CheckboxColumn',
-                            'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->account_movement_item_id];
-                            }
-                        ];
-                    }
-                    $cols = array_merge($cols, [
-                            [
-                                'header'=>Yii::t('app', 'Date'),
-                                'value' => function ($model) {
-                                    return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
-                                }
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Description'),
-                                'attribute'=>'description',
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Debit'),
-                                'value' => function ($model) {
-                                    return Yii::$app->formatter->asCurrency($model->debit);
-                                }
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Status'),
-                                'value' => function ($model) {
-                                    return Yii::t('app', ucfirst($model->status));
-                                }
-                            ]]);
-
-                    echo GridView::widget([
-                        //'layout'=> '{items}{}',
-                        'id'=>'wDebit',
-                        'caption' => Yii::t('accounting', 'Debits with out conciliation.'),
-                        'dataProvider' => $debitDataProvider,
-                        'columns' => $cols
-                    ]);?>
-
-                    <?php
-                    $cols = [];
-
-                    if (!$readOnly) {
-                        $cols[] = [
-                            'class' => 'yii\grid\CheckboxColumn',
-                            'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->account_movement_item_id];
-                            }
-                        ];
-                    }
-                    $cols = array_merge($cols, [
+                        ],
                         [
-                            'header'=>Yii::t('app', 'Date'),
-                            'attribute'=>'date',
-                            'format'=>['date']
+                            'label' => 'Cuit',
+                            'value' => function ($model) {
+                                if($model->customer) {
+                                    return $model->document_number;
+                                }
+
+                                return null;
+                            }
+                        ],
+                        [
+                            'label' => 'Cuit2',
+                            'value' => function ($model) {
+                                if($model->customer) {
+                                    return $model->cuit2;
+                                }
+
+                                return null;
+                            }
                         ],
                         [
                             'header'=>Yii::t('app', 'Description'),
                             'attribute'=>'description',
+                        ],
+                        [
+                            'header'=>Yii::t('app', 'Debit'),
+                            'value' => function ($model) {
+                                return Yii::$app->formatter->asCurrency($model->debit);
+                            }
                         ],
                         [
                             'header'=>Yii::t('app', 'Credit'),
@@ -234,28 +168,65 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                                 return Yii::$app->formatter->asCurrency($model->credit);
                             }
                         ],
-                        [
-                            'header'=>Yii::t('app', 'Status'),
-                            'value' => function ($model) {
-                                return Yii::t('app', ucfirst($model->status));
-                            }
-                        ]]);
+
+                    ]);
 
                     echo GridView::widget([
-                        //'layout'=> '{items}',
-                        'id'=> 'wCredit',
-                        'caption' => Yii::t('accounting', 'Credits with out conciliation.'),
-                        'dataProvider' => $creditDataProvider,
+                        //'layout'=> '{items}{}',
+                        'id'=>'wDebit',
+                        //'caption' => Yii::t('accounting', 'Debits with out conciliation.'),
+                        'dataProvider' => $movementsDataProvider,
                         'columns' => $cols
                     ]);?>
 
+<!--                    --><?php
+//                    $cols = [];
+//
+//                    if (!$readOnly) {
+//                        $cols[] = [
+//                            'class' => 'yii\grid\CheckboxColumn',
+//                            'checkboxOptions' => function($model, $key, $index, $column) {
+//                                return ['value' => $model->account_movement_item_id];
+//                            }
+//                        ];
+//                    }
+//                    $cols = array_merge($cols, [
+//                        [
+//                            'header'=>Yii::t('app', 'Date'),
+//                            'attribute'=>'date',
+//                            'format'=>['date']
+//                        ],
+//                        [
+//                            'header'=>Yii::t('app', 'Description'),
+//                            'attribute'=>'description',
+//                        ],
+//                        [
+//                            'header'=>Yii::t('app', 'Credit'),
+//                            'value' => function ($model) {
+//                                return Yii::$app->formatter->asCurrency($model->credit);
+//                            }
+//                        ],
+//                        [
+//                            'header'=>Yii::t('app', 'Status'),
+//                            'value' => function ($model) {
+//                                return Yii::t('app', ucfirst($model->status));
+//                            }
+//                        ]]);
+//
+//                    echo GridView::widget([
+//                        //'layout'=> '{items}',
+//                        'id'=> 'wCredit',
+//                        'caption' => Yii::t('accounting', 'Credits with out conciliation.'),
+//                        'dataProvider' => $creditDataProvider,
+//                        'columns' => $cols
+//                    ]);?>
+
                 </div>
             </div>
-            <?php \yii\widgets\Pjax::end();?>
         </div>
 
-        <div class="col-sm-6">
-            <div class="panel panel-primary">
+        <div class="col-sm-6" style="padding: 0px;">
+            <div class="panel panel-success">
                 <div class="panel-heading">
                     <strong>
                         <?= Yii::t('accounting', 'Summary'); ?>
@@ -270,11 +241,50 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     <!-- </div> -->
                     <?php } ?>
                 </div>
-                <div class="panel-body" id="w_resume_items">
+                <div class="panel-body" style="overflow-y: scroll;  height: 500px"">
+
+                    <?php echo $this->render('_resume_items_search', ['operationTypes' => $operationTypes, 'resume_id' => $model->resume_id])?>
+
+                    <div id="w_resume_items" style="text-align: center">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <?php
+    $cols = [];
+    if(!$readOnly) {
+        $cols[] = [
+            'class' => 'yii\grid\CheckboxColumn',
+            'checkboxOptions' => function($model, $key, $index, $column) {
+                return ['value' => $model->conciliation_item_id];
+            }
+        ];
+    }
+    $cols = array_merge($cols, [[
+        'header'=>Yii::t('app', 'Date'),
+        'value' => function ($model) {
+            return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
+        }
+    ],[
+        'header'=>Yii::t('app', 'Description'),
+        'attribute'=>'description',
+    ],[
+        'header'=>Yii::t('app', 'Amount'),
+        'value' => function ($model) {
+            return Yii::$app->formatter->asCurrency($model->amount);
+        }
+    ]]);
+
+    echo GridView::widget([
+        //'layout'=> '{items}',
+        'id'=> 'wConciliated',
+        'caption' => Yii::t('accounting', 'Conciliated'),
+        'dataProvider' => $conciliatedDataProvider,
+        'columns' => $cols,
+    ]);?>
+
 </div>
 <script>
     var Conciliate = new function() {
@@ -292,14 +302,34 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 Conciliate.close();
             });
 
+            $(document).on('click', '#btn-resume-search', function (e) {
+               e.preventDefault();
+               Conciliate.findResumeItems(true);
+            });
+
             Conciliate.findResumeItems();
         }
 
-        this.findResumeItems = function() {
+        this.findResumeItems = function(search = false) {
+            var data= {};
+            if (!search){
+                data = {
+                    ResumeSearch: {
+                        resume_id: "<?php echo $model->resume_id?>"
+                    }
+                };
+            }else {
+                data= $('#resume_search_form').serializeArray();
+            }
+
             $.ajax({
-                url: "<?=Url::toRoute(['/accounting/conciliation/get-resume-items', 'resume_id'=> $model->resume_id, 'readOnly'=> $readOnly ])?>",
+                url: "<?=Url::toRoute(['/accounting/conciliation/get-resume-items', 'readOnly'=> $readOnly ])?>",
+                data: data,
                 method: 'POST',
                 dataType: 'html',
+                beforeSend: function() {
+                    $('#w_resume_items').html('<img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                },
                 success: function(data){
                     $("#w_resume_items").html(data);
                 }
