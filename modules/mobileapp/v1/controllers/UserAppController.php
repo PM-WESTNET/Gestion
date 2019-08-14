@@ -35,6 +35,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use app\modules\sale\modules\contract\models\Contract;
 use yii\web\UploadedFile;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
 
 class UserAppController extends Controller
 {
@@ -1072,6 +1073,9 @@ class UserAppController extends Controller
                 $due_date = date('d-m-Y', $due_timestamp);
 
                 if($connection->force($due_date, $payment_extension_product, null, false)){
+                    //Activo los items del contrato
+                    $cti = new ContractToInvoice();
+                    $cti->updateContract($contract);
                     return [
                         'status' => true,
                     ];
@@ -1091,12 +1095,14 @@ class UserAppController extends Controller
         } else {
             if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
                 $payment_extension_product = Config::getValue('extend_payment_product_id');
-                $payment_extension_duration_days = Config::getValue('payment_extension_real_duration_days');
 
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
-                $due_date = date('d-m-Y', $due_timestamp);
+                $max_date_payment_extension = \app\modules\sale\models\Customer::getMaxDateRealPaymentExtension();
+                $due_date = (new \DateTime('now'))->setTimestamp($max_date_payment_extension)->format('d-m-Y');
 
                 if($connection->force($due_date, $payment_extension_product, null, true)){
+                    //Activo los items del contrato
+                    $cti = new ContractToInvoice();
+                    $cti->updateContract($contract);
                     return [
                         'status' => true,
                     ];

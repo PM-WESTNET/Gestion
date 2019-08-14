@@ -1510,7 +1510,7 @@ class Customer extends ActiveRecord {
             $to = (new \DateTime('last day of this month'));
         }
 
-        foreach ($this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
+        foreach ($this->getContracts()->all() as $contract) {
             $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
 
             if ($connection) {
@@ -1526,7 +1526,7 @@ class Customer extends ActiveRecord {
             if($count_notify_payments){
                 //Si se tienen en cuenta los informes de pago, se debe restar 1 a la cantidad total. Si no puede
                 // realizar un informe de pago, es porque ya se ha realizado el correspondiente a este mes
-                if(!$this->canNotifyPayment() && $payment_extension_qty > 1) {
+                if(!$this->canNotifyPayment() && $payment_extension_qty > 0 && $payment_extension_qty != 1) {
                     $payment_extension_qty -= 1;
                 }
             }
@@ -1540,7 +1540,11 @@ class Customer extends ActiveRecord {
      * @param null $period
      * @return bool
      * @throws \Exception
-     * Indica si el cliente puede pedir una extension de pago
+     * Indica si el cliente puede pedir una extension de pago.
+     * Logica de negocio: Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
+     * es mayor al dia corriente, el cliente no puede solicitar una extensión de pago. Ej: 15 + 5 = 20
+     * Si hoy es 16, puedo solicitar una extension de pago
+     * Si hoy es 21 ya no puedo solicitarla
      */
     public function canRequestPaymentExtension()
     {
@@ -1549,16 +1553,16 @@ class Customer extends ActiveRecord {
             return false;
         }
 
+        $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
+        $today = (new \DateTime('now'))->getTimestamp();
+
+        if($today > $max_date_can_request_payment_extension) {
+            return false;
+        }
+
         //Y si no ha solicitado el máximo de extensiones de pago permitidas.
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
-
-        /**
-         * Si ha no puede informar mas pagos es porque ya ha hecho uno este mes, y ese debe descontarse de las extensiones de pago normales.
-         */
-        if(!$this->canNotifyPayment() && $payment_extension_qty > 0) {
-            $payment_extension_qty -= 1;
-        }
 
         return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
     }
@@ -1573,5 +1577,31 @@ class Customer extends ActiveRecord {
         $date_to = (new \DateTime('last day of this month'))->format('Y-m-d');
 
         return !$this->getNotifyPayments()->where(['>','date', $date])->andWhere(['<', 'date', $date_to])->exists();
+    }
+
+    /**
+     * Devuelve un timestamp con la fecha max en la que se informará al cliente sobre una extension de pago
+     */
+    public static function getMaxDateNoticePaymentExtension()
+    {
+        $expiration_bill_days_qty = Config::getValue('bill_default_expiration_days');
+        $payment_extension_days_qty = Config::getValue('payment_extension_duration_days');
+
+        $day_of_the_month = $expiration_bill_days_qty + $payment_extension_days_qty;
+
+        return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
+    }
+
+    /**
+     * Devuelve un timestamp con la fecha max real de una extension de pago
+     */
+    public static function getMaxDateRealPaymentExtension()
+    {
+        $expiration_bill_days_qty = Config::getValue('bill_default_expiration_days');
+        $payment_extension_days_qty = Config::getValue('payment_extension_real_duration_days');
+
+        $day_of_the_month = $expiration_bill_days_qty + $payment_extension_days_qty;
+
+        return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
     }
 }

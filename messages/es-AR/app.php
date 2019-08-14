@@ -1138,4 +1138,13 @@
     'Notify Payment' => 'Informe de pago',
     'Created At' => 'Creado el',
     'Image Receipt' => 'Imagen de recibo',
+    'Payment extension can`t be created' => 'La extensión de pago no pudo ser creada',
+    'Your notify payment can`t be created' => 'Su informe de pago no puedo ser creada',
+    'Notify payment not found or failed to handle image' => 'Informe de pago no encontrado o falló al manejar la imagen',
+    'Contract not found' => 'Contrato no encontrado',
+    'Connection not found' => 'Conexión no encontrado',
+    'An error occurred. Your connection can`t be restored.' => 'Ocurrió un error. Su conexión no puede ser restablecida.',
+    'Your connection can`t be restored.' => 'Su conexión no puede ser restablecida',
+    'Your connection can`t be restored or you can`t request a new payment extension this month.' => 'Su conexión no puede ser restablecida o usted no puede solicitar mas extensiones de pago este mes',
+    'Your notify payment was created successfully' => 'Su informe de pago se creó exitosamente',
 );
