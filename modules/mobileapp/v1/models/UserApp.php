@@ -91,7 +91,7 @@ class UserApp extends \app\components\db\ActiveRecord
             $contracts = [];
             $duration_days = $payment_extension_duration_days;
 
-            foreach ($customer->contracts as $contract) {
+            foreach ($customer->getContracts()->where(['status' => 'active'])->all() as $contract) {
                 $contracts[] = [
                     'contract_id' => $contract->contract_id,
                     'service_address' => $contract->address ? $contract->address->fullAddress : $customer->address,
