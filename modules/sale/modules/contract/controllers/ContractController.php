@@ -233,6 +233,9 @@ class ContractController extends Controller {
                 }
 
                 $transaction->commit();
+                //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
+                $model->createMesaTicket($model);
+
                 if(Yii::$app->request->post('mode') === '1'){
                     return $this->redirect(['/sale/contract/contract/update', 'id' => $model->contract_id]);
                 }else{

@@ -86,7 +86,12 @@ class Contract extends ActiveRecord {
 
             $is_developer_mode = Config::getValue('is_developer_mode');
             if(!$is_developer_mode) {
-                $behaviors[] = 'app\modules\westnet\components\MesaTicketContractBehavior';
+                //  Se sobreescribe la propiedad events del behavior para evitar que se distare cuando el contrato se
+                //inserta y que aun no tenga contract details que analizar.
+                $behaviors[] = [
+                    'class' => 'app\modules\westnet\components\MesaTicketContractBehavior',
+                    'events' => []
+                ];
                 $behaviors[] = 'app\modules\westnet\components\RouterContractBehavior';
             }
         }
