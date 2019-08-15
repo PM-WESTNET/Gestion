@@ -150,7 +150,6 @@ class ConciliationController extends Controller
             'query' => $model->getConciliationItems(),
         ]);
 
-        $totales = $model->getTotals();
 
         $operationTypes = ArrayHelper::map(OperationType::find()->all(), 'operation_type_id', 'name');
 
@@ -161,11 +160,27 @@ class ConciliationController extends Controller
             'movementsDataProvider' => $movementsDataProvider,
             'totalAccountDebit' => $totalAccountDebit,
             'totalAccountCredit' => $totalAccountCredit,
-            'totalConciliationDebit' => $totales['debit'],
-            'totalConciliationCredit' => $totales['credit'],
             'readOnly' =>$readOnly,
             'operationTypes' => $operationTypes
         ]);
+    }
+
+    public function actionGetAccountMovements($id, $readOnly=false)
+    {
+        $model = $this->findModel($id);
+        // Busco los movimientos de cuenta en el rango de fechas de la conciliacion.
+        // y teniendo en cuenta que no sean movimientos cerrados
+        $searchModel = new AccountMovementSearch();
+        $searchModel->account_id_from = $model->moneyBoxAccount->account->lft;
+        $searchModel->account_id_to = $model->moneyBoxAccount->account->rgt;
+        $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
+        $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
+
+        $params = Yii::$app->request->post();
+
+        $movementsDataProvider = $searchModel->searchForConciliation($params);
+
+        return $this->renderAjax('_movements', ['readOnly' => $readOnly, 'movementsDataProvider' => $movementsDataProvider]);
     }
 
     public function actionGetResumeItems($readOnly=false)

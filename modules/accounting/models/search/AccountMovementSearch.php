@@ -39,6 +39,10 @@ class AccountMovementSearch extends AccountMovement {
     public $account_id;
     //Tiempo
     public $toTime;
+
+    //Conciliaciones
+    public $cuit;
+    public $cuit2;
         
     public function rules() {
         $statuses = ['draft', 'closed', 'conciled', 'broken'];
@@ -46,7 +50,7 @@ class AccountMovementSearch extends AccountMovement {
         return [
             [['debit', 'credit'], 'number'],
             [['account_id_from', 'account_id_to', 'account_id'], 'integer'],
-            [['toDate', 'fromDate', 'date'], 'safe'],
+            [['toDate', 'fromDate', 'date', 'cuit', 'cuit2'], 'safe'],
             [['toDate', 'fromDate', 'date'], 'default', 'value' => null],
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],

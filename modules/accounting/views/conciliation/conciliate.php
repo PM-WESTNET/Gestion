@@ -114,113 +114,10 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     <?php } ?>
                 </div>
                 <div class="panel-body" style="overflow-y: scroll; height: 500px">
-
-                    <?php
-                    $cols = [];
-                    if (!$readOnly) {
-                        $cols[] = [
-                            'class' => 'yii\grid\CheckboxColumn',
-                            'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->account_movement_item_id];
-                            }
-                        ];
-                    }
-                    $cols = array_merge($cols, [
-                        [
-                            'header'=>Yii::t('app', 'Date'),
-                            'value' => function ($model) {
-                                return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
-                            }
-                        ],
-                        [
-                            'label' => 'Cuit',
-                            'value' => function ($model) {
-                                if($model->customer) {
-                                    return $model->document_number;
-                                }
-
-                                return null;
-                            }
-                        ],
-                        [
-                            'label' => 'Cuit2',
-                            'value' => function ($model) {
-                                if($model->customer) {
-                                    return $model->cuit2;
-                                }
-
-                                return null;
-                            }
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Description'),
-                            'attribute'=>'description',
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Debit'),
-                            'value' => function ($model) {
-                                return Yii::$app->formatter->asCurrency($model->debit);
-                            }
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Credit'),
-                            'value' => function ($model) {
-                                return Yii::$app->formatter->asCurrency($model->credit);
-                            }
-                        ],
-
-                    ]);
-
-                    echo GridView::widget([
-                        //'layout'=> '{items}{}',
-                        'id'=>'wDebit',
-                        //'caption' => Yii::t('accounting', 'Debits with out conciliation.'),
-                        'dataProvider' => $movementsDataProvider,
-                        'columns' => $cols
-                    ]);?>
-
-<!--                    --><?php
-//                    $cols = [];
-//
-//                    if (!$readOnly) {
-//                        $cols[] = [
-//                            'class' => 'yii\grid\CheckboxColumn',
-//                            'checkboxOptions' => function($model, $key, $index, $column) {
-//                                return ['value' => $model->account_movement_item_id];
-//                            }
-//                        ];
-//                    }
-//                    $cols = array_merge($cols, [
-//                        [
-//                            'header'=>Yii::t('app', 'Date'),
-//                            'attribute'=>'date',
-//                            'format'=>['date']
-//                        ],
-//                        [
-//                            'header'=>Yii::t('app', 'Description'),
-//                            'attribute'=>'description',
-//                        ],
-//                        [
-//                            'header'=>Yii::t('app', 'Credit'),
-//                            'value' => function ($model) {
-//                                return Yii::$app->formatter->asCurrency($model->credit);
-//                            }
-//                        ],
-//                        [
-//                            'header'=>Yii::t('app', 'Status'),
-//                            'value' => function ($model) {
-//                                return Yii::t('app', ucfirst($model->status));
-//                            }
-//                        ]]);
-//
-//                    echo GridView::widget([
-//                        //'layout'=> '{items}',
-//                        'id'=> 'wCredit',
-//                        'caption' => Yii::t('accounting', 'Credits with out conciliation.'),
-//                        'dataProvider' => $creditDataProvider,
-//                        'columns' => $cols
-//                    ]);?>
-
+                    <?php echo $this->render('movements_search')?>
+                    <div id="movements_grid">
+                        <?php echo $this->render('_movements', ['readOnly' => $readOnly, 'movementsDataProvider' => $movementsDataProvider])?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -307,6 +204,11 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                Conciliate.findResumeItems(true);
             });
 
+            $(document).on('click', '#btn-movement-search', function (e) {
+                e.preventDefault();
+                Conciliate.findMovements();
+            });
+
             Conciliate.findResumeItems();
         }
 
@@ -332,6 +234,26 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 },
                 success: function(data){
                     $("#w_resume_items").html(data);
+                }
+            });
+        }
+
+        this.findMovements = function() {
+            var data= {};
+
+            data= $('#movement_search_form').serializeArray();
+
+
+            $.ajax({
+                url: "<?=Url::toRoute(['/accounting/conciliation/get-account-movements', 'id' => $model->conciliation_id,'readOnly'=> $readOnly ])?>",
+                data: data,
+                method: 'POST',
+                dataType: 'html',
+                beforeSend: function() {
+                    $('#movements_grid').html('<img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                },
+                success: function(data){
+                    $("#movements_grid'").html(data);
                 }
             });
         }
