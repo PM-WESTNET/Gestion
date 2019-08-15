@@ -568,12 +568,18 @@ class Contract extends ActiveRecord {
             ->all());
     }
 
-
     /**
-     * Devuelve el precio tentativo de la proxima factura. El saldo tentativo lo calcula con el precio del plan
-     * y lo productos a facturar que tiene el contrato en el momento del calculo
+     * Verifica si el contrato tiene un plan con la categoria de plan-fibra
      */
-    public function getAmountNextBill(){
+    public function hasFibraPlan()
+    {
+        $fibra_category = \app\modules\sale\models\Category::findOne(['system' => 'plan-fibra']);
 
+        return $this->getContractDetails()
+            ->leftJoin('product p', 'p.product_id = contract_detail.product_id')
+            ->leftJoin('product_has_category phc', 'phc.product_id = p.product_id')
+            ->where(['type' => 'plan'])
+            ->andWhere(['phc.category_id' => $fibra_category->category_id])
+            ->exists();
     }
 }
