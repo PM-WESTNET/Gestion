@@ -56,14 +56,14 @@ class BancoFrances implements BankInterface
         }
         $file = \Yii::getAlias('@app').'/web/direct_debit/'.$filename;
 
-        $resource = fopen($file.'.txt', 'w+');
+        $resource = fopen($file.'.REC', 'w+');
 
         if ($resource === false) {
             return false;
         }
 
-        $export->file = $file.'.txt';
-        $this->fileName = $filename.'.txt';
+        $export->file = $file.'.REC';
+        $this->fileName = $filename.'.REC';
         $export->save();
 
         $debits= $this->getDebits($export->bank_id, $export->company_id);

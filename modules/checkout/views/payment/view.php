@@ -64,7 +64,13 @@ $this->params['breadcrumbs'][] = $this->title;
         $attributes = array_merge($attributes, [
             [
                 'attribute' => 'customer',
-                'value' => $model->customer ? $model->customer->fullName : ''
+                'value' => function($model) {
+                    if(!$model->customer_id) {
+                        return '';
+                    }
+                    return Html::a($model->customer->fullName, ['/sale/customer/view', 'id' => $model->customer_id]);
+                },
+                'format' => 'raw'
             ],
             'date:date',
             'number',
