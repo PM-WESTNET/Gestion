@@ -76,7 +76,7 @@ class Customer extends \app\modules\sale\models\Customer
 
     public function getPaymentsToShow()
     {
-        $all_payments = $this->getPayments()->where(['status' => Payment::PAYMENT_CLOSED])->orderBy('date', SORT_DESC)->limit(10)->all();
+        $all_payments = $this->getPayments()->where(['status' => Payment::PAYMENT_CLOSED])->orderBy(['timestamp'=> SORT_DESC])->limit(5)->all();
         $payments = [];
 
         foreach ($all_payments as $payment) {

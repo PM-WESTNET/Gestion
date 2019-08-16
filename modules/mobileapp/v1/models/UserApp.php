@@ -109,7 +109,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'customer_code' => $customer->customer_id,
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
-                'customer_name' => $customer->name .' - '. $customer->code,
+                'customer_name' => $customer->fullName,
                 'contracts' => $contracts,
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
                 'price' => $price,
