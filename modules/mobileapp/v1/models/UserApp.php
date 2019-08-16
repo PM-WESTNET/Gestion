@@ -85,11 +85,9 @@ class UserApp extends \app\components\db\ActiveRecord
 
         $payment_extension_info = [];
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
-        $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
 
         foreach ($this->customers as $key => $customer){
             $contracts = [];
-            $duration_days = $payment_extension_duration_days;
 
             foreach ($customer->getContracts()->where(['status' => 'active'])->all() as $contract) {
                 $contracts[] = [
@@ -113,8 +111,8 @@ class UserApp extends \app\components\db\ActiveRecord
                 'contracts' => $contracts,
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
                 'price' => $price,
-                'duration_days' => $payment_extension_duration_days,
-                'date_available_to' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
+                'duration_days' => 0,
+                'date_available_to' => \app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension(),
                 'can_notify_payment' => $customer->canNotifyPayment(),
             ];
         }
@@ -129,14 +127,16 @@ class UserApp extends \app\components\db\ActiveRecord
         $accounts = [];
 
         foreach ($this->customers as $key => $customer){
-            $accounts[] = [
-                'customer_code' => $customer->customer_id,
-                'code' => $customer->code,
-                'customer_payment_code' => $customer->payment_code,
-                'customer_name' => $customer->fullName,
-                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
-                'can_notify_payment' => $customer->canNotifyPayment()
-            ];
+            if($customer->hasActiveContract()){
+                $accounts[] = [
+                    'customer_code' => $customer->customer_id,
+                    'code' => $customer->code,
+                    'customer_payment_code' => $customer->payment_code,
+                    'customer_name' => $customer->fullName,
+                    'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                    'can_notify_payment' => $customer->canNotifyPayment()
+                ];
+            }
         }
 
         return $accounts;

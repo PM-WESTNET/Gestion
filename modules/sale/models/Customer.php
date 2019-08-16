@@ -1604,4 +1604,12 @@ class Customer extends ActiveRecord {
 
         return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
     }
+
+    /**
+     * Indica si el cliente tiene un contrato activo.
+     */
+    public function hasActiveContract()
+    {
+        return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
 }
