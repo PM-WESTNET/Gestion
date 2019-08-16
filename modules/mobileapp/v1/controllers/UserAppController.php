@@ -8,7 +8,7 @@
 
 namespace app\modules\mobileapp\v1\controllers;
 
-
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\mobileapp\v1\components\Controller;
@@ -25,6 +25,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\TaxCondition;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use app\modules\westnet\models\ConnectionForcedHistorial;
+use app\modules\westnet\models\NotifyPayment;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\db\Exception;
@@ -33,6 +34,8 @@ use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use app\modules\sale\modules\contract\models\Contract;
+use yii\web\UploadedFile;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
 
 class UserAppController extends Controller
 {
@@ -922,6 +925,9 @@ class UserAppController extends Controller
         ];
     }
 
+    /**
+     * Crea una extension de pago y fuerza la conexion
+     */
     public function actionForceConnection() {
         $data = Yii::$app->request->post();
 
@@ -929,46 +935,190 @@ class UserAppController extends Controller
             throw new BadRequestHttpException('Contract ID and Reason are required');
         }
 
-
         $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
+        $result = $this->createPaymentExtensionAndForce($data['contract_id'], false);
+        if($result['status']){
+            Yii::$app->response->setStatusCode(200);
+            return [
+                'status' => 'success',
+                'title' => Yii::t('app','Payment Extension created successfully'),
+                'msj' => Yii::t('app','In about 30 minutes your connection will be restored. For this operation will be added ${amount} in your next bill', ['amount' => $contract->getAmountPaymentExtension()]),
+            ];
+        }
+
+        Yii::$app->response->setStatusCode(400);
+        return [
+            'status' => 'error',
+            'error' => Yii::t('app','Can`t create payment extension'),
+            'title' => Yii::t('app','Payment extension can`t be created'),
+            'msj' => Yii::t('app',''),
+        ];
+    }
+
+
+    /**
+     * Devuelve un listado de los medios de pagos disponibles para ser mostrados en la app
+     */
+    public function actionPaymentMethods()
+    {
+        $payment_methods = [];
+
+        foreach(PaymentMethod::getPaymentMethodsAvailableForApp() as $payment_method){
+            array_push($payment_methods, [
+                'payment_method_id' => $payment_method->payment_method_id,
+                'name' => $payment_method->name,
+            ]);
+        };
+
+        return $payment_methods;
+    }
+
+    /**
+     * Crea una notificación de pago, una extension de pago gratuita y fuerza la conexión
+     */
+    public function actionCreateNotifyPayment()
+    {
+        $data = Yii::$app->request->post();
+
+        $notify_payment = new NotifyPayment([
+            'customer_id' => $data['customer'],
+            'date' => $data['date'],
+            'amount' => $data['amount'],
+            'payment_method_id' => $data['payment_method_id'],
+            'contract_id' => $data['contract'],
+        ]);
+
+        $trasanction = Yii::$app->db->beginTransaction();
+
+        $result = $this->createPaymentExtensionAndForce($data['contract']);
+        if($notify_payment->save() && $result['status']) {
+            $trasanction->commit();
+            return [
+                'status' => true,
+                'notify_payment_id' => $notify_payment->notify_payment_id,
+                'message' => Yii::t('app', 'Your notify payment was created successfully')
+            ];
+        }
+
+        $trasanction->rollBack();
+
+        return [
+            'status' => false,
+            'notify_payment_id' => null,
+            'message' => array_key_exists('message', $result) ? $result['message'] : Yii::t('app', 'Your notify payment can`t be created')
+        ];
+    }
+
+    /**
+     * Sube la imagen correspondiente al comprobante del informe de pago
+     */
+    public function actionUploadNotifyPaymentImage()
+    {
+
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $data = Yii::$app->request->post();
+
+        $notify_payment = NotifyPayment::findOne($data['notify_payment_id']);
+        $notify_payment->image_receipt = UploadedFile::getInstanceByName('imageFile');
+
+        if ($notify_payment->upload()) {
+            $notify_payment->image_receipt = $notify_payment->getUrlImage();
+            if ($notify_payment->save()) {
+                \Yii::$app->response->setStatusCode(200);
+                return [
+                    'status' => true,
+                ];
+            }
+        }
+
+        \Yii::$app->response->setStatusCode(400);
+        return [
+            'status' => false,
+            'error' => Yii::t('app', 'Notify payment not found or failed to handle image'),
+        ];
+    }
+
+    /**
+     * Crea una extensión de pago (gratuita o paga) y fuerza la conexion
+     */
+    private function createPaymentExtensionAndForce($contract_id, $free = true)
+    {
+        $contract = Contract::find()->andWhere(['contract_id' => $contract_id])->one();
 
         if (empty($contract)) {
             throw new BadRequestHttpException('Contract not found');
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Contract not found'),
+            ];
         }
 
         $connection = $contract->connection;
 
         if (empty($connection)) {
             throw new BadRequestHttpException('Connection not found');
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Connection not found'),
+            ];
         }
 
-        if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
-            $payment_extension_product = Config::getValue('extend_payment_product_id');
-            $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
-            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
-            $create_pti = true;
+        //Si es gratuito significa que viene de un informe de pago
+        if($free) {
+            if($connection->canForce()) {
+                $payment_extension_product = Config::getValue('extend_payment_product_id');
+                $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
 
-            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
-                $due_date = date('d-m-Y', $due_timestamp);
-            }else{
                 $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
                 $due_date = date('d-m-Y', $due_timestamp);
-                $create_pti = false;
-            }
 
-            if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
+                if($connection->force($due_date, $payment_extension_product, null, false)){
+                    //Activo los items del contrato
+                    $cti = new ContractToInvoice();
+                    $cti->updateContract($contract);
+                    return [
+                        'status' => true,
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => Yii::t('app', 'An error occurred. Your connection can`t be restored.')
+                    ];
+                }
+            } else {
                 return [
-                  'status' => 'success',
-                    'msj' => Yii::t('app','Payment Extension created successfull')
+                    'status' => false,
+                    'message' => Yii::t('app', 'Your connection can`t be restored.')
+                ];
+            }
+        //Si no es gratuito, se está solicitando una extension de pago
+        } else {
+            if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
+                $payment_extension_product = Config::getValue('extend_payment_product_id');
+
+                $max_date_payment_extension = \app\modules\sale\models\Customer::getMaxDateRealPaymentExtension();
+                $due_date = (new \DateTime('now'))->setTimestamp($max_date_payment_extension)->format('d-m-Y');
+
+                if($connection->force($due_date, $payment_extension_product, null, true)){
+                    //Activo los items del contrato
+                    $cti = new ContractToInvoice();
+                    $cti->updateContract($contract);
+                    return [
+                        'status' => true,
+                    ];
+                } else {
+                    return [
+                        'status' => false,
+                        'message' => Yii::t('app', 'Your connection can`t be restored.')
+                    ];
+                }
+            } else {
+                return [
+                    'status' => false,
+                    'message' => Yii::t('app', 'Your connection can`t be restored or you can`t request a new payment extension this month.')
                 ];
             }
         }
-
-        Yii::$app->response->setStatusCode(400);
-        return [
-            'status' => 'error',
-            'error' => Yii::t('app','Can`t create payment extension')
-        ];
     }
+
 }

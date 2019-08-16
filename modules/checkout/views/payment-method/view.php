@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'register_number:boolean',
             'send_ivr:boolean',
+            'show_in_app:boolean',
             [
                 'attribute'=>'type',
                 'value'=>Yii::t('app',ucfirst($model->type))

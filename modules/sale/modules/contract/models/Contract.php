@@ -587,4 +587,14 @@ class Contract extends ActiveRecord {
             ->andWhere(['phc.category_id' => $fibra_category->category_id])
             ->exists();
     }
+
+    /**
+     * Devuelve el importe de el producto extensión de pago
+     */
+    public function getAmountPaymentExtension()
+    {
+        $product = Product::findOne(Config::getValue('extend_payment_product_id'));
+
+        return round($product->finalPrice,2);
+    }
 }
