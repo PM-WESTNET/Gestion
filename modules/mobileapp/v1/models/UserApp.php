@@ -113,7 +113,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
                 'price' => $price,
                 'duration_days' => 0,
-                'date_available_to' => \app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension()->format('d-m-Y'),
+                'date_available_to' => (new \DateTime('now'))->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())->format('d-m-Y'),
                 'can_notify_payment' => $customer->canNotifyPayment(),
             ];
         }
