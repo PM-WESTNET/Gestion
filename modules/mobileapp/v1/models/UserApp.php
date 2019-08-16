@@ -5,6 +5,7 @@ namespace app\modules\mobileapp\v1\models;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\Customer;
 use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use yii\web\ServerErrorHttpException;
 
@@ -89,7 +90,7 @@ class UserApp extends \app\components\db\ActiveRecord
         foreach ($this->customers as $key => $customer){
             $contracts = [];
 
-            foreach ($customer->getContracts()->where(['status' => 'active'])->all() as $contract) {
+            foreach ($customer->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
                 $contracts[] = [
                     'contract_id' => $contract->contract_id,
                     'service_address' => $contract->address ? $contract->address->fullAddress : $customer->address,
@@ -112,7 +113,7 @@ class UserApp extends \app\components\db\ActiveRecord
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
                 'price' => $price,
                 'duration_days' => 0,
-                'date_available_to' => \app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension(),
+                'date_available_to' => \app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension()->format('d-m-Y'),
                 'can_notify_payment' => $customer->canNotifyPayment(),
             ];
         }
