@@ -195,4 +195,11 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
      * @return mixed
      */
     public function getWorkflowCreateLog(){}
+
+    public function getCustomer() {
+        Yii::trace($this->account_movement_id);
+        die();
+
+        return $this->accountMovement->customer;
+    }
 }

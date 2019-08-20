@@ -20,8 +20,9 @@ $cols = array_merge($cols, [
     [
         'label' => 'Cuit',
         'value' => function ($model) {
-            if($model->customer) {
-                return $model->document_number;
+            $customer = $model->customer;
+            if($customer) {
+                return $customer->document_number;
             }
 
             return null;

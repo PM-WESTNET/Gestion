@@ -341,16 +341,19 @@ class AccountMovement extends \app\components\companies\ActiveRecord
         return true;
     }
 
-    public function getAccountMovementHasRelations(){
-        return $this->hasMany(AccountMovementRelation::class, ['account_movement_id' => 'account_movement_id']);
+    public function getAccountMovementRelations(){
+        Yii::info($this->account_movement_id);
+        return AccountMovementRelation::find()->andWhere(['account_movement_id' => $this->account_movement_id])->all();
     }
 
 
     public function getCustomer() {
-        $relations = $this->accountMovementHasRelations;
+        Yii::info($this->account_movement_id);
 
-        foreach ($relations as $relation) {
-            $model= $relation->model;
+        $relations = $this->accountMovementRelations;
+
+        foreach ($relations as $hasRelation) {
+            $model= $hasRelation->model;
 
             if (!empty($model) && !empty($model->customer)){
                 return $model->customer;
