@@ -97,7 +97,7 @@ class NotifyPayment extends \yii\db\ActiveRecord
      */
     public function upload()
     {
-        $filename = \Yii::getAlias('@webroot/uploads/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
+        $filename = \Yii::getAlias('@webroot/uploads/payments/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
 
         if ($this->image_receipt->saveAs($filename)) {
             return true;
@@ -112,7 +112,7 @@ class NotifyPayment extends \yii\db\ActiveRecord
      */
     public function getUrlImage()
     {
-        $url = \Yii::getAlias('uploads/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
+        $url = \Yii::getAlias('@webroot/uploads/payments/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
         return $url;
     }
 
