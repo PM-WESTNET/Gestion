@@ -41,7 +41,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'image_receipt',
                 'value' => function($model) {
-                    return Html::img($model->getUrlImage(), ['class' => 'img-responsive']);
+                    return Html::img($model->image_receipt, ['class' => 'img-responsive']);
                 },
                 'format' => 'raw'
             ],

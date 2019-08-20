@@ -114,7 +114,7 @@ class NotifyPayment extends \yii\db\ActiveRecord
     {
         $url = null;
         if ($this->image_receipt !== null) {
-            $url = \Yii::getAlias('@webroot/uploads/payments/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
+            $url = \Yii::getAlias('uploads/payments/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
         }
         return $url;
     }
