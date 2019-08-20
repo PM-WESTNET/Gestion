@@ -597,4 +597,35 @@ class CustomerController extends Controller
 
         return $pdf;
     }
+
+
+    public function actionGetCustomer()
+    {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['code']) || empty($data['code'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','"code" param is required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        $customer->scenario= 'full';
+
+        return [
+            'error' => 'false',
+            'data' => $customer,
+        ];
+    }
 }
