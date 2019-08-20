@@ -15,6 +15,7 @@ $this->params['breadcrumbs'][] = 'Pago Fácil - ' . $model->upload_date;
 ?>
 
 <div class="title">
+    <div class="messages"></div>
     <h1><?= Html::encode($this->title) ?></h1>
     <?php if ($model->status == 'draft'): ?>
         <p>
@@ -132,11 +133,12 @@ $this->params['breadcrumbs'][] = 'Pago Fácil - ' . $model->upload_date;
             $.ajax({
                 url: '<?= Url::to(['payment/confirm-file'])?>&idFile=<?=$model->pago_facil_transmition_file_id?>',
                 method: 'POST',
-                dataType: 'json',
-                success: function(data){
-                    window.location.reload();                
-                }               
-                
+                dataType: 'json'
+            }).done(function(data) {
+                window.location.reload();
+            }).fail(function(jqXHR){
+                $('#confirm').html('<?php echo Yii::t('westnet','Confirm and process file')?>');
+                $('.messages').html('<div class="alert alert-danger">Ocurrió un error en el server. ' + jqXHR.text + '</div>')
             });
         }
     }
