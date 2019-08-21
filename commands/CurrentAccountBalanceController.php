@@ -53,7 +53,7 @@ class CurrentAccountBalanceController extends Controller
                 $searchModel->customer_id = $customer->customer_id;
                 $total = $searchModel->accountTotal();
 
-                $customer->updateAttributes(['current_account_balance' => $total, 'last_balance' => $today]);
+                $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
             }
         }
     }

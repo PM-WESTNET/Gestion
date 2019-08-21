@@ -23,6 +23,7 @@ class Customer extends \app\modules\sale\models\Customer
         return  [
             'name',
             'lastname',
+            'fullName',
             'documentType',
             'document_number',
             'taxCondition',
