@@ -114,6 +114,8 @@ class Contract extends ActiveRecord {
             [['print_ads'], 'default', 'value' => 0],
             [['status'], 'string'],
             [['status'], 'in', 'range' => ['draft', 'active', 'inactive', 'canceled', 'low-process']],
+            //[['instalation_schedule'], 'in', 'range' => ['in the morning', 'in the afternoon', 'all day']],
+            //[['instalation_schedule'], 'default', 'value' => 'all day'],
             [['status'], 'default', 'value' => 'draft'],
             [['from_date'], 'required', 'on' => 'invoice'],
         ];

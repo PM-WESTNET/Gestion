@@ -160,7 +160,9 @@ class ContractController extends Controller {
                 $vendor = Vendor::findByUserId(Yii::$app->user->id);
                 $model->vendor_id = $vendor ? $vendor->vendor_id : NULL;
             }
-            $model->instalation_schedule = Yii::$app->request->post()['Contract']['instalation_schedule'];
+            if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+            }
         }
         if(!empty($_POST['same_address'])){
             $same_address = $_POST['same_address'];
@@ -233,8 +235,11 @@ class ContractController extends Controller {
                 }
 
                 $transaction->commit();
-                //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
-                $model->createMesaTicket($model);
+
+                if ($model->hasMethod('createMesaTicket')) {
+                    //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
+                    $model->createMesaTicket($model);
+                }
 
                 if(Yii::$app->request->post('mode') === '1'){
                     return $this->redirect(['/sale/contract/contract/update', 'id' => $model->contract_id]);
@@ -244,6 +249,7 @@ class ContractController extends Controller {
             } catch (\Exception $ex) {
                 $transaction->rollBack();
                 $model->isNewRecord = true;
+                Yii::info($ex);
                 Yii::$app->session->addFlash('error', $ex->getMessage());
             }
         }            
@@ -260,7 +266,9 @@ class ContractController extends Controller {
            if (empty(Yii::$app->request->post()['contractDetailIns']['funding_plan_id'])){
                $contractDetailIns->addError('funding_plan_id');
            }
-            \Yii::$app->session->setFlash('error', Yii::t('app', 'You most complete all data'));
+           if($contractDetailIns->hasErrors()){
+               \Yii::$app->session->addFlash('error', Yii::t('app', 'You most complete all data'));
+           }
         }
 
         if (Yii::$app->user->identity->hasRole('seller', false)) {
@@ -426,7 +434,10 @@ class ContractController extends Controller {
                         $model->update(false);
                     }
 
-                    $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                        $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    }
+
                     $model->address_id = $address->address_id;
 
                     $model->update(false);
