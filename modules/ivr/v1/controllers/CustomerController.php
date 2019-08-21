@@ -597,4 +597,92 @@ class CustomerController extends Controller
 
         return $pdf;
     }
+
+
+    /**
+     * @SWG\Post(path="/customer/get-customer",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'error': 'false',
+     *               'data': {
+     *                   'customer_id': 39932,
+     *                   'fullName': 'LEZCANO, NADIA ETHEL ',
+     *                   'documentType': {
+     *                   'document_type_id': 2,
+     *                   'name': 'DNI',
+     *                   'code': 96,
+     *                   'regex': ''
+     *                  },
+     *                   'document_number': '39382763',
+     *                   'code': 47745,
+     *                   'balance': -1035.03,
+     *                   'last_payment': {
+     *                   'amount': 1110,
+     *                   'date': '17-07-2019'
+     *                   },
+     *                   'clipped': 'enabled'
+     *               }
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomer()
+    {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['code']) || empty($data['code'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','"code" param is required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        $customer->scenario= 'full';
+
+        return [
+            'error' => 'false',
+            'data' => $customer,
+        ];
+    }
 }

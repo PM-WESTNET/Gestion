@@ -182,4 +182,34 @@ class CustomerCest
 
     }
 
+    public function getCustomer(IvrapiTester $I)
+    {
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/get-customer', ['code' => 59809]);
+        $I->seeResponseCodeIs(200);
+        $I->seeResponseContainsJson([
+            'error' => 'false',
+            'data' => [
+                'customer_id' => 45900,
+                'fullName' => "GOMEZ, MARIO SANTOS",
+                'documentType' => [
+                    "document_type_id" => 2,
+                    "name" => "DNI",
+                    "code" => "96",
+                    "regex" => ""
+                ],
+                'document_number' => '17356926',
+                'code' => 59809,
+                'balance' => 1500,
+                'last_payment' => [
+                    'amount' => 200,
+                    'date' => '30-01-2019'
+                ],
+                'clipped' => 'enabled'
+            ]
+        ]);
+    }
+
 }

@@ -562,7 +562,7 @@ class PaymentController extends Controller {
     }
     
     public function actionConfirmFile($idFile){
-        set_time_limit(300);
+        set_time_limit(0);
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
         
         if ($model->confirmFile()) {
