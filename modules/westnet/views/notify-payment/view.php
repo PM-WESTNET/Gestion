@@ -25,7 +25,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'date',
+            [
+                'attribute' => 'date',
+                'value' => function($model) {
+                    return date('d-m-Y',strtotime( $model->date));
+                }
+            ],
             [
                 'attribute' => 'amount',
                 'value' => function($model) {
@@ -39,17 +44,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'created_at',
+                'value' => function($model) {
+                    return $model->created_at ? (new \DateTime('now'))->setTimestamp($model->created_at)->format('d-m-Y H:i') : '00-00-00 00:00';
+                }
+            ],
+            [
                 'attribute' => 'image_receipt',
                 'value' => function($model) {
                     return Html::img($model->image_receipt, ['class' => 'img-responsive']);
                 },
                 'format' => 'raw'
-            ],
-            [
-                'attribute' => 'created_at',
-                'value' => function($model) {
-                    return $model->created_at ? (new \DateTime('now'))->setTimestamp($model->created_at)->format('Y-m-d H:i') : '00-00-00 00:00';
-                }
             ],
         ],
     ]) ?>

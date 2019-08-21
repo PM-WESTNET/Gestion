@@ -872,12 +872,15 @@ class UserAppController extends Controller
 
         $failed_register= new AppFailedRegister();
 
-        if ($failed_register->load($data, '') && $failed_register->save()){
-            return [
-                'status' => 'success',
-                'message' => Yii::t('app','Data has been saved succesfull')
-            ];
-        }
+        if($failed_register->load($data, '')) {
+            $failed_register->type = AppFailedRegister::TYPE_CONTACT;
+            if ($failed_register->save()){
+                return [
+                    'status' => 'success',
+                    'message' => Yii::t('app','Data has been saved succesfull')
+                ];
+            }
+        };
 
         return [
           'status' => 'error',
@@ -1020,6 +1023,7 @@ class UserAppController extends Controller
 
         $notify_payment = NotifyPayment::findOne($data['notify_payment_id']);
         $notify_payment->image_receipt = UploadedFile::getInstanceByName('imageFile');
+
 
         if ($notify_payment->upload()) {
             $notify_payment->image_receipt = $notify_payment->getUrlImage();

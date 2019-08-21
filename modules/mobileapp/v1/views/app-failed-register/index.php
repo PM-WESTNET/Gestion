@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
+            'name',
             [
                 'attribute' => 'document_number',
                 'value' => function($model){
