@@ -119,6 +119,10 @@ class Customer extends \app\modules\sale\models\Customer
             $destinataries[]= ['label' => 'phone3', 'value' => $this->phone3];
         }
 
+        if (!empty($this->phone4)){
+            $destinataries[]= ['label' => 'phone4', 'value' => $this->phone4];
+        }
+
         if (!empty($this->email)){
             $destinataries[]= ['label' => 'email', 'value' => $this->email];
         }
