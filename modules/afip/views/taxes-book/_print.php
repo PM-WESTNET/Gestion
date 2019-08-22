@@ -123,7 +123,7 @@ class Book {
                     'date' => Yii::$app->getFormatter()->asDate($value['date']),
                     'business_name' => $value['empresa'],
                     'tax_identification' => $value['numero_documento'],
-                    'number' => $value['tipo_comprobante'] . " - " . $value['numero_comprobante'],
+                    'number' => $value['nombre_tipo_comprobante'] . " - " . $value['numero_comprobante'],
                     'net' => $value['neto']
                 ];
             } else {

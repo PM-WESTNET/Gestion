@@ -391,6 +391,7 @@ class TaxesBookSearch extends ProviderBill
         $sql = "SELECT
                     date,
                     bill_type                                                                   as tipo_comprobante,
+                    bill_type_name                                                              as nombre_tipo_comprobante,
                     number                                                                      as numero_comprobante,
                     0                                                                           as numero_importacion,
                     tipo_documento                                                              as tipo_documento,
@@ -445,6 +446,7 @@ class TaxesBookSearch extends ProviderBill
                         CASE WHEN p.tax_condition_id = 3 THEN 96 ELSE 80 END as tipo_documento,
                         pb.date,
                         bt.code                    AS bill_type,
+                        bt.name                    AS bill_type_name,
                         pb.number,
                         tbi.page,
                         (pb.net * bt.multiplier)       AS net,
