@@ -1,6 +1,7 @@
 <?php
 
 use app\modules\sale\models\Product;
+use app\modules\sale\models\search\FundingPlanSearch;
 use app\modules\sale\modules\contract\models\Contract;
 use kartik\widgets\DatePicker;
 use kartik\widgets\DepDrop;
@@ -394,7 +395,7 @@ use webvimark\modules\UserManagement\models\User;
         this.changeProduct = function() {
             if( ( $('#old_product_id').val() != $('#plan_product_id').val() &&
                 $('#contract_detail_status').val()!='<?php echo Contract::STATUS_DRAFT?>' &&
-                $('#old_product_id').val() != '') /* || <?php echo ((count($contractDetailPlan->getErrors())>0 ) ? 'true' : 'false' );?> */) {
+                $('#old_product_id').val() != '') /** <?php echo ((count($contractDetailPlan->getErrors())>0 ) ? 'true' : 'false' );?> **/) {
                 $('#divPlanFromDate').show()
                 $('#plan_from_date').removeAttr('disabled');
                 $('#plan_from_date').val('');
