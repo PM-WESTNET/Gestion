@@ -29,36 +29,22 @@ class Instructive extends \app\components\db\ActiveRecord
         return 'instructive';
     }
     
-    /**
-     * @inheritdoc
-     */
-    /*
+
     public function behaviors()
     {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at'],
                 ],
-            ],
-            'date' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-                ],
-                'value' => function(){return date('Y-m-d');},
-            ],
-            'time' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
-                ],
-                'value' => function(){return date('h:i');},
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at'
             ],
         ];
     }
-    */
+
 
     /**
      * @inheritdoc
