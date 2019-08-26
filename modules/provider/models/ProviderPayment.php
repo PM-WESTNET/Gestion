@@ -7,7 +7,9 @@ use app\modules\accounting\components\AccountMovementRelationManager;
 use app\modules\accounting\components\CountableInterface;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\models\PaymentMethod;
+use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
+use app\modules\paycheck\models\Paycheck;
 use Codeception\Util\Debug;
 use Yii;
 use yii\base\InvalidParamException;
@@ -266,6 +268,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     public function afterSave($insert, $changedAttributes) {
         parent::afterSave($insert, $changedAttributes);
         $this->updateBalanceBill();
+
+        if($this->status === 'closed') {
+            $this->onClose();
+        }
     }
 
     /**
@@ -457,6 +463,23 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
             //Para disparar la actualización del campo balance en el beforesave
             $this->save();
             return true;
+        }
+    }
+
+    /**
+     * Al cerrar el pago, si alguno de los items tiene un cheque como pago, marco el cheque como entregado
+     */
+    public function onClose()
+    {
+        foreach ($this->providerPaymentItems as $item) {
+
+            if ($item->payment_method_id == Config::getValue('payment_method_paycheck')) {
+                $paycheck =  Paycheck::findOne($item->paycheck_id);
+
+                if ($paycheck) {
+                    $paycheck->changeState(Paycheck::STATE_COMMITED);
+                }
+            }
         }
     }
 }

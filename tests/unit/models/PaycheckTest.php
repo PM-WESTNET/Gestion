@@ -6,6 +6,7 @@ use app\modules\accounting\models\AccountMovementRelation;
 use app\modules\paycheck\models\Paycheck;
 use app\tests\fixtures\AccountMovementFixture;
 use app\tests\fixtures\PaycheckFixture;
+use Codeception\Util\Debug;
 
 class PaycheckTest extends \Codeception\Test\Unit
 {
@@ -38,12 +39,14 @@ class PaycheckTest extends \Codeception\Test\Unit
     public function testOnCommitedCreateAccountMovement()
     {
         $paycheck = Paycheck::findOne(1);
+        $paycheck->outAccount = 65;
         $accountMovementRelation = null;
 
         if (empty($paycheck)) {
             expect('Paycheck not found', false)->true();
             return;
         }
+
 
         if ($paycheck->changeState(Paycheck::STATE_COMMITED)) {
             $accountMovementRelation = AccountMovementRelation::find()
@@ -53,6 +56,7 @@ class PaycheckTest extends \Codeception\Test\Unit
                 ])->one();
 
         }
+
 
         expect('Movement not created', $accountMovementRelation)->notNull();
     }

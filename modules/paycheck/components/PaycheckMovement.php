@@ -20,6 +20,7 @@ use app\modules\checkout\models\PaymentItem;
 use app\modules\config\models\Config;
 use app\modules\paycheck\models\Paycheck;
 use app\modules\sale\models\Company;
+use Codeception\Util\Debug;
 use Yii;
 
 class PaycheckMovement extends BaseMovement
@@ -74,9 +75,8 @@ class PaycheckMovement extends BaseMovement
                     return $account_movement_id;
                 }
             }elseif ($action == "update" && $modelInstance->status == Paycheck::STATE_COMMITED && $modelInstance->is_own = 1 ){
-                $config = AccountConfig::findOne(['class' => 'app\\modules\\paycheck\\models\\Paycheck']);
+                //$config = AccountConfig::findOne(['class' => 'app\\modules\\paycheck\\models\\Paycheck']);
                 $amounts = $modelInstance->getAmounts();
-
                 $items = array();
 
                 $item = new AccountMovementItem();
@@ -91,9 +91,9 @@ class PaycheckMovement extends BaseMovement
                 $item->status = AccountMovementItem::STATE_DRAFT;
                 $items[] = $item;
 
-                $company = $modelInstance->moneyBox->company;
+                $company = $modelInstance->moneyBoxAccount->company;
                 $countMov = CountableMovement::getInstance();
-                if (!($account_movement_id = $countMov->createMovement(Yii::t('paycheck', 'Payment') . " - " . Yii::t('paycheck', 'Paycheck') . ": " . $modelInstance->moneyBox->name . " Nro.: " . $modelInstance->number,
+                if (!($account_movement_id = $countMov->createMovement(Yii::t('paycheck', 'Payment') . " - " . Yii::t('paycheck', 'Paycheck') . ": " . $modelInstance->moneyBoxAccount->moneyBox->name . " Nro.: " . $modelInstance->number,
                     $company->company_id,
                     $items,
                     null,
@@ -101,10 +101,20 @@ class PaycheckMovement extends BaseMovement
                     (new \DateTime($modelInstance->dateStamp))->format('d-m-Y')))
                 ) {
                     $this->addMessage('error', Yii::t('accounting', 'The movement is created with errors.'));
+                        Debug::debug('Error en countMov');
                     foreach ($countMov->getErrors() as $error) {
                         $this->addMessage('error', $error);
                     }
                 } else {
+                    Debug::debug('Por crear relacion');
+                    $relation = new AccountMovementRelation([
+                        'class' => 'app\modules\paycheck\models\Paycheck',
+                        'model_id' => $modelInstance->paycheck_id,
+                        'account_movement_id' => $account_movement_id
+                    ]);
+
+                    $relation->save();
+                    Debug::debug($account_movement_id);
                     return $account_movement_id;
                 }
 
@@ -115,12 +125,14 @@ class PaycheckMovement extends BaseMovement
 
             }
         } catch (\Exception $ex) {
+            Debug::debug($ex);
             if (Yii::$app instanceof \yii\web\Application) {
                 $this->addMessage('error', Yii::t('accounting', 'The movement could not be created.') . $ex->getMessage());
             } else {
                 echo Yii::t('accounting', 'The movement could not be created.') . $ex->getMessage();
             }
         }
+        Debug::debug('Salio por false');
         return false;
     }
 }
