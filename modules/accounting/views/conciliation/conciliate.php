@@ -261,45 +261,39 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
 
         this.conciliate = function(type) {
             // Busco lo seleccionado de movimientos y de resumen
-            var resumeDebit = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
-            var resumeCredit = $('#w_resume_items_credit').yiiGridView('getSelectedRows');
-            var movementDebit = $('#wDebit').yiiGridView('getSelectedRows');
-            var movementCredit = $('#wCredit').yiiGridView('getSelectedRows');
+            var resume = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
+            var movement = $('#wDebit').yiiGridView('getSelectedRows');
 
             var data = {};
 
-            if ( ( movementDebit.length > 0 && resumeCredit.length > 0 ) ||
-                 ( movementCredit.length > 0 && resumeDebit.length > 0 )) {
-                alert("<?=Yii::t('accounting', 'You can not mark resume items and movements with the different balance.')?>");
-            } else {
-                // Si tengo quiero conciliar movimientos del resumen para los que no tengo
-                // movimientos contables, consulto si los quiero crear.
-                if ( (movementDebit.length + movementCredit.length) == 0 && (resumeDebit.length + resumeCredit.length) > 0) {
-                    if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
-                        data.resumeItems = resumeDebit.concat(resumeCredit);
-                    }
-                } else {
-                    data.resumeItems = resumeDebit.concat(resumeCredit);
-                    data.movementItems = movementCredit.concat(movementDebit);
+
+            // Si tengo quiero conciliar movimientos del resumen para los que no tengo
+            // movimientos contables, consulto si los quiero crear.
+            if ( movement.length == 0 && resume.lenth > 0) {
+                if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
+                    data.resumeItems = resume;
                 }
-
-                var conciliation_id = $('#conciliation_id').val();
-                $.ajax({
-                    url: '<?= Url::toRoute(['/accounting/conciliation/conciliar', 'conciliation_id'=>$model->conciliation_id ])?>',
-                    method: 'POST',
-                    dataType: 'json',
-                    data: data,
-                    success: function(data){
-                        if (data.status!="success") {
-                            alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
-
-                        } else {
-                            $.pjax.reload({container: '#w0'});
-                        }
-                    }
-                });
-
+            } else {
+                data.resumeItems = resume;
+                data.movementItems = movement;
             }
+
+            var conciliation_id = $('#conciliation_id').val();
+            $.ajax({
+                url: '<?= Url::toRoute(['/accounting/conciliation/conciliar', 'conciliation_id'=>$model->conciliation_id ])?>',
+                method: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function(data){
+                    if (data.status!="success") {
+                        alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
+
+                    } else {
+                        $.pjax.reload({container: '#w0'});
+                    }
+                }
+            });
+
 
 
         }

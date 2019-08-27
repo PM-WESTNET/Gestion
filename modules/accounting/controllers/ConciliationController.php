@@ -238,20 +238,23 @@ class ConciliationController extends Controller
         // Genero Items de la conciliacion
         if (count($movements_ids)==0 && count($resume_items_ids) > 0) {
             // Para cada item del resumen creo un item de la conciliacion
+            $item = new ConciliationItem();
+            $item->conciliation_id = $conciliation_id;
+            $item->date = date('d-m-Y');
+            $item->save();
+            $operation= null;
             foreach($resume_items_ids as $key => $value) {
                 if(($resModel=ResumeItem::findOne($value))!==null) {
-                    $item = new ConciliationItem();
-                    $item->conciliation_id = $conciliation_id;
-                    $item->date = date('d-m-Y');
-                    $item->amount = $resModel->debit + $resModel->credit;
-                    $item->description = $resModel->description;
-                    $item->save();
+                    $operation = $resModel->operationType;
                     $item->addResumeItem($resModel->resume_item_id);
-                    $item->save();
                     $resModel->updateAttributes(['ready' => true]);
                     $status = "success";
                 }
             }
+            $item->amount += $sumResume + $sumMovements;
+            $item->description = $operation->name;
+            $item->save();
+            Yii::info($item->hasErrors());
         } else {
 
             // Si son iguales marco todo
