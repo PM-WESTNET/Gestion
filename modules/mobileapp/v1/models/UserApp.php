@@ -135,7 +135,7 @@ class UserApp extends ActiveRecord
                     'code' => $customer->code,
                     'customer_payment_code' => $customer->payment_code,
                     'customer_name' => $customer->fullName,
-                    'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                    'balance' => $customer->current_account_balance ? round($customer->current_account_balance) : 0,
                     'can_notify_payment' => $customer->canNotifyPayment()
                 ];
             }
@@ -156,7 +156,7 @@ class UserApp extends ActiveRecord
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->fullName,
-                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                'balance' => $customer->current_account_balance ? round($customer->current_account_balance) : 0,
                 'bills' => $customer->getBillsToShow()
             ];
         }
@@ -176,7 +176,7 @@ class UserApp extends ActiveRecord
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
                 'customer_name' => $customer->fullName,
-                'balance' => $customer->current_account_balance ? $customer->current_account_balance : 0,
+                'balance' => $customer->current_account_balance ? round($customer->current_account_balance) : 0,
                 'payments' => $customer->getPaymentsToShow(),
             ];
         }
