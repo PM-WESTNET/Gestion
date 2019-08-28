@@ -95,7 +95,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>function($model) {
                     return Yii::$app->formatter->asCurrency( ($model['bill_id']> 0) ?  $model['total'] : 0 );
                 },
-                'contentOptions'=>['class'=>'text-right']
+                'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'label' => Yii::t('app', 'Credit'),
@@ -103,6 +104,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::$app->formatter->asCurrency( ($model['payment_id']> 0) ?  $model['total'] : 0 );
                 },
                 'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'label' => Yii::t('app', 'Balance'),
@@ -110,6 +112,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::$app->formatter->asCurrency( $model['saldo'] );
                 },
                 'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',
