@@ -16,6 +16,7 @@ use app\modules\ivr\v1\models\search\CustomerSearch;
 use app\modules\sale\models\Bill;
 use app\modules\sale\modules\contract\models\Contract;
 use Yii;
+use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
 
@@ -658,31 +659,40 @@ class CustomerController extends Controller
      */
     public function actionGetCustomer()
     {
-        $data = Yii::$app->request->post();
+        try {
 
-        if (!isset($data['code']) || empty($data['code'])) {
-            \Yii::$app->response->setStatusCode(400);
+            $data = Yii::$app->request->post();
+
+            if (!isset($data['code']) || empty($data['code'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"code" param is required')
+                ];
+            }
+
+            $customer = Customer::findOne(['code' => $data['code']]);
+
+            if (empty($customer)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            $customer->scenario= 'full';
+
+            return [
+                'error' => 'false',
+                'data' => $customer,
+            ];
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => \Yii::t('ivrapi','"code" param is required')
+                'msg' => $ex->getMessage()
             ];
         }
-
-        $customer = Customer::findOne(['code' => $data['code']]);
-
-        if (empty($customer)) {
-            \Yii::$app->response->setStatusCode(400);
-            return [
-                'error' => 'true',
-                'msg' => \Yii::t('ivrapi','Customer not found')
-            ];
-        }
-
-        $customer->scenario= 'full';
-
-        return [
-            'error' => 'false',
-            'data' => $customer,
-        ];
     }
 }

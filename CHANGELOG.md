@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.08.28.1] - 28-08-2019
+### Cambiado
+ - Correccion error IVR con clientes Free
+ 
 ## [2019.08.28.0] - 28-08-2019
 ### Cambiado
  - Corrección error reportado Florencia Muñoz al crear contrato con domicilio distinto al del cliente
