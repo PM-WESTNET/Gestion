@@ -319,7 +319,7 @@ class Contract extends ActiveRecord {
                         case 'address_id':
                             $oldAddress= Address::findOne(['address_id' => $oldValue]);
                             $log = new CustomerLog();
-                            $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fulAddress, 'Contract', $this->contract_id);
+                            $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fullAddress, 'Contract', $this->contract_id);
                             break;
                         case 'status':
                             if ($this->status === self::STATUS_CANCELED) {
