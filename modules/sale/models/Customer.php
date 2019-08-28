@@ -637,6 +637,7 @@ class Customer extends ActiveRecord {
     public function __get($name) {
 
         if ($name != 'profiles' && strpos($name, 'profile') !== false) {
+            Yii::info($name);
             if (isset($this->_profiles[substr($name, 8)]))
                 return $this->_profiles[substr($name, 8)];
 

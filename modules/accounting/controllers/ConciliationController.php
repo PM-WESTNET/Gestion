@@ -168,15 +168,17 @@ class ConciliationController extends Controller
     public function actionGetAccountMovements($id, $readOnly=false)
     {
         $model = $this->findModel($id);
+        $params = Yii::$app->request->post();
         // Busco los movimientos de cuenta en el rango de fechas de la conciliacion.
         // y teniendo en cuenta que no sean movimientos cerrados
         $searchModel = new AccountMovementSearch();
         $searchModel->account_id_from = $model->moneyBoxAccount->account->lft;
         $searchModel->account_id_to = $model->moneyBoxAccount->account->rgt;
-        $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
-        $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
+        if (empty($params['AccountMovementSearch']['date'])){
+            $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
+            $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
+        }
 
-        $params = Yii::$app->request->post();
 
         $movementsDataProvider = $searchModel->searchForConciliation($params);
 
@@ -244,17 +246,19 @@ class ConciliationController extends Controller
             $item->save();
             $operation= null;
             foreach($resume_items_ids as $key => $value) {
-                if(($resModel=ResumeItem::findOne($value))!==null) {
+                $resModel=ResumeItem::findOne($value);
+                if($resModel) {
                     $operation = $resModel->operationType;
                     $item->addResumeItem($resModel->resume_item_id);
                     $resModel->updateAttributes(['ready' => true]);
+                    $item->amount += ($resModel->debit - $resModel->credit);
                     $status = "success";
                 }
             }
-            $item->amount += $sumResume + $sumMovements;
+            Yii::info($operation);
             $item->description = $operation->name;
-            $item->save();
-            Yii::info($item->hasErrors());
+            $item->updateAttributes(['description', 'amount']);
+            Yii::info(print_r($item->getErrors(),1));
         } else {
 
             // Si son iguales marco todo

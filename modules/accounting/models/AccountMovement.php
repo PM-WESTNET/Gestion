@@ -347,7 +347,8 @@ class AccountMovement extends \app\components\companies\ActiveRecord
     }
 
 
-    public function getCustomer() {
+    public function getCustomer()
+    {
         Yii::info($this->account_movement_id);
 
         $relations = $this->accountMovementRelations;
@@ -358,6 +359,17 @@ class AccountMovement extends \app\components\companies\ActiveRecord
             if (!empty($model) && !empty($model->customer)){
                 return $model->customer;
             }
+        }
+
+        return null;
+    }
+
+    public static function searchCustomer($account_movement_id)
+    {
+        $movement = AccountMovement::findOne($account_movement_id);
+
+        if ($movement) {
+            return $movement->getCustomer();
         }
 
         return null;

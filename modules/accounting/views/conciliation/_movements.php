@@ -6,7 +6,7 @@ if (!$readOnly) {
     $cols[] = [
         'class' => 'yii\grid\CheckboxColumn',
         'checkboxOptions' => function($model, $key, $index, $column) {
-            return ['value' => $model->account_movement_item_id];
+            return ['value' => $model['account_movement_item_id']];
         }
     ];
 }
@@ -14,15 +14,15 @@ $cols = array_merge($cols, [
     [
         'header'=>Yii::t('app', 'Date'),
         'value' => function ($model) {
-            return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
+            return ($model['date'] ? Yii::$app->formatter->asDate($model['date'], 'dd-MM-yyyy')  : '' );
         }
     ],
     [
         'label' => 'Cuit',
         'value' => function ($model) {
-            $customer = $model->customer;
+            $customer = \app\modules\accounting\models\AccountMovement::searchCustomer($model['account_movement_id']);
             if($customer) {
-                return $customer->document_number;
+                    return $customer->document_number;
             }
 
             return null;
@@ -31,8 +31,9 @@ $cols = array_merge($cols, [
     [
         'label' => 'Cuit2',
         'value' => function ($model) {
-            if($model->customer) {
-                return $model->cuit2;
+            $customer = \app\modules\accounting\models\AccountMovement::searchCustomer($model['account_movement_id']);
+            if($customer) {
+                return $customer->profile_cuit2;
             }
 
             return null;
@@ -45,13 +46,13 @@ $cols = array_merge($cols, [
     [
         'header'=>Yii::t('app', 'Debit'),
         'value' => function ($model) {
-            return Yii::$app->formatter->asCurrency($model->debit);
+            return Yii::$app->formatter->asCurrency($model['debit']);
         }
     ],
     [
         'header'=>Yii::t('app', 'Credit'),
         'value' => function ($model) {
-            return Yii::$app->formatter->asCurrency($model->credit);
+            return Yii::$app->formatter->asCurrency($model['credit']);
         }
     ],
 
@@ -62,5 +63,6 @@ echo GridView::widget([
     'id'=>'wDebit',
     //'caption' => Yii::t('accounting', 'Debits with out conciliation.'),
     'dataProvider' => $movementsDataProvider,
-    'columns' => $cols
+    'columns' => $cols,
+    'summary' => ''
 ]);?>

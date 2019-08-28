@@ -241,7 +241,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
         this.findMovements = function() {
             var data= {};
 
-            data= $('#movement_search_form').serializeArray();
+            data= $('#movements_search_form').serializeArray();
 
 
             $.ajax({
@@ -253,7 +253,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     $('#movements_grid').html('<img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
                 },
                 success: function(data){
-                    $("#movements_grid'").html(data);
+                    $("#movements_grid").html(data);
                 }
             });
         }

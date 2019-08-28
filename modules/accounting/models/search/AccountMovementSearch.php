@@ -7,6 +7,7 @@ use app\modules\accounting\models\AccountMovement;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -221,19 +222,13 @@ class AccountMovementSearch extends AccountMovement {
     }
 
     public function searchForConciliation($params) {
-        $query = self::find()
-                ->select(['ami.account_movement_item_id', 'account_movement.date', 'account_movement.description', 'account_movement.status', '(coalesce(ami.debit,0)) as debit', '(coalesce(ami.credit,0)) as credit'])
+        $query = (new Query())
+                ->select(['ami.account_movement_item_id', 'account_movement.date', 'account_movement.account_movement_id', 'account_movement.description', 'account_movement.status', '(coalesce(ami.debit,0)) as debit', '(coalesce(ami.credit,0)) as credit'])
+                ->from('account_movement')
                 ->leftJoin('account_movement_item ami', 'account_movement.account_movement_id = ami.account_movement_id')
                 ->leftJoin('conciliation_item_has_account_movement_item cami', 'ami.account_movement_item_id = cami.account_movement_item_id')
                 ->leftJoin('conciliation_item ci', 'cami.conciliation_item_id = ci.conciliation_item_id');
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => [
-                'defaultOrder' => ['date' => SORT_ASC]
-            ],
-            'key' => 'account_movement_item_id'
-        ]);
 
         // join con cuentas
         $query->leftJoin('account', 'ami.account_id = account.account_id');
@@ -241,9 +236,9 @@ class AccountMovementSearch extends AccountMovement {
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            return $dataProvider;
+//        }
         $query->andFilterWhere(['between', 'account.lft', $this->account_id_from, $this->account_id_to])
                 ->andFilterWhere(['company_id' => $this->company_id]);
         $query->andWhere('ci.conciliation_item_id IS NULL');
@@ -265,6 +260,15 @@ class AccountMovementSearch extends AccountMovement {
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
 
+        $query->orderBy(['date' => SORT_DESC]);
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $query->all(),
+//            'sort' => [
+//                'defaultOrder' => ['date' => SORT_ASC]
+//            ],
+            'key' => 'account_movement_item_id'
+        ]);
         $dataProvider->setPagination(false);
 
         return $dataProvider;

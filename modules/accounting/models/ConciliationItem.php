@@ -157,7 +157,7 @@ class ConciliationItem extends \app\components\db\ActiveRecord
      */
     private function formatDatesAfterFind()
     {
-            $this->date = Yii::$app->formatter->asDate($this->date);
+            $this->date = Yii::$app->formatter->asDate($this->date, 'dd-MM-yyyy');
         }
      
     /**
