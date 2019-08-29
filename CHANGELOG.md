@@ -3,9 +3,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2019.08.29.0] - 29-08-2019
+## [2019.08.29.2] - 29-08-2019
 ### Cambiado
  - Solicitud de Federico de Iperfex al devolver clientes sin pagos registrados
+
+
+## [2019.08.29.1] - 29-08-2019
+### Modificado
+ - Cambios para creación automática de tickets de fibra.
+ 
+## [2019.08.29.0] - 29-08-2019
+### Agregado
+ - Comando de consola para que actualice una categoria de tickets con una de mesa, y de ser necesario, cree una nueva.
+ 
+## [2019.08.28.2] - 28-08-2019
+### Cambiado
+ - Correción de error en cuenta corriente de cliente, se muestra codigo html.
+ 
 
 ## [2019.08.28.1] - 28-08-2019
 ### Cambiado
