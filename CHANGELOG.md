@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.08.29.0] - 29-08-2019
+### Cambiado
+ - Solicitud de Federico de Iperfex al devolver clientes sin pagos registrados
+
 ## [2019.08.28.1] - 28-08-2019
 ### Cambiado
  - Correccion error IVR con clientes Free
