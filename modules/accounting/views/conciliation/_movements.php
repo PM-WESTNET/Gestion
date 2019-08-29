@@ -32,8 +32,9 @@ $cols = array_merge($cols, [
         'label' => 'Cuit2',
         'value' => function ($model) {
             $customer = \app\modules\accounting\models\AccountMovement::searchCustomer($model['account_movement_id']);
-            if($customer) {
-                return $customer->profile_cuit2;
+            $profileClass = \app\modules\sale\models\ProfileClass::findOne(['name' => 'cuit2']);
+            if($customer && $profileClass) {
+                return $customer->getProfile($profileClass->profile_class_id);
             }
 
             return null;

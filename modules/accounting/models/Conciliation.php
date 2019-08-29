@@ -225,23 +225,23 @@ class Conciliation extends \app\components\companies\ActiveRecord
      *
      * @return int|mixed
      */
-    public function getTotals()
-    {
-        $credit = 0;
-        $debit = 0;
-
-        foreach($this->getConciliationItems()->all() as $item) {
-            foreach($item->getConciliationItemHasResumeItems()->all() as $res) {
-                $credit += ($res->resumeItem->credit > 0 ? $res->resumeItem->credit : 0 );
-                $debit  += ($res->resumeItem->debit > 0 ? $res->resumeItem->debit : 0 );
-            }
-        }
-
-        return [
-            'debit' => $debit,
-            'credit' => $credit
-        ];
-    }
+//    public function getTotals()
+//    {
+//        $credit = 0;
+//        $debit = 0;
+//
+//        foreach($this->getConciliationItems()->all() as $item) {
+//            foreach($item->getConciliationItemHasResumeItems()->all() as $res) {
+//                $credit += ($res->resumeItem->credit > 0 ? $res->resumeItem->credit : 0 );
+//                $debit  += ($res->resumeItem->debit > 0 ? $res->resumeItem->debit : 0 );
+//            }
+//        }
+//
+//        return [
+//            'debit' => $debit,
+//            'credit' => $credit
+//        ];
+//    }
 
 
     /**
@@ -400,4 +400,21 @@ class Conciliation extends \app\components\companies\ActiveRecord
 
 
     }
+
+    public function getTotals() {
+        $debit = 0;
+        $credit = 0;
+        foreach ($this->conciliationItems as $item) {
+            $totals = $item->getTotals();
+            $debit += $totals['debit'];
+            $credit += $totals['credit'];
+        }
+
+        return [
+            'debit' => $debit,
+            'credit' => $credit,
+            'total' => (-$debit + $credit)
+        ];
+    }
+
 }

@@ -216,4 +216,32 @@ class ConciliationItem extends \app\components\db\ActiveRecord
         $has->account_movement_item_id = $account_item;
         $this->link('conciliationItemHasAccountMovementItems', $has);
     }
+
+    public function getTotals()
+    {
+        $debit = 0;
+        $credit = 0;
+
+        foreach ($this->resumeItems as $item) {
+            if ($item->debit !== null) {
+                $debit += $item->debit;
+            }else {
+                $credit += $item->credit;
+            }
+        }
+
+        foreach ($this->accountItem as $item) {
+            if ($item->debit !== null) {
+                $debit += $item->debit;
+            }else {
+                $credit += $item->credit;
+            }
+        }
+
+        return [
+          'debit' => $debit,
+          'credit' => $credit,
+          'total' => (-$debit + $credit)
+        ];
+    }
 }

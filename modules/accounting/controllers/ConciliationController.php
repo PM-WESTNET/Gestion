@@ -145,6 +145,9 @@ class ConciliationController extends Controller
 
         $totalAccountCredit = $searchModel->totalCredit;
         $totalAccountDebit = $searchModel->totalDebit;
+        $resumeTotal = $model->resume->getTotal();
+        $totalResumeCredit = $resumeTotal['credit'];
+        $totalResumeDebit = $resumeTotal['debit'];
 
         $conciliatedDataProvider = new ActiveDataProvider([
             'query' => $model->getConciliationItems(),
@@ -160,6 +163,8 @@ class ConciliationController extends Controller
             'movementsDataProvider' => $movementsDataProvider,
             'totalAccountDebit' => $totalAccountDebit,
             'totalAccountCredit' => $totalAccountCredit,
+            'totalResumeCredit' => $totalResumeCredit,
+            'totalResumeDebit' => $totalResumeDebit,
             'readOnly' =>$readOnly,
             'operationTypes' => $operationTypes
         ]);
@@ -251,7 +256,7 @@ class ConciliationController extends Controller
                     $operation = $resModel->operationType;
                     $item->addResumeItem($resModel->resume_item_id);
                     $resModel->updateAttributes(['ready' => true]);
-                    $item->amount += ($resModel->debit - $resModel->credit);
+                    $item->amount += (-$resModel->debit + $resModel->credit);
                     $status = "success";
                 }
             }

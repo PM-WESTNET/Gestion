@@ -12,7 +12,7 @@ use yii\jui\Dialog;
 /* @var $this yii\web\View */
 /* @var $model app\modules\accounting\models\Conciliation */
 
-$this->title = (!$readOnly ? Yii::t('app', 'Update {modelClass}: ', ['modelClass' => Yii::t('accounting', 'Conciliation'),]) : "" ) . ' ' . $model->name;
+$this->title = $model->moneyBoxAccount->moneyBox->name . " - " . $model->moneyBoxAccount->number;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('accounting', 'Conciliations'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->conciliation_id]];
 $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
@@ -40,62 +40,16 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-sm-8 col-sm-offset-2">
-            <?php \yii\widgets\Pjax::begin(['id'=>'w_header']);?>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <strong>
-                        <?=$model->moneyBoxAccount->moneyBox->name . " - " . $model->moneyBoxAccount->number?>
-                    </strong>
-                    <?php if (!$readOnly) { ?>
-                    <!-- <div class="pull-right" role="group"> -->
-                        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
-                            <button type="button" id="btnClose" class="btn btn-success pull-right">
-                                <span class="glyphicon glyphicon-ok"></span> <?= Yii::t('app', 'Ready');?>
-                            </button>
-                        <?php endif;?>
-                    <!-- </div> -->
-                    <?php } ?>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-sm-1 text-center">
-                            <strong><?= Yii::t('app', 'Date'); ?></strong>
-                            <br/>
-                            <?= $model->date ?>
-                        </div>
-                        <div class="col-sm-2 text-center">
-                            <strong><?= Yii::t('accounting', 'Date From'); ?></strong>
-                            <br/>
-                            <?= $model->date_from ?>
-                        </div>
-                        <div class="col-sm-2 text-center">
-                            <strong><?= Yii::t('accounting', 'Date To'); ?></strong>
-                            <br/>
-                            <?= $model->date_to ?>
-                        </div>
-                        <div class="col-sm-1 text-center">
-                            <strong><?= Yii::t('app', 'Status'); ?></strong>
-                            <br/>
-                            <?= Yii::t('accounting', ucfirst($model->status)) ?>
-                        </div>
-                        <div class="col-sm-3 text-center">
-                            <strong><?= Yii::t('accounting', 'Account Debit Balance'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalAccountDebit) ?>
-                        </div>
-                        <div class="col-sm-3 text-center">
-                            <strong><?= Yii::t('accounting', 'Account Credit Balance'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalAccountCredit) ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php \yii\widgets\Pjax::end();?>
-        </div>
-    </div>
+    <?php if (!$readOnly) { ?>
+        <!-- <div class="pull-right" role="group"> -->
+        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+            <button type="button" data-type="btnConciliate" class="btn btn-success btnConciliate">
+                 <?=Yii::t('accounting', 'Conciliate');?> <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+        <?php endif;?>
+        <!-- </div> -->
+    <?php } ?>
+
 
     <div class="row">
 
@@ -105,13 +59,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     <strong>
                         <?=Yii::t('accounting', 'Account Movements')?>
                     </strong>
-                    <?php if (false) { ?>
-                        <!-- <div class="pull-right" role="group"> -->
-                            <button type="button" data-type="btnDeconciliate" class="btn btn-warning btnDeconciliate pull-right">
-                                <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-triangle-right"></span>
-                            </button>
-                        <!-- </div> -->
-                    <?php } ?>
+
                 </div>
                 <div class="panel-body" style="overflow-y: scroll; height: 500px">
                     <?php echo $this->render('movements_search')?>
@@ -128,15 +76,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     <strong>
                         <?= Yii::t('accounting', 'Summary'); ?>
                     </strong>
-                    <?php if (!$readOnly) { ?>
-                    <!-- <div class="pull-right" role="group"> -->
-                        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
-                            <button type="button" data-type="btnConciliate" class="btn btn-success btnConciliate pull-right">
-                                <span class="glyphicon glyphicon-triangle-left"></span> <?=Yii::t('accounting', 'Conciliate');?>
-                            </button>
-                        <?php endif;?>
-                    <!-- </div> -->
-                    <?php } ?>
+
                 </div>
                 <div class="panel-body" style="overflow-y: scroll;  height: 500px"">
 
@@ -148,6 +88,15 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
             </div>
         </div>
     </div>
+
+
+    <h3><?php echo Yii::t('accounting', 'Conciliated')?></h3>
+
+    <button type="button" data-type="btnDeconciliate" class="btn btn-warning btnDeconciliate">
+        <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-chevron-up"></span>
+    </button>
+
+
 
     <?php
     $cols = [];
@@ -177,10 +126,84 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
     echo GridView::widget([
         //'layout'=> '{items}',
         'id'=> 'wConciliated',
-        'caption' => Yii::t('accounting', 'Conciliated'),
         'dataProvider' => $conciliatedDataProvider,
         'columns' => $cols,
+        'summary' => ''
     ]);?>
+
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <strong>
+                        <?=$model->moneyBoxAccount->moneyBox->name . " - " . $model->moneyBoxAccount->number?>
+                    </strong>
+                    <?php if (!$readOnly) { ?>
+                        <!-- <div class="pull-right" role="group"> -->
+                        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+                            <button type="button" id="btnClose" class="btn btn-success pull-right">
+                                <span class="glyphicon glyphicon-ok"></span> <?= Yii::t('app', 'Close');?>
+                            </button>
+                        <?php endif;?>
+                        <!-- </div> -->
+                    <?php } ?>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Debit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalAccountDebit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Credit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalAccountCredit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency(-$totalAccountDebit + $totalAccountCredit) ?>
+                        </div>
+
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Debit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalResumeDebit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Credit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalResumeCredit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency(-$totalResumeDebit + $totalResumeCredit) ?>
+                        </div>
+                    </div>
+                    <?php $totals = $model->getTotals()?>
+                    <div class="row">
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Debit'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['debit']) ?>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Credit'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['credit']) ?>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Total'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['total']) ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 <script>

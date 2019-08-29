@@ -262,8 +262,14 @@ class AccountMovementSearch extends AccountMovement {
 
         $query->orderBy(['date' => SORT_DESC]);
 
+        $models = $query->all();
+
+        if ($this->cuit) {
+            $models = $this->filterByCustomerDocumentNumber($this->cuit, $models);
+        }
+
         $dataProvider = new ArrayDataProvider([
-            'allModels' => $query->all(),
+            'allModels' => $models,
 //            'sort' => [
 //                'defaultOrder' => ['date' => SORT_ASC]
 //            ],
@@ -459,6 +465,30 @@ class AccountMovementSearch extends AccountMovement {
                 return ['debit' => 0, 'credit' => 0, 'balance' => 0];
             }
         }
+    }
+
+    public function filterByCustomerDocumentNumber($filter, $models)
+    {
+        $movements = [];
+
+        foreach ($models as $model) {
+            $customer = AccountMovement::searchCustomer($model['account_movement_id']);
+            $profileClass = \app\modules\sale\models\ProfileClass::findOne(['name' => 'cuit2']);
+            $cuit2= '';
+            if ($customer) {
+
+                if ($profileClass) {
+                    $cuit2 = $customer->getProfile($profileClass->profile_class_id);
+                }
+
+                if ($customer->document_number === $filter || $cuit2 === $filter) {
+                    array_push($movements, $model);
+                }
+
+            }
+        }
+
+        return $movements;
     }
 
 }

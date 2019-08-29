@@ -572,7 +572,6 @@ class Customer extends ActiveRecord {
      * @return null | app\modules\sale\models\Profile
      */
     public function getProfile($class_id) {
-
         $class = ProfileClass::find()->where(['profile_class_id' => $class_id])->one();
 
         //Si el profile soporta multiples valores, devolvemos un array con todos los valores
@@ -637,7 +636,6 @@ class Customer extends ActiveRecord {
     public function __get($name) {
 
         if ($name != 'profiles' && strpos($name, 'profile') !== false) {
-            Yii::info($name);
             if (isset($this->_profiles[substr($name, 8)]))
                 return $this->_profiles[substr($name, 8)];
 
