@@ -90,7 +90,7 @@ class Contract extends ActiveRecord {
                 //inserta y que aun no tenga contract details que analizar.
                 $behaviors[] = [
                     'class' => 'app\modules\westnet\components\MesaTicketContractBehavior',
-//                    'events' => []
+                    'events' => []
                 ];
                 $behaviors[] = 'app\modules\westnet\components\RouterContractBehavior';
             }
