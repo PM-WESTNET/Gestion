@@ -312,7 +312,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                         alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
 
                     } else {
-                        $.pjax.reload({container: '#w0'});
+                        location.reload()
                     }
                 }
             });
@@ -341,7 +341,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                             }
 
                         } else {
-                            $.pjax.reload({container: '#w0'});
+                            location.reload()
                         }
                     }
                 });
@@ -358,7 +358,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                         if (data.status=="success") {
                             window.location = '<?= \yii\helpers\Url::toRoute(['/accounting/conciliation/index']) ?>';
                         } else {
-                            alert(data.message);
+                            location.reload()
                         }
                     }
                 });

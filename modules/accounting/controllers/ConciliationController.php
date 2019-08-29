@@ -254,7 +254,7 @@ class ConciliationController extends Controller
                 $resModel=ResumeItem::findOne($value);
                 if($resModel) {
                     $operation = $resModel->operationType;
-                    $item->addResumeItem($resModel->resume_item_id);
+                    $item->addResumeItem($resModel, true);
                     $resModel->updateAttributes(['ready' => true]);
                     $item->amount += (-$resModel->debit + $resModel->credit);
                     $status = "success";

@@ -2,6 +2,7 @@
 
 namespace app\modules\accounting\models;
 
+use app\modules\accounting\components\CountableMovement;
 use Yii;
 
 /**
@@ -203,11 +204,47 @@ class ConciliationItem extends \app\components\db\ActiveRecord
         }
     }
 
-    public function addResumeItem($resume_item)
+    public function addResumeItem($resume_item, $createMov = false)
     {
         $has = new ConciliationItemHasResumeItem();
-        $has->resume_item_id = $resume_item;
+        $has->resume_item_id = $resume_item->resume_item_id;
         $this->link('conciliationItemHasResumeItems', $has);
+
+        if($createMov) {
+            $description = $resume_item->operationType->name;
+            $countableMovement= CountableMovement::getInstance();
+            $mvItem1 = new AccountMovementItem();
+            $mvItem1->account_id = $this->conciliation->moneyBoxAccount->account_id;
+            if ($resume_item->debit > 0) {
+                $mvItem1->debit = $resume_item->debit;
+                $mvItem1->credit =0 ;
+            }else {
+                $mvItem1->debit = 0;
+                $mvItem1->credit = $resume_item->credit;
+            }
+
+            $mvItem1->save();
+
+            $mvItem2 = new AccountMovementItem();
+            $mvItem2->account_id = $resume_item->moneyBoxHasOperationType->account_id;
+            if ($resume_item->debit > 0) {
+                $mvItem2->debit = 0;
+                $mvItem2->credit = $resume_item->debit;
+            }else {
+                $mvItem2->debit = $resume_item->credit;
+                $mvItem2->credit = 0;
+            }
+
+            $mvItem2->save();
+
+            $movement_id = $countableMovement->createMovement($description,$this->conciliation->moneyBoxAccount->company_id,
+                [$mvItem1, $mvItem2], null, null, $resume_item->date);
+
+            if ($movement_id) {
+                $this->addAccountItem($mvItem1);
+            }
+
+        }
     }
 
     public function addAccountItem($account_item)
@@ -223,20 +260,20 @@ class ConciliationItem extends \app\components\db\ActiveRecord
         $credit = 0;
 
         foreach ($this->resumeItems as $item) {
-            if ($item->debit !== null) {
+            if ($item->debit > 0) {
                 $debit += $item->debit;
             }else {
                 $credit += $item->credit;
             }
         }
 
-        foreach ($this->accountItem as $item) {
-            if ($item->debit !== null) {
-                $debit += $item->debit;
-            }else {
-                $credit += $item->credit;
-            }
-        }
+//        foreach ($this->accountMovementItems as $item) {
+//            if ($item->debit !== null) {
+//                $debit += $item->debit;
+//            }else {
+//                $credit += $item->credit;
+//            }
+//        }
 
         return [
           'debit' => $debit,
