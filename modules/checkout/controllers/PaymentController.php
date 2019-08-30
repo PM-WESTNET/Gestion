@@ -646,4 +646,35 @@ class PaymentController extends Controller {
 
         return $this->redirect(['pagofacil-payments-index']);
     }
+
+    /**
+     * Envía el recibo de pago por email al cliente.
+     */
+    public function actionEmail($id, $from = 'index')
+    {
+        $model = $this->findModel($id);
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+        if (trim($model->customer->email) == "") {
+            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
+        }
+
+        if ($model->sendEmail($fileName)) {
+            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+        } else {
+            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
+        };
+
+        if ($from === 'index') {
+            return $this->redirect(['index']);
+        } else {
+            return $this->redirect(['view', 'customer' => $model->customer_id]);
+        }
+    }
 }

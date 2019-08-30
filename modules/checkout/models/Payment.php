@@ -17,6 +17,8 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\HttpException;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\sale\models\Company;
 
 /**
  * This is the model class for table "payment".
@@ -569,5 +571,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
     public static function getLastNumber($company_id){
         $number = Payment::find()->where(['company_id' => $company_id])->max('number');
         return $number;
+    }
+
+    /**
+     * @return bool
+     * Envia el comprobante por email al cliente correspondiente.
+     */
+    public function sendEmail($pdfFileName)
+    {
+        $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
+
+        if ($sender->send( $this->customer->email, "Envio de comprobante", [
+            'params'=>[
+                'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
+                'comprobante'   => sprintf("%08d", $this->number )
+            ]],[], [],[$pdfFileName]) ) {
+            return true;
+        }
+        return false;
     }
 }

@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]);
             }
-            //if($model->deletable){
+            if($model->deletable){
                 echo Html::a("<span class='glyphicon glyphicon-remove'></span> " .Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
                     'class' => 'btn btn-danger',
                     'data' => [
@@ -46,7 +46,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         'method' => 'post',
                     ],
                 ]);
-            //}
+            }
+
+            if($model->status === Payment::PAYMENT_CLOSED && ($model->customer ? trim($model->customer->email) : "" ) !=""){
+                echo Html::a('<span class="glyphicon glyphicon-envelope"></span> '. Yii::t('app', 'Send By Email'), Url::toRoute(['email', 'id' => $model->payment_id, 'from' => 'index']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+            }
                 echo Html::a("<span class='glyphicon glyphicon-user'></span> " .Yii::t('app', 'Change Customer'), '#', ['class' => 'btn btn-warning', 'id' => 'change-customer']);
             ?>
         </p>

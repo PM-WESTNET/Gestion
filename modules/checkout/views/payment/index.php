@@ -7,6 +7,7 @@ use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
+use app\modules\checkout\models\Payment;
 
 /* @var $this View */
 /* @var $searchModel PaymentSearch */
@@ -97,11 +98,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
-            'template'=>'{view} {update} {delete} {pdf}',
+            'template'=>'{view} {update} {delete} {pdf} {email}',
             'buttons'=>[
                 'pdf' => function ($url, $model, $key) {
                     return ($model->status == 'closed' ?
                         Html::a('<span class="glyphicon glyphicon-print"></span>', Url::toRoute(['payment/pdf', 'id'=>$key]), ['target'=>"_blank", 'class' => 'btn btn-print']) : '') ;
+                },
+                'email' => function ($url, $model, $key) {
+                    if($model->status === Payment::PAYMENT_CLOSED && ($model->customer ? trim($model->customer->email) : "" ) !=""){
+                        return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $key, 'from' => 'index']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                    }
                 },
                 'delete' => function ($url, $model, $key) {
                     if($model->getDeletable() && $model->status != 'cancelled'){
