@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <!--Contratos-->
-
+    <hr>
     <?php if($contracts->getTotalCount() >= 1) {
         echo $this->render('_customer-contracts', [
             'model' => $model,
@@ -148,7 +148,7 @@ $this->params['breadcrumbs'][] = $this->title;
     } else { ?>
         <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
     <?php } ?>
-    
+    <hr>
     <!--Fin Contratos-->
 
     <h2> <?= Yii::t('app', 'Customer data')?>  </h2>

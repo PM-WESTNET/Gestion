@@ -16,13 +16,30 @@ use yii\web\View;
 
 $this->title = Yii::t('app', 'Current account');
 $this->params['breadcrumbs'][] = $this->title;
+$contracts = new ActiveDataProvider([
+    'query' => $customer->getContracts()
+])
 ?>
 <div class="payment-index">
 
     <h1><?= Html::a($customer->code . ' - ' . $customer->name.' '.$customer->lastname, ['/sale/customer/view', 'id' => $customer->customer_id]); ?> <small style="padding-left: 10px; text-transform: uppercase;"><?= Html::encode($this->title) ?></small></h1>
 
     <?=$this->render('_account-detail', ['searchModel' => $searchModel, 'searchModelAccount' => $searchModelAccount]);?>
-    
+
+    <!--Contratos-->
+
+    <br>
+    <?php if($contracts->getCount() >= 1) {
+        echo $this->render('../../../sale/views/customer/_customer-contracts', [
+            'model' => $customer,
+            'contracts' => $contracts
+        ]);
+    } else { ?>
+        <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
+    <?php } ?>
+
+    <!--Fin Contratos-->
+
     <div class="title">
         <p>
             <?php
@@ -41,11 +58,8 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
     </div>
 
-    <h2>
-        <?= Yii::t('app','Detail') ?>
-    </h2>
-    <?php
-    echo GridView::widget([
+    <h2> <?= Yii::t('app','Detail') ?> </h2>
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],

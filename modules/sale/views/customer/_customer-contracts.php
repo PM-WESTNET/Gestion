@@ -13,11 +13,11 @@ use app\components\helpers\UserA;
 use yii\helpers\Html;
 
 ?>
-<hr>
 <h2> <?= Yii::t('app', 'Contracts') ?> </h2>
 
 <?= GridView::widget([
     'dataProvider' => $contracts,
+    'summary' => false,
     'columns' => [
         ['class' => 'yii\grid\SerialColumn'],
 
@@ -66,4 +66,3 @@ use yii\helpers\Html;
     ],
 ]);
 ?>
-<hr>
