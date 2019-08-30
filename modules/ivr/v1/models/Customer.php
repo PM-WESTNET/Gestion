@@ -65,7 +65,10 @@ class Customer extends \app\modules\sale\models\Customer
         if($lastPayment) {
             $data['last_payment'] = $lastPayment;
         }else {
-            $data['last_payment'] = [];
+            $data['last_payment'] = [
+                'amount' => 0,
+                'date' => '00-00-0000'
+            ];
         }
 
         return $data;
