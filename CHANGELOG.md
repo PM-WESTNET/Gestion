@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Modificado
  - Se autocompleta la fecha de hoy en el modal de forzar conexion.
  - Cambio de lugar "Deudores" en menu.
+ - Se modifica la forma en la que se aplican los pagos de proveedores a los comprobantes de proveedor, para evitar que se haga un doble asiento en las cuentas contables.
 
 ## [2019.08.30.0] - 30-08-2019
 ### Modificado

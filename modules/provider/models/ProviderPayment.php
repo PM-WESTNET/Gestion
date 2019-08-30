@@ -441,8 +441,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
                 }
             }
         }
-        //Para disparar la actualizacion del balance en el beforesave
-        $this->save();
+        //Actualizamos el balance
+        $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
 
         return $return;
     }
