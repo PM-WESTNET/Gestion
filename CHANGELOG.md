@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.08.30.0] - 30-08-2019
+### Modificado
+ - Se incluyen phone2, phone3 y phone4 en exportación de clientes deudores.
+ 
 ## [2019.08.29.1] - 29-08-2019
 ### Modificado
  - Cambios para creación automática de tickets de fibra.

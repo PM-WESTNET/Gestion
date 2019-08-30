@@ -372,8 +372,11 @@ class CustomerController extends Controller
             'A' => ['code', Yii::t('app', 'Customer Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'D' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
-            'E' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'D' => ['phone2', Yii::t('app', 'Phone 2'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'E' => ['phone3', Yii::t('app', 'Phone 3'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'F' => ['phone4', Yii::t('app', 'Phone 4'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'G' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
+            'H' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();
         

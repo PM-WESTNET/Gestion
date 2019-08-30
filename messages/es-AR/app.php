@@ -472,6 +472,8 @@
   'Periods' => 'Períodos',
   'Phone' => 'Teléfono Fijo',
   'Phone 2' => 'Teléfono 2',
+  'Phone 3' => 'Teléfono 3',
+  'Phone 4' => 'Teléfono 4',
   'Phones' => 'Teléfonos de Contacto',
   'Plan' => 'Plan',
   'Plan Feature' => 'Característica de Plan',
