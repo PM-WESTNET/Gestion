@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.08.30.1] - 30-08-2019
 ### Agregado
  - Se incluye botón para enviar recibo de pago por email desde index de pagos y vista de cada uno.
  - Se incluye bloque de info de contrato en vista de cuenta corriente del cliente.
