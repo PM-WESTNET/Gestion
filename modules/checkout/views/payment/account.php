@@ -22,7 +22,8 @@ $contracts = new ActiveDataProvider([
 ?>
 <div class="payment-index">
 
-    <h1><?= Html::a($customer->code . ' - ' . $customer->name.' '.$customer->lastname, ['/sale/customer/view', 'id' => $customer->customer_id]); ?> <small style="padding-left: 10px; text-transform: uppercase;"><?= Html::encode($this->title) ?></small></h1>
+    <h1 style="margin-bottom: auto"><?= Html::a($customer->code . ' - ' . $customer->name.' '.$customer->lastname, ['/sale/customer/view', 'id' => $customer->customer_id]); ?> <small style="padding-left: 10px; text-transform: uppercase;"><?= Html::encode($this->title) ?></small></h1>
+    <h4"><?= Yii::t('app', 'Payment Code') .': '. $customer->payment_code?></h5>
 
     <?=$this->render('_account-detail', ['searchModel' => $searchModel, 'searchModelAccount' => $searchModelAccount]);?>
 
