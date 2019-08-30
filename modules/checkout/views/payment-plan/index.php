@@ -31,6 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
+            [
+                'attribute' => 'created_at',
+                'value' => function($model) {
+                    return $model->created_at ? (new \DateTime('now'))->setTimestamp($model->created_at)->format('d-m-Y') : '';
+                }
+            ],
+            [
+                'attribute' => 'created_by',
+                'value' => function($model) {
+                    return $model->userCreatedBy ? $model->userCreatedBy->username : '';
+                }
+            ],
             'from_date:date',
             [
                 'label' => Yii::t('app', 'Status'),

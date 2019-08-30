@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
  - Se incluye botón para enviar recibo de pago por email desde index de pagos y vista de cada uno.
  - Se incluye bloque de info de contrato en vista de cuenta corriente del cliente.
  - Se incluye código de pago en vista de cuenta corriente del cliente.
+ - Se agregan los campos created_at y created_by en la tabla payment_plan para determinar cuándo y quien creó el plan de pago. 
+ 
 ### Modificado
  - Se autocompleta la fecha de hoy en el modal de forzar conexion.
  - Cambio de lugar "Deudores" en menu.
