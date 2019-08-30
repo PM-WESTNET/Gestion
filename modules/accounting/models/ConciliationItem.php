@@ -126,7 +126,7 @@ class ConciliationItem extends \app\components\db\ActiveRecord
 
     public function getAccountMovementItems()
     {
-        return $this->hasMany(AccountMovementItem::class, ['account_movement_id' => 'account_movement_id'])->viaTable('conciliation_item_has_account_movement_item', ['conciliation_item_id' => 'conciliation_item_id']);
+        return $this->hasMany(AccountMovementItem::class, ['account_movement_item_id' => 'account_movement_item_id'])->viaTable('conciliation_item_has_account_movement_item', ['conciliation_item_id' => 'conciliation_item_id']);
     }
     
         
@@ -204,15 +204,32 @@ class ConciliationItem extends \app\components\db\ActiveRecord
         }
     }
 
-    public function addResumeItem($resume_item, $createMov = false)
+    public function addResumeItem($resume_item, $createMov = false, $partner_distribution_model_id = null)
     {
         $has = new ConciliationItemHasResumeItem();
         $has->resume_item_id = $resume_item->resume_item_id;
-        $this->link('conciliationItemHasResumeItems', $has);
+        $has->conciliation_item_id = $this->conciliation_item_id;
+        $has->save();
+
+        Yii::debug('Fecha: ' . $resume_item->date);
 
         if($createMov) {
             $description = $resume_item->operationType->name;
-            $countableMovement= CountableMovement::getInstance();
+            $acountMovement = new AccountMovement([
+                'time' => '00:00:00',
+                'description' => $description,
+                'status' => 'draft',
+                'company_id' => $this->conciliation->moneyBoxAccount->company_id,
+                'partner_distribution_model_id' => $partner_distribution_model_id,
+                'accounting_period_id' => AccountingPeriod::getActivePeriod()->accounting_period_id
+            ]);
+            $acountMovement->date = $resume_item->date;
+
+            if (!$acountMovement->save()){
+                Yii::debug($acountMovement->getErrors());
+                return ;
+            }
+
             $mvItem1 = new AccountMovementItem();
             $mvItem1->account_id = $this->conciliation->moneyBoxAccount->account_id;
             if ($resume_item->debit > 0) {
@@ -222,8 +239,10 @@ class ConciliationItem extends \app\components\db\ActiveRecord
                 $mvItem1->debit = 0;
                 $mvItem1->credit = $resume_item->credit;
             }
-
+            $mvItem1->account_movement_id = $acountMovement->account_movement_id;
             $mvItem1->save();
+
+            Yii::debug($mvItem1->getErrors());
 
             $mvItem2 = new AccountMovementItem();
             $mvItem2->account_id = $resume_item->moneyBoxHasOperationType->account_id;
@@ -234,15 +253,14 @@ class ConciliationItem extends \app\components\db\ActiveRecord
                 $mvItem2->debit = $resume_item->credit;
                 $mvItem2->credit = 0;
             }
+            $mvItem2->account_movement_id = $acountMovement->account_movement_id;
 
             $mvItem2->save();
+            Yii::debug($mvItem2->getErrors());
 
-            $movement_id = $countableMovement->createMovement($description,$this->conciliation->moneyBoxAccount->company_id,
-                [$mvItem1, $mvItem2], null, null, $resume_item->date);
 
-            if ($movement_id) {
-                $this->addAccountItem($mvItem1);
-            }
+            $this->addAccountItem($mvItem1->account_movement_item_id);
+
 
         }
     }
@@ -251,7 +269,8 @@ class ConciliationItem extends \app\components\db\ActiveRecord
     {
         $has = new ConciliationItemHasAccountMovementItem();
         $has->account_movement_item_id = $account_item;
-        $this->link('conciliationItemHasAccountMovementItems', $has);
+        $has->conciliation_item_id = $this->conciliation_item_id;
+        $has->save();
     }
 
     public function getTotals()

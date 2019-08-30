@@ -46,6 +46,11 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
             <button type="button" data-type="btnConciliate" class="btn btn-success btnConciliate">
                  <?=Yii::t('accounting', 'Conciliate');?> <span class="glyphicon glyphicon-chevron-down"></span>
             </button>
+
+            <span style="display: none" id="conciliate_gif">
+                <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+                <?php echo Yii::t('app','Conciliating')?>...
+            </span>
         <?php endif;?>
         <!-- </div> -->
     <?php } ?>
@@ -96,7 +101,10 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
         <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-chevron-up"></span>
     </button>
 
-
+    <span  style="display: none" id="conciliate_gif">
+                <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+        <?php echo Yii::t('app','Desconciliating')?>...
+    </span>
 
     <?php
     $cols = [];
@@ -205,6 +213,30 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
         </div>
     </div>
 
+
+    <div class="modal fade" role="dialog" id="partner_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"><?php echo Yii::t('app','Select a Partner Distribution Model')?></h4>
+                </div>
+                <div class="modal-body">
+                    <?php echo \kartik\select2\Select2::widget([
+                        'data' => $partner_distribution_model,
+                        'name' => 'partnerDistribution',
+                        'options' => [
+                            'id' => 'partner_distribution_model'
+                        ]
+                    ])?>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success btnModalConciliate" data-type="btnConciliate"><?php echo Yii::t('accounting','Conciliate')?></button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>
 <script>
     var Conciliate = new function() {
@@ -213,8 +245,12 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 Conciliate.deconciliate($(this).data('type'));
             });
             $(document).off('click', '.btnConciliate').on('click', '.btnConciliate', function(){
+                Conciliate.validateConciliate($(this).data('type'));
+            });
+            $(document).on('click', '.btnModalConciliate', function(){
                 Conciliate.conciliate($(this).data('type'));
             });
+
             $(document).off('change', '#resume_id').on('change', '#resume_id', function(){
                 Conciliate.findResumeItems($(this).val());
             });
@@ -281,6 +317,19 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
             });
         }
 
+        this.validateConciliate = function(type) {
+            var resume = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
+            var movement = $('#wDebit').yiiGridView('getSelectedRows');
+
+            if ( movement.length == 0 && resume.length > 0) {
+                if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
+                    $('#partner_model').modal();
+                }
+                return
+            }
+
+            Conciliate.conciliate(type);
+        };
 
         this.conciliate = function(type) {
             // Busco lo seleccionado de movimientos y de resumen
@@ -292,10 +341,9 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
 
             // Si tengo quiero conciliar movimientos del resumen para los que no tengo
             // movimientos contables, consulto si los quiero crear.
-            if ( movement.length == 0 && resume.lenth > 0) {
-                if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
-                    data.resumeItems = resume;
-                }
+            if ( movement.length == 0 && resume.length > 0) {
+                data.resumeItems = resume;
+                data.partner_distribution_model_id =$('#partner_distribution_model').val();
             } else {
                 data.resumeItems = resume;
                 data.movementItems = movement;
@@ -307,7 +355,11 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 method: 'POST',
                 dataType: 'json',
                 data: data,
+                beforeSend: function(){
+                    $('#conciliate_gif').show()
+                },
                 success: function(data){
+                    $('#conciliate_gif').hide()
                     if (data.status!="success") {
                         alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
 
@@ -334,7 +386,11 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     method: 'POST',
                     dataType: 'json',
                     data: data,
+                    beforeSend: function(){
+                        $('#desconciliate_gif').show()
+                    },
                     success: function(data){
+                        $('#desconciliate_gif').hide()
                         if (data.status!="success") {
                             if (data.message!="") {
                                 alert("<?=Yii::t('app', 'This resource could not be deleted.')?>");

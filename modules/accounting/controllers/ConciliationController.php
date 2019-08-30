@@ -11,6 +11,7 @@ use app\modules\accounting\models\Resume;
 use app\modules\accounting\models\ResumeItem;
 use app\modules\accounting\models\search\AccountMovementSearch;
 use app\modules\accounting\models\search\ResumeSearch;
+use app\modules\partner\models\PartnerDistributionModel;
 use Yii;
 use app\modules\accounting\models\Conciliation;
 use yii\data\ActiveDataProvider;
@@ -153,7 +154,7 @@ class ConciliationController extends Controller
             'query' => $model->getConciliationItems(),
         ]);
 
-
+        $partner_distibution_model = ArrayHelper::map(PartnerDistributionModel::find()->andWhere(['company_id' => $model->company_id])->all(),'partner_distribution_model_id', 'name');
         $operationTypes = ArrayHelper::map(OperationType::find()->all(), 'operation_type_id', 'name');
 
         $this->layout = '/fluid';
@@ -166,7 +167,8 @@ class ConciliationController extends Controller
             'totalResumeCredit' => $totalResumeCredit,
             'totalResumeDebit' => $totalResumeDebit,
             'readOnly' =>$readOnly,
-            'operationTypes' => $operationTypes
+            'operationTypes' => $operationTypes,
+            'partner_distribution_model' => $partner_distibution_model
         ]);
     }
 
@@ -250,11 +252,12 @@ class ConciliationController extends Controller
             $item->date = date('d-m-Y');
             $item->save();
             $operation= null;
+            $partnerDistribution= Yii::$app->request->post('partner_distribution_model_id');
             foreach($resume_items_ids as $key => $value) {
                 $resModel=ResumeItem::findOne($value);
                 if($resModel) {
                     $operation = $resModel->operationType;
-                    $item->addResumeItem($resModel, true);
+                    $item->addResumeItem($resModel, true, $partnerDistribution);
                     $resModel->updateAttributes(['ready' => true]);
                     $item->amount += (-$resModel->debit + $resModel->credit);
                     $status = "success";
@@ -288,7 +291,7 @@ class ConciliationController extends Controller
 
                 // Asocio los items del resumen
                 foreach($mResumeItems as $res) {
-                    $item->addResumeItem($res->resume_item_id);
+                    $item->addResumeItem($res);
                     $res->updateAttributes(['ready' => true]);
                 }
 

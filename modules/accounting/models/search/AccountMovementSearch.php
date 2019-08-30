@@ -226,8 +226,8 @@ class AccountMovementSearch extends AccountMovement {
                 ->select(['ami.account_movement_item_id', 'account_movement.date', 'account_movement.account_movement_id', 'account_movement.description', 'account_movement.status', '(coalesce(ami.debit,0)) as debit', '(coalesce(ami.credit,0)) as credit'])
                 ->from('account_movement')
                 ->leftJoin('account_movement_item ami', 'account_movement.account_movement_id = ami.account_movement_id')
-                ->leftJoin('conciliation_item_has_account_movement_item cami', 'ami.account_movement_item_id = cami.account_movement_item_id')
-                ->leftJoin('conciliation_item ci', 'cami.conciliation_item_id = ci.conciliation_item_id');
+                ->leftJoin('conciliation_item_has_account_movement_item cami', 'ami.account_movement_item_id = cami.account_movement_item_id');
+                //->leftJoin('conciliation_item ci', 'cami.conciliation_item_id = ci.conciliation_item_id');
 
 
         // join con cuentas
@@ -241,7 +241,6 @@ class AccountMovementSearch extends AccountMovement {
 //        }
         $query->andFilterWhere(['between', 'account.lft', $this->account_id_from, $this->account_id_to])
                 ->andFilterWhere(['company_id' => $this->company_id]);
-        $query->andWhere('ci.conciliation_item_id IS NULL');
 
         //Estado/s de factura
         $this->filterStatus($query);
@@ -256,6 +255,9 @@ class AccountMovementSearch extends AccountMovement {
         $queryTotals->select(['sum(coalesce(ami.debit,0)) as debit', 'sum(coalesce(ami.credit,0)) as credit']);
         $queryTotals->groupBy("");
         $rsTotals = $queryTotals->one();
+
+        //Aplicamos este filtro despues de clonar para saber el saldo de la cuenta
+        $query->andWhere(['IS', 'cami.conciliation_item_id', null]);
 
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
