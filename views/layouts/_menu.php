@@ -123,7 +123,6 @@ if (Yii::$app->getModule('afip')) {
     //Clientes
     $items[] = ['label' => Yii::t('app','Customers'), 'items'=>[
         ['label'=>Yii::t('app','Customers'), 'url'=>['/sale/customer/index']],
-        ['label'=>Yii::t('app','Customer Debts'), 'url'=>['/sale/customer/debtors']],
         ['label'=>Yii::t('app','Cashing panel'), 'url'=>['/sale/customer/cashing-panel']],
     ['label'=>Yii::t('app', 'Positive Balance Customers'), 'url'=>['/sale/customer/positive-balance-customers']],
         ['label'=> Yii::t('app', 'Pending Installations'), 'url' =>['/sale/customer/pending-installations']],
@@ -149,6 +148,7 @@ if (Yii::$app->getModule('afip')) {
         ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
         ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
         ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
+        ['label'=>Yii::t('app','Customer Debts'), 'url'=>['/sale/customer/debtors']],
     ]];
 //}
 

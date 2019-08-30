@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
  - Se incluye código de pago en vista de cuenta corriente del cliente.
 ### Modificado
  - Se autocompleta la fecha de hoy en el modal de forzar conexion.
+ - Cambio de lugar "Deudores" en menu.
 
 ## [2019.08.30.0] - 30-08-2019
 ### Modificado
