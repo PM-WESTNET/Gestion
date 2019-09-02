@@ -18,6 +18,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use app\modules\checkout\models\PagoFacilTransmitionFile;
 use \app\modules\accounting\models\search\AccountMovementSearch;
+use app\modules\sale\models\Product;
+use app\modules\westnet\models\Vendor;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -210,16 +212,14 @@ class PaymentController extends Controller {
         }
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $customer->customer_id;
+        $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+        $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+            ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+            ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+            ->all(), 'vendor_id', 'fullName');
 
         $dataProvider = $searchModel->searchAccount($customer->customer_id, Yii::$app->request->queryParams);
-
-        $retVals = [
-            'searchModel' => $searchModel,
-            'customer' => $customer,
-            'dataProvider' => $dataProvider
-        ];
-        $retVals['dataModelAccount'] = $dataModelAccount;
-        $retVals['searchModelAccount'] = $searchModelAccount;
 
         if($customer->hasDraftBills()) {
             Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft bills'));
@@ -229,7 +229,15 @@ class PaymentController extends Controller {
             Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft payments'));
         }
 
-        return $this->render('account', $retVals);
+        return $this->render('account', [
+            'searchModel' => $searchModel,
+            'customer' => $customer,
+            'dataProvider' => $dataProvider,
+            'dataModelAccount' => $dataModelAccount,
+            'searchModelAccount' => $searchModelAccount,
+            'products' => $products,
+            'vendors' => $vendors
+        ]);
     }
 
     /**

@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.02.0] - 02-09-2019
+### Agregado
+ - Se incluye botón para forzar conexion en partial de _customer-contracts.
+
 ## [2019.08.30.1] - 30-08-2019
 ### Agregado
  - Se incluye botón para enviar recibo de pago por email desde index de pagos y vista de cada uno.

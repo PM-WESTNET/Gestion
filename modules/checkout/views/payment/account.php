@@ -33,7 +33,9 @@ $contracts = new ActiveDataProvider([
     <?php if($contracts->getCount() >= 1) {
         echo $this->render('../../../sale/views/customer/_customer-contracts', [
             'model' => $customer,
-            'contracts' => $contracts
+            'contracts' => $contracts,
+            'products' => $products,
+            'vendors' => $vendors
         ]);
     } else { ?>
         <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
