@@ -165,9 +165,12 @@ $contracts = new ActiveDataProvider([
                         }
                     },
                     'email' => function ($url, $model, $key) {
-                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' 
-                                && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
-                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id'=>$model['bill_id'], 'from' => 'account_current']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
+                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                        }
+
+                        if($model['type'] == 'Payment' && $model['status'] === Payment::PAYMENT_CLOSED && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
+                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current-account']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
                         }
                     },
                     

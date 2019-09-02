@@ -681,6 +681,8 @@ class PaymentController extends Controller {
 
         if ($from === 'index') {
             return $this->redirect(['index']);
+        } elseif ($from == 'current-account') {
+            return $this->redirect(['current-account', 'customer' => $model->customer_id]);
         } else {
             return $this->redirect(['view', 'customer' => $model->customer_id]);
         }
