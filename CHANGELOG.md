@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] 
 
+## [2019.09.02.2] - 02-09-2019
+### Agregado
+ - Se agrega función para registrar pagos desde ivr
+ 
 ## [2019.09.02.1] - 02-09-2019
 ### Agregado
  - Se agrega boton de enviar comprobante (para pagos) por email en vista de cuenta de cliente.
