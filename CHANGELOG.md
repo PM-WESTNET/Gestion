@@ -1,7 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] 
+
+## [2019.09.02.1] - 02-09-2019
+### Agregado
+ - Se agrega boton de enviar comprobante (para pagos) por email en vista de cuenta de cliente.
+
+## [2019.09.02.0] - 02-09-2019
+### Agregado
+ - Se incluye botón para forzar conexion en partial de _customer-contracts.
 
 ## [2019.08.30.1] - 30-08-2019
 ### Agregado

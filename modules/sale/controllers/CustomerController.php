@@ -29,6 +29,8 @@ use yii\web\Response;
 use SoapClient;
 use yii\web\UploadedFile;
 use yii2fullcalendar\yii2fullcalendar;
+use app\modules\sale\models\Product;
+use app\modules\westnet\models\Vendor;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -175,11 +177,21 @@ class CustomerController extends Controller
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
 
+            $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+            $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+                ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+                ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+                ->all(), 'vendor_id', 'fullName');
+
+
             return $this->render('view', [
                 'model' => $model,
                 'address'=> $address,
                 'contracts' => $contracts,
-                'messages' => $messages
+                'messages' => $messages,
+                'products' => $products,
+                'vendors' => $vendors
             ]);
         }else{
            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));

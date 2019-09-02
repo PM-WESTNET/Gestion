@@ -143,7 +143,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if($contracts->getTotalCount() >= 1) {
         echo $this->render('_customer-contracts', [
             'model' => $model,
-            'contracts' => $contracts
+            'contracts' => $contracts,
+            'products' => $products,
+            'vendors' => $vendors
         ]);
     } else { ?>
         <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
