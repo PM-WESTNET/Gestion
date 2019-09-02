@@ -208,6 +208,7 @@ class BancoFrances implements BankInterface
                 if ($p->save()) {
                     $this->createItemAndRelation($payment['amount'], 'Debito Directo cta ' . $payment['cbu'], $payment_method->payment_method_id, $import->money_box_account_id, $p, $import);
                     $payments_created ++;
+                    $transaction->commit();
                 } else {
                     $transaction->rollBack();
                     array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'], 'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Cant create payment. Customer code: ').$payment['customer_code']]);
@@ -217,7 +218,6 @@ class BancoFrances implements BankInterface
                 array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'] ,'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Customer not found'). ': '.$payment['customer_code']]);
             }
 
-            $transaction->commit();
         }
 
         //Creamos registros de todos los pagos que no se pudieron procesar

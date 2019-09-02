@@ -66,7 +66,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
             [['import_timestamp', 'process_timestamp', 'status', 'company_id', 'bank_id', 'money_box_account_id', 'create_timestamp'], 'integer'],
             [['company_id', 'bank_id', 'money_box_account_id',], 'required'],
             [['file'], 'string', 'max' => 255],
-            [['fileUploaded'], 'file', 'extensions' => 'txt'],
+            //[['fileUploaded'], 'file', 'extensions' => 'txt'],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::class, 'targetAttribute' => ['bank_id' => 'bank_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
             [['money_box_account_id'], 'exist', 'skipOnError' => true, 'targetClass' => MoneyBoxAccount::class, 'targetAttribute' => ['money_box_account_id' => 'money_box_account_id']],
