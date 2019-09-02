@@ -269,8 +269,6 @@ class BankController extends Controller
                 $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
             } else {
                 \Yii::$app->session->setFlash('error', $result_import['errors']);
-                var_dump($result_import);
-                var_dump($result_import);
             }
         }
 
