@@ -1588,10 +1588,15 @@ class Customer extends ActiveRecord {
      * Indica si el cliente puede informar de un pago.
      * Sólo puede informar de un nuevo pago si no ha hecho el informe de un pago este mes
      */
-    public function canNotifyPayment()
+    public function canNotifyPayment($date = null, $date_to = null)
     {
-        $date = (new \DateTime('first day of this month'))->format('Y-m-d');
-        $date_to = (new \DateTime('last day of this month'))->format('Y-m-d');
+        if($date === null) {
+            $date = (new \DateTime('first day of this month'))->format('Y-m-d');
+        }
+
+        if($date_to === null) {
+            $date_to = (new \DateTime('last day of this month'))->format('Y-m-d');
+        }
 
         return !$this->getNotifyPayments()->where(['>','date', $date])->andWhere(['<', 'date', $date_to])->exists();
     }

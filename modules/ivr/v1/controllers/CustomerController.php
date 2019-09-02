@@ -14,11 +14,14 @@ use app\modules\ivr\v1\components\Controller;
 use app\modules\ivr\v1\models\Customer;
 use app\modules\ivr\v1\models\search\CustomerSearch;
 use app\modules\sale\models\Bill;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\NotifyPayment;
 use Yii;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 
 class CustomerController extends Controller
 {
@@ -694,5 +697,167 @@ class CustomerController extends Controller
                 'msg' => $ex->getMessage()
             ];
         }
+    }
+
+    /**
+     * @SWG\Post(path="/customer/create-notify-payment",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Informa un pago",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *          @SWG\Property(property="date", type="string", description="Formato dd-mm-yyyy"),
+     *          @SWG\Property(property="amount", type="number", description="Monto del pago"),
+     *          @SWG\Property(property="payment_method_id", type="integer", description="ID del método de pago"),
+     *          @SWG\Property(property="contract_id", type="integer", description="ID del contrato"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'error': 'false',
+     *               'msg': 'Su informe de pago se creó exitosamente'
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *              Usted no puede notificar un pago este mes
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionCreateNotifyPayment()
+    {
+        $data = Yii::$app->request->post();
+
+        if (!isset($data['code']) || empty($data['code']) || !isset($data['date']) || empty($data['date']) ||
+            !isset($data['amount']) || empty($data['amount']) || !isset($data['payment_method_id']) || empty($data['payment_method_id'])
+            || !isset($data['contract_id']) || empty($data['contract_id'])) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','code, date, amount, payment_method_id, contract_id are required')
+            ];
+        }
+
+        $customer = Customer::findOne(['code' => $data['code']]);
+
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        $date = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('first day of this month')->format('Y-m-d');
+        $date_to = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('last day of this month')->format('Y-m-d');
+
+
+        if (!$customer->canNotifyPayment($date, $date_to)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','You can`t notify a payment this month')
+
+            ];
+        }
+
+        $notify_payment = new NotifyPayment([
+            'customer_id' => $customer->customer_id,
+            'date' => Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd'),
+            'amount' => $data['amount'],
+            'payment_method_id' => $data['payment_method_id'],
+            'contract_id' => $data['contract_id'],
+            'from' => 'IVR'
+        ]);
+
+        $trasanction = Yii::$app->db->beginTransaction();
+
+        $result = $this->createPaymentExtensionAndForce($data['contract_id']);
+        if($notify_payment->save() && $result['status']) {
+            $trasanction->commit();
+            return [
+                'error' => 'false',
+                'msg' => Yii::t('app', 'Your notify payment was created successfully')
+            ];
+        }
+
+        $trasanction->rollBack();
+
+        return [
+            'error' => 'true',
+            'msg' => array_key_exists('message', $result) ? $result['message'] : Yii::t('app', 'Your notify payment can`t be created')
+        ];
+    }
+
+    /**
+     * Crea una extensión de pago (gratuita o paga) y fuerza la conexion
+     */
+    private function createPaymentExtensionAndForce($contract_id)
+    {
+        $contract = Contract::find()->andWhere(['contract_id' => $contract_id])->one();
+
+        if (empty($contract)) {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Contract not found'),
+            ];
+        }
+
+        $connection = $contract->connection;
+
+        if (empty($connection)) {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Connection not found'),
+            ];
+        }
+
+        if($connection->canForce()) {
+            $payment_extension_product = Config::getValue('extend_payment_product_id');
+            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+
+            $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+            $due_date = date('d-m-Y', $due_timestamp);
+
+            if($connection->force($due_date, $payment_extension_product, null, false)){
+                //Activo los items del contrato
+                $cti = new ContractToInvoice();
+                $cti->updateContract($contract);
+                return [
+                    'status' => true,
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => Yii::t('app', 'An error occurred. Your connection can`t be restored.')
+                ];
+            }
+        } else {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Your connection can`t be restored.')
+            ];
+        }
+            //Si no es gratuito, se está solicitando una extension de pago
     }
 }
