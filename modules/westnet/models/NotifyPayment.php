@@ -21,9 +21,10 @@ use app\modules\sale\models\Customer;
  */
 class NotifyPayment extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+
+    const FROM_APP = 'App';
+    const FROM_IVR = 'Ivr';
+
     public static function tableName()
     {
         return 'notify_payment';

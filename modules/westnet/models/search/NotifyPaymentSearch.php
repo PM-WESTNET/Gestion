@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\westnet\models\NotifyPayment;
+use yii\db\Query;
 
 /**
  * NotifyPaymentSearch represents the model behind the search form of `app\modules\westnet\models\NotifyPayment`.
@@ -90,5 +91,17 @@ class NotifyPaymentSearch extends NotifyPayment
         $query->andFilterWhere(['like', 'image_receipt', $this->image_receipt]);
 
         return $dataProvider;
+    }
+
+    public function report()
+    {
+        $query = (new Query())->select('COUNT(*) as qty, pm.name as payment_method_name')
+                ->from('notify_payment np')
+                ->leftJoin('payment_method pm', 'pm.payment_method_id = np.payment_method_id')
+                ->where(['from' => NotifyPayment::FROM_APP])
+                ->groupBy(['pm.name'])
+                ->all();
+
+        return $query;
     }
 }

@@ -48,4 +48,22 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= round($statistics[0]['used_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['used_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
         </div>
     </div>
+
+    <hr>
+
+    <div class="col-sm-12 list-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?= Yii::t('app', 'Notify payments qty per payment method') ?></h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <?php foreach ($paymentsStatistics as $paymentStatistic) {
+                        echo "<li class='list-group-item'>". $paymentStatistic['payment_method_name']." <span class='badge'>".$paymentStatistic['qty']."</span></li>";
+                    }?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>

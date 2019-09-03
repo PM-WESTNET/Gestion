@@ -1,8 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] 
+## [Unreleased]
 
+## [2019.09.03.0] - 03-09-2019
+### Agregado
+ - Se agrega en reporte de aplicación, cantidad de informes de pago realizados, por medio de pago.
+### Modificado
+ - Se cambia reporte de APP para que en "Clientes Activos" solo muestre aquellos que poseen una conexion activa.
+ 
 ## [2019.09.02.2] - 02-09-2019
 ### Agregado
  - Se agrega función para registrar pagos desde ivr
