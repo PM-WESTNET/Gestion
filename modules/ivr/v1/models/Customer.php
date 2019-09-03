@@ -12,6 +12,7 @@ namespace app\modules\ivr\v1\models;
 
 use app\modules\config\models\Config;
 use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
 
 class Customer extends \app\modules\sale\models\Customer
@@ -27,6 +28,19 @@ class Customer extends \app\modules\sale\models\Customer
                 'documentType',
                 'document_number',
                 'code',
+                'contracts' => function($model) {
+                    $contracts = [];
+                    foreach ($model->contracts as $contract) {
+                        if($contract->status === Contract::STATUS_ACTIVE){
+                            $contracts[] = [
+                                'contract_id' => $contract->contract_id,
+                                'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
+                            ];
+                        }
+                    }
+
+                    return $contracts;
+                },
                 'balance' => function($model){
                     return $model->current_account_balance;
                 },

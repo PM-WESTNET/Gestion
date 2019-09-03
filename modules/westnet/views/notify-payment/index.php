@@ -55,6 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->paymentMethod->name;
                 }
             ],
+            'from',
             [
                 'class' => 'app\components\grid\ActionColumn',
                 'template' => '{view}'

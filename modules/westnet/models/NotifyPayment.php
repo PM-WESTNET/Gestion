@@ -35,14 +35,15 @@ class NotifyPayment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['date'], 'safe'],
+            [['date', 'from'], 'safe'],
             [['amount'], 'number'],
             [['payment_method_id', 'created_at', 'customer_id', 'contract_id'], 'integer'],
             [['image_receipt'], 'string'],
             [['payment_method_id'], 'exist', 'skipOnError' => true, 'targetClass' => PaymentMethod::class, 'targetAttribute' => ['payment_method_id' => 'payment_method_id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['contract_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contract::class, 'targetAttribute' => ['contract_id' => 'contract_id']],
-            [['amount', 'payment_method_id', 'date', 'customer_id', 'contract_id'], 'required']
+            [['amount', 'payment_method_id', 'date', 'customer_id', 'contract_id'], 'required'],
+            [['from'], 'default', 'value' => 'App']
         ];
     }
 
@@ -60,6 +61,7 @@ class NotifyPayment extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'customer_id' => Yii::t('app', 'Customer'),
             'contract_id' => Yii::t('app', 'Contract'),
+            'from' => Yii::t('app','From'),
         ];
     }
 

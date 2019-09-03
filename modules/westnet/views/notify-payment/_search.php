@@ -19,12 +19,21 @@ use app\modules\checkout\models\PaymentMethod;
     ]); ?>
 
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <?= $form->field($model,'payment_method_id')->widget(Select2::class, [
                 'data' => PaymentMethod::getPaymentMethodForSelect()
+            ]);?>
+        </div>
+        <div class="col-sm-4">
+            <?= $form->field($model,'from')->widget(Select2::class, [
+                'data' => [
+                    'App' => Yii::t('app','Mobile App'),
+                    'IVR' => Yii::t('app','IVR'),
+                ],
+                'options' => ['placeholder' => Yii::t('app','Select an option')]
             ]);?>
         </div>
     </div>
