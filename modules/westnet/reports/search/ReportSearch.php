@@ -540,11 +540,12 @@ class ReportSearch extends Model
      */
     public function notifyPaymentStatistics()
     {
-        $query = (new Query())->select([new Expression("COUNT(*) as qty, pm.name as payment_method_name, date_format(np.date, '%Y%m') as period")])
+        $query = (new Query())->select([new Expression("COUNT(*) as qty, pm.name as payment_method_name, date_format(FROM_UNIXTIME(np.created_at), '%Y%m') as period")])
             ->from('notify_payment np')
             ->leftJoin('payment_method pm', 'pm.payment_method_id = np.payment_method_id')
             ->where(['from' => NotifyPayment::FROM_APP])
-            ->groupBy(['pm.name', "date_format(np.date, '%Y%m')"])
+            ->groupBy(['pm.name', "date_format(FROM_UNIXTIME(np.created_at), '%Y%m')"])
+            ->orderBy(["date_format(FROM_UNIXTIME(np.created_at), '%Y%m')" => SORT_DESC])
             ->all();
 
         return $query;
@@ -555,15 +556,19 @@ class ReportSearch extends Model
      */
     public function paymentExtensionStatistics()
     {
+        $payment_extension_product = Config::getValue('extend_payment_product_id');
+
         $query = (new Query())
             ->select([new Expression("COUNT(*) as payment_extension_qty, 0 as notify_payment_qty, date_format(date,'%Y%m') as period")])
-            ->from('connection_forced_historial')
+            ->from('contract_detail')
+            ->where(['product_id' => $payment_extension_product])
             ->groupBy([new Expression("date_format(date, '%Y%m')")]);
 
         $queryNotifyPayment = (new Query())
-            ->select([new Expression("0 as payment_extension_qty, COUNT(*) as notify_payment_qty, date_format(date, '%Y%m') as period")])
-            ->from('notify_payment')
-            ->groupBy([new Expression("date_format(date, '%Y%m')")]);
+            ->select([new Expression("0 as payment_extension_qty, COUNT(*) as notify_payment_qty,date_format(FROM_UNIXTIME(np.created_at), '%Y%m') as period")])
+            ->from('notify_payment np')
+            ->groupBy(["date_format(FROM_UNIXTIME(np.created_at), '%Y%m')"])
+            ->orderBy(["date_format(FROM_UNIXTIME(np.created_at), '%Y%m')" => SORT_DESC]);
 
         $mainQuery = $query->union($queryNotifyPayment, true);
 
@@ -573,8 +578,6 @@ class ReportSearch extends Model
             ->from(['a' => $mainQuery])
             ->orderBy(['period' => SORT_DESC])
             ->groupBy(['period']);
-
-        \Yii::trace($query->createCommand()->getRawSql());
 
         return $query->all();
     }
