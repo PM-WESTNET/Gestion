@@ -4,7 +4,7 @@ namespace app\modules\mobileapp\v1\models\search;
 
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\Customer;
-use app\modules\westnet\models\Connection;
+use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -93,8 +93,7 @@ class UserAppActivitySearch extends UserAppActivity
             ->select([new Expression('count(*) AS customer_qty'), new Expression('0 as installed_qty'), new Expression('0 as used_qty')])
             ->from('customer c')
             ->leftJoin('contract con', 'con.customer_id = c.customer_id')
-            ->leftJoin('connection conn', 'conn.contract_id = con.contract_id')
-            ->where(['conn.status' => Connection::STATUS_ACCOUNT_ENABLED])
+            ->where(['con.status' => Contract::STATUS_ACTIVE])
             ->all();
 
         $queryInstalled = new Query();

@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.04.1] - 04-09-2019
+### Modificado
+ - Consulta de clientes activos en mobile app.
+ 
 ## [2019.09.04.0] - 04-09-2019
 ### Agregado
  - Se agrega a reporte de APP cantidad de extensiones de pago por periodo.
