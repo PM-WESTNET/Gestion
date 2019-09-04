@@ -11,6 +11,7 @@ namespace app\modules\westnet\reports\search;
 use app\components\helpers\DbHelper;
 use app\modules\accounting\models\Account;
 use app\modules\config\models\Config;
+use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
 use yii\base\Model;
@@ -534,5 +535,48 @@ class ReportSearch extends Model
         return $query->one();
     }
 
+    /**
+     * Devuelve la cantidad de informes de pago agrupados por periodo y medio de pago
+     */
+    public function notifyPaymentStatistics()
+    {
+        $query = (new Query())->select([new Expression("COUNT(*) as qty, pm.name as payment_method_name, date_format(np.date, '%Y%m') as period")])
+            ->from('notify_payment np')
+            ->leftJoin('payment_method pm', 'pm.payment_method_id = np.payment_method_id')
+            ->where(['from' => NotifyPayment::FROM_APP])
+            ->groupBy(['pm.name', "date_format(np.date, '%Y%m')"])
+            ->all();
+
+        return $query;
+    }
+
+    /**
+     * Devuelve la cantidad de extensiones de pago agrupadas por periodos (restandole los forzados de connexion que corresponden a los informes de pago).
+     */
+    public function paymentExtensionStatistics()
+    {
+        $query = (new Query())
+            ->select([new Expression("COUNT(*) as payment_extension_qty, 0 as notify_payment_qty, date_format(date,'%Y%m') as period")])
+            ->from('connection_forced_historial')
+            ->groupBy([new Expression("date_format(date, '%Y%m')")]);
+
+        $queryNotifyPayment = (new Query())
+            ->select([new Expression("0 as payment_extension_qty, COUNT(*) as notify_payment_qty, date_format(date, '%Y%m') as period")])
+            ->from('notify_payment')
+            ->groupBy([new Expression("date_format(date, '%Y%m')")]);
+
+        $mainQuery = $query->union($queryNotifyPayment, true);
+
+        $query = new Query();
+        $query
+            ->select(['SUM(payment_extension_qty) as payment_extension_qty, SUM(notify_payment_qty) as notify_payment_qty', 'period'])
+            ->from(['a' => $mainQuery])
+            ->orderBy(['period' => SORT_DESC])
+            ->groupBy(['period']);
+
+        \Yii::trace($query->createCommand()->getRawSql());
+
+        return $query->all();
+    }
 
 }

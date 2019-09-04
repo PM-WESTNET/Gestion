@@ -6,6 +6,8 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\westnet\models\ConnectionForcedHistorial;
+use yii\db\Query;
+use yii\db\Expression;
 
 /**
  * ConnectionForcedHistorialSearch represents the model behind the search form about `app\modules\westnet\models\ConnectionForcedHistorial`.

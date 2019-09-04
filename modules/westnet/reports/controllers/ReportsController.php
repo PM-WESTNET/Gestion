@@ -4,6 +4,7 @@ namespace app\modules\westnet\reports\controllers;
 
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
@@ -625,13 +626,16 @@ class ReportsController extends Controller
         Yii::$app->session->setFlash('info', "Se considera como desinstalada la app cuando el último uso registrado de la app es mayor a $config_min_last_update meses. <br> La cantidad de meses que se tiene en cuenta para este cálculo puede ser configurable desde Home->Aplicación->Mobile app->Meses para declarar la app desinstalada");
         $search = new UserAppActivitySearch();
         $statistics = $search->searchStatistics(Yii::$app->request->get());
-        $notifyPaymentsSearch = new NotifyPaymentSearch();
-        $paymentsStatistics = $notifyPaymentsSearch->report();
+
+        $reportSearch = new ReportSearch();
+        $paymentsStatistics = $reportSearch->notifyPaymentStatistics();
+        $paymentExtensionStatistics = $reportSearch->paymentExtensionStatistics();
 
         return $this->render('/reports/mobile-app', [
             'searchModel' => $search,
             'statistics' => $statistics,
-            'paymentsStatistics' => $paymentsStatistics
+            'paymentsStatistics' => $paymentsStatistics,
+            'paymentExtensionStatistics' => $paymentExtensionStatistics
         ]);
     }
 }

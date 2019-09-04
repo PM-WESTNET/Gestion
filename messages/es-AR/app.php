@@ -1204,5 +1204,6 @@
     'Your connection can`t be restored.' => 'Su conexión no puede ser restablecida',
     'Your connection can`t be restored or you can`t request a new payment extension this month.' => 'Su conexión no puede ser restablecida o usted no puede solicitar mas extensiones de pago este mes',
     'Your notify payment was created successfully' => 'Su informe de pago se creó exitosamente',
-    'Notify payments qty per payment method' => 'Cantidad de informes de pago por medio de pago'
+    'Notify payments qty per payment method' => 'Cantidad de informes de pago por medio de pago',
+    'Payment extension qty per period' => 'Cantidad de extensiones de pago solicitadas por período',
 );
