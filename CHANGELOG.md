@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.04.0] - 04-09-2019
+### Agregado
+ - Se agrega a reporte de APP cantidad de extensiones de pago por periodo.
+### Modificado
+ - Se modifica reporte de APP. Cantidad de informes de pago agrupados por periodo y medio de pago.
+ 
 ## [2019.09.03.0] - 03-09-2019
 ### Agregado
  - Se agrega en reporte de aplicación, cantidad de informes de pago realizados, por medio de pago.
