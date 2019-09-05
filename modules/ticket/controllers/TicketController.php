@@ -8,6 +8,7 @@ use app\modules\ticket\models\Assignation;
 use app\modules\ticket\models\Category;
 use app\modules\ticket\models\Observation;
 use app\modules\ticket\models\Status;
+use app\modules\ticket\models\TicketManagement;
 use app\modules\westnet\components\MesaTicketManager;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
@@ -406,8 +407,15 @@ class TicketController extends Controller
             $model = $this->findModel($id);
 
             $dataProvider = new ActiveDataProvider(['query' => $model->getObservations()]);
+            $dataProviderTicketManagement = new ActiveDataProvider([
+                'query' => $model->getTicketManagements()
+            ]);
 
-            $observations = $this->renderAjax('_observations', ['dataProvider' => $dataProvider, 'model' => $model]);
+            $observations = $this->renderAjax('_observations', [
+                'dataProvider' => $dataProvider,
+                'dataProviderTicketManagement' => $dataProviderTicketManagement,
+                'model' => $model
+            ]);
 
             return [
                 'title' => Yii::t('app','Ticket') . ': '. $model->title . ' - ' . Yii::t('app','Observations'),
@@ -427,6 +435,24 @@ class TicketController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new Observation();
             $form = $this->renderPartial('../observation/_new-observation', ['model' => $model, 'ticket_id' => $ticket_id]);
+
+            return [
+                'form' => $form
+            ];
+        }
+
+        throw new NotFoundHttpException('Page Not Found');
+    }
+
+    /**
+     * Devuelve el formulario de creacion de gestion de ticket
+     */
+    public function actionGetManagementForm($ticket_id)
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = new TicketManagement();
+            $form = $this->renderPartial('_new-ticket-management', ['model' => $model, 'ticket_id' => $ticket_id]);
 
             return [
                 'form' => $form

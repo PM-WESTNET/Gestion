@@ -1206,4 +1206,7 @@
     'Your notify payment was created successfully' => 'Su informe de pago se creó exitosamente',
     'Notify payments qty per payment method' => 'Cantidad de informes de pago por medio de pago',
     'Payment extension qty per period' => 'Cantidad de extensiones de pago solicitadas por período',
+    'Register ticket management' => 'Registrar gestión',
+    'Ticket management' => 'Gestión de ticket',
+    'Ticket Managements' => 'Gestiones'
 );

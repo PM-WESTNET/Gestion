@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\models;
 
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 
 /**
@@ -35,6 +36,7 @@ class TicketManagement extends \yii\db\ActiveRecord
             [['ticket_id', 'user_id'], 'required'],
             [['ticket_id', 'user_id'], 'integer'],
             [['timestamp'], 'string', 'max' => 255],
+            [['by_wp', 'by_sms', 'by_email', 'by_call'], 'boolean']
         ];
     }
 
@@ -50,6 +52,11 @@ class TicketManagement extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -60,6 +67,10 @@ class TicketManagement extends \yii\db\ActiveRecord
             'ticket_id' => Yii::t('app', 'Ticket ID'),
             'user_id' => Yii::t('app', 'User ID'),
             'timestamp' => Yii::t('app', 'Date'),
+            'by_wp' => Yii::t('app','WhatsApp'),
+            'by_sms' => Yii::t('app', 'SMS'),
+            'by_email' => Yii::t('app', 'Email'),
+            'by_call' => Yii::t('app', 'Call')
         ];
     }
 }

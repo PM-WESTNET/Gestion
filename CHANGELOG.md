@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.05.0] - 05-09-2019
+### Agregado
+ - Se agrega gestion de ticket desde modal de creacion de observacion.
+ - Se agregan tipos de gestion de tickets. Campos nuevos en tabla ticket_management.
+ 
 ## [2019.09.04.1] - 04-09-2019
 ### Modificado
  - Consulta de clientes activos en mobile app.
