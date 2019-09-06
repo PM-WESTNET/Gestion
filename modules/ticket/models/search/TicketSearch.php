@@ -164,9 +164,6 @@ class TicketSearch extends Ticket {
             $query->andWhere(['<>','status_id', $err_status->status_id]);
         }
 
-
-        $query->orderBy('ticket.status_id');
-
         $dataProvider->query = $query;
 
         return $dataProvider;

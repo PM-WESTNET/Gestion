@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ## Agregado
  - Panel de gestiones de cada cliente, con vínculo a ticket.
+### Modificado
+ - Se modifica consulta de tickets, ya que salteaba registros el paginador de yii
 
 ## [2019.09.06.0] - 06-09-2019
 ### Agregado
