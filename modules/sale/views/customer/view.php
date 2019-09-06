@@ -109,7 +109,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Discounts'), ['/sale/customer-has-discount/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Products to Invoice'), ['/sale/product-to-invoice/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Payment Plan'), ['/checkout/payment-plan/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
-            
+            <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Ticket Managements'), ['/ticket/ticket-management/customer-index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
+
             <?php if(User::canRoute('/sale/bill/index')): ?>
             <div class="pull-right" style="margin-right: -10px;">
                 <?= $this->render('_bills-dropdown', ['model' => $model, 'class' => 'btn btn-primary']); //Lista de comprobantes de cliente ?>

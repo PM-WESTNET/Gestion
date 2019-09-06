@@ -46,6 +46,24 @@ class TicketManagementController extends Controller
     }
 
     /**
+     * Lists all TicketManagement models.
+     * @return mixed
+     */
+    public function actionCustomerIndex($customer_id)
+    {
+        $searchModel = new TicketManagementSearch([
+            'customer_id' => $customer_id
+        ]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('customer-index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'customer_id' => $customer_id
+        ]);
+    }
+
+    /**
      * Displays a single TicketManagement model.
      * @param integer $id
      * @return mixed

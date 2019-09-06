@@ -4,6 +4,7 @@ namespace app\modules\ticket\models;
 
 use webvimark\modules\UserManagement\models\User;
 use Yii;
+use app\modules\ticket\models\Ticket;
 
 /**
  * This is the model class for table "arya_ticket.ticket_management".
@@ -57,6 +58,11 @@ class TicketManagement extends \yii\db\ActiveRecord
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
+    public function getTicket()
+    {
+        return $this->hasOne(Ticket::class, ['ticket_id' => 'ticket_id']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -64,8 +70,8 @@ class TicketManagement extends \yii\db\ActiveRecord
     {
         return [
             'ticket_management_id' => Yii::t('app', 'Ticket Management ID'),
-            'ticket_id' => Yii::t('app', 'Ticket ID'),
-            'user_id' => Yii::t('app', 'User ID'),
+            'ticket_id' => Yii::t('app', 'Ticket'),
+            'user_id' => Yii::t('app', 'User'),
             'timestamp' => Yii::t('app', 'Date'),
             'by_wp' => Yii::t('app','WhatsApp'),
             'by_sms' => Yii::t('app', 'SMS'),

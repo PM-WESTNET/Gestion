@@ -1208,5 +1208,10 @@
     'Payment extension qty per period' => 'Cantidad de extensiones de pago solicitadas por período',
     'Register ticket management' => 'Registrar gestión',
     'Ticket management' => 'Gestión de ticket',
-    'Ticket Managements' => 'Gestiones'
+    'Ticket Managements' => 'Gestiones',
+    'Date from' => 'Fecha desde',
+    'Date to' => 'Fecha hasta',
+    'Call' => 'Llamado',
+    'Ticket Managements from' => 'Gestiones de',
+    'See ticket' => 'Ver ticket',
 );
