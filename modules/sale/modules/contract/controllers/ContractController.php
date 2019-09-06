@@ -16,6 +16,7 @@ use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\sale\modules\contract\models\search\ContractDetailSearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
+use app\modules\ticket\models\Ticket;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\EmptyAds;
 use app\modules\westnet\models\Node;
@@ -799,6 +800,7 @@ class ContractController extends Controller {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
                     $model->customer->sendMobileAppLinkSMSMessage();
+                    Ticket::createGestionADSTicket($model->customer_id);
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }

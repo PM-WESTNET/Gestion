@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\models;
 
+use app\modules\config\models\Config;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\ticket\behaviors\GenerateActionBehavior;
 use app\modules\ticket\components\MesaTicket;
@@ -835,6 +836,22 @@ class Ticket extends \app\components\db\ActiveRecord {
     public function getTicketManagementQuantity()
     {
         return $this->getTicketManagements()->count();
+    }
+
+    /**
+     * Crea un ticket de la categoría de Gestion de ADS.
+     */
+    public static function createGestionADSTicket($customer_id)
+    {
+        $ticket = new Ticket([
+            'customer_id' => $customer_id,
+            'task_id' => null,
+            'category_id' => Config::getValue('ticket_category_gestion_ads'),
+            'title' => 'Gestionar ADS',
+            'content' => 'Instalación realizada. Se asignó la IP al cliente.'
+        ]);
+
+        return $ticket->save();
     }
 
 }

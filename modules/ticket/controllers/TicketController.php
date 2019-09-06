@@ -359,12 +359,13 @@ class TicketController extends Controller
         $search->setScenario('wideSearch');
 
         $category = Category::findOne(Config::getValue('installations_category_id'));
+        $category2 = Config::getValue('ticket_category_gestion_ads');
 
         if (empty($category)) {
             throw new BadRequestHttpException('Categoria de Instalaciones no encontrada');
         }
 
-        $search->category_id = $category->category_id;
+        $search->categories = [$category->category_id, $category2];
 
         if (!User::hasRole('installations_manager')){
             $search->user_id = Yii::$app->user->id;

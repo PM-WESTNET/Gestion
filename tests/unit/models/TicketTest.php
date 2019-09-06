@@ -13,6 +13,7 @@ use app\tests\fixtures\CustomerFixture;
 use app\tests\fixtures\TicketCategoryFixture;
 use app\tests\fixtures\UserFixture;
 use app\modules\ticket\models\Assignation;
+use app\modules\config\models\Config;
 
 class TicketTest extends \Codeception\Test\Unit
 {
@@ -225,5 +226,29 @@ class TicketTest extends \Codeception\Test\Unit
         expect('Ticket management total is 1', $model->getTicketManagementQuantity())->equals(1);
     }
 
+    public function testCreateGestionADSTicket()
+    {
+        $ticket_category_gestion_ads = Config::getValue('ticket_category_gestion_ads');
+        $inital_ticket_qty = count(Ticket::find()->where(['category_id' => $ticket_category_gestion_ads])->all());
+
+        expect('Ticket created', Ticket::createGestionADSTicket(45900))->true();
+        expect('Ticket qty increased', count(Ticket::find()->where(['category_id' => $ticket_category_gestion_ads])->all()))->equals($inital_ticket_qty + 1);
+
+
+    }
+    /*
+         public static function createGestionADSTicket($customer_id)
+    {
+        $ticket = new Ticket([
+            'customer_id' => $customer_id,
+            'task_id' => null,
+            'category_id' => Config::getValue('ticket_category_gestion_ads'),
+            'title' => 'Gestionar ADS',
+            'content' => 'Instalación realizada. Se asignó la IP al cliente.'
+        ]);
+
+        return $ticket->save();
+    }
+     */
 //    TODO resto funciones anteriores de la clase
 }

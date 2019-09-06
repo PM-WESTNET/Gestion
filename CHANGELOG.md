@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.06.0] - 06-09-2019
+### Agregado
+ - Al activar un contrato, se genera un ticket de la categoría de Gestion de Ads.
+### Modificado
+ - En panel de gestión de instalaciones, se muestran tambien los tickets de la categoría de gestion de ADS.
+ 
 ## [2019.09.05.0] - 05-09-2019
 ### Agregado
  - Se agrega gestion de ticket desde modal de creacion de observacion.

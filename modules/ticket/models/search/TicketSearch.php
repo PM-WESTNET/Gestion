@@ -30,6 +30,8 @@ class TicketSearch extends Ticket {
     public $close_from_date;
     public $close_to_date;
 
+    public $categories;
+
     public function init() {
         parent::init();
     }
@@ -39,7 +41,7 @@ class TicketSearch extends Ticket {
             [['ticket_id'], 'integer'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id'], 'safe'],
+            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories'], 'safe'],
         ];
     }
     
@@ -120,8 +122,15 @@ class TicketSearch extends Ticket {
             'ticket_id' => $this->ticket_id,
             'status_id' => $this->status_id,
             'color_id' => $this->color_id,
-            'category_id' => $this->category_id,
         ]);
+
+        if($this->category) {
+            $query->andFilterWhere(['category_id' => $this->category_id]);
+        }
+
+        if($this->categories) {
+            $query->andFilterWhere(['in','category_id', $this->categories]);
+        }
 
         $query->andFilterWhere(['like', 'title', $this->title]);
         $query->andFilterWhere(['like', 'number', $this->number]);
