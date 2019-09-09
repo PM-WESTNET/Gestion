@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.09.1] - 09-09-2019
+## Agregado
+ - Se agrega comando de consola para corregir comprobantes a proveedor con neto en impuestos mal cargados.
+  
 ## [2019.09.09.0] - 09-09-2019
 ## Agregado
  - Panel de gestiones de cada cliente, con vínculo a ticket.
