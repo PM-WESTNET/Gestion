@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.09.09.0] - 09-09-2019
 ## Agregado
  - Panel de gestiones de cada cliente, con vínculo a ticket.
 ### Modificado
