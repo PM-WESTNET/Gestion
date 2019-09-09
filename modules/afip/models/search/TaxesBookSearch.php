@@ -126,12 +126,7 @@ class TaxesBookSearch extends ProviderBill
 
         $subQuery = 'SELECT distinct concat(c.lastname, \' \', c.name) AS business_name, c.document_number as tax_identification, b.date, bt.name AS bill_type, ' .
                     'b.number, b.amount,'.
-                    '(CASE '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.21 THEN 0.21 '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.105 THEN 0.105 '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.27 THEN 0.27 '.
-                        'ElSE 0.21 '.
-                    'END) as pct, '.
+                    '0.21 as pct, '.
                     'tbi.page, '.
                     '(if((b.amount = b.total), (b.amount / 1.21), b.amount)* bt.multiplier) AS net, ' .
                     '(b.total * bt.multiplier) AS total, ' .

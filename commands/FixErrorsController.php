@@ -55,14 +55,22 @@ class FixErrorsController extends \yii\console\Controller
      * Para llamar a esta acción ./yii set-tax-rate-net-into-provider-bills 1006215,1006135 por ejemplo
      */
     public function actionSetTaxRateNetIntoProviderBills(array $providerBillsIds) {
-        $provider_bills = ProviderBill::find()->where(['in','provider_bill_id', $providerBillsIds])->all();
+        foreach ($providerBillsIds as $providerBillId) {
+            $provider_bill = ProviderBill::findOne($providerBillId);
 
-        foreach ($provider_bills as $provider_bill) {
-            $provider_bill_has_tax_rate = $provider_bill->getProviderBillHasTaxRates()->where(['in','tax_rate_id', [1,2,3,4,14,15]])->all();
-            foreach ($provider_bill_has_tax_rate as $pbhtr) {
-                $pbhtr->updateAttributes(['net' => round(($pbhtr->amount / $pbhtr->taxRate->pct),2)]);
+            if(!$provider_bill) {
+                echo "Problemas para encontrar el comprobante con id $providerBillId\n";
+            } else {
+                echo "Actualizando comprobante $provider_bill->provider_bill_id ...\n";
+                $provider_bill_has_tax_rate = $provider_bill->getProviderBillHasTaxRates()->where(['in','tax_rate_id', [1,2,3,4,14,15]])->all();
+
+                foreach ($provider_bill_has_tax_rate as $pbhtr) {
+                    $new_net = $pbhtr->amount / $pbhtr->taxRate->pct;
+                    $pbhtr->updateAttributes(['net' => round($new_net,2)]);
+                }
+
+                $provider_bill->calculateTotal();
             }
-            $provider_bill->calculateTotal();
         }
     }
 
