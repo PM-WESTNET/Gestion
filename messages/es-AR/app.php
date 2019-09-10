@@ -1150,7 +1150,7 @@
     'Are you sure you want to register a ticket management?' => '¿Está seguro que quiere registrar una gestión del ticket?',
     'Ticket management registered successfully' => 'Gestión de ticket registrada exitosamente',
     'Ticket management quantity' => 'Cantidad de gestiones',
-    'Remember: Customers whose debt is on the first bill are excluded' => 'Recuerde: Los clientes cuya deuda es de la primer factura están excluidos',
+    'Remember: Customers whose debt is on the first bill and their contract is in low status are excluded' => 'Recuerde: Los clientes cuya deuda es de la primer factura y su contrato está en estado de baja están excluidos',
     'active' => 'Activo',
     'Has mobile app installed' => '¿Tiene la app instalada?',
     'Last app use' => 'Último uso de la aplicación',

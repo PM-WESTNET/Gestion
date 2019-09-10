@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.10.0] - 10-09-2019
+### Modificado
+ - Se quitan los clientes con contrato en estado de baja del listado del panel de cobranza.
+ 
 ## [2019.09.09.1] - 09-09-2019
 ## Agregado
  - Se agrega comando de consola para corregir comprobantes a proveedor con neto en impuestos mal cargados.

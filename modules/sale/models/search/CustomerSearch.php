@@ -47,6 +47,8 @@ class CustomerSearch extends Customer {
     public $customers_id;
     public $customer_id;
 
+    public $not_contract_status;
+
     //TODO: dejar solo nodes
     public $node_id;
     public $nodes = [];
@@ -74,7 +76,7 @@ class CustomerSearch extends Customer {
         return [
             [['customer_id', 'document_type_id', 'debt_bills', 'plan_id'], 'integer'],
             [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to'], 'safe'],
-            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status'],'safe'],
+            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
@@ -700,6 +702,10 @@ class CustomerSearch extends Customer {
 
         if (!empty($this->contract_status)) {
             $query->andWhere(['contract.status' => $this->contract_status]);
+        }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
         }
     }
 

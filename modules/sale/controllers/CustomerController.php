@@ -728,9 +728,10 @@ class CustomerController extends Controller
     {
         $searchModel = new CustomerSearch;
         $searchModel->exclude_customers_with_one_bill = true;
+        $searchModel->not_contract_status = 'low';
         $dataProvider = $searchModel->searchDebtors(Yii::$app->request->getQueryParams(), 100);
 
-        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill are excluded'));
+        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill and their contract is in low status are excluded'));
 
         return $this->render('cashing-panel', [
             'dataProvider' => $dataProvider,
