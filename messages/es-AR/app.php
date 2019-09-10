@@ -1214,4 +1214,7 @@
     'Call' => 'Llamado',
     'Ticket Managements from' => 'Gestiones de',
     'See ticket' => 'Ver ticket',
+    'Created by' => 'Creado por',
+    'Start date from' => 'Fecha desde',
+    'Start date to' => 'Fecha hasta'
 );

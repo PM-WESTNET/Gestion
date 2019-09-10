@@ -22,15 +22,18 @@ class TicketSearch extends Ticket {
     public $user_id;
     public $customer;
     public $customer_number;
+    public $customer_id;
     public $document;
     public $assignations;
     public $start_date_label;
     public $ticket_management_qty;
-
+    public $created_by;
     public $close_from_date;
     public $close_to_date;
 
     public $categories;
+    public $start_date_from;
+    public $start_date_to;
 
     public function init() {
         parent::init();
@@ -41,7 +44,7 @@ class TicketSearch extends Ticket {
             [['ticket_id'], 'integer'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories'], 'safe'],
+            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to'], 'safe'],
         ];
     }
     
@@ -51,6 +54,9 @@ class TicketSearch extends Ticket {
             'customer' => Yii::t('app', 'Customer'),
             'customer_number' => Yii:: t('app', 'Customer Number'),
             'ticket_management_qty' => Yii::t('app', 'Ticket management quantity'),
+            'created_by' => Yii::t('app', 'Created by'),
+            'start_date_from' => Yii::t('app', 'Start date from'),
+            'start_date_to' => Yii::t('app', 'Start date to'),
         ]);
     }
 
@@ -108,6 +114,7 @@ class TicketSearch extends Ticket {
             $query->andFilterWhere(['between', 'start_date', $start_date, $end_date]);
             $this->start_date = $this->start_date;
         }
+
         if (!is_null($this->finish_date) && strpos($this->finish_date, ' al ') !== false) {
             list($start_date, $end_date) = explode(' al ', $this->finish_date);
             
@@ -118,10 +125,20 @@ class TicketSearch extends Ticket {
             $this->finish_date = $this->finish_date;
         }
 
+        //Rango de fecha start date
+        if($this->start_date_from) {
+            $query->andFilterWhere(['>=', 'start_date', $this->start_date_from]);
+        }
+
+        if($this->start_date_to) {
+            $query->andFilterWhere(['<=', 'start_date', $this->start_date_to]);
+        }
+
         $query->andFilterWhere([
             'ticket_id' => $this->ticket_id,
             'status_id' => $this->status_id,
             'color_id' => $this->color_id,
+            'ticket.customer_id' => $this->customer_id,
         ]);
 
         if($this->category) {
@@ -141,6 +158,10 @@ class TicketSearch extends Ticket {
         if($this->assignations) {
             $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
                 ->andFilterWhere(['assig.user_id' => $this->assignations]);
+        }
+
+        if($this->created_by) {
+            $query->andFilterWhere(['ticket.user_id' => $this->created_by]);
         }
 
         if($this->user_id) {

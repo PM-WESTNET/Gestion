@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Modificado
+ - Se modifican los filtros de panel de tickets de instalaciones.
+ - Se modifican los filtros de panel de tickets de gestión de cobranza.
 
 ## [2019.09.10.0] - 10-09-2019
 ### Modificado
