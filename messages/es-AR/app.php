@@ -1216,5 +1216,11 @@
     'See ticket' => 'Ver ticket',
     'Created by' => 'Creado por',
     'Start date from' => 'Fecha desde',
-    'Start date to' => 'Fecha hasta'
+    'Start date to' => 'Fecha hasta',
+    'Theres one or more notify payments by transference not verified' => 'Hay uno o mas informes de pago por transferencia no verificados',
+    'Mark as verified' => 'Marcar como verificada',
+    'Are you sure you want to mark it as verified?' => 'Está seguro de que quiere marcarla como verificada?',
+    'Notify payment cant be verified' => 'El informe de pago no pudo ser verificado',
+    'Verified' => 'Verificado',
+    'Verified by' => 'Verificado por'
 );

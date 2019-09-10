@@ -3,6 +3,7 @@
 namespace app\modules\westnet\models;
 
 use app\modules\sale\modules\contract\models\Contract;
+use webvimark\modules\UserManagement\models\User;
 use Yii;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\sale\models\Customer;
@@ -44,7 +45,8 @@ class NotifyPayment extends \yii\db\ActiveRecord
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['contract_id'], 'exist', 'skipOnError' => true, 'targetClass' => Contract::class, 'targetAttribute' => ['contract_id' => 'contract_id']],
             [['amount', 'payment_method_id', 'date', 'customer_id', 'contract_id'], 'required'],
-            [['from'], 'default', 'value' => 'App']
+            [['from'], 'default', 'value' => 'App'],
+            [['verified'], 'default', 'value' => 0]
         ];
     }
 
@@ -63,6 +65,8 @@ class NotifyPayment extends \yii\db\ActiveRecord
             'customer_id' => Yii::t('app', 'Customer'),
             'contract_id' => Yii::t('app', 'Contract'),
             'from' => Yii::t('app','From'),
+            'verified' => Yii::t('app','Verified'),
+            'verified_by_user_id' => Yii::t('app','Verified by'),
         ];
     }
 
@@ -95,6 +99,14 @@ class NotifyPayment extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getVerifiedByUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'verified_by_user_id']);
+    }
+
+    /**
      * Sube una imagen
      * @return boolean
      */
@@ -120,6 +132,31 @@ class NotifyPayment extends \yii\db\ActiveRecord
             $url = \Yii::getAlias('uploads/payments/' . $this->image_receipt->baseName . '.' . $this->image_receipt->extension);
         }
         return $url;
+    }
+
+    /**
+     * Verifica si hay Informes de pago por transferencias que no hayan sido marcados como verificado.
+     */
+    public static function transferenceNotifyPaymentsNotVerifiedExists()
+    {
+        $payment_method = PaymentMethod::getTransferencia();
+
+        if($payment_method) {
+            return NotifyPayment::find()->where(['verified'=> 0])->andWhere(['payment_method_id' => $payment_method->payment_method_id])->exists();
+        }
+
+        return false;
+    }
+
+    /**
+     * Marca como verificado un informe de pago.
+     */
+    public function verify($user_id)
+    {
+        $this->verified = 1;
+        $this->verified_by_user_id = $user_id;
+
+        return $this->save();
     }
 
 }

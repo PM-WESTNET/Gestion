@@ -124,4 +124,19 @@ class NotifyPaymentController extends Controller
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
+
+    /**
+     * Marca como verificado el informe de pago.
+     * Logica de negocio: Se usa para alertar cuando una transferencia no fue verificada.
+     */
+    public function actionVerify($notify_payment_id)
+    {
+        $model = $this->findModel($notify_payment_id);
+
+        if(!$model->verify(Yii::$app->user->getId())) {
+            Yii::$app->session->addFlash('error', Yii::t('app','Notify payment cant be verified'));
+        }
+
+        return $this->redirect(['index']);
+    }
 }

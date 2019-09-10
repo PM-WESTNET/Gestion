@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.09.10.1] - 10-09-2019
+### Agregado
+ - Se agrega alerta para usuarios que compartan el rol User-alert-new-no-verified-tranferences cuando existan informes de pago que no estén marcados como verificados.
+ - Se agrega boton en index de informes de pago para poder marcar como verificados aquellos que tengan medio de pago transferencia.
+ - Se agrega botonn en vista de informe de pago para poder marcar como verificado.
 ### Modificado
  - Se modifican los filtros de panel de tickets de instalaciones.
  - Se modifican los filtros de panel de tickets de gestión de cobranza.

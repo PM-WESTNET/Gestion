@@ -135,4 +135,18 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     {
         return ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name');
     }
+
+    /**
+     * Obtiene el medio de pago Transferencia.
+     */
+    public static function getTransferencia()
+    {
+        $payment_method = PaymentMethod::findOne(['name' => 'Transferencia']);
+
+        if(!$payment_method) {
+            return false;
+        }
+
+        return $payment_method;
+    }
 }
