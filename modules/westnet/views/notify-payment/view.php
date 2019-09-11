@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\modules\checkout\models\PaymentMethod;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\NotifyPayment */
