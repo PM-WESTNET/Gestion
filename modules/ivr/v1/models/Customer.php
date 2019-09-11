@@ -11,6 +11,7 @@ namespace app\modules\ivr\v1\models;
 
 
 use app\modules\config\models\Config;
+use app\modules\sale\models\Bill;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
@@ -48,6 +49,10 @@ class Customer extends \app\modules\sale\models\Customer
                     $account = $model->accountInfo();
                     return $account['last_payment'];
                 },
+                'last_bill' => function($model) {
+                    $last_bill = $model->lastBill();
+                    return $last_bill['last_bill'];
+                },
                 'clipped' => function($model) {
                     if ($model->hasClippedForDebt()) {
                         return 'disabled';
@@ -80,6 +85,27 @@ class Customer extends \app\modules\sale\models\Customer
             $data['last_payment'] = $lastPayment;
         }else {
             $data['last_payment'] = [
+                'amount' => 0,
+                'date' => '00-00-0000'
+            ];
+        }
+
+        return $data;
+    }
+
+    /**
+     * Devuelve el total y fecha del ultimo comprobante del cliente.
+     */
+    public function lastBill() {
+        $data = [];
+
+        $lastBill = Bill::find()->andWhere(['customer_id' => $this->customer_id])->orderBy(['timestamp' => SORT_DESC])->one();
+
+        if($lastBill) {
+            $data['last_bill']['amount'] = $lastBill->total;
+            $data['last_bill']['date'] = (new \DateTime($lastBill->date))->format('d-m-Y');
+        }else {
+            $data['last_bill'] = [
                 'amount' => 0,
                 'date' => '00-00-0000'
             ];

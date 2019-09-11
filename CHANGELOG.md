@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.11.0] - 11-09-2019
+### Agregado
+ - Se agrega información de la última factura en endpoint de IVR (customer/get-customer).
+### Modificado
+ - Se anula el tiempo máximo de exportación en notificación de SMSInfobip.
+ 
 ## [2019.09.10.1] - 10-09-2019
 ### Agregado
  - Se agrega alerta para usuarios que compartan el rol User-alert-new-no-verified-tranferences cuando existan informes de pago que no estén marcados como verificados.
