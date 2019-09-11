@@ -83,6 +83,7 @@ class SMSInfobipTransport implements TransportInterface
     public function export($notification)
     {
         Yii::setLogger(new EmptyLogger());
+        set_time_limit(0);
 
         //Nombre de archivo
         try{
