@@ -90,6 +90,8 @@ class NotifyPaymentSearch extends NotifyPayment
 
         $query->andFilterWhere(['like', 'image_receipt', $this->image_receipt]);
 
+        $query->orderBy(['created_at' => SORT_DESC]);
+
         return $dataProvider;
     }
 
