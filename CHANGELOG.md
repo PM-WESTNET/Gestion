@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.12.0] - 12-09-2019
+### Modificado
+ - Se cambia el schema de estados listados en filtro de panel de instalaciones.
+ 
 ## [2019.09.11.0] - 11-09-2019
 ### Agregado
  - Se agrega información de la última factura en endpoint de IVR (customer/get-customer).

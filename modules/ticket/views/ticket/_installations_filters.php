@@ -8,6 +8,7 @@ use webvimark\modules\UserManagement\models\User;
 use yii\helpers\Url;
 use app\modules\ticket\components\schemas\SchemaCobranza;
 use yii\jui\DatePicker;
+use app\modules\ticket\components\schemas\SchemaInstalaciones;
 
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
@@ -21,7 +22,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-sm-3">
-            <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaCobranza::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
+            <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaInstalaciones::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
 
         <div class="col-sm-3">
