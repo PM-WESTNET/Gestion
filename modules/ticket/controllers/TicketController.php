@@ -571,4 +571,28 @@ class TicketController extends Controller
         return $this->redirect(['collection-tickets']);
     }
 
+    /**
+     * Renderiza un gráfico con la cantidad de tickets.
+     */
+    public function actionReport()
+    {
+        $searchModel = new TicketSearch();
+        $searchModel->status_id = null;
+        $data = $searchModel->searchReport(Yii::$app->request->getQueryParams());
+        $datas = [];
+        $cols = [];
+
+        foreach($data as $item) {
+            $cols[] = (new \DateTime($item['periodo'] . '-01'))->format('m-Y');
+            $datas[] = $item['qty'];
+        }
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => 'green'
+        ]);
+    }
+
 }

@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.12.1] - 12-09-2019
+### Agregado
+ - Reporte de Tickets.
+### Modificado
+ - Se elimina información de ultimo comprobante en endpoint de IVR (get-customer).
+
 ## [2019.09.12.0] - 12-09-2019
 ### Modificado
  - Se cambia el schema de estados listados en filtro de panel de instalaciones.

@@ -1222,5 +1222,7 @@
     'Are you sure you want to mark it as verified?' => 'Está seguro de que quiere marcarla como verificada?',
     'Notify payment cant be verified' => 'El informe de pago no pudo ser verificado',
     'Verified' => 'Verificado',
-    'Verified by' => 'Verificado por'
+    'Verified by' => 'Verificado por',
+    'Tickets report' => 'Reporte de tickets',
+    'Ticket quantity' => 'Ticket quantity',
 );

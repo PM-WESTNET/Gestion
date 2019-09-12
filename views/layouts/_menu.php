@@ -207,6 +207,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
+        ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
     ]];
 
     //Reportes por empresa
