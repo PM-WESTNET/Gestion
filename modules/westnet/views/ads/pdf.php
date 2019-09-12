@@ -404,7 +404,7 @@ try {
         </td>
         <td style="width:20px; padding: 2px;">&nbsp;</td>
         <td colspan="4" style="width:630px; border: 1px solid black; padding: 2px;">
-            <?= $company->technical_service_phone ? $company->technical_service_phone : 'a' ?>
+            <?= $company->technical_service_phone ? $company->technical_service_phone : Config::getValue('ads-contact_technical_service') ?>
         </td>
     </tr>
     <tr>
