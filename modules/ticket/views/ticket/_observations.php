@@ -17,30 +17,11 @@ use yii\widgets\ListView;
         'data-ticket' => $model->ticket_id
     ])?>
 
-    <?php if($model->canAddTicketManagement()) {
-        echo Html::a('<span class="glyphicon glyphicon-pushpin"></span> '. Yii::t('app', 'Register ticket management'), '#', [
-            'class' => 'btn btn-primary',
-            'id' => 'add_management_btn',
-            'data-ticket' => $model->ticket_id
-        ]);
-    } ?>
-    <h3><?= Yii::t('app', 'Observations')?></h3>
-
-    <div class="observation_list" >
-
+    <div class="col-sm-12">
+        <h3><?= Yii::t('app', 'Observations')?></h3>
         <?= ListView::widget([
             'dataProvider' => $dataProvider,
             'itemView' => '_observation',
-            'summary' => ''
-        ])?>
-    </div>
-
-    <h3><?= Yii::t('app', 'Ticket Managements')?></h3>
-
-    <div class="management_list" >
-        <?= ListView::widget([
-            'dataProvider' => $dataProviderTicketManagement,
-            'itemView' => '_ticket-management',
             'summary' => ''
         ])?>
     </div>

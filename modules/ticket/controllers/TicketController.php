@@ -448,12 +448,12 @@ class TicketController extends Controller
     /**
      * Devuelve el formulario de creacion de gestion de ticket
      */
-    public function actionGetManagementForm($ticket_id)
+    public function actionGetManagementForm($ticket_id, $observation_id)
     {
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new TicketManagement();
-            $form = $this->renderPartial('_new-ticket-management', ['model' => $model, 'ticket_id' => $ticket_id]);
+            $form = $this->renderPartial('_new-ticket-management', ['model' => $model, 'ticket_id' => $ticket_id, 'observation_id' => $observation_id]);
 
             return [
                 'form' => $form

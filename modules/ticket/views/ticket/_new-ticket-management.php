@@ -27,6 +27,10 @@ use yii\helpers\Html;
                         'value' => $ticket_id
                 ]); ?>
 
+                <?= $form->field($model, 'observation_id')->textInput([
+                    'value' => $observation_id
+                ]); ?>
+
                 <?= $form->field($model, 'user_id')->textInput([
                     'value' => Yii::$app->user->getId()
                 ]); ?>

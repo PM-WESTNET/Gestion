@@ -311,7 +311,7 @@ $this->params['breadcrumbs'][] = $this->title;
             bootbox.hideAll();
             $.ajax({
                 url : "<?= Url::to(['get-management-form'])?>",
-                data: $.param({ticket_id: $(btn).data('ticket')}),
+                data: $.param({ticket_id: $(btn).data('ticket'), observation_id: $(btn).data('observation')}),
                 dataType: 'json',
             }).done(function (response) {
                 bootbox.dialog ({

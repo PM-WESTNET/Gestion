@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.13.0] - 13-09-2019
+### Agregado
+ - Las gestiones de ticket se vinculan siempre a una observación.
+### Modificado
+ - Cambios en modal de observaciones, para el registro de gestiones de tickets.
+
 ## [2019.09.12.1] - 12-09-2019
 ### Agregado
  - Reporte de Tickets.
