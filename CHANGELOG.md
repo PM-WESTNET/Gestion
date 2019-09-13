@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.13.1] - 13-09-2019
+### Modificado
+ - Validación de combinación numero de comprobante y proveedor cambiada por numero + proveedor + tipo de comprobante en comprobantes.
+ 
 ## [2019.09.13.0] - 13-09-2019
 ### Agregado
  - Las gestiones de ticket se vinculan siempre a una observación.

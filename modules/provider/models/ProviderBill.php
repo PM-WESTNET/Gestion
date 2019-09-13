@@ -86,7 +86,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             [['payed'],'boolean'],
             [['status'], 'default', 'value' => ProviderBill::STATUS_DRAFT],
             [['company_id', 'number1', 'number2'], 'safe'],
-            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id']],
+            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id', 'bill_type_id']],
             ['number1', 'default' , 'value' => '0000'],
             ['number2', 'default', 'value' => '00000000'],
         ];
