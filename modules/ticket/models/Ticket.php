@@ -684,6 +684,7 @@ class Ticket extends \app\components\db\ActiveRecord {
         $this->unlinkAll('assignations', true);
         $this->unlinkAll('observations', true);
         $this->unlinkAll('completeHistory', true);
+        $this->unlinkAll('ticketManagements', true);
     }
 
     /**

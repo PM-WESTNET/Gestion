@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.13.2] - 13-09-2019
+### Modificado 
+ - Eliminación de ticket implica la eliminación de las gestiones.
+
 ## [2019.09.13.1] - 13-09-2019
 ### Modificado
  - Validación de combinación numero de comprobante y proveedor cambiada por numero + proveedor + tipo de comprobante en comprobantes.
