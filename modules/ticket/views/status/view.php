@@ -40,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app','Action'),
                 'value' => function ($model) {
-                    return $model->actionConfig->action->name;
+                    return $model->actionConfig? $model->actionConfig->action->name : '';
                 }
             ]
         ;

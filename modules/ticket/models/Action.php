@@ -57,7 +57,8 @@ class Action extends \app\components\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name'], 'string', 'max' => 255]
+            [['name'], 'string', 'max' => 255],
+            [['type'], 'safe']
         ];
     }
 
