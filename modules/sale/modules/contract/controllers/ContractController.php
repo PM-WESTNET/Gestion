@@ -775,8 +775,9 @@ class ContractController extends Controller {
                 $customer->code = $code;
                 $customer->payment_code = $emptyAds->payment_code;
                 $customer->company_id = $emptyAds->company_id;
+                $customer->status = Customer::STATUS_ENABLED;
                 $emptyAds->used = true;
-                $customer->updateAttributes(['code', 'payment_code', 'company_id']);
+                $customer->updateAttributes(['code', 'payment_code', 'company_id', 'status']);
                 $emptyAds->updateAttributes(['used']);
             }else{
                 Yii::$app->session->setFlash('error', Yii::t('app', 'This ADS has been used before or not exist'));
@@ -801,6 +802,7 @@ class ContractController extends Controller {
                 if ($cti->createContract($model, $connection)) {
                     $model->customer->sendMobileAppLinkSMSMessage();
                     Ticket::createGestionADSTicket($model->customer_id);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }
@@ -865,6 +867,7 @@ class ContractController extends Controller {
                     //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];
                 }else{
@@ -1060,6 +1063,7 @@ class ContractController extends Controller {
                 
                 if ($connection->updateAttributes(['status_account'])) {
                     $transaction->commit();
+                    $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['view', 'id' => $contract_id]);
                 }else{
                     $transaction->rollBack();

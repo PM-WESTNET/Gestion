@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.09.16.0] - 16-09-2019
+### Agregado
+ - Al activar o desactivar un contrato, el estado del cliente cambia de Activo a Inactivo.
+ 
 ## [2019.09.13.2] - 13-09-2019
 ### Modificado 
  - Eliminación de ticket implica la eliminación de las gestiones.
