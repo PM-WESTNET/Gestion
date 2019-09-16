@@ -3,6 +3,8 @@
 use app\modules\sale\models\Discount;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\ArrayHelper;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\models\CustomerHasDiscount */
@@ -17,11 +19,11 @@ use yii\widgets\ActiveForm;
 
     <?php
         if($model->isNewRecord) {
-            echo $form->field($model, 'discount_id')->dropDownList(
-                \yii\helpers\ArrayHelper::map(\app\modules\sale\models\Discount::find()->all(), 'discount_id', 'name'),[
-                'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')]),
-                'encode'=>false,
-                'separator'=>'<br/>',
+            echo $form->field($model, 'discount_id')->widget(Select2::class, [
+                'data' => ArrayHelper::map(Discount::find()->all(), 'discount_id', 'name'),
+                'pluginOptions' => [
+                    'placeholder' => Yii::t('app', 'Select ...')
+                ]
             ])->label(Yii::t('app','Discount'));
         } else {
             echo Html::activeHiddenInput($model, 'discount_id');
