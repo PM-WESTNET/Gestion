@@ -154,6 +154,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             'contract_id' => TicketModule::t('app', 'Contract'),
             'user_id' => TicketModule::t('app', 'User'),
             'external_tag_id' => TicketModule::t('app', 'Tag'),
+            'task_date' => TicketModule::t('app', 'Task date'),
         ];
     }
 

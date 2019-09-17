@@ -2,9 +2,24 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-
 ## [2019.09.17.2]
  - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
+
+## [2019.09.17.1] - 17-09-2019
+### Modificado
+ - Se modifican las columnas en panel de gestion de instalaciones.
+ 
+## [2019.09.17.0] - 17-09-2019
+### Modificado
+ - Se cambia medio de filtrado en panel de tickets de instalaciones.
+ - Se cambia medio de filtrado en panel de tickets de gestion de cobraza.
+
+## [2019.09.16.1] - 16-09-2019
+### Modificado
+ - Mejora de usabilidad: Cambio en el selector de descuento al crear un descuento al cliente para que permita buscar con autocompletado.
+ - Corrección de error en vista de estado de ticket.
+ - Corrección de error al guardar tipo de acción - Tickets.
+ 
 
 ## [2019.09.16.0] - 16-09-2019
 ### Agregado

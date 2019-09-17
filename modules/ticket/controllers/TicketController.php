@@ -342,6 +342,10 @@ class TicketController extends Controller
 
         $search->category_id = $category->category_id;
 
+        if (!isset($params['TicketSearch']['show_all'])){
+            $search->show_all= true;
+        }
+
         if (!User::hasRole('collection_manager')){
             $search->user_id = Yii::$app->user->id;
         }
@@ -358,6 +362,7 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('installations_category_id'));
         $category2 = Config::getValue('ticket_category_gestion_ads');
@@ -368,11 +373,14 @@ class TicketController extends Controller
 
         $search->categories = [$category->category_id, $category2];
 
+        if (!isset($params['TicketSearch']['show_all'])){
+            $search->show_all= true;
+        }
         if (!User::hasRole('installations_manager')){
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search($params);
 
         return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 
