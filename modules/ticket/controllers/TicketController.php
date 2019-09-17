@@ -332,6 +332,7 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('cobranza_category_id'));
 
@@ -345,7 +346,7 @@ class TicketController extends Controller
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search($params);
 
         return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 

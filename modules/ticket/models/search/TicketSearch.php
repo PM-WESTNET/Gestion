@@ -36,6 +36,7 @@ class TicketSearch extends Ticket {
     public $categories;
     public $start_date_from;
     public $start_date_to;
+    public $show_all;
 
     public function init() {
         parent::init();
@@ -44,9 +45,10 @@ class TicketSearch extends Ticket {
     public function rules() {
         return [
             [['ticket_id'], 'integer'],
+            [['show_all'], 'boolean'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations'], 'safe'],
+            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations', 'show_all'], 'safe'],
         ];
     }
     
@@ -59,6 +61,7 @@ class TicketSearch extends Ticket {
             'created_by' => Yii::t('app', 'Created by'),
             'start_date_from' => Yii::t('app', 'Start date from'),
             'start_date_to' => Yii::t('app', 'Start date to'),
+            'show_all' => Yii::t('app','Show All')
         ]);
     }
 
@@ -166,7 +169,7 @@ class TicketSearch extends Ticket {
             $query->andFilterWhere(['ticket.user_id' => $this->created_by]);
         }
 
-        if($this->user_id) {
+        if($this->user_id && !(boolean)$this->show_all) {
             $query->andFilterWhere(['like', 'user.id', $this->user_id]);
         }
 
