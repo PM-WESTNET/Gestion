@@ -64,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             }
         ],
+        'start_date',
         [
             'header' => TicketModule::t('app', 'Status'),
             'attribute' => 'status_id',
@@ -97,7 +98,12 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-        'title',
+        [
+            'attribute' => 'task_date',
+            'value' => function($model) {
+                return $model->task_id ? $model->task->date : '';
+            }
+        ],
         [
             'label' => Yii::t('app', 'Ticket management quantity'),
             'value' => function($model) {
