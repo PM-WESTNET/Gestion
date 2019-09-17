@@ -35,26 +35,11 @@ class CurrentAccountBalanceController extends Controller
         echo "Clientes con conexiones activas que no han sido actualizados hoy: ". count($customers_to_update) ."\n";
 
         foreach ($customers_to_update as $customer) {
+            $searchModel = new PaymentSearch();
+            $searchModel->customer_id = $customer->customer_id;
+            $total = $searchModel->accountTotal();
 
-            $new_payments = Payment::find()
-                ->where(['customer_id' => $customer->customer_id])
-                ->andWhere(['>', 'date', date('Y-m-d', $customer->last_balance)])
-                ->andWhere(['status' => Payment::PAYMENT_CLOSED])
-                ->exists();
-
-            $new_bills = Bill::find()
-                ->where(['customer_id' => $customer->customer_id])
-                ->andWhere(['>', 'date', date('Y-m-d', $customer->last_balance)])
-                ->andWhere(['status' => Bill::STATUS_CLOSED])
-                ->exists();
-
-            if($new_payments || $new_bills || $customer->last_balance == null) {
-                $searchModel = new PaymentSearch();
-                $searchModel->customer_id = $customer->customer_id;
-                $total = $searchModel->accountTotal();
-
-                $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
-            }
+            $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
         }
     }
 }
