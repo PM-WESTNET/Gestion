@@ -341,10 +341,6 @@ class TicketController extends Controller
 
         $search->category_id = $category->category_id;
 
-        if (!User::hasRole('collection_manager')){
-            $search->user_id = Yii::$app->user->id;
-        }
-
         $dataProvider = $search->search(Yii::$app->request->post());
 
         return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
@@ -366,10 +362,6 @@ class TicketController extends Controller
         }
 
         $search->categories = [$category->category_id, $category2];
-
-        if (!User::hasRole('installations_manager')){
-            $search->user_id = Yii::$app->user->id;
-        }
 
         $dataProvider = $search->search(Yii::$app->request->post());
 

@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ## [2019.09.17.1] - 17-09-2019
- - Se 
+### Modificado
+ - Se modifican las columnas en panel de gestion de instalaciones.
+ 
 ## [2019.09.17.0] - 17-09-2019
 ### Modificado
  - Se cambia medio de filtrado en panel de tickets de instalaciones.
