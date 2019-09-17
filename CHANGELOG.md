@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [2019.09.17.2]
+ - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
 
 ## [2019.09.17.3] - 17-09-2019
 ### Modificado
@@ -23,6 +25,7 @@ All notable changes to this project will be documented in this file.
  - Corrección de error en vista de estado de ticket.
  - Corrección de error al guardar tipo de acción - Tickets.
  
+
 ## [2019.09.16.0] - 16-09-2019
 ### Agregado
  - Al activar o desactivar un contrato, el estado del cliente cambia de Activo a Inactivo.

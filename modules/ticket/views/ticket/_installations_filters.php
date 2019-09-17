@@ -16,6 +16,12 @@ $form= ActiveForm::begin(['method' => 'POST']);
 
 <div class="ticket_filters">
     <div class="row">
+        <div class="col-sm-12" style="text-align: right">
+
+            <?php echo $form->field($model, 'show_all')->checkbox()?>
+        </div>
+    </div>
+    <div class="row">
 
         <div class="col-sm-3">
             <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>

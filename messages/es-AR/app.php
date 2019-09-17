@@ -1225,5 +1225,6 @@
     'Verified by' => 'Verificado por',
     'Tickets report' => 'Reporte de tickets',
     'Ticket quantity' => 'Cantidad de tickets',
+    'Show All' => 'Mostrar todos los Tickets'
 
 );
