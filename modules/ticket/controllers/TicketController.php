@@ -345,7 +345,7 @@ class TicketController extends Controller
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search(Yii::$app->request->post());
 
         return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 
@@ -371,7 +371,7 @@ class TicketController extends Controller
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search(Yii::$app->request->post());
 
         return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 

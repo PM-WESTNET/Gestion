@@ -105,33 +105,6 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         [
-            'label' => Yii::t('app', 'Assignated users'),
-            'value' => function($model) {
-                $assignations = $model->assignations;
-                $assignation_string = '';
-                foreach ($assignations as $assignation) {
-                    $assignation_string .= $assignation->user->username .', ';
-                }
-                return $assignation_string;
-            },
-            'contentOptions' => ['style' => ['max-width' => '250px;']],
-        ],
-        [
-            'header' => Yii::t('app', 'Assign to user'),
-            'attribute' => 'user_id',
-            'value' => function($model) {
-                return Select2::widget([
-                    'name' => 'new_assigned_user',
-                    'data' => ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username'),
-                    'options' => ['data-ticket' => $model->ticket_id , 'class' => 'select_to_assig_to_user', 'placeholder' => Yii::t('app','Select ...')],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ],
-                ]);
-            },
-            'format' => 'raw'
-        ],
-        [
             'class' => 'app\components\grid\ActionColumn',
             'template' => '{current-account}{observations}{register-management}',
             'buttons' => [
