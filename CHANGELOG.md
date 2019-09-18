@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [2019.09.17.2]
  - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
 
+## [2019.09.17.3] - 17-09-2019
+### Modificado
+ - Se modifica cron para actualizar saldo de los clientes.
+ 
 ## [2019.09.17.1] - 17-09-2019
 ### Modificado
  - Se modifican las columnas en panel de gestion de instalaciones.
+ - Se quitan restricciones por usuario para ver tickets de otros en panel de cobranza y panel de gestion de instalaciones.
  
 ## [2019.09.17.0] - 17-09-2019
 ### Modificado
