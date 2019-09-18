@@ -771,6 +771,14 @@ class CustomerController extends Controller
         $date = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('first day of this month')->format('Y-m-d');
         $date_to = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('last day of this month')->format('Y-m-d');
 
+        if (!$customer->getContracts()->andWhere(['contract_id' => $data['contract_id']])->exists()){
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Invalid Contract')
+
+            ];
+        }
 
         if (!$customer->canNotifyPayment($date, $date_to)) {
             \Yii::$app->response->setStatusCode(400);
@@ -780,6 +788,8 @@ class CustomerController extends Controller
 
             ];
         }
+
+
 
         $notify_payment = new NotifyPayment([
             'customer_id' => $customer->customer_id,
