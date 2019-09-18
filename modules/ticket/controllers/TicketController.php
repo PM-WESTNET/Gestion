@@ -332,7 +332,7 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
-        $params = Yii::$app->request->post();
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('cobranza_category_id'));
 
@@ -362,7 +362,7 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
-        $params = Yii::$app->request->post();
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('installations_category_id'));
         $category2 = Config::getValue('ticket_category_gestion_ads');
