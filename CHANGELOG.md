@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-## [2019.08.19.0] - 19-09-2019
+## [2019.09.19.0] - 19-09-2019
 ### Modificado
  - Correccion de fecha de tarea de ticket en panel de tickets de Instalaciones realizadas.
  - Agregado de fecha de tarea de ticket en panel de tickets de cobranza
