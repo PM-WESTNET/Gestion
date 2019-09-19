@@ -360,6 +360,12 @@ class Connection extends ActiveRecord {
      * @return boolean
      */
     public function canForce(){
+
+        //TODO: Remover esta condicion cuando se haya finalizado el desarrollo de IVR
+        if ($this->contract->customer->code === 27237){
+            return true;
+        }
+
         $forcedHistoralSearch = new ConnectionForcedHistorialSearch();
         $forced_param = Config::getValue('times_forced_conn_month');
         $times = $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);
