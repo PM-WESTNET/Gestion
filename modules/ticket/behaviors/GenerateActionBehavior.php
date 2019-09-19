@@ -34,7 +34,7 @@ class GenerateActionBehavior extends Behavior
          * el ticket no se actualice por algun problema
          */
         return [
-            ActiveRecord::EVENT_BEFORE_UPDATE => 'beforeUpdate',
+            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdate',
         ];
     }
 
@@ -42,12 +42,12 @@ class GenerateActionBehavior extends Behavior
      * @param $event
      * Genero una accion, si el estado esta configurado para ello
      */
-    public function beforeUpdate($event)
+    public function afterUpdate($event)
     {
         //Es un objet de la clase Ticket?
         if($event->sender instanceof Ticket) {
             //El estado ha cambiado?
-            if($event->sender->oldAttributes['status_id'] != $event->sender->status_id) {
+            if(isset($event->changedAttributes['status_id'])) {
                 //El estado genera una acción?
                 if($event->sender->status->generate_action) {
                     GeneratedActionsFactory::generate($event->sender);

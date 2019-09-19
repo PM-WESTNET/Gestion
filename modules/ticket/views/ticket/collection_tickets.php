@@ -104,6 +104,12 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
+        [
+            'attribute' => 'task_date',
+            'value' => function($model) {
+                return $model->task_id ? $model->task->date : '';
+            }
+        ],
         'title',
         [
             'label' => Yii::t('app', 'Ticket management quantity'),
