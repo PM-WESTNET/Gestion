@@ -186,6 +186,8 @@ class CustomerSearch extends Customer {
         $this->filterByNodes($query);
         $this->filterByZone($query);
         $this->filterByPlan($query);
+        $this->filterEmailStatus($query);
+        $this->filterMobileAppStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
