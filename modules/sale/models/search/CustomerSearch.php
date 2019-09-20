@@ -768,11 +768,13 @@ class CustomerSearch extends Customer {
 
     private function filterEmailStatus($query){
         if ($this->email_status) {
-            $query->andWhere(['customer.email_status' => $this->email_status]);
+            $query->andFilterWhere(['customer.email_status' => $this->email_status]);
+            $query->andWhere(['<>','customer.email', '']);
         }
 
         if ($this->email2_status) {
-            $query->andWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andFilterWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andWhere(['<>','customer.email2', '']);
         }
     }
 
