@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [2019.09.20.0] - 20-09-2019
+### Modificado
+ - Al filtrar por estados de emails para validar en elastic email, no se tienen en cuenta los
+ clientes con emails vacios.
 ## [2019.09.19.0] - 19-09-2019
 ### Modificado
  - Correccion de fecha de tarea de ticket en panel de tickets de Instalaciones realizadas.
