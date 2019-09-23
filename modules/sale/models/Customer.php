@@ -540,16 +540,28 @@ class Customer extends ActiveRecord {
      * @return Query
      */
     public function getActiveCustomerHasDiscounts($date = null) {
+
         if ($date) {
             $dateNow = $date->format('Y-m-d');
+            $first_day = (new \DateTime($dateNow))->format('Y-m-01');
+            $last_day = (new \DateTime($dateNow))->modify('last day of this month')->format('Y-m-d');
         } else {
-            $dateNow = (new DateTime('now'))->format('Y-m-d');
+            $first_day = (new \DateTime('now'))->format('Y-m-01');
+            $last_day = (new \DateTime('now'))->modify('last day of this month')->format('Y-m-d');
         }
-        return $this
-                        ->hasMany(CustomerHasDiscount::className(), ['customer_id' => 'customer_id'])
-                        ->where("'" . $dateNow . "' between from_date and to_date")
-                        ->andWhere(['status' => Discount::STATUS_ENABLED])
-        ;
+
+        return $this->hasMany(CustomerHasDiscount::class, ['customer_id' => 'customer_id'])
+            ->leftJoin('discount', 'discount.discount_id = customer_has_discount.discount_id')
+            ->where(['and',
+                ['>=', 'customer_has_discount.from_date', $first_day],
+                ['<=', 'customer_has_discount.to_date', $last_day],
+                ['persistent' => null],
+            ])
+            ->orWhere(['and',
+                ['not', ['persistent' => null]],
+                ['customer_has_discount.to_date' => null],
+            ])
+            ->andWhere(['discount.status' => Discount::STATUS_ENABLED]);
     }
 
     /**
@@ -1633,5 +1645,12 @@ class Customer extends ActiveRecord {
     public function hasActiveContract()
     {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    public static function hasFirstBillPayed($customer_id)
+    {
+        $search = new CustomerSearch();
+        $result = $search->searchDebtBills($customer_id);
+        return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
     }
 }

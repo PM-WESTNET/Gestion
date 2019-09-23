@@ -10,6 +10,7 @@ use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\CustomerHasDiscount;
 use app\modules\sale\models\Discount;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\models\search\BillSearch;
@@ -559,10 +560,14 @@ class ContractToInvoice
                                 'concept' => $customerDiscount,
                                 'discount_id' => $customerDiscount->discount->discount_id
                             ]);
+
+                            //Si el descuento es de tipo persistent y ya se aplicó se debe actualizar el estado
+                            if($customerDiscount->discount->persistent) {
+                                $customerDiscount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                            }
                         }
                         unset($customerActiveDiscount[$key]);
                     }
-
                 }
 
                 if($bill->getBillDetails()->exists()) {
