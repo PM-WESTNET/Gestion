@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [2019.09.20.1] - 20-09-2019
+### Modificado
+ - Filtros de estado de emails e instalacion de app agregados a la exportacion de clientes
+## [2019.09.20.0] - 20-09-2019
+### Modificado
+ - Al filtrar por estados de emails para validar en elastic email, no se tienen en cuenta los
+ clientes con emails vacios.
+## [2019.09.19.0] - 19-09-2019
+### Modificado
+ - Correccion de fecha de tarea de ticket en panel de tickets de Instalaciones realizadas.
+ - Agregado de fecha de tarea de ticket en panel de tickets de cobranza
+ 
 ## [2019.09.17.2]
  - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
 
