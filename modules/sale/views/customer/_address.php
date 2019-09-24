@@ -15,6 +15,8 @@ use app\modules\zone\models\Zone;
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
  */
+
+$google_api_key = \app\modules\config\models\Config::getValue('google_maps_api_key');
 ?>
 <div id="address" class="panel panel-default">
     <div class="panel-body">
@@ -115,7 +117,8 @@ use app\modules\zone\models\Zone;
         </div>
     </div>
 </div>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=AIzaSyAftuVHJbcAg7ugSH2nbY80VKUmH_ocE5Y"></script>
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=<?=$google_api_key?>"></script>
 
 <?php if(!isset($hideMap) || $hideMap == false): ?>
 <script type="text/javascript">
