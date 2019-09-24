@@ -21,6 +21,7 @@ class ReferencedDiscount
 
     /**
      * Aplico el ultimo descunto disponible para recomendados.
+     * Se aplica cuando el cliente que ha referenciado ha pagado la primera factura y el cliente referenciado no tiene aplicado el descuento.
      *
      * @param Payment $payment
      * @throws \Exception
@@ -37,18 +38,19 @@ class ReferencedDiscount
                 ->orderBy(['discount_id' => SORT_DESC])->all();
 
             foreach ($discounts as $discount) {
+
                 //Verifico que la primera factura esté pagada y que no tenga un descuento
-                if(Customer::hasFirstBillPayed($payment->customer_id) && !$this->customerHasDiscount($payment->customer_id, $discount->discount_id)) {
+                if(Customer::hasFirstBillPayed($payment->customer_id) && !$this->customerHasDiscount($payment->customer->customer_reference_id, $discount->discount_id)) {
 
                     $chd = new CustomerHasDiscount([
                         'customer_id' => $payment->customer->customer_reference_id,
                         'discount_id' => $discount->discount_id,
                         'status' => CustomerHasDiscount::STATUS_ENABLED,
+                        'from_date' => (new \DateTime('first day of next month'))->format('d-m-Y')
                     ]);
 
                     //Si el descuento es "persistente", no debo indicar fechas.
                     if(!$discount->persistent) {
-                        $chd->from_date = (new \DateTime('first day of next month'))->format('d-m-Y');
                         $chd->to_date = (new \DateTime('last day of next month'))->format('d-m-Y');
                     }
                     $chd->save();
