@@ -255,7 +255,8 @@ class CustomerController extends Controller
             ];
         }
 
-        if (!$customer->canRequestPaymentExtension()) {
+        //TODO: Eliminar segunda condicion al finalizar el desarrollo de IVR
+        if (!$customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
 
             return [
