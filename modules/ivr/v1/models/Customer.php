@@ -94,12 +94,9 @@ class Customer extends \app\modules\sale\models\Customer
     public function extendConnetionInfo()
     {
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
-        $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
-        $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
 
         $contracts = [];
         $payment_extension_requested = $this->getPaymentExtensionQtyRequest();
-        $duration_days = $payment_extension_requested < 1 ? $payment_extension_duration_days_for_free : $payment_extension_duration_days;
 
         foreach ($this->contracts as $contract) {
             $contracts[] = [
@@ -118,9 +115,9 @@ class Customer extends \app\modules\sale\models\Customer
         $payment_extension_info = [
             'code' => $this->code,
             'contracts' => $contracts,
-            'price' => $payment_extension_requested < 1 ? 0 : $price,
+            'price' => $price,
             'from_date' => (new \DateTime('now'))->format('d-m-Y'),
-            'to_date' => (new \DateTime('now'))->modify("+$duration_days days")->format('d-m-Y'),
+            'to_date' =>(new \DateTime('now'))->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())->format('d-m-Y'),
         ];
 
         return $payment_extension_info;

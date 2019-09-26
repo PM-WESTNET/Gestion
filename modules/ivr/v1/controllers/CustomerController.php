@@ -255,7 +255,8 @@ class CustomerController extends Controller
             ];
         }
 
-        if (!$customer->canRequestPaymentExtension()) {
+        //TODO: Eliminar segunda condicion al finalizar el desarrollo de IVR
+        if (!$customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
 
             return [
@@ -346,14 +347,11 @@ class CustomerController extends Controller
             $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
             $create_pti = true;
 
-            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
-                $due_date = date('d-m-Y', $due_timestamp);
-            }else{
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
-                $due_date = date('d-m-Y', $due_timestamp);
-                $create_pti = false;
-            }
+            $due_date =(new \DateTime('now'))
+                ->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())
+                ->format('d-m-Y');
+
+
 
             if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
                 return [
