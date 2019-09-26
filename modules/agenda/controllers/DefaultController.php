@@ -130,7 +130,7 @@ class DefaultController extends Controller {
                     $Event->allDay = true;
                 }
                 $this->setColors($task, $Event);
-                $Event->url = Url::to(['/agenda/task/update', 'id' => $task->task_id, 'agenda' => true], true);
+                $Event->url = Url::to(['/agenda/task/view', 'id' => $task->task_id, 'agenda' => true], true);
                 $events[] = $Event;
             }
         }
