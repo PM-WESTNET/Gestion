@@ -6,6 +6,7 @@ use kartik\widgets\Select2;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\jui\DatePicker;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\models\Discount */
@@ -29,11 +30,14 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'referenced')->checkbox() ?>
 
+    <?= Html::label('Persistente indica que el descuento una vez generado al cliente, no tiene fecha de fin de vigencia, sino que se deshabilita despues de haberse aplicado la primera vez. Esto es para que en caso de no poder aplicarse, en la pŕoxima facturación se intente nuevamente', null, ['class' => 'hint-block']) ?>
+    <?= $form->field($model, 'persistent')->checkbox() ?>
+
     <?= $form->field($model, 'value')->textInput() ?>
 
-    <?= $form->field($model, 'from_date')->widget(\yii\jui\DatePicker::classname(), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
+    <?= $form->field($model, 'from_date')->widget(DatePicker::class, ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
 
-    <?= $form->field($model, 'to_date')->widget(\yii\jui\DatePicker::classname(), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
+    <?= $form->field($model, 'to_date')->widget(DatePicker::class), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
 
     <?= $form->field($model, 'periods')->textInput() ?>
 
@@ -49,7 +53,7 @@ use yii\widgets\ActiveForm;
         Discount::VALUE_FROM_PLAN => Yii::t('app', 'Plan'),
     ],['prompt' => Yii::t('app', 'Select')]) ?>
 
-    <?php echo $form->field($model, 'product_id')->widget(Select2::className(),[
+    <?= $form->field($model, 'product_id')->widget(Select2::className(),[
         'data' => ArrayHelper::map(Product::find()->all(), 'product_id', 'name'),
         'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
         'pluginOptions' => [
@@ -75,7 +79,7 @@ use yii\widgets\ActiveForm;
         }
 
         this.changeApply = function(){
-            if($('#discount-value_from').val() == '<?php echo Discount::VALUE_FROM_PRODUCT ?>') {
+            if($('#discount-value_from').val() == '<?= Discount::VALUE_FROM_PRODUCT ?>') {
                 $('.field-discount-product_id').show();
             } else {
                 $('.field-discount-product_id').hide();

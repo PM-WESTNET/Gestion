@@ -1225,6 +1225,7 @@
     'Verified by' => 'Verificado por',
     'Tickets report' => 'Reporte de tickets',
     'Ticket quantity' => 'Cantidad de tickets',
-    'Show All' => 'Mostrar todos los Tickets'
-
+    'Show All' => 'Mostrar todos los Tickets',
+    'Persistent' => 'Persistente',
+    'If persistent is selected, must be a referenced discount' => 'Si se selecciona persistente, debe ser un descuento recomendado',
 );

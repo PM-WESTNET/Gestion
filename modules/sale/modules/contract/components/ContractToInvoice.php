@@ -295,7 +295,7 @@ class ContractToInvoice
 
     public function invoiceAll($params)
     {
-        Yii::setLogger(new EmptyLogger());
+//        Yii::setLogger(new EmptyLogger());
 
         $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
@@ -390,9 +390,7 @@ class ContractToInvoice
                 $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
-                if($automatically_generated) {
-                    $bill->automatically_generated = true;
-                }
+                $bill->automatically_generated = $automatically_generated ? true : null;
                 $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
@@ -430,7 +428,7 @@ class ContractToInvoice
 
                     // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
                     foreach($contract->contractDetails as $contractDetail) {
-                        if($contractDetail->product->type=='plan' && $includePlan) {
+                        if($contractDetail->product->type == 'plan' && $includePlan) {
                             if (!$contractDetail->isAddedForInvoice($periods)){
                                 $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
 
@@ -450,9 +448,6 @@ class ContractToInvoice
                                 ]);
                                 $pti->save(false);
                             }
-                            /** @var Connection $connection */
-                            $connection = $contract->getConnection()->one();
-                            $node = $connection->node;
                         }
                     }
 
@@ -475,7 +470,7 @@ class ContractToInvoice
 
                         // El proporcional se calcula si el mes de inicio del plan es igual al mes que se esta.
                         if($pti->contract_detail_id) {
-                            if($pti->contractDetail->product->type=='plan') {
+                            if($pti->contractDetail->product->type == 'plan') {
                                 if($includePlan) {
                                     $factorProporcional = 1;
                                     if( $period->format('Ym') == $contractStart->format('Ym') && !$next) {
@@ -500,13 +495,21 @@ class ContractToInvoice
                                 $discounts = Discount::findActiveByProduct($pti->contractDetail->product_id);
                                 $discount = (count($discounts)>0 ?  $discounts[0]: null );
                             }
-
                         }
+
                         if($discount) {
-                            if($discount->type==Discount::TYPE_PERCENTAGE ) {
+                            if($discount->type == Discount::TYPE_PERCENTAGE ) {
                                 $unit_net_discount =  $unit_net_price * ($discount->value/100);
                             } else {
                                 $unit_net_discount =  $discount->value;
+                            }
+
+                            //Si el descuento es de tipo persistente, se debe deshabilitar una vez que ha sido aplicado.
+                            if($discount->persistent) {
+                                $customer_discount = CustomerHasDiscount::find()->where(['discount_id' => $discount->discount_id, 'customer_id' => $bill->customer_id, 'status' => CustomerHasDiscount::STATUS_ENABLED])->one();
+                                if($customer_discount) {
+                                    $customer_discount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                                }
                             }
                         }
 
@@ -535,6 +538,8 @@ class ContractToInvoice
                             'unit_net_discount' => $unit_net_discount
                         ]);
                         $pti->status = 'consumed';
+
+
                         if (!$pti->save(false)) {
                             FlashHelper::flashErrors($pti);
                         }

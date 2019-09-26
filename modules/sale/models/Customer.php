@@ -543,24 +543,22 @@ class Customer extends ActiveRecord {
 
         if ($date) {
             $dateNow = $date->format('Y-m-d');
-            $first_day = (new \DateTime($dateNow))->format('Y-m-01');
-            $last_day = (new \DateTime($dateNow))->modify('last day of this month')->format('Y-m-d');
         } else {
-            $first_day = (new \DateTime('now'))->format('Y-m-01');
-            $last_day = (new \DateTime('now'))->modify('last day of this month')->format('Y-m-d');
+            $dateNow = (new \DateTime('now'))->format('Y-m-d');
         }
 
         return $this->hasMany(CustomerHasDiscount::class, ['customer_id' => 'customer_id'])
             ->leftJoin('discount', 'discount.discount_id = customer_has_discount.discount_id')
             ->where(['and',
-                ['>=', 'customer_has_discount.from_date', $first_day],
-                ['<=', 'customer_has_discount.to_date', $last_day],
+                ['<=', 'customer_has_discount.from_date', $dateNow],
+                ['>=', 'customer_has_discount.to_date', $dateNow],
                 ['persistent' => null],
             ])
             ->orWhere(['and',
                 ['not', ['persistent' => null]],
                 ['customer_has_discount.to_date' => null],
             ])
+            ->andWhere(['customer_has_discount.status' => CustomerHasDiscount::STATUS_ENABLED])
             ->andWhere(['discount.status' => Discount::STATUS_ENABLED]);
     }
 
@@ -1647,6 +1645,9 @@ class Customer extends ActiveRecord {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
     }
 
+    /**
+     * Indica si el cliente tiene la primer factura pagada.
+     */
     public static function hasFirstBillPayed($customer_id)
     {
         $search = new CustomerSearch();

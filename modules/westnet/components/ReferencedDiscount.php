@@ -30,6 +30,7 @@ class ReferencedDiscount
     {
         //Sólo se aplica el descuento a clientes que tengan un cliente referenciado.
         if($payment->customer->customer_reference_id) {
+
             //En Customerhasdicount hacer que no tenga fecha y que tenga otro campo que indique q no vence, sino que se intenta aplicar siempre,
             //hasta que realmente se aplique y se marque como aplicado.
 
@@ -38,7 +39,6 @@ class ReferencedDiscount
                 ->orderBy(['discount_id' => SORT_DESC])->all();
 
             foreach ($discounts as $discount) {
-
                 //Verifico que la primera factura esté pagada y que no tenga un descuento
                 if(Customer::hasFirstBillPayed($payment->customer_id) && !$this->customerHasDiscount($payment->customer->customer_reference_id, $discount->discount_id)) {
 
@@ -57,36 +57,6 @@ class ReferencedDiscount
                 }
             }
         }
-
-//        try {
-//            $discounts = Discount::find()
-//                ->where(['referenced'=>1, 'status' => Discount::STATUS_ENABLED])
-//                ->orderBy(['discount_id'=>SORT_DESC])->all();
-//
-//            if(count($discounts)>0) {
-//                Yii::debug($discounts);
-//                /** @var Discount $discount */
-//                foreach ($discounts as $discount) {
-//                    Yii::debug($discount);
-//                    if ($this->firstInvoicePayed($payment->customer_id) &&
-//                        !$this->customerHasDiscount($payment->customer_id, $discount->discount_id) ) {
-//                        $chd = new CustomerHasDiscount();
-//                        $chd->customer_id = $payment->customer->customer_reference_id;
-//                        $chd->discount_id = $discount->discount_id;
-//                        $chd->status = 'enabled';
-//                        $chd->from_date   = (new \DateTime('first day of next month'))->format('d-m-Y');
-//                        $chd->to_date     = (new \DateTime('last day of next month'))->format('d-m-Y');
-//                        $chd->save();
-//                        break;
-//                    }
-//                }
-//            } else {
-//                throw new \Exception(Yii::t('westnet', 'The discount for referenced is not configurated.'));
-//            }
-//        } catch (\Exception $ex) {
-//            error_log(print_r($ex,1));
-//        }
-
     }
 
     private function customerHasDiscount($customer_id, $discount_id)

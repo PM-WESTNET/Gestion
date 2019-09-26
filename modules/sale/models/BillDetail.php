@@ -151,9 +151,15 @@ class BillDetail extends \app\components\db\ActiveRecord
     //Calcula el subtotal del detalle
     public function getSubtotal()
     {
+        $subtotal = 0.0;
 
-        return round(($this->type == 'discount' || !is_null($this->discount_id) ? ($this->qty * $this->unit_net_discount) : ($this->qty * ($this->unit_net_price - $this->unit_net_discount ) ) ), 2) ;
+        if($this->type == 'discount') {
+            $subtotal = $this->qty * $this->unit_net_discount;
+        } else {
+            $subtotal = $this->qty * ($this->unit_net_price - $this->unit_net_discount);
+        }
 
+        return round($subtotal, 2);
     }
 
     //Calcula el total del detalle
