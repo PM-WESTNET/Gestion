@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.09.26.0] - 26-09-2019
+### Modificado
+ - Se modifica código que permite la eliminación de tickets
+ - Se modifica código del modal para forzado de conexion en cuenta corriente del cliente.
+ 
 ## [2019.09.23.1] - 23-09-2019
 ### Modificado
  - Se modifica la respuesta de la api de APP. Mostraba "Su cuenta presenta deuda" al tener saldo positivo.
