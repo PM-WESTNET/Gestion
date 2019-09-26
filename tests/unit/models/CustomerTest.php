@@ -25,6 +25,8 @@ use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\tests\fixtures\CustomerMessageFixture;
 use app\modules\sale\models\Bill;
 use app\modules\checkout\models\Payment;
+use app\modules\sale\models\CustomerHasDiscount;
+use app\modules\sale\models\Discount;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -80,6 +82,7 @@ class CustomerTest extends \Codeception\Test\Unit
     {
         $model = new Customer([
             'tax_condition_id' => 1,
+            'name' => 'Pepe',
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
@@ -105,6 +108,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
+            'name' => 'Pepe',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -133,6 +137,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Pepe',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -355,6 +360,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
@@ -380,6 +386,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
@@ -409,6 +416,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
+            'name' => 'Cliente1',
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
             'email' => 'customer@gmail.com',
@@ -438,6 +446,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -469,6 +478,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -501,6 +511,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
+            'name' => 'Cliente1',
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
             'email' => 'customer@gmail.com',
@@ -532,6 +543,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -556,6 +568,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -569,6 +582,60 @@ class CustomerTest extends \Codeception\Test\Unit
         $payment->updateAttributes(['status' => Payment::PAYMENT_DRAFT]);
 
         expect('Customer has one draft payment', $model->hasDraftPayments())->true();
+    }
+
+    public function testGetActiveCustomerHasDiscounts()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $discount = new Discount([
+            'name' => 'Descuento1',
+            'status' => Discount::STATUS_ENABLED,
+            'type' => Discount::TYPE_FIXED,
+            'value' => 50,
+            'value_from' => 'plan',
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
+            'periods' => 1,
+            'apply_to' => Discount::APPLY_TO_PRODUCT,
+            'referenced' => 1,
+        ]);
+        $discount->save();
+
+        $chd = new CustomerHasDiscount([
+            'customer_id' => $model->customer_id,
+            'discount_id' => $discount->discount_id,
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
+            'status' => CustomerHasDiscount::STATUS_ENABLED
+        ]);
+        $chd->save();
+
+        expect('Get one discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(1);
+
+        $chd->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+
+        $chd->updateAttributes(['status' => CustomerHasDiscount::STATUS_ENABLED]);
+        $discount->updateAttributes(['status' => Discount::STATUS_DISABLED]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+
+        $discount->updateAttributes(['status' =>  Discount::STATUS_ENABLED]);
+        $chd->updateAttributes(['from_date' => (new \DateTime('now'))->modify('+1 days')->format('Y-m-d')]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
     }
 
     //TODO resto de la clase
