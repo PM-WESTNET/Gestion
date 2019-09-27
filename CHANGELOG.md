@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Modificado
  - Se cambia redireccion al hacer click en tarea desde la agenda a la vista de la tarea.
+ - Se definen filtros por defecto en  vista de agenda.
 
 ## [2019.09.26.0] - 26-09-2019
 ### Modificado
