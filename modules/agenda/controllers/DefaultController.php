@@ -38,11 +38,11 @@ class DefaultController extends Controller {
         }
 
         if(!$searchModel->create_option) {
-            $searchModel->create_option = 'all';
+            $searchModel->create_option = 'me';
         }
 
         if(!$searchModel->user_option) {
-            $searchModel->user_option = 'all';
+            $searchModel->user_option = 'me';
         }
 
         $tasks = $searchModel->searchAgenda();

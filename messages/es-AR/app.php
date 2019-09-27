@@ -1225,6 +1225,19 @@
     'Verified by' => 'Verificado por',
     'Tickets report' => 'Reporte de tickets',
     'Ticket quantity' => 'Cantidad de tickets',
-    'Show All' => 'Mostrar todos los Tickets'
+    'Show All' => 'Mostrar todos los Tickets',
+    'Completed task' => 'Tarea Completa',
+    'In progress task' => 'Tarea en Progreso',
+    'Pending task' => 'Tarea Pendiente',
+    'Stopped task' => 'Tarea Detenida',
+    'Created task' => 'Tarea Creada',
+    'Highest priority' => 'La más Alta Prioridad',
+    'High priority' => 'Prioridad Alta',
+    'Medium priority' => 'Prioridad Media',
+    'Low priority' => 'Prioridad Baja',
+    'Task statuses' => 'Estados de Tarea',
+    'Task priorities' => 'Prioridades de Tarea',
+    'Task creator' => 'Creador de tarea',
+    'Assignations' => 'Asignaciones'
 
 );
