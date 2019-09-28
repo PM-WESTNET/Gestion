@@ -44,6 +44,7 @@ class AccountMovementSearch extends AccountMovement {
     //Conciliaciones
     public $cuit;
     public $cuit2;
+
         
     public function rules() {
         $statuses = ['draft', 'closed', 'conciled', 'broken'];
@@ -56,7 +57,7 @@ class AccountMovementSearch extends AccountMovement {
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
             ['company_id', 'integer'],
-            [['account_movement_id', 'toTime'], 'safe']
+            [['account_movement_id', 'toTime', 'description'], 'safe']
         ];
     }
 
@@ -242,6 +243,7 @@ class AccountMovementSearch extends AccountMovement {
         $query->andFilterWhere(['between', 'account.lft', $this->account_id_from, $this->account_id_to])
                 ->andFilterWhere(['company_id' => $this->company_id]);
 
+        $query->andFilterWhere(['like', 'description', $this->description]);
         //Estado/s de factura
         $this->filterStatus($query);
 
