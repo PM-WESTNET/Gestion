@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.09.30.0]
+### Agregado
+ - Se agregan items de configuración para telefonos de Atención general mostrados en la APP.
+ - Se modifica API de APP para indicar a la app si son con WhatsApp o no.
 ### Modificado
  - Se cambia redireccion al hacer click en tarea desde la agenda a la vista de la tarea.
  - Se definen filtros por defecto en  vista de agenda.
