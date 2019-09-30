@@ -47,7 +47,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                  <?=Yii::t('accounting', 'Conciliate');?> <span class="glyphicon glyphicon-chevron-down"></span>
             </button>
 
-            <span style="display: none" id="conciliate_gif">
+            <span style="display: none" class="conciliate_gif">
                 <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
                 <?php echo Yii::t('app','Conciliating')?>...
             </span>
@@ -101,8 +101,8 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
         <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-chevron-up"></span>
     </button>
 
-    <span  style="display: none" id="conciliate_gif">
-                <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+    <span  style="display: none" id="desconciliate_gif">
+                <img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="">
         <?php echo Yii::t('app','Desconciliating')?>...
     </span>
 
@@ -231,6 +231,10 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     ])?>
                 </div>
                 <div class="modal-footer">
+                    <span style="display: none" class="conciliate_gif">
+                        <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+                                <?php echo Yii::t('app','Conciliating')?>...
+                    </span>
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-success btnModalConciliate" data-type="btnConciliate"><?php echo Yii::t('accounting','Conciliate')?></button>
                 </div>
@@ -289,7 +293,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 method: 'POST',
                 dataType: 'html',
                 beforeSend: function() {
-                    $('#w_resume_items').html('<img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                    $('#w_resume_items').html('<img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
                 },
                 success: function(data){
                     $("#w_resume_items").html(data);
@@ -309,7 +313,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 method: 'POST',
                 dataType: 'html',
                 beforeSend: function() {
-                    $('#movements_grid').html('<img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                    $('#movements_grid').html('<img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
                 },
                 success: function(data){
                     $("#movements_grid").html(data);
@@ -356,10 +360,14 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 dataType: 'json',
                 data: data,
                 beforeSend: function(){
-                    $('#conciliate_gif').show()
+                    $('.conciliate_gif').show()
+                    $('.btnConciliate').attr('disabled', 'disabled');
+                    $('.btnModalConciliate').attr('disabled', 'disabled');
                 },
                 success: function(data){
-                    $('#conciliate_gif').hide()
+                    $('.conciliate_gif').hide();
+                    $('.btnConciliate').removeAttr('disabled');
+                    $('.btnModalConciliate').removeAttr('disabled');
                     if (data.status!="success") {
                         alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
 
@@ -388,9 +396,11 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     data: data,
                     beforeSend: function(){
                         $('#desconciliate_gif').show()
+                        $('.btnDeconciliate').attr('disabled', 'disabled');
                     },
                     success: function(data){
-                        $('#desconciliate_gif').hide()
+                        $('#desconciliate_gif').hide();
+                        $('.btnDeconciliate').removeAttr('disabled');
                         if (data.status!="success") {
                             if (data.message!="") {
                                 alert("<?=Yii::t('app', 'This resource could not be deleted.')?>");
