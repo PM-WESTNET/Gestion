@@ -1228,4 +1228,5 @@
     'Show All' => 'Mostrar todos los Tickets',
     'Persistent' => 'Persistente',
     'If persistent is selected, must be a referenced discount' => 'Si se selecciona persistente, debe ser un descuento recomendado',
+    'More than one referenced discount are enabled' => 'Mas de un descuento por recomendado están activos',
 );

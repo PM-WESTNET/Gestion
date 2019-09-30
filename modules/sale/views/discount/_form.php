@@ -15,7 +15,7 @@ use yii\jui\DatePicker;
 
 <div class="discount-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin()?>
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => 100]) ?>
 
@@ -35,9 +35,9 @@ use yii\jui\DatePicker;
 
     <?= $form->field($model, 'value')->textInput() ?>
 
-    <?= $form->field($model, 'from_date')->widget(DatePicker::class, ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
+    <?= $form->field($model, 'from_date')->widget(DatePicker::class, ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control']]) ?>
 
-    <?= $form->field($model, 'to_date')->widget(DatePicker::class), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
+    <?= $form->field($model, 'to_date')->widget(DatePicker::class, ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control']]) ?>
 
     <?= $form->field($model, 'periods')->textInput() ?>
 
