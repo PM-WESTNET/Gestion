@@ -79,7 +79,7 @@ class ProviderBillController extends Controller
             $model->company_id = \app\modules\sale\models\Company::findDefault()->company_id;
         }
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             $existing_provider_bill = ProviderBill::find()->where(['number' => $model->number1.'-'.$model->number2])->andWhere(['provider_id' => $model->provider_id])->one();
             if ($existing_provider_bill) {
                 \Yii::$app->session->setFlash('error', 'Ya existe una factura con el mismo número para ese provedor');
