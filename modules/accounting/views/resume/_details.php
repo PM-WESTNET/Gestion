@@ -134,8 +134,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
                                  </div>'
 
                     ])->widget(\kartik\select2\Select2::class, [
-                        'data' => ['Fecha' => 'Fecha', 'Descripcion' => 'Descripcion', 'Código' => 'Código', 'Crédito' => 'Crédito', 'Débito' => 'Débito'],
-                        'value' => ['Fecha', 'Descripcion', 'Código', 'Crédito', 'Débito'],
+                        'data' => ['Fecha' => 'Fecha', 'Descripcion' => 'Descripcion', 'Código' => 'Código', 'Debe' => 'Debe', 'Haber' => 'Haber'],
+                        'value' => ['Fecha', 'Descripcion', 'Código', 'Debe', 'Haber'],
                         'maintainOrder' => true,
                         'options' => [
                             'placeholder' => Yii::t('accounting','Columns of File'),

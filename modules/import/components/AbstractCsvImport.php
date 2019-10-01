@@ -170,7 +170,7 @@ abstract class AbstractCsvImport
                         $data[$fieldName."-new"] = utf8_decode($valueFunctions[$fieldName]($value));
                     }
 
-                    if ($fieldName === 'Débito' || $fieldName === 'Crédito') {
+                    if ($fieldName === 'Debe' || $fieldName === 'Haber') {
                         $data[$fieldName] = (double)$value;
                     }else {
                         $data[$fieldName] = utf8_decode($value);

@@ -45,13 +45,13 @@ $cols = array_merge($cols, [
         'attribute'=>'description',
     ],
     [
-        'header'=>Yii::t('app', 'Debit'),
+        'header'=>Yii::t('accounting', 'Debit'),
         'value' => function ($model) {
             return Yii::$app->formatter->asCurrency($model['debit']);
         }
     ],
     [
-        'header'=>Yii::t('app', 'Credit'),
+        'header'=>Yii::t('accounting', 'Credit'),
         'value' => function ($model) {
             return Yii::$app->formatter->asCurrency($model['credit']);
         }
