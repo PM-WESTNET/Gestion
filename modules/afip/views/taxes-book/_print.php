@@ -116,8 +116,7 @@ class Book {
             $this->pageTotals['total'] += $value['total'];
         }
 
-
-        if($this->isExcel)  {
+        if ($this->isExcel) {
             if ($this->model->type == 'buy') {
                 $data = [
                     'date' => Yii::$app->getFormatter()->asDate($value['date']),
@@ -129,16 +128,16 @@ class Book {
             } else {
                 $data = [
                     'date' => Yii::$app->getFormatter()->asDate($value['date']),
-                    'business_name'=>$value['business_name'],
-                    'tax_identification'=>$value['tax_identification'],
-                    'number'=>$value['bill_type'] . " - " . $value['number'],
-                    'net'=>$value['net']
+                    'business_name' => $value['business_name'],
+                    'tax_identification' => $value['tax_identification'],
+                    'number' => $value['bill_type'] . " - " . $value['number'],
+                    'net' => $value['net']
                 ];
             }
 
             foreach ($this->taxes as $tax) {
-                $tax_name = $tax->tax->name . ' ' .($tax->pct*100) . '%';
-                if($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%'){
+                $tax_name = $tax->tax->name . ' ' . ($tax->pct * 100) . '%';
+                if ($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%') {
 
                     if ($this->model->type == 'buy') {
 
@@ -212,18 +211,19 @@ class Book {
             $this->excel->writeRow($data, 0);
 
         } else {
-            ?>
+            echo "<tr>";
 
-            <tr>
+            if ($this->model->type == 'buy') { ?>
                 <td class="date"><?= Yii::$app->getFormatter()->asDate($value['date']) ?></td>
                 <td class="bussines_name"><?= $value['empresa'] ?></td>
                 <td class="tax_identification"><?= $value['numero_documento'] ?></td>
-                <td class="bill"><?=$value['nombre_tipo_comprobante'] . " - " . $value['numero_comprobante'] ?></td>
+                <td class="bill"><?= $value['nombre_tipo_comprobante'] . " - " . $value['numero_comprobante'] ?></td>
                 <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value['neto']) ?></td>
 
+
                 <?php foreach ($this->taxes as $tax) {
-                    $tax_name = $tax->tax->name . ' ' .($tax->pct*100) . '%';
-                    if($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%'){
+                    $tax_name = $tax->tax->name . ' ' . ($tax->pct * 100) . '%';
+                    if ($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%') {
 
                         if ($this->model->type == 'buy') {
 
@@ -292,11 +292,28 @@ class Book {
                             $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'];
                         }
 
-                        echo "<td class='amount'>".Yii::$app->getFormatter()->asCurrency($data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%']) ."</td>";
+                        echo "<td class='amount'>" . Yii::$app->getFormatter()->asCurrency($data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%']) . "</td>";
                     }
                 }
-                echo " <td class='amount'>". Yii::$app->getFormatter()->asCurrency($value['total'])."</td></tr>";?>
-            <?php
+
+                echo " <td class='amount'>" . Yii::$app->getFormatter()->asCurrency($value['total']) . "</td></tr>";
+
+            } else { ?>
+                <td class="date"><?= Yii::$app->getFormatter()->asDate($value['date']) ?></td>
+                <td class="bussines_name"><?= $value['business_name'] ?></td>
+                <td class="tax_identification"><?= $value['tax_identification'] ?></td>
+                <td class="bill"><?= $value['bill_type'] . " - " . $value['number'] ?></td>
+                <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value['net']) ?></td>
+
+                <?php foreach ($this->taxes as $tax) {
+                    $tax_name = $tax->tax->name . ' ' . ($tax->pct * 100) . '%';
+                    if ($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%') {
+                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'];
+                            echo "<td class='amount'>". Yii::$app->getFormatter()->asCurrency($value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%']) ."</td>";
+                     }
+                }
+                echo " <td class='amount'>" . Yii::$app->getFormatter()->asCurrency($value['total']) . "</td></tr>";
+            }
         }
     }
 
