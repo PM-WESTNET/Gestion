@@ -235,12 +235,12 @@ class ConciliationController extends Controller
         $sumMovements = AccountMovementItem::find()
             ->andWhere(['account_movement_item_id' => $movements_ids])
             ->andWhere(['status' => 'draft'])
-            ->sum('COALESCE(debit,0)+COALESCE(credit,0)');
+            ->sum('COALESCE(ABS(debit),0)+COALESCE(ABS(credit),0)');
 
         $sumResume = ResumeItem::find()
             ->andWhere(['resume_item_id' => $resume_items_ids])
             ->andWhere(['status' => 'draft'])
-            ->sum('COALESCE(debit,0)+COALESCE(credit,0)');
+            ->sum('COALESCE(ABS(debit),0)+COALESCE(ABS(credit),0)');
 
 
         // En el caso de que no exista movimiento pero si item en el resumen,
