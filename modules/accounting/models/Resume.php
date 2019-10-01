@@ -291,8 +291,8 @@ class Resume extends \app\components\companies\ActiveRecord
         $total = ['debit' => 0, 'credit'=> 0];
 
         foreach($this->getResumeItems()->all()  as $item) {
-            $total['debit'] +=  ($item->debit > 0 ?  $item->debit : 0 );
-            $total['credit'] +=  ($item->credit > 0 ?  $item->credit : 0 );
+            $total['debit'] +=  (abs($item->debit) > 0 ?  abs($item->debit) : 0 );
+            $total['credit'] +=  (abs($item->credit) > 0 ?  abs($item->credit) : 0 );
         }
         return $total;
     }
