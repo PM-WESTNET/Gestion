@@ -437,7 +437,7 @@ class TaxesBookController extends \app\components\web\Controller
         $searchModel->company_id = $model->company_id;
 
         if ($model->type == 'buy') {
-            $dataProvider = $searchModel->findBuyBills(Yii::$app->request->getQueryParams());
+            $dataProvider = $searchModel->findBuyTxt(Yii::$app->request->getQueryParams());
         } else {
             $dataProvider = $searchModel->findSale(Yii::$app->request->getQueryParams());
         }

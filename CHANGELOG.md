@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.01.0]
+### Modificado
+ - Se corrige la generación en blanco del PDF del libro de compras.
+
 ## [2019.09.30.0]
 ### Agregado
  - Se agregan items de configuración para telefonos de Atención general mostrados en la APP.

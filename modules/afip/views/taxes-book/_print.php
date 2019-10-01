@@ -216,19 +216,86 @@ class Book {
 
             <tr>
                 <td class="date"><?= Yii::$app->getFormatter()->asDate($value['date']) ?></td>
-                <td class="bussines_name"><?= $value['business_name'] ?></td>
-                <td class="tax_identification"><?= $value['tax_identification'] ?></td>
-                <td class="bill"><?= $value['bill_type'] . " - " . $value['number'] ?></td>
-                <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value['net']) ?></td>
+                <td class="bussines_name"><?= $value['empresa'] ?></td>
+                <td class="tax_identification"><?= $value['numero_documento'] ?></td>
+                <td class="bill"><?=$value['nombre_tipo_comprobante'] . " - " . $value['numero_comprobante'] ?></td>
+                <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value['neto']) ?></td>
+
                 <?php foreach ($this->taxes as $tax) {
                     $tax_name = $tax->tax->name . ' ' .($tax->pct*100) . '%';
                     if($tax_name != 'IVA 0%' && $tax_name != 'IVA 5%' && $tax_name != 'IVA 2.5%'){
-                        $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'];
-                    ?>
-                    <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%']) ?></td>
-                <?php }} ?>
-                <td class="amount"><?= Yii::$app->getFormatter()->asCurrency($value['total']) ?></td>
-            </tr>
+
+                        if ($this->model->type == 'buy') {
+
+                            if (($tax->pct * 100) == 21) {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_21'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_21'];
+                            }
+
+                            if (($tax->pct * 100) == 10.5) {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_105'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_105'];
+                            }
+
+                            if (($tax->pct * 100) == 27) {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_27'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_27'];
+                            }
+
+                            //Para evitar que la consulta se realice mas de una vez por tax.
+                            $tax_slug = $tax->tax->slug;
+
+                            if ($tax_slug == 'ingresos-brutos') {
+
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iibb'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iibb'];
+                            }
+
+                            if ($tax_slug == 'cptos-no-grav') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['conceptos_no_incluido_neto'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['conceptos_no_incluido_neto'];
+                            }
+
+                            if ($tax_slug == 'percep-iva') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['percepciones_a_cuenta_iva'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['percepciones_a_cuenta_iva'];
+                            }
+
+                            if ($tax_slug == 'percep-ing-b') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['municipales'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['municipales'];
+                            }
+
+                            if ($tax_slug == 'retenc-iva') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['retencion_iva'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['retencion_iva'];
+                            }
+
+                            if ($tax_slug == 'retenc-ing-b') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['retencion_ingresos_brutos'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['retencion_ingresos_brutos'];
+                            }
+
+                            if ($tax_slug == 'retenc-gan') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['internos'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['internos'];
+                            }
+
+                            if ($tax_slug == 'iva-otros') {
+                                $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['percepciones_a_cuenta_otros'];
+                                $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['percepciones_a_cuenta_otros'];
+                            }
+
+
+                        } else {
+                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'];
+                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'];
+                        }
+
+                        echo "<td class='amount'>".Yii::$app->getFormatter()->asCurrency($data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%']) ."</td>";
+                    }
+                }
+                echo " <td class='amount'>". Yii::$app->getFormatter()->asCurrency($value['total'])."</td></tr>";?>
             <?php
         }
     }
