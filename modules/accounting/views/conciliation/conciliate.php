@@ -187,7 +187,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                         <div class="col-sm-2 text-center">
                             <strong><?= Yii::t('accounting', 'Resume Balance'); ?></strong>
                             <br/>
-                            <?= Yii::$app->formatter->asCurrency(-$totalResumeDebit + $totalResumeCredit) ?>
+                            <?= Yii::$app->formatter->asCurrency(-$totalResumeDebit - $totalResumeCredit) ?>
                         </div>
                     </div>
                     <?php $totals = $model->getTotals()?>

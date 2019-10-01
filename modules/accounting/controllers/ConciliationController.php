@@ -259,7 +259,7 @@ class ConciliationController extends Controller
                     $operation = $resModel->operationType;
                     $item->addResumeItem($resModel, true, $partnerDistribution);
                     $resModel->updateAttributes(['ready' => true]);
-                    $item->amount += (-$resModel->debit + $resModel->credit);
+                    $item->amount += ($resModel->debit - $resModel->credit);
                     $status = "success";
                 }
             }
