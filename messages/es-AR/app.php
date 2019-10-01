@@ -1126,5 +1126,6 @@
     'Mobile app data edition tickets' => 'Tickets de edición de datos desde aplicación',
     'Mobile app registration tickets' => 'Tickets de registro de aplicación',
     'Request data edition tickets' => 'Tickets de solicitud de edición de datos',
-    'Mobile app status' => 'Estado de la aplicación móvil'
+    'Mobile app status' => 'Estado de la aplicación móvil',
+    'Date must be greater than {date}' => 'Fecha debe ser mayor a {date}'
 );

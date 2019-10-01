@@ -5,6 +5,7 @@ namespace app\modules\provider\models;
 use app\modules\accounting\components\AccountMovementRelationManager;
 use app\modules\accounting\components\CountableInterface;
 use app\modules\accounting\components\CountableMovement;
+use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\TaxRate;
@@ -89,6 +90,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             ['number', 'unique', 'targetAttribute' => ['number', 'provider_id']],
             ['number1', 'default' , 'value' => '0000'],
             ['number2', 'default', 'value' => '00000000'],
+            ['date', 'validateMinimunDate']
         ];
     }
 
@@ -202,6 +204,18 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     public function getPartnerDistributionModel()
     {
         return $this->hasOne(PartnerDistributionModel::className(), ['partner_distribution_model_id' => 'partner_distribution_model_id']);
+    }
+
+    /**
+     * Valida la fecha minima de creación del comprobante.
+     */
+    public function validateMinimunDate($attribute, $params) {
+        $days = Config::getValue('limit_days_to_create_provider_bill') ;
+        $min_date = (new \DateTime('now'))->modify("-$days days")->format('Y-m-d');
+
+        if($this->date < $min_date) {
+            $this->addError($attribute, Yii::t('app', 'Date must be greater than {date}' , ['date' => $min_date]));
+        }
     }
 
     /**
