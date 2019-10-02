@@ -130,6 +130,7 @@ if (Yii::$app->getModule('afip')) {
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Payments'), 'url'=>['/checkout/payment/index']],
         ['label'=>Yii::t('app','Notify payments'), 'url'=>['/westnet/notify-payment']],
+        ['label'=>Yii::t('app','Programmatic Change Plan'), 'url'=>['/sale/contract/programmatic-change-plan/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Profile Classes'), 'url'=>['/sale/profile-class/index']],
         ['label'=>'<li class="divider"></li>', 'encode'=>false],
