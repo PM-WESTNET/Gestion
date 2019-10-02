@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.02.0] - 02-10-2019
+### Modificado
+ - Se modifica la forma en la que se calcula el neto de los comprobantes cuando se les aplica al total un descuento fijo.
+ - Se modifica PDF de libro de IVA compras y ventas.
+ - Se modifica Excel de libro de IVA compras y ventas.
+
 ## [2019.10.01.0]
 ### Modificado
  - Se corrige la generación en blanco del PDF del libro de compras.

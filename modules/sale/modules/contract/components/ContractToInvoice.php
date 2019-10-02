@@ -449,9 +449,6 @@ class ContractToInvoice
                                 ]);
                                 $pti->save(false);
                             }
-                            /** @var Connection $connection */
-                            $connection = $contract->getConnection()->one();
-                            $node = $connection->node;
                         }
                     }
 
