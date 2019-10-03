@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.03.0] - 03-10-2019
+### Modificado
+ - Modificación del proceso de creación de extensión de pago para IVR solicitado por Laura Mineo
+ 
 ## [2019.10.02.0] - 02-10-2019
 ### Modificado
  - Se modifica la forma en la que se calcula el neto de los comprobantes cuando se les aplica al total un descuento fijo.
