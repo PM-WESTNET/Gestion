@@ -331,7 +331,7 @@ class CustomerController extends Controller
             ];
         }
 
-        $contract = Contract::find()->andWhere(['customer_id' => $customer->customer_id])->one();
+        $contract = Contract::find()->andWhere(['customer_id' => $customer->customer_id, 'status' => Contract::STATUS_ACTIVE])->one();
 
         if (empty($contract)) {
             Yii::$app->response->setStatusCode(400);
