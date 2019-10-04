@@ -24,7 +24,7 @@ use yii\db\ActiveRecord;
  * @property Product $product
  * @property User $user
  */
-class ProgrammaticChangePlan extends \yii\db\ActiveRecord
+class ProgrammedPlanChange extends \yii\db\ActiveRecord
 {
 
     public $customer_id;
@@ -33,7 +33,7 @@ class ProgrammaticChangePlan extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'programmatic_change_plan';
+        return 'programmed_plan_change';
     }
 
     public function behaviors()
@@ -87,9 +87,10 @@ class ProgrammaticChangePlan extends \yii\db\ActiveRecord
             'applied' => Yii::t('app', 'Applied'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
-            'contract_id' => Yii::t('app', 'Contract ID'),
-            'product_id' => Yii::t('app', 'Product ID'),
-            'user_id' => Yii::t('app', 'User ID'),
+            'contract_id' => Yii::t('app', 'Contract'),
+            'product_id' => Yii::t('app', 'Plan'),
+            'user_id' => Yii::t('app', 'User'),
+            'customer_id' => Yii::t('app', 'Customer'),
         ];
     }
 
@@ -139,5 +140,14 @@ class ProgrammaticChangePlan extends \yii\db\ActiveRecord
     public function formatDatesAfterFind()
     {
         $this->date = Yii::$app->formatter->asDate($this->date, 'dd-MM-yyyy');
+    }
+
+    public function getDeletable()
+    {
+        if($this->applied) {
+            return false;
+        }
+
+        return true;
     }
 }

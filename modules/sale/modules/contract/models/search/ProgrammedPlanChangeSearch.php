@@ -5,12 +5,12 @@ namespace app\modules\sale\modules\contract\models\search;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\sale\modules\contract\models\ProgrammaticChangePlan;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 
 /**
- * ProgrammaticChangePlanSearch represents the model behind the search form of `app\modules\sale\modules\contract\models\ProgrammaticChangePlan`.
+ * ProgrammedPlanChangeSearch represents the model behind the search form of `app\modules\sale\modules\contract\models\ProgrammedPlanChange`.
  */
-class ProgrammaticChangePlanSearch extends ProgrammaticChangePlan
+class ProgrammedPlanChangeSearch extends ProgrammedPlanChange
 {
     public $customer_id;
     /**
@@ -19,7 +19,8 @@ class ProgrammaticChangePlanSearch extends ProgrammaticChangePlan
     public function rules()
     {
         return [
-            [['programmatic_change_plan_id', 'date', 'applied', 'created_at', 'updated_at', 'contract_id', 'product_id', 'user_id'], 'integer'],
+            [['programmed_plan_change_id', 'applied', 'created_at', 'updated_at', 'contract_id', 'product_id', 'user_id', 'customer_id'], 'integer'],
+            [['date'], 'safe']
         ];
     }
 
@@ -41,7 +42,7 @@ class ProgrammaticChangePlanSearch extends ProgrammaticChangePlan
      */
     public function search($params)
     {
-        $query = ProgrammaticChangePlan::find();
+        $query = ProgrammedPlanChange::find();
 
         // add conditions that should always apply here
 
@@ -59,15 +60,30 @@ class ProgrammaticChangePlanSearch extends ProgrammaticChangePlan
 
         // grid filtering conditions
         $query->andFilterWhere([
-            'programmatic_change_plan_id' => $this->programmatic_change_plan_id,
-            'date' => $this->date,
-            'applied' => $this->applied,
+            'programmed_plan_change_id' => $this->programmed_plan_change_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'contract_id' => $this->contract_id,
             'product_id' => $this->product_id,
             'user_id' => $this->user_id,
         ]);
+
+        if($this->date) {
+            $date = (new \DateTime($this->date))->getTimestamp();
+            $query->andFilterWhere(['date' => $date]);
+        }
+
+        if($this->customer_id) {
+            $query->leftJoin('contract', 'contract.contract_id = programmed_plan_change.contract_id')
+                ->andFilterWhere(['contract.customer_id' => $this->customer_id]);
+        }
+
+        if($this->applied) {
+            $query->andFilterWhere(['applied' => 1]);
+        } else {
+            $query->andFilterWhere(['applied' => null]);
+        }
+
+        $query->orderBy(['date' => SORT_DESC]);
 
         return $dataProvider;
     }

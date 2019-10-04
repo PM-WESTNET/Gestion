@@ -1,12 +1,12 @@
 <?php namespace models;
 
-use app\modules\sale\modules\contract\models\ProgrammaticChangePlan;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use app\tests\fixtures\ContractDetailFixture;
 use app\tests\fixtures\ContractFixture;
 use app\tests\fixtures\ProductFixture;
 use app\tests\fixtures\UserFixture;
 
-class ProgrammaticChangePlanTest extends \Codeception\Test\Unit
+class ProgrammedPlanChangeTest extends \Codeception\Test\Unit
 {
     /**
      * @var \UnitTester
@@ -39,8 +39,27 @@ class ProgrammaticChangePlanTest extends \Codeception\Test\Unit
         ];
     }
 
+    public function testInvalidWhenNewAndEmppty()
+    {
+        $model = new ProgrammedPlanChange();
+
+        expect('Invalid when empty and new', $model->validate())->false();
+    }
+
+    public function testValidWhenNewAndFull()
+    {
+        $model = new ProgrammedPlanChange([
+            'date' =>  (new \DateTime('now'))->modify('+5 days'),
+            'contract_id' => 1,
+            'product_id' => 4,
+            'user_id' => 1,
+        ]);
+
+        expect('Valid when new and full', $model->validate())->true();
+    }
+
     public function testSaveSuccess() {
-        $model = new ProgrammaticChangePlan();
+        $model = new ProgrammedPlanChange();
 
         $model->date = (new \DateTime('now'))->modify('+5 days');
         $model->contract_id = 1;
@@ -52,7 +71,7 @@ class ProgrammaticChangePlanTest extends \Codeception\Test\Unit
     }
 
     public function testSaveFailWithBeforeDate() {
-        $model = new ProgrammaticChangePlan();
+        $model = new ProgrammedPlanChange();
 
         $model->date = (new \DateTime('now'))->modify('-5 days');
         $model->contract_id = 1;

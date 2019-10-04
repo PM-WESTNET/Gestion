@@ -7,26 +7,30 @@ use app\modules\sale\models\Customer;
 use app\modules\sale\modules\contract\models\Contract;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
-use app\modules\sale\modules\contract\models\ProgrammaticChangePlan;
-use app\modules\sale\modules\contract\models\search\ProgrammaticChangePlanSearch;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
+use app\modules\sale\modules\contract\models\search\ProgrammedPlanChangeSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\modules\sale\modules\contract\models\Plan;
 
 /**
- * ProgrammaticChangePlanController implements the CRUD actions for ProgrammaticChangePlan model.
+ * ProgrammedPlanChangeController implements the CRUD actions for ProgrammedPlanChange model.
  */
-class ProgrammaticChangePlanController extends Controller
+class ProgrammedPlanChangeController extends Controller
 {
 
     /**
-     * Lists all ProgrammaticChangePlan models.
+     * Lists all ProgrammedPlanChange models.
      * @return mixed
      */
-    public function actionIndex()
+    public function actionIndex($customer_id = null)
     {
-        $searchModel = new ProgrammaticChangePlanSearch();
+        $searchModel = new ProgrammedPlanChangeSearch();
+        if($customer_id != null) {
+            $searchModel->customer_id = $customer_id;
+        }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
@@ -36,7 +40,7 @@ class ProgrammaticChangePlanController extends Controller
     }
 
     /**
-     * Displays a single ProgrammaticChangePlan model.
+     * Displays a single ProgrammedPlanChange model.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -49,20 +53,20 @@ class ProgrammaticChangePlanController extends Controller
     }
 
     /**
-     * Creates a new ProgrammaticChangePlan model.
+     * Creates a new ProgrammedPlanChange model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
     public function actionCreate($contract_id = null, $customer_id = null)
     {
-        $model = new ProgrammaticChangePlan();
+        $model = new ProgrammedPlanChange([
+            'user_id' => Yii::$app->user->getId()
+        ]);
         $customer = null;
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->programmatic_change_plan_id]);
-        }
 
-        $queryPlans = \app\modules\sale\models\Product::find()
-            ->andWhere(['type' => 'plan', 'status' => 'enabled']);
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            return $this->redirect(['view', 'id' => $model->programmed_plan_change_id]);
+        }
 
         if ($contract_id) {
             $contract = Contract::findOne($contract_id);
@@ -71,14 +75,7 @@ class ProgrammaticChangePlanController extends Controller
                 throw new BadRequestHttpException('Contract not found');
             }
             $customer =  $contract->customer;
-
-            $queryPlans->joinWith('categories');
-            if ($customer->customerCategory->name === 'Familia') {
-                $queryPlans->andWhere(['category.system' => 'planes-de-internet-residencial']);
-            }elseif  ($customer->customerCategory->name === 'Empresa') {
-                $queryPlans->andWhere(['category.system' => 'planes-de-internet-empresa']);
-            }
-
+            $model->customer_id = $customer->customer_id;
             $model->contract_id = $contract_id;
         }
 
@@ -90,27 +87,19 @@ class ProgrammaticChangePlanController extends Controller
             }
 
             $contract = Contract::findOne(['customer_id' => $customer->customer_id]);
-            $queryPlans->joinWith('categories');
-            if ($customer->customerCategory->name === 'Familia') {
-                $queryPlans->andWhere(['category.system' => 'planes-de-internet-residencial']);
-            }elseif  ($customer->customerCategory->name === 'Empresa') {
-                $queryPlans->andWhere(['category.system' => 'planes-de-internet-empresa']);
-            }
-
+            $model->customer_id = $customer->customer_id;
             $model->contract_id = $contract->contract_id;
         }
 
-        $planes = \yii\helpers\ArrayHelper::map($queryPlans->all(),'product_id', 'name');
-
         return $this->render('create', [
             'model' => $model,
-            'planes' => $planes,
             'customer' => $customer,
+            'contract_id' => $contract_id,
         ]);
     }
 
     /**
-     * Updates an existing ProgrammaticChangePlan model.
+     * Updates an existing ProgrammedPlanChange model.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param integer $id
      * @return mixed
@@ -121,7 +110,7 @@ class ProgrammaticChangePlanController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->programmatic_change_plan_id]);
+            return $this->redirect(['view', 'id' => $model->programmed_plan_change_id]);
         }
 
         return $this->render('update', [
@@ -130,7 +119,7 @@ class ProgrammaticChangePlanController extends Controller
     }
 
     /**
-     * Deletes an existing ProgrammaticChangePlan model.
+     * Deletes an existing ProgrammedPlanChange model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param integer $id
      * @return mixed
@@ -144,15 +133,15 @@ class ProgrammaticChangePlanController extends Controller
     }
 
     /**
-     * Finds the ProgrammaticChangePlan model based on its primary key value.
+     * Finds the ProgrammedPlanChange model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return ProgrammaticChangePlan the loaded model
+     * @return ProgrammedPlanChange the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id)
     {
-        if (($model = ProgrammaticChangePlan::findOne($id)) !== null) {
+        if (($model = ProgrammedPlanChange::findOne($id)) !== null) {
             return $model;
         }
 

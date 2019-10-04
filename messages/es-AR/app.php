@@ -1238,6 +1238,13 @@
     'Task statuses' => 'Estados de Tarea',
     'Task priorities' => 'Prioridades de Tarea',
     'Task creator' => 'Creador de tarea',
-    'Assignations' => 'Asignaciones'
-
+    'Assignations' => 'Asignaciones',
+    'Programmed plan changes' => 'Cambios de velocidad programados',
+    'Programmed plan change' => 'Cambio de velocidad programada',
+    'Create programmed plan change' => 'Crear cambio de velocidad programado',
+    'Applied' => 'Aplicado',
+    'User' => 'Usuario',
+    'Created At' => 'Creado en',
+    'Updated At' => 'Actualizado en',
+    'Create programmed plan change' => 'Crear cambio de velocidad programada',
 );
