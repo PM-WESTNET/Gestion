@@ -168,8 +168,12 @@ class BillDetail extends \app\components\db\ActiveRecord
         return round($this->qty * $this->unit_final_price, 2) ;
     }
 
-    public function getTotalDiscount()
+    public function getTotalDiscount($withTaxes = false)
     {
+        if($withTaxes) {
+            return round($this->qty * ($this->unit_net_discount * 1.21), 2);
+        }
+
         return round($this->qty * $this->unit_net_discount, 2) ;
     }
 
