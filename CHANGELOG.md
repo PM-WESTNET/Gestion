@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 ## [2019.10.07.0] - 07-10-2019
 ### Modificado
  - Exportacion de libro IVA ventas: Se modifica consulta para optimizar tiempos de espera. 
+
+## [2019.10.03.0] - 03-10-2019
+### Modificado
+ - Modificación del proceso de creación de extensión de pago para IVR solicitado por Laura Mineo
  
 ## [2019.10.02.0] - 02-10-2019
 ### Modificado

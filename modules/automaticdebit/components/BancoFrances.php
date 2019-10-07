@@ -73,7 +73,7 @@ class BancoFrances implements BankInterface
         $totalOperations = 0;
         $totalAmount = 0;
         foreach ($debits as $debit) {
-            $bills = $this->getCustomerBills($debit->customer_id, $this->periodFrom, $this->periodTo);
+            $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
 
             foreach ($bills as $bill) {
                 $resource = $this->addFirstLine($resource, $debit, $bill, $export->concept);
@@ -437,7 +437,7 @@ class BancoFrances implements BankInterface
      * @throws InvalidConfigException
      * Obtiene los comprobantes de un cliente pendientes de pago.
      */
-    private function getCustomerBills($customer_id, $fromDate = null, $toDate = null)
+    private function getCustomerBills($customer_id, $company_id, $fromDate = null, $toDate = null)
     {
         $bills = Bill::find()
             ->leftJoin('bill_has_export_to_debit bhtd', 'bhtd.bill_id=bill.bill_id')
@@ -449,6 +449,7 @@ class BancoFrances implements BankInterface
             ->andWhere(['bill.status' => 'closed'])
             ->andWhere(['bt.multiplier' => 1])
             ->andWhere(['LIKE', 'bt.class', 'app\modules\sale\models\bills\Bill'])
+            ->andWhere(['bill.company_id' => $company_id])
             ->all();
 
         return $bills;

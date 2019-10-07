@@ -371,7 +371,7 @@ class Connection extends ActiveRecord {
         $times = $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);
         
                 
-        if ((int)$times < (int)$forced_param) {
+        if ((int)$times < (int)$forced_param && $this->status === self::STATUS_ENABLED && $this->contract->status === Contract::STATUS_ACTIVE) {
             return true;
         }else{
             return false;

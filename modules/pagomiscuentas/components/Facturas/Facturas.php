@@ -40,7 +40,7 @@ class Facturas extends AbstractExportWriter
             }
 
             $this->addLine(new Trailer(), [
-                'company'   => $this->data['company'],
+                'company'   => str_pad($this->data['company'], 4, '0', STR_PAD_LEFT),
                 'date'      => (new \DateTime('now'))->format('Ymd'),
                 'cantidad'  => $cantidad,
                 'total'     => $total
