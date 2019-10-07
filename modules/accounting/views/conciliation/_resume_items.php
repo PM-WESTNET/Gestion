@@ -66,7 +66,7 @@ if ($resumeItemsDataProvider) {
         //'layout'=> '{items}',
         'id'=> 'w_resume_items_debit',
         'dataProvider' => $resumeItemsDataProvider,
-        'rowOptions' => function ($model) {
+        /**'rowOptions' => function ($model) {
             if ($model->ready) {
                 return [
                     'style' => 'background-color: #7FFFB2'
@@ -74,7 +74,7 @@ if ($resumeItemsDataProvider) {
             }
 
             return [];
-        },
+        },**/
         'summary' => '',
         'columns' => $cols
     ]);
