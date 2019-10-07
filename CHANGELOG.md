@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.07.0] - 07-10-2019
+### Modificado
+ - Exportacion de libro IVA ventas: Se modifica consulta para optimizar tiempos de espera. 
+ 
 ## [2019.10.02.0] - 02-10-2019
 ### Modificado
  - Se modifica la forma en la que se calcula el neto de los comprobantes cuando se les aplica al total un descuento fijo.

@@ -427,6 +427,8 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionPrint($id)
     {
         set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
         Yii::$app->response->format = 'pdf';
         $this->layout = '//pdf';
@@ -453,6 +455,8 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionExportExcel($id)
     {
         set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
         Yii::$app->htmlToPdf->options['orientation'] = 'landscape';
         $searchModel  = new TaxesBookSearch();
@@ -480,6 +484,8 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionIibbProducts()
     {
         set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $isSearch = Yii::$app->request->post('search', true);
         if($isSearch) {
             $iibb = new IibbSearch();
@@ -501,6 +507,8 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionExportExcelIIBB()
     {
         set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $iibb = new IibbSearch();
         $iibb->load(Yii::$app->request->bodyParams);
 
@@ -535,6 +543,8 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionExportTxt($id, $type)
     {
         set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
 
         $searchModel  = new TaxesBookSearch();
