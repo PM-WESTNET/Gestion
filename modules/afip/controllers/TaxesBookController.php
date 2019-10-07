@@ -22,6 +22,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\components\helpers\EmptyLogger;
 
 /**
  * TaxesBookController implements the CRUD actions for TaxesBook model.
