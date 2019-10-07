@@ -64,6 +64,7 @@ class ProgrammedPlanChange extends \yii\db\ActiveRecord
             [['product_id'], 'exist', 'skipOnError' => true, 'targetClass' => Product::class, 'targetAttribute' => ['product_id' => 'product_id']],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
             ['date', 'validateDate'],
+            ['applied' , 'default', 'value' => 0]
         ];
     }
 

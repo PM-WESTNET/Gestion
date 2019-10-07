@@ -65,7 +65,8 @@ class ProgrammedPlanChangeController extends Controller
         $customer = null;
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->programmed_plan_change_id]);
+            Yii::$app->session->addFlash('success', Yii::t('app','Programmed Plan Change created successfull'));
+            return $this->redirect(['index']);
         }
 
         if ($contract_id) {

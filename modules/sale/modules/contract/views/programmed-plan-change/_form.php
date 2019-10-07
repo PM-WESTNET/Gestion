@@ -70,21 +70,16 @@ use kartik\depdrop\DepDrop;
         this.init = function(){
             if($('#programmedplanchange-customer_id').val() !== ''){
                 $('#programmedplanchange-customer_id').trigger({type: 'select2:select'});
-                $('#select-contract-id').val(44784);
+                $('#select-contract-id').val("<?= $contract_id ?>");
+
+                $('#programmedplanchange-customer_id').on('change', function () {
+                    console.log('change');
+                });
+
+
+
             }
 
-            $('#programmedplanchange-customer_id').on('change', function () {
-                console.log('change');
-            });
-
-            $('#select-contract-id').on('change', function () {
-                console.log('change contract');
-                $('#select-contract-id').val(44784);
-            });
-
-            $('#select-contract-id').on('depdrop:init', function(event) {
-                console.log('init')
-            });
 
             $(document).off("click", "#plan-show_in_ads").on("click", "#plan-show_in_ads", function(evt){
                 self.nameAds($(this).is(':checked'));

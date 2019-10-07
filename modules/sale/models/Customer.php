@@ -13,6 +13,7 @@ use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\westnet\models\NotifyPayment;
@@ -1637,5 +1638,23 @@ class Customer extends ActiveRecord {
     public function hasActiveContract()
     {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    public function hasPendingPlanChange() {
+        $contracts = Contract::find()->andWhere(['customer_id' => $this->customer_id, 'status' => Contract::STATUS_ACTIVE])->all();
+        $ids = array_map(function($contract) { return $contract->contract_id;}, $contracts);
+
+        return ProgrammedPlanChange::find()->andWhere(['contract_id' => $ids, 'applied' => false])->exists();
+    }
+
+    public function getPendingPlanChange()
+    {
+        $change = ProgrammedPlanChange::find()
+            ->innerJoin('contract c', 'c.contract_id=programmed_plan_change.contract_id')
+            ->andWhere(['c.customer_id' => $this->customer_id, 'c.status' => Contract::STATUS_ACTIVE, 'applied' => false])
+            ->orderBy(['programmed_plan_change.date' => SORT_DESC])
+            ->one();
+
+        return $change;
     }
 }

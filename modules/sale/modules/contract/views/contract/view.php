@@ -26,6 +26,15 @@ $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
 ?>
 <div class="contract-view">
+    <?php
+    if ($model->hasPendingPlanChange()):
+        ?>
+        <?php $change = $model->getPendingPlanChange()?>
+        <div class="alert alert-warning">
+            <h4><?php echo Yii::t('app','This contract has pending programmed plan change for {date}', ['date' => $change->date])?></h4>
+        </div>
+    <?php endif; ?>
+
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
