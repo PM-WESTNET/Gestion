@@ -364,7 +364,7 @@ $companyData = $model->company;
             </td>
             <!-- Precio -->
             <td style="width: 130px; float:left;">
-                <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?=round($discount,2)?></h5>
+                <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($discount,2)?></h5>
             </td>
         <?php } ?>
         <!-- Item -->
@@ -373,7 +373,7 @@ $companyData = $model->company;
         </td>
         <!-- Precio -->
         <td style="width: 130px; float:left;">
-            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?=round($model->calculateTotal(),2)?></h5>
+            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($model->calculateTotal(),2)?></h5>
         </td>
     </tr>
     <tr style="padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
