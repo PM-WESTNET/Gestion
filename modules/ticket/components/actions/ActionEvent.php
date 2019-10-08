@@ -47,6 +47,11 @@ class ActionEvent extends Action implements ActionInterface
             'users' => $users,
             'creator_id' => $user_id
         ]);
-        $new_task->save();
+
+        if ($new_task->save()){
+            $ticket->task_id= $new_task->task_id;
+            $ticket->updateAttributes(['task_id']);
+        }
+
     }
 }

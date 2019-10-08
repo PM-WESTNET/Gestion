@@ -104,7 +104,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'code',
                 'web',
                 'portal_web',
-                'pagomiscuentas_code'
+                [
+                    'attribute' => 'pagomiscuentas_code',
+                    'value' => function ($model){
+                        return str_pad($model->pagomiscuentas_code, 4, '0', STR_PAD_LEFT);
+                    }
+                ],
             ],
         ]) ?>
    </div>

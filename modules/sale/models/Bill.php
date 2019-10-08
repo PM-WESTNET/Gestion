@@ -404,7 +404,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateAmount()
     {
-        $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
+        $discountFixedDetail = $this->getFixedDiscountPerDetail(true, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(true);
 
         $amount = 0.0;

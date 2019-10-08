@@ -64,6 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'CustomerSearch[customer_status]' => $searchModel->customer_status,
                 'CustomerSearch[connection_status]' => $searchModel->connection_status,
                 'CustomerSearch[contract_status]' => $searchModel->contract_status,                   
+                'CustomerSearch[email_status]' => $searchModel->email_status,
+                'CustomerSearch[email2_status]' => $searchModel->email2_status,
+                'CustomerSearch[mobile_app_status]' => $searchModel->mobile_app_status,
                 ];
             }
         echo Html::a('<span class="glyphicon glyphicon-export"></span> '.Yii::t('app', 'Export'), Url::to($params), ['class'=> 'btn btn-warning', 'target' => '_blank']);

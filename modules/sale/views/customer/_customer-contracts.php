@@ -206,8 +206,10 @@ foreach ($contracts->getModels() as $contract) {
                     });
                 }
             }else{
-                $('#message-con').html('<div class="alert alert-danger">Por favor, complete fecha de vencimiento y motivo.</div>');
+                $('.errormessages').html('<div class="alert alert-danger">Por favor, complete fecha de vencimiento y motivo.</div>');
             }
         }
     }
 </script>
+
+<?php $this->registerJs('ContractList') ?>

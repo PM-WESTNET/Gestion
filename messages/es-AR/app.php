@@ -1228,5 +1228,18 @@
     'Show All' => 'Mostrar todos los Tickets',
     'Persistent' => 'Persistente',
     'If persistent is selected, must be a referenced discount' => 'Si se selecciona persistente, debe ser un descuento recomendado',
-    'More than one referenced discount are enabled' => 'Mas de un descuento por recomendado están activos',
+    'More than one referenced discount are enabled' => 'Mas de un descuento por recomendado están activos',_
+    'Completed task' => 'Tarea Completa',
+    'In progress task' => 'Tarea en Progreso',
+    'Pending task' => 'Tarea Pendiente',
+    'Stopped task' => 'Tarea Detenida',
+    'Created task' => 'Tarea Creada',
+    'Highest priority' => 'La más Alta Prioridad',
+    'High priority' => 'Prioridad Alta',
+    'Medium priority' => 'Prioridad Media',
+    'Low priority' => 'Prioridad Baja',
+    'Task statuses' => 'Estados de Tarea',
+    'Task priorities' => 'Prioridades de Tarea',
+    'Task creator' => 'Creador de tarea',
+    'Assignations' => 'Asignaciones'
 );

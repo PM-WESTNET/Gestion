@@ -2,6 +2,60 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.10.07.0] - 07-10-2019
+### Modificado
+ - Exportacion de libro IVA ventas: Se modifica consulta para optimizar tiempos de espera. 
+
+## [2019.10.03.0] - 03-10-2019
+### Modificado
+ - Modificación del proceso de creación de extensión de pago para IVR solicitado por Laura Mineo
+ 
+## [2019.10.02.0] - 02-10-2019
+### Modificado
+ - Se modifica la forma en la que se calcula el neto de los comprobantes cuando se les aplica al total un descuento fijo.
+ - Se modifica PDF de libro de IVA compras y ventas.
+ - Se modifica Excel de libro de IVA compras y ventas.
+
+## [2019.10.01.0]
+### Modificado
+ - Se corrige la generación en blanco del PDF del libro de compras.
+
+## [2019.09.30.0]
+### Agregado
+ - Se agregan items de configuración para telefonos de Atención general mostrados en la APP.
+ - Se modifica API de APP para indicar a la app si son con WhatsApp o no.
+### Modificado
+ - Se cambia redireccion al hacer click en tarea desde la agenda a la vista de la tarea.
+ - Se definen filtros por defecto en  vista de agenda.
+
+## [2019.09.26.0] - 26-09-2019
+### Modificado
+ - Se modifica código que permite la eliminación de tickets
+ - Se modifica código del modal para forzado de conexion en cuenta corriente del cliente.
+ 
+## [2019.09.23.1] - 23-09-2019
+### Modificado
+ - Se modifica la respuesta de la api de APP. Mostraba "Su cuenta presenta deuda" al tener saldo positivo.
+ 
+## [2019.09.23.0] - 23-09-2019
+### Modificado
+ - Limitación de borrado de tareas cuando están asociadas a un ticket.
+ 
+## [2019.09.20.1] - 20-09-2019
+### Modificado
+ - Filtros de estado de emails e instalacion de app agregados a la exportacion de clientes
+ 
+## [2019.09.20.0] - 20-09-2019
+### Modificado
+ - Al filtrar por estados de emails para validar en elastic email, no se tienen en cuenta los
+ clientes con emails vacios.
+ 
+## [2019.09.19.0] - 19-09-2019
+### Modificado
+ - Correccion de fecha de tarea de ticket en panel de tickets de Instalaciones realizadas.
+ - Agregado de fecha de tarea de ticket en panel de tickets de cobranza
+ 
 ## [2019.09.17.2]
  - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
  - Modificaciones en index de descuento a cliente.

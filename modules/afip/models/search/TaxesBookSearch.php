@@ -340,14 +340,6 @@ class TaxesBookSearch extends ProviderBill
                     LEFT JOIN taxes_book_item tbi ON b.bill_id = tbi.bill_id
                     LEFT JOIN customer AS c ON b.customer_id = c.customer_id
                     LEFT JOIN bill_type AS bt ON b.bill_type_id = bt.bill_type_id
-                    LEFT JOIN (
-                                SELECT bill_id,
-                                  round((line_total / line_subtotal) - 1, 3) AS pct,
-                                  sum(line_subtotal)                         AS line_subtotal,
-                                  sum(line_total)                            AS line_total
-                                FROM bill_detail
-                                GROUP BY bill_id, round((line_total / line_subtotal) - 1, 3)
-                              ) AS bd ON b.bill_id = bd.bill_id
                     LEFT JOIN tax_rate tr on round(tr.pct,2) = round(if(b.total = b.amount, 0.21, (b.total / b.amount) - 1), 2)
                     LEFT JOIN document_type dt on c.document_type_id = dt.document_type_id
                     LEFT JOIN point_of_sale pos on b.company_id = pos.company_id
@@ -355,8 +347,7 @@ class TaxesBookSearch extends ProviderBill
                   (b.ein IS NOT NULL AND b.ein <> '' OR ((b.ein IS NULL OR b.ein = '') AND bt.invoice_class_id IS NULL)) AND 1 = 1
                 AND b.company_id = :company_id AND tbi.taxes_book_id = :taxes_book_id
                 AND bt.applies_to_sale_book = 1
-                  GROUP BY c.name, c.document_number, b.date, concat(bt.name, ' - ', b.number), b.amount,
-                    if(bd.pct = 0 OR bd.pct IS NULL, 0.21, bd.pct), tbi.page, tr.code
+                  GROUP BY c.name, c.document_number, b.date, concat(bt.name, ' - ', b.number), b.amount, tbi.page, tr.code
                   ORDER BY tbi.page, b.date DESC, b.number";
 
         $queryParams[':company_id'] = $this->company_id;

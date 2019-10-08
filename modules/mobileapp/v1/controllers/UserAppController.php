@@ -891,17 +891,63 @@ class UserAppController extends Controller
      */
     public function actionGetContactInfo()
     {
+        $phones = [];
         $info = Config::getValue('app_contact_info');
         $tecnico = Config::getValue('app_ws_tecnico');
         $admin = Config::getValue('app_ws_admin');
         $ventas = Config::getValue('app_ws_ventas');
+
+        array_push($phones,[
+            'name' => 'Ventas',
+            'phones' => [
+                [
+                    'phone' => $ventas,
+                    'wp' => true
+                ]
+            ]
+        ]);
+
+        array_push($phones,[
+            'name' => 'Atención general',
+            'phones' => [
+                [
+                    'phone' => Config::getValue('app_atencion_general_phone1'),
+                    'wp' => false
+                ],
+                [
+                    'phone' => Config::getValue('app_atencion_general_phone2'),
+                    'wp' => false
+                ]
+            ]
+        ]);
+
+        array_push($phones,[
+            'name' => 'Administración',
+            'phones' => [
+                [
+                    'phone' => $admin,
+                    'wp' => true
+                ]
+            ]
+        ]);
+
+        array_push($phones,[
+            'name' => 'Servicio Técnico',
+            'phones' => [
+                [
+                    'phone' => $admin,
+                    'wp' => true
+                ]
+            ]
+        ]);
 
         return [
             'status' => 'success',
             'info' => $info,
             'tecnico' => $tecnico,
             'admin' => $admin,
-            'ventas' => $ventas
+            'ventas' => $ventas,
+            'phones' => $phones
         ];
     }
 

@@ -9,7 +9,7 @@ use yii\helpers\Url;
 use app\modules\ticket\components\schemas\SchemaCobranza;
 use yii\jui\DatePicker;
 
-$form= ActiveForm::begin(['method' => 'POST']);
+$form= ActiveForm::begin(['method' => 'GET']);
 ?>
 
 

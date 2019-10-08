@@ -35,6 +35,10 @@ use app\modules\sale\modules\contract\models\ContractDetail;
 use app\tests\fixtures\VendorFixture;
 use app\tests\fixtures\ProductPriceFixture;
 use app\tests\fixtures\ProductHasTaxRateFixture;
+use app\modules\sale\modules\contract\models\Plan;
+use app\modules\sale\models\ProductPrice;
+use app\modules\sale\models\Product;
+use app\modules\sale\models\BillType;
 
 class BillTest extends \Codeception\Test\Unit
 {
@@ -473,6 +477,149 @@ class BillTest extends \Codeception\Test\Unit
         expect('Amount is 536.78', $generated_bill->amount)->equals(536.78);
         expect('Taxes is 112.72', $generated_bill->taxes)->equals(112.72);
     }
+
+    /**
+     * Prueba de descuento fijo aplicado a cliente, al total.
+     */
+    public function testVerifyAmountsWithFixedDiscount()
+    {
+        $model = new Customer([
+            'name' => 'Nombre',
+            'lastname' => 'Apellido',
+            'tax_condition_id' => 3,
+            'publicity_shape' => 'web',
+            'document_number' => '29918157',
+            'document_type_id' => 2,
+            'customerClass' => 1,
+            'company_id' => 2,
+            'status' => Customer::STATUS_ENABLED,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $plan = new Plan([
+            'name' => 'Empresa - 10240 Kbps',
+            'system' => 'fibra-0-10240-0-10240',
+            'code' => '70',
+            'show_in_ads' => 1,
+            'ads_name' => '10 Mb',
+            'description' => 'qwerty',
+            'status' => 'enabled',
+            'unit_id' => 1
+        ]);
+        $plan->setTaxRates([1]);
+        $plan->save();
+        $plan->setPrice(5600, (new \DateTime('now'))->modify('+1 years')->format('y-m-d'));
+
+        $contract = new Contract([
+            'customer_id' => $model->customer_id,
+            'date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 year')->format('d-m-Y'),
+            'status' => Contract::STATUS_ACTIVE,
+            'address_id' => 1,
+            'description' => 'Descripción del contrato',
+        ]);
+        $contract->save();
+
+        $contract_detail = new ContractDetail([
+            'contract_id' => $contract->contract_id,
+            'product_id' => $plan->product_id,
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' =>(new \DateTime('now'))->modify('+1 year')->format('d-m-Y'),
+            'status' => ContractDetail::STATUS_ACTIVE,
+            'date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'count' => 1,
+            'applied' => 1,
+            'vendor_id' => 1
+        ]);
+        $contract_detail->save();
+
+        $discount = new Discount([
+            'name' => 'ACUERDO NEGOCIOS AGRICOLAS',
+            'status' => Discount::STATUS_ENABLED,
+            'type' => Discount::TYPE_FIXED,
+            'value' => 50,
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 year')->format('d-m-Y'),
+            'periods' => 1,
+            'product_id' => null,
+            'apply_to' => Discount::APPLY_TO_CUSTOMER,
+            'value_from' => Discount::VALUE_FROM_TOTAL,
+            'referenced' => 0
+        ]);
+        $discount->save();
+
+        $customer_has_discount = new CustomerHasDiscount([
+            'customer_id' => $model->customer_id,
+            'discount_id' => $discount->discount_id,
+            'from_date' => (new \DateTime('now'))->modify('-1 days')->format('d-m-Y'),
+            'status' => CustomerHasDiscount::STATUS_ENABLED,
+        ]);
+        $customer_has_discount->save();
+
+        expect('No bills before', count(Bill::find()->all()))->equals(0);
+
+        $bill_type = BillType::findOne(2);
+        $bill_type->updateAttributes(['invoice_class_id' => null]);
+
+        $company = Company::findOne(2);
+        $cti = new ContractToInvoice();
+        $cti->invoice($company, 2, $model->customer_id, (new \DateTime('now')), true, 'observación del comprobante', null, true);
+        $generated_bill = Bill::find()->one();
+
+        expect('One bills after', count(Bill::find()->all()))->equals(1);
+        expect('Amount is not empty', $generated_bill->amount)->notEmpty();
+        expect('Taxes is not empty', $generated_bill->taxes)->notEmpty();
+        expect('Total is not empty', $generated_bill->total)->notEmpty();
+        expect('Amount + Taxes = Total', $generated_bill->amount + $generated_bill->taxes)->equals($generated_bill->total);
+        expect('Details quantity is two', count($generated_bill->billDetails))->equals(2);
+        expect('Total is 6726', $generated_bill->total)->equals(6726);
+        expect('Amount is 5558.68', $generated_bill->amount)->equals(5558.68);
+        expect('Taxes is 1167.32', $generated_bill->taxes)->equals(1167.32);
+    }
+
+    /**
+     * TODO PRUEBAS DE CASOS DE DESCUENTOS
+     * * Por porcentaje
+     *  * Por recomendado
+     *      * Aplicado a cliente
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     *      * Aplicado a Producto
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan        |OK|
+     *  * Por no recomendado
+     *      * Aplicado a cliente
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     *      * Aplicado a Producto
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     * * Fijo
+     *  * Por recomendado
+     *      * Aplicado a cliente
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     *      * Aplicado a Producto
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     *  * Por no recomendado
+     *      * Aplicado a cliente
+     *          * Valor de Total        |OK|
+     *          * Valor de Producto
+     *          * Valor de Plan
+     *      * Aplicado a Producto
+     *          * Valor de Total
+     *          * Valor de Producto
+     *          * Valor de Plan
+     */
 
     //TODO aplicar descuentos con todos los escenarios posibles.
 }

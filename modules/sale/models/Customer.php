@@ -1600,6 +1600,10 @@ class Customer extends ActiveRecord {
      */
     public function canNotifyPayment($date = null, $date_to = null)
     {
+        //TODO: Eliminar condicion cuando finalize desarrollo de IVR
+        if ($this->code === 27237) {
+            return true;
+        }
         if($date === null) {
             $date = (new \DateTime('first day of this month'))->format('Y-m-d');
         }

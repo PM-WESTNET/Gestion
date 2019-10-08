@@ -10,13 +10,13 @@ use app\modules\sale\models\TaxCondition;
 use app\modules\sale\models\CustomerClass;
 use app\modules\sale\models\CustomerCategory;
 use app\modules\zone\models\Zone;
+use app\modules\config\models\Config;
 
 /**
  * @var yii\web\View $this
  * @var yii\widgets\ActiveForm $form
  */
-
-$google_api_key = \app\modules\config\models\Config::getValue('google_maps_api_key');
+$google_api_key = Config::getValue('google_maps_api_key');
 ?>
 <div id="address" class="panel panel-default">
     <div class="panel-body">
