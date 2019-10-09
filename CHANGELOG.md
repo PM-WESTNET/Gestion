@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Modificado
+ - Reporte de tickets: el selector de estados, se carga de acuerdo a la categoría seleccionada.
 
 ## [2019.10.09.1] - 09-10-2019
 ### Agregado

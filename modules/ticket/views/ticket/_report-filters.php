@@ -8,6 +8,8 @@ use app\modules\ticket\models\Status;
 use yii\helpers\ArrayHelper;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\ticket\models\Category;
+use kartik\depdrop\DepDrop;
+use yii\helpers\Url;
 
 ?>
 <div class="customer-index">
@@ -48,7 +50,10 @@ use app\modules\ticket\models\Category;
                 <?= $form->field($model, 'category_id')->widget(Select2::class, [
                     'value' => $model->category_id,
                     'data' => ArrayHelper::map(Category::find()->all(), 'category_id', 'name'),
-                    'options' => ['placeholder' => Yii::t('app','Select')],
+                    'options' => [
+                        'placeholder' => Yii::t('app','Select'),
+                        'id' => 'category_id'
+                    ],
                     'pluginOptions' => [
                         'allowClear' => 'true',
                     ]
@@ -56,12 +61,13 @@ use app\modules\ticket\models\Category;
             </div>
 
             <div class="col-sm-6">
-                <?= $form->field($model, 'status_id')->widget(Select2::class, [
+                <?= $form->field($model, 'status_id')->widget(DepDrop::class, [
                         'value' => $model->status_id,
                         'data' => ArrayHelper::map(Status::find()->all(), 'status_id', 'name'),
-                        'options' => ['placeholder' => Yii::t('app','Select')],
                         'pluginOptions' => [
-                            'allowClear' => 'true',
+                            'depends' => ['category_id'],
+                            'placeholder' => Yii::t('app','Select'),
+                            'url' => Url::to(['/ticket/category/get-status-from-schema'])
                         ]
                 ]) ?>
             </div>
