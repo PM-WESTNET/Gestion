@@ -105,6 +105,15 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         [
+            'attribute' => 'discounted',
+            'value' => function($model) {
+                $checked = $model->discounted ? true : false;
+                return Html::checkbox('', $checked, ['class' => 'dicounted', 'data-ticket' => $model->ticket_id]);
+            },
+            'format' => 'raw',
+            'contentOptions' => ['style' => 'text-align: center']
+        ],
+        [
             'label' => Yii::t('app', 'Ticket management quantity'),
             'value' => function($model) {
                 return $model->getTicketManagementQuantity();
@@ -170,6 +179,11 @@ $this->params['breadcrumbs'][] = $this->title;
     var Tickets = new function () {
 
         this.init = function () {
+            $('.dicounted').on('click', function (e) {
+                if(window.confirm('<?= Yii::t('app', 'Are you sure you want to check that option?')?>')) {
+                    Tickets.setDiscountedValue($(this).data('ticket'), $(this).prop('checked'));
+                }
+            })
             $(document).on('click', '.btn-obs', function (e) {
                 e.preventDefault();
                 Tickets.getObservations($(this).data('ticket'));
@@ -227,6 +241,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         $('.task_date_div').addClass('hidden');
                     }
                 }
+            })
+        }
+
+        this.setDiscountedValue = function(ticket_id, value) {
+            $.ajax({
+                url: "<?= Url::to(['set-discounted'])?>",
+                data: {ticket_id: ticket_id, discounted: value},
+                dataType: 'json',
+                method: 'GET'
             })
         }
 

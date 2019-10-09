@@ -1241,5 +1241,6 @@
     'Task statuses' => 'Estados de Tarea',
     'Task priorities' => 'Prioridades de Tarea',
     'Task creator' => 'Creador de tarea',
-    'Assignations' => 'Asignaciones'
+    'Assignations' => 'Asignaciones',
+    'Are you sure you want to check that option?' => '¿Esta seguro que quiere tildar esa opción?'
 );

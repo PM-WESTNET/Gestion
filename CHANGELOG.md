@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [20119.10.09.0] - 09-10-2019
+## [2019.10.09.1] - 09-10-2019
+### Agregado
+ - Panel de Tickets de instalación: Se agrega columna que permite marcar tickets como "descontados".
+
+## [2019.10.09.0] - 09-10-2019
 ### Agregado
  - PDF de comprobante: Se agrega importe total de descuento.
  - Creación o actualización de descuentos: Se genera un alerta cuando mas de un descuento por recomendado está activo.

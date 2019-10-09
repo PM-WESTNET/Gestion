@@ -604,4 +604,20 @@ class TicketController extends Controller
         ]);
     }
 
+    /**
+     * Actualiza el campo discount de Ticket
+     */
+    public function actionSetDiscounted($ticket_id, $discounted)
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = $this->findModel($ticket_id);
+
+        if($model) {
+            $model->updateAttributes(['discounted' => $discounted == 'false' ? 0 : 1]);
+            return ['status' => 'success'];
+        }
+
+        return ['status' => 'error', 'msj' => Yii::t('app','Ticket not found')];
+    }
+
 }
