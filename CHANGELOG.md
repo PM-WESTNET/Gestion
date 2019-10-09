@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [20119.10.09.0] - 09-10-2019
+### Agregado
+ - PDF de comprobante: Se agrega importe total de descuento.
+ - Creación o actualización de descuentos: Se genera un alerta cuando mas de un descuento por recomendado está activo.
+ - Descuentos: Posibilidad de marcar un descuento como "persistente".
+ - Descuento por recomendado persistente: Modificaciones necesarias para que los descuentos persistentes, solo se inhabiliten cuando se haya aplicado.
+ - Descuento por recomendado persistente del 25%
+ 
 ## [2019.10.07.0] - 07-10-2019
 ### Modificado
  - Exportacion de libro IVA ventas: Se modifica consulta para optimizar tiempos de espera. 
