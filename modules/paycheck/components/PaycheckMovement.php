@@ -74,7 +74,7 @@ class PaycheckMovement extends BaseMovement
                 } else {
                     return $account_movement_id;
                 }
-            }elseif ($action == "update" && $modelInstance->status == Paycheck::STATE_COMMITED && $modelInstance->is_own = 1 ){
+            }/**elseif ($action == "update" && $modelInstance->status == Paycheck::STATE_COMMITED && $modelInstance->is_own = 1 ){
                 //$config = AccountConfig::findOne(['class' => 'app\\modules\\paycheck\\models\\Paycheck']);
                 $amounts = $modelInstance->getAmounts();
                 $items = array();
@@ -118,7 +118,7 @@ class PaycheckMovement extends BaseMovement
                     return $account_movement_id;
                 }
 
-            } elseif ($action == "update" && $modelInstance->status == Paycheck::STATE_REJECTED ) {
+            }**/ elseif ($action == "update" && $modelInstance->status == Paycheck::STATE_REJECTED ) {
                 /** @var AccountMovementRelation $amr */
                 $amr = AccountMovementRelationManager::find($modelInstance);
                 return CountableMovement::getInstance()->revertMovement($amr->account_movement_id, Yii::t('paycheck', 'Paycheck') . " - " . Yii::t('paycheck', 'rejected') );
