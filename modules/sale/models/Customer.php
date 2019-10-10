@@ -445,6 +445,13 @@ class Customer extends ActiveRecord {
     {
         return $this->hasMany(NotifyPayment::class, ['customer_id' => 'customer_id']);
     }
+
+    public function getTickets()
+    {
+        return $this->hasMany(Ticket::class, ['customer_id' => 'customer_id']);
+    }
+
+
     /**
      * Despues de guardar, guarda los profiles
      * @param boolean $insert
