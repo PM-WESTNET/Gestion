@@ -33,7 +33,7 @@ class EmailTransport implements TransportInterface {
         set_time_limit(0);
 
         //Nombre de archivo
-        $fileName = 'sms-contacts.xls';
+        $fileName = 'mail-notification.xls';
 
         ob_start();
         header('Content-Type: application/vnd.ms-excel');
