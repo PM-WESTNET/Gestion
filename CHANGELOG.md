@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2019.10.10.0] - 10-10-2019
+### Agregado
+ - Cierre de tickets de cobranza automáticos: Al realizar un pago un cliente, si su deuda es menor al 
+ tolerante y si no tiene gestiones, se pasa el ticket a estado "Pagó sin gestionar", si tiene una o mas 
+ gestiones se cambia el estado a "Pagó"
 ### Modificado
  - Reporte de tickets: el selector de estados, se carga de acuerdo a la categoría seleccionada.
 
