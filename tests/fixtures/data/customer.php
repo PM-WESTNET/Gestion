@@ -44,7 +44,7 @@ $customer = [
         'customer_reference_id' => NULL,'code' => '59813','payment_code' => NULL,'publicity_shape' => 'poster',
         'screen_notification' => '1','sms_notification' => '1','email_notification' => '1',
         'sms_fields_notifications' => 'phone,phone2,phone3','email_fields_notifications' => 'email,email2',
-        'needs_bill' => '0','parent_company_id' => 8, 'payment_code' => 999000111225, 'current_account_balance' => 1500,
+        'needs_bill' => '0','parent_company_id' => 8, 'payment_code' => 999000111226, 'current_account_balance' => 1500,
         'last_balance' => 1563408000],
 ];
 

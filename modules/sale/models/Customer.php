@@ -1550,7 +1550,7 @@ class Customer extends ActiveRecord {
     public function canRequestPaymentExtension()
     {
         //Sólo si el cliente no debe mas de una factura
-        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
+        if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
             return false;
         }
 
@@ -1637,5 +1637,21 @@ class Customer extends ActiveRecord {
     public function hasActiveContract()
     {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    public function isNewCustomer()
+    {
+        $contracts = $this->contracts;
+        foreach ($contracts as $contract) {
+            if (empty($contract->from_date) || $contract->from_date === Yii::t('app', 'Undetermined time')){
+                return true;
+            }
+
+            if (strtotime(Yii::$app->formatter->asDate($contract->from_date, 'yyyy-MM-dd')) > (strtotime(date('Y-m-d')) - (86400 * (int)Config::getValue('new_contracts_days')))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

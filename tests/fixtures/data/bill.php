@@ -80,32 +80,6 @@ return [
       'partner_distribution_model_id' => 1
   ],
   [
-      'bill_id' => 6,
-      'date' => '2018-02-20',
-      'time' => null,
-      'timestamp' => 1516406400,
-      'number' => null,
-      'currency' => 1,
-      'amount' => 1000,
-      'customer_id' => 45903,
-      'observation' => 'XXXXX',
-      'user_id' => 1,
-      'partner_distribution_model_id' => 1
-  ],
-  [
-      'bill_id' => 6,
-      'date' => '2018-02-20',
-      'time' => null,
-      'timestamp' => 1516406400,
-      'number' => null,
-      'currency' => 1,
-      'amount' => 1000,
-      'customer_id' => 45903,
-      'observation' => 'XXXXX',
-      'user_id' => 1,
-      'partner_distribution_model_id' => 1
-  ],
-  [
       'bill_id' => 7,
       'date' => '2018-02-20',
       'time' => null,
@@ -120,6 +94,32 @@ return [
   ],
   [
       'bill_id' => 8,
+      'date' => '2018-02-20',
+      'time' => null,
+      'timestamp' => 1516406400,
+      'number' => null,
+      'currency' => 1,
+      'amount' => 1000,
+      'customer_id' => 45903,
+      'observation' => 'XXXXX',
+      'user_id' => 1,
+      'partner_distribution_model_id' => 1
+  ],
+  [
+      'bill_id' => 9,
+      'date' => '2018-02-20',
+      'time' => null,
+      'timestamp' => 1516406400,
+      'number' => null,
+      'currency' => 1,
+      'amount' => 1000,
+      'customer_id' => 45903,
+      'observation' => 'XXXXX',
+      'user_id' => 1,
+      'partner_distribution_model_id' => 1
+  ],
+  [
+      'bill_id' => 10,
       'date' => '2018-02-20',
       'time' => null,
       'timestamp' => 1516406400,

@@ -10,5 +10,7 @@ return  [
     'You can`t notify a payment this month' => 'Usted no puede notificar un pago este mes',
     'Invalid Contract' => 'Contrato Inválido',
     'Payment Extension created successfull' => 'Extensión de Pago creada con éxito',
-    'Can`t create payment extension' => 'No se pudo realizar la Extensión de Pago'
+    'Can`t create payment extension' => 'No se pudo realizar la Extensión de Pago',
+    'The customer can`t request a payment extension' => 'El cliente no puede solicitar extensión de pago',
+    'The customer haven`t any bill' => 'El cliente no posee factura'
 ];

@@ -256,6 +256,14 @@ class CustomerController extends Controller
             ];
         }
 
+        if ($customer->isNewCustomer()){
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','The customer can`t request a payment extension')
+            ];
+        }
+
         //TODO: Eliminar segunda condicion al finalizar el desarrollo de IVR
         if (!$customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
@@ -553,13 +561,22 @@ class CustomerController extends Controller
             ];
         }
 
+        // La de cupon
+        if ($customer->company_id === 4) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => Yii::t('ivrapi','The customer haven`t any bill')
+            ];
+        }
+
         $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
 
         if(empty($model)) {
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => 'The customer haven`t any bill'
+                'msg' => Yii::t('ivrapi','The customer haven`t any bill')
             ];
         }
 
