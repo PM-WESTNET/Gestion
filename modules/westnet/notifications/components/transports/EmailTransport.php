@@ -9,7 +9,8 @@ use yii\base\Component;
 use app\components\helpers\EmptyLogger;
 use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 use yii\validators\EmailValidator;
-
+use PHPExcel;
+use PHPExcel_IOFactory;
 /**
  * Description of EmailTransport
  *
@@ -24,30 +25,58 @@ class EmailTransport implements TransportInterface {
             'programmable'
         ];
     }
-    
-    public function export($notification){
-        
+
+    public function export($notification)
+    {
         //Para evitar que la memoria alcance el limite
         Yii::setLogger(new EmptyLogger());
-        
+        set_time_limit(0);
+
         //Nombre de archivo
-        $fileName = 'emails.csv';
-        
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="'.$fileName.'"');
-        
-        $output = fopen('php://output', 'w');
-        
-        //Encabezado:
-        fputcsv($output, [ Yii::t('app', 'Name'), Yii::t('app', 'Lastname'), Yii::t('app', 'Email') ] );
-        
-        foreach($notification->destinataries as $destinataries){
-            $query = $destinataries->getCustomersQuery();
-            foreach($query->each() as $customer) {
-                fputcsv($output, [ $customer['name'], $customer['lastname'], $customer['email'] ]);
+        $fileName = 'sms-contacts.xls';
+
+        ob_start();
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+
+        $excel = new PHPExcel();
+
+        $excel->getProperties()
+            ->setCreator("Arya By Quoma S.A.")
+            ->setTitle("SMS Contacts");
+
+        $excel->setActiveSheetIndex(0)
+            ->setCellValue('A1', Yii::t('app', 'Name'))
+            ->setCellValue('B1', Yii::t('app', 'Lastname'))
+            ->setCellValue('C1', Yii::t('app', 'Email'));
+
+        $i = 2;
+
+        foreach ($notification->destinataries as $destinataries) {
+            /** @var Query $query */
+            $query = $destinataries->getCustomersQuery(false)->andWhere(['email_status' => 'active']);
+
+            foreach ($query->batch(1000) as $customers) {
+                foreach ($customers as $customer) {
+
+                    $excel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $customer['name'])
+                        ->setCellValue('B' . $i, $customer['lastname'])
+                        ->setCellValue('C' . $i, $customer['email']);
+                    $i++;
+                }
+                $excel->getActiveSheet()->getStyle('A1:A' . $i)
+                    ->getNumberFormat()
+                    ->setFormatCode();
             }
         }
-        
+
+        $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+        $objWriter->save('php://output');
     }
 
     /**

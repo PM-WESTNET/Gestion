@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.10.1] - 10-10-2019
+### Modificado
+ - Exportación de notificaciones: Se cambia la exportación de los clientes que se incluyen en la notificación a un excel.
+ 
 ## [2019.10.10.0] - 10-10-2019
 ### Agregado
  - Cierre de tickets de cobranza automáticos: Al realizar un pago un cliente, si su deuda es menor al 
