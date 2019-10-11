@@ -792,7 +792,7 @@ class CustomerController extends Controller
     {
         $data = Yii::$app->request->post();
 
-        if (!isset($data['code']) || empty($data['code']) || !isset($data['date']) || empty($data['date']) ||
+        if (!isset($data['code']) || empty($data['code']) ||
             !isset($data['amount']) || empty($data['amount']) || !isset($data['payment_method_id']) || empty($data['payment_method_id'])
             || !isset($data['contract_id']) || empty($data['contract_id'])) {
             \Yii::$app->response->setStatusCode(400);
@@ -812,8 +812,8 @@ class CustomerController extends Controller
             ];
         }
 
-        $date = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('first day of this month')->format('Y-m-d');
-        $date_to = (new \DateTime(Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd')))->modify('last day of this month')->format('Y-m-d');
+        $date = (new \DateTime(date('Y-m-d')))->modify('first day of this month')->format('Y-m-d');
+        $date_to = (new \DateTime(date('Y-m-d')))->modify('last day of this month')->format('Y-m-d');
 
         if (!$customer->getContracts()->andWhere(['contract_id' => $data['contract_id']])->exists()){
             \Yii::$app->response->setStatusCode(400);
@@ -837,7 +837,7 @@ class CustomerController extends Controller
 
         $notify_payment = new NotifyPayment([
             'customer_id' => $customer->customer_id,
-            'date' => Yii::$app->formatter->asDate($data['date'], 'yyyy-MM-dd'),
+            'date' => date('Y-m-d'),
             'amount' => $data['amount'],
             'payment_method_id' => $data['payment_method_id'],
             'contract_id' => $data['contract_id'],
