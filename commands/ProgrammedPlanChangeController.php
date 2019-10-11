@@ -36,10 +36,13 @@ class ProgrammedPlanChangeController extends Controller
 
 
             $programmed_plan_changes = ProgrammedPlanChange::find()
-                ->where(['applied' => null])
+                ->where(['applied' => 0])
                 ->andWhere(['>=','date', $timestamp_today])
                 ->andWhere(['<=', 'date', $timestamp_today_last_hour])
                 ->all();
+
+            echo 'Cambios Encontrados: ' . count($programmed_plan_changes);
+            echo "\n";
 
             foreach ($programmed_plan_changes as $plan_change) {
                 $contract = Contract::findOne($plan_change->contract_id);
@@ -53,6 +56,8 @@ class ProgrammedPlanChangeController extends Controller
                 $new_plan = Plan::findOne($plan_change->product_id);
 
                 if ($actual_contract_detail_plan) {
+                    echo 'Cambio a '. $contract->customer->fullName . ' de ' . $old_plan->name . ' a ' . $new_plan->name;
+                    echo "\n";
                     $old_contract_detail = clone($actual_contract_detail_plan);
                     $old_contract_detail->to_date = (new \DateTime('now'))->modify('-1 day')->format('d-m-Y');
                     if($old_contract_detail->createLog()) {
@@ -70,6 +75,9 @@ class ProgrammedPlanChangeController extends Controller
                 }
             }
         } catch (\Exception $ex) {
+            echo "error: " . $ex->getMessage();
+            echo "\n";
+
             \Yii::info('Falla el proceso: '.$ex->getTraceAsString(), 'cambio-de-velocidad-programada');
         }
     }
