@@ -149,6 +149,7 @@ class ContractToInvoice
             }
             return true;
         } catch (Exception $ex){
+            Yii::info($ex->getTraceAsString(), 'Active_Contract');
             error_log($ex->getMessage());
             Debug::debug($ex);
             return false;

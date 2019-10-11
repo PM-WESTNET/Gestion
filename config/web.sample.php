@@ -75,7 +75,16 @@ $config = [
                     'logVars' => [],
                     'exportInterval' => 1,
                     'logFile' => '@runtime/logs/app_facturacion.log'
-                ]
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['Active_Contract'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_active_contract.log'
+
+                ],
             ],
         ],
         'db' => $db['db'],

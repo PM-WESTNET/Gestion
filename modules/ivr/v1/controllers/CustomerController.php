@@ -561,8 +561,10 @@ class CustomerController extends Controller
             ];
         }
 
-        // La de cupon
-        if ($customer->company_id === 4) {
+
+        $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
+
+        if(empty($model)) {
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
@@ -570,9 +572,8 @@ class CustomerController extends Controller
             ];
         }
 
-        $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
-
-        if(empty($model)) {
+        // La de cupon
+        if ($model->bill_type_id == Config::getValue('cupon_bill_types')) {
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
