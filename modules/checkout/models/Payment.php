@@ -143,6 +143,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
             'discount' => [
                 'class'=> 'app\modules\westnet\components\ReferencedDiscountBehavior'
             ],
+            'ticket' => [
+                'class'=> 'app\modules\ticket\behaviors\TicketBehavior'
+            ],
         ];
     }
 

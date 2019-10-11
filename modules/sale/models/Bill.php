@@ -470,6 +470,17 @@ class Bill extends ActiveRecord implements CountableInterface
 
     }
 
+    public function totalDiscountWithTaxes()
+    {
+        $total = 0.0;
+
+        foreach ($this->billDetails as $detail) {
+            $total += (float)$detail->getTotalDiscount(true);
+        }
+
+        return round($total,2);
+    }
+
 
     /**
      * Permite agregar un detalle a una factura. El detalle solo puede

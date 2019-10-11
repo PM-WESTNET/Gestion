@@ -445,6 +445,13 @@ class Customer extends ActiveRecord {
     {
         return $this->hasMany(NotifyPayment::class, ['customer_id' => 'customer_id']);
     }
+
+    public function getTickets()
+    {
+        return $this->hasMany(Ticket::class, ['customer_id' => 'customer_id']);
+    }
+
+
     /**
      * Despues de guardar, guarda los profiles
      * @param boolean $insert
@@ -540,16 +547,26 @@ class Customer extends ActiveRecord {
      * @return Query
      */
     public function getActiveCustomerHasDiscounts($date = null) {
+
         if ($date) {
             $dateNow = $date->format('Y-m-d');
         } else {
-            $dateNow = (new DateTime('now'))->format('Y-m-d');
+            $dateNow = (new \DateTime('now'))->format('Y-m-d');
         }
-        return $this
-                        ->hasMany(CustomerHasDiscount::className(), ['customer_id' => 'customer_id'])
-                        ->where("'" . $dateNow . "' between from_date and to_date")
-                        ->andWhere(['status' => Discount::STATUS_ENABLED])
-        ;
+
+        return $this->hasMany(CustomerHasDiscount::class, ['customer_id' => 'customer_id'])
+            ->leftJoin('discount', 'discount.discount_id = customer_has_discount.discount_id')
+            ->where(['and',
+                ['<=', 'customer_has_discount.from_date', $dateNow],
+                ['>=', 'customer_has_discount.to_date', $dateNow],
+                ['persistent' => null],
+            ])
+            ->orWhere(['and',
+                ['not', ['persistent' => null]],
+                ['customer_has_discount.to_date' => null],
+            ])
+            ->andWhere(['customer_has_discount.status' => CustomerHasDiscount::STATUS_ENABLED])
+            ->andWhere(['discount.status' => Discount::STATUS_ENABLED]);
     }
 
     /**
@@ -1653,5 +1670,15 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * Indica si el cliente tiene la primer factura pagada.
+     */
+    public static function hasFirstBillPayed($customer_id)
+    {
+        $search = new CustomerSearch();
+        $result = $search->searchDebtBills($customer_id);
+        return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
     }
 }

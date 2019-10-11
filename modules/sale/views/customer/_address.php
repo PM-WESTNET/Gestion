@@ -117,6 +117,7 @@ $google_api_key = Config::getValue('google_maps_api_key');
         </div>
     </div>
 </div>
+
 <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=<?=$google_api_key?>"></script>
 
 <?php if(!isset($hideMap) || $hideMap == false): ?>

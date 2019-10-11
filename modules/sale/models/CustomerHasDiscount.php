@@ -122,10 +122,12 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
         if (parent::beforeSave($insert)) {
             $this->formatDatesBeforeSave();
             if($insert) {
-                $this->to_date = (new \DateTime(Yii::$app->formatter->asDate($this->from_date)));
-                $this->to_date->add(new \DateInterval("P".$this->discount->periods."M"));
-                $this->to_date->modify('-1 day');
-                $this->to_date = $this->to_date->format('Y-m-d');
+                if(!$this->discount->persistent) {
+                    $this->to_date = (new \DateTime(Yii::$app->formatter->asDate($this->from_date)));
+                    $this->to_date->add(new \DateInterval("P".$this->discount->periods."M"));
+                    $this->to_date->modify('-1 day');
+                    $this->to_date = $this->to_date->format('Y-m-d');
+                }
             }
             return true;
         } else {
@@ -157,7 +159,7 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
     private function formatDatesBeforeSave()
     {
             $this->from_date = Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd');
-            $this->to_date = Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd');
+            $this->to_date = $this->to_date ? Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd') : null;
         }
     
              

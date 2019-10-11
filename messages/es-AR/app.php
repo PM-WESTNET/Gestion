@@ -1226,6 +1226,9 @@
     'Tickets report' => 'Reporte de tickets',
     'Ticket quantity' => 'Cantidad de tickets',
     'Show All' => 'Mostrar todos los Tickets',
+    'Persistent' => 'Persistente',
+    'If persistent is selected, must be a referenced discount' => 'Si se selecciona persistente, debe ser un descuento recomendado',
+    'More than one referenced discount are enabled' => 'Mas de un descuento por recomendado están activos',
     'Completed task' => 'Tarea Completa',
     'In progress task' => 'Tarea en Progreso',
     'Pending task' => 'Tarea Pendiente',
@@ -1238,6 +1241,6 @@
     'Task statuses' => 'Estados de Tarea',
     'Task priorities' => 'Prioridades de Tarea',
     'Task creator' => 'Creador de tarea',
-    'Assignations' => 'Asignaciones'
-
+    'Assignations' => 'Asignaciones',
+    'Are you sure you want to check that option?' => '¿Esta seguro que quiere tildar esa opción?'
 );

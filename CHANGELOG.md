@@ -3,6 +3,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.10.1] - 10-10-2019
+### Modificado
+ - Exportación de notificaciones: Se cambia la exportación de los clientes que se incluyen en la notificación a un excel.
+ 
+## [2019.10.10.0] - 10-10-2019
+### Agregado
+ - Cierre de tickets de cobranza automáticos: Al realizar un pago un cliente, si su deuda es menor al 
+ tolerante y si no tiene gestiones, se pasa el ticket a estado "Pagó sin gestionar", si tiene una o mas 
+ gestiones se cambia el estado a "Pagó"
+### Modificado
+ - Reporte de tickets: el selector de estados, se carga de acuerdo a la categoría seleccionada.
+
+## [2019.10.09.1] - 09-10-2019
+### Agregado
+ - Panel de Tickets de instalación: Se agrega columna que permite marcar tickets como "descontados".
+
+## [2019.10.09.0] - 09-10-2019
+### Agregado
+ - PDF de comprobante: Se agrega importe total de descuento.
+ - Creación o actualización de descuentos: Se genera un alerta cuando mas de un descuento por recomendado está activo.
+ - Descuentos: Posibilidad de marcar un descuento como "persistente".
+ - Descuento por recomendado persistente: Modificaciones necesarias para que los descuentos persistentes, solo se inhabiliten cuando se haya aplicado.
+ - Descuento por recomendado persistente del 25%
+ 
 ## [2019.10.07.0] - 07-10-2019
 ### Modificado
  - Exportacion de libro IVA ventas: Se modifica consulta para optimizar tiempos de espera. 
@@ -58,7 +82,8 @@ All notable changes to this project will be documented in this file.
  
 ## [2019.09.17.2]
  - Opcion de mostrar los tickets de todos los usuarios en los paneles de tickets de cobranza e instalaciones 
-
+ - Modificaciones en index de descuento a cliente.
+ 
 ## [2019.09.17.3] - 17-09-2019
 ### Modificado
  - Se modifica cron para actualizar saldo de los clientes.
