@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.15.0] - 15-10-2019
+### Modificado
+ - IVR: Se corrige forzado de conexion, ahora si el cliente debe más de 1 factura no puede forzar la conexión, al igual que los clientes nuevos.
+ - IVR:  Al informar pago solo se solicita el monto abonado.
+ - IVR: Solo se envian facturas A y B por email.
+ - Correccion al importar pago de pago facil de cliente sin empresa asignada.
+
 ## [2019.10.10.1] - 10-10-2019
 ### Modificado
  - Exportación de notificaciones: Se cambia la exportación de los clientes que se incluyen en la notificación a un excel.
