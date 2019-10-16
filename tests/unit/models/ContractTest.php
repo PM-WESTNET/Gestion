@@ -9,6 +9,8 @@ use app\tests\fixtures\ZoneFixture;
 use app\tests\fixtures\ServerFixture;
 use app\tests\fixtures\NodeFixture;
 use app\modules\westnet\models\Connection;
+use app\modules\config\models\Config;
+use app\modules\sale\models\ProductToInvoice;
 
 class ContractTest extends \Codeception\Test\Unit
 {
@@ -39,6 +41,9 @@ class ContractTest extends \Codeception\Test\Unit
             ],
             'node' => [
                 'class' => NodeFixture::class
+            ],
+            'details' => [
+                'class' => \app\tests\fixtures\ContractDetailFixture::class
             ]
         ];
     }
@@ -221,4 +226,59 @@ class ContractTest extends \Codeception\Test\Unit
 
         $this->assertEquals('active', $model->status);
     }
+
+    public function testGetActivePaymentExtensionQtyPerPeriod()
+    {
+        $model = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => 45900
+        ]);
+        $model->save();
+
+        Config::setValue('id-product_id-extension-de-pago', 3);
+
+        $this->tester->haveRecord(ContractDetail::class, [
+            'contract_id' => $model->contract_id,
+            'product_id' => 1,
+            'from_date' => (new \DateTime('now'))->format('Y-m-d'),
+            'to_date' => NULL,
+            'status' => 'active',
+            'funding_plan_id' => NULL,
+            'date' => (new \DateTime('now'))->modify('+1 year')->format('Y-m-d'),
+            'discount_id' => NULL,
+            'count' => '1',
+            'vendor_id' => NULL,
+            'applied' => '1'
+        ]);
+
+        expect('Contract dont have any payment extension', $model->getActivePaymentExtensionQtyPerPeriod())->equals(0);
+
+        $contract_detail_id = $this->tester->haveRecord(ContractDetail::class, [
+            'contract_id' => $model->contract_id,
+            'product_id' => 3,
+            'from_date' => (new \DateTime('now'))->format('Y-m-d'),
+            'to_date' => NULL,
+            'status' => 'active',
+            'funding_plan_id' => NULL,
+            'date' => (new \DateTime('now'))->modify('+1 year')->format('Y-m-d'),
+            'discount_id' => NULL,
+            'count' => '1',
+            'vendor_id' => NULL,
+            'applied' => '1'
+        ]);
+
+        $this->tester->haveRecord(ProductToInvoice::class, [
+            'contract_detail_id' => $contract_detail_id,
+            'funding_plan' => null,
+            'date' => (new \DateTime('now'))->format('Y-m-01'),
+            'period' => (new \DateTime('now'))->format('Y-m-01'),
+            'amount' => 100,
+            'status' => 'active',
+        ]);
+
+        expect('Contract dont have any payment extension', $model->getActivePaymentExtensionQtyPerPeriod())->equals(1);
+
+
+    }
+
 }

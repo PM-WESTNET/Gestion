@@ -52,6 +52,7 @@ class PaymentPlanController extends Controller
         $model->customer_id = $customer_id;
         $payment = new Payment();
         $payment->customer_id = $customer_id;
+        $model->created_by = Yii::$app->user ? Yii::$app->user->getId() : '';
 
         if( $model->load(Yii::$app->request->post()) && $model->validate() ) {
             $model->save();

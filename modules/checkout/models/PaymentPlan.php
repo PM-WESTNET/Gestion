@@ -3,6 +3,7 @@
 namespace app\modules\checkout\models;
 
 use app\components\workflow\WithWorkflow;
+use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\ProductToInvoice;
@@ -50,33 +51,17 @@ class PaymentPlan extends \app\components\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    /*
     public function behaviors()
     {
         return [
-            'timestamp' => [
+            'created_at' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
                 ],
-            ],
-            'date' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-                ],
-                'value' => function(){return date('Y-m-d');},
-            ],
-            'time' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
-                ],
-                'value' => function(){return date('h:i');},
             ],
         ];
     }
-    */
 
     /**
      * @inheritdoc
@@ -90,7 +75,7 @@ class PaymentPlan extends \app\components\db\ActiveRecord
             [['status'], 'string'],
             [['status'], 'in', 'range' => ['active', 'completed', 'canceled']],
             [['status'], 'default', 'value' => 'active'],
-            [['fee', 'apply', 'customer_id'], 'integer'],
+            [['fee', 'apply', 'customer_id', 'created_by'], 'integer'],
             [['original_amount', 'final_amount', 'value_applied', 'payment_plan_amount'], 'number'],
             [['from_date'], 'date'],
         ];
@@ -115,6 +100,8 @@ class PaymentPlan extends \app\components\db\ActiveRecord
             'productToInvoices' => Yii::t('app', 'ProductToInvoices'),
             'payment_plan_amount' => Yii::t('app', 'Payment Plan Amount'),
             'balance' => Yii::t('app', 'payment_plan_balance'),
+            'created_at' => Yii::t('app', 'Creado'),
+            'created_by' => Yii::t('app', 'Creado por'),
         ];
     }    
 
@@ -135,7 +122,13 @@ class PaymentPlan extends \app\components\db\ActiveRecord
         return $this->hasMany(ProductToInvoice::className(), ['payment_plan_id' => 'payment_plan_id']);
     }
 
-
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserCreatedBy()
+    {
+        return $this->hasOne(User::class, ['id' => 'created_by']);
+    }
 
     /**
      * @inheritdoc

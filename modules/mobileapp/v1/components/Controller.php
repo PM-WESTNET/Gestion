@@ -32,7 +32,7 @@ class Controller extends ActiveController
         }
 
         //Verifico que venga y sea valido el token privado
-        if (!$headers->has('X-private-token') || $headers->get('X-private-token') !== Config::getValue('private_token')){
+        if ((!$headers->has('X-private-token')) || ($headers->get('X-private-token') !== Config::getValue('private_token'))){
             throw new ForbiddenHttpException('No Private Token');
 
         }

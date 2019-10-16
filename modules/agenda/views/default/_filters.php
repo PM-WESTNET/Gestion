@@ -19,7 +19,7 @@ use yii\jui\DatePicker;
     <div class="row">
         <div class="col-sm-4">
             <label class="display-block">
-                <?= AgendaModule::t('app', 'Task creator'); ?>
+                <?= Yii::t('app', 'Task creator'); ?>
             </label>
             <div class="btn-group" data-toggle="buttons">
                 <label class="btn btn-default font-size-xs <?= ($model->create_option == 'all') ? 'active' : '' ;?>">
@@ -35,7 +35,7 @@ use yii\jui\DatePicker;
         </div>
         <div class="col-sm-4">
             <label class="display-block">
-                <?= AgendaModule::t('app', 'Assignations'); ?>
+                <?= Yii::t('app', 'Assignations'); ?>
             </label>
             <div class="btn-group" data-toggle="buttons">
                 <label class="btn btn-default font-size-xs <?= ($model->user_option == 'all') ? 'active' : '' ;?>">

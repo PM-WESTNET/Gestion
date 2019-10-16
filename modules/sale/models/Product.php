@@ -7,6 +7,10 @@ use app\modules\accounting\models\Account;
 use Yii;
 use \Hackzilla\BarcodeBundle\Utility\Barcode;
 use app\modules\sale\modules\contract\models\Plan;
+use app\modules\westnet\models\ProductCommission;
+use yii\behaviors\SluggableBehavior;
+use app\modules\media\behaviors\MediaBehavior;
+use app\modules\config\models\Config;
 
 /**
  * This is the model class for table "product".
@@ -38,7 +42,9 @@ use app\modules\sale\modules\contract\models\Plan;
  */
 class Product extends ActiveRecord
 {
-    
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+
     protected static $companyRequired = false;
     
     public $initial_stock;
@@ -97,13 +103,13 @@ class Product extends ActiveRecord
                 ],
             ],
             'slug'=>[
-                'class' => \yii\behaviors\SluggableBehavior::className(),
+                'class' => SluggableBehavior::class,
                 'slugAttribute' => 'system',
                 'attribute' => 'name',
                 'ensureUnique'=>true
             ],
             'media' => [
-                'class' => \app\modules\media\behaviors\MediaBehavior::className(),
+                'class' => MediaBehavior::class,
             ]
         ];
     }
@@ -188,7 +194,7 @@ class Product extends ActiveRecord
      */
     public function getBillDetails()
     {
-        return $this->hasMany(BillDetail::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(BillDetail::class, ['product_id' => 'product_id']);
     }
 
     /*** Relations ***/
@@ -198,7 +204,7 @@ class Product extends ActiveRecord
      */
     public function getUnit()
     {
-        return $this->hasOne(Unit::className(), ['unit_id' => 'unit_id']);
+        return $this->hasOne(Unit::class, ['unit_id' => 'unit_id']);
     }
     
     /**
@@ -207,10 +213,10 @@ class Product extends ActiveRecord
     public function getSecondaryUnit()
     {
         
-        if(!\app\modules\config\models\Config::getValue('enable_secondary_stock')){
+        if(!Config::getValue('enable_secondary_stock')){
             return null;
         }
-        return $this->hasOne(Unit::className(), ['unit_id' => 'secondary_unit_id']);
+        return $this->hasOne(Unit::class, ['unit_id' => 'secondary_unit_id']);
     }
 
     /**
@@ -218,7 +224,7 @@ class Product extends ActiveRecord
      */
     public function getProductDiscounts()
     {
-        return $this->hasMany(ProductDiscount::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(ProductDiscount::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -226,7 +232,7 @@ class Product extends ActiveRecord
      */
     public function getAllProductDiscounts()
     {
-        return $this->hasMany(ProductDiscount::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(ProductDiscount::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -234,7 +240,7 @@ class Product extends ActiveRecord
      */
     public function getProductHasCategory()
     {
-        return $this->hasOne(ProductHasCategory::className(), ['product_id' => 'product_id']);
+        return $this->hasOne(ProductHasCategory::class, ['product_id' => 'product_id']);
     }
     
     /**
@@ -242,7 +248,7 @@ class Product extends ActiveRecord
      */
     public function getFundingPlan()
     {
-        return $this->hasMany(FundingPlan::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(FundingPlan::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -250,7 +256,7 @@ class Product extends ActiveRecord
      */
     public function getCategories()
     {
-        return $this->hasMany(Category::className(), ['category_id' => 'category_id'])->viaTable('product_has_category', ['product_id' => 'product_id']);
+        return $this->hasMany(Category::class, ['category_id' => 'category_id'])->viaTable('product_has_category', ['product_id' => 'product_id']);
     }
 
     /**
@@ -258,7 +264,7 @@ class Product extends ActiveRecord
      */
     public function getAccount()
     {
-        return $this->hasOne(Account::className(), ['account_id' => 'account_id']);
+        return $this->hasOne(Account::class, ['account_id' => 'account_id']);
     }
 
     /**
@@ -266,7 +272,7 @@ class Product extends ActiveRecord
      */
     public function getCommission()
     {
-        return $this->hasOne(\app\modules\westnet\models\ProductCommission::className(), ['product_commission_id' => 'product_commission_id']);
+        return $this->hasOne(ProductCommission::class, ['product_commission_id' => 'product_commission_id']);
     }
 
     /**
@@ -274,7 +280,7 @@ class Product extends ActiveRecord
      */
     public function getDiscounts()
     {
-        return $this->hasMany(Discount::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(Discount::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -308,7 +314,7 @@ class Product extends ActiveRecord
      */
     public function getStockMovements()
     {
-        return $this->hasMany(StockMovement::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(StockMovement::class, ['product_id' => 'product_id']);
     }
     
     /**
@@ -316,7 +322,7 @@ class Product extends ActiveRecord
      */
     public function getProductPrices()
     {
-        return $this->hasMany(ProductPrice::className(), ['product_id' => 'product_id']);
+        return $this->hasMany(ProductPrice::class, ['product_id' => 'product_id']);
     }
     
     /**
@@ -381,7 +387,7 @@ class Product extends ActiveRecord
     public function getPriceFromDate($date)
     {
         
-        $query = $this->hasOne(ProductPrice::className(), ['product_id' => 'product_id'])
+        $query = $this->hasOne(ProductPrice::class, ['product_id' => 'product_id'])
             ->where('timestamp <= :date_timestamp',['date_timestamp'=>strtotime($date)])
             ->orderBy(['timestamp' => SORT_DESC]);
         
@@ -413,7 +419,7 @@ class Product extends ActiveRecord
      */
     public function getTaxRates()
     {
-        return $this->hasMany(TaxRate::className(), ['tax_rate_id' => 'tax_rate_id'])->viaTable('product_has_tax_rate', ['product_id' => 'product_id']);
+        return $this->hasMany(TaxRate::class, ['tax_rate_id' => 'tax_rate_id'])->viaTable('product_has_tax_rate', ['product_id' => 'product_id']);
     }
     
     public function setTaxRates($rates)

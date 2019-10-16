@@ -5,6 +5,8 @@ namespace app\modules\sale\models;
 use app\components\companies\ActiveRecord;
 use app\components\db\ModifierBehavior;
 use app\modules\accounting\components\CountableInterface;
+use app\modules\automaticdebit\models\AutomaticDebit;
+use app\modules\automaticdebit\models\BillHasExportToDebit;
 use app\modules\checkout\models\BillHasPayment;
 use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
@@ -40,6 +42,10 @@ use app\modules\mailing\components\sender\MailSender;
  */
 class Bill extends ActiveRecord implements CountableInterface
 {
+    const STATUS_DRAFT = 'draft';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CLOSED = 'closed';
+
     public $fillNumber = true;
 
     public $pointOfSale;
@@ -127,7 +133,7 @@ class Bill extends ActiveRecord implements CountableInterface
             [['currency'], 'string', 'max' => 45],
             [['observation'], 'string', 'max' => 250],
             [['company_id', 'user_id', 'partner_distribution_model_id'], 'number'],
-            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number'], 'safe']
+            [['partnerDistributionModel', 'point_of_sale_id', 'date' , 'number', 'automatically_generated'], 'safe']
         ]);
     }
 
@@ -398,7 +404,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateAmount()
     {
-        $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
+        $discountFixedDetail = $this->getFixedDiscountPerDetail(true, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(true);
 
         $amount = 0.0;
@@ -462,6 +468,17 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return round($total,2);
 
+    }
+
+    public function totalDiscountWithTaxes()
+    {
+        $total = 0.0;
+
+        foreach ($this->billDetails as $detail) {
+            $total += (float)$detail->getTotalDiscount(true);
+        }
+
+        return round($total,2);
     }
 
 
@@ -627,7 +644,8 @@ class Bill extends ActiveRecord implements CountableInterface
 
     /**
      * Genera la factura electronica en base a la clase del tipo de factura.
-     *
+     * IMPORTANTE No quitar los \Yii::info con categoria facturación, ya que están para realizar un log de los errores que se puedan presentar
+     * los errores se pueden ver desde la carpeta runtime/logs/app_facturacion.log
      * @return bool
      */
     public function invoice()
@@ -658,6 +676,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             $retValue = true;
                         } else {
                             $retValue = false;
+                            \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
                             Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
                         }
                     } else {
@@ -688,14 +707,17 @@ class Bill extends ActiveRecord implements CountableInterface
                     }
 
                     foreach ($result['errors'] as $msg) {
+                        \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                         Yii::$app->session->addFlash('error', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
                     foreach ($result['observations'] as $msg) {
+                        \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                         Yii::$app->session->addFlash('info', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
 
                     return ($retValue || empty($result['errors']));
                 } catch (\Exception $ex) {
+                    \Yii::info($ex, 'facturacion');
                     Yii::$app->session->setFlash("error", Yii::t('app', $ex->getMessage()));
                     return false;
                 }
@@ -1177,6 +1199,8 @@ class Bill extends ActiveRecord implements CountableInterface
         //Si se debe forzar la utilizacion de la empresa asignada al cliente:
         if($customer->company && \app\modules\config\models\Config::getValue('force_customer_company')){
             $this->company_id = $customer->company_id;
+            //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+            $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
         }
 
         $defaultBillType = $customer->defaultBillType;
@@ -1195,6 +1219,8 @@ class Bill extends ActiveRecord implements CountableInterface
             if(!$this->company->checkBillType($defaultBillType)){
                 if($customer->company){
                     $this->company_id = $customer->company_id;
+                    //Para evitar que el punto de venta no se actualice cuando se cambia la empresa.
+                    $this->point_of_sale_id = $customer->company->getDefaultPointOfSale() ? $customer->company->getDefaultPointOfSale()->point_of_sale_id : '';
                 }
 
             }else{
@@ -1486,5 +1512,56 @@ class Bill extends ActiveRecord implements CountableInterface
         $this->ein = $ein;
         $this->ein_expiration = $ein_expiration;
         return $this->save(['ein' => $ein, 'ein_expiration' => $ein_expiration]);
+    }
+
+    /**
+     * @param bool $update_amounts
+     * @return bool
+     * Verifica que los importes del comprobantes estén correctos, tiene opción para volver a calcularlos en caso de que estén erróneos.
+     * //TODO hacer verificaciones de los detalles e importes de los mismos. Verificaciones para evitar errores en afip.
+     */
+    public function verifyAmounts($update_amounts = false) {
+
+        if($this->amount == 0 || $this->taxes == 0 || $this->total == 0 || ($this->amount + $this->taxes != $this->total)) {
+            if($update_amounts) {
+                $this->updateAmounts();
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    public function verifyNumberAndDate()
+    {
+        $lastNumber = Bill::find()->where([
+            'bill_type_id' => $this->bill_type_id,
+            'status' => 'closed',
+            'company_id' => $this->company_id
+        ])->orderBy(['number' => SORT_DESC])
+            ->limit(1)->one();
+
+        $today = (new \DateTime('now'))->format('Y-m-d');
+
+        if($this->date != $today || $this->number != $lastNumber->number){
+            $this->updateAttributes(['number' => (int) $lastNumber->number + 1, 'date' => $today]);
+        }
+
+    }
+
+
+    /**
+     * Indica si la factura se abonara por debito directo
+     */
+    public function hasDirectDebit() {
+        if ($this->customer) {
+            $hasDebit = AutomaticDebit::find()->andWhere(['customer_id' => $this->customer_id, 'status' => AutomaticDebit::ENABLED_STATUS])->one();
+
+            if ($hasDebit && $hasDebit->created_at < $this->timestamp) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

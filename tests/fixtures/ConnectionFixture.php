@@ -9,12 +9,13 @@
 namespace app\tests\fixtures;
 
 
+use app\modules\westnet\models\Connection;
 use yii\test\ActiveFixture;
 
 class ConnectionFixture extends ActiveFixture
 {
 
-    public $modelClass = 'app\modules\westnet\models\Connection';
+    public $modelClass = Connection::class;
     public $depends = [
        ContractFixture::class,
        NodeFixture::class,

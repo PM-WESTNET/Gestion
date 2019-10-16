@@ -344,10 +344,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 <div id="message-con"></div>
                 <div class="form-group">
                     <label for="due_date" class="control-label"><?php echo Yii::t('westnet', 'Forced Activation Due Date') ?></label>
-                    <?php
-                    echo DatePicker::widget([
+                    <?= DatePicker::widget([
                         'name' => 'due_date',
-                        'type' => 1,
+                        'type' => DatePicker::TYPE_INPUT,
+                        'value' => (new \DateTime('now'))->format('d-m-Y'),
                         'pluginOptions' => [
                             'autoclose' => true,
                             'format' => 'dd-mm-yyyy',
@@ -754,7 +754,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
         this.showForce = function () {
             if (confirm('<?php echo Yii::t('westnet', 'Are you sure you want to force the activation of this connection?') ?>')) {
-                $('#due_date').val('');
                 $('#connection-modal').modal('show')
             } else {
                 $('#force-connection').button('reset');

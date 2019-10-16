@@ -78,4 +78,16 @@ class AccountMovementItemTest extends \Codeception\Test\Unit
         expect('Get workflow have draft status', array_key_exists(AccountMovementItem::STATE_DRAFT, $model->getWorkflowStates()));
         expect('Get workflow have draft status', array_key_exists(AccountMovementItem::STATE_CONCILED, $model->getWorkflowStates()));
     }
+
+    public function testGetWorkFlowAttr()
+    {
+        $model = new AccountMovementItem([
+            'account_movement_id' => 1,
+            'account_id' => 1
+        ]);
+        $model->save();
+
+        $attribute = $model->getWorkflowAttr();
+        expect('Attribute exists', $model->hasAttribute($attribute))->true();
+    }
 }

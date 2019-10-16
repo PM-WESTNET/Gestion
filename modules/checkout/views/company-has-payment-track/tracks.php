@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <div id="company-paymenttracks">
                             <?php foreach ($tracks as $track) {
                                 $payment_track_config = $model->getPaymentTracks()->where(['track_id' => $track->track_id])->one();
-                                $checked = $payment_track_config->track_status == CompanyHasPaymentTrack::STATUS_ENABLED ? 'checked' : '';
+                                $checked = $payment_track_config ? $payment_track_config->track_status == CompanyHasPaymentTrack::STATUS_ENABLED ? 'checked' : '' : '';
                                 ?>
 
                                 <div class="row col-sm-12">

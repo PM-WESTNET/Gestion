@@ -16,6 +16,7 @@ use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\sale\modules\contract\models\search\ContractDetailSearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
+use app\modules\ticket\models\Ticket;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\EmptyAds;
 use app\modules\westnet\models\Node;
@@ -160,7 +161,9 @@ class ContractController extends Controller {
                 $vendor = Vendor::findByUserId(Yii::$app->user->id);
                 $model->vendor_id = $vendor ? $vendor->vendor_id : NULL;
             }
-            $model->instalation_schedule = Yii::$app->request->post()['Contract']['instalation_schedule'];
+            if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+            }
         }
         if(!empty($_POST['same_address'])){
             $same_address = $_POST['same_address'];
@@ -233,6 +236,12 @@ class ContractController extends Controller {
                 }
 
                 $transaction->commit();
+
+                if ($model->hasMethod('createMesaTicket')) {
+                    //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
+                    $model->createMesaTicket($model);
+                }
+
                 if(Yii::$app->request->post('mode') === '1'){
                     return $this->redirect(['/sale/contract/contract/update', 'id' => $model->contract_id]);
                 }else{
@@ -241,6 +250,7 @@ class ContractController extends Controller {
             } catch (\Exception $ex) {
                 $transaction->rollBack();
                 $model->isNewRecord = true;
+                Yii::info($ex);
                 Yii::$app->session->addFlash('error', $ex->getMessage());
             }
         }            
@@ -257,7 +267,9 @@ class ContractController extends Controller {
            if (empty(Yii::$app->request->post()['contractDetailIns']['funding_plan_id'])){
                $contractDetailIns->addError('funding_plan_id');
            }
-            \Yii::$app->session->setFlash('error', Yii::t('app', 'You most complete all data'));
+           if($contractDetailIns->hasErrors()){
+               \Yii::$app->session->addFlash('error', Yii::t('app', 'You most complete all data'));
+           }
         }
 
         if (Yii::$app->user->identity->hasRole('seller', false)) {
@@ -423,7 +435,10 @@ class ContractController extends Controller {
                         $model->update(false);
                     }
 
-                    $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                        $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    }
+
                     $model->address_id = $address->address_id;
 
                     $model->update(false);
@@ -777,6 +792,8 @@ class ContractController extends Controller {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
                     $model->customer->sendMobileAppLinkSMSMessage();
+                    Ticket::createGestionADSTicket($model->customer_id);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }
@@ -841,6 +858,7 @@ class ContractController extends Controller {
                     //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];
                 }else{
@@ -1036,6 +1054,7 @@ class ContractController extends Controller {
                 
                 if ($connection->updateAttributes(['status_account'])) {
                     $transaction->commit();
+                    $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['view', 'id' => $contract_id]);
                 }else{
                     $transaction->rollBack();

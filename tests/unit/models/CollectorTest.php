@@ -59,8 +59,12 @@ class CollectorTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'number' => '1234',
             'document_number' => '12456789',
-            'document_type' => 'DNI'
+            'document_type' => 'DNI',
+            'password' => 'password',
+            'password_repeat' => 'password'
         ]);
+
+        $model->save();
 
         expect('Valid when full and new', $model->save())->true();
     }
@@ -79,7 +83,9 @@ class CollectorTest extends \Codeception\Test\Unit
             'lastname' => 'Hongo',
             'number' => '123456',
             'document_number' => '12456789',
-            'document_type' => 'DNI'
+            'document_type' => 'DNI',
+            'password' => 'password',
+            'password_repeat' => 'password'
         ]);
         $model->save();
 
@@ -94,6 +100,8 @@ class CollectorTest extends \Codeception\Test\Unit
 
         $ecopagos = $model->fetchEcopagos();
 
+        \Codeception\Util\Debug::debug($ecopagos);
+
         expect('Fetch document types', $ecopagos[1])->equals('Ecopago1');
     }
 
@@ -104,7 +112,9 @@ class CollectorTest extends \Codeception\Test\Unit
             'lastname' => 'Gallegos',
             'number' => '123456',
             'document_number' => '12456789',
-            'document_type' => 'DNI'
+            'document_type' => 'DNI',
+            'password' => 'password',
+            'password_repeat' => 'password'
         ]);
         $model->save();
 
@@ -113,7 +123,9 @@ class CollectorTest extends \Codeception\Test\Unit
             'lastname' => 'Gallegos',
             'number' => '1234567',
             'document_number' => '12456789',
-            'document_type' => 'DNI'
+            'document_type' => 'DNI',
+            'password' => 'password',
+            'password_repeat' => 'password'
         ]);
         $model2->save();
 
@@ -130,7 +142,9 @@ class CollectorTest extends \Codeception\Test\Unit
             'lastname' => 'Gallegos',
             'number' => '123456',
             'document_number' => '12456789',
-            'document_type' => 'DNI'
+            'document_type' => 'DNI',
+            'password' => 'password',
+            'password_repeat' => 'password'
         ]);
         $model->save();
 

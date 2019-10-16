@@ -5,7 +5,7 @@ use app\tests\fixtures\CompanyFixture;
 use app\tests\fixtures\PaymentMethodFixture;
 use app\tests\fixtures\TrackFixture;
 
-class CompanyHasPaymentCompanyHasPaymentTrackTest extends \Codeception\Test\Unit
+class CompanyHasPaymentTrackTest extends \Codeception\Test\Unit
 {
     /**
      * @var \UnitTester

@@ -49,7 +49,10 @@ class AppFailedRegisterTest extends \Codeception\Test\Unit
         $model = new AppFailedRegister([
             'name' => 'AppFailedRegister',
             'phone' => '123456789',
-            'type' => AppFailedRegister::TYPE_REGISTER
+            'type' => AppFailedRegister::TYPE_REGISTER,
+            'document_type' => 'asd',
+            'document_number' => '123',
+            'email' => 'email'
         ]);
 
         expect('Saved when full and new', $model->save())->true();
@@ -60,7 +63,10 @@ class AppFailedRegisterTest extends \Codeception\Test\Unit
         $model = new AppFailedRegister([
             'name' => 'AppFailedRegister',
             'phone' => '123456789',
-            'type' => AppFailedRegister::TYPE_REGISTER
+            'type' => AppFailedRegister::TYPE_REGISTER,
+            'document_type' => 'asd',
+            'document_number' => '123',
+            'email' => 'email'
         ]);
         $model->save();
 

@@ -10,6 +10,10 @@ use app\modules\ticket\components\actions\ActionTicket;
 use app\tests\fixtures\TicketFixture;
 use app\modules\ticket\models\Ticket;
 use app\tests\fixtures\StatusHasActionFixture;
+use app\tests\fixtures\TicketStatusFixture;
+use app\tests\fixtures\CustomerFixture;
+use app\tests\fixtures\TicketCategoryFixture;
+use app\tests\fixtures\UserFixture;
 
 class ActionTicketTest extends \Codeception\Test\Unit
 {
@@ -25,6 +29,18 @@ class ActionTicketTest extends \Codeception\Test\Unit
             ],
             'status_has_action' => [
                 'class' => StatusHasActionFixture::class
+            ],
+            'status' => [
+                'class' => TicketStatusFixture::class
+            ],
+            'customer' => [
+                'class' => CustomerFixture::class
+            ],
+            'category' => [
+                'class' => TicketCategoryFixture::class
+            ],
+            'user' => [
+                'class' => UserFixture::class
             ]
         ];
     }
@@ -62,7 +78,14 @@ class ActionTicketTest extends \Codeception\Test\Unit
 
     public function testGenerate()
     {
-        $ticket = Ticket::findOne(1);
+        $ticket = new Ticket([
+            'status_id' => 1,
+            'customer_id' => 45900,
+            'title' => 'Ticket1',
+            'content' => 'Content ticket1',
+            'category_id' => 1,
+        ]);
+
         $ticket->updateAttributes(['status_id' => 43]);
 
         expect('No tickets before', count(Ticket::find()->all()))->equals(1);

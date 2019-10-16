@@ -4,6 +4,7 @@ namespace app\modules\sale\models;
 
 use app\modules\config\models\Config;
 use app\modules\zone\models\Zone;
+use Codeception\Util\Debug;
 use Yii;
 use webvimark\modules\UserManagement\models\User;
 
@@ -423,7 +424,7 @@ class Address extends \app\components\db\ActiveRecord {
             }
         }
 
-        if ($customer_id !== NULL) {
+        if ($customer_id !== NULL && !empty($customer_id)) {
             if ($insert) {
                 $log = new CustomerLog();
                 $log->createInsertLog($customer_id, '', $this->address_id);

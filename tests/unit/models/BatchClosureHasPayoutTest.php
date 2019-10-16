@@ -61,18 +61,28 @@ class BatchClosureHasPayoutTest extends \Codeception\Test\Unit
             'username' => 'lmazza',
             'status' => Cashier::STATUS_ACTIVE,
             'username' => 'lmazza',
+            'user_id' => 1,
             'password' => '123',
             'password_repeat' => '123',
             'beforeSave' => function () { return true; }
         ]);
         $cashier->save();
+
         $payout = Stub::make(Payout::class, [
             'ecopago_id' => 1,      //Fixture
             'cashier_id' => $cashier->cashier_id,       //Fixture
             'amount' => '123',
             'customer_number' => $customer->code,      //Fixture
+            'afterSave' => function () { return true; },
             'beforeSave' => function () { return true; },
-            'afterSave' => function () { return true; }
+            'payment_id' => 1,
+            'customer_id' => 45900,
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'time' => (new \DateTime('now'))->format('H:i:s'),
+            'datetime' => (new \DateTime('now'))->getTimestamp(),
+        ]);
+        Stub::update($payout, [
+            'beforeSave' => function () use ($payout) { $payout->date = Yii::$app->formatter->asDate($payout->date, 'yyyy-MM-dd'); return true; }
         ]);
         $payout->save();
 
@@ -80,6 +90,8 @@ class BatchClosureHasPayoutTest extends \Codeception\Test\Unit
             'batch_closure_id' => $batch_closure->batch_closure_id,
             'payout_id' => $payout->payout_id,
         ]);
+
+        $model->validate();
 
         expect('Valid when full and new', $model->validate())->true();
     }
@@ -111,6 +123,7 @@ class BatchClosureHasPayoutTest extends \Codeception\Test\Unit
             'username' => 'lmazza',
             'status' => Cashier::STATUS_ACTIVE,
             'username' => 'lmazza',
+            'user_id' => 1,
             'password' => '123',
             'password_repeat' => '123',
             'beforeSave' => function () { return true; }
@@ -122,7 +135,15 @@ class BatchClosureHasPayoutTest extends \Codeception\Test\Unit
             'amount' => '123',
             'customer_number' => $customer->code,      //Fixture
             'beforeSave' => function () { return true; },
-            'afterSave' => function () { return true; }
+            'afterSave' => function () { return true; },
+            'payment_id' => 1,
+            'customer_id' => 45900,
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'time' => (new \DateTime('now'))->format('H:i:s'),
+            'datetime' => (new \DateTime('now'))->getTimestamp(),
+        ]);
+        Stub::update($payout, [
+            'beforeSave' => function () use ($payout) { $payout->date = Yii::$app->formatter->asDate($payout->date, 'yyyy-MM-dd'); return true; }
         ]);
         $payout->save();
 

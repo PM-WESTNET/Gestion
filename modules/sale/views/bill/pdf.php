@@ -356,12 +356,23 @@ $companyData = $model->company;
     ?>
     <tr style="margin-left:425px; width:435px; display: block;">
         <!-- Item -->
+        <?php $discount = $model->totalDiscountWithTaxes();
+        if($discount > 0) { ?>
+            <td style="width: 300px;float:left;">
+                <h5 style="text-align: right;margin-top: 6px; margin-bottom: 6px; font-size: 18px;">Descuento aplicado:</h5>
+            </td>
+            <!-- Precio -->
+            <td style="width: 130px; float:left;">
+                <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($discount,2)?></h5>
+            </td>
+        <?php } ?>
+        <!-- Item -->
         <td style="width: 300px;float:left;">
             <h5 style="text-align: right;margin-top: 6px; margin-bottom: 6px; font-size: 18px;">TOTAL:</h5>
         </td>
         <!-- Precio -->
         <td style="width: 130px; float:left;">
-            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?=round($model->calculateTotal(),2)?></h5>
+            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($model->calculateTotal(),2)?></h5>
         </td>
     </tr>
     <tr style="padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
@@ -374,6 +385,28 @@ $companyData = $model->company;
             Puede retirar su factura en: <?php echo $model->company->address  ?>
         </td>
     </tr>
+
+    <?php if (!$model->hasDirectDebit()):?>
+        <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">
+            <td>
+                Medios de Pago:
+            </td>
+        </tr>
+        <tr style=" display: block; padding-bottom: 4px;padding-top: 4px;padding-left: 30px; font-size: 0.2cm">
+            <td>
+                <ul>
+                    <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>;
+                </ul>
+            </td>
+        </tr>
+    <?php else: ?>
+        <tr style="border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 10pt;
+        font-weight: bold; background-color: #D7D7D7">
+            <td>
+                <?php echo Config::getValue('direct_debit_bill_text')?>
+            </td>
+        </tr>
+    <?php endif;?>
     <tr style=" display: block; border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px;">
         <td>
             Medios de Pago:

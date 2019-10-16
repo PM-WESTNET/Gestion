@@ -114,7 +114,7 @@ class BillType extends \app\components\db\ActiveRecord
      */
     public function getBills()
     {
-        return $this->hasMany(Bill::className(), ['bill_type_id' => 'bill_type_id']);
+        return $this->hasMany(Bill::class, ['bill_type_id' => 'bill_type_id']);
     }
     
     /**
@@ -122,7 +122,7 @@ class BillType extends \app\components\db\ActiveRecord
      */
     public function getBillTypes()
     {
-        return $this->hasMany(BillType::className(), ['bill_type_id' => 'child_id'])->viaTable('bill_type_has_bill_type', ['parent_id' => 'bill_type_id']);
+        return $this->hasMany(BillType::class, ['bill_type_id' => 'child_id'])->viaTable('bill_type_has_bill_type', ['parent_id' => 'bill_type_id']);
     }
     
     /**
@@ -156,7 +156,7 @@ class BillType extends \app\components\db\ActiveRecord
     public function getInvoiceClass()
     {
         
-        return $this->hasOne(InvoiceClass::className(), ['invoice_class_id' => 'invoice_class_id']);
+        return $this->hasOne(InvoiceClass::class, ['invoice_class_id' => 'invoice_class_id']);
         
     }
     
@@ -165,7 +165,7 @@ class BillType extends \app\components\db\ActiveRecord
      */
     public function getCompanies()
     {
-        return $this->hasMany(Company::className(), ['company_id' => 'company_id'])->viaTable('company_has_bill_type', ['bill_type_id' => 'bill_type_id']);
+        return $this->hasMany(Company::class, ['company_id' => 'company_id'])->viaTable('company_has_bill_type', ['bill_type_id' => 'bill_type_id']);
     }
              
     /**

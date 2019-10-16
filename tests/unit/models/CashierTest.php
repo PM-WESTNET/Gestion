@@ -76,6 +76,7 @@ class CashierTest extends \Codeception\Test\Unit
             'document_type' => 'DNI',
             'username' => 'lmazza',
             'status' => Cashier::STATUS_ACTIVE,
+            'user_id' => 1,
             'username' => 'lmazza',
             'password' => '123',
             'password_repeat' => '123',
@@ -125,6 +126,7 @@ class CashierTest extends \Codeception\Test\Unit
             'username' => 'lmazza',
             'status' => Cashier::STATUS_ACTIVE,
             'username' => 'lmazza',
+            'user_id' => 1,
             'password' => '123',
             'password_repeat' => '123',
             'beforeSave' => function () { return true; }

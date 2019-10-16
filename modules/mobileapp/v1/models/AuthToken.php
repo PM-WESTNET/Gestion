@@ -4,6 +4,7 @@ namespace app\modules\mobileapp\v1\models;
 
 use app\modules\config\models\Config;
 use Yii;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "auth_token".
@@ -15,7 +16,7 @@ use Yii;
  *
  * @property UserApp $userApp
  */
-class AuthToken extends \app\components\db\ActiveRecord
+class AuthToken extends ActiveRecord
 {
 
 

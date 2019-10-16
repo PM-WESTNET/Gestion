@@ -16,7 +16,11 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\Connection;
+use app\modules\westnet\models\ConnectionForcedHistorial;
+use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\models\EmptyAds;
 use Codeception\Util\Debug;
@@ -75,6 +79,15 @@ use app\modules\ticket\models\Ticket;
  */
 class Customer extends ActiveRecord {
 
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+    const STATUS_BLOCKED = 'blocked';
+
+    //Email status
+    const EMAIL_STATUS_ACTIVE = 'active';
+    const EMAIL_STATUS_BOUNCED = 'bounced';
+    const EMAIL_STATUS_INACTIVE = 'inactive';
+    const EMAIL_STATUS_INVALID = 'invalid';
 
     protected static $companyRequired = false;
     
@@ -118,6 +131,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
+            [['last_calculation_current_account_balance', 'current_account_balance'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
@@ -378,7 +392,7 @@ class Customer extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getBills() {
-        return $this->hasMany(Bill::className(), ['customer_id' => 'customer_id']);
+        return $this->hasMany(Bill::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -436,6 +450,17 @@ class Customer extends ActiveRecord {
     {
         return $this->hasMany(CustomerHasCustomerMessage::class, ['customer_id' => 'customer_id']);
     }
+
+    public function getNotifyPayments()
+    {
+        return $this->hasMany(NotifyPayment::class, ['customer_id' => 'customer_id']);
+    }
+
+    public function getTickets()
+    {
+        return $this->hasMany(Ticket::class, ['customer_id' => 'customer_id']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -554,16 +579,26 @@ class Customer extends ActiveRecord {
      * @return Query
      */
     public function getActiveCustomerHasDiscounts($date = null) {
+
         if ($date) {
             $dateNow = $date->format('Y-m-d');
         } else {
-            $dateNow = (new DateTime('now'))->format('Y-m-d');
+            $dateNow = (new \DateTime('now'))->format('Y-m-d');
         }
-        return $this
-                        ->hasMany(CustomerHasDiscount::className(), ['customer_id' => 'customer_id'])
-                        ->where("'" . $dateNow . "' between from_date and to_date")
-                        ->andWhere(['status' => Discount::STATUS_ENABLED])
-        ;
+
+        return $this->hasMany(CustomerHasDiscount::class, ['customer_id' => 'customer_id'])
+            ->leftJoin('discount', 'discount.discount_id = customer_has_discount.discount_id')
+            ->where(['and',
+                ['<=', 'customer_has_discount.from_date', $dateNow],
+                ['>=', 'customer_has_discount.to_date', $dateNow],
+                ['persistent' => null],
+            ])
+            ->orWhere(['and',
+                ['not', ['persistent' => null]],
+                ['customer_has_discount.to_date' => null],
+            ])
+            ->andWhere(['customer_has_discount.status' => CustomerHasDiscount::STATUS_ENABLED])
+            ->andWhere(['discount.status' => Discount::STATUS_ENABLED]);
     }
 
     /**
@@ -1376,6 +1411,7 @@ class Customer extends ActiveRecord {
         $lastMonth = (new DateTime())->modify('last day of this month');
 
         $customer = Customer::findOne(['code' => $customer_code]);
+
         $ticket = Ticket::find()
             ->leftJoin('status', 'status.status_id = ticket.status_id')
             ->where(['customer_id' => $customer->customer_id, 'category_id' => $category_id, 'status.is_open' => $is_open ? 1 : 0])
@@ -1653,5 +1689,190 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * @return array
+     * Devuelve los estados posibles para ser listados en un desplegable o similar.
+     */
+    public static function getStatusEmailForSelect()
+    {
+        return [
+            Customer::EMAIL_STATUS_ACTIVE => Yii::t('app', Customer::EMAIL_STATUS_ACTIVE),
+            Customer::EMAIL_STATUS_BOUNCED => Yii::t('app', Customer::EMAIL_STATUS_BOUNCED),
+            Customer::EMAIL_STATUS_INACTIVE => Yii::t('app', Customer::EMAIL_STATUS_INACTIVE),
+            Customer::EMAIL_STATUS_INVALID => Yii::t('app', Customer::EMAIL_STATUS_INVALID)
+        ];
+    }
+
+    /**
+     * @param $customer_id
+     * Devuelve la cantidad de facturas que adeuda un cliente.
+     */
+    public static function getOwedBills($customer_id)
+    {
+        $customer_search = new CustomerSearch();
+        $owed_bills = $customer_search->searchDebtBills($customer_id);
+        if(!$owed_bills) {
+            return 0;
+        }
+        return $owed_bills['debt_bills'];
+    }
+
+    /**
+     * @return int
+     * @throws \Exception
+     * Devuelve la cantidad de extensiones de pago pedidas en el período
+     * Si se indica que cuente los informes de pago(que tambien generan que la conexion sea forzada) se restará 1 al
+     * total de conexiones forzadas siempre que sean mayor a 1.
+     */
+    public function getPaymentExtensionQtyRequest($from = null, $to = null, $count_notify_payments = true)
+    {
+        $payment_extension_qty = 0;
+
+        if (empty($from)) {
+            $from = (new \DateTime('first day of this month'));
+        }
+
+        if (empty($to)) {
+            $to = (new \DateTime('last day of this month'));
+        }
+
+        foreach ($this->getContracts()->all() as $contract) {
+            $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+            if ($connection) {
+                $extension_qty = ConnectionForcedHistorial::find()
+                    ->andWhere(['connection_id' => $connection->connection_id])
+                    ->andWhere(['>=', 'create_timestamp', $from->getTimestamp()])
+                    ->andWhere(['<', 'create_timestamp', $to->getTimestamp() + 86400])
+                    ->count();
+
+                $payment_extension_qty += $extension_qty;
+            }
+
+            if($count_notify_payments){
+                //Si se tienen en cuenta los informes de pago, se debe restar 1 a la cantidad total. Si no puede
+                // realizar un informe de pago, es porque ya se ha realizado el correspondiente a este mes
+                if(!$this->canNotifyPayment() && $payment_extension_qty > 0 && $payment_extension_qty != 1) {
+                    $payment_extension_qty -= 1;
+                }
+            }
+        }
+
+        return $payment_extension_qty;
+    }
+
+    /**
+     * @param $customer_id
+     * @param null $period
+     * @return bool
+     * @throws \Exception
+     * Indica si el cliente puede pedir una extension de pago.
+     * Logica de negocio: Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
+     * es mayor al dia corriente, el cliente no puede solicitar una extensión de pago. Ej: 15 + 5 = 20
+     * Si hoy es 16, puedo solicitar una extension de pago
+     * Si hoy es 21 ya no puedo solicitarla
+     */
+    public function canRequestPaymentExtension()
+    {
+        //Sólo si el cliente no debe mas de una factura
+        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
+            return false;
+        }
+
+        $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
+        $today = (new \DateTime('now'))->getTimestamp();
+
+        if($today > $max_date_can_request_payment_extension) {
+            return false;
+        }
+
+        //Y si no ha solicitado el máximo de extensiones de pago permitidas.
+        $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
+        $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
+
+        return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
+    }
+
+    /**
+     * Verifica que el cliente tenga comprobantes en estado borrador
+     */
+    public function hasDraftBills()
+    {
+        return $this->getBills()->where(['status' => Bill::STATUS_DRAFT])->exists();
+    }
+
+    /**
+     * Verifica que el cliente tenga pagos en estado borrador
+     */
+    public function hasDraftPayments()
+    {
+        return $this->getPayments()->where(['status' => Payment::PAYMENT_DRAFT])->exists();
+    }
+
+    /**
+     * Indica si el cliente puede informar de un pago.
+     * Sólo puede informar de un nuevo pago si no ha hecho el informe de un pago este mes
+     */
+    public function canNotifyPayment($date = null, $date_to = null)
+    {
+        //TODO: Eliminar condicion cuando finalize desarrollo de IVR
+        if ($this->code === 27237) {
+            return true;
+        }
+        if($date === null) {
+            $date = (new \DateTime('first day of this month'))->format('Y-m-d');
+        }
+
+        if($date_to === null) {
+            $date_to = (new \DateTime('last day of this month'))->format('Y-m-d');
+        }
+
+        return !$this->getNotifyPayments()->where(['>','date', $date])->andWhere(['<', 'date', $date_to])->exists();
+    }
+
+    /**
+     * Devuelve un timestamp con la fecha max en la que se informará al cliente sobre una extension de pago
+     */
+    public static function getMaxDateNoticePaymentExtension()
+    {
+        $expiration_bill_days_qty = Config::getValue('bill_default_expiration_days');
+        $payment_extension_days_qty = Config::getValue('payment_extension_duration_days');
+
+        $day_of_the_month = $expiration_bill_days_qty + $payment_extension_days_qty;
+
+        return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
+    }
+
+    /**
+     * Devuelve un timestamp con la fecha max real de una extension de pago
+     */
+    public static function getMaxDateRealPaymentExtension()
+    {
+        $expiration_bill_days_qty = Config::getValue('bill_default_expiration_days');
+        $payment_extension_days_qty = Config::getValue('payment_extension_real_duration_days');
+
+        $day_of_the_month = $expiration_bill_days_qty + $payment_extension_days_qty;
+
+        return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
+    }
+
+    /**
+     * Indica si el cliente tiene un contrato activo.
+     */
+    public function hasActiveContract()
+    {
+        return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    /**
+     * Indica si el cliente tiene la primer factura pagada.
+     */
+    public static function hasFirstBillPayed($customer_id)
+    {
+        $search = new CustomerSearch();
+        $result = $search->searchDebtBills($customer_id);
+        return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
     }
 }

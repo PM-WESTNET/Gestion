@@ -7,7 +7,7 @@ use app\modules\sale\components\BillExpert;
 use yii\helpers\Url;
 use app\components\helpers\UserA;
 use yii\bootstrap\Modal;
-
+use app\modules\sale\models\Bill;
 
 /**
  * @var yii\web\View $this
@@ -95,7 +95,7 @@ $formatter = Yii::$app->formatter;
             </div>
             <div class="col-sm-2">
                 <span class="text-center font-s"><?=Yii::t('app','Number')?></span>
-                <span class="text-center font-bold"><?= $model->status != 'draft' ? $model->number : '' ?></span>
+                <span class="text-center font-bold"><?= $model->status == Bill::STATUS_CLOSED ? $model->number : '' ?></span>
             </div>
             <div class="col-sm-3">
                 <span class="text-center font-s"><?=Yii::t('app','Date')?></span>

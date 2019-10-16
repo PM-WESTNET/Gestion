@@ -24,7 +24,7 @@ class InfobipService
      * @param $message Mensaje a enviar
      * @return array
      */
-    public static function sendSimpleSMS($from, $to, $message)
+    public static function sendSimpleSMS($from, $to, $message, $customer_id = null)
     {
         $dest= [];
 
@@ -73,6 +73,25 @@ class InfobipService
             ];
         } else {
             \Yii::info($response);
+
+            $data = json_decode($response);
+
+            if ($data->messages) {
+                foreach ($data->messages as $sms) {
+                    $msj = new InfobipMessage([
+                        'messageId' => $sms->messageId,
+                        'to' => $sms->to,
+                        'status' => $sms->status->name,
+                        'status_description' => $sms->status->description,
+                        'sent_timestamp' => time(),
+                        'message' => $message,
+                        'customer_id' => $customer_id
+                    ]);
+
+                    $msj->save();
+                }
+            }
+
             return [
                 'status' => 'success',
                 'response'  => $response

@@ -8,6 +8,7 @@ use app\modules\ticket\models\search\TicketManagementSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
 
 /**
  * TicketManagementController implements the CRUD actions for TicketManagement model.
@@ -41,6 +42,24 @@ class TicketManagementController extends Controller
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    /**
+     * Lists all TicketManagement models.
+     * @return mixed
+     */
+    public function actionCustomerIndex($customer_id)
+    {
+        $searchModel = new TicketManagementSearch([
+            'customer_id' => $customer_id
+        ]);
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('customer-index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'customer_id' => $customer_id
         ]);
     }
 
@@ -123,5 +142,32 @@ class TicketManagementController extends Controller
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+
+    /**
+     * @return array
+     * Crea una gestion y devuelve una respuesta json
+     */
+    public function actionRegisterTicketManagement()
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $model = new TicketManagement();
+
+        if($model->load(Yii::$app->request->post()) && $model->save()){
+            return [
+                'status' => 'success',
+                'observation' => $model,
+                'errors' => []
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'observation' => $model,
+            'errors' => $model->getErrors()
+        ];
+
     }
 }

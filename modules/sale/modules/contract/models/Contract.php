@@ -8,12 +8,14 @@ use app\modules\sale\models\Address;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerLog;
 use app\modules\sale\models\Product;
+use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\modules\contract\components\CompanyByNode;
 use app\modules\ticket\models\Category;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\Vendor;
 use webvimark\modules\UserManagement\models\User;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -84,7 +86,12 @@ class Contract extends ActiveRecord {
 
             $is_developer_mode = Config::getValue('is_developer_mode');
             if(!$is_developer_mode) {
-                $behaviors[] = 'app\modules\westnet\components\MesaTicketContractBehavior';
+                //  Se sobreescribe la propiedad events del behavior para evitar que se distare cuando el contrato se
+                //inserta y que aun no tenga contract details que analizar.
+                $behaviors[] = [
+                    'class' => 'app\modules\westnet\components\MesaTicketContractBehavior',
+                    'events' => []
+                ];
                 $behaviors[] = 'app\modules\westnet\components\RouterContractBehavior';
             }
         }
@@ -107,6 +114,8 @@ class Contract extends ActiveRecord {
             [['print_ads'], 'default', 'value' => 0],
             [['status'], 'string'],
             [['status'], 'in', 'range' => ['draft', 'active', 'inactive', 'canceled', 'low-process']],
+            //[['instalation_schedule'], 'in', 'range' => ['in the morning', 'in the afternoon', 'all day']],
+            //[['instalation_schedule'], 'default', 'value' => 'all day'],
             [['status'], 'default', 'value' => 'draft'],
             [['from_date'], 'required', 'on' => 'invoice'],
         ];
@@ -310,7 +319,7 @@ class Contract extends ActiveRecord {
                         case 'address_id':
                             $oldAddress= Address::findOne(['address_id' => $oldValue]);
                             $log = new CustomerLog();
-                            $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fulAddress, 'Contract', $this->contract_id);
+                            $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fullAddress, 'Contract', $this->contract_id);
                             break;
                         case 'status':
                             if ($this->status === self::STATUS_CANCELED) {
@@ -532,5 +541,62 @@ class Contract extends ActiveRecord {
         } else {
             $this->updateAttributes(['status' => 'draft']);
         }
+    }
+
+    /**
+     * @param $period
+     * @return int
+     * @throws \Exception
+     * Devuelve la cantidad de productos a facturar de extension de pago para el período dado (en caso de estar vacío, utiliza el período corriente) que aún no han sido facturados.
+     * Regla de negocio: Para consultar las extensiones pedidas el mes corriente es necesario que el $period sea correspondiente al primer dia del mes siguiente, ya que las extensiones
+     * de pago se agregan para la facturación del próximo mes.
+     */
+    public function getActivePaymentExtensionQtyPerPeriod($period = null)
+    {
+        $end_period = (new \DateTime($period))->modify('+1 month')->format('Y-m-01');
+        $payment_extension_product_id = Config::getValue('id-product_id-extension-de-pago');
+
+        if(!$period) {
+            $period = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $contract_detail_ids = (new Query())
+            ->select('contract_detail_id')
+            ->from('contract_detail')
+            ->where(['contract_id' => $this->contract_id])
+            ->andWhere(['product_id' => $payment_extension_product_id])
+            ->all();
+
+        return count(ProductToInvoice::find()
+            ->where(['status' => ProductToInvoice::STATUS_ACTIVE])
+            ->andWhere(['>=','period', $period])
+            ->andWhere(['<', 'period', $end_period])
+            ->andWhere(['in','contract_detail_id', $contract_detail_ids])
+            ->all());
+    }
+
+    /**
+     * Verifica si el contrato tiene un plan con la categoria de plan-fibra
+     */
+    public function hasFibraPlan()
+    {
+        $fibra_category = \app\modules\sale\models\Category::findOne(['system' => 'plan-fibra']);
+
+        return $this->getContractDetails()
+            ->leftJoin('product p', 'p.product_id = contract_detail.product_id')
+            ->leftJoin('product_has_category phc', 'phc.product_id = p.product_id')
+            ->where(['type' => 'plan'])
+            ->andWhere(['phc.category_id' => $fibra_category->category_id])
+            ->exists();
+    }
+
+    /**
+     * Devuelve el importe de el producto extensión de pago
+     */
+    public function getAmountPaymentExtension()
+    {
+        $product = Product::findOne(Config::getValue('extend_payment_product_id'));
+
+        return round($product->finalPrice,2);
     }
 }

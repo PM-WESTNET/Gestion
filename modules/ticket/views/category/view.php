@@ -45,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'schema_id',
                 'value' => function ($model) {
-                    return $model->schema->name;
+                    return $model->schema ? $model->schema->name : '';
                 }
             ],
             [

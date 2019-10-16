@@ -115,7 +115,10 @@ $config = [
                     ],
                 ],
                  'cobrodigital' => [
-                                    'class' => 'yii\i18n\PhpMessageSource',
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'pagomiscuentas' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
                 ],
             ],
         ],

@@ -14,3 +14,5 @@
 ./yii migrate --migrationPath=modules/mobileapp/migrations
 ./yii migrate --migrationPath=modules/log/migrations
 ./yii migrate --interactive=0
+./yii migrate --migrationPath=vendor/conquer/oauth2/src/migrations
+./yii migrate --migrationPath=modules/ivr/v1/migrations

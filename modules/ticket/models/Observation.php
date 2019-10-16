@@ -96,6 +96,13 @@ class Observation extends \app\components\db\ActiveRecord {
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getTicketManagement() {
+        return $this->hasOne(TicketManagement::class, ['ticket_management_id' => 'ticket_management_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getUser() {
 
         $userModel = $this->userModelClass;

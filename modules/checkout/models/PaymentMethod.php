@@ -5,6 +5,7 @@ namespace app\modules\checkout\models;
 use app\modules\sale\models\Company;
 use Yii;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "payment_method".
@@ -15,6 +16,7 @@ use yii\db\Query;
  * @property integer $register_number
  * @property boolean $allow_track_config
  * @property string $type_code_if_isnt_direct_channel
+ * @property boolean $send_ivr
  *
  * @property Payment[] $payments
  */
@@ -23,6 +25,10 @@ class PaymentMethod extends \app\components\db\ActiveRecord
 
     const TYPE_CODE_19 = 'code_19_digits';
     const TYPE_CODE_29 = 'code_29_digits';
+
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+
 
     public static function tableName()
     {
@@ -38,6 +44,9 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             [['name'], 'required'],
             [['type_code_if_isnt_direct_channel'], 'safe'],
             [['register_number', 'allow_track_config'], 'boolean'],
+            [['register_number', 'send_ivr'], 'boolean'],
+            [['send_ivr'], 'default', 'value' => false],
+            [['show_in_app'], 'default', 'value' => false],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
             [['name'], 'string', 'max' => 45],
@@ -57,6 +66,8 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'type' => Yii::t('app', 'Tipo de pago'),
             'allow_track_config' => Yii::t('app', 'Allow track config'),
             'type_code_if_isnt_direct_channel' => Yii::t('app', 'Type code if isnt direct channel'),
+            'send_ivr' => Yii::t('app', 'Send to Ivr'),
+            'show_in_app' => Yii::t('app', 'Show in app'),
         ];
     }
 
@@ -65,7 +76,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
      */
     public function getPayments()
     {
-        return $this->hasMany(PaymentItem::className(), ['payment_method_id' => 'payment_method_id']);
+        return $this->hasMany(PaymentItem::class, ['payment_method_id' => 'payment_method_id']);
     }
 
     /**
@@ -157,5 +168,35 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             self::TYPE_CODE_19 => Yii::t('app', self::TYPE_CODE_19),
             self::TYPE_CODE_29 => Yii::t('app', self::TYPE_CODE_29),
         ];
+    }
+
+    /**
+     * Devuelve un listado de medios de pago que están disponibles para ser mostrados en la app
+     */
+    public static function getPaymentMethodsAvailableForApp()
+    {
+        return PaymentMethod::find()->where(['show_in_app' => true, 'status' => PaymentMethod::STATUS_ENABLED])->all();
+    }
+
+    /**
+     * Devuelve los medios de pago para ser listados en un desplegable
+     */
+    public static function getPaymentMethodForSelect()
+    {
+        return ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name');
+    }
+
+    /**
+     * Obtiene el medio de pago Transferencia.
+     */
+    public static function getTransferencia()
+    {
+        $payment_method = PaymentMethod::findOne(['name' => 'Transferencia']);
+
+        if(!$payment_method) {
+            return false;
+        }
+
+        return $payment_method;
     }
 }

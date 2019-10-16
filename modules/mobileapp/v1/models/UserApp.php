@@ -2,9 +2,13 @@
 
 namespace app\modules\mobileapp\v1\models;
 
-use Yii;
-use yii\web\ServerErrorHttpException;
+use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\Customer;
+use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\models\Contract;
+use Yii;
+use yii\db\ActiveRecord;
+use yii\web\ServerErrorHttpException;
 
 /**
  * This is the model class for table "user_app".
@@ -18,7 +22,7 @@ use app\modules\mobileapp\v1\models\Customer;
  * @property AuthToken[] $authTokens
  * @property UserAppHasCustomer[] $userAppHasCustomers
  */
-class UserApp extends \app\components\db\ActiveRecord
+class UserApp extends ActiveRecord
 {
 
 
@@ -76,24 +80,108 @@ class UserApp extends \app\components\db\ActiveRecord
 
     public function extraFields()
     {
-        return  ['accounts'];
+        return  ['accounts', 'paymentExtensionInfo', 'bills', 'payments'];
     }
 
-    public function getAccounts(){
-        $accounts= [];
+    public function getPaymentExtensionInfo() {
+
+        $payment_extension_info = [];
+        $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
 
         foreach ($this->customers as $key => $customer){
-            $accounts[] = [
+            $contracts = [];
+
+            foreach ($customer->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->all() as $contract) {
+                $contracts[] = [
+                    'contract_id' => $contract->contract_id,
+                    'service_address' => $contract->address ? $contract->address->fullAddress : $customer->address,
+                ];
+            }
+
+
+            if (empty($payment_extension_product)) {
+                $price = 0;
+            }else {
+                $price = round($payment_extension_product->finalPrice, 2);
+            }
+
+            $payment_extension_info[] = [
                 'customer_code' => $customer->customer_id,
                 'code' => $customer->code,
                 'customer_payment_code' => $customer->payment_code,
-                'customer_name' => $customer->name .' - '. $customer->code,
-                'showBills' => $customer->showBills,
-                'data' => $customer->getAccount()
+                'customer_name' => $customer->fullName,
+                'contracts' => $contracts,
+                'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
+                'price' => $price,
+                'duration_days' => 0,
+                'date_available_to' => (new \DateTime('now'))->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())->format('d-m-Y'),
+                'can_notify_payment' => $customer->canNotifyPayment(),
             ];
         }
 
+        return $payment_extension_info;
+    }
+
+    /**
+     * Devuelve información basica de las cuentas de los clientes asociados al user app
+     */
+    public function getAccounts(){
+        $accounts = [];
+
+        foreach ($this->customers as $key => $customer){
+            if($customer->hasActiveContract()){
+                $accounts[] = [
+                    'customer_code' => $customer->customer_id,
+                    'code' => $customer->code,
+                    'customer_payment_code' => $customer->payment_code,
+                    'customer_name' => $customer->fullName,
+                    'balance' => $customer->current_account_balance ? ($customer->current_account_balance > 0 ? 0 : round($customer->current_account_balance) ): 0,
+                    'can_notify_payment' => $customer->canNotifyPayment()
+                ];
+            }
+        }
+
         return $accounts;
+    }
+
+    /**
+     * Devuelve 10 comprobantes por cliente asociado al user app
+     */
+    public function getBills(){
+        $bills = [];
+
+        foreach ($this->customers as $key => $customer){
+            $bills[] = [
+                'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
+                'customer_name' => $customer->fullName,
+                'balance' => $customer->current_account_balance ? round($customer->current_account_balance) : 0,
+                'bills' => $customer->getBillsToShow()
+            ];
+        }
+
+        return $bills;
+    }
+
+    /**
+     * Devuelve 10 comprobantes por cliente asociado al user app
+     */
+    public function getPayments(){
+        $payments = [];
+
+        foreach ($this->customers as $key => $customer){
+            $payments[] = [
+                'customer_code' => $customer->customer_id,
+                'code' => $customer->code,
+                'customer_payment_code' => $customer->payment_code,
+                'customer_name' => $customer->fullName,
+                'balance' => $customer->current_account_balance ? round($customer->current_account_balance) : 0,
+                'payments' => $customer->getPaymentsToShow(),
+            ];
+        }
+
+        return $payments;
     }
 
 

@@ -16,6 +16,7 @@ class ProviderBillSearch extends ProviderBill
     public $start_date;
     public $finish_date;
     public $company_id;
+    public $amountApplied;
 
     /**
      * @inheritdoc
@@ -103,5 +104,43 @@ class ProviderBillSearch extends ProviderBill
         if (!empty($this->finish_date)) {
             $query->andFilterWhere(['<=', 'date', Yii::$app->formatter->asDate($this->finish_date, 'yyyy-MM-dd')]);
         }
+    }
+
+    public function searchWithDebt($params)
+    {
+        /** @var Query $query */
+        $query = $this->find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => ['timestamp' => SORT_ASC]
+            ]
+        ]);
+
+        $query->addSelect(['provider_bill.*', 'sum(coalesce(pbhpp.amount, 0)) as amountApplied'])
+            ->joinWith(['billType'])
+            ->leftJoin('provider_bill_has_provider_payment pbhpp', 'provider_bill.provider_bill_id = pbhpp.provider_bill_id')
+            ->where(['pbhpp.provider_bill_id' => null]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('1=2');
+            return $dataProvider;
+        }
+
+        if($this->provider_id) {
+            $query->andFilterWhere([
+                'provider_bill.provider_id' => $this->provider_id,
+                'bill_type.multiplier' => [-1, 1]
+            ]);
+        }
+
+        //Fix pagination
+        $query->groupBy('provider_bill.provider_bill_id');
+        $query->having("sum(coalesce(pbhpp.amount, 0)) < provider_bill.total");
+
+        return $dataProvider;
     }
 }

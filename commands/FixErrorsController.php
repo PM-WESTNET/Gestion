@@ -21,11 +21,13 @@ class FixErrorsController extends \yii\console\Controller
 {
 
     public $billId = [];
+    public $providerBillsIds = [];
 
     public function options($actionID)
     {
         return array_merge(parent::options($actionID), [
-            'billIds'
+            'billIds',
+            'providerBillsIds'
         ]);
     }
 
@@ -45,6 +47,30 @@ class FixErrorsController extends \yii\console\Controller
 
         foreach ($provider_bills as $provider_bill) {
             $provider_bill->calculateTotal();
+        }
+    }
+
+    /**
+     * Actualiza el neto en tax rate de los comprobantes a proveedor, y actualiza los totales de los mismos, solo a los tax rate que tienen porcentaje (IVA)
+     * Para llamar a esta acción ./yii set-tax-rate-net-into-provider-bills 1006215,1006135 por ejemplo
+     */
+    public function actionSetTaxRateNetIntoProviderBills(array $providerBillsIds) {
+        foreach ($providerBillsIds as $providerBillId) {
+            $provider_bill = ProviderBill::findOne($providerBillId);
+
+            if(!$provider_bill) {
+                echo "Problemas para encontrar el comprobante con id $providerBillId\n";
+            } else {
+                echo "Actualizando comprobante $provider_bill->provider_bill_id ...\n";
+                $provider_bill_has_tax_rate = $provider_bill->getProviderBillHasTaxRates()->where(['in','tax_rate_id', [1,2,3,4,14,15]])->all();
+
+                foreach ($provider_bill_has_tax_rate as $pbhtr) {
+                    $new_net = $pbhtr->amount / $pbhtr->taxRate->pct;
+                    $pbhtr->updateAttributes(['net' => round($new_net,2)]);
+                }
+
+                $provider_bill->calculateTotal();
+            }
         }
     }
 

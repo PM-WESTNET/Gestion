@@ -49,16 +49,17 @@ class m190513_121415_add_base_tables_cobro_digital extends Migration
         $this->addColumn('customer', 'payment_code_cobro_digital_29', $this->string());
         $this->addColumn('customer', 'payment_code_cobro_digital_pdf', $this->text());
 
-        $track = Track::find()->where(['slug' => 'directo'])->one();
 
-        foreach (Company::find()->all() as $company) {
-            foreach (PaymentMethod::find()->all() as $payment_method) {
-                $this->insert('company_has_payment_track', [
-                    'company_id' => $company->company_id,
-                    'payment_method_id' => $payment_method->payment_method_id,
-                    'track_id' => $track->track_id,
-                    'status' => CompanyHasPaymentTrack::STATUS_DISABLED
-                ]);
+        foreach(Track::find()->all() as $track) {
+            foreach (Company::find()->all() as $company) {
+                foreach (PaymentMethod::find()->all() as $payment_method) {
+                    $this->insert('company_has_payment_track', [
+                        'company_id' => $company->company_id,
+                        'payment_method_id' => $payment_method->payment_method_id,
+                        'track_id' => $track->track_id,
+                        'status' => CompanyHasPaymentTrack::STATUS_DISABLED
+                    ]);
+                }
             }
         }
 

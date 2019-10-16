@@ -47,6 +47,8 @@ class CustomerSearch extends Customer {
     public $customers_id;
     public $customer_id;
 
+    public $not_contract_status;
+
     //TODO: dejar solo nodes
     public $node_id;
     public $nodes = [];
@@ -74,7 +76,7 @@ class CustomerSearch extends Customer {
         return [
             [['customer_id', 'document_type_id', 'debt_bills', 'plan_id'], 'integer'],
             [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to'], 'safe'],
-            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status'],'safe'],
+            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
@@ -184,6 +186,8 @@ class CustomerSearch extends Customer {
         $this->filterByNodes($query);
         $this->filterByZone($query);
         $this->filterByPlan($query);
+        $this->filterEmailStatus($query);
+        $this->filterMobileAppStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -498,7 +502,7 @@ class CustomerSearch extends Customer {
             $subQueryPayments->andWhere(['>=', 'p.date', Yii::$app->getFormatter()->asDate($this->fromDate, 'yyyy-MM-dd') ]);
         }
 
-        $masterSubQuery = (new Query())->select(['customer.customer_id', 'concat(customer.lastname, \' \', customer.name) as name', 'customer.phone', 'customer.code',
+        $masterSubQuery = (new Query())->select(['customer.customer_id', 'concat(customer.lastname, \' \', customer.name) as name', 'customer.phone','customer.phone2','customer.phone3','customer.phone4', 'customer.code',
                 'round(coalesce(('.$subQueryBills->createCommand()->getRawSql().'), 0) - coalesce(('.$subQueryPayments->createCommand()->getRawSql().'), 0)) as saldo', 'bills.debt_bills', 'bills.payed_bills',
                 new Expression('( bills.debt_bills +  bills.payed_bills) as total_bills'),
             'contract_detail.product_id as plan',
@@ -701,6 +705,10 @@ class CustomerSearch extends Customer {
         if (!empty($this->contract_status)) {
             $query->andWhere(['contract.status' => $this->contract_status]);
         }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
+        }
     }
 
     private function filterByContractAge($query) {
@@ -762,11 +770,13 @@ class CustomerSearch extends Customer {
 
     private function filterEmailStatus($query){
         if ($this->email_status) {
-            $query->andWhere(['customer.email_status' => $this->email_status]);
+            $query->andFilterWhere(['customer.email_status' => $this->email_status]);
+            $query->andWhere(['<>','customer.email', '']);
         }
 
         if ($this->email2_status) {
-            $query->andWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andFilterWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andWhere(['<>','customer.email2', '']);
         }
     }
 
@@ -812,7 +822,7 @@ class CustomerSearch extends Customer {
                 new Expression('sum(b.total * bt.multiplier) AS amount')])
             ->from(new Expression('bill b FORCE INDEX(fk_bill_customer1_idx)'))
             ->leftJoin('bill_type bt', 'b.bill_type_id = bt.bill_type_id' )
-            ->where(['b.status'=>['closed', 'completed'], 'b.customer_id'=>$customer_id])
+            ->where(['b.status' => 'closed', 'b.customer_id'=>$customer_id])
             ->andWhere(['<>','b.total', 0])
             ->groupBy(['b.customer_id','b.bill_id'])
         ;
@@ -820,7 +830,7 @@ class CustomerSearch extends Customer {
         $queryPayment = (new Query())
             ->select(['p.customer_id', 'p.date as date', new Expression('0 AS i'), new Expression('-p.amount')])
             ->from('payment as p')
-            ->where(['p.status'=>'closed', 'p.customer_id'=>$customer_id])
+            ->where(['p.status' => 'closed', 'p.customer_id'=>$customer_id])
         ;
 
         $subQuery = (new Query());

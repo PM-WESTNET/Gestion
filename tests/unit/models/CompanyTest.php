@@ -69,6 +69,8 @@ class CompanyTest extends \Codeception\Test\Unit
         $model->tax_condition_id = 1;
         $model->code = '1';
         $model->partner_distribution_model_id = 1;
+        $model->fantasy_name = 'Empresa';
+        $model->start= (new \DateTime('now'))->format('d-m-Y');
 
         $this->assertTrue($model->save());
     }

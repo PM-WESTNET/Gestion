@@ -2,7 +2,9 @@
 
 namespace app\modules\ticket\models;
 
+use webvimark\modules\UserManagement\models\User;
 use Yii;
+use app\modules\ticket\models\Ticket;
 
 /**
  * This is the model class for table "arya_ticket.ticket_management".
@@ -14,9 +16,8 @@ use Yii;
  */
 class TicketManagement extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+    public $observation_id;
+
     public static function tableName()
     {
         return 'arya_ticket.ticket_management';
@@ -33,8 +34,9 @@ class TicketManagement extends \yii\db\ActiveRecord
     {
         return [
             [['ticket_id', 'user_id'], 'required'],
-            [['ticket_id', 'user_id'], 'integer'],
+            [['ticket_id', 'user_id', 'observation_id'], 'integer'],
             [['timestamp'], 'string', 'max' => 255],
+            [['by_wp', 'by_sms', 'by_email', 'by_call'], 'boolean']
         ];
     }
 
@@ -50,6 +52,16 @@ class TicketManagement extends \yii\db\ActiveRecord
         ];
     }
 
+    public function getUser()
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function getTicket()
+    {
+        return $this->hasOne(Ticket::class, ['ticket_id' => 'ticket_id']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -57,9 +69,28 @@ class TicketManagement extends \yii\db\ActiveRecord
     {
         return [
             'ticket_management_id' => Yii::t('app', 'Ticket Management ID'),
-            'ticket_id' => Yii::t('app', 'Ticket ID'),
-            'user_id' => Yii::t('app', 'User ID'),
+            'ticket_id' => Yii::t('app', 'Ticket'),
+            'user_id' => Yii::t('app', 'User'),
             'timestamp' => Yii::t('app', 'Date'),
+            'by_wp' => Yii::t('app','WhatsApp'),
+            'by_sms' => Yii::t('app', 'SMS'),
+            'by_email' => Yii::t('app', 'Email'),
+            'by_call' => Yii::t('app', 'Call')
         ];
+    }
+
+    /**
+     * Asocia la gestion del ticket a una observación
+     */
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        if ($insert) {
+            if($this->observation_id) {
+                $observation = Observation::findOne($this->observation_id);
+                if($observation) {
+                    $observation->updateAttributes(['ticket_management_id' => $this->ticket_management_id]);
+                }
+            }
+        }
     }
 }

@@ -95,6 +95,9 @@ return [
                         'modules/user-management/front' => 'modules/user-management/front.php',
                     ],
                 ],
+                'cobrodigital' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
             ]
         ],
         'formatter' => [

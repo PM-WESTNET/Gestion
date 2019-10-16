@@ -76,7 +76,7 @@ class ProductDiscount extends \app\components\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
+        return $this->hasOne(Product::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -84,6 +84,6 @@ class ProductDiscount extends \app\components\db\ActiveRecord
      */
     public function getDiscountEvent()
     {
-        return $this->hasOne(DiscountEvent::className(), ['discount_event_id' => 'discount_event_id']);
+        return $this->hasOne(DiscountEvent::class, ['discount_event_id' => 'discount_event_id']);
     }
 }

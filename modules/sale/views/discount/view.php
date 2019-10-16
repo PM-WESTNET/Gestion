@@ -43,6 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Referenced'),
                 'value' => Yii::t('app', $model->referenced ? 'Yes' : 'No' ),
             ],
+            'persistent:boolean',
             'value',
             'from_date',
             'to_date',

@@ -11,7 +11,8 @@ class CashierFixture extends ActiveFixture
     public $modelClass = Cashier::class;
 
     public $depends = [
-        EcopagoFixture::class
+        EcopagoFixture::class,
+        UserFixture::class
     ];
 }
 

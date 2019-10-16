@@ -80,7 +80,7 @@ class ProviderBillController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post())) {
-            $existing_provider_bill = ProviderBill::find()->where(['number' => $model->number1.'-'.$model->number2])->andWhere(['provider_id' => $model->provider_id])->one();
+            $existing_provider_bill = ProviderBill::find()->where(['number' => $model->number1.'-'.$model->number2])->andWhere(['provider_id' => $model->provider_id])->andWhere(['bill_type_id' => $model->bill_type_id])->one();
             if ($existing_provider_bill) {
                 \Yii::$app->session->setFlash('error', 'Ya existe una factura con el mismo número para ese provedor');
                 return $this->render('create', [
@@ -213,7 +213,8 @@ class ProviderBillController extends Controller
             $tax = $model->addTax([
                 'provider_bill_id'  => $tax->provider_bill_id,
                 'tax_rate_id'       => $tax->tax_rate_id,
-                'amount'            => $tax->amount
+                'amount'            => $tax->amount,
+                'net'            => $tax->net
             ]);
         }
 

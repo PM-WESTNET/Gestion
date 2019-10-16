@@ -21,7 +21,7 @@ class m190523_180707_add_config_item_for_notification_unused_payment_cards exten
             'attr' => 'min-unused-payment-cards-qty-notification',
             'type' => 'textInput',
             'label' => "Cantidad en la que se creará un recordatorio",
-            'description' => "Se mostraŕá una notificación cuando la cantidad de las tarjetas de cobro disponibles sea menor al valor",
+            'description' => "Se mostrará una notificación cuando la cantidad de las tarjetas de cobro disponibles sea menor al valor",
             'multiple' => 0,
             'category_id' => $category->category_id,
             'superadmin' => 0,

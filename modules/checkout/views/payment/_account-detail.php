@@ -1,6 +1,6 @@
 <?php
 $debt = $searchModel->accountTotalCredit();
-$payed = $searchModel->accountPayed();
+$payed = $searchModel->accountPayed(null, null, true);
 
 $total = $searchModel->accountTotal();
 
@@ -11,7 +11,7 @@ if($total < -(Yii::$app->params['account_tolerance'])){
 }
 ?>
 
-<h4><?php //$searchModel->paymentMethod->name; ?></h4>
+<h2><?= Yii::t('app', 'Account') ?></h2>
 <table class="table table-bordered">
     <thead>
         <tr>

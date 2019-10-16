@@ -64,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             }
         ],
+        'start_date',
         [
             'header' => TicketModule::t('app', 'Status'),
             'attribute' => 'status_id',
@@ -97,35 +98,26 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'raw'
         ],
-        'title',
-        'start_date',
-        'finish_date',
         [
-            'label' => Yii::t('app', 'Assignated users'),
+            'attribute' => 'task_date',
             'value' => function($model) {
-                $assignations = $model->assignations;
-                $assignation_string = '';
-                foreach ($assignations as $assignation) {
-                    $assignation_string .= $assignation->user->username .', ';
-                }
-                return $assignation_string;
-            },
-            'contentOptions' => ['style' => ['max-width' => '250px;']],
+                return $model->task_id ? $model->task->date : '';
+            }
         ],
         [
-            'header' => Yii::t('app', 'Assign to user'),
-            'attribute' => 'user_id',
+            'attribute' => 'discounted',
             'value' => function($model) {
-                return Select2::widget([
-                    'name' => 'new_assigned_user',
-                    'data' => ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username'),
-                    'options' => ['data-ticket' => $model->ticket_id , 'class' => 'select_to_assig_to_user', 'placeholder' => Yii::t('app','Select ...')],
-                    'pluginOptions' => [
-                        'allowClear' => true,
-                    ],
-                ]);
+                $checked = $model->discounted ? true : false;
+                return Html::checkbox('', $checked, ['class' => 'dicounted', 'data-ticket' => $model->ticket_id]);
             },
-            'format' => 'raw'
+            'format' => 'raw',
+            'contentOptions' => ['style' => 'text-align: center']
+        ],
+        [
+            'label' => Yii::t('app', 'Ticket management quantity'),
+            'value' => function($model) {
+                return $model->getTicketManagementQuantity();
+            }
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
@@ -139,15 +131,6 @@ $this->params['breadcrumbs'][] = $this->title;
                             'ticket' => $model->ticket_id
                        ]
                     ]);
-                },
-                'register-management' => function ($url, $model) {
-                    if($model->canAddTicketManagement()) {
-                        return Html::a('<span class="glyphicon glyphicon-pushpin"></span>', ['add-ticket-management', 'ticket_id' => $model->ticket_id, 'redirect' => 'installations-tickets'], [
-                            'class' => 'btn btn-primary btn-add-ticket-management',
-                            'title' => Yii::t('app', 'Register ticket management'),
-                            'data-confirm' => Yii::t('app', 'Are you sure you want to register a ticket management?')
-                        ]);
-                    }
                 },
                 'current-account' => function ($url, $model) {
                     return Html::a(Yii::t('app', 'Account'), ['/checkout/payment/current-account', 'customer' => $model->customer_id], [
@@ -196,6 +179,11 @@ $this->params['breadcrumbs'][] = $this->title;
     var Tickets = new function () {
 
         this.init = function () {
+            $('.dicounted').on('click', function (e) {
+                if(window.confirm('<?= Yii::t('app', 'Are you sure you want to check that option?')?>')) {
+                    Tickets.setDiscountedValue($(this).data('ticket'), $(this).prop('checked'));
+                }
+            })
             $(document).on('click', '.btn-obs', function (e) {
                 e.preventDefault();
                 Tickets.getObservations($(this).data('ticket'));
@@ -204,6 +192,16 @@ $this->params['breadcrumbs'][] = $this->title;
             $(document).on('click', '#add_obs_btn', function (e) {
                 e.preventDefault();
                 Tickets.addObservationForm($(this));
+            });
+
+            $(document).on('click', '#add_management_btn', function (e) {
+                e.preventDefault();
+                Tickets.addManagementForm($(this));
+            });
+
+            $(document).on('click', '#management-submit-btn', function (e) {
+                e.preventDefault();
+                Tickets.registerTicketManagement()
             });
 
             $(document).on('click', '#observation-submit-btn', function (e) {
@@ -243,6 +241,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         $('.task_date_div').addClass('hidden');
                     }
                 }
+            })
+        }
+
+        this.setDiscountedValue = function(ticket_id, value) {
+            $.ajax({
+                url: "<?= Url::to(['set-discounted'])?>",
+                data: {ticket_id: ticket_id, discounted: value},
+                dataType: 'json',
+                method: 'GET'
             })
         }
 
@@ -301,6 +308,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             });
         }
+
+        this.addManagementForm = function (btn) {
+            bootbox.hideAll();
+            $.ajax({
+                url : "<?= Url::to(['get-management-form'])?>",
+                data: $.param({ticket_id: $(btn).data('ticket'), observation_id: $(btn).data('observation')}),
+                dataType: 'json',
+            }).done(function (response) {
+                bootbox.dialog ({
+                    title: '<h3><?= Yii::t('app','Register ticket management')?></h3>',
+                    size: 'large',
+                    message: response.form
+                });
+            })
+        };
+
+        this.registerTicketManagement = function () {
+            var ticket_id = $('#ticketmanagement-ticket_id').val();
+            $.ajax({
+                url: '<?= Url::to(['/ticket/ticket-management/register-ticket-management'])?>',
+                method: 'POST',
+                data: $('#management-form').serializeArray(),
+                dataType: 'json',
+                success: function(data){
+                    if(data.status === 'success') {
+                        console.log('asdada');
+                        bootbox.hideAll();
+                        Tickets.getObservations(ticket_id);
+                    }
+                }
+            });
+        }
+
     };
 
 

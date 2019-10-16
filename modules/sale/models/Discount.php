@@ -66,6 +66,11 @@ class Discount extends \app\components\db\ActiveRecord
             [['type'], 'in', 'range' => [Discount::TYPE_FIXED, Discount::TYPE_PERCENTAGE]],
             [['apply_to'], 'in', 'range' => [Discount::APPLY_TO_CUSTOMER, Discount::APPLY_TO_PRODUCT]],
             [['value_from'], 'in', 'range' => [Discount::VALUE_FROM_TOTAL, Discount::VALUE_FROM_PRODUCT, Discount::VALUE_FROM_PLAN]],
+            [['referenced', 'persistent'], function($attribute, $params, $validator) {
+                if($this->persistent == 1 && $this->referenced != 1) {
+                    $this->addError($attribute, Yii::t('app', 'If persistent is selected, must be a referenced discount'));
+                }
+            }]
         ];
     }
 
@@ -90,7 +95,8 @@ class Discount extends \app\components\db\ActiveRecord
             'customerHasDiscounts' => Yii::t('app', 'CustomerHasDiscounts'),
             'product' => Yii::t('app', 'Product'),
             'productToInvoices' => Yii::t('app', 'ProductToInvoices'),
-            'referenced' => Yii::t('app', 'Referenced')
+            'referenced' => Yii::t('app', 'Referenced'),
+            'persistent' => Yii::t('app', 'Persistent'),
         ];
     }    
 
