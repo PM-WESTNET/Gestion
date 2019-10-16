@@ -78,7 +78,9 @@ class CustomerLogTest extends \Codeception\Test\Unit
             'date' => (new \DateTime('now'))->format('Y-m-d'),
             'customer_id' => 45900,
             'user_id' => 1,
-            'observations' => 'observation'
+            'observations' => 'observation',
+            'object_id' => 1,
+            'class_name' => 'class'
         ]);
 
         expect('Saved when full and new', $model->save())->true();

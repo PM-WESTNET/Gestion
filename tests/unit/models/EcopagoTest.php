@@ -79,7 +79,7 @@ class EcopagoTest extends \Codeception\Test\Unit
         $model = new Ecopago([
             'status_id' => 1,   //Fixture
             'name' => 'Ecopago1',
-            'commission_type' =>  'percentaje',
+            'commission_type' =>  'percentage',
             'commission_value' => '1.6',
             'account_id' => 1,  //Fixture
             'provider_id' => 149
@@ -93,7 +93,7 @@ class EcopagoTest extends \Codeception\Test\Unit
         $model = new Ecopago([
             'status_id' => 1,           //Fixture
             'name' => 'Ecopago1',
-            'commission_type' =>  'percentaje',
+            'commission_type' =>  'percentage',
             'commission_value' => '1.6',
             'account_id' => 1,          //Fixture
             'provider_id' => 149        //Fixture
@@ -118,7 +118,7 @@ class EcopagoTest extends \Codeception\Test\Unit
         $model = new Ecopago([
             'status_id' => 1,           //Fixture
             'name' => 'Ecopago1',
-            'commission_type' =>  'percentaje',
+            'commission_type' =>  'percentage',
             'commission_value' => '1.6',
             'account_id' => 1,          //Fixture
             'provider_id' => 149        //Fixture

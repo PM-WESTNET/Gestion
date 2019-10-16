@@ -13,6 +13,7 @@ use app\modules\sale\models\Customer;
 use app\tests\fixtures\CashierFixture;
 use Codeception\Stub;
 use app\modules\westnet\ecopagos\models\Cashier;
+use app\tests\fixtures\UserFixture;
 
 class PayoutTest extends \Codeception\Test\Unit
 {
@@ -28,6 +29,9 @@ class PayoutTest extends \Codeception\Test\Unit
             ],
             'cashier' => [
                 'class' => CashierFixture::class
+            ],
+            'user' => [
+                'class' => UserFixture::class
             ]
         ];
     }
@@ -74,7 +78,8 @@ class PayoutTest extends \Codeception\Test\Unit
             'username' => 'lmazza',
             'password' => '123',
             'password_repeat' => '123',
-            'beforeSave' => function () { return true; }
+            'beforeSave' => function () { return true; },
+            'user_id' => 1
         ]);
         $cashier->save();
 
@@ -84,9 +89,16 @@ class PayoutTest extends \Codeception\Test\Unit
             'amount' => '123',
             'customer_number' => $customer->code,      //Fixture
             'beforeSave' => function () { return true; },
-            'afterSave' => function () { return true; }
+            'afterSave' => function () { return true; },
+            'payment_id' => 1,
+            'customer_id' => 45900,
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'time' => (new \DateTime('now'))->format('H:i:s'),
+            'datetime' => (new \DateTime('now'))->getTimestamp(),
         ]);
-        $model->save();
+        Stub::update($model, [
+            'beforeSave' => function () use ($model) { $model->date = Yii::$app->formatter->asDate($model->date, 'yyyy-MM-dd'); return true; }
+        ]);
 
         expect('Valid when full and new', $model->save())->true();
     }
@@ -191,7 +203,8 @@ class PayoutTest extends \Codeception\Test\Unit
             'username' => 'lmazza',
             'password' => '123',
             'password_repeat' => '123',
-            'beforeSave' => function () { return true; }
+            'beforeSave' => function () { return true; },
+            'user_id' => 1
         ]);
         $cashier->save();
 
@@ -202,8 +215,17 @@ class PayoutTest extends \Codeception\Test\Unit
             'customer_number' => $customer->code,      //Fixture
             'copy_number' => 1,
             'beforeSave' => function () { return true; },
-            'afterSave' => function () { return true; }
+            'afterSave' => function () { return true; },
+            'payment_id' => 1,
+            'customer_id' => 45900,
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'time' => (new \DateTime('now'))->format('H:i:s'),
+            'datetime' => (new \DateTime('now'))->getTimestamp(),
         ]);
+        Stub::update($model, [
+            'beforeSave' => function () use ($model) { $model->date = Yii::$app->formatter->asDate($model->date, 'yyyy-MM-dd'); return true; }
+        ]);
+
         $model->save();
         $model->incrementNumberCopy();
 

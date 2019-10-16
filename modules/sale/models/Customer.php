@@ -1508,16 +1508,18 @@ class Customer extends ActiveRecord {
             $unused_payment_card = PaymentCard::find()->where(['used' => 0])->one();
 
             //Si no está en entorno de testing me conecto a la api de CobroDigital
-            if(YII_ENV_TEST){
-                $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
-                $unused_payment_card->updateAttributes(['used' => 1]);
-                return true;
-            } else {
-                //Se edita el pagador "vacío" en cobro digital, para que puedan incluirse los datos del cliente
-                if(CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
+            if($unused_payment_card) {
+                if (YII_ENV_TEST) {
                     $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
                     $unused_payment_card->updateAttributes(['used' => 1]);
                     return true;
+                } else {
+                    //Se edita el pagador "vacío" en cobro digital, para que puedan incluirse los datos del cliente
+                    if (CobroDigital::editarPagadorBy29DigitsCode($unused_payment_card->code_29_digits, $this->code, $this->document_number, $this->email)) {
+                        $this->updateAttributes(['payment_code_19_digits' => $unused_payment_card->code_19_digits, 'payment_code_29_digits' => $unused_payment_card->code_29_digits]);
+                        $unused_payment_card->updateAttributes(['used' => 1]);
+                        return true;
+                    }
                 }
             }
         }

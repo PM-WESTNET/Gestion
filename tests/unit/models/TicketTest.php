@@ -14,6 +14,7 @@ use app\tests\fixtures\TicketCategoryFixture;
 use app\tests\fixtures\UserFixture;
 use app\modules\ticket\models\Assignation;
 use app\modules\config\models\Config;
+use app\modules\ticket\models\TicketManagement;
 
 class TicketTest extends \Codeception\Test\Unit
 {
@@ -211,8 +212,6 @@ class TicketTest extends \Codeception\Test\Unit
             'category_id' => 1,
         ]);
         $model->save();
-
-        expect('Ticket management total is 0', $model->getTicketManagementQuantity())->equals(0);
 
         $observation = new Observation([
             'title' => 'Título de la observación',

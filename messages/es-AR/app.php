@@ -1269,5 +1269,6 @@
     'Task priorities' => 'Prioridades de Tarea',
     'Task creator' => 'Creador de tarea',
     'Assignations' => 'Asignaciones',
-    'Are you sure you want to check that option?' => '¿Esta seguro que quiere tildar esa opción?'
+    'Are you sure you want to check that option?' => '¿Esta seguro que quiere tildar esa opción?',
+    'Payment methods and codes' => 'Medios de pago y códigos'
 );

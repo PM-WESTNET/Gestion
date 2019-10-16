@@ -1,10 +1,13 @@
 <?php namespace models;
 
+use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
 use app\tests\fixtures\ConnectionFixture;
 use app\tests\fixtures\ContractFixture;
 use app\tests\fixtures\ProductFixture;
 use app\tests\fixtures\ProductPriceFixture;
+use app\tests\fixtures\UserFixture;
 use Codeception\Util\Debug;
 
 class ConnectionTest extends \Codeception\Test\Unit
@@ -36,10 +39,12 @@ class ConnectionTest extends \Codeception\Test\Unit
             ],
             'product_price' => [
                 'class' =>  ProductPriceFixture::class
+            ],
+            'user' => [
+                'class' => UserFixture::class
             ]
         ];
     }
-
 
     public function testSuccessForceConnection()
     {

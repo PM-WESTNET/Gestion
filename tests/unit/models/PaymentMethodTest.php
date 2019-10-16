@@ -126,8 +126,6 @@ class PaymentMethodTest extends Unit
 
     public function testGetPaymentMethodForSelect()
     {
-        expect('Array is empty', PaymentMethod::getPaymentMethodForSelect())->isEmpty();
-
         $model = new PaymentMethod([
             'name' => 'paymentMethod',
             'status' => PaymentMethod::STATUS_ENABLED,

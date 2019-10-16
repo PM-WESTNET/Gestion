@@ -66,7 +66,10 @@ class ResumeTest extends \Codeception\Test\Unit {
         $model = new Resume([
             'money_box_account_id' => 1,
             'name' => 'Resume1',
-            'company_id' => 1
+            'company_id' => 1,
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'date_from' => (new \DateTime('now'))->format('d-m-Y'),
+            'date_to' => (new \DateTime('now'))->format('d-m-Y'),
         ]);
 
         expect('Saved when full and new', $model->save())->true();

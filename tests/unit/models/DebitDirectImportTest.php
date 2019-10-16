@@ -51,7 +51,7 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
 
         expect('Valid when full and new', $model->validate())->true();
@@ -69,7 +69,7 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
 
         expect('Save when full and new', $model->save())->true();
@@ -89,7 +89,7 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
         $model->save();
 
@@ -115,7 +115,7 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
         $model->save();
 
@@ -129,14 +129,16 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
         $model->save();
+
+        $failed_payments = count(DebitDirectFailedPayment::find()->all());
 
         $failed_payment = DebitDirectImport::createFailedPayment('123', 123, (new \DateTime('now'))->format('Y-m-d'), '123456789', $model->debit_direct_import_id, 'error');
 
         expect('Create failed payment return true', $failed_payment)->true();
-        expect('Failed payment created', count(DebitDirectFailedPayment::find()->all()))->equals(1);
+        expect('Failed payment created', count(DebitDirectFailedPayment::find()->all()))->equals($failed_payments + 1);
     }
 
     public function testArePaymentPendingToClose()
@@ -144,7 +146,7 @@ class DebitDirectImportTest extends Unit
         $model = new DebitDirectImport([
             'company_id' => 1 ,
             'bank_id' => 1,
-            'money_box_account_id' => 42,
+            'money_box_account_id' => 1,
         ]);
         $model->save();
 

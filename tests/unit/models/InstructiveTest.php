@@ -47,7 +47,6 @@ class InstructiveTest extends \Codeception\Test\Unit
         $model->name = 'Test Me';
         $model->instructive_category_id = 1;
 
-
         expect('Failed', $model->save())->true();
     }
 }

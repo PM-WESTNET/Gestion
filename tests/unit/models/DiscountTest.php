@@ -56,7 +56,9 @@ class DiscountTest extends \Codeception\Test\Unit
             'status' => Discount::STATUS_ENABLED,
             'type' => Discount::TYPE_FIXED,
             'value_from' => Discount::VALUE_FROM_TOTAL,
-            'value' => '50'
+            'value' => '50',
+            'from_date' => (new \DateTime('now'))->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y')
         ]);
 
         expect('Valid when full and new', $model->save())->true();

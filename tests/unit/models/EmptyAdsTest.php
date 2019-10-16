@@ -48,6 +48,7 @@ class EmptyAdsTest extends \Codeception\Test\Unit
     public function testInvalidWhenEmptyAndNew()
     {
         $model = new EmptyAds();
+
         expect('Invalid when empty and new', $model->validate())->false();
     }
 
@@ -73,7 +74,8 @@ class EmptyAdsTest extends \Codeception\Test\Unit
         $model = new EmptyAds([
             'code' => '236',
             'payment_code' => '456',
-            'node_id' => 1
+            'node_id' => 1,
+            'company_id' => 1
         ]);
 
         expect('Valid when full and new', $model->save())->true();
@@ -131,7 +133,8 @@ class EmptyAdsTest extends \Codeception\Test\Unit
         $model = new EmptyAds([
             'code' => '236',
             'payment_code' => '456',
-            'node_id' => 1
+            'node_id' => 1,
+            'company_id' => 1
         ]);
         $model->save();
 

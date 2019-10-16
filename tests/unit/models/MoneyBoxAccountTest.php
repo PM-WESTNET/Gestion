@@ -125,7 +125,8 @@ class MoneyBoxAccountTest extends \Codeception\Test\Unit
         $model->save();
 
         $period = new AccountingPeriod([
-            'name' => 'Mes'
+            'name' => 'Mes',
+            'date_from' => (new \DateTime('now'))->format('Y-m-d')
         ]);
         $period->save();
 

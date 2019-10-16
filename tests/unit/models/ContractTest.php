@@ -11,6 +11,7 @@ use app\tests\fixtures\NodeFixture;
 use app\modules\westnet\models\Connection;
 use app\modules\config\models\Config;
 use app\modules\sale\models\ProductToInvoice;
+use app\tests\fixtures\ContractDetailFixture;
 
 class ContractTest extends \Codeception\Test\Unit
 {
@@ -42,8 +43,8 @@ class ContractTest extends \Codeception\Test\Unit
             'node' => [
                 'class' => NodeFixture::class
             ],
-            'details' => [
-                'class' => \app\tests\fixtures\ContractDetailFixture::class
+            'contract_detail' => [
+                'class' => ContractDetailFixture::class
             ]
         ];
     }

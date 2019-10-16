@@ -781,13 +781,14 @@ class CustomerTest extends \Codeception\Test\Unit
             'periods' => 1,
             'apply_to' => Discount::APPLY_TO_PRODUCT,
             'referenced' => 1,
+            'persistent' => null
         ]);
         $discount->save();
 
         $chd = new CustomerHasDiscount([
             'customer_id' => $model->customer_id,
             'discount_id' => $discount->discount_id,
-            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'from_date' => (new \DateTime('now'))->modify('-1 month +3 days')->format('d-m-Y'),
             'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
             'status' => CustomerHasDiscount::STATUS_ENABLED
         ]);
