@@ -36,6 +36,7 @@ use yii\web\Response;
 use app\modules\sale\modules\contract\models\Contract;
 use yii\web\UploadedFile;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
+use app\modules\westnet\models\PaymentExtensionHistory;
 
 class UserAppController extends Controller
 {
@@ -1149,6 +1150,7 @@ class UserAppController extends Controller
                     //Activo los items del contrato
                     $cti = new ContractToInvoice();
                     $cti->updateContract($contract);
+                    PaymentExtensionHistory::createPaymentExtensionHistory($contract->customer_id, PaymentExtensionHistory::FROM_APP);
                     return [
                         'status' => true,
                     ];

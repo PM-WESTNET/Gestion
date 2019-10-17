@@ -18,6 +18,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\NotifyPayment;
+use app\modules\westnet\models\PaymentExtensionHistory;
 use Yii;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
@@ -389,6 +390,7 @@ class CustomerController extends Controller
 
 
             if($connection->force($due_date, $payment_extension_product->product_id, null, $create_pti)){
+                PaymentExtensionHistory::createPaymentExtensionHistory($contract->customer_id, PaymentExtensionHistory::FROM_IVR);
                 return [
                     'error' => 'false',
                     'to_date' => $due_date,

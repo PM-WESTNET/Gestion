@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.17.0] - 17-10-2019
+### Agregado
+ - Solicitud de extensión de pago desde IVR: Se registra un historial al crear la extensión de pago.
+ - Solicitud de extensión de pago desde APP: Se registra un historial al crear la extensión de pago.
+ - Reporte de extensiones de pago solicitadas desde IVR y APP.
+
 ## [2019.10.15.0] - 15-10-2019
 ### Modificado
  - IVR: Se corrige forzado de conexion, ahora si el cliente debe más de 1 factura no puede forzar la conexión, al igual que los clientes nuevos.

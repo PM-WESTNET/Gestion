@@ -1243,5 +1243,8 @@
     'Task creator' => 'Creador de tarea',
     'Assignations' => 'Asignaciones',
     'Are you sure you want to check that option?' => '¿Esta seguro que quiere tildar esa opción?',
-    'Customer haven`t a company associated' => 'El Cliente no tiene una empresa asociada'
+    'Customer haven`t a company associated' => 'El Cliente no tiene una empresa asociada',
+    'Payment extension history' => 'Historial de extensiones de pago',
+    'app' => 'APP',
+    'ivr' => 'IVR'
 );
