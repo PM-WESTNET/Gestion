@@ -24,7 +24,11 @@ use app\modules\checkout\models\PaymentMethod;
         </div>
         <div class="col-sm-4">
             <?= $form->field($model,'payment_method_id')->widget(Select2::class, [
-                'data' => PaymentMethod::getPaymentMethodForSelect()
+                'data' => PaymentMethod::getPaymentMethodForSelect(),
+                'pluginOptions' => [
+                    'allowClear' => true,
+                    'placeholder' => Yii::t('app', 'Select ...')
+                ]
             ]);?>
         </div>
         <div class="col-sm-4">

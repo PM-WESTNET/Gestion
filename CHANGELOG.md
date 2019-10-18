@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.18.0] - 18-10-2019
+### Modificado
+ - Panel de informes de pago de clientes: Se agrega la posibilidad en filtros del panel de poder seleccionar todos los medios de pago.
+
 ## [2019.10.17.0] - 17-10-2019
 ### Agregado
  - Solicitud de extensión de pago desde IVR: Se registra un historial al crear la extensión de pago.
