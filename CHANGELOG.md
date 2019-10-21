@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.21.0] - 21-10-2019
+### Modificado
+ - Panel de cuenta corriente de provedor: Se modifica el formato en el que se muestra columna Saldo en listado de comprobantes.
+
 ## [2019.10.18.0] - 18-10-2019
 ### Modificado
  - Panel de informes de pago de clientes: Se agrega la posibilidad en filtros del panel de poder seleccionar todos los medios de pago.
