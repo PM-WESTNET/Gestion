@@ -286,7 +286,7 @@ class PaymentSearch extends Payment
                     ->where("b.customer_id IS NOT NULL");
         $cantidad = $masterQuery->count("*");
 
-        $masterQuery->orderBy(['b.date' => SORT_DESC, 'b.bill_id' => SORT_DESC]);
+        $masterQuery->orderBy(['b.date' => SORT_DESC, 'b.time' => SORT_DESC, 'b.bill_id' => SORT_DESC]);
         Yii::$app->db->createCommand( 'set @saldo:=0;')->execute();
         $dataProvider = new ActiveDataProvider([
             'query' => $masterQuery,

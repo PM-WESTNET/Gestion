@@ -351,9 +351,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @param type $method
      * @return type
      */
-    public function accountTotal($fromDate = null, $toDate = null){
+    public function accountTotal($fromDate = null, $toDate = null, $only_closed = true){
 
-        return $this->accountPayed($fromDate, $toDate, true) - $this->accountTotalCredit($fromDate, $toDate);
+        return $this->accountPayed($fromDate, $toDate, $only_closed) - $this->accountTotalCredit($fromDate, $toDate, $only_closed);
 
     }
 
@@ -400,16 +400,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
      *
      * @return float|mixed
      */
-    public function accountTotalCredit($fromDate = null, $toDate = null)
+    public function accountTotalCredit($fromDate = null, $toDate = null, $only_closed = true)
     {
 
         $query = Bill::find();
         $query->leftJoin("bill_type", 'bill.bill_type_id = bill_type.bill_type_id' );
         $query->where([
             'bill.customer_id' => $this->customer_id,
-            'bill.status' => Bill::STATUS_CLOSED
+
         ]);
-        
+
+
+        if ($only_closed) {
+            $query->andWhere([
+                'bill.status' => Bill::STATUS_CLOSED
+            ]);
+        }
+
         if($fromDate !== null){
             $query->andWhere("date>='$fromDate'");
         }

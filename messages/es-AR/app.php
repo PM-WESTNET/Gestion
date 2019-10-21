@@ -1246,5 +1246,7 @@
     'Customer haven`t a company associated' => 'El Cliente no tiene una empresa asociada',
     'Payment extension history' => 'Historial de extensiones de pago',
     'app' => 'APP',
-    'ivr' => 'IVR'
+    'ivr' => 'IVR',
+    'Total (Closed Bills)' => 'Total (Comprobantes Cerrados)',
+    'Total (All Bills)' => 'Total (Todos los Comprobantes)',
 );
