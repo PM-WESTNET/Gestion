@@ -169,7 +169,7 @@ class Contract extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getContractDetails() {
-        return $this->hasMany(ContractDetail::className(), ['contract_id' => 'contract_id']);
+        return $this->hasMany(ContractDetail::className(), ['contract_id' => 'contract_id'])->cache(-1);
     }
 
     /**

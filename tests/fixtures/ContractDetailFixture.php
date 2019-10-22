@@ -9,12 +9,13 @@
 namespace app\tests\fixtures;
 
 
+use app\modules\sale\modules\contract\models\ContractDetail;
 use yii\test\ActiveFixture;
 
 class ContractDetailFixture extends ActiveFixture
 {
 
-    public $modelClass = ContractDetailFixture::class;
+    public $modelClass = ContractDetail::class;
     public $depends = [
         ContractFixture::class,
         ProductFixture::class

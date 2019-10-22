@@ -388,16 +388,24 @@ class Connection extends ActiveRecord {
         $this->status_account = self::STATUS_ACCOUNT_FORCED;
         $this->due_date = $due_date;
 
+        try{
+
+
+
         $trasanction = Yii::$app->db->beginTransaction();
 
         if ($this->save(true)) {
             $this->createForcedHistorial();
             if ($create_product){
 
-                if ($this->createExtendPaymentCD($product_id, $vendor_id)){
+                if (!$this->createExtendPaymentCD($product_id, $vendor_id)){
+                    Debug::debug('O no crea CD o lo crea y sale por falso');
                     $trasanction->rollBack();
                     return false;
                 }
+
+                Debug::debug('----- antes'.count($this->contract->contractDetails));
+
 
                 $cti = new ContractToInvoice();
                 if (!$cti->updateContract($this->contract)) {
@@ -405,6 +413,7 @@ class Connection extends ActiveRecord {
                     $trasanction->rollBack();
                     return false;
                 }
+                Debug::debug('En teoria activa contrato');
             }
 
             $trasanction->commit();
@@ -416,6 +425,9 @@ class Connection extends ActiveRecord {
 
         $trasanction->rollBack();
         return false;
+        } catch (\Exception $ex) {
+            Debug::debug($ex->getTraceAsString());
+        }
     }
 
     /**
@@ -433,8 +445,9 @@ class Connection extends ActiveRecord {
         $contract_detail->from_date = (new \DateTime())->modify('first day of next month')->format('d-m-Y');
         $contract_detail->to_date = (new \DateTime())->modify('last day of next month')->format('d-m-Y');
         $contract_detail->vendor_id = $vendor_id;
+        $contract_detail->status = Contract::STATUS_DRAFT;
 
-        return !$contract_detail->save(false);
+        return $contract_detail->save(false);
     }
 
     private function createForcedHistorial() {
