@@ -411,11 +411,6 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                 $('#panel_bills').replaceWith(
                     $(html).find('#panel_bills')
                 );
-                $("#payment_method_id").trigger("change");
-                if (jQuery('#money_box_account_id_bank').data('depdrop')) { jQuery('#money_box_account_id_bank').depdrop('destroy'); }
-                jQuery('#money_box_account_id_bank').depdrop(eval(jQuery('#money_box_account_id_bank').attr('data-krajee-depdrop')));
-                if (jQuery('#money_box_account_id_small').data('depdrop')) { jQuery('#money_box_account_id_small').depdrop('destroy'); }
-                jQuery('#money_box_account_id_small').depdrop(eval(jQuery('#money_box_account_id_small').attr('data-krajee-depdrop')));
             });
         }
 
