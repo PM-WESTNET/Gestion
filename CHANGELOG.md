@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.22.0] - 22-10-2019
+### Modificado
+ - Se limita la eliminación de pagos a proveedores.
+ - Se limita la eliminación de comprobantes a proveedores
+
 ## [2019.10.21.0] - 21-10-2019
 ### Modificado
  - Panel de cuenta corriente de provedor: Se modifica el formato en el que se muestra columna Saldo en listado de comprobantes.

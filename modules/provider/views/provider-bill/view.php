@@ -4,6 +4,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\modules\provider\models\ProviderBill;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\provider\models\ProviderBill */
@@ -18,7 +19,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
             <p>
-                <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_bill_id], ['class' => 'btn btn-primary']) ?>
+                <?php if($model->status != ProviderBill::STATUS_CLOSED) {
+                    echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_bill_id], ['class' => 'btn btn-primary']);
+                }?>
+
                 <?php if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_bill_id], [
                     'class' => 'btn btn-danger',
                     'data' => [
