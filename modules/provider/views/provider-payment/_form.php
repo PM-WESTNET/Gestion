@@ -171,9 +171,11 @@ $payment_method_cash = Config::getValue('payment_method_cash');
             <?= Yii::t('app','Close Payment'); ?>
         </a>
         <a id="savePayment" class="btn btn-success"><?= Yii::t('app',($model->isNewRecord ? 'Next' : 'Add Detail')); ?></a>
-        <?= Html::a(Yii::t('app', 'Save draft'),['view' , 'id' => $model->provider_payment_id], [
+        <?php if(!$model->isNewRecord) {
+            echo Html::a(Yii::t('app', 'Save draft'),['view' , 'id' => $model->provider_payment_id], [
                 'class' => 'btn btn-warning',
-        ])?>
+            ]);
+        }?>
     </div>
     <input type="hidden" id="provider_bill_amount" value="<?php echo $model->calculateTotalPayed()?>" />
     <input type="hidden" id="amount_total" value="<?php echo $model->amount?>" />
