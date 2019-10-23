@@ -4,6 +4,7 @@ use app\modules\paycheck\models\Paycheck;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
+use app\modules\provider\models\ProviderPayment;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\provider\models\search\ProviderPaymentSearch */
@@ -60,6 +61,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => function($model) { return ($model['date'] ? Yii::$app->formatter->asDate( $model['date'] ) : '' ); }
         ];
         $columns[] = [
+            'attribute' => 'status',
+            'value' => function($model) { return Yii::t('app', $model['status']); }
+        ];
+        $columns[] = [
             'label' => Yii::t('app', 'Amount'),
             'value' => function($model) { return ($model['amount'] ? Yii::$app->formatter->asCurrency( $model['amount'] ) : '' ); }
         ];
@@ -76,8 +81,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     },
                     'delete' => function ($url, $model, $key) {
-                        return '<a href="'.Url::toRoute(['provider-payment/delete', 'id'=>$model['provider_payment_id']]).
-                        '" title="'.Yii::t('app','Delete').'" data-confirm="'.Yii::t('yii','Are you sure you want to delete this item?').'" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>';
+                        $payment = ProviderPayment::findOne($model['provider_payment_id']);
+                        if($payment) {
+                            if($payment->getDeletable()) {
+                                return '<a href="' . Url::toRoute(['provider-payment/delete', 'id' => $model['provider_payment_id']]) .
+                                    '" title="' . Yii::t('app', 'Delete') . '" data-confirm="' . Yii::t('yii', 'Are you sure you want to delete this item?') . '" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>';
+                            }
+                        }
                     },
                 ]
             ];
