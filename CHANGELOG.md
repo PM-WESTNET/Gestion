@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.23.0] - 23-10-2019
+### Agregado
+ Cambios de velocidad programados:
+   - Se agregan botones en el contrato y vista de cliente para crear un cambio de velocidad programado.
+   - Se agrega panel de cambios de velocidad programados, con posibilidad de filtrar por cliente, plan, fecha, usuario que lo creó, y si es un cambio aplicado o no.
+   - Se crea commando que aplica los cambios de velocidad.
+   
 ## [2019.10.22.0] - 22-10-2019
 ### Modificado
  - Se limita la eliminación de pagos a proveedores.
