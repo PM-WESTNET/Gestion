@@ -47,7 +47,15 @@ $this->params['breadcrumbs'][] = $this->title;
            h1 {background-color: <?= $bgColor ?>}
     </style>
     <?php endif; ?>
-        
+
+    <?php
+        if ($model->hasPendingPlanChange()):
+    ?>
+        <?php $change = $model->getPendingPlanChange()?>
+        <div class="alert alert-warning">
+            <h4><?php echo Yii::t('app','The customer has pending programmed plan change for {date}', ['date' => $change->date])?></h4>
+        </div>
+    <?php endif; ?>
     <div class="title">
         <h1><?php echo Html::encode($this->title) ?></h1>
     </div>
@@ -79,7 +87,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php
                 //Está habilitado manejo de planes?
                 if(Yii::$app->params['plan_product']): ?>
-                <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?>
+                <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?> <br>
+                <?= UserA::a('<span class="glyphicon glyphicon-time"></span> '.Yii::t('app', 'Create programmed plan change'), ['/sale/contract/programmed-plan-change/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning pull-right']) ?>
                 <?php endif; ?>
                 <?= UserA::a(Yii::t('app', 'Customer Log'), ['/sale/customer-log/index', 'customer_id' => $model->customer_id], ['class' => 'btn btn-info']) ?>
 
@@ -113,6 +122,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php if(User::canRoute('/sale/bill/index')): ?>
             <div class="pull-right" style="margin-right: -10px;">
+
                 <?= $this->render('_bills-dropdown', ['model' => $model, 'class' => 'btn btn-primary']); //Lista de comprobantes de cliente ?>
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>

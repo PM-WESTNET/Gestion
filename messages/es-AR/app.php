@@ -1249,4 +1249,14 @@
     'ivr' => 'IVR',
     'Total (Closed Bills)' => 'Total (Comprobantes Cerrados)',
     'Total (All Bills)' => 'Total (Todos los Comprobantes)',
+    'Programmed plan changes' => 'Cambios de velocidad programados',
+    'Programmed plan change' => 'Cambio de velocidad programado',
+    'Create programmed plan change' => 'Crear cambio de velocidad programado',
+    'Applied' => 'Aplicado',
+    'User' => 'Usuario',
+    'Created At' => 'Creado en',
+    'Updated At' => 'Actualizado en',
+    'The customer has pending programmed plan change for {date}' => 'El cliente posee un cambio de velocidad programado para el día {date}',
+    'This contract has pending programmed plan change for {date}' => 'Este contrato posee un cambio de velocidad programado para el día {date}',
+    'Programmed Plan Change created successfull' => 'Cambio de velocidad programado realizado con éxito'
 );

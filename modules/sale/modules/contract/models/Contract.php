@@ -599,4 +599,17 @@ class Contract extends ActiveRecord {
 
         return round($product->finalPrice,2);
     }
+
+    public function hasPendingPlanChange()
+    {
+        return ProgrammedPlanChange::find()->andWhere(['contract_id' => $this->contract_id, 'applied' => 0])->exists();
+    }
+
+    public function getPendingPlanChange()
+    {
+        return ProgrammedPlanChange::find()
+            ->andWhere(['contract_id' => $this->contract_id, 'applied' => 0])
+            ->orderBy(['date' => SORT_DESC])
+            ->one();
+    }
 }

@@ -13,6 +13,7 @@ use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\westnet\models\NotifyPayment;
@@ -1680,5 +1681,27 @@ class Customer extends ActiveRecord {
         $search = new CustomerSearch();
         $result = $search->searchDebtBills($customer_id);
         return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+    }
+
+    /**
+     * Indica si el cliente tiene un cambio de plan programdado.
+     */
+    public function hasPendingPlanChange() {
+        $contracts = Contract::find()->andWhere(['customer_id' => $this->customer_id, 'status' => Contract::STATUS_ACTIVE])->all();
+        $ids = array_map(function($contract) { return $contract->contract_id;}, $contracts);
+
+        return ProgrammedPlanChange::find()->andWhere(['contract_id' => $ids, 'applied' => false])->exists();
+    }
+
+    /**
+     * Devuelve el cambio de velocidad programado
+     */
+    public function getPendingPlanChange()
+    {
+        return ProgrammedPlanChange::find()
+            ->innerJoin('contract c', 'c.contract_id=programmed_plan_change.contract_id')
+            ->andWhere(['c.customer_id' => $this->customer_id, 'c.status' => Contract::STATUS_ACTIVE, 'applied' => false])
+            ->orderBy(['programmed_plan_change.date' => SORT_DESC])
+            ->one();
     }
 }

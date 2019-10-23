@@ -370,6 +370,7 @@ class ContractController extends Controller {
                             if ($contractDetailPlan->status != Contract::STATUS_DRAFT) {
                                 if (!empty($contractDetailPlan->from_date)) {
                                     //$contractDetailOld->to_date
+
                                     try {
                                         $fromDate = (new DateTime($contractDetailPlan->from_date));
                                     } catch (\Exception $ex) {
@@ -382,6 +383,8 @@ class ContractController extends Controller {
                                     }
 
                                     if ($fromDate > $oldFrom) {
+                                        //Creo un registro en Programmed plan changed
+
                                         // Le pongo la fecha de fin al plan anterior para que la guarde en el log.
                                         $contractDetailOld->to_date = (new DateTime($contractDetailPlan->from_date))->modify('-1 day')->format('d-m-Y');
                                         $contractDetailOld->createLog();
@@ -1153,5 +1156,41 @@ class ContractController extends Controller {
         $model = Contract::findOne($contract_id);
         $model->revertNegativeSurvey();
         return $this->redirect(['view', 'id' => $contract_id]);
+    }
+
+
+    /**
+     * Devuelve un array con contratos para ser listados en un select2
+     */
+    public function actionGetContractsByCustomer()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $out = [];
+        $pre_selected_contract_id = null;
+
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+
+            if ($parents != null) {
+                $customer_id = $parents[0];
+
+                if(isset($_POST['depdrop_params'])) {
+                    $pre_selected_contract_id = $_POST['depdrop_params'][0];
+                }
+                $customer = Customer::findOne($customer_id);
+
+                if(!$customer) {
+                    throw new BadRequestHttpException('Customer not found');
+                }
+
+                $selected = 0;
+                foreach ($customer->contracts as $contract) {
+                    $out[] = ['id' => $contract->contract_id, 'name' => "[$contract->contract_id] Contracto en " .$contract->address->shortAddress];
+                }
+
+                return ['output' => $out, 'selected'=> $pre_selected_contract_id ? $pre_selected_contract_id : $selected];
+            }
+        }
     }
 }
