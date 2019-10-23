@@ -29,4 +29,17 @@ return [
         'count' => 1,
         'vendor_id' => 1
     ],
+    [
+        'contract_detail_id' => 3,
+        'contract_id' => 1,
+        'product_id' => 1,
+        'date' =>  '2018-03-06',
+        'from_date' => '2018-03-06',
+        'to_date' => null,
+        'status' => 'active',
+        'funding_plan_id' => null,
+        'discount_id' => null,
+        'applied' => true,
+        'count' => 1
+    ],
 ];

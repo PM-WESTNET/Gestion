@@ -308,10 +308,20 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     {
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
     }
-    
-    public function getDeletable(){
-        return count($this->providerBillHasProviderPayments) == 0;
 
+    /**
+     * Determina si el comprobante puede eliminarse
+     */
+    public function getDeletable(){
+        if($this->status == ProviderBill::STATUS_CLOSED) {
+            return false;
+        }
+
+        if($this->getProviderBillHasProviderPayments()->exists()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -215,6 +215,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getDeletable()
     {
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
         return true;
     }
     

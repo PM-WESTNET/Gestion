@@ -3,6 +3,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.23.0] - 23-10-2019
+### Agregado
+ Cambios de velocidad programados:
+   - Se agregan botones en el contrato y vista de cliente para crear un cambio de velocidad programado.
+   - Se agrega panel de cambios de velocidad programados, con posibilidad de filtrar por cliente, plan, fecha, usuario que lo creó, y si es un cambio aplicado o no.
+   - Se crea commando que aplica los cambios de velocidad.
+   
+## [2019.10.22.0] - 22-10-2019
+### Modificado
+ - Se limita la eliminación de pagos a proveedores.
+ - Se limita la eliminación de comprobantes a proveedores
+
 ## [2019.10.21.0] - 21-10-2019
 ### Modificado
  - Panel de cuenta corriente de provedor: Se modifica el formato en el que se muestra columna Saldo en listado de comprobantes.

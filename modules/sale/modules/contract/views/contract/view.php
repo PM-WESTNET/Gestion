@@ -26,6 +26,15 @@ $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
 ?>
 <div class="contract-view">
+    <?php
+    if ($model->hasPendingPlanChange()):
+        ?>
+        <?php $change = $model->getPendingPlanChange()?>
+        <div class="alert alert-warning">
+            <h4><?php echo Yii::t('app','This contract has pending programmed plan change for {date}', ['date' => $change->date])?></h4>
+        </div>
+    <?php endif; ?>
+
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
@@ -70,6 +79,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             <?php
             if ($model->status == Contract::STATUS_ACTIVE) {
                 echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
+                echo UserA::a(Yii::t('app', 'Create programmed plan change'), ['programmed-plan-change/create', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning']);
             }
             if ($model->status == Contract::STATUS_LOW_PROCESS) {
                 echo UserA::a(Yii::t('app', 'Definitive Low'), ['cancel-contract', 'id' => $model->contract_id], ['class' => 'btn btn-danger', 'id' => 'btn-definitive-low' ]);
