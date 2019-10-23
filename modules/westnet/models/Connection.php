@@ -388,10 +388,6 @@ class Connection extends ActiveRecord {
         $this->status_account = self::STATUS_ACCOUNT_FORCED;
         $this->due_date = $due_date;
 
-        try{
-
-
-
         $trasanction = Yii::$app->db->beginTransaction();
 
         if ($this->save(true)) {
@@ -425,9 +421,7 @@ class Connection extends ActiveRecord {
 
         $trasanction->rollBack();
         return false;
-        } catch (\Exception $ex) {
-            Debug::debug($ex->getTraceAsString());
-        }
+
     }
 
     /**

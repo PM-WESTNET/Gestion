@@ -308,15 +308,23 @@ class ContractTest extends \Codeception\Test\Unit
 
         expect('No active item 1', $not_active_items)->equals(0);
 
+        $contract = Contract::findOne(2);
+        $connection = $contract->connection;
+
         if (!$connection->force('31-12-2019', $product_id, $contract->vendor_id, true)){
             expect('No forzo 2', false)->true();
         }
 
         $connection->ip4_public = '0';
 
+        \Codeception\Util\Debug::debug($contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->asArray()->all());
+
         $not_active_items = $contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->count();
 
         expect('No active item 2', $not_active_items)->equals(0);
+
+        $contract = Contract::findOne(2);
+        $connection = $contract->connection;
 
         if (!$connection->force('31-12-2019', $product_id, $contract->vendor_id, true)){
             expect('No forzo 3', false)->true();

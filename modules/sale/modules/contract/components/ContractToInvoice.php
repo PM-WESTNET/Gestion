@@ -68,25 +68,16 @@ class ContractToInvoice
     public function updateContract(Contract $contract)
     {
         try{
-            Debug::debug('Comienza a activar contrato');
             // Guardo los proximos a |urar.
-
-            Debug::debug('----- contract  od '.$contract->contract_id);
-//            Debug::debug(count(ContractDetail::find()->where(['contract_id' => 2])->all()));
-            Debug::debug('-----'.count($contract->contractDetails));
             foreach ($contract->contractDetails as $detail) {
-                Debug::debug('Estado del Detalle: '. $detail->status . 'ID: ' . $detail->contract_detail_id);
                 $updateAttributes = ['from_date', 'status'];
                 // Si es plan no tengo que guardarlo
                 if ($detail->status == Contract::STATUS_DRAFT) {
-                    Debug::debug('Detalle en borrador');
                     $contractStart = (Yii::t('app', 'Undetermined time') == $contract->from_date ? null : (new DateTime($contract->from_date))); ;
 
-                    Debug::debug('Inicio: '. $contractStart->format('Y-m-d'));
                     // Defino al periodo en el primer dia del mes de inicio del contrato
                     // Si el item tiene distinta fecha, tomo la del item
                     $detailDate = (Yii::t('app', 'Undetermined time') == $detail->from_date ? null : (new DateTime($detail->from_date))); ;
-                    Debug::debug('Detail Date: '. $detailDate->format('Y-m-d'));
                     //if( $detailDate && $contractStart != $detailDate ) {
                     if( $contract->status == Contract::STATUS_ACTIVE ) {
                         $period = new DateTime($detailDate->format('Y-m-') . '01');
@@ -94,10 +85,7 @@ class ContractToInvoice
                         $period = new DateTime('first day of this month');
                     }
 
-                    Debug::debug('Periodo: '. $period->format('d-m-Y'));
-
                     if ($detail->canAddProductToInvoice($period)) {
-                        Debug::debug('Puedo facturar');
                         // A cada detalle le pongo la fecha de inicio de contrato
                         $detail->from_date = $period->format('Y-m-d');
                         // Si no es plan cargo los ProductToBill
@@ -115,7 +103,6 @@ class ContractToInvoice
                         }
                         // Si tiene plan de pago tengo que crear una cuota para cada mes.
                         if ($detail->funding_plan_id) {
-                            Debug::debug('Entro por plan de pago');
                             for ($i = 1; $i <= $detail->fundingPlan->qty_payments; $i++) {
                                 $ptb = $this->createProductToInvoice([
                                     'contract_detail_id' => $detail->contract_detail_id,
@@ -137,7 +124,6 @@ class ContractToInvoice
                                 $ptb->save(true);
                             }
                         } else {
-                            Debug::debug('Entro por sin plan de pago');
                             //Solicito el precio activo en funcion del contrato de cliente (aplica reglas de negocio)
                             $activePrice = $detail->product->getActivePrice($detail)->one();
 
@@ -168,7 +154,6 @@ class ContractToInvoice
                     $detail->updateAttributes($updateAttributes);
                 }
             }
-            Debug::debug('Voy a salir por true');
             return true;
         } catch (Exception $ex){
             Debug::debug('Excepcion sale por false: ' . $ex->getTraceAsString());
