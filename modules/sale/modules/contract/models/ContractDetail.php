@@ -412,14 +412,15 @@ class ContractDetail extends ActiveRecord
             }
         }
 
-        return ($this->getProductToInvoices()
+        $query = $this->getProductToInvoices()
                 ->andFilterWhere([
                     'date_format(period, \'%Y%m\')'=>$period->format('Ym'),
                     'status' => ['consumed', 'active']
-                ])
-                ->count() == 0);
+                ]);
+
+        return ($query->count() == 0);
     }
-    
+
     /**
      * @return ActiveQuery
      */
