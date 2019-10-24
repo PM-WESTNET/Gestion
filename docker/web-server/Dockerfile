@@ -37,6 +37,7 @@ RUN cp /usr/share/zoneinfo/America/Argentina/Mendoza /etc/localtime
 
 RUN sed -i "s/memory_limit = 128M/memory_limit = 512M/g" /etc/php5/apache2/php.ini
 RUN sed -i "s/max_execution_time = 30/max_execution_time = 120/g" /etc/php5/apache2/php.ini
+RUN sed -i "s/post_max_size = 8M/post_max_size = 50M/g" /etc/php5/apache2/php.ini
 
 RUN echo "xdebug.remote_enable=1" >> /etc/php5/mods-available/xdebug.ini
 RUN echo "xdebug.remote_handler=dbgp" >> /etc/php5/mods-available/xdebug.ini

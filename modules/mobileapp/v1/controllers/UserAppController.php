@@ -1027,6 +1027,25 @@ class UserAppController extends Controller
     {
         $data = Yii::$app->request->post();
 
+        $customer = Customer::findOne($data['customer']);
+
+        if (empty($customer)) {
+            return [
+                'status' => false,
+                'notify_payment_id' => null,
+                'message' => Yii::t('app','Customer not found')
+            ];
+        }
+
+        if (!$customer->canNotifyPayment()) {
+            return [
+                'status' => false,
+                'notify_payment_id' => null,
+                'message' => Yii::t('app','Customer not found')
+            ];
+        }
+
+
         $notify_payment = new NotifyPayment([
             'customer_id' => $data['customer'],
             'date' => $data['date'],
@@ -1035,10 +1054,30 @@ class UserAppController extends Controller
             'contract_id' => $data['contract'],
         ]);
 
+        /**
+         * Si image_receipt viene en los datos, viene con la imagen capturada por la camara en base64
+         * por lo que debemos crear el archivo con el contenido de image_receipt
+         */
+        if ($data['image_receipt']){
+            $relativeName = 'uploads/payments/'. time() . rand(0, 99).'.jpg';
+            $filename= Yii::getAlias('@webroot/'.$relativeName);
+            $save= file_put_contents($filename, base64_decode($data['image_receipt']));
+
+            if ($save === false) {
+                return [
+                    'status' => false,
+                    'notify_payment_id' => null,
+                    'message' =>  Yii::t('app', 'Your notify payment can`t be created')
+                ];
+            }
+
+            $notify_payment->image_receipt = $relativeName;
+        }
+
         $trasanction = Yii::$app->db->beginTransaction();
 
         $result = $this->createPaymentExtensionAndForce($data['contract']);
-        if($notify_payment->save() && $result['status']) {
+        if($result['status'] && $notify_payment->save()) {
             $trasanction->commit();
             return [
                 'status' => true,
