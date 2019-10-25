@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2019.10.25.0] - 25-10-2019
+### Modificado
+ - Correccion de número de Servicio Técnico mostrado en la app
+
 ## [2019.10.23.0] - 23-10-2019
 ### Agregado
  Cambios de velocidad programados:

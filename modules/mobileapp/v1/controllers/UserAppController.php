@@ -936,7 +936,7 @@ class UserAppController extends Controller
             'name' => 'Servicio Técnico',
             'phones' => [
                 [
-                    'phone' => $admin,
+                    'phone' => $tecnico,
                     'wp' => true
                 ]
             ]
