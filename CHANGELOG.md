@@ -8,9 +8,9 @@ All notable changes to this project will be documented in this file.
  - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
  - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
  - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
- - Cheques: Marcar como entregado al crear un pago a proveedor
- - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador
- - Informar Pago: Error al enviar foto capturada por la camara 
+ - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
+ - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
+ - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
 
 ## [2019.10.25.0] - 25-10-2019
 ### Modificado
