@@ -171,6 +171,11 @@ $payment_method_cash = Config::getValue('payment_method_cash');
             <?= Yii::t('app','Close Payment'); ?>
         </a>
         <a id="savePayment" class="btn btn-success"><?= Yii::t('app',($model->isNewRecord ? 'Next' : 'Add Detail')); ?></a>
+        <?php if(!$model->isNewRecord) {
+            echo Html::a(Yii::t('app', 'Save draft'),['view' , 'id' => $model->provider_payment_id], [
+                'class' => 'btn btn-warning',
+            ]);
+        }?>
     </div>
     <input type="hidden" id="provider_bill_amount" value="<?php echo $model->calculateTotalPayed()?>" />
     <input type="hidden" id="amount_total" value="<?php echo $model->amount?>" />
@@ -411,11 +416,6 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                 $('#panel_bills').replaceWith(
                     $(html).find('#panel_bills')
                 );
-                $("#payment_method_id").trigger("change");
-                if (jQuery('#money_box_account_id_bank').data('depdrop')) { jQuery('#money_box_account_id_bank').depdrop('destroy'); }
-                jQuery('#money_box_account_id_bank').depdrop(eval(jQuery('#money_box_account_id_bank').attr('data-krajee-depdrop')));
-                if (jQuery('#money_box_account_id_small').data('depdrop')) { jQuery('#money_box_account_id_small').depdrop('destroy'); }
-                jQuery('#money_box_account_id_small').depdrop(eval(jQuery('#money_box_account_id_small').attr('data-krajee-depdrop')));
             });
         }
 

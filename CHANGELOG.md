@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [Pendiente de aprobación]
+ - Pagos a proveedores: Se limita la eliminación de pagos a proveedores.
+ - Pagos a proveedores: Se limita la eliminación de comprobantes a proveedores.
+ - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
+ - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
+ - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
 
 ## [2019.10.25.0] - 25-10-2019
 ### Modificado

@@ -123,7 +123,7 @@
   'Clear' => 'Limpiar',
   'Clipped' => 'Cortado',
   'Close' => 'Cerrar',
-  'Close Payment' => 'Aceptar',
+  'Close Payment' => 'Cerrar pago',
   'Close Pending Batch Invoices' => 'Cerrar Facturas de lote pendientes',
   'Close bill' => 'Cerrar factura',
   'Closed' => 'Cerrado',
@@ -1258,5 +1258,6 @@
     'Updated At' => 'Actualizado en',
     'The customer has pending programmed plan change for {date}' => 'El cliente posee un cambio de velocidad programado para el día {date}',
     'This contract has pending programmed plan change for {date}' => 'Este contrato posee un cambio de velocidad programado para el día {date}',
-    'Programmed Plan Change created successfull' => 'Cambio de velocidad programado realizado con éxito'
+    'Programmed Plan Change created successfull' => 'Cambio de velocidad programado realizado con éxito',
+    'created' => 'Borrador'
 );
