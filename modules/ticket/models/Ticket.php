@@ -34,6 +34,8 @@ use app\modules\agenda\models\Task;
  * @property integer $user_id
  * @property integer $contract_id
  * @property integer $external_tag_id
+ * @property integer $closed_by
+ * @property integer $closed_timestamp
  *
  * @property Assignation[] $assignations
  * @property Observation[] $observations
@@ -560,6 +562,10 @@ class Ticket extends \app\components\db\ActiveRecord {
             if ($this->category->notify === 1) {
                 MesaTicket::createTicket($this);
             }
+
+            if (array_key_exists('status_id', $changedAttributes)) {
+                $this->verifyStatus();
+            }
         }
     }
 
@@ -857,6 +863,17 @@ class Ticket extends \app\components\db\ActiveRecord {
         ]);
 
         return $ticket->save();
+    }
+
+    public function verifyStatus()
+    {
+        if ($this->statusIsClosed()) {
+            if (!Yii::$app->request->isConsoleRequest && !empty(Yii::$app->user->getIdentity())) {
+                $this->closed_by = Yii::$app->user->id;
+                $this->closed_timestamp = time();
+                $this->updateAttributes(['closed_timestamp', 'closed_by']);
+            }
+        }
     }
 
 }
