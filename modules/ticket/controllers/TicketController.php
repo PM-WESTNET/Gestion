@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\controllers;
 
+use app\components\helpers\DbHelper;
 use app\modules\sale\models\Customer;
 use app\modules\ticket\models\Action;
 use app\modules\ticket\models\Assignation;
@@ -16,6 +17,7 @@ use app\modules\ticket\models\Ticket;
 use \app\modules\ticket\models\search\TicketSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\data\Pagination;
@@ -602,6 +604,28 @@ class TicketController extends Controller
             'data' => $datas,
             'colors' => 'green'
         ]);
+    }
+
+
+    public function actionClosedTicketsPerUser()
+    {
+        $data = Yii::$app->request->getQueryParams();
+        $search = new TicketSearch();
+        $search->load($data);
+
+        $ticket_dbname= DbHelper::getDbName(Yii::$app->dbticket);
+
+        $user_query = User::find()->innerJoin("$ticket_dbname.ticket t", 't.user_id=user.id')->andWhere(['status' => User::STATUS_ACTIVE])->distinct();
+
+        $user_filter= ArrayHelper::map($user_query->all(), 'id', 'username');
+
+        if (isset($data['TicketSearch']['user_id']) && !empty($data['TicketSearch']['user_id'])) {
+            $user_query->andWhere(['id' => $data['TicketSearch']['user_id']]);
+        }
+
+        $users = new ActiveDataProvider(['query' => $user_query]);
+
+        return $this->render('tickets-per-user', ['users' => $users, 'search' => $search, 'user_filter' => $user_filter]);
     }
 
     /**

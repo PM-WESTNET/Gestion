@@ -556,6 +556,10 @@ class Ticket extends \app\components\db\ActiveRecord {
             if ($this->category->notify === 1) {
                 MesaTicket::updateTicket($this);
             }
+
+            if (array_key_exists('status_id', $changedAttributes)) {
+                $this->verifyStatus();
+            }
         } else {
             //Creates a new history entry for this ticket, being created
             History::createHistoryEntry($this, History::TITLE_CREATED);
@@ -563,9 +567,6 @@ class Ticket extends \app\components\db\ActiveRecord {
                 MesaTicket::createTicket($this);
             }
 
-            if (array_key_exists('status_id', $changedAttributes)) {
-                $this->verifyStatus();
-            }
         }
     }
 

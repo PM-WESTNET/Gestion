@@ -209,6 +209,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
         ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
+        ['label' => Yii::t('app', 'Closed Tickets report'), 'url' => ['/ticket/ticket/closed-tickets-per-user']],
         ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
     ]];
 

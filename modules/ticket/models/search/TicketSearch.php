@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\models\search;
 
+use app\modules\ticket\models\History;
 use app\modules\ticket\models\Status;
 use Yii;
 use yii\base\Model;
@@ -387,5 +388,27 @@ class TicketSearch extends Ticket {
         $query->groupBy(new Expression('date_format(start_date, \'%Y-%m\')'));
 
         return $query->all(Yii::$app->dbticket);
+    }
+
+    public function ticketsPerUser($user_id)
+    {
+        $query = Ticket::find()
+            ->innerJoin('status s', 's.status_id=ticket.status_id')
+            ->innerJoin('history h', 'h.ticket_id=ticket.ticket_id')
+            ->andFilterWhere([
+                's.is_open' => 0,
+                'h.title' => History::titleLabels(History::TITLE_CLOSED),
+                'h.user_id' => $user_id
+            ]);
+
+        if(!empty($this->close_from_date)){
+            $query->andWhere(['>=','ticket.finish_date', Yii::$app->formatter->asDate($this->close_from_date, 'yyyy-MM-dd')]);
+        }
+
+        if(!empty($this->close_to_date)){
+            $query->andWhere(['<=','ticket.finish_date', Yii::$app->formatter->asDate($this->close_to_date, 'yyyy-MM-dd')]);
+        }
+
+        return $query->count();
     }
 }
