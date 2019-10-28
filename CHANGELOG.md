@@ -11,6 +11,11 @@ All notable changes to this project will be documented in this file.
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
+ - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
+ 
+## [2019.10.28.0] - 28-10-2019
+### Modificado
+ - Optimizacion de widget de notificaciones
 
 ## [2019.10.25.0] - 25-10-2019
 ### Modificado
