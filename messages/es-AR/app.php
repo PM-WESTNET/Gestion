@@ -1262,4 +1262,5 @@
     'created' => 'Borrador',
     'Closed Tickets per User' => 'Tickets Cerrados por Usuario',
     'Closed Tickets' => 'Tickets Cerrados',
+    'Closed Tickets report' => 'Reporte de Tickets Cerrados por Usuario',
 );
