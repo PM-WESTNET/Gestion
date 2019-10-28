@@ -630,7 +630,7 @@ class Task extends ActiveRecord {
                 $notification->datetime = time();
                 $notification->status = Notification::STATUS_UNREAD;
                 $notification->reason = EventType::EVENT_TASK_EXPIRED;
-                $notification->save(false);
+                $notification->updateAttributes(['datetime', 'status', 'reason']);
             }
         }
 
