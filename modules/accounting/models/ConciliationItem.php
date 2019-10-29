@@ -244,7 +244,7 @@ class ConciliationItem extends \app\components\db\ActiveRecord
 
             Yii::debug($mvItem1->getErrors());
 
-            $mvItem2 = new AccountMovementItem();
+            /**$mvItem2 = new AccountMovementItem();
             $mvItem2->account_id = $resume_item->moneyBoxHasOperationType->account_id;
             if ($resume_item->debit > 0) {
                 $mvItem2->debit = 0;
@@ -256,7 +256,7 @@ class ConciliationItem extends \app\components\db\ActiveRecord
             $mvItem2->account_movement_id = $acountMovement->account_movement_id;
 
             $mvItem2->save();
-            Yii::debug($mvItem2->getErrors());
+            Yii::debug($mvItem2->getErrors());**/
 
 
             $this->addAccountItem($mvItem1->account_movement_item_id);
