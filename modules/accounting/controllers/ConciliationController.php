@@ -11,6 +11,7 @@ use app\modules\accounting\models\Resume;
 use app\modules\accounting\models\ResumeItem;
 use app\modules\accounting\models\search\AccountMovementSearch;
 use app\modules\accounting\models\search\ResumeSearch;
+use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
 use Yii;
 use app\modules\accounting\models\Conciliation;
@@ -269,8 +270,9 @@ class ConciliationController extends Controller
             Yii::info(print_r($item->getErrors(),1));
         } else {
 
+            $diference = ($sumResume - $sumMovements);
             // Si son iguales marco todo
-            if ($sumMovements == $sumResume) {
+            if ($sumMovements == $sumResume || abs($diference) <= (double)Config::getValue('movements_items_range')) {
                 $bOk = true;
 
                 $mMovements = AccountMovementItem::findAll(['account_movement_item_id'=>$movements_ids]);
@@ -281,6 +283,7 @@ class ConciliationController extends Controller
                 $item->amount = $sumResume;
                 $item->description = Yii::t('accounting', 'Conciliation of {movement} and {resume}.', ['movement'=>implode(",", $movements_ids), 'resume'=>implode(",", $resume_items_ids)] );
                 $item->date = date('d-m-Y');
+                $item->variation_balance = $diference;
                 $item->save();
 
                 // Asocio los movmientos

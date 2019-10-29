@@ -13,6 +13,7 @@ use Yii;
  * @property double $amount
  * @property string $date
  * @property string $description
+ * @property double $variation_balance
  *
  *
  * @property Conciliation $conciliation
@@ -71,6 +72,8 @@ class ConciliationItem extends \app\components\db\ActiveRecord
             [['conciliation_id'], 'required'],
             [['conciliation_id'], 'integer'],
             [['amount'], 'number'],
+            [['variation_balance'], 'double'],
+            ['variation_balance', 'default', 'value' => 0],
             [['date', 'conciliation'], 'safe'],
             [['date'], 'date'],
             [['description'], 'string', 'max' => 150]

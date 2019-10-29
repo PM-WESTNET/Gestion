@@ -323,6 +323,27 @@ class Conciliation extends \app\components\companies\ActiveRecord
                     foreach( $accountItems as $res) {
                         $res->accountMovementItem->changeState(AccountMovementItem::STATE_CONCILED);
                     }
+
+                    if ($this->totalDiference > 0 ) {
+                        $mov= new AccountMovementItem();
+                        $mov->account_id = $this->moneyBoxAccount->account->account_id;
+                        $mov->status = AccountMovementItem::STATE_CONCILED;
+                        $mov->debit = $this->totalDiference;
+
+                        $countMov = new CountableMovement();
+                        $countMov->createMovement( "Ajuste  - " .$this->name, $this->company_id, [$mov]);
+
+                    } elseif ($this->totalDiference < 0) {
+                        $mov= new AccountMovementItem();
+                        $mov->account_id = $this->moneyBoxAccount->account->account_id;
+                        $mov->status = AccountMovementItem::STATE_CONCILED;
+                        $mov->credit = $this->totalDiference;
+
+                        $countMov = new CountableMovement();
+                        $countMov->createMovement( "Ajuste  - " .$this->name, $this->company_id, [$mov]);
+                    }
+
+
                     $bOk = true;
                 }
             }
@@ -390,9 +411,10 @@ class Conciliation extends \app\components\companies\ActiveRecord
         $debitDataProvider = $searchModel->searchForConciliation([]);
         $totalAccountDebit = $searchModel->totalDebit;
 
-        $balance = $totalAccountCredit - $totalAccountDebit;
+        $balance = $totalAccountDebit - $totalAccountCredit;
+        $diference = abs(($this->resume->balance_final - $balance));
 
-        if ($this->resume->balance_final !== $balance) {
+        if ($this->resume->balance_final !== $balance || ($diference > (double)Config::getValue('diference_balance_on_close') && $diference == $this->totalDiference)) {
             return false;
         }
 
@@ -415,6 +437,17 @@ class Conciliation extends \app\components\companies\ActiveRecord
             'credit' => $credit,
             'total' => (-$debit + $credit)
         ];
+    }
+
+    public function getTotalDiference()
+    {
+        $diference = 0;
+
+        foreach ($this->conciliationItems as $item) {
+            $diference += $item->variation_balance;
+        }
+
+        return $diference;
     }
 
 }
