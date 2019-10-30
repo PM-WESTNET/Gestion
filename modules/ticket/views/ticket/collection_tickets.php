@@ -107,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'attribute' => 'task_date',
             'value' => function($model) {
-                return $model->task_id ? $model->task->date : '';
+                return $model->task ? $model->task->date : '';
             }
         ],
         'title',
