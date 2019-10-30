@@ -14,6 +14,7 @@ use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\InvoiceProcess;
 use app\modules\sale\models\PointOfSale;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\TaxCondition;
@@ -105,15 +106,25 @@ class BatchInvoiceController  extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
-            Yii::$app->session->set( '_invoice_all_', [
+            Yii::$app->cache->set( '_invoice_all_', [
                 '_invoice_total_' => 0,
                 '_invoice_cantidad_', 0
             ]);
 
-            $cti = new ContractToInvoice();
-            $cti->invoiceAll(Yii::$app->request->post());
+            $company_id = Yii::$app->request->post('ContractSearch')['company_id'];
+            $bill_type_id = Yii::$app->request->post('ContractSearch')['bill_type_id'];
+            $period = Yii::$app->request->post('ContractSearch')['period'];
+            $observation = array_key_exists('bill_observation', Yii::$app->request->post()) ? Yii::$app->request->post('bill_observation') : '';
 
-            $messages = $cti->getMessages();
+            if(InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, $period, $observation, InvoiceProcess::TYPE_CREATE_BILLS)) {
+
+            };
+
+//            $cti = new ContractToInvoice();
+//            $cti->invoiceAll(Yii::$app->request->post());
+
+//            $messages = $cti->getMessages();
+            $messages = [];
 
             return [
                 'status' => 'success',
@@ -132,11 +143,14 @@ class BatchInvoiceController  extends Controller
 
         $process = Yii::$app->request->post('process');
 
-        return Yii::$app->session->get($process, [
+        $a = Yii::$app->cache->get($process, [
             'total' => 0,
             'qty'   => 0
         ]);
 
+        \Yii::trace($a);
+
+        return $a;
     }
 
     /**
@@ -175,6 +189,8 @@ class BatchInvoiceController  extends Controller
             $total = $query->count();
             $retMessages = [];
 
+            //TODO crear registro
+
             foreach ($query->batch() as $bills) {
                 foreach ($bills as $bill) {
                     $bill->verifyNumberAndDate();
@@ -204,6 +220,8 @@ class BatchInvoiceController  extends Controller
                     $i++;
                 }
             }
+
+            //TODO actualizar registro
 
             return [
                 'status' => 'success',
@@ -316,6 +334,20 @@ class BatchInvoiceController  extends Controller
         $bill->fillNumber();
 
         return $bill;
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionInvoiceProcessCreateBillIsStarted()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+            return [ 'invoice_process_started' => true ];
+        }
+
+        return [ 'invoice_process_started' => false ];
     }
 
 }

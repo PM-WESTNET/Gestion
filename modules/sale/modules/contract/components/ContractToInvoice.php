@@ -12,6 +12,7 @@ use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerHasDiscount;
 use app\modules\sale\models\Discount;
+use app\modules\sale\models\InvoiceProcess;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\search\ProductToInvoiceSearch;
@@ -317,7 +318,7 @@ class ContractToInvoice
         if( $contractSearch->invoice_date instanceof DateTime) {
             $invoice_date = $contractSearch->invoice_date;
         } else {
-            $invoice_date = DateTime::createFromFormat( 'd-m-Y', $contractSearch->invoice_date );
+            $invoice_date = DateTime::createFromFormat( 'd-m-Y', $contractSearch->invoice_date);
         }
         $customers = [];
 
@@ -327,16 +328,19 @@ class ContractToInvoice
             $this->invoice_day_for_next_month = 0;
         }
 
+
         $i = 1;
-        Yii::$app->session->set( '_invoice_all_', [
+        Yii::$app->cache->set( '_invoice_all_', [
             'total' => $cantidadTotal,
             'qty'   => $i
         ]);
 
         // Creo notificacion para la app. Es una notificacion para todos los clientes que se facturen
-        $mobilepush = $this->createMobilePush();
+//        $mobilepush = $this->createMobilePush();
 
         $afip_error = false;
+
+        echo count($contractSearch->searchForInvoice($params)->all()) . "\n";
 
         //Se hace el cambio a batch para evitar facturacion de contratos duplicados
         foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
@@ -346,7 +350,7 @@ class ContractToInvoice
                     if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
                         $afip_error = true;
                     }
-                    Yii::$app->session->set('_invoice_all_', [
+                    Yii::$app->cache->set('_invoice_all_', [
                         'total' => $cantidadTotal,
                         'qty' => $i
                     ]);
@@ -358,17 +362,20 @@ class ContractToInvoice
                     $customers[] = $item['customer_id'];
 
                     // Agrego al cliente a la notificacion, para que se le notifique
-                    $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
+//                    $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
 
-                    Yii::$app->session->close();
+//                    Yii::$app->session->close();
                     $i++;
                     $transaction->commit();
                 //}
             }
         }
 
+        //Actualizo el estado de el registro de proeso de facturación
+        InvoiceProcess::endProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+
         // Envio la notificacion a los clientes facturados
-        $mobilepush->send();
+//        $mobilepush->send();
 
     }
 
@@ -599,7 +606,10 @@ class ContractToInvoice
 //                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
 //                    return false;
 //                }
-                $this->addMessage($bill);
+
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    $this->addMessage($bill);
+                }
             }
 
             return true;
