@@ -17,6 +17,7 @@ use yii\helpers\Json;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use app\modules\accounting\models\AccountMovement;
 
 /**
  * MoneyBoxAccountController implements the CRUD actions for MoneyBoxAccount model.
@@ -165,6 +166,14 @@ class MoneyBoxAccountController extends Controller
             $searchModel->account_id_from = $account->lft;
             $searchModel->account_id_to = $account->rgt;
             $searchModel->account_id = $account->account_id;
+
+            if (!$searchModel->toDate) {
+                $searchModel->toDate = (new \DateTime('now'))->format('Y-m-d');
+            }
+
+            if (!$searchModel->fromDate) {
+                $searchModel->fromDate = (new \DateTime('now'))->modify('-1 month')->format('Y-m-d');
+            }
 
             $data = $searchModel->search($params, 1);
             $dataProvider = $searchModel->search($params, 0);
@@ -428,5 +437,87 @@ class MoneyBoxAccountController extends Controller
             }
         }
         echo Json::encode(['output'=>'', 'selected'=>'']);
+    }
+
+    /**
+     * +     * @param $money_box_account_id
+     * +     * @param $movement_id
+     * +     * @return Response
+     * +     * @throws NotFoundHttpException
+     * +     * @throws \yii\db\Exception
+     * +     * Busca y cierra los movimientos anteriores al movimiento indicado.
+     * +     */
+    public function actionCloseThisAndPrevious($money_box_account_id, $movement_id)
+    {
+        $this->layout = '/fluid';
+        $model = $this->findModel($money_box_account_id);
+        $movement = AccountMovement::findOne($movement_id);
+
+        $account = null;
+        if (!empty($model->account)) {
+            $account = $model->account;
+        } else {
+            if (!empty($model->moneyBox->account)) {
+                $account = $model->moneyBox->account;
+            }
+        }
+
+        $searchModel = new AccountMovementSearch();
+        $params['AccountMovementSearch']['toDate'] = $movement->date;
+        $params['AccountMovementSearch']['fromDate'] = AccountMovement::find()->where(['not', ['status' => 'closed']])->orderBy(['date' => SORT_ASC])->one()->date;
+        $params['AccountMovementSearch']['account_id_from'] = $account->lft;
+        $params['AccountMovementSearch']['account_id_to'] = $account->rgt;
+        $params['AccountMovementSearch']['account_id'] = $account->account_id;
+
+        $dataProvider = $searchModel->search($params, 1);
+        $result = $this->closeMovements($dataProvider, $movement->date, $movement->time);
+
+        if ($result['status']) {
+            Yii::$app->session->setFlash('success', Yii::t('app', 'Movements closed successfully'));
+        } else {
+            Yii::$app->session->setFlash('error', Yii::t('app', 'Movements cant be closed') . ': ' . $result['fail_close_movements']);
+        }
+
+        return $this->redirect(['movements', 'id' => $money_box_account_id]);
+    }
+
+    /**
+     * @param $dataProvider
+     * @return array
+     * @throws \yii\db\Exception
+     * Cierra los movimientos.
+     */
+    private function closeMovements($dataProvider, $toDate, $toTime)
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        $success = true;
+        $fails_close_movements = [];
+        foreach ($dataProvider as $movement) {
+            $movement = AccountMovement::findOne($movement['account_movement_id']);
+            if ($movement->status != AccountMovement::STATE_CLOSED) {
+                if($movement->date != $toDate || ($movement->date == $toDate && $movement->time <= $toTime)) {
+                    if (!$movement->close()) {
+                        $success = false;
+                        array_push($fails_close_movements, $movement['account_movement_id']);
+                    }
+                }
+            }
+        }
+
+        if ($success) {
+            $transaction->commit();
+        } else {
+            $transaction->rollBack();
+        }
+
+        $string_fails = '';
+        foreach ($fails_close_movements as $fails_close_movement) {
+            $string_fails .= ' ' . $fails_close_movement . ',';
+        }
+
+        return [
+            'status' => $success,
+            'fail_close_movements' => $string_fails
+        ];
     }
 }

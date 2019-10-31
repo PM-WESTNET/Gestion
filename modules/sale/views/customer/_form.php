@@ -16,6 +16,8 @@ use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
+use app\modules\sale\models\Company;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * @var yii\web\View $this
@@ -49,7 +51,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
-                $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
+                $data = ArrayHelper::map( Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
             }
             ?>
             <div class="form-group field-company_id">
@@ -64,7 +66,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
     </div>
     <div class="row">
-
         <div class="col-sm-12">
             <?= $form->field($model, 'tax_condition_id')->dropDownList(
                 ArrayHelper::map(TaxCondition::find()->orderBy(['name'=>SORT_ASC])->all(), 'tax_condition_id', 'name' )) ?>
@@ -85,7 +86,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         <div class="col-sm-3 col-xs-12">
             <?php
-                if (!\webvimark\modules\UserManagement\models\User::hasRole('superadmin')){
+                if (!User::hasRole('superadmin')){
                     $document_types= DocumentType::find()->andWhere(['<>','code', 99]);
                 }else{
                     $document_types= DocumentType::find();
@@ -151,7 +152,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         </div>
         <div class="col-sm-6 col-xs-12">
-
             <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
@@ -182,7 +182,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?php if (Yii::$app->getModule("accounting")) { ?>
             <div class="form-group field-provider-account">
                 <?= $form->field($model, 'account_id')->widget(Select2::className(),[
-                    'data' => yii\helpers\ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+                    'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
                     'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                     'pluginOptions' => [
                         'allowClear' => true
@@ -253,7 +253,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         }    
     ?>    
         
-    <div class="row" <?=(webvimark\modules\UserManagement\models\User::hasRole('seller', false) && !(webvimark\modules\UserManagement\models\User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
+    <div class="row" <?=(User::hasRole('seller', false) && !(User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
         <div class="col-sm-4 col-xs-4" >
             <?= $form->field($model, '_notifications_way')->checkboxList(Customer::getNotificationWays(), ['id' => 'notifications_way'])?>
         </div>

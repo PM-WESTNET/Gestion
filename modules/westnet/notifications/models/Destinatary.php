@@ -673,6 +673,6 @@ class Destinatary extends ActiveRecord {
 
     public function getCustomers()
     {
-        return $this->hasMany(Customer::className(), ['customer_id' => 'customer_id'])->viaTable('destinatary_has_customer', ['destinatary_id' => 'destinatary_id']);
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->viaTable('destinatary_has_customer', ['destinatary_id' => 'destinatary_id']);
     }
 }

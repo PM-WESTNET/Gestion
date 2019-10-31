@@ -18,6 +18,7 @@ use Yii;
  * @property string $status
  * @property string $date
  * @property integer $money_box_has_operation_type_id
+ * @property boolean $ready
  *
  * @property ConciliationItem[] $conciliationItems
  * @property MoneyBoxHasOperationType $moneyBoxHasOperationType
@@ -80,8 +81,8 @@ class ResumeItem extends \app\components\db\ActiveRecord
         return [
             [['resume_id', 'date', 'money_box_has_operation_type_id'], 'required'],
             [['resume_id', 'money_box_has_operation_type_id'], 'integer'],
-            [['debit', 'credit'], 'number'],
-            [['debit', 'credit'], 'default', 'value'=> 0],
+            [['debit', 'credit'], 'double'],
+            [['debit', 'credit', 'ready'], 'default', 'value'=> 0],
             [['status'], 'in', 'range' => ['draft', 'conciled']],
             [['status'], 'default', 'value'=>'draft'],
             [['date', 'moneyBoxHasOperationType', 'resume'], 'safe'],
@@ -91,6 +92,7 @@ class ResumeItem extends \app\components\db\ActiveRecord
             [['reference', 'code'], 'string', 'max' => 45],
             [['date'], 'validateDate'],
             [['debit', 'credit'], 'validateAmount'],
+            [['ready'], 'boolean']
             /*['debit', 'required', 'when' => function($model) {
                 return ($model->moneyBoxHasOperationType->getOperationType()->one()->is_debit && $model->debit == 0);
             }],
@@ -108,13 +110,13 @@ class ResumeItem extends \app\components\db\ActiveRecord
      */
     public function validateAmount($attribute,$params)
     {
-        if($attribute == 'debit') {
-            if($this->moneyBoxHasOperationType->operationType->is_debit && $this->debit == 0) {
+        if($this->moneyBoxHasOperationType->operationType && $attribute == 'debit') {
+            if($this->moneyBoxHasOperationType->operationType->is_debit && $this->debit === 0) {
                 $this->addError($attribute, Yii::t('accounting', 'The amount must be greater than 0.'));
             }
         }
-        if($attribute == 'credit') {
-            if(!$this->moneyBoxHasOperationType->operationType->is_debit && $this->credit == 0) {
+        if($this->moneyBoxHasOperationType->operationType && $attribute == 'credit') {
+            if(!$this->moneyBoxHasOperationType->operationType->is_debit && $this->credit === 0) {
                 $this->addError($attribute, Yii::t('accounting', 'The amount must be greater than 0.'));
             }
         }
@@ -211,7 +213,7 @@ class ResumeItem extends \app\components\db\ActiveRecord
      */
     private function formatDatesAfterFind()
     {
-            $this->date = Yii::$app->formatter->asDate($this->date);
+            $this->date = Yii::$app->formatter->asDate($this->date, 'dd-MM-yyyy');
         }
      
     /**
@@ -287,4 +289,10 @@ class ResumeItem extends \app\components\db\ActiveRecord
      * @return mixed
      */
     public function getWorkflowCreateLog(){}
+
+
+
+    public function getOperationType() {
+        return $this->hasOne(OperationType::class, ['operation_type_id' => 'operation_type_id'])->viaTable('money_box_has_operation_type', ['money_box_has_operation_type_id' => 'money_box_has_operation_type_id']);
+    }
 }

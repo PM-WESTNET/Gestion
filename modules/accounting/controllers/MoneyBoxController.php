@@ -136,7 +136,7 @@ class MoneyBoxController extends Controller
         if ($item->load(Yii::$app->request->post()) ) {
             if($id) {
                 $item->money_box_has_operation_type_id = $id;
-                $item->updateAttributes(['code', 'operation_type_id']);
+                $item->updateAttributes(['code', 'operation_type_id', 'money_box_id', 'account_id', 'money_box_account_id']);
             } else {
                 $item->save();
             }

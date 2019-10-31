@@ -793,5 +793,4 @@ class Task extends ActiveRecord {
         }
         return $visual_priority;
     }
-
 }

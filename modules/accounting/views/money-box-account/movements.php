@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\View;
 use kartik\export\ExportMenu;
+use app\modules\accounting\models\AccountMovement;
 
 /* @var $this View */
 /* @var $dataProvider ActiveDataProvider */
@@ -14,11 +15,8 @@ JsMovementsPaginateAsset::register($this);
 $this->title = Yii::t('accounting', 'Movements') . " - " . $model->moneyBox->name . " - " . $model->number;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('accounting', 'Money Box Accounts'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
-
     
 ?>
-
-
 <div class="account-movement-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
@@ -46,67 +44,18 @@ $this->params['breadcrumbs'][] = $this->title;
         ]
     ]);
 
-    // Renders a export dropdown menu
+    /** Renders a export dropdown menu
     echo ExportMenu::widget([
         'dataProvider' => $dataProvider,
-        'showFooter' => true,
         'columns' => [
-            [
-                'label' => Yii::t('app', 'Date'),
-                'value' => function($model) {
-                    return $model['date'];
-                }
-            ],
-            [
-                'label' => Yii::t('app', 'From / To'),
-                'value' => function($model) {
-                    return ($model['debit'] != 0 ? $model['from'] : '  A '. $model['from']);
-                }
-            ],
-            [
-                'label' => Yii::t('app', 'Description'),
-                'value' => function($model) {
-                    return $model['description'];
-                }
-            ],
-            [
-                'label' => Yii::t('app', 'Description'),
-                'value' => function($model) {
-                    return $model['description'];
-                }
-            ],
-            [
-                'label' => Yii::t('accounting', 'Debit'),
-                'value' => function($model) {
-                    return Yii::$app->formatter->asCurrency($model['debit']);
-                },
-                'footer' => Yii::$app->formatter->asCurrency($searchModel->totalDebit),
-            ],
-            [
-                'label' => Yii::t('accounting', 'Credit'),
-                'value' => function($model) {
-                    return Yii::$app->formatter->asCurrency($model['credit']);
-                },
-                'footer' => Yii::$app->formatter->asCurrency($searchModel->totalCredit),
-            ],
-            [
-                'label' => Yii::t('app', 'Balance'),
-                'value' => function($model) {
-                    return Yii::$app->formatter->asCurrency($model['partial_balance']);
-                },
-                'footer' => Yii::$app->formatter->asCurrency( $searchModel->totalDebit - $searchModel->totalCredit ),
-            ],
-            [
-                'label' => Yii::t('app', 'Status'),
-                'value' => function($model) {
-                    return Yii::t('accounting', $model['status']);
-                }
-            ],
+            'date',
+            'description',
+            'debit:currency',
+            'credit:currency',
 
         ],
         'showConfirmAlert'=>false
-    ]);
-
+    ]);**/
         
     ?>
     <table class="kv-grid-table table table-bordered table-striped kv-table-wrap" >
@@ -118,33 +67,41 @@ $this->params['breadcrumbs'][] = $this->title;
                 <th><?= Yii::t('accounting', 'Debit')?></th>
                 <th><?= Yii::t('accounting', 'Credit')?></th>
                 <th><?= Yii::t('app', 'Balance')?></th>
-                <th>&nbsp;</th>
+                <th>&nbsp</th>
                 <th><?= Yii::t('app', 'Status')?></th>
                 <th> </th>
             </tr>
         </thead>
         <tbody id="content">
-           
-            <?php
-                foreach ($data as $key => $movement){
-                    echo '<tr id="f'.$key.'" class="'.($movement['check'] ? 'danger' : '' ).'">';
-                        echo '<td>' . Yii::$app->formatter->asDate($movement['date'], 'dd-MM-yyyy') . '</td>';
-                        echo '<td style="'.($movement['debit'] == 0 ? 'text-align: right' : 'text-align: left' ).'">' . ($movement['debit'] != 0 ? $movement['from'] : '  A '. $movement['from'] ). '</td>';
-                        echo '<td>' . $movement['description'] . '</td>';
-                        echo '<td>' . Yii::$app->formatter->asCurrency($movement['debit']) . '</td>';
-                        echo '<td>' . Yii::$app->formatter->asCurrency($movement['credit']) . '</td>';
-                        echo '<td>' . Yii::$app->formatter->asCurrency($movement['partial_balance']) . '</td>';
-                        echo '<td><input type="checkbox" '.($movement['check'] ? 'checked' : '' ).' class="check_movement" data-id="'.$movement['account_movement_id'].'" /> </td>';
-                        echo '<td>' . Yii::t('accounting', $movement['status']) . '</td>';
-                        echo '<td>' 
-                                    . '<a href="'. Url::to(['/accounting/account-movement/view', 'id'=> $movement['account_movement_id']]). '" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>  '
-                                    . ($movement['status'] === 'draft' ? '<a href="'. Url::to(['/accounting/account-movement/close', 'id'=> $movement['account_movement_id'], 'from' => 'movements', 'money_box_account_id' => $movement['money_box_account_id'], 'from_date' => $searchModel->fromDate, 'to_date' =>$searchModel->toDate ]). '" class="btn btn-warning"><span class="glyphicon glyphicon-lock"></span></a>' : '').
-                              '</td>'; 
-                    echo '</tr>';    
-                }
-            
-            ?>
-               
+            <?php foreach ($data as $key => $movement) { ?>
+                <tr id="f<?= $key ?> " class=" <?= $movement['check'] ? 'danger' : '' ?> ">
+                    <td> <?= Yii::$app->formatter->asDate($movement['date'], 'dd-MM-yyyy') ?> </td>
+                    <td style=" <?= ($movement['debit'] == 0 ? 'text-align: right' : 'text-align: left') ?>"> <?= ($movement['debit'] != 0 ? $movement['from'] : '  A ' . $movement['from']) ?></td>
+                    <td> <?= $movement['description'] ?> </td>
+                    <td> <?= Yii::$app->formatter->asCurrency($movement['debit']) ?> </td>
+                    <td> <?= Yii::$app->formatter->asCurrency($movement['credit']) ?> </td>
+                    <td> <?= Yii::$app->formatter->asCurrency($movement['partial_balance']) ?> </td>
+                    <td>
+                        <input type="checkbox" <?= $movement['check'] ? 'checked' : '' ?> class="check_movement"
+                               data-id=" <?= $movement['account_movement_id'] ?>"/>
+                    </td>
+                    <td> <?= Yii::t('accounting', $movement['status']) ?></td>
+                    <td>
+                        <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span>', ['/accounting/account-movement/view', 'id' => $movement['account_movement_id']], [
+                            'class' => 'btn btn-view',
+                            'title' => Yii::t('app', 'View')
+                        ])?>
+
+                        <?php if ($movement['status'] != AccountMovement::STATE_CLOSED) {
+                            echo Html::a('<span class="glyphicon glyphicon-lock"></span>', ['close-this-and-previous', 'money_box_account_id' => $model->money_box_account_id, 'movement_id' => $movement['account_movement_id'], 'from' => 'movements'], [
+                                'class' => 'btn btn-warning',
+                                'title' => Yii::t('app', 'Close'),
+                                'data-confirm' => Yii::t('app', 'If this movement is closed all previous movements will be closed too. Are you sure you want to continue?')
+                            ]);
+                        } ?>
+                    </td>
+                </tr>
+            <?php } ?>
         </tbody>
     </table>
     <div class="pagination2">
@@ -153,19 +110,19 @@ $this->params['breadcrumbs'][] = $this->title;
    
     
     <div class="row">
-        <div class="col-sm-6">&nbsp;</div>
+        <div class="col-sm-6">&nbsp</div>
         <div class="col-sm-2 text-center">
-            <strong><?= Yii::t('accounting', 'Debit'); ?></strong>
+            <strong><?= Yii::t('accounting', 'Debit') ?></strong>
         </div>
         <div class="col-sm-2 text-center">
-            <strong><?= Yii::t('accounting', 'Credit'); ?></strong>
+            <strong><?= Yii::t('accounting', 'Credit') ?></strong>
         </div>
         <div class="col-sm-2 text-center">
-            <strong><?= Yii::t('app', 'Balance'); ?></strong>
+            <strong><?= Yii::t('app', 'Balance') ?></strong>
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">&nbsp;</div>
+        <div class="col-sm-6">&nbsp</div>
         <div class="col-sm-2  text-center">
             <?=Yii::$app->formatter->asCurrency($searchModel->totalDebit); ?>
         </div>
@@ -176,7 +133,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $balance = $searchModel->totalDebit - $searchModel->totalCredit;
         ?>
         <div class="col-sm-2 text-center <?=($balance < 0 ? 'alert-danger' : '' )?>">
-            <?=Yii::$app->formatter->asCurrency( $balance ); ?>
+            <?=Yii::$app->formatter->asCurrency( $balance ) ?>
         </div>
     </div>
 
@@ -186,7 +143,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <script>
     var movementsView = new function(){
     this.init= function(){
-        <?= empty($init) ? 'movementsView.set_cookie("current", 1);' : '' ?>
+        <?= empty($init) ? 'movementsView.set_cookie("current", 1)' : '' ?>
         $('#content').jPaginate({ items: 15}, true);
         $('.pagination a').css('float', 'none');
 

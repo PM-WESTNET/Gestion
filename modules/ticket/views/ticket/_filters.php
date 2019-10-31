@@ -9,8 +9,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\jui\DatePicker;
 use yii\widgets\ActiveForm;
-
-
+use \kartik\daterange\DateRangePicker;
+use yii\helpers\Url;
 
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
@@ -66,7 +66,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
     <div class="row">
         <div class="col-lg-6">
-            <?= $form->field($model, 'start_date')->widget(\kartik\daterange\DateRangePicker::className(), [
+            <?= $form->field($model, 'start_date')->widget(DateRangePicker::class, [
                 'convertFormat' => true,
                 'useWithAddon' => false,
                 'model' => $model,
@@ -83,7 +83,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-lg-6">
-            <?=$form->field($model, 'finish_date')->widget(\kartik\daterange\DateRangePicker::className(), [
+            <?=$form->field($model, 'finish_date')->widget(DateRangePicker::class, [
                 'convertFormat' => true,
                 'useWithAddon' => false,
                 'model' => $model,
@@ -108,7 +108,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
         </div>
         <dvi class="col-lg-1">
-            <?= \yii\bootstrap\Html::a('Borrar Filtros', yii\helpers\Url::to(['index']), ['class' =>'btn btn-default'])?>
+            <?= \yii\bootstrap\Html::a('Borrar Filtros', Url::to(['index']), ['class' =>'btn btn-default'])?>
         </dvi>
     </div>
 

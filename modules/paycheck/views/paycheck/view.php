@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <p>
             <?php
-            if(count($model->getPossibleStates())>1) {
+            if(count($model->getPossibleStates()) > 1 && $model->getUpdatable()) {
                 echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->paycheck_id], ['class' => 'btn btn-primary']);
             }
             ?>

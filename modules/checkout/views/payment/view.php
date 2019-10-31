@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <p>
             <?php
-            if ($model->status =='draft') {
+            if ($model->getUpdatable()) {
                 echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " .Yii::t('app', 'Update'), ['update', 'id' => $model->payment_id], ['class' => 'btn btn-primary']);
             }
             if ($model->status !== 'draft'){
@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]);
             }
+
             if($model->deletable){
                 echo Html::a("<span class='glyphicon glyphicon-remove'></span> " .Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
                     'class' => 'btn btn-danger',

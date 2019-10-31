@@ -302,6 +302,9 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit',
+        ],
         'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',
             'modules' => [

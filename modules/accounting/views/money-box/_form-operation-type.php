@@ -41,7 +41,7 @@ use yii\widgets\ActiveForm;
     </div>
 </div>
 <div class="row">
-    <div class="col-sm-4 col-md-4">
+    <div class="col-sm-3 col-md-3">
         <?= $form->field($item, 'operation_type_id')->widget(Select2::className(),[
             'data' => yii\helpers\ArrayHelper::map(OperationType::find()->all(), 'operation_type_id', 'name' ),
             'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
@@ -51,7 +51,7 @@ use yii\widgets\ActiveForm;
         ]);
         ?>
     </div>
-    <div class="col-sm-4 col-md-4">
+    <div class="col-sm-3 col-md-3">
         <div class="form-group">
             <?= $form->field($item, 'account_id')->widget(Select2::className(),[
                 'data' => yii\helpers\ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
@@ -63,11 +63,14 @@ use yii\widgets\ActiveForm;
             ?>
         </div>
     </div>
+    <div class="col-sm-3 col-md-3">
+        <?php echo $form->field($item, 'code')->textInput()?>
+    </div>
 
     <div class="col-sm-2 col-md-2">
         <label style="display: block">&nbsp;</label>
         <a class="btn btn-<?=($item->isNewRecord  ? 'success' : 'primary' ) ?>" id="operation-type-add">
-            <span id="operation-type-add-span" class="glyphicon glyphicon-<?=($item->isNewRecord  ? 'plus' : 'pencil' ) ?>"><?= Yii::t('app', ($item->isNewRecord  ? 'Add' : 'Update' )) ?></span>
+            <span id="operation-type-add-span" class="glyphicon glyphicon-<?=($item->isNewRecord  ? 'plus' : 'pencil' ) ?>"></span><?= Yii::t('app', ($item->isNewRecord  ? 'Add' : 'Update' )) ?>
         </a>
     </div>
 

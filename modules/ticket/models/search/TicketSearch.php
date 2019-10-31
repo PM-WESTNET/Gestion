@@ -172,8 +172,6 @@ class TicketSearch extends Ticket {
         if($this->user_id && !(boolean)$this->show_all) {
             $query->andFilterWhere(['like', 'user.id', $this->user_id]);
         }
-
-
         
         if (empty($params['sort'])) {
             $query->orderBy([
@@ -288,7 +286,7 @@ class TicketSearch extends Ticket {
         $query->joinWith('customerProfiles', false);
 
         //Profiles habilitados para busqueda
-        $profileClasses = \app\modules\agenda\models\Ticket::getSearchableProfileClasses();
+        $profileClasses = Ticket::getSearchableProfileClasses();
         foreach ($profileClasses as $class) {
 
             /* El query debe ser armado asi para que funcione coorectamente. Pasando profile_class_id como parametro :profile_class_id no funciona.

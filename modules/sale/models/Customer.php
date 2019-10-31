@@ -605,7 +605,6 @@ class Customer extends ActiveRecord {
      * @return null | app\modules\sale\models\Profile
      */
     public function getProfile($class_id) {
-
         $class = ProfileClass::find()->where(['profile_class_id' => $class_id])->one();
 
         //Si el profile soporta multiples valores, devolvemos un array con todos los valores
@@ -720,7 +719,6 @@ class Customer extends ActiveRecord {
                 $p->delete();
 
             $this->unlinkAll('hourRanges', $this);
-
             return true;
         } else {
             return false;
@@ -1099,6 +1097,7 @@ class Customer extends ActiveRecord {
             Debug::debug('Total :'. $total);
             Debug::debug('Tolerance :'. Yii::$app->params['account_tolerance'] );
         }
+
 
         if ($total < -(Yii::$app->params['account_tolerance'])) {
             return true;

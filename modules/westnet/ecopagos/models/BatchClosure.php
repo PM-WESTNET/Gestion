@@ -16,6 +16,7 @@ use yii\db\ActiveQuery;
 use yii\db\Connection;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use app\modules\accounting\components\AccountMovementRelationManager;
 
 /**
  * This is the model class for table "batch_closure".
@@ -312,6 +313,9 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
      * Strong relations: Payouts
      */
     public function getDeletable() {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
         return false;
     }
 
@@ -481,6 +485,7 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
     protected function unlinkWeakRelations() {
         //reopen each payout for another batch closure can close them
         $this->reopenPayouts();
+        AccountMovementRelationManager::delete($this);
     }
 
     /**

@@ -178,5 +178,21 @@
   'Broken' => 'Inválido',
   'The movement is created with errors.' => 'El movimiento fue creado con errores.',
   'You can not add a move to a date other than today.' => 'No se puede agregar un movimiento a una fecha distinta de hoy.',
-    'Includes account' => 'Incluye cuenta'
+  'Includes account' => 'Incluye cuenta',
+  'Operation Type {operation} isn`t registered' => 'El tipo de operación {operation} no esta registrada',
+  'Input the name of columns separated with comma' => 'Ingrese el nombre de las columnas separados por coma',
+  'Columns of File' => 'Columnas del Archivo',
+  'Columns' => 'Columnas',
+  'Separator' => 'Separador',
+  'Money Box has undefined code operations' => 'La entidad monetaria tiene códigos de operaciones no definidos',
+  'Code' => 'Código',
+  'The balance of account is not equals to balance of resume' => 'El saldo de la cuenta no es igual al saldo del resumen',
+  'Includes account' => 'Incluye cuenta',
+    'Resume Debit Balance' => 'Saldo Deudor de Resumen',
+    'Resume Credit Balance' => 'Saldo Acreedor de Resumen',
+    'Resume Balance' => 'Saldo de Balance',
+    'Concilated Debit' => 'Saldo Deudor Conciliado',
+    'Concilated Credit' => 'Saldo Acreedor Conciliado',
+    'Concilated Total' => 'Total Conciliado',
+    'Select a Partner Distribution Model' => 'Seleccionar un Modelo de Distribución Societario'
 );

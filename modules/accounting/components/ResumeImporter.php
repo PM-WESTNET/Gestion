@@ -11,8 +11,10 @@ namespace app\modules\accounting\components;
 
 use app\modules\accounting\models\MoneyBoxHasOperationType;
 use app\modules\accounting\models\OperationType;
+use app\modules\accounting\models\Resume;
 use app\modules\accounting\models\ResumeItem;
 use app\modules\import\components\AbstractCsvImport;
+use Codeception\Util\Debug;
 use PHPExcel;
 use PHPExcel_Cell_DataValidation;
 use PHPExcel_IOFactory;
@@ -21,16 +23,19 @@ use yii\db\Expression;
 
 class ResumeImporter extends AbstractCsvImport
 {
+    /**@var Resume**/
+    private $resume;
+
     public function getValueFunctions()
     {
         return [
             'Código' => function($value) {
                 $query = MoneyBoxHasOperationType::find();
                 $value = $query->select('money_box_has_operation_type_id')
-                    ->leftJoin('operation_type ot', 'money_box_has_operation_type.operation_type_id = ot.operation_type_id')
+                    //->leftJoin('operation_type ot', 'money_box_has_operation_type.operation_type_id = ot.operation_type_id')
                     ->where([
                         'money_box_id'=>$this->_params['money_box_id'],
-                        'ot.code'=>$value,
+                        'code'=>$value,
                     ])->andWhere(new Expression('money_box_account_id ='.$this->_params['money_box_account_id'] . ' or money_box_account_id is null'  ))
                 ->one();
 
@@ -41,31 +46,87 @@ class ResumeImporter extends AbstractCsvImport
 
     public function persist($data)
     {
+        /**
+         * No siempre pero en algunos archivos sabe devolver la ultima fila vacia, lo que hace que despues falle, por eso
+         * en este caso devuelvo true para que siga con el proceso
+         */
+        if (empty($data['Fecha']) && empty($data['Código'] && (empty($data['Crédito']) || empty($data['Débito'])))){
+            return true;
+        }
+
+        /**
+         * Si el tipo de operación no fue encontrada, se crea y se la asigna al money box del resumen
+        **/
+        if (empty($data['Código-new'])) {
+
+            if (empty($this->resume)){
+                $resume= Resume::findOne($this->_params['resume_id']);
+
+                if (empty($resume)) {
+                    $this->_errors[] = 'Resume not found';
+                    return;
+                }
+                $this->resume = $resume;
+            }
+
+            /**$operation = new OperationType([
+                'name' => 'Operation code :'. $data['Código'] ,
+                'code' => $data['Código'],
+                'is_debit' => $debit
+            ]);
+
+
+
+            if (!$operation->save()){
+                Yii::debug(print_r($operation->getErrors(), 1));
+                $this->_errors[] = Yii::t('accounting','Cant save operation with code {code}', ['code' => $data['Código']]);
+                return;
+            }**/
+
+            $MBHOT= new MoneyBoxHasOperationType([
+                'money_box_id' => $this->resume->moneyBoxAccount->money_box_id,
+                'code' => $data['Código'],
+                'money_box_account_id' => $this->_params['money_box_account_id'],
+                'account_id' => $this->resume->moneyBoxAccount->account_id
+            ]);
+
+            $MBHOT->save();
+
+            Yii::debug(print_r($MBHOT->getErrors(), 1));
+
+            $data['Código-new'] = $MBHOT->money_box_has_operation_type_id ;
+        }
+        Yii::debug(print_r($data,1));
         $item = new ResumeItem();
         try {
             $item->setAttributes([
                 'description' => $data['Descripcion'],
                 'reference' => '',
                 'code' => $data['Código'],
-                'debit' => $data['Débito'],
-                'credit' => $data['Crédito'],
+                'debit' => abs((double)($data['Debe'])),
+                'credit' => abs((double)$data['Haber']),
                 'status' => ResumeItem::STATE_DRAFT,
-                'date' => Yii::$app->formatter->asDate(str_replace('/','-', $data['Fecha'])),
+                'date' => $this->formatDate($data['Fecha']),
                 'money_box_has_operation_type_id' => $data['Código-new'],
                 'resume_id' => $this->_params['resume_id']
             ]);
-            if(!$item->validate()) {
+            if($item->validate()) {
                 $item->save(false);
             } else {
+                Yii::debug(print_r($item->getErrors(), 1));
                 foreach( $item->getErrors() as $value) {
                     $this->_errors[] = $value;
                 }
 
-                throw new \Exception(Yii::t('app', 'Validation error.'));
+                return false;
+                //throw new \Exception(Yii::t('app', 'Validation error.'));
             }
         } catch(\Exception $ex) {
+            Yii::debug($ex->getTraceAsString());
             throw new \Exception(Yii::t('app', 'Error on save. ' . $ex->getMessage()));
         }
+
+        return true;
     }
 
     public function getImportExcel()
@@ -123,6 +184,52 @@ class ResumeImporter extends AbstractCsvImport
         }
 
         return PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+
+    }
+
+    /**
+     * Formatea la fecha que viene del archivo csv del banco. Algunos bancos expresan la fecha como dd/mm/yyyy otros como dd-mm-yyyy
+     * y otros como en el caso del credicop mandan la fecha como yyyymmdd. Por lo que esta funcion normaliza la fecha y devuelve el
+     * formato dd-mm-yyyy     *
+     * @param $date
+     * @return mixed|string
+     */
+    public function formatDate($date)
+    {
+        if (strpos($date, '/') !== false) {
+            $date = str_replace('/', '-', $date);
+            $explode = explode('-', $date);
+
+            if ((integer)$explode[0] > 31){
+                $date = Yii::$app->formatter->asDate($date, 'dd-MM-yyyy');
+            }
+        }
+        elseif (strpos($date, '-') !== false) {
+            $explode = explode('-', $date);
+
+            if ((integer)$explode[0] > 31){
+                $date = Yii::$app->formatter->asDate($date, 'dd-MM-yyyy');
+            }
+        }
+        else {
+            $first_block = substr($date,0, 4);
+            $second_block = substr($date,4, 2);
+            $thirth_block = substr($date,6);
+
+            Debug::debug($thirth_block. '-'.$second_block.'-'.$first_block);
+
+            if (!((integer)$second_block > 0 && (integer)$second_block < 13)) {
+                $thirth_block = substr($date,0, 2);
+                $second_block = substr($date,2, 2);
+                $first_block = substr($date,4);
+
+                Debug::debug($thirth_block. '-'.$second_block.'-'.$first_block);
+            }
+
+            $date = $thirth_block. '-'.$second_block.'-'.$first_block;
+        }
+
+        return $date;
 
     }
 }

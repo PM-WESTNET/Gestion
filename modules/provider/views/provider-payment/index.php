@@ -77,7 +77,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     },
                     'update' => function ($url, $model, $key) {
-                        return ( $model['status'] != 'created' ? '' :  '<a href="'.Url::toRoute(['provider-payment/update', 'id'=>$model['provider_payment_id']]).'" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
+                        $provider_payment = ProviderPayment::findOne($model['provider_payment_id']);
+                        if ($provider_payment->getUpdatable()) {
+                            return ($model['status'] != 'created' ? '' : '<a href="' . Url::toRoute(['provider-payment/update', 'id' => $model['provider_payment_id']]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
+                        }
 
                     },
                     'delete' => function ($url, $model, $key) {

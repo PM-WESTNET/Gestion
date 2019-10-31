@@ -479,7 +479,6 @@ class UserAppController extends Controller
         $userApp= $this->getUserApp();
 
         if (!empty($userApp)){
-
             $customer= Customer::findOne(['code' => $data['code'], 'status' => 'enabled']);
             $company = Company::findOne(['name' => 'Westnet']);
 
@@ -1168,5 +1167,4 @@ class UserAppController extends Controller
             }
         }
     }
-
 }

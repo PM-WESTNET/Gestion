@@ -8,7 +8,6 @@
 
 namespace app\modules\pagomiscuentas\models\search;
 
-
 use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\bills\Credit;
@@ -41,6 +40,7 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
 
         $query->andFilterWhere(['company_id'=>$this->company_id]);
         $query->andFilterWhere(['type'=>$this->type]);
+
         if($this->from) {
             $query->andWhere(new Expression("date >= '" . $this->from->format('Y-m-d') ."'" ));
         }

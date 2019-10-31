@@ -140,7 +140,11 @@ class ResumeController extends Controller
         if($newState == Resume::STATE_CLOSED) {
             $total = $model->getTotal();
 
-            if( ($model->balance_initial + $total['credit'] ) - $total['debit'] != $model->balance_final ) {
+            Yii::debug('totales: ' . print_r($total, 1));
+            Yii::debug('calculo: '. (($model->balance_initial + (double)$total['credit'] ) - (double)$total['debit']));
+            Yii::debug('deberia dar: '. $model->balance_final);
+
+            if( round(($model->balance_initial + $total['credit'] ) - $total['debit'], 2) != $model->balance_final ) {
                 Yii::$app->session->setFlash("error", Yii::t('accounting', 'The final balance is not equal to: initial balance + credit - debit.'));
                 return $this->redirect(['details', 'id' => $model->resume_id]);
             }
@@ -170,7 +174,8 @@ class ResumeController extends Controller
         $model = $this->findModel($id);
 
         $resumeItems = new ActiveDataProvider([
-            'query' => $model->getResumeItems()->orderBy(['date'=>'DESC'])
+            'query' => $model->getResumeItems()->orderBy(['date'=> SORT_DESC]),
+            //'pagination' => false
         ]);
 
         return $this->render('_details', [
@@ -255,15 +260,16 @@ class ResumeController extends Controller
             }
             $file->saveAs(Yii::getAlias('@webroot') . $filePath);
 
-            $oImporter = new ResumeImporter(Yii::getAlias('@webroot') . $filePath, ["Fecha", "Código", "Descripcion", "Débito", "Crédito"] );
+            $oImporter = new ResumeImporter(Yii::getAlias('@webroot') . $filePath, $model->columns, $model->separator);
             $oImporter->init([
                 'resume_id' => $model->resume_id,
                 'money_box_account_id' => $model->money_box_account_id,
                 'money_box_id' => $model->moneyBoxAccount->money_box_id,
+                'account_id' => $model->account_id,
             ]);
             if(!$oImporter->import()) {
                 foreach($oImporter->getErrors() as $error) {
-                    Yii::$app->session->addFlash('error', $error );
+                    Yii::$app->session->setFlash('error', $error );
                 }
             }
 

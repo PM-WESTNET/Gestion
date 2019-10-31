@@ -236,11 +236,15 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getWorkflowCreateLog(){}
 
+    /**
+     * @return bool
+     * Cambia el estado a cerrado de account_movement
+     */
     public function close()
     {
         try {
             if ($this->can(AccountMovement::STATE_CLOSED)) {
-                foreach($this->accountMovementItems as $item) {
+                foreach ($this->accountMovementItems as $item) {
                     $item->changeState(AccountMovement::STATE_CLOSED);
                 }
                 return $this->changeState(AccountMovement::STATE_CLOSED);
@@ -249,7 +253,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
             }
 
             return true;
-        } catch(\Exception $ex) {
+        } catch (\Exception $ex) {
             return false;
         }
     }
@@ -316,5 +320,58 @@ class AccountMovement extends \app\components\companies\ActiveRecord
 
         return $total;
 
+    }
+
+    /**
+     * @return bool
+     * Cierra el movimiento actual y los posteriores a éste, cerrando tambien todos los items
+     */
+    public function closeThisAndPreviousMovements()
+    {
+
+        if ($this->can(AccountMovement::STATE_CLOSED)) {
+            foreach ($this->accountMovementItems as $item) {
+                $item->changeState(AccountMovement::STATE_CLOSED);
+            }
+            return $this->changeState(AccountMovement::STATE_CLOSED);
+        } else {
+            throw new \Exception('Cant Close');
+        }
+
+        return true;
+    }
+
+    public function getAccountMovementRelations(){
+        Yii::info($this->account_movement_id);
+        return AccountMovementRelation::find()->andWhere(['account_movement_id' => $this->account_movement_id])->all();
+    }
+
+
+    public function getCustomer()
+    {
+        Yii::info($this->account_movement_id);
+
+        $relations = $this->accountMovementRelations;
+
+        foreach ($relations as $hasRelation) {
+            $model= $hasRelation->model;
+
+            if (!empty($model) && !empty($model->customer)){
+                return $model->customer;
+            }
+        }
+
+        return null;
+    }
+
+    public static function searchCustomer($account_movement_id)
+    {
+        $movement = AccountMovement::findOne($account_movement_id);
+
+        if ($movement) {
+            return $movement->getCustomer();
+        }
+
+        return null;
     }
 }

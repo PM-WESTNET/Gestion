@@ -54,6 +54,7 @@ class IntegratechService
                 'DESTADDR' => '54'.$phone, //El destinatario tiene que ir en formato internacional, con codigo de pais incluido
                 'MESSAGE' => $message
             ];
+
             $ch = curl_init($url);
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($sms_data));

@@ -171,9 +171,7 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
                     $userModel = Yii::$app->modules['agenda']->params['user']['class'];
                     $users = $userModel::find()
                             ->select(['username as value', 'username as label', 'id as id'])
-                            ->where([
-                                'status' => User::STATUS_ACTIVE
-                            ])
+                            ->where(['status' => User::STATUS_ACTIVE])
                             ->asArray()
                             ->all();
                     ?>
@@ -193,6 +191,7 @@ $this->params['breadcrumbs'][] = AgendaModule::t('app', 'Update');
                                 Task.addUser(event, ui);
                              }")
                         ],
+
                     ]) ?>
                     <div id="alert-already-selected" class="alert alert-warning" style="margin-top: 15px; display: none;">
                         Usuario ya asignado.

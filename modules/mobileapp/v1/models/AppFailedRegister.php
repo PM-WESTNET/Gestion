@@ -40,7 +40,6 @@ class AppFailedRegister extends ActiveRecord
     /**
      * @inheritdoc
      */
-
     public function behaviors()
     {
         return [
@@ -201,5 +200,4 @@ class AppFailedRegister extends ActiveRecord
             }
         }
     }
-
 }

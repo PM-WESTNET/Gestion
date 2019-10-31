@@ -7,6 +7,7 @@ use app\modules\accounting\models\AccountMovement;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -37,6 +38,13 @@ class AccountMovementSearch extends AccountMovement {
     public $account_movement_item_id;
     public $account;
     public $account_id;
+    //Tiempo
+    public $toTime;
+
+    //Conciliaciones
+    public $cuit;
+    public $cuit2;
+
         
     public function rules() {
         $statuses = ['draft', 'closed', 'conciled', 'broken'];
@@ -44,12 +52,12 @@ class AccountMovementSearch extends AccountMovement {
         return [
             [['debit', 'credit'], 'number'],
             [['account_id_from', 'account_id_to', 'account_id'], 'integer'],
-            [['toDate', 'fromDate', 'date'], 'safe'],
+            [['toDate', 'fromDate', 'date', 'cuit', 'cuit2'], 'safe'],
             [['toDate', 'fromDate', 'date'], 'default', 'value' => null],
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
             ['company_id', 'integer'],
-            [['account_movement_id'], 'safe']
+            [['account_movement_id', 'toTime', 'description'], 'safe']
         ];
     }
 
@@ -95,6 +103,7 @@ class AccountMovementSearch extends AccountMovement {
                     'am.account_movement_id',
                     'am.description',
                     'am.date',
+                    'am.time',
                     'IF(isnull(ami.debit), 0, ami.debit) as debit',
                     'IF(isnull(ami.credit), 0, ami.credit) as credit',
                     'ami.account_movement_item_id',
@@ -109,13 +118,14 @@ class AccountMovementSearch extends AccountMovement {
                 ->leftJoin('account ac2', 'ami2.account_id = ac2.account_id')
                 ->where('ac.lft between ' . $this->account_id_from . ' and ' . $this->account_id_to)
                 ->groupBy(['am.date', 'ami.account_movement_item_id', 'ami.status'])
-                ->orderBy('am.date');
+                ->orderBy('am.date, am.time');
         /**
         $queryTotals = new Query();
         $queryTotals->select(['sum(c.debit) as debit', 'sum(c.credit) as credit']);
         $queryTotals->from(['c' => $subQuery]);
          **/
         $this->filterDates($subQuery, 'am');
+        $this->filterTimes($subQuery, 'am');
         $rsTotals = $this->statusAccount(true);
 
         $this->totalDebit = $rsTotals['debit'];
@@ -213,19 +223,13 @@ class AccountMovementSearch extends AccountMovement {
     }
 
     public function searchForConciliation($params) {
-        $query = self::find()
-                ->select(['ami.account_movement_item_id', 'account_movement.date', 'account_movement.description', 'account_movement.status', '(coalesce(ami.debit,0)) as debit', '(coalesce(ami.credit,0)) as credit'])
+        $query = (new Query())
+                ->select(['ami.account_movement_item_id', 'account_movement.date', 'account_movement.account_movement_id', 'account_movement.description', 'account_movement.status', '(coalesce(ami.debit,0)) as debit', '(coalesce(ami.credit,0)) as credit'])
+                ->from('account_movement')
                 ->leftJoin('account_movement_item ami', 'account_movement.account_movement_id = ami.account_movement_id')
-                ->leftJoin('conciliation_item_has_account_movement_item cami', 'ami.account_movement_item_id = cami.account_movement_item_id')
-                ->leftJoin('conciliation_item ci', 'cami.conciliation_item_id = ci.conciliation_item_id');
+                ->leftJoin('conciliation_item_has_account_movement_item cami', 'ami.account_movement_item_id = cami.account_movement_item_id');
+                //->leftJoin('conciliation_item ci', 'cami.conciliation_item_id = ci.conciliation_item_id');
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => [
-                'defaultOrder' => ['date' => SORT_ASC]
-            ],
-            'key' => 'account_movement_item_id'
-        ]);
 
         // join con cuentas
         $query->leftJoin('account', 'ami.account_id = account.account_id');
@@ -233,13 +237,13 @@ class AccountMovementSearch extends AccountMovement {
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            return $dataProvider;
-        }
+//        if (!$this->validate()) {
+//            return $dataProvider;
+//        }
         $query->andFilterWhere(['between', 'account.lft', $this->account_id_from, $this->account_id_to])
                 ->andFilterWhere(['company_id' => $this->company_id]);
-        $query->andWhere('ci.conciliation_item_id IS NULL');
 
+        $query->andFilterWhere(['like', 'description', $this->description]);
         //Estado/s de factura
         $this->filterStatus($query);
 
@@ -254,8 +258,28 @@ class AccountMovementSearch extends AccountMovement {
         $queryTotals->groupBy("");
         $rsTotals = $queryTotals->one();
 
+        //Aplicamos este filtro despues de clonar para saber el saldo de la cuenta
+        $query->andWhere(['IS', 'cami.conciliation_item_id', null]);
+
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
+
+        $query->orderBy(['date' => SORT_DESC]);
+
+        $models = $query->all();
+
+        if ($this->cuit) {
+            $models = $this->filterByCustomerDocumentNumber($this->cuit, $models);
+        }
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $models,
+//            'sort' => [
+//                'defaultOrder' => ['date' => SORT_ASC]
+//            ],
+            'key' => 'account_movement_item_id'
+        ]);
+        $dataProvider->setPagination(false);
 
         return $dataProvider;
     }
@@ -374,6 +398,18 @@ class AccountMovementSearch extends AccountMovement {
         }
     }
 
+    /**
+     * Agrega queries para filtrar por tiempo
+     * @param type $query
+     */
+    private function filterTimes($query, $alias = null)
+    {
+        $table = $alias ? $alias : 'account_movement';
+        if ($this->toTime) {
+            $query->andFilterWhere(['<=', "$table.time", $this->toTime]);
+        }
+    }
+
     private function filterBalance($query) {
         if (!empty($this->balance)) {
             if ($this->balance == 'credit') {
@@ -433,6 +469,30 @@ class AccountMovementSearch extends AccountMovement {
                 return ['debit' => 0, 'credit' => 0, 'balance' => 0];
             }
         }
+    }
+
+    public function filterByCustomerDocumentNumber($filter, $models)
+    {
+        $movements = [];
+
+        foreach ($models as $model) {
+            $customer = AccountMovement::searchCustomer($model['account_movement_id']);
+            $profileClass = \app\modules\sale\models\ProfileClass::findOne(['name' => 'cuit2']);
+            $cuit2= '';
+            if ($customer) {
+
+                if ($profileClass) {
+                    $cuit2 = $customer->getProfile($profileClass->profile_class_id);
+                }
+
+                if ($customer->document_number === $filter || $cuit2 === $filter) {
+                    array_push($movements, $model);
+                }
+
+            }
+        }
+
+        return $movements;
     }
 
 }

@@ -208,7 +208,6 @@ class SMSIntegratechTransport implements TransportInterface
     private function replaceText($text, $customer)
     {
         $replaced_text = $text;
-
         $replace_max_string = self::getMaxLengthReplacement();
         $replaced_text = str_replace('@Nombre', trim(substr($customer['name'], 0, $replace_max_string['@Nombre'])), $replaced_text);
         $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
@@ -355,5 +354,4 @@ class SMSIntegratechTransport implements TransportInterface
             '@Categoria' => Config::getValue('notification-replace-@Categoria'),
         ];
     }
-
 }

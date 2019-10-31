@@ -59,8 +59,8 @@ class DefaultController extends Controller {
      * @return type
      * @throws NotFoundHttpException
      */
-    public function actionUpdateAgenda() {
-
+    public function actionUpdateAgenda()
+    {
         \Yii::$app->response->format = Response::FORMAT_JSON;
 
         $json = [];
@@ -114,7 +114,6 @@ class DefaultController extends Controller {
 
         if (!empty($tasks)) {
             foreach ($tasks as $task) {
-
                 $Event = new Event();
                 $Event->id = $task->task_id;
                 $Event->title = $task->visualPriority .' '.$task->name;

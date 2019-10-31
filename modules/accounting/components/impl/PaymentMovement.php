@@ -148,12 +148,11 @@ class PaymentMovement extends BaseMovement
                         }
 
                         if( !($account_movement_id = $countMov->createMovement(
-                                Yii::t('app',  'Charge') . " - " . $modelInstance->concept . " - " . $modelInstance->customer->getFullName(),
+                                Yii::t('app',  'Charge') . " - " . $modelInstance->concept . " - " . $modelInstance->customer->getFullName() . ' .Fecha del comprobante: ' . $modelInstance->date,
                                 $modelInstance->company_id,
                                 $items,
                                 null,
-                                $modelInstance->partner_distribution_model_id,
-                                $modelInstance->date
+                                $modelInstance->partner_distribution_model_id
                             )) ) {
                             $this->addMessage('error', Yii::t('accounting', 'The movement is created with errors.'));
                             foreach($countMov->getErrors() as $error) {

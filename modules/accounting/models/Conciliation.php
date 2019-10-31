@@ -4,6 +4,7 @@ namespace app\modules\accounting\models;
 
 use app\components\workflow\WithWorkflow;
 use app\modules\accounting\components\CountableMovement;
+use app\modules\accounting\models\search\AccountMovementSearch;
 use Yii;
 use yii\base\Exception;
 
@@ -224,23 +225,23 @@ class Conciliation extends \app\components\companies\ActiveRecord
      *
      * @return int|mixed
      */
-    public function getTotals()
-    {
-        $credit = 0;
-        $debit = 0;
-
-        foreach($this->getConciliationItems()->all() as $item) {
-            foreach($item->getConciliationItemHasResumeItems()->all() as $res) {
-                $credit += ($res->resumeItem->credit > 0 ? $res->resumeItem->credit : 0 );
-                $debit  += ($res->resumeItem->debit > 0 ? $res->resumeItem->debit : 0 );
-            }
-        }
-
-        return [
-            'debit' => $debit,
-            'credit' => $credit
-        ];
-    }
+//    public function getTotals()
+//    {
+//        $credit = 0;
+//        $debit = 0;
+//
+//        foreach($this->getConciliationItems()->all() as $item) {
+//            foreach($item->getConciliationItemHasResumeItems()->all() as $res) {
+//                $credit += ($res->resumeItem->credit > 0 ? $res->resumeItem->credit : 0 );
+//                $debit  += ($res->resumeItem->debit > 0 ? $res->resumeItem->debit : 0 );
+//            }
+//        }
+//
+//        return [
+//            'debit' => $debit,
+//            'credit' => $credit
+//        ];
+//    }
 
 
     /**
@@ -311,7 +312,8 @@ class Conciliation extends \app\components\companies\ActiveRecord
                             $mov->debit = $credit;
                             $items[] = $mov;
                         }
-                        CountableMovement::createMovement(Yii::t('accounting','Conciliation') . " - " .$this->name, $this->company_id, $items);
+                        $countMov = new CountableMovement();
+                        $countMov->createMovement(Yii::t('accounting','Conciliation') . " - " .$this->name, $this->company_id, $items);
                     }
                 } else {
                     // Como tiene movimientos modifico el estado
@@ -321,6 +323,27 @@ class Conciliation extends \app\components\companies\ActiveRecord
                     foreach( $accountItems as $res) {
                         $res->accountMovementItem->changeState(AccountMovementItem::STATE_CONCILED);
                     }
+
+                    if ($this->totalDiference > 0 ) {
+                        $mov= new AccountMovementItem();
+                        $mov->account_id = $this->moneyBoxAccount->account->account_id;
+                        $mov->status = AccountMovementItem::STATE_CONCILED;
+                        $mov->debit = $this->totalDiference;
+
+                        $countMov = new CountableMovement();
+                        $countMov->createMovement( "Ajuste  - " .$this->name, $this->company_id, [$mov]);
+
+                    } elseif ($this->totalDiference < 0) {
+                        $mov= new AccountMovementItem();
+                        $mov->account_id = $this->moneyBoxAccount->account->account_id;
+                        $mov->status = AccountMovementItem::STATE_CONCILED;
+                        $mov->credit = $this->totalDiference;
+
+                        $countMov = new CountableMovement();
+                        $countMov->createMovement( "Ajuste  - " .$this->name, $this->company_id, [$mov]);
+                    }
+
+
                     $bOk = true;
                 }
             }
@@ -367,4 +390,64 @@ class Conciliation extends \app\components\companies\ActiveRecord
      * @return mixed
      */
     public function getWorkflowCreateLog(){}
+
+    /*
+     * Verifica que el saldo de la cuenta es igual al saldo final del resumen
+     */
+    public function validateBalance()
+    {
+        $searchModel = new AccountMovementSearch();
+        $searchModel->account_id_from = $this->moneyBoxAccount->account->lft;
+        $searchModel->account_id_to = $this->moneyBoxAccount->account->rgt;
+        $searchModel->fromDate = $this->date_from;
+        $searchModel->toDate = $this->date_to;
+        $searchModel->balance = 'credit';
+
+        $creditDataProvider = $searchModel->searchForConciliation([]);
+
+        $totalAccountCredit = $searchModel->totalCredit;
+
+        $searchModel->balance = 'debit';
+        $debitDataProvider = $searchModel->searchForConciliation([]);
+        $totalAccountDebit = $searchModel->totalDebit;
+
+        $balance = $totalAccountDebit - $totalAccountCredit;
+        $diference = abs(($this->resume->balance_final - $balance));
+
+        if ($this->resume->balance_final !== $balance || ($diference > (double)Config::getValue('diference_balance_on_close') && $diference == $this->totalDiference)) {
+            return false;
+        }
+
+        return true;
+
+
+    }
+
+    public function getTotals() {
+        $debit = 0;
+        $credit = 0;
+        foreach ($this->conciliationItems as $item) {
+            $totals = $item->getTotals();
+            $debit += $totals['debit'];
+            $credit += $totals['credit'];
+        }
+
+        return [
+            'debit' => $debit,
+            'credit' => $credit,
+            'total' => (-$debit + $credit)
+        ];
+    }
+
+    public function getTotalDiference()
+    {
+        $diference = 0;
+
+        foreach ($this->conciliationItems as $item) {
+            $diference += $item->variation_balance;
+        }
+
+        return $diference;
+    }
+
 }

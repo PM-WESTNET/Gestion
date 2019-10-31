@@ -112,5 +112,4 @@ class FixErrorsController extends \yii\console\Controller
             }
         }
     }
-
 }

@@ -22,7 +22,6 @@ class ReportSearch extends Model
 {
     public $date_from;
     public $date_to;
-
     public $company_id;
 
     public function init()

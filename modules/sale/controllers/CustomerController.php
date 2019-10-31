@@ -104,7 +104,6 @@ class CustomerController extends Controller
             'J' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'K' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'L' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            
         ])->createHeader();       
         
         foreach ($customers as $c) {
@@ -635,12 +634,9 @@ class CustomerController extends Controller
         $billsQuery= $customer_search->searchAllBills();
         $ticketQuery =$customer_search->getTicketsCount();
         $installations= $contract_search->getInstallations($params, $billsQuery, $ticketQuery);
-        
-        
-        
+
         $dataProvider= new ActiveDataProvider(['query' => $installations]);
         $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
-
 
         $this->layout= '//fluid';
         return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
@@ -810,8 +806,5 @@ class CustomerController extends Controller
         }
 
         return $this->render('verify-emails', ['results' => $results]);
-
-
     }
-
 }
