@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
+ - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
  
 ## [2019.10.28.0] - 28-10-2019
 ### Modificado
