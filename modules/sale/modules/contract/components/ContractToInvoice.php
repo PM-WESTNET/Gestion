@@ -10,12 +10,14 @@ use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\CustomerHasDiscount;
 use app\modules\sale\models\Discount;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\search\ProductToInvoiceSearch;
 use app\modules\sale\models\TaxRate;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
 use app\modules\westnet\isp\IspFactory;
 use app\modules\westnet\models\Connection;
@@ -72,6 +74,7 @@ class ContractToInvoice
                 // Si es plan no tengo que guardarlo
                 if ($detail->status == Contract::STATUS_DRAFT) {
                     $contractStart = (Yii::t('app', 'Undetermined time') == $contract->from_date ? null : (new DateTime($contract->from_date))); ;
+
                     // Defino al periodo en el primer dia del mes de inicio del contrato
                     // Si el item tiene distinta fecha, tomo la del item
                     $detailDate = (Yii::t('app', 'Undetermined time') == $detail->from_date ? null : (new DateTime($detail->from_date))); ;
@@ -136,6 +139,10 @@ class ContractToInvoice
                                 'discount_id' => ($detail->discount ? $detail->discount->discount_id : null )
                             ]);
                             $ptb->save(true);
+
+                            if ($ptb->hasErrors()){
+                                Debug::debug('Errores en PTB: ' . print_r($ptb->getErrors(),1));
+                            }
                         }
                         if ($detail->product->type != 'plan') {
                             $detail->to_date = clone $period;
@@ -149,6 +156,8 @@ class ContractToInvoice
             }
             return true;
         } catch (Exception $ex){
+            Debug::debug('Excepcion sale por false: ' . $ex->getTraceAsString());
+            Yii::info($ex->getTraceAsString(), 'Active_Contract');
             error_log($ex->getMessage());
             return false;
         }
@@ -293,7 +302,7 @@ class ContractToInvoice
 
     public function invoiceAll($params)
     {
-        Yii::setLogger(new EmptyLogger());
+//        Yii::setLogger(new EmptyLogger());
 
         $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
@@ -333,7 +342,7 @@ class ContractToInvoice
             foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
                         $afip_error = true;
                     }
                     Yii::$app->session->set('_invoice_all_', [
@@ -373,7 +382,7 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null)
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false)
     {
 
         try{
@@ -388,6 +397,7 @@ class ContractToInvoice
                 $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
+                $bill->automatically_generated = $automatically_generated ? true : null;
                 $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
@@ -425,7 +435,7 @@ class ContractToInvoice
 
                     // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
                     foreach($contract->contractDetails as $contractDetail) {
-                        if($contractDetail->product->type=='plan' && $includePlan) {
+                        if($contractDetail->product->type == 'plan' && $includePlan) {
                             if (!$contractDetail->isAddedForInvoice($periods)){
                                 $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
 
@@ -445,9 +455,6 @@ class ContractToInvoice
                                 ]);
                                 $pti->save(false);
                             }
-                            /** @var Connection $connection */
-                            $connection = $contract->getConnection()->one();
-                            $node = $connection->node;
                         }
                     }
 
@@ -470,7 +477,7 @@ class ContractToInvoice
 
                         // El proporcional se calcula si el mes de inicio del plan es igual al mes que se esta.
                         if($pti->contract_detail_id) {
-                            if($pti->contractDetail->product->type=='plan') {
+                            if($pti->contractDetail->product->type == 'plan') {
                                 if($includePlan) {
                                     $factorProporcional = 1;
                                     if( $period->format('Ym') == $contractStart->format('Ym') && !$next) {
@@ -495,13 +502,21 @@ class ContractToInvoice
                                 $discounts = Discount::findActiveByProduct($pti->contractDetail->product_id);
                                 $discount = (count($discounts)>0 ?  $discounts[0]: null );
                             }
-
                         }
+
                         if($discount) {
-                            if($discount->type==Discount::TYPE_PERCENTAGE ) {
+                            if($discount->type == Discount::TYPE_PERCENTAGE ) {
                                 $unit_net_discount =  $unit_net_price * ($discount->value/100);
                             } else {
                                 $unit_net_discount =  $discount->value;
+                            }
+
+                            //Si el descuento es de tipo persistente, se debe deshabilitar una vez que ha sido aplicado.
+                            if($discount->persistent) {
+                                $customer_discount = CustomerHasDiscount::find()->where(['discount_id' => $discount->discount_id, 'customer_id' => $bill->customer_id, 'status' => CustomerHasDiscount::STATUS_ENABLED])->one();
+                                if($customer_discount) {
+                                    $customer_discount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                                }
                             }
                         }
 
@@ -530,6 +545,8 @@ class ContractToInvoice
                             'unit_net_discount' => $unit_net_discount
                         ]);
                         $pti->status = 'consumed';
+
+
                         if (!$pti->save(false)) {
                             FlashHelper::flashErrors($pti);
                         }
@@ -555,26 +572,33 @@ class ContractToInvoice
                                 'concept' => $customerDiscount,
                                 'discount_id' => $customerDiscount->discount->discount_id
                             ]);
+
+                            //Si el descuento es de tipo persistent y ya se aplicó se debe actualizar el estado
+                            if($customerDiscount->discount->persistent) {
+                                $customerDiscount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                            }
                         }
                         unset($customerActiveDiscount[$key]);
                     }
-
                 }
 
                 if($bill->getBillDetails()->exists()) {
                     $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
                     $bill->save(false);
                     $bill->fillNumber = false;
-                    $bill->complete();
-                    $bill->close();
+                    $bill->verifyAmounts(true);
+                    if($close_bill) {
+                        $bill->complete();
+                        $bill->close();
+                    }
                 }
 
 
                 // Si es electronica y no se emitio es por error en AFIP y corto proceso.
-                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
-                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
-                    return false;
-                }
+//                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
+//                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
+//                    return false;
+//                }
                 $this->addMessage($bill);
             }
 

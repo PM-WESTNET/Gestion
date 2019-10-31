@@ -7,6 +7,7 @@ use app\modules\ticket\models\Schema;
 use app\modules\ticket\models\Ticket;
 use Yii;
 use app\modules\sale\models\Customer;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "app_failed_register".
@@ -22,7 +23,7 @@ use app\modules\sale\models\Customer;
  * @property string $status
  * @property integer $created_at
  */
-class AppFailedRegister extends \app\components\db\ActiveRecord
+class AppFailedRegister extends ActiveRecord
 {
 
     const TYPE_REGISTER = 'register';

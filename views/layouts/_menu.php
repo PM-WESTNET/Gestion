@@ -125,13 +125,14 @@ if (Yii::$app->getModule('afip')) {
     //Clientes
     $items[] = ['label' => Yii::t('app','Customers'), 'items'=>[
         ['label'=>Yii::t('app','Customers'), 'url'=>['/sale/customer/index']],
-        ['label'=>Yii::t('app','Customer Debts'), 'url'=>['/sale/customer/debtors']],
         ['label'=>Yii::t('app','Cashing panel'), 'url'=>['/sale/customer/cashing-panel']],
     ['label'=>Yii::t('app', 'Positive Balance Customers'), 'url'=>['/sale/customer/positive-balance-customers']],
         ['label'=> Yii::t('app', 'Pending Installations'), 'url' =>['/sale/customer/pending-installations']],
         ['label'=> Yii::t('app', 'Installations'), 'url' =>['/sale/customer/installations']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Payments'), 'url'=>['/checkout/payment/index']],
+        ['label'=>Yii::t('app','Notify payments'), 'url'=>['/westnet/notify-payment']],
+        ['label'=>Yii::t('app','Programmed plan changes'), 'url'=>['/sale/contract/programmed-plan-change/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Profile Classes'), 'url'=>['/sale/profile-class/index']],
         ['label'=>'<li class="divider"></li>', 'encode'=>false],
@@ -150,6 +151,7 @@ if (Yii::$app->getModule('afip')) {
         ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
         ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
         ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
+        ['label'=>Yii::t('app','Customer Debts'), 'url'=>['/sale/customer/debtors']],
     ]];
 //}
 //Productos
@@ -186,6 +188,9 @@ if (Yii::$app->getModule('checkout')) {
             '<li class="divider"></li>',
             ['label'=>Yii::t('pagomiscuentas','Export Pagomiscuentas'), 'url'=>['/pagomiscuentas/export/index']],
             ['label'=>Yii::t('pagomiscuentas','Import Pagomiscuentas'), 'url'=>['/pagomiscuentas/import/index']],
+            '<li class="divider"></li>',
+            ['label'=>Yii::t('app','Banks for Automatic Debit'), 'url'=>['/automaticdebit/bank/index']],
+            ['label'=>Yii::t('app','Automatic Debit'), 'url'=>['/automaticdebit/automatic-debit/index']],
     ]];
 }
 
@@ -203,6 +208,8 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
+        ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
+        ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
     ]];
 
     //Reportes por empresa
@@ -361,6 +368,9 @@ if (Yii::$app->getModule('westnet')) {
             ['label' => Yii::t('app', 'Infobip'), 'visible' => Yii::$app->user->isSuperadmin],
             [
                 'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
+            ],
+            [
+                'label' => Yii::t('app', 'Infobip sended sms'), 'url' => ['/westnet/notifications/infobip/default/sended-messages']
             ],
             [
                 'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin

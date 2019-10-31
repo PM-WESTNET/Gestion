@@ -3,6 +3,7 @@
 namespace app\modules\sale\models;
 
 use Yii;
+use app\modules\config\models\Config;
 
 /**
  * This is the model class for table "bill_detail".
@@ -43,7 +44,7 @@ class BillDetail extends \app\components\db\ActiveRecord
     {
         $rules = [
             [['unit_final_price','unit_net_price', 'qty', 'line_total', 'unit_net_discount'], 'number'],
-            [['unit_id'], 'exist', 'targetClass' => Unit::className()],
+            [['unit_id'], 'exist', 'targetClass' => Unit::class],
             [['bill_id', 'unit_id'], 'required'],
             [['bill_id', 'product_id', 'unit_id', 'discount_id'], 'integer'],
             [['concept'], 'string', 'max' => 255],
@@ -61,7 +62,7 @@ class BillDetail extends \app\components\db\ActiveRecord
         }
 
         //Si esta activado el stock secundario
-        if(\app\modules\config\models\Config::getValue('enable_secondary_stock')){
+        if(Config::getValue('enable_secondary_stock')){
 
             if($this->product && $this->product->secondaryUnit && $this->product->secondaryUnit->type == 'int'){
 
@@ -112,7 +113,7 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getBill()
     {
-        return $this->hasOne(Bill::className(), ['bill_id' => 'bill_id']);
+        return $this->hasOne(Bill::class, ['bill_id' => 'bill_id']);
     }
 
     /**
@@ -120,7 +121,7 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getProduct()
     {
-        return $this->hasOne(Product::className(), ['product_id' => 'product_id']);
+        return $this->hasOne(Product::class, ['product_id' => 'product_id']);
     }
 
     /**
@@ -128,7 +129,7 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getStockMovements()
     {
-        return $this->hasMany(StockMovement::className(), ['bill_detail_id' => 'bill_detail_id']);
+        return $this->hasMany(StockMovement::class, ['bill_detail_id' => 'bill_detail_id']);
     }
 
     /**
@@ -136,7 +137,7 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getUnit()
     {
-        return $this->hasOne(Unit::className(), ['unit_id' => 'unit_id']);
+        return $this->hasOne(Unit::class, ['unit_id' => 'unit_id']);
     }
 
     /**
@@ -144,15 +145,21 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getDiscount()
     {
-        return $this->hasOne(Discount::className(), ['discount_id' => 'discount_id']);
+        return $this->hasOne(Discount::class, ['discount_id' => 'discount_id']);
     }
 
     //Calcula el subtotal del detalle
     public function getSubtotal()
     {
+        $subtotal = 0.0;
 
-        return round(($this->type == 'discount' || !is_null($this->discount_id) ? ($this->qty * $this->unit_net_discount) : ($this->qty * ($this->unit_net_price - $this->unit_net_discount ) ) ), 2) ;
+        if($this->type == 'discount') {
+            $subtotal = $this->qty * $this->unit_net_discount;
+        } else {
+            $subtotal = $this->qty * ($this->unit_net_price - $this->unit_net_discount);
+        }
 
+        return round($subtotal, 2);
     }
 
     //Calcula el total del detalle
@@ -161,8 +168,12 @@ class BillDetail extends \app\components\db\ActiveRecord
         return round($this->qty * $this->unit_final_price, 2) ;
     }
 
-    public function getTotalDiscount()
+    public function getTotalDiscount($withTaxes = false)
     {
+        if($withTaxes) {
+            return round($this->qty * ($this->unit_net_discount * 1.21), 2);
+        }
+
         return round($this->qty * $this->unit_net_discount, 2) ;
     }
 
@@ -273,12 +284,12 @@ class BillDetail extends \app\components\db\ActiveRecord
      */
     public function getIva()
     {
-        $tax_iva= Tax::findOne(['slug'=> 'iva']);
-        $tax_rates= TaxRate::findAll(['tax_id' => $tax_iva->tax_id]);
-        $tax_rates_ids= [];
+        $tax_iva = Tax::findOne(['slug'=> 'iva']);
+        $tax_rates = TaxRate::findAll(['tax_id' => $tax_iva->tax_id]);
+        $tax_rates_ids = [];
         
         foreach ($tax_rates as $tr){
-            $tax_rates_ids[]= $tr->tax_rate_id;
+            $tax_rates_ids[] = $tr->tax_rate_id;
         }
         
         $phtr= ProductHasTaxRate::findOne(['product_id' => $this->product_id, 'tax_rate_id' => $tax_rates_ids]);

@@ -26,6 +26,9 @@ class MesaTicketContractBehavior extends Behavior
     /**
      * @inheritdoc
      */
+
+    public $events = [ ActiveRecord::EVENT_AFTER_INSERT => 'afterInsert' ];
+
     public function init()
     {
         parent::init();
@@ -39,21 +42,34 @@ class MesaTicketContractBehavior extends Behavior
      */
     public function events()
     {
-        return [
-            ActiveRecord::EVENT_AFTER_INSERT => 'afterInsert',
-        ];
+        return $this->events;
     }
 
     public function afterInsert($event)
     {
+        $this->createMesaTicket($event->sender);
+    }
+
+    public function createMesaTicket($obj)
+    {
         $ticket = null;
-        if($event->sender instanceof Contract) {
-            /** @var Contract $contract */
-            $contract = $event->sender;
-            $instalation_category_id = Config::getValue('instalation_category_id');
+        if($obj instanceof Contract) {
+
+            $contract = $obj;
+
+            /**
+             * Si tiene un plan que sea de fibra, la categoria del ticket a crear no es la misma que la de las instalaciones comunes
+             */
+            if($contract->hasFibraPlan()){
+                $instalation_category_id = Config::getValue('fibra_instalation_category_id');
+            } else {
+                $instalation_category_id = Config::getValue('instalation_category_id');
+            }
+
             if (!$instalation_category_id) {
                 throw new Exception(Yii::t('app', 'Parameter not found: {parameter}', ['parameter' => 'instalation_category_id']));
             }
+
             //$category = Category::findOne(['category_id'=>$instalation_category_id]);
             $ticket = new Ticket();
             $ticket->contract_id = $contract->contract_id;
@@ -66,7 +82,6 @@ class MesaTicketContractBehavior extends Behavior
             $ticket->external_tag_id = Ticket::getTagByName('LLEVAR ADS ORIGINAL');
             $ticket->setUsers([Yii::$app->user->id]);
             $ticket->save();
-
         }
     }
 }

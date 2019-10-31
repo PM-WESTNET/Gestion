@@ -1,17 +1,32 @@
 <?php
+/**
+ * @var \app\modules\checkout\models\search\PaymentSearch $searchModel
+ */
+
+
 $debt = $searchModel->accountTotalCredit();
-$payed = $searchModel->accountPayed();
+$payed = $searchModel->accountPayed(null, null, true);
 
 $total = $searchModel->accountTotal();
+$real_total = $searchModel->accountTotal(null, null, false);
 
 if($total < -(Yii::$app->params['account_tolerance'])){
     $totalClass = 'text-danger';
 }else{
     $totalClass = 'text-success';
 }
+
+if($real_total < -(Yii::$app->params['account_tolerance'])){
+    $real_totalClass = 'text-danger';
+}else{
+    $real_totalClass = 'text-success';
+}
+
 ?>
 
-<h4><?php //$searchModel->paymentMethod->name; ?></h4>
+
+
+<h2><?= Yii::t('app', 'Account') ?></h2>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -41,11 +56,19 @@ if($total < -(Yii::$app->params['account_tolerance'])){
             <?php } ?>
         </tr>
         <tr>
-            <td><h2><?= Yii::t('app','Total') ?></h2></td>
+            <td><h3 style="margin: 0px"><?= Yii::t('app','Total (Closed Bills)') ?></h3></td>
             <td>
-                <h2 class="<?= $totalClass; ?>">
+                <h3 class="<?= $totalClass; ?>" style="margin: 0px">
                     <?= Yii::$app->formatter->asCurrency($total); ?>
-                </h2>
+                </h3>
+            </td>
+        </tr>
+        <tr>
+            <td><h3 style="margin: 0px"><?= Yii::t('app','Total (All Bills)') ?></h3></td>
+            <td>
+                <h3 class="<?= $real_totalClass; ?>" style="margin: 0px">
+                    <?= Yii::$app->formatter->asCurrency($real_total); ?>
+                </h3>
             </td>
         </tr>
     </tbody>

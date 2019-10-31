@@ -151,6 +151,86 @@ $this->params['breadcrumbs'][] = $this->title;
             ]) ?>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <h3 class="panel-title">
+                    <?= Yii::t('app', 'Ticket Managements') ?>
+                </h3>
+            </div>
+
+        </div>
+        <div class="panel-body">
+            <?= GridView::widget([
+                'dataProvider' => new ActiveDataProvider(['query' => $model->getTicketManagements()]),
+                'columns' => [
+                    [
+                        'attribute' => 'timestamp',
+                        'value' => function($model) {
+                            return $model->timestamp ? (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y') : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'ticket_id',
+                        'value' => function($model) {
+                            return $model->ticket ? $model->ticket->title : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function($model) {
+                            return $model->user ? $model->user->username : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'by_wp',
+                        'value' => function($model) {
+                            if($model->by_wp) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_call',
+                        'value' => function($model) {
+                            if($model->by_call) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_email',
+                        'value' => function($model) {
+                            if($model->by_email) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_sms',
+                        'value' => function($model) {
+                            if($model->by_sms) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                ]
+            ]) ?>
+        </div>
+    </div>
 </div>
 
 <?php Modal::begin([

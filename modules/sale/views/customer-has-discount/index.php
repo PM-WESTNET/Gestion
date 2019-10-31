@@ -45,7 +45,13 @@ $this->params['breadcrumbs'][] = $this->title ;
                 }
             ],
             'from_date:date',
-            'to_date:date',
+            [
+                'attribute' => 'to_date',
+                'value' => function($model) {
+                    return $model->to_date ? $model->to_date : '';
+                },
+                'format' => 'raw'
+            ],
             [
                 'class' => 'app\components\grid\ActionColumn',
             ],

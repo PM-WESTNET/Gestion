@@ -16,13 +16,33 @@ use yii\web\View;
 
 $this->title = Yii::t('app', 'Current account');
 $this->params['breadcrumbs'][] = $this->title;
+$contracts = new ActiveDataProvider([
+    'query' => $customer->getContracts()
+])
 ?>
 <div class="payment-index">
 
-    <h1><?= Html::a($customer->code . ' - ' . $customer->name.' '.$customer->lastname, ['/sale/customer/view', 'id' => $customer->customer_id]); ?> <small style="padding-left: 10px; text-transform: uppercase;"><?= Html::encode($this->title) ?></small></h1>
+    <h1 style="margin-bottom: auto"><?= Html::a($customer->code . ' - ' . $customer->name.' '.$customer->lastname, ['/sale/customer/view', 'id' => $customer->customer_id]); ?> <small style="padding-left: 10px; text-transform: uppercase;"><?= Html::encode($this->title) ?></small></h1>
+    <h4"><?= Yii::t('app', 'Payment Code') .': '. $customer->payment_code?></h5>
 
     <?=$this->render('_account-detail', ['searchModel' => $searchModel, 'searchModelAccount' => $searchModelAccount]);?>
-    
+
+    <!--Contratos-->
+
+    <br>
+    <?php if($contracts->getCount() >= 1) {
+        echo $this->render('../../../sale/views/customer/_customer-contracts', [
+            'model' => $customer,
+            'contracts' => $contracts,
+            'products' => $products,
+            'vendors' => $vendors
+        ]);
+    } else { ?>
+        <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
+    <?php } ?>
+
+    <!--Fin Contratos-->
+
     <div class="title">
         <p>
             <?php
@@ -41,11 +61,8 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
     </div>
 
-    <h2>
-        <?= Yii::t('app','Detail') ?>
-    </h2>
-    <?php
-    echo GridView::widget([
+    <h2> <?= Yii::t('app','Detail') ?> </h2>
+    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
@@ -58,7 +75,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label'=>Yii::t('app','Type'),
                 'value'=>function($model){
-                    return Yii::t('app', $model['type']) . " - " . $model['number'] ;
+                    $number = $model['status'] == Bill::STATUS_CLOSED ? ' - '.$model['number'] : '';
+                    return Yii::t('app', $model['type']) . $number;
                 }
             ],            [
                 'label'=>Yii::t('app','Status'),
@@ -94,7 +112,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=>function($model) {
                     return Yii::$app->formatter->asCurrency( ($model['bill_id']> 0) ?  $model['total'] : 0 );
                 },
-                'contentOptions'=>['class'=>'text-right']
+                'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'label' => Yii::t('app', 'Credit'),
@@ -102,6 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::$app->formatter->asCurrency( ($model['payment_id']> 0) ?  $model['total'] : 0 );
                 },
                 'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'label' => Yii::t('app', 'Balance'),
@@ -109,6 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::$app->formatter->asCurrency( $model['saldo'] );
                 },
                 'contentOptions'=>['class'=>'text-right'],
+                'format' => 'raw'
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',
@@ -144,9 +165,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     },
                     'email' => function ($url, $model, $key) {
-                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' 
-                                && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
-                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id'=>$model['bill_id'], 'from' => 'account_current']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
+                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                        }
+
+                        if($model['type'] == 'Payment' && $model['status'] === Payment::PAYMENT_CLOSED && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
+                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current-account']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
                         }
                     },
                     

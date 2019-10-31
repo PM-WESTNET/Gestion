@@ -8,6 +8,7 @@ use app\modules\accounting\components\CountableInterface;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\partner\models\PartnerDistributionModel;
+use Codeception\Util\Debug;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
@@ -37,6 +38,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
 
     private $_providerBills;
     private $_oldBills;
+
+    const STATUS_CREATED = 'created';
+    const STATUS_CLOSED = 'closed';
+    const STATUS_CONCILED = 'conciled';
 
     public function __construct($config = array()) {
         parent::__construct($config);
@@ -109,7 +114,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getProviderBillHasProviderPayments()
     {
-        return $this->hasMany(ProviderBillHasProviderPayment::className(), ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(ProviderBillHasProviderPayment::class, ['provider_payment_id' => 'provider_payment_id']);
     }
 
     /**
@@ -117,7 +122,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getProviderBills()
     {
-        return $this->hasMany(ProviderBill::className(), ['provider_bill_id' => 'provider_bill_id'])->viaTable('provider_bill_has_provider_payment', ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(ProviderBill::class, ['provider_bill_id' => 'provider_bill_id'])->viaTable('provider_bill_has_provider_payment', ['provider_payment_id' => 'provider_payment_id']);
     }
 
 
@@ -171,7 +176,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {            
-            $this->formatDatesBeforeSave();            
+            $this->formatDatesBeforeSave();
+            $this->balance = $this->amount - $this->calculateTotalPayed();
             return true;
         } else {
             return false;
@@ -213,6 +219,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
             return false;
         }
 
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
         return true;
     }
 
@@ -225,6 +235,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         if(!AccountMovementRelationManager::isDeletable($this)) {
             return false;
         }
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
         return true;
     }
     
@@ -415,5 +429,58 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         }
 
         return true;
+    }
+
+
+    /**
+     *  Aplica un provider_payment a una o mas provider_bills, de la mas vieja a la mas nueva
+     * y actualiza el valor de balance
+     */
+    public function associateProviderBills($provider_bill_ids)
+    {
+        $return = true;
+        if (count($provider_bill_ids) > 0) {
+            $provider_bills = ProviderBill::find()->where(['provider_bill_id' => $provider_bill_ids])->orderBy(['date' => SORT_ASC])->all();
+            $saldo = $this->balance;
+            foreach ($provider_bills as $provider_bill) {
+                if ($saldo > 0) {
+                    $debt = $provider_bill->getDebt();
+
+                    $pbhpp = new ProviderBillHasProviderPayment([
+                        'provider_bill_id' => $provider_bill->provider_bill_id,
+                        'provider_payment_id' => $this->provider_payment_id
+                    ]);
+
+                    if ($saldo >= $debt) {
+                        $pbhpp->amount = $debt;
+                        $saldo -= $debt;
+                    } else if ($saldo < $debt) {
+                        $pbhpp->amount = $saldo;
+                        $saldo = 0;
+                    }
+
+                    if(!$pbhpp->save()){
+                        $return = false;
+                    }
+                }
+            }
+        }
+        //Actualizamos el balance
+        $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
+
+        return $return;
+    }
+
+    /**
+     * Elimina la asociación con provider bills
+     */
+    public function disassociateProviderBills($provider_bill_ids)
+    {
+        if (count($provider_bill_ids) > 0) {
+            ProviderBillHasProviderPayment::deleteAll(['provider_payment_id' => $this->provider_payment_id, 'provider_bill_id' => $provider_bill_ids]);
+            //Para disparar la actualización del campo balance en el beforesave
+            $this->save();
+            return true;
+        }
     }
 }

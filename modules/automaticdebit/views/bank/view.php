@@ -28,6 +28,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-import"></span> '.Yii::t('app', 'Imports'), ['imports', 'bank_id' => $model->bank_id], ['class' => 'btn btn-warning']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-export"></span> '.Yii::t('app', 'Exports'), ['exports', 'bank_id' => $model->bank_id], ['class' => 'btn btn-info']) ?>
     </p>
 
     <?= DetailView::widget([
@@ -102,5 +104,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
         ]
     ])?>
-
 </div>

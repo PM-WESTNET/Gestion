@@ -318,6 +318,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'email',
             ],
             [
+                'label' => Yii::t('app', 'Email Status'),
+                'attribute'=>'email_status',
+            ],
+            [
                 'label' => Yii::t('app', 'Phone'),
                 'attribute'=>'phone',
             ],

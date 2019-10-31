@@ -17,6 +17,8 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\HttpException;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\sale\models\Company;
 
 /**
  * This is the model class for table "payment".
@@ -140,6 +142,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
             ],
             'discount' => [
                 'class'=> 'app\modules\westnet\components\ReferencedDiscountBehavior'
+            ],
+            'ticket' => [
+                'class'=> 'app\modules\ticket\behaviors\TicketBehavior'
             ],
         ];
     }
@@ -346,9 +351,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @param type $method
      * @return type
      */
-    public function accountTotal($fromDate = null, $toDate = null){
+    public function accountTotal($fromDate = null, $toDate = null, $only_closed = true){
 
-        return $this->accountPayed($fromDate, $toDate) - $this->accountTotalCredit($fromDate, $toDate);
+        return $this->accountPayed($fromDate, $toDate, $only_closed) - $this->accountTotalCredit($fromDate, $toDate, $only_closed);
 
     }
 
@@ -360,7 +365,7 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @param string $toDate 
      * @return float|mixed
      */
-    public function accountPayed($fromDate = null, $toDate = null)
+    public function accountPayed($fromDate = null, $toDate = null, $only_closed = false)
     {
         $qMethodPayment = (new Query())->select(['payment_method_id'])
             ->from('payment_method')
@@ -369,9 +374,11 @@ class Payment extends  ActiveRecord  implements CountableInterface
         $query = Payment::find()
             ->leftJoin('payment_item pi', 'payment.payment_id = pi.payment_id')
             ->where(['NOT IN', 'pi.payment_method_id'  , $qMethodPayment])
-            ->andWhere(['customer_id'=>$this->customer_id])
-            ->andWhere(['<>', 'status', 'cancelled'])
-        ;
+            ->andWhere(['customer_id'=>$this->customer_id]);
+
+        if($only_closed) {
+            $query->andWhere(['status' => Payment::PAYMENT_CLOSED]);
+        }
         
         if($fromDate !== null){
             $query->andWhere("date>='$fromDate'");
@@ -393,15 +400,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
      *
      * @return float|mixed
      */
-    public function accountTotalCredit($fromDate = null, $toDate = null)
+    public function accountTotalCredit($fromDate = null, $toDate = null, $only_closed = true)
     {
 
         $query = Bill::find();
         $query->leftJoin("bill_type", 'bill.bill_type_id = bill_type.bill_type_id' );
         $query->where([
-            'bill.customer_id'=>$this->customer_id,
+            'bill.customer_id' => $this->customer_id,
+
         ]);
-        
+
+
+        if ($only_closed) {
+            $query->andWhere([
+                'bill.status' => Bill::STATUS_CLOSED
+            ]);
+        }
+
         if($fromDate !== null){
             $query->andWhere("date>='$fromDate'");
         }
@@ -413,7 +428,6 @@ class Payment extends  ActiveRecord  implements CountableInterface
         $debt = $query->sum('(bill.total * bill_type.multiplier)');
 
         return abs($debt) > 0.0 ? $debt : 0.0;
-
     }
 
     /**
@@ -498,12 +512,21 @@ class Payment extends  ActiveRecord  implements CountableInterface
             ]);
         }
         if(empty($item)) {
+            \Yii::trace('no encuentra');
             $item = new PaymentItem();
             $item->setAttributes($item_payment);
-            $this->link('paymentItems', $item);
+            \Yii::trace($item);
+            $item->save();
+            $a = $this->link('paymentItems', $item);
+
+            \Yii::trace($item->getErrors());
         } else {
+            \Yii::trace('encuentra');
+            \Yii::trace($item);
             $item->save();
         }
+
+        \Yii::trace($item->getErrors());
 
         return $item;
     }
@@ -578,5 +601,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
     public static function getLastNumber($company_id){
         $number = Payment::find()->where(['company_id' => $company_id])->max('number');
         return $number;
+    }
+
+    /**
+     * @return bool
+     * Envia el comprobante por email al cliente correspondiente.
+     */
+    public function sendEmail($pdfFileName)
+    {
+        $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
+
+        if ($sender->send( $this->customer->email, "Envio de comprobante", [
+            'params'=>[
+                'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
+                'comprobante'   => sprintf("%08d", $this->number )
+            ]],[], [],[$pdfFileName]) ) {
+            return true;
+        }
+        return false;
     }
 }

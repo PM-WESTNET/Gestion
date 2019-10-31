@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\components\companies\CompanySelector;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\BankCompanyConfig */
@@ -12,13 +13,19 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= \app\components\companies\CompanySelector::widget(['model' => $model, 'form' => $form]) ?>
+    <?= CompanySelector::widget(['model' => $model, 'form' => $form]) ?>
 
     <?= $form->field($model, 'account_number')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'service_code')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'other_service_code')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'branch')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'company_identification')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'other_company_identification')->textInput(['maxlength' => true]) ?>
 
     <?= $form->field($model, 'control_digit')->textInput(['maxlength' => true]) ?>
 

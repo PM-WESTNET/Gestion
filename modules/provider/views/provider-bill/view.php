@@ -4,6 +4,7 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use app\modules\provider\models\ProviderBill;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\provider\models\ProviderBill */
@@ -123,6 +124,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $model->taxRate->tax->name . " " . $model->taxRate->name;
                         }
                     ],
+                    'net:currency',
                     'amount:currency'
                 ],
                 'options'=>[

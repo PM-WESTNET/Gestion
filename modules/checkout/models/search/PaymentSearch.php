@@ -36,6 +36,10 @@ class PaymentSearch extends Payment
     public $from;
     public $to;
 
+    public $paymentMethods;
+    public $only_closed_bills;
+    public $only_closed_payments;
+
     /**
      * @inheritdoc
      */
@@ -45,7 +49,27 @@ class PaymentSearch extends Payment
             [['payment_id', 'timestamp', 'customer_id'], 'integer'],
             [['amount'], 'number'],
             [['from', 'to'], 'date'],
-            [['date', 'time', 'concept', 'number', 'from', 'to', 'type', 'customer_number', 'company_id', 'customer_name', 'customer_lastname', 'from_date', 'to_date', '_status', 'from_amount', 'to_amount'], 'safe'],
+            [[
+                'date',
+                'time',
+                'concept',
+                'number',
+                'from',
+                'to',
+                'type',
+                'customer_number',
+                'company_id',
+                'customer_name',
+                'customer_lastname',
+                'from_date',
+                'to_date',
+                '_status',
+                'from_amount',
+                'to_amount',
+                'paymentMethods',
+                'only_closed_bills',
+                'only_closed_payments'
+            ], 'safe'],
         ];
     }
 
@@ -56,18 +80,20 @@ class PaymentSearch extends Payment
     {
         $labels = parent::attributeLabels();
 
-        $labels = array_merge($labels,
-            ['to' => Yii::t('app', 'To'),
-             'from' => Yii::t('app', 'From'),
-                'customer_number' => \Yii::t('app', 'Customer Number'), 
-                'company_id' => \Yii::t('app', 'Company'),
-                'customer_name'=> \Yii::t('app', 'Name'), 
-                'customer_lastname' => \Yii::t('app', 'Lastname'), 
-                'from_date' => \Yii::t('app', 'From Date'), 
-                'to_date'=> \Yii::t('app', 'To Date'), 
-                '_status'=> \Yii::t('app', 'Status'), 
-                'from_amount' => \Yii::t('app', 'From Amount'), 
-                'to_amount' => \Yii::t('app', 'To Amount')]);
+        $labels = array_merge($labels, [
+            'to' => Yii::t('app', 'To'),
+            'from' => Yii::t('app', 'From'),
+            'customer_number' => \Yii::t('app', 'Customer Number'),
+            'company_id' => \Yii::t('app', 'Company'),
+            'customer_name'=> \Yii::t('app', 'Name'),
+            'customer_lastname' => \Yii::t('app', 'Lastname'),
+            'from_date' => \Yii::t('app', 'From Date'),
+            'to_date'=> \Yii::t('app', 'To Date'),
+            '_status'=> \Yii::t('app', 'Status'),
+            'from_amount' => \Yii::t('app', 'From Amount'),
+            'to_amount' => \Yii::t('app', 'To Amount'),
+            'paymentMethods' => Yii::t('app','Payment Methods')
+        ]);
                 
 
         return $labels;
@@ -111,7 +137,7 @@ class PaymentSearch extends Payment
         }**/
         $this->load($params);
         $query->joinWith(["paymentItems"]);
-        $query->leftJoin('payment_method pm', 'payment_item.payment_method_id = pm.payment_method_id');
+        $query->leftJoin('payment_method pm', 'pm.payment_method_id = payment_item.payment_method_id ');
         $query->joinWith(["customer"]);
         $query->leftJoin('bill_has_payment bhp', 'bhp.payment_id = payment.payment_id');
         $query->leftJoin('bill', 'bhp.bill_id = bill.bill_id');
@@ -122,11 +148,11 @@ class PaymentSearch extends Payment
             $query->leftJoin('company', 'payment.company_id = company.company_id');
         }
 
-        if (!$this->validate()) {
+        /**if (!$this->validate()) {
             // uncomment the following line if you do not want to any records when validation fails
             $query->where('0=1');
             return $query;
-        }
+        }**/
 
         $query->andFilterWhere([
             'payment_id' => $this->payment_id,
@@ -154,6 +180,10 @@ class PaymentSearch extends Payment
         
         if(!empty($this->to_date)){
             $query->andFilterWhere(['<=', 'payment.date', Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd')]);  
+        }
+
+        if(!empty($this->paymentMethods)){
+            $query->andFilterWhere(['IN', 'pm.payment_method_id', $this->paymentMethods]);
         }
         
         $groupBy = ['customer.customer_id', 'customer.name', 'payment.payment_id', 'payment.amount', 'payment.date', 'payment.status'];
@@ -187,6 +217,8 @@ class PaymentSearch extends Payment
     public function searchAccount($customer_id, $params)
     {
         $queryPayments = $this->searchPayment($params);
+        $this->load($params);
+
         $queryPayments->select([
             new Expression("'Payment' AS type"), "customer.customer_id", "concat(customer.lastname, ', ', customer.name) AS name",
             new Expression('0 as bill_id'), "payment.payment_id", "payment.date", "payment.time", "payment.number",
@@ -211,7 +243,14 @@ class PaymentSearch extends Payment
             'bill_type.multiplier' => [-1,1]
         ]);
 
-        $this->load($params);
+        if($this->only_closed_bills) {
+            $queryBills->andWhere(['bill.status' => Bill::STATUS_CLOSED]);
+        }
+
+        if($this->only_closed_payments) {
+            $queryPayments->andWhere(['payment.status' => Payment::PAYMENT_CLOSED]);
+        }
+
         $desde = (new \DateTime('now -800 month'))->format('Y-m').'-01'; // Get bills from begining TODO improve query
         if(!empty($this->from)) {
             $desde = Yii::$app->formatter->asDate($this->from, 'Y-M-dd');
@@ -247,7 +286,7 @@ class PaymentSearch extends Payment
                     ->where("b.customer_id IS NOT NULL");
         $cantidad = $masterQuery->count("*");
 
-        $masterQuery->orderBy(['b.date' => SORT_DESC, 'b.bill_id' => SORT_DESC]);
+        $masterQuery->orderBy(['b.date' => SORT_DESC, 'b.time' => SORT_DESC, 'b.bill_id' => SORT_DESC]);
         Yii::$app->db->createCommand( 'set @saldo:=0;')->execute();
         $dataProvider = new ActiveDataProvider([
             'query' => $masterQuery,

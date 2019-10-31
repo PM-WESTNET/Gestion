@@ -2,9 +2,11 @@
 
 namespace app\modules\automaticdebit\controllers;
 
+use app\modules\automaticdebit\models\Bank;
 use Yii;
 use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\automaticdebit\models\AutomaticDebitSearch;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -70,8 +72,11 @@ class AutomaticDebitController extends Controller
             return $this->redirect(['view', 'id' => $model->automatic_debit_id]);
         }
 
+        $banks = ArrayHelper::map(Bank::find()->andWhere(['status' => Bank::STATUS_ENABLED])->all(), 'bank_id', 'name');
+
         return $this->render('create', [
             'model' => $model,
+            'banks' => $banks
         ]);
     }
 
@@ -90,8 +95,11 @@ class AutomaticDebitController extends Controller
             return $this->redirect(['view', 'id' => $model->automatic_debit_id]);
         }
 
+        $banks = ArrayHelper::map(Bank::find()->andWhere(['status' => Bank::STATUS_ENABLED])->all(), 'bank_id', 'name');
+
         return $this->render('update', [
             'model' => $model,
+            'banks' => $banks
         ]);
     }
 

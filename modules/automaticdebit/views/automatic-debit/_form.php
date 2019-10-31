@@ -1,5 +1,6 @@
 <?php
 
+use app\modules\automaticdebit\models\AutomaticDebit;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
@@ -12,19 +13,21 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'customer_id')->textInput() ?>
+    <?php echo $this->render('../../../sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id', 'label' => Yii::t('app','Customer')])?>
 
-    <?= $form->field($model, 'bank_id')->textInput() ?>
+    <?= $form->field($model, 'bank_id')->dropDownList($banks) ?>
 
-    <?= $form->field($model, 'cbu')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'cbu')->textInput(['maxlength' => 22]) ?>
 
-    <?= $form->field($model, 'beneficiario_number')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'status')->dropDownList([
+        AutomaticDebit::ENABLED_STATUS => Yii::t('app','Active'),
+        AutomaticDebit::DISABLED_STATUS => Yii::t('app','Inactive')
+    ]) ?>
 
-    <?= $form->field($model, 'status')->textInput() ?>
-
-    <?= $form->field($model, 'created_at')->textInput() ?>
-
-    <?= $form->field($model, 'updated_at')->textInput() ?>
+    <?= $form->field($model, 'customer_type')->dropDownList([
+        'own' => Yii::t('app','Bank Customer'),
+        'other' => Yii::t('app','Other Customer')
+    ]) ?>
 
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>

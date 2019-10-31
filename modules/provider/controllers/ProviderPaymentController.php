@@ -5,6 +5,7 @@ namespace app\modules\provider\controllers;
 use app\modules\provider\models\ProviderBill;
 use app\modules\provider\models\ProviderBillHasProviderPayment;
 use app\modules\provider\models\ProviderPaymentItem;
+use app\modules\provider\models\search\ProviderBillSearch;
 use Yii;
 use app\modules\provider\models\ProviderPayment;
 use app\modules\provider\models\search\ProviderPaymentSearch;
@@ -12,6 +13,10 @@ use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\web\Response;
+use yii\helpers\ArrayHelper;
+use app\modules\accounting\models\MoneyBox;
+use app\modules\config\models\Config;
 
 /**
  * ProviderPaymentController implements the CRUD actions for ProviderPayment model.
@@ -204,7 +209,7 @@ class ProviderPaymentController extends Controller {
      * @return json
      */
     public function actionAddBill($id) {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         $bill = new ProviderBillHasProviderPayment();
         $bill->load(Yii::$app->request->post());
@@ -362,4 +367,95 @@ class ProviderPaymentController extends Controller {
         }
     }
 
+    /**
+     * Vista que permite aplicar el pago a un comprobante
+     * @param $payment_id
+     * @return array
+     * @throws NotFoundHttpException
+     */
+    public function actionApply($provider_payment_id) {
+        $model = ProviderPayment::findOne($provider_payment_id);
+        $searchModel = new ProviderBillSearch();
+        $searchModel->provider_id = $model->provider_id;
+        $billDataProvider = $searchModel->searchWithDebt([]);
+
+        $appliedDataProvider = new ActiveDataProvider([
+            'query' => $model->getProviderBills(),
+            'sort' => [
+                //'defaultOrder' => ['bill.date'=>SORT_ASC]
+            ]
+        ]);
+
+        return $this->render('apply', [
+            'model' => $model,
+            'billDataProvider' => $billDataProvider,
+            'appliedDataProvider' => $appliedDataProvider
+        ]);
+    }
+
+    /**
+     * Agrega un item al pago
+     *
+     * @param int $id
+     * @return json
+     */
+    public function actionAsociateProviderBill($id) {
+        $status = 'success';
+        $message = '';
+        Yii::$app->response->format = 'json';
+
+        $bills_ids = Yii::$app->request->post('bills');
+        $model = $this->findModel($id);
+        if (!$model->associateProviderBills($bills_ids)) {
+            $message = Yii::t('app', 'One or more provider bills cant be applied correctly');
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Agrega un item al pago
+     *
+     * @param int $id
+     * @return json
+     */
+    public function actionRemoveAssociationWithProviderBill($id) {
+        $status = 'success';
+        $message = '';
+        Yii::$app->response->format = 'json';
+
+        $bills_ids = Yii::$app->request->post('bills');
+        $model = $this->findModel($id);
+        if (!$model->disassociateProviderBills($bills_ids)) {
+            $message = Yii::t('app', 'One or more provider bills cant be disassociated');
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    /**
+     * Devuelve un listado de bancos o cajas para ser desplegados en un selector.
+     */
+    public function actionGetDataForSelector($type) {
+        Yii::$app->response->format = 'json';
+        $data = [];
+
+        if($type == 'bank'){
+            foreach (MoneyBox::findByMoneyBoxType(Config::getValue('money_box_bank'))->all() as $bank) {
+                array_push($data, ['val' => $bank->money_box_id, 'text' => $bank->name]);
+            }
+        } else {
+            foreach (MoneyBox::findByMoneyBoxType(Config::getValue('money_box_smallbox'))->all() as $box) {
+                array_push($data, ['val' => $box->money_box_id, 'text' => $box->name]);
+            }
+        }
+
+        return $data;
+    }
 }

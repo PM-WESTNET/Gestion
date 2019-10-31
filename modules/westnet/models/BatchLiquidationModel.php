@@ -84,7 +84,7 @@ class BatchLiquidationModel extends \yii\base\Model
      */
     public function getVendorLiquidationItems()
     {
-        return $this->hasMany(VendorLiquidationItem::className(), ['vendor_liquidation_id' => 'vendor_liquidation_id']);
+        return $this->hasMany(VendorLiquidationItem::class, ['vendor_liquidation_id' => 'vendor_liquidation_id']);
     }
     
     public function getPeriodMonth()

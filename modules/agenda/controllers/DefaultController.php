@@ -38,11 +38,11 @@ class DefaultController extends Controller {
         }
 
         if(!$searchModel->create_option) {
-            $searchModel->create_option = 'all';
+            $searchModel->create_option = 'me';
         }
 
         if(!$searchModel->user_option) {
-            $searchModel->user_option = 'all';
+            $searchModel->user_option = 'me';
         }
 
         $tasks = $searchModel->searchAgenda();
@@ -129,7 +129,7 @@ class DefaultController extends Controller {
                     $Event->allDay = true;
                 }
                 $this->setColors($task, $Event);
-                $Event->url = Url::to(['/agenda/task/update', 'id' => $task->task_id, 'agenda' => true], true);
+                $Event->url = Url::to(['/agenda/task/view', 'id' => $task->task_id, 'agenda' => true], true);
                 $events[] = $Event;
             }
         }

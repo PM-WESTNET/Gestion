@@ -87,7 +87,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             [['payed'],'boolean'],
             [['status'], 'default', 'value' => ProviderBill::STATUS_DRAFT],
             [['company_id', 'number1', 'number2'], 'safe'],
-            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id']],
+            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id', 'bill_type_id']],
             ['number1', 'default' , 'value' => '0000'],
             ['number2', 'default', 'value' => '00000000'],
             ['date', 'validateMinimunDate']
@@ -147,7 +147,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getBillType()
     {
-        return $this->hasOne(BillType::className(), ['bill_type_id' => 'bill_type_id']);
+        return $this->hasOne(BillType::class, ['bill_type_id' => 'bill_type_id']);
     }
 
     /**
@@ -155,7 +155,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getProvider()
     {
-        return $this->hasOne(Provider::className(), ['provider_id' => 'provider_id']);
+        return $this->hasOne(Provider::class, ['provider_id' => 'provider_id']);
     }
 
     /**
@@ -163,7 +163,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getProviderBillHasProviderPayments()
     {
-        return $this->hasMany(ProviderBillHasProviderPayment::className(), ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasMany(ProviderBillHasProviderPayment::class, ['provider_bill_id' => 'provider_bill_id']);
     }
 
     /**
@@ -171,7 +171,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getProviderPayments()
     {
-        return $this->hasMany(ProviderPayment::className(), ['provider_payment_id' => 'provider_payment_id'])->viaTable('provider_bill_has_provider_payment', ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasMany(ProviderPayment::class, ['provider_payment_id' => 'provider_payment_id'])->viaTable('provider_bill_has_provider_payment', ['provider_bill_id' => 'provider_bill_id']);
     }
 
     /**
@@ -179,7 +179,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getProviderBillHasTaxRates()
     {
-        return $this->hasMany(ProviderBillHasTaxRate::className(), ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasMany(ProviderBillHasTaxRate::class, ['provider_bill_id' => 'provider_bill_id']);
     }
 
     /**
@@ -187,7 +187,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getTaxRates()
     {
-        return $this->hasMany(TaxRate::className(), ['tax_rate_id' => 'tax_rate_id'])->viaTable('provider_bill_has_tax_rate', ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasMany(TaxRate::class, ['tax_rate_id' => 'tax_rate_id'])->viaTable('provider_bill_has_tax_rate', ['provider_bill_id' => 'provider_bill_id']);
     }
 
     /**
@@ -195,7 +195,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getProviderBillItems()
     {
-        return $this->hasMany(ProviderBillItem::className(), ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasMany(ProviderBillItem::class, ['provider_bill_id' => 'provider_bill_id']);
     }
 
     /**
@@ -203,7 +203,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function getPartnerDistributionModel()
     {
-        return $this->hasOne(PartnerDistributionModel::className(), ['partner_distribution_model_id' => 'partner_distribution_model_id']);
+        return $this->hasOne(PartnerDistributionModel::class, ['partner_distribution_model_id' => 'partner_distribution_model_id']);
     }
 
     /**
@@ -334,6 +334,10 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
         };
 
         if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if($this->status == ProviderBill::STATUS_CLOSED) {
             return false;
         }
 
@@ -478,26 +482,11 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     public function calculateTaxes()
     {
         $taxes = 0;
-        $all_taxes = $this->getProviderBillHasTaxRates()->innerJoin('tax_rate', 'tax_rate.tax_rate_id = provider_bill_has_tax_rate.tax_rate_id')->where(['not', ['tax_rate.pct' => 0]])->all();
+        $all_taxes = $this->getProviderBillHasTaxRates()->innerJoin('tax_rate', 'tax_rate.tax_rate_id = provider_bill_has_tax_rate.tax_rate_id')->all();
         foreach($all_taxes as $tax) {
             $taxes += $tax->amount;
         }
         $this->taxes = $taxes;
-        return $taxes;
-    }
-
-    /**
-     * Calcula los impuestos que tienen porcentaje 0.
-     *
-     * @return int|mixed
-     */
-    public function calculateTaxesWithZeroPercentage()
-    {
-        $taxes = 0;
-        $all_taxes = $this->getProviderBillHasTaxRates()->innerJoin('tax_rate', 'tax_rate.tax_rate_id = provider_bill_has_tax_rate.tax_rate_id')->where(['tax_rate.pct' => 0])->all();
-        foreach( $all_taxes  as $tax) {
-            $taxes += $tax->amount;
-        }
         return $taxes;
     }
 
@@ -522,8 +511,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
         foreach ($this->getProviderBillItems()->all() as $item) {
             $totalItems += $item->amount;
         }
-        $taxesWithZeroPercentaje = $this->calculateTaxesWithZeroPercentage();
-        $this->net = $totalItems + $taxesWithZeroPercentaje;
+        $this->net = $totalItems;
         return $totalItems;
     }
 
@@ -606,5 +594,42 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
 
             return $this->save();
         }
+    }
+
+    /**
+     * Devuelve el importe restante de la factura. Si aun no hay ningun pago,
+     * devolvera el importe total de la factura.
+     * @return real
+     */
+    public function getDebt(){
+
+        $payedAmount = $this->getPayedAmount(true);
+
+        $total = $this->total;
+
+        if(abs($total - $payedAmount) > $total * Yii::$app->params['payment_tolerance']){
+            return $total - $payedAmount;
+        }else{
+            return 0.0;
+        }
+
+    }
+
+    /**
+     * Devuelve el monto que ha sido pagado del comprobante
+     * @return type
+     */
+    public function getPayedAmount($includeDraft=false)
+    {
+
+        $payedAmount = 0.0;
+        foreach($this->providerPayments as $payment){
+            if ( ($includeDraft && $payment->status=='draft') || ($payment->status!='draft')) {
+                $payedAmount += $payment->amount;
+            }
+        }
+
+        return $payedAmount;
+
     }
 }

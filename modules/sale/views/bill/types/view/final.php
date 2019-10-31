@@ -80,7 +80,7 @@ echo GridView::widget([
                     <td class="text-right">
                         <?php
                         $formatter = Yii::$app->formatter;
-                        echo $formatter->asCurrency($model->totalDiscount());
+                        echo $formatter->asCurrency($model->totalDiscountWithTaxes());
                         ?>
                     </td>
                     <td class="text-right">

@@ -3,6 +3,7 @@
 namespace app\modules\checkout\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "payment_method".
@@ -11,14 +12,15 @@ use Yii;
  * @property string $name
  * @property string $status
  * @property integer $register_number
+ * @property boolean $send_ivr
  *
  * @property Payment[] $payments
  */
 class PaymentMethod extends \app\components\db\ActiveRecord
 {
-    /**
-     * @inheritdoc
-     */
+    const STATUS_ENABLED = 'enabled';
+    const STATUS_DISABLED = 'disabled';
+
     public static function tableName()
     {
         return 'payment_method';
@@ -31,7 +33,9 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['register_number'], 'boolean'],
+            [['register_number', 'send_ivr'], 'boolean'],
+            [['send_ivr'], 'default', 'value' => false],
+            [['show_in_app'], 'default', 'value' => false],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['type'], 'in', 'range'=>['exchanging','provisioning','account']],
             [['name'], 'string', 'max' => 45],
@@ -49,6 +53,8 @@ class PaymentMethod extends \app\components\db\ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'register_number' => Yii::t('app', 'Register Number?'),
             'type' => Yii::t('app', 'Tipo de pago'),
+            'send_ivr' => Yii::t('app', 'Send to Ivr'),
+            'show_in_app' => Yii::t('app', 'Show in app'),
         ];
     }
 
@@ -57,7 +63,7 @@ class PaymentMethod extends \app\components\db\ActiveRecord
      */
     public function getPayments()
     {
-        return $this->hasMany(PaymentItem::className(), ['payment_method_id' => 'payment_method_id']);
+        return $this->hasMany(PaymentItem::class, ['payment_method_id' => 'payment_method_id']);
     }
 
     /**
@@ -113,5 +119,34 @@ class PaymentMethod extends \app\components\db\ActiveRecord
         return true;
         
     }
-    
+
+    /**
+     * Devuelve un listado de medios de pago que están disponibles para ser mostrados en la app
+     */
+    public static function getPaymentMethodsAvailableForApp()
+    {
+        return PaymentMethod::find()->where(['show_in_app' => true, 'status' => PaymentMethod::STATUS_ENABLED])->all();
+    }
+
+    /**
+     * Devuelve los medios de pago para ser listados en un desplegable
+     */
+    public static function getPaymentMethodForSelect()
+    {
+        return ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name');
+    }
+
+    /**
+     * Obtiene el medio de pago Transferencia.
+     */
+    public static function getTransferencia()
+    {
+        $payment_method = PaymentMethod::findOne(['name' => 'Transferencia']);
+
+        if(!$payment_method) {
+            return false;
+        }
+
+        return $payment_method;
+    }
 }

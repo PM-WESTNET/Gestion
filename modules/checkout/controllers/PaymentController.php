@@ -13,9 +13,13 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use app\modules\checkout\models\PagoFacilTransmitionFile;
+use \app\modules\accounting\models\search\AccountMovementSearch;
+use app\modules\sale\models\Product;
+use app\modules\westnet\models\Vendor;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -37,11 +41,14 @@ class PaymentController extends Controller {
             $searchModel->from_date= date('Y-m').'-01';
             $searchModel->to_date= (new \DateTime())->modify('last day of this month')->format('Y-m-d');
         }
+
+        $paymentMethods = ArrayHelper::map(PaymentMethod::getPaymentMethods(), 'payment_method_id', 'name');
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-                    'searchModel' => $searchModel,
-                    'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'paymentMethods' => $paymentMethods
         ]);
     }
 
@@ -197,7 +204,7 @@ class PaymentController extends Controller {
         // Si se utiliza cuentas sacar la deuda con las cuentas
         if (Yii::$app->getModule("accounting")) {
             if ($customer->account !== null) {
-                $searchModelAccount = new \app\modules\accounting\models\search\AccountMovementSearch();
+                $searchModelAccount = new AccountMovementSearch();
                 $searchModelAccount->account_id_from = $customer->account->lft;
                 $searchModelAccount->account_id_to = $customer->account->rgt;
                 $dataModelAccount = $searchModelAccount->search(Yii::$app->request->queryParams);
@@ -205,18 +212,32 @@ class PaymentController extends Controller {
         }
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $customer->customer_id;
+        $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+        $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+            ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+            ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+            ->all(), 'vendor_id', 'fullName');
 
         $dataProvider = $searchModel->searchAccount($customer->customer_id, Yii::$app->request->queryParams);
 
-        $retVals = [
+        if($customer->hasDraftBills()) {
+            Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft bills'));
+        }
+
+        if($customer->hasDraftPayments()) {
+            Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft payments'));
+        }
+
+        return $this->render('account', [
             'searchModel' => $searchModel,
             'customer' => $customer,
-            'dataProvider' => $dataProvider
-        ];
-        $retVals['dataModelAccount'] = $dataModelAccount;
-        $retVals['searchModelAccount'] = $searchModelAccount;
-
-        return $this->render('account', $retVals);
+            'dataProvider' => $dataProvider,
+            'dataModelAccount' => $dataModelAccount,
+            'searchModelAccount' => $searchModelAccount,
+            'products' => $products,
+            'vendors' => $vendors
+        ]);
     }
 
     /**
@@ -512,11 +533,13 @@ class PaymentController extends Controller {
         if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
             $import = $transmition_file->import();
                 if(array_key_exists('errors', $import)) {
-                    $string_error = '';
-                    foreach ($import['errors'] as $error) {
-                        $string_error .= $error . "<br>";
+                    if(!empty($import['errors'])) {
+                        $string_error = '';
+                        foreach ($import['errors'] as $error) {
+                            $string_error .= $error . "<br>";
+                        }
+                        Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
                     }
-                    Yii::$app->session->setFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
                 } else {
                     Yii::$app->session->setFlash('success', 'Archivo importado con éxito');
                 }
@@ -547,7 +570,7 @@ class PaymentController extends Controller {
     }
     
     public function actionConfirmFile($idFile){
-        set_time_limit(300);
+        set_time_limit(0);
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
         
         if ($model->confirmFile()) {
@@ -630,5 +653,38 @@ class PaymentController extends Controller {
         }
 
         return $this->redirect(['pagofacil-payments-index']);
+    }
+
+    /**
+     * Envía el recibo de pago por email al cliente.
+     */
+    public function actionEmail($id, $from = 'index')
+    {
+        $model = $this->findModel($id);
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+        if (trim($model->customer->email) == "") {
+            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
+        }
+
+        if ($model->sendEmail($fileName)) {
+            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+        } else {
+            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
+        };
+
+        if ($from === 'index') {
+            return $this->redirect(['index']);
+        } elseif ($from == 'current-account') {
+            return $this->redirect(['current-account', 'customer' => $model->customer_id]);
+        } else {
+            return $this->redirect(['view', 'customer' => $model->customer_id]);
+        }
     }
 }

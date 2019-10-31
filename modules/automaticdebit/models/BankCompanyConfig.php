@@ -19,6 +19,9 @@ use yii\behaviors\TimestampBehavior;
  * @property int $bank_id
  * @property int $created_at
  * @property int $updated_at
+ * @property string $service_code
+ * @property string $other_service_code
+ * @property string $other_company_identification
  *
  * @property Bank $bank
  * @property Company $company
@@ -41,7 +44,8 @@ class BankCompanyConfig extends ActiveRecord
         return [
             [['company_id', 'bank_id'], 'required'],
             [['company_id', 'bank_id', 'created_at', 'updated_at'], 'integer'],
-            [['company_identification', 'branch', 'control_digit', 'account_number'], 'string', 'max' => 45],
+            [['control_digit'], 'string', 'length' => 2],
+            [['company_identification', 'branch', 'account_number', 'service_code', 'other_service_code', 'other_company_identification'], 'string', 'max' => 45],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::class, 'targetAttribute' => ['bank_id' => 'bank_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
         ];
@@ -70,6 +74,7 @@ class BankCompanyConfig extends ActiveRecord
         return [
             'bank_company_config_id' => Yii::t('app', 'Bank Company Config ID'),
             'company_identification' => Yii::t('app', 'Company Identification'),
+            'other_company_identification' => Yii::t('app', 'Other Company Identification'),
             'branch' => Yii::t('app', 'Branch'),
             'control_digit' => Yii::t('app', 'Control Digit'),
             'account_number' => Yii::t('app', 'Account Number'),
@@ -77,6 +82,9 @@ class BankCompanyConfig extends ActiveRecord
             'bank_id' => Yii::t('app', 'Bank ID'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
+            'other_company_identification' => Yii::t('app', 'Other company identification'),
+            'service_code' => Yii::t('app','Service Code'),
+            'other_service_code' => Yii::t('app','Other Service Code'),
         ];
     }
 
@@ -85,7 +93,7 @@ class BankCompanyConfig extends ActiveRecord
      */
     public function getBank()
     {
-        return $this->hasOne(Bank::className(), ['bank_id' => 'bank_id']);
+        return $this->hasOne(Bank::class, ['bank_id' => 'bank_id']);
     }
 
     /**
@@ -93,6 +101,6 @@ class BankCompanyConfig extends ActiveRecord
      */
     public function getCompany()
     {
-        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 }

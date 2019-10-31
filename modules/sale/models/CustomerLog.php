@@ -138,6 +138,8 @@ class CustomerLog extends ActiveRecord {
         $this->customer_id = $customer_id;
         if(!YII_ENV_TEST){
             $this->user_id = Yii::$app->user->identity->id;
+        } else {
+            $this->user_id = 1;
         }
         $this->observations = 'Alta ' . $class_name . ': ' . $object_id;
         $this->object_id = $object_id;

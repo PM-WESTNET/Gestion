@@ -16,6 +16,7 @@ use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\sale\modules\contract\models\search\ContractDetailSearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
+use app\modules\ticket\models\Ticket;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\EmptyAds;
 use app\modules\westnet\models\Node;
@@ -160,7 +161,9 @@ class ContractController extends Controller {
                 $vendor = Vendor::findByUserId(Yii::$app->user->id);
                 $model->vendor_id = $vendor ? $vendor->vendor_id : NULL;
             }
-            $model->instalation_schedule = Yii::$app->request->post()['Contract']['instalation_schedule'];
+            if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+            }
         }
         if(!empty($_POST['same_address'])){
             $same_address = $_POST['same_address'];
@@ -233,6 +236,12 @@ class ContractController extends Controller {
                 }
 
                 $transaction->commit();
+
+                if ($model->hasMethod('createMesaTicket')) {
+                    //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
+                    $model->createMesaTicket($model);
+                }
+
                 if(Yii::$app->request->post('mode') === '1'){
                     return $this->redirect(['/sale/contract/contract/update', 'id' => $model->contract_id]);
                 }else{
@@ -241,6 +250,7 @@ class ContractController extends Controller {
             } catch (\Exception $ex) {
                 $transaction->rollBack();
                 $model->isNewRecord = true;
+                Yii::info($ex);
                 Yii::$app->session->addFlash('error', $ex->getMessage());
             }
         }            
@@ -257,7 +267,9 @@ class ContractController extends Controller {
            if (empty(Yii::$app->request->post()['contractDetailIns']['funding_plan_id'])){
                $contractDetailIns->addError('funding_plan_id');
            }
-            \Yii::$app->session->setFlash('error', Yii::t('app', 'You most complete all data'));
+           if($contractDetailIns->hasErrors()){
+               \Yii::$app->session->addFlash('error', Yii::t('app', 'You most complete all data'));
+           }
         }
 
         if (Yii::$app->user->identity->hasRole('seller', false)) {
@@ -358,6 +370,7 @@ class ContractController extends Controller {
                             if ($contractDetailPlan->status != Contract::STATUS_DRAFT) {
                                 if (!empty($contractDetailPlan->from_date)) {
                                     //$contractDetailOld->to_date
+
                                     try {
                                         $fromDate = (new DateTime($contractDetailPlan->from_date));
                                     } catch (\Exception $ex) {
@@ -370,6 +383,8 @@ class ContractController extends Controller {
                                     }
 
                                     if ($fromDate > $oldFrom) {
+                                        //Creo un registro en Programmed plan changed
+
                                         // Le pongo la fecha de fin al plan anterior para que la guarde en el log.
                                         $contractDetailOld->to_date = (new DateTime($contractDetailPlan->from_date))->modify('-1 day')->format('d-m-Y');
                                         $contractDetailOld->createLog();
@@ -423,7 +438,10 @@ class ContractController extends Controller {
                         $model->update(false);
                     }
 
-                    $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    if(Yii::$app->request->post()['Contract']['instalation_schedule'] !== '') {
+                        $model->instalation_schedule= Yii::$app->request->post()['Contract']['instalation_schedule'];
+                    }
+
                     $model->address_id = $address->address_id;
 
                     $model->update(false);
@@ -760,8 +778,9 @@ class ContractController extends Controller {
                 $customer->code = $code;
                 $customer->payment_code = $emptyAds->payment_code;
                 $customer->company_id = $emptyAds->company_id;
+                $customer->status = Customer::STATUS_ENABLED;
                 $emptyAds->used = true;
-                $customer->updateAttributes(['code', 'payment_code', 'company_id']);
+                $customer->updateAttributes(['code', 'payment_code', 'company_id', 'status']);
                 $emptyAds->updateAttributes(['used']);
             }else{
                 Yii::$app->session->setFlash('error', Yii::t('app', 'This ADS has been used before or not exist'));
@@ -785,6 +804,8 @@ class ContractController extends Controller {
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($model, $connection)) {
                     $model->customer->sendMobileAppLinkSMSMessage();
+                    Ticket::createGestionADSTicket($model->customer_id);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['/sale/contract/contract/view', 'id' => $model->contract_id]);
                 }
             }
@@ -849,6 +870,7 @@ class ContractController extends Controller {
                     //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
+                    $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];
                 }else{
@@ -1044,6 +1066,7 @@ class ContractController extends Controller {
                 
                 if ($connection->updateAttributes(['status_account'])) {
                     $transaction->commit();
+                    $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     return $this->redirect(['view', 'id' => $contract_id]);
                 }else{
                     $transaction->rollBack();
@@ -1133,5 +1156,41 @@ class ContractController extends Controller {
         $model = Contract::findOne($contract_id);
         $model->revertNegativeSurvey();
         return $this->redirect(['view', 'id' => $contract_id]);
+    }
+
+
+    /**
+     * Devuelve un array con contratos para ser listados en un select2
+     */
+    public function actionGetContractsByCustomer()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $out = [];
+        $pre_selected_contract_id = null;
+
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+
+            if ($parents != null) {
+                $customer_id = $parents[0];
+
+                if(isset($_POST['depdrop_params'])) {
+                    $pre_selected_contract_id = $_POST['depdrop_params'][0];
+                }
+                $customer = Customer::findOne($customer_id);
+
+                if(!$customer) {
+                    throw new BadRequestHttpException('Customer not found');
+                }
+
+                $selected = 0;
+                foreach ($customer->contracts as $contract) {
+                    $out[] = ['id' => $contract->contract_id, 'name' => "[$contract->contract_id] Contracto en " .$contract->address->shortAddress];
+                }
+
+                return ['output' => $out, 'selected'=> $pre_selected_contract_id ? $pre_selected_contract_id : $selected];
+            }
+        }
     }
 }

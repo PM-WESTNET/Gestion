@@ -2,6 +2,9 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use app\modules\automaticdebit\models\Bank;
+use app\modules\automaticdebit\models\AutomaticDebit;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\automaticdebit\models\AutomaticDebitSearch */
@@ -25,16 +28,33 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'automatic_debit_id',
-            'customer_id',
-            'bank_id',
+            [
+                'attribute' => 'customer_id',
+                'value' => function ($model) {
+                    return $model->customer->fullName;
+                },
+                'filter' => $this->render('../../../sale/views/customer/_find-with-autocomplete', ['form' => null, 'model' => $searchModel, 'attribute' => 'customer_id', 'label' => Yii::t('app','Customer')])
+            ],
+            [
+                'attribute' => 'bank_id',
+                'value' => function ($model) {
+                    return $model->bank->name;
+                },
+                'filter' => ArrayHelper::map(Bank::find()->all(), 'bank_id', 'name')
+            ],
             'cbu',
-            'beneficiario_number',
-            //'status',
-            //'created_at',
-            //'updated_at',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return $model->getStatusLabel();
+                },
+                'filter' => [
+                    AutomaticDebit::ENABLED_STATUS => Yii::t('app','Enabled'),
+                    AutomaticDebit::DISABLED_STATUS => Yii::t('app','Disabled')
+                ]
+            ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'app\components\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

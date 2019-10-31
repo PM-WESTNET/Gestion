@@ -8,6 +8,7 @@ use app\modules\ticket\models\Assignation;
 use app\modules\ticket\models\Category;
 use app\modules\ticket\models\Observation;
 use app\modules\ticket\models\Status;
+use app\modules\ticket\models\TicketManagement;
 use app\modules\westnet\components\MesaTicketManager;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
@@ -331,6 +332,7 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('cobranza_category_id'));
 
@@ -340,11 +342,15 @@ class TicketController extends Controller
 
         $search->category_id = $category->category_id;
 
+        if (!isset($params['TicketSearch']['show_all'])){
+            $search->show_all= true;
+        }
+
         if (!User::hasRole('collection_manager')){
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search($params);
 
         return $this->render('collection_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 
@@ -356,20 +362,25 @@ class TicketController extends Controller
         $this->layout = '/fluid';
         $search = new TicketSearch();
         $search->setScenario('wideSearch');
+        $params = Yii::$app->request->getQueryParams();
 
         $category = Category::findOne(Config::getValue('installations_category_id'));
+        $category2 = Config::getValue('ticket_category_gestion_ads');
 
         if (empty($category)) {
             throw new BadRequestHttpException('Categoria de Instalaciones no encontrada');
         }
 
-        $search->category_id = $category->category_id;
+        $search->categories = [$category->category_id, $category2];
 
+        if (!isset($params['TicketSearch']['show_all'])){
+            $search->show_all= true;
+        }
         if (!User::hasRole('installations_manager')){
             $search->user_id = Yii::$app->user->id;
         }
 
-        $dataProvider = $search->search(Yii::$app->request->getQueryParams());
+        $dataProvider = $search->search($params);
 
         return $this->render('installation_tickets', ['searchModel' => $search, 'dataProvider' => $dataProvider]);
 
@@ -406,8 +417,15 @@ class TicketController extends Controller
             $model = $this->findModel($id);
 
             $dataProvider = new ActiveDataProvider(['query' => $model->getObservations()]);
+            $dataProviderTicketManagement = new ActiveDataProvider([
+                'query' => $model->getTicketManagements()
+            ]);
 
-            $observations = $this->renderAjax('_observations', ['dataProvider' => $dataProvider, 'model' => $model]);
+            $observations = $this->renderAjax('_observations', [
+                'dataProvider' => $dataProvider,
+                'dataProviderTicketManagement' => $dataProviderTicketManagement,
+                'model' => $model
+            ]);
 
             return [
                 'title' => Yii::t('app','Ticket') . ': '. $model->title . ' - ' . Yii::t('app','Observations'),
@@ -427,6 +445,24 @@ class TicketController extends Controller
             Yii::$app->response->format = Response::FORMAT_JSON;
             $model = new Observation();
             $form = $this->renderPartial('../observation/_new-observation', ['model' => $model, 'ticket_id' => $ticket_id]);
+
+            return [
+                'form' => $form
+            ];
+        }
+
+        throw new NotFoundHttpException('Page Not Found');
+    }
+
+    /**
+     * Devuelve el formulario de creacion de gestion de ticket
+     */
+    public function actionGetManagementForm($ticket_id, $observation_id)
+    {
+        if (Yii::$app->request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $model = new TicketManagement();
+            $form = $this->renderPartial('_new-ticket-management', ['model' => $model, 'ticket_id' => $ticket_id, 'observation_id' => $observation_id]);
 
             return [
                 'form' => $form
@@ -515,5 +551,71 @@ class TicketController extends Controller
         }
 
         return $this->redirect([$redirect]);
+    }
+
+    public function actionCloseCollectionTicketsByPeriod(){
+
+        $data = Yii::$app->request->get();
+
+        $search = new TicketSearch();
+        $search->category_id = Config::getValue('cobranza_category_id');
+        $query = $search->searchClosedByPeriodAndStatus($data);
+
+
+        if ($query->exists()) {
+            $count = $query->count();
+            $status = Status::findOne(['name' => 'Cerrado (Por Jefe de Cobranza)']);
+
+            foreach ($query->all() as $ticket) {
+                $ticket->updateAttributes(['status_id' => $status->status_id]);
+            }
+
+            Yii::$app->session->addFlash('success', Yii::t('app','{count} tickets has been closed', ['count' => $count]));
+            return $this->redirect(['collection-tickets']);
+        }
+
+        Yii::$app->session->addFlash('warning', Yii::t('app','Can`t found tickets to close'));
+
+        return $this->redirect(['collection-tickets']);
+    }
+
+    /**
+     * Renderiza un gráfico con la cantidad de tickets.
+     */
+    public function actionReport()
+    {
+        $searchModel = new TicketSearch();
+        $searchModel->status_id = null;
+        $data = $searchModel->searchReport(Yii::$app->request->getQueryParams());
+        $datas = [];
+        $cols = [];
+
+        foreach($data as $item) {
+            $cols[] = (new \DateTime($item['periodo'] . '-01'))->format('m-Y');
+            $datas[] = $item['qty'];
+        }
+
+        return $this->render('report', [
+            'searchModel' => $searchModel,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => 'green'
+        ]);
+    }
+
+    /**
+     * Actualiza el campo discount de Ticket
+     */
+    public function actionSetDiscounted($ticket_id, $discounted)
+    {
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        $model = $this->findModel($ticket_id);
+
+        if($model) {
+            $model->updateAttributes(['discounted' => $discounted == 'false' ? 0 : 1]);
+            return ['status' => 'success'];
+        }
+
+        return ['status' => 'error', 'msj' => Yii::t('app','Ticket not found')];
     }
 }

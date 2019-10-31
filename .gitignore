@@ -92,3 +92,5 @@ web/index.php
 /tests/_support/_generated/UnitTesterActions.php
 /mysql/
 /westnet/mysql/
+web/direct_debit/
+web/direct_debit_import/

@@ -2,7 +2,9 @@
 
 namespace app\modules\automaticdebit\models;
 
+use app\modules\automaticdebit\components\BankInterface;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 
@@ -99,5 +101,25 @@ class Bank extends \yii\db\ActiveRecord
         ];
 
         return $labels[$this->status];
+    }
+
+    /**
+     * @return BankInterface
+     * @throws InvalidConfigException
+     */
+    public function getBankInstance()
+    {
+        if (empty($this->class)) {
+            throw new InvalidConfigException('Bank class can`t be empty');
+        }
+
+        $class = $this->class;
+        $instance = new $class;
+
+        if (!($instance instanceof BankInterface)) {
+            throw new InvalidConfigException('Bank class must implement Bank Interface');
+        }
+
+        return $instance;
     }
 }

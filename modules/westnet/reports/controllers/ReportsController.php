@@ -4,6 +4,8 @@ namespace app\modules\westnet\reports\controllers;
 
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
+use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\search\ReportSearch;
@@ -625,9 +627,15 @@ class ReportsController extends Controller
         $search = new UserAppActivitySearch();
         $statistics = $search->searchStatistics(Yii::$app->request->get());
 
+        $reportSearch = new ReportSearch();
+        $paymentsStatistics = $reportSearch->notifyPaymentStatistics();
+        $paymentExtensionStatistics = $reportSearch->paymentExtensionStatistics();
+
         return $this->render('/reports/mobile-app', [
             'searchModel' => $search,
-            'statistics' => $statistics
+            'statistics' => $statistics,
+            'paymentsStatistics' => $paymentsStatistics,
+            'paymentExtensionStatistics' => $paymentExtensionStatistics
         ]);
     }
 }

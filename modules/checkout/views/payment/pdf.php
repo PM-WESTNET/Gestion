@@ -56,7 +56,7 @@ $formatter = Yii::$app->formatter;
     <!-- Datos clientes a Facturar -->
     <tr>
         <td>
-            <p style="margin-top: 5px; padding-left: 20px; font-weight: 800;">Cliente:  <span style="font-weight: 400;"><?=$model->customer->fullName?></span></p>
+            <p style="margin-top: 5px; padding-left: 20px; font-weight: 800;">Cliente:  <span style="font-weight: 400;"><?=$model->customer->fullName .' - '. $model->customer->code?></span></p>
             <p style="margin-top: 5px; padding-left: 20px; font-weight: 800;">Dirección: <span style="font-weight: 400;"><?=$model->customer->address->shortAddress?></span></p>
             <p style="margin-top: 5px; padding-left: 20px; font-weight: 800;">IVA: <span style="font-weight: 400;"><?=$model->customer->taxCondition->name?></span></p>
         </td>

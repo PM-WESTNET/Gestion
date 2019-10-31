@@ -12,6 +12,7 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\models\Customer;
 ?>
 
 <div class="filters-costumer">
@@ -71,10 +72,10 @@ use app\modules\sale\modules\contract\models\Contract;
             <?= $form->field($model, 'contract_status')->checkboxList(Contract::getStatusesForSelect(), ['id' => 'contract_status'])?>
         </div>
         <div class="col-sm-1">
-            <?= $form->field($model, 'email_status')->checkboxList(['valid' => 'Válido', 'invalid' => 'Inválido'], ['id' => 'email_status']) ?>
+            <?= $form->field($model, 'email_status')->checkboxList(Customer::getStatusEmailForSelect(), ['id' => 'email_status']) ?>
         </div>
         <div class="col-sm-1">
-            <?= $form->field($model, 'email2_status')->checkboxList(['valid' => 'Válido', 'invalid' => 'Inválido'], ['id' => 'email2_status']) ?>
+            <?= $form->field($model, 'email2_status')->checkboxList(Customer::getStatusEmailForSelect(), ['id' => 'email2_status']) ?>
         </div>
         <div class="col-sm-2">
             <?= $form->field($model, 'mobile_app_status')->checkboxList(['uninstalled' => 'Desintalada', 'installed' => 'Instalada'], ['id' => 'mobile_app_status']) ?>

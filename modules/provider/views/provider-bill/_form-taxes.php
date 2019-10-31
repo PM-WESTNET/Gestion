@@ -34,6 +34,9 @@ use yii\widgets\ActiveForm;
         ?>
     </div>
     <div class="col-sm-9 col-md-3">
+        <?= $form->field($pbt, 'net')->textInput()  ?>
+    </div>
+    <div class="col-sm-9 col-md-3">
         <?= $form->field($pbt, 'amount')->textInput()  ?>
     </div>
     <div class="col-sm-9 col-md-2">

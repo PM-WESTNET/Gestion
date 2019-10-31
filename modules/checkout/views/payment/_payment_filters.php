@@ -63,7 +63,12 @@ $form= ActiveForm::begin(['method' => 'GET']);
                 'closed' => Yii::t('app', 'Closed'), 
                 'conciled' => Yii::t('accounting', 'Conciled'), 
                 'cancelled' => Yii::t('accounting', 'Canceled'),])?>
-        </div>        
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <?=$form->field($search, 'paymentMethods', ['inline' => true])->checkboxList($paymentMethods)?>
+        </div>
     </div>
     <div class="row">
             <div class="col-sm-1">

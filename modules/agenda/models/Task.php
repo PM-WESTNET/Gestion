@@ -2,6 +2,7 @@
 
 namespace app\modules\agenda\models;
 
+use app\modules\ticket\models\Ticket;
 use Yii;
 use app\modules\config\models\Config;
 use app\modules\agenda\AgendaModule;
@@ -198,6 +199,15 @@ class Task extends ActiveRecord {
         $userModel = $this->userModelClass;
         $userPK = $this->userModelId;
         return $this->hasMany($userModel::className(), [$userPK => 'user_id'])->viaTable('notification', ['task_id' => 'task_id']);
+    }
+
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTickets() {
+
+        return $this->hasMany(Ticket::class, ['task_id' => 'task_id']);
     }
 
     /**
@@ -532,6 +542,9 @@ class Task extends ActiveRecord {
      * Strong relations: None.
      */
     public function getDeletable() {
+        if($this->getTickets()->exists()) {
+            return false;
+        }
         return true;
     }
 
@@ -617,7 +630,7 @@ class Task extends ActiveRecord {
                 $notification->datetime = time();
                 $notification->status = Notification::STATUS_UNREAD;
                 $notification->reason = EventType::EVENT_TASK_EXPIRED;
-                $notification->save(false);
+                $notification->updateAttributes(['datetime', 'status', 'reason']);
             }
         }
 

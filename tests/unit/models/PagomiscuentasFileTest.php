@@ -12,6 +12,7 @@ use app\tests\fixtures\PointOfSaleFixture;
 use app\tests\fixtures\CompanyHasBillTypeFixture;
 USE app\modules\sale\components\BillExpert;
 use yii\db\Expression;
+use app\modules\checkout\models\Payment;
 
 class PagomiscuentasFileTest extends \Codeception\Test\Unit
 {
@@ -108,7 +109,7 @@ class PagomiscuentasFileTest extends \Codeception\Test\Unit
         ]);
         $model->save();
 
-        expect('Create payment when type is payment only', $model->createPayment(45900, (new \DateTime('now'))->format('Y-m-d'), 123, 'description', 1))->true();
+        expect('Create payment when type is payment only', $model->createPayment(45900, (new \DateTime('now'))->format('Y-m-d'), 123, 'description', 1))->isInstanceOf(Payment::class);
     }
 
     public function testCreateRelationWithPayment()

@@ -38,20 +38,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]);
             }
-            if ($model->deletable) {
-                echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
+
+            if($model->deletable){
+                echo Html::a("<span class='glyphicon glyphicon-remove'></span> " .Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
                     'class' => 'btn btn-danger',
                     'data' => [
                         'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
                         'method' => 'post',
                     ],
                 ]);
-
-                echo Html::a("<span class='glyphicon glyphicon-user'></span> " . Yii::t('app', 'Change Customer'), '#', [
-                    'class' => 'btn btn-warning',
-                    'id' => 'change-customer'
-                ]);
             }
+
+            if($model->status === Payment::PAYMENT_CLOSED && ($model->customer ? trim($model->customer->email) : "" ) !=""){
+                echo Html::a('<span class="glyphicon glyphicon-envelope"></span> '. Yii::t('app', 'Send By Email'), Url::toRoute(['email', 'id' => $model->payment_id, 'from' => 'index']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+            }
+                echo Html::a("<span class='glyphicon glyphicon-user'></span> " .Yii::t('app', 'Change Customer'), '#', ['class' => 'btn btn-warning', 'id' => 'change-customer']);
             ?>
         </p>
     </div>
@@ -68,7 +69,13 @@ $this->params['breadcrumbs'][] = $this->title;
         $attributes = array_merge($attributes, [
             [
                 'attribute' => 'customer',
-                'value' => $model->customer ? $model->customer->fullName : ''
+                'value' => function($model) {
+                    if(!$model->customer_id) {
+                        return '';
+                    }
+                    return Html::a($model->customer->fullName, ['/sale/customer/view', 'id' => $model->customer_id]);
+                },
+                'format' => 'raw'
             ],
             'date:date',
             'number',

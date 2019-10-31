@@ -61,11 +61,29 @@ $config = [
             'useFileTransport' => true,
         ],
         'log' => [
+            'flushInterval' => 1,
             'traceLevel' => YII_DEBUG ? 3 : 0,
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['facturacion'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_facturacion.log'
+                ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['Active_Contract'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_active_contract.log'
+
                 ],
             ],
         ],
@@ -168,6 +186,19 @@ $config = [
                 'load-media-error-handling' => 'ignore'
             ],
         ],
+        'authClientCollection' => [
+            'class' => 'yii\authclient\Collection',
+            'clients' => [
+                'ivr' => [
+                    'class' => 'yii\authclient\OAuth2',
+                    'clientId' => 'ivr_user',
+                    'clientSecret' => '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe',
+                    'tokenUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token',
+                    'authUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/login',
+                    'apiBaseUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/',
+                ],
+            ],
+        ],
     ],
     'modules' => [
         'sale' => [
@@ -265,12 +296,23 @@ $config = [
                 ],
             ]
         ],
+        'automaticdebit' => [
+            'class' => 'app\modules\automaticdebit\AutomaticDebitModule'
+        ],
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
         'automatic_debit' => [
             'class' => 'app\module\automatic_debit\AutomaticDebit',
         ],
+        'ivr' =>  [
+            'class' => 'app\modules\ivr\IvrModule',
+            'modules' => [
+                'v1' => [
+                    'class' => 'app\modules\ivr\v1\V1Module'
+                ]
+            ]
+        ]
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',

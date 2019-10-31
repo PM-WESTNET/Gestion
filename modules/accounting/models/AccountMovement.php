@@ -102,7 +102,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getAccountMovementItems()
     {
-        return $this->hasMany(AccountMovementItem::className(), ['account_movement_id' => 'account_movement_id']);
+        return $this->hasMany(AccountMovementItem::class, ['account_movement_id' => 'account_movement_id']);
     }
 
     /**
@@ -110,7 +110,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getPartnerDistributionModel()
     {
-        return $this->hasOne(PartnerDistributionModel::className(), ['partner_distribution_model_id' => 'partner_distribution_model_id']);
+        return $this->hasOne(PartnerDistributionModel::class, ['partner_distribution_model_id' => 'partner_distribution_model_id']);
     }
     
     /**
@@ -125,7 +125,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getDailyMoneyBoxAccount()
     {
-        return $this->hasOne(MoneyBoxAccount::className(), ['money_box_account_id' => 'daily_money_box_account_id']);
+        return $this->hasOne(MoneyBoxAccount::class, ['money_box_account_id' => 'daily_money_box_account_id']);
     }
 
     /**
@@ -176,7 +176,7 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getDeletable()
     {
-        return ($this->status==AccountMovement::STATE_DRAFT || $this->status==AccountMovement::STATE_BROKEN);
+        return ($this->status == AccountMovement::STATE_DRAFT || $this->status == AccountMovement::STATE_BROKEN);
     }
     
     /**

@@ -288,7 +288,7 @@ class PartnerLiquidationSearch extends PartnerLiquidation
 
         $query = (new Query())
             ->select([
-                new Expression("if(plm.class = 'app\\modules\\accounting\\models\\AccountMovement', 'Movimiento', if(plm.class = 'app\\modules\\checkout\\models\\Payment', 'Cobro', 'Pago' )) as type"),
+                new Expression("if(plm.class = 'app\\\\modules\\\\accounting\\\\models\\\\AccountMovement', 'Movimiento', if(plm.class = 'app\\\\modules\\\\checkout\\\\models\\\\Payment', 'Cobro', 'Pago' )) as type"),
                 new Expression("coalesce(am.date, p.date, pp.date) as date"),
                 'plm.model_id', new Expression("coalesce(am.description, p.concept, pp.description) as description"),
                 new Expression("coalesce((select sum(ami.debit) from account_movement_item ami where ami.account_movement_id = am.account_movement_id), p.amount, pp.amount) as amount")
