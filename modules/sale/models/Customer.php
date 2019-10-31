@@ -1659,6 +1659,10 @@ class Customer extends ActiveRecord {
 
     public function isNewCustomer()
     {
+        if ($this->code === 27237) {
+           return false;
+        }
+
         $contracts = $this->contracts;
         foreach ($contracts as $contract) {
             if (empty($contract->from_date) || $contract->from_date === Yii::t('app', 'Undetermined time')){
