@@ -14,6 +14,25 @@ All notable changes to this project will be documented in this file.
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
  
+  
+ ## [2019.10.31.0] - 31-10-2019
+ ### Agregado
+ - Resumenes bancarios: Importación de resumenes bancarios.
+ - Conciliaciones automática de cuentas.
+ - Contabilidad: Asignación de tiopos de operaciones y códigos a entidades bancarias.
+ - IVR: Habilitación de cliente 27237 para pruebas de IVR
+ ### Modificado
+  - Contabilidad:
+    - Cierre de movimientos contables: Al cerrar un movimiento de una cuenta monetaria, se cierran todos los movimientos
+    anteriores a ese.
+    - Limitación al eliminar o actualizar pagos a proveedor, Comprobantes a proveedor, Cheques, Comprobantes o pagos de 
+    clientes  cuando sus movimientos contables correspondientes ya están cerrados para evitar diferencias en las cajas.
+    - Los movimientos generados automáticamente a partir de un pago a proveedor por ejemplo, se hacen con la fecha actual
+    y no con la fecha del pago. Esto evita movientos en períodos en los cuales ya se han verificado todos los movimientos.
+  - Pagos a proveedores:
+    - Se limita la creación de los pago a proveedores a X dias para atrás desde el dia actual. La cantidad de dias es 
+    configurable.
+  
 ## [2019.10.28.0] - 28-10-2019
 ### Modificado
  - Optimizacion de widget de notificaciones
