@@ -3,17 +3,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## [Pendiente de aprobación]
- - Pagos a proveedores: Se limita la eliminación de pagos a proveedores.
- - Pagos a proveedores: Se limita la eliminación de comprobantes a proveedores.
- - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
- - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
- - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
+ 
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
- - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item
+ - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
+ 
+ ## [2019.10.31.2] - 31-10-2019
+ ### Modificado
+ - Pagos a proveedores: Se limita la eliminación de pagos a proveedores.
+ - Pagos a proveedores: Se limita la eliminación de comprobantes a proveedores.
+ - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
+ - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
+ - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
  
  ## [2019.10.31.1] - 31-10-2019
  ### Modificado
