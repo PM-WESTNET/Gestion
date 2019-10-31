@@ -360,7 +360,7 @@ class CustomerController extends Controller
             ];
         }
 
-        if (!$contract->customer->canRequestPaymentExtension() && $customer->customer_id !== 27237) {
+        if (!$contract->customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
 
             return [

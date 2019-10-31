@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file.
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
  
+ ## [2019.10.31.1] - 31-10-2019
+ ### Modificado
+  - Cambio de Velocidad Programado: Solo se muestran contratos activos
+  - Cambio de Velocidad Programado: Solo se muestran planes
   
  ## [2019.10.31.0] - 31-10-2019
  ### Agregado
