@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
  - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
+ - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item
  
  ## [2019.10.31.1] - 31-10-2019
  ### Modificado
