@@ -13,7 +13,9 @@ class m190802_165454_add_invoice_process_table extends Migration
             'end_datetime' => $this->integer()->defaultValue(null),
             'company_id' => $this->integer(),
             'bill_type_id' => $this->integer(),
-            'period' => $this->string(),
+            'period' => $this->string()->defaultValue(null),
+            'from_date' => $this->string()->defaultValue(null),
+            'to_date' => $this->string()->defaultValue(null),
             'status' => "ENUM('pending','error','finished')",
             'observation' => $this->text()->defaultValue(null),
             'type' => "ENUM('create_bills', 'close_bills')"

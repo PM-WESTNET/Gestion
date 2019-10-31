@@ -308,6 +308,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
 
                                 } else {
                                     for (error in data.errors) {
+                                        console.log(error);
+                                        console.log(errors[error]);
 
                                         $('.field-' + error).addClass('has-error');
                                         $('.field-' + error + ' .help-block').text(data.errors[error]);

@@ -16,6 +16,8 @@ use app\modules\sale\models\Company;
  * @property int $company_id
  * @property int $bill_type_id
  * @property string $period
+ * @property string $from_date
+ * @property string $to_date
  * @property string $status
  * @property string $observation
  *
@@ -45,11 +47,20 @@ class InvoiceProcess extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'bill_type_id', 'status', 'period', 'type'],'required'],
+            [['company_id', 'bill_type_id', 'status', 'type'],'required'],
             [['start_datetime', 'end_datetime'], 'safe'],
             [['company_id', 'bill_type_id'], 'integer'],
             [['status', 'observation', 'type'], 'string'],
-            [['period'], 'string', 'max' => 255],
+            [['period', 'from_date', 'to_date'], 'string', 'max' => 255],
+            ['period', 'required', 'when' => function($model) {
+                return $model->type == InvoiceProcess::TYPE_CREATE_BILLS;
+            }],
+            ['from_date', 'required', 'when' => function($model) {
+                return $model->type == InvoiceProcess::TYPE_CLOSE_BILLS;
+            }],
+            ['to_date', 'required', 'when' => function($model) {
+                return $model->type == InvoiceProcess::TYPE_CLOSE_BILLS;
+            }],
             [['bill_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillType::class, 'targetAttribute' => ['bill_type_id' => 'bill_type_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
         ];
@@ -70,6 +81,8 @@ class InvoiceProcess extends \yii\db\ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'observation' => Yii::t('app', 'Observation'),
             'type' => Yii::t('app', 'Type'),
+            'from_date' => Yii::t('app', 'From date'),
+            'to_date' => Yii::t('app', 'To date'),
         ];
     }
 
@@ -104,7 +117,7 @@ class InvoiceProcess extends \yii\db\ActiveRecord
         return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 
-    public static function createInvoiceProcess($company_id, $bill_type_id, $period, $observation, $type)
+    public static function createInvoiceProcess($company_id, $bill_type_id, $period = null, $observation, $type, $from_date = null, $to_date = null)
     {
         if(!InvoiceProcess::getPendingInvoiceProcess($type)) {
             $model = new InvoiceProcess([
@@ -113,10 +126,15 @@ class InvoiceProcess extends \yii\db\ActiveRecord
                 'status' => InvoiceProcess::STATUS_PENDING,
                 'period' => $period,
                 'observation' => $observation,
-                'type' => $type
+                'type' => $type,
+                'from_date' => $from_date,
+                'to_date' => $to_date
             ]);
 
-            return $model->save();
+//            return
+                $a = $model->save();
+            \Yii::trace($model->getErrors());
+            return $a;
         }
 
         return false;

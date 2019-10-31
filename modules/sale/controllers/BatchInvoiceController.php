@@ -116,8 +116,11 @@ class BatchInvoiceController  extends Controller
             $period = Yii::$app->request->post('ContractSearch')['period'];
             $observation = array_key_exists('bill_observation', Yii::$app->request->post()) ? Yii::$app->request->post('bill_observation') : '';
 
-            if(InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, $period, $observation, InvoiceProcess::TYPE_CREATE_BILLS)) {
-
+            if(!InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, $period, $observation, InvoiceProcess::TYPE_CREATE_BILLS, null, null)) {
+                return [
+                    'status' => 'error',
+                    'messages' => 'error al crear'
+                ];
             };
 
 //            $cti = new ContractToInvoice();
@@ -176,6 +179,8 @@ class BatchInvoiceController  extends Controller
     public function actionCloseInvoices()
     {
         set_time_limit(0);
+        $retMessages = [];
+
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
@@ -183,43 +188,61 @@ class BatchInvoiceController  extends Controller
                 'total' => 0,
                 'qty' => 0
             ]);
-            $i = 1;
-            $searchModel = new BillSearch();
-            $query = $searchModel->searchPendingToClose(Yii::$app->request->post());
-            $total = $query->count();
-            $retMessages = [];
 
-            //TODO crear registro
+            $company_id = Yii::$app->request->post('BillSearch')['company_id'];
+            $bill_type_id = Yii::$app->request->post('BillSearch')['bill_type_id'];
+            $fromDate = Yii::$app->request->post('BillSearch')['fromDate'];
+            $toDate = Yii::$app->request->post('BillSearch')['toDate'];
 
-            foreach ($query->batch() as $bills) {
-                foreach ($bills as $bill) {
-                    $bill->verifyNumberAndDate();
-                    $bill->close();
 
-                   $messages = Yii::$app->session->getAllFlashes();
-                    $fn = function ($messages) {
-                        $rtn = [];
-                        if(is_array($messages)) {
-                            foreach ($messages as $message) {
-                                $rtn[] = Yii::t('afip', $message);
-                            }
-                        }
+            if(InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, null, '', InvoiceProcess::TYPE_CLOSE_BILLS, $fromDate, $toDate)) {
+                return [
+                    'status' => 'success',
+                    'messages' => $retMessages
+                ];
+            } else {
 
-                        return $rtn;
-                    };
-                    foreach ($messages as $key => $message) {
-                        $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
-                            Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
-                    }
-
-                    Yii::$app->session->set('_invoice_close_', [
-                        'total' => $total,
-                        'qty' => $i
-                    ]);
-                    Yii::$app->session->close();
-                    $i++;
-                }
-            }
+                return [
+                    'status' => 'error',
+                    'messages' => 'No es posible registrar el nuevo proceso de facturación'
+                ];
+            };
+//            $i = 1;
+//            $searchModel = new BillSearch();
+//            $query = $searchModel->searchPendingToClose(Yii::$app->request->post());
+//            $total = $query->count();
+//
+//            //TODO crear registro
+//
+//            foreach ($query->batch() as $bills) {
+//                foreach ($bills as $bill) {
+//                    $bill->verifyNumberAndDate();
+//                    $bill->close();
+//
+//                   $messages = Yii::$app->session->getAllFlashes();
+//                    $fn = function ($messages) {
+//                        $rtn = [];
+//                        if(is_array($messages)) {
+//                            foreach ($messages as $message) {
+//                                $rtn[] = Yii::t('afip', $message);
+//                            }
+//                        }
+//
+//                        return $rtn;
+//                    };
+//                    foreach ($messages as $key => $message) {
+//                        $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
+//                            Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
+//                    }
+//
+//                    Yii::$app->session->set('_invoice_close_', [
+//                        'total' => $total,
+//                        'qty' => $i
+//                    ]);
+//                    Yii::$app->session->close();
+//                    $i++;
+//                }
+//            }
 
             //TODO actualizar registro
 

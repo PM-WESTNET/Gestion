@@ -634,6 +634,8 @@ class Bill extends ActiveRecord implements CountableInterface
                 }
             }
         }  catch (\Exception $e){
+            echo 'ERROR______________ '.$e->getTraceAsString()."\n";
+            \Yii::info('ERROR ________________ ' .$e->getTraceAsString(), 'facturacion-cerrado');
             $transaction->rollback();
         }
 
@@ -724,7 +726,9 @@ class Bill extends ActiveRecord implements CountableInterface
             } else {
                 //Si un tipo no tiene asociado factura electronica, la actualizacion de estado se debe realizar de todas formas
                 $msg = Yii::t('app', 'Invoice successfully created.');
-                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                }
                 $this->updateAttributes(['status' => 'closed']);
                 //Agrega el numero de comprobante
                 if ($this->fillNumber) {
@@ -1168,7 +1172,7 @@ class Bill extends ActiveRecord implements CountableInterface
         if ($this->billType && !$this->billType->invoiceClass) {
             if ($this->number) {
                 $bill = Bill::find()->where(['number' => $this->number])->exists();
-                if($bill){
+                if($bill && !Yii::$app instanceof Yii\console\Application){
                     Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
                 }
             } else {
