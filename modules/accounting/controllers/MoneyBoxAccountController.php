@@ -465,13 +465,12 @@ class MoneyBoxAccountController extends Controller
         $searchModel = new AccountMovementSearch();
         $params['AccountMovementSearch']['toDate'] = $movement->date;
         $params['AccountMovementSearch']['fromDate'] = AccountMovement::find()->where(['not', ['status' => 'closed']])->orderBy(['date' => SORT_ASC])->one()->date;
-        $params['AccountMovementSearch']['toTime'] = $movement->time;
         $params['AccountMovementSearch']['account_id_from'] = $account->lft;
         $params['AccountMovementSearch']['account_id_to'] = $account->rgt;
         $params['AccountMovementSearch']['account_id'] = $account->account_id;
 
         $dataProvider = $searchModel->search($params, 1);
-        $result = $this->closeMovements($dataProvider);
+        $result = $this->closeMovements($dataProvider, $movement->date, $movement->time);
 
         if ($result['status']) {
             Yii::$app->session->setFlash('success', Yii::t('app', 'Movements closed successfully'));
@@ -488,7 +487,7 @@ class MoneyBoxAccountController extends Controller
      * @throws \yii\db\Exception
      * Cierra los movimientos.
      */
-    private function closeMovements($dataProvider)
+    private function closeMovements($dataProvider, $toDate, $toTime)
     {
         $transaction = Yii::$app->db->beginTransaction();
         $success = true;
@@ -496,9 +495,11 @@ class MoneyBoxAccountController extends Controller
         foreach ($dataProvider as $movement) {
             $movement = AccountMovement::findOne($movement['account_movement_id']);
             if ($movement->status != AccountMovement::STATE_CLOSED) {
-                if (!$movement->close()) {
-                    $success = false;
-                    array_push($fails_close_movements, $movement['account_movement_id']);
+                if($movement->date != $toDate || ($movement->date == $toDate && $movement->time <= $toTime)) {
+                    if (!$movement->close()) {
+                        $success = false;
+                        array_push($fails_close_movements, $movement['account_movement_id']);
+                    }
                 }
             }
         }
