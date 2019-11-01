@@ -211,9 +211,9 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     public function validateMinimunDate($attribute, $params) {
         $days = Config::getValue('limit_days_to_create_provider_bill') ;
-        $min_date = (new \DateTime('now'))->modify("-$days days")->format('Y-m-d');
+        $min_date = (new \DateTime('now'))->modify("-$days days")->getTimestamp();
 
-        if($this->date < $min_date) {
+        if((new \DateTime($this->date ))->getTimestamp() < $min_date) {
             $this->addError($attribute, Yii::t('app', 'Date must be greater than {date}' , ['date' => $min_date]));
         }
     }

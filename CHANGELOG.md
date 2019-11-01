@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
+ - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
  
  ##[2019.11.01.0] - 01-11-2019
  ### Modificado
