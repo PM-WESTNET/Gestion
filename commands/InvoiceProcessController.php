@@ -71,7 +71,7 @@ class InvoiceProcessController extends Controller
         $i = 1;
         $searchModel = new BillSearch();
         $query = $searchModel->searchPendingToClose([
-            'ContractSearch' => [
+            'BillSearch' => [
                 'company_id' => $invoice_process->company_id,
                 'bill_type_id' => $invoice_process->bill_type_id,
                 'period' => $invoice_process->period,
@@ -82,6 +82,11 @@ class InvoiceProcessController extends Controller
 //        $retMessages = [];
 
         echo "total $total \n";
+        Yii::$app->cache->set('_invoice_close_', [
+            'total' => $total,
+            'qty' => $i
+        ]);
+
 
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
@@ -112,5 +117,7 @@ class InvoiceProcessController extends Controller
                 $i++;
             }
         }
+
+        InvoiceProcess::endProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
     }
 }

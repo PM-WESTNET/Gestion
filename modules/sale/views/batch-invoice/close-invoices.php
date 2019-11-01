@@ -10,6 +10,7 @@ use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\Bill;
 use yii\widgets\Pjax;
+use app\modules\sale\models\InvoiceProcess;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -89,20 +90,24 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-sm-offset-6 col-sm-3">
-                            <div class="form-group field-button">
-                                <label>&nbsp;</label>
-                                <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-warning form-control', 'id' => 'btnFind' ]) ?>
+                    <?php if(!InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) { ?>
+                        <div class="row">
+                            <div class="col-sm-offset-6 col-sm-3">
+                                <div class="form-group field-button">
+                                    <label>&nbsp;</label>
+                                    <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-warning form-control', 'id' => 'btnFind' ]) ?>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group field-button">
+                                    <label>&nbsp;</label>
+                                    <?= Html::a(Yii::t('app', 'Close'), null, ['class' => 'btn btn-success form-control', 'id'=> 'btnInvoice']) ?>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-sm-3">
-                            <div class="form-group field-button">
-                                <label>&nbsp;</label>
-                                <?= Html::a(Yii::t('app', 'Close'), null, ['class' => 'btn btn-success form-control', 'id'=> 'btnInvoice']) ?>
-                            </div>
-                        </div>
-                    </div>
+                    <?php } else { ?>
+                        <h3 class="alert-info"> Procesando ... </h3>
+                    <?php } ?>
 
                     <?php ActiveForm::end(); ?>
                 </div>
@@ -205,12 +210,37 @@ $this->params['breadcrumbs'][] = $this->title;
                 BatchInvoice.cargarBillType();
             });
             $(document).off('click', "#btnInvoice").on('click', "#btnInvoice", function(){
-                BatchInvoice.facturar();
+                var attr = $('#btnInvoice').attr('disabled');
+                if (typeof attr !== typeof undefined && attr !== false) {
+                    ev.preventDefault();
+                }
+                else {
+                    BatchInvoice.facturar();
+                }
             });
 
             BatchInvoice.cargarBillType();
             $('#panel-progress').hide();
             $('#panel-filtro').show();
+
+            $.ajax({
+                url: '<?= Url::to(["invoice-process-close-bill-is-started"])?>',
+                method: 'GET',
+                datatType: 'json',
+                success: function (data) {
+                    console.log('se consulta');
+                    console.log(data);
+                    if(data.invoice_process_started) {
+                        console.log('entra');
+                        $('#panel-progress').show();
+                        $('#panel-filtro').hide();
+                        BatchInvoice.processing = true;
+                        setTimeout(BatchInvoice.getProceso(), 500);
+                    } else {
+                        BatchInvoice.processing = false;
+                    }
+                }
+            })
         }
 
         this.cargarBillType = function (){
@@ -336,7 +366,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     }
                 });
-            }, 1000)
+            }, 2000)
         }
     }
 </script>

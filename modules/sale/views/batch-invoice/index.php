@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <?=$form->field($searchModel, 'period')->widget(DatePicker::classname(), [
+                            <?=$form->field($searchModel, 'period')->widget(DatePicker::class, [
                                 'type' => 1,
                                 'language' => Yii::$app->language,
                                 'model' => $searchModel,

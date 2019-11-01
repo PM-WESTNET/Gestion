@@ -55,12 +55,6 @@ class InvoiceProcess extends \yii\db\ActiveRecord
             ['period', 'required', 'when' => function($model) {
                 return $model->type == InvoiceProcess::TYPE_CREATE_BILLS;
             }],
-            ['from_date', 'required', 'when' => function($model) {
-                return $model->type == InvoiceProcess::TYPE_CLOSE_BILLS;
-            }],
-            ['to_date', 'required', 'when' => function($model) {
-                return $model->type == InvoiceProcess::TYPE_CLOSE_BILLS;
-            }],
             [['bill_type_id'], 'exist', 'skipOnError' => true, 'targetClass' => BillType::class, 'targetAttribute' => ['bill_type_id' => 'bill_type_id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['company_id' => 'company_id']],
         ];

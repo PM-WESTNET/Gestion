@@ -170,10 +170,12 @@ class BatchInvoiceController  extends Controller
             ]
         ]);
 
-        return $this->render('close-invoices', [
-            'dataProvider' => $dataProvider,
-            'searchModel' => $searchModel,
-        ]);
+        var_dump(Yii::$app->cache->get('_invoice_close_'));die();
+
+//        return $this->render('close-invoices', [
+//            'dataProvider' => $dataProvider,
+//            'searchModel' => $searchModel,
+//        ]);
     }
 
     public function actionCloseInvoices()
@@ -184,7 +186,7 @@ class BatchInvoiceController  extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
-            Yii::$app->session->set( '_invoice_close_', [
+            Yii::$app->cache->set( '_invoice_close_', [
                 'total' => 0,
                 'qty' => 0
             ]);
@@ -367,6 +369,20 @@ class BatchInvoiceController  extends Controller
         Yii::$app->response->format = 'json';
 
         if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+            return [ 'invoice_process_started' => true ];
+        }
+
+        return [ 'invoice_process_started' => false ];
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionInvoiceProcessCloseBillIsStarted()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) {
             return [ 'invoice_process_started' => true ];
         }
 
