@@ -143,7 +143,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <script>
     var movementsView = new function(){
     this.init= function(){
-        <?= empty($init) ? 'movementsView.set_cookie("current", 1)' : '' ?>
+        <?= empty($init) ? 'movementsView.set_cookie("current", 1);' : '' ?>
         $('#content').jPaginate({ items: 15}, true);
         $('.pagination a').css('float', 'none');
 
