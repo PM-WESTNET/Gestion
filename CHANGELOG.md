@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
  - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
  - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor
+ - Correcion de conteo de tickets
+ - Correcion error duplicado de tickets en panel de cobranza
  
  ##[2019.11.01.0] - 01-11-2019
  ### Modificado
