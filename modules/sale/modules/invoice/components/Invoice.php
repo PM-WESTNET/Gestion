@@ -45,7 +45,7 @@ class Invoice {
         $api->setTesting($params['testing']);
         $api->setUseOnline($params['use-online']);
         $api->setSaveCalls($params['save-calls']);
-        if ($session->has("afip_token")) {
+        if ($session->exists("afip_token")) {
             $api->setTokens($session->get("afip_token"));
         }
         $obs = array();

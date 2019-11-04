@@ -119,19 +119,13 @@ class BatchInvoiceController  extends Controller
             if(!InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, $period, $observation, InvoiceProcess::TYPE_CREATE_BILLS, null, null)) {
                 return [
                     'status' => 'error',
-                    'messages' => 'error al crear'
+                    'message' => Yii::t('app', 'Invoice process cannot be started, reload the page to see the real state of the process')
                 ];
             };
 
-//            $cti = new ContractToInvoice();
-//            $cti->invoiceAll(Yii::$app->request->post());
-
-//            $messages = $cti->getMessages();
-            $messages = [];
-
             return [
                 'status' => 'success',
-                'messages' => $messages
+                'message' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
             ];
         }
     }
@@ -151,9 +145,15 @@ class BatchInvoiceController  extends Controller
             'qty'   => 0
         ]);
 
-        \Yii::trace($a);
+        $creation_errors = Yii::$app->cache->get('_invoice_create_errors') ? [Yii::$app->cache->get('_invoice_create_errors')] : [];
+        $close_errors = Yii::$app->cache->get('_invoice_close_errors') ? [Yii::$app->cache->get('_invoice_close_errors')] : [];
 
-        return $a;
+
+        $errors = [
+            'errors' => array_merge($creation_errors, $close_errors)
+        ];
+
+        return array_merge($a, $errors);
     }
 
     /**
@@ -170,18 +170,15 @@ class BatchInvoiceController  extends Controller
             ]
         ]);
 
-        var_dump(Yii::$app->cache->get('_invoice_close_'));die();
-
-//        return $this->render('close-invoices', [
-//            'dataProvider' => $dataProvider,
-//            'searchModel' => $searchModel,
-//        ]);
+        return $this->render('close-invoices', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
     }
 
     public function actionCloseInvoices()
     {
         set_time_limit(0);
-        $retMessages = [];
 
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
@@ -197,60 +194,17 @@ class BatchInvoiceController  extends Controller
             $toDate = Yii::$app->request->post('BillSearch')['toDate'];
 
 
-            if(InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, null, '', InvoiceProcess::TYPE_CLOSE_BILLS, $fromDate, $toDate)) {
-                return [
-                    'status' => 'success',
-                    'messages' => $retMessages
-                ];
-            } else {
-
+            if(!InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, null, '', InvoiceProcess::TYPE_CLOSE_BILLS, $fromDate, $toDate)) {
                 return [
                     'status' => 'error',
-                    'messages' => 'No es posible registrar el nuevo proceso de facturación'
-                ];
-            };
-//            $i = 1;
-//            $searchModel = new BillSearch();
-//            $query = $searchModel->searchPendingToClose(Yii::$app->request->post());
-//            $total = $query->count();
-//
-//            //TODO crear registro
-//
-//            foreach ($query->batch() as $bills) {
-//                foreach ($bills as $bill) {
-//                    $bill->verifyNumberAndDate();
-//                    $bill->close();
-//
-//                   $messages = Yii::$app->session->getAllFlashes();
-//                    $fn = function ($messages) {
-//                        $rtn = [];
-//                        if(is_array($messages)) {
-//                            foreach ($messages as $message) {
-//                                $rtn[] = Yii::t('afip', $message);
-//                            }
-//                        }
-//
-//                        return $rtn;
-//                    };
-//                    foreach ($messages as $key => $message) {
-//                        $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
-//                            Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
-//                    }
-//
-//                    Yii::$app->session->set('_invoice_close_', [
-//                        'total' => $total,
-//                        'qty' => $i
-//                    ]);
-//                    Yii::$app->session->close();
-//                    $i++;
-//                }
-//            }
+                    'message' => Yii::t('app', 'Invoice process cannot be started, reload the page to see the real state of the process')
 
-            //TODO actualizar registro
+                ];
+            }
 
             return [
                 'status' => 'success',
-                'messages' => $retMessages
+                'messages' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
             ];
         }
     }

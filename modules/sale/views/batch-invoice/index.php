@@ -187,8 +187,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 var attr = $('#btnInvoice').attr('disabled');
                 if (typeof attr !== typeof undefined && attr !== false) {
                         ev.preventDefault();
-                }
-                else {
+                } else {
                     BatchInvoice.facturar();
                 }
             });
@@ -281,40 +280,14 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             data: postdata,
                             dataType: 'json',
                             success: function (data, textStatus, jqXhr) {
-                                if (data.status == 'success') {
-//                                    BatchInvoice.processing = false;
-                                    var errores = 0;
-                                    var exitosos = 0;
-                                    if(data.messages.error) {
-                                        errores = data.messages.error.length;
-                                        for (i in data.messages.error){
-                                            var div = $("#div-message").clone();
-                                            div.addClass('alert-danger');
-                                            div.find('#message').html(data.messages.error[i]);
-                                            div.show();
-                                            div.appendTo("#messages");
-
-                                        };
-                                        $("#messages").show();
-
-                                        if(data.messages.success) {
-                                            exitosos = data.messages.success.length;
-                                        }
-                                        $("#without-error").html(exitosos);
-                                        $("#with-error").html(errores);
-                                        $("#div-without-error").show();
-                                        $("#div-with-error").show();
-                                    }
-
+                                if (data.status == "success") {
+                                    $("#div-message").addClass('alert-info');
+                                    $("#div-message").find('#message').html(data.message);
+                                    $("#div-message").show();
                                 } else {
-                                    for (error in data.errors) {
-                                        console.log(error);
-                                        console.log(errors[error]);
-
-                                        $('.field-' + error).addClass('has-error');
-                                        $('.field-' + error + ' .help-block').text(data.errors[error]);
-
-                                    }
+                                    $("#div-message").addClass('alert-danger');
+                                    $("#div-message").find('#message').html(data.message);
+                                    $("#div-message").show();
                                 }
                             }
                         });

@@ -1259,5 +1259,8 @@
     'The customer has pending programmed plan change for {date}' => 'El cliente posee un cambio de velocidad programado para el día {date}',
     'This contract has pending programmed plan change for {date}' => 'Este contrato posee un cambio de velocidad programado para el día {date}',
     'Programmed Plan Change created successfull' => 'Cambio de velocidad programado realizado con éxito',
-    'created' => 'Borrador'
+    'created' => 'Borrador',
+    'Invoice process has been started, please wait some minutes...' =>  'Se ha iniciado el proceso de facturación, por favor espere unos momentos...',
+    'Invoice process cannot be started, reload the page to see the real state of the process' => 'El proceso de facturación no puede iniciarse, recargue la página para verificar el estado actual del mismo.',
+    'Company and bill type cant be empty' => 'Empresa y tipo de comprobante no pueden estar vacíos',
 );

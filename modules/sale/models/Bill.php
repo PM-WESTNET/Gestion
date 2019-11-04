@@ -674,12 +674,17 @@ class Bill extends ActiveRecord implements CountableInterface
                             $msg = Yii::t('app', 'Invoice successfully created.');
                             $this->status = 'closed';
                             $backToDraft = false;
-                            Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                            if(!Yii::$app instanceof Yii\console\Application) {
+                                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                            }
                             $retValue = true;
                         } else {
                             $retValue = false;
+                            $this->addErrorToCacheOrSession(['An error occurred while the Invoice is processed.'. ' - Bill_id: '. $this->bill_id, ]);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
-                            Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
+                            if(!Yii::$app instanceof Yii\console\Application) {
+                                Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
+                            }
                         }
                     } else {
                         $backToDraft = true;
@@ -709,18 +714,18 @@ class Bill extends ActiveRecord implements CountableInterface
                     }
 
                     foreach ($result['errors'] as $msg) {
+                        $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'error');
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
-                        Yii::$app->session->addFlash('error', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
                     foreach ($result['observations'] as $msg) {
+                        $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
-                        Yii::$app->session->addFlash('info', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
 
                     return ($retValue || empty($result['errors']));
                 } catch (\Exception $ex) {
                     \Yii::info($ex, 'facturacion');
-                    Yii::$app->session->setFlash("error", Yii::t('app', $ex->getMessage()));
+                    $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                     return false;
                 }
             } else {
@@ -741,12 +746,25 @@ class Bill extends ActiveRecord implements CountableInterface
             if($this->isNewRecord){
                 $this->number = $this->fillNumber(true);
             } else {
-                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                }
                 $this->updateAttributes(['status' => 'closed']);
             }
         }
 
         return true;
+    }
+
+    /**
+     * Examina si es una instacia de consola o no, y agrega los mensajes de error a cache o a session según corresponda.
+     */
+    private function addErrorToCacheOrSession($error, $key = null){
+        if(Yii::$app instanceof Yii\console\Application) {
+            Yii::$app->cache->set('_invoice_close_errors', $error);
+        } else {
+            Yii::$app->session->addFlash($key, $error);
+        }
     }
 
     /**

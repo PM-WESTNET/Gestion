@@ -16,6 +16,11 @@ use app\modules\sale\models\search\BillSearch;
 
 class InvoiceProcessController extends Controller
 {
+    public function init()
+    {
+        Yii::setAlias('@webroot', __DIR__.'/../web');
+        parent::init();
+    }
 
     public function actionControlInvoiceProcess()
     {
@@ -25,6 +30,7 @@ class InvoiceProcessController extends Controller
         if($pending_invoice_process) {
             try {
                 if(Yii::$app->mutex_create_bills->acquire('mutex')) {
+                    Yii::$app->cache->set('_invoice_create_errors', []);
                     $this->invoiceAll($pending_invoice_process);
                 }
             } catch (\Exception $ex) {
@@ -34,9 +40,9 @@ class InvoiceProcessController extends Controller
         }
 
         if($pending_close_invoice_process) {
-            echo "entra a cerrar \n";
             try {
                 if(Yii::$app->mutex_close_bills->acquire('mutex')) {
+                   Yii::$app->cache->set('_invoice_close_errors' ,[]);
                     $this->closePendingBills($pending_close_invoice_process);
                 }
             } catch (\Exception $ex) {
@@ -79,42 +85,23 @@ class InvoiceProcessController extends Controller
         ]);
 
         $total = $query->count();
-//        $retMessages = [];
 
-        echo "total $total \n";
         Yii::$app->cache->set('_invoice_close_', [
             'total' => $total,
             'qty' => $i
         ]);
 
-
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
                 echo "$bill->bill_id \n";
                 $bill->verifyNumberAndDate();
-                $bill->close();
-
-//                $messages = Yii::$app->session->getAllFlashes();
-//                $fn = function ($messages) {
-//                    $rtn = [];
-//                    if(is_array($messages)) {
-//                        foreach ($messages as $message) {
-//                            $rtn[] = Yii::t('afip', $message);
-//                        }
-//                    }
-//
-//                    return $rtn;
-//                };
-//                foreach ($messages as $key => $message) {
-//                    $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
-//                        Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
-//                }
-
-                Yii::$app->cache->set('_invoice_close_', [
-                    'total' => $total,
-                    'qty' => $i
-                ]);
-                $i++;
+                if($bill->close()){
+                    Yii::$app->cache->set('_invoice_close_', [
+                        'total' => $total,
+                        'qty' => $i
+                    ]);
+                    $i++;
+                }
             }
         }
 

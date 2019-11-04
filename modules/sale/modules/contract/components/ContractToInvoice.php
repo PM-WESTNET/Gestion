@@ -607,13 +607,15 @@ class ContractToInvoice
 //                    return false;
 //                }
 
-                if (!Yii::$app instanceof Yii\console\Application) {
-                    $this->addMessage($bill);
-                }
+                $this->addMessage($bill);
+
             }
 
             return true;
         } catch(\Exeption $ex) {
+            if (Yii::$app instanceof Yii\console\Application) {
+                Yii::$app->cache->set('_invoice_create_errors', $ex->getTraceAsString());
+            }
             error_log('*********************************************************************************');
             error_log( "Exception: " .  $ex->getMessage() );
         }
@@ -631,12 +633,23 @@ class ContractToInvoice
             $this->messages[$type][] = $message;
         } else {
             // Busco los errores del comprobante y los agrego a un array local
-            $messages = Yii::$app->session->getAllFlashes();
-            foreach($messages as $key=>$message) {
-                $this->messages[$key][] = Yii::t('app', 'The bill of {customer} can\'t be closed, reason: {reason}', [
-                    'customer'=> $bill->customer->name, 'reason' => (is_array($message) ? implode('<br/>', $message ) : $message)
-                ]);
+            if (!Yii::$app instanceof Yii\console\Application) {
+                $messages = Yii::$app->session->getAllFlashes();
+                foreach($messages as $key=>$message) {
+                    $this->messages[$key][] = Yii::t('app', 'The bill of {customer} can\'t be closed, reason: {reason}', [
+                        'customer'=> $bill->customer->name, 'reason' => (is_array($message) ? implode('<br/>', $message ) : $message)
+                    ]);
+                }
+            } else {
+                if(Yii::$app->cache->get('_invoice_create_errors') ) {
+                    foreach (Yii::$app->cache->get('_invoice_create_errors') as $error) {
+                        $this->messages['danger'][] = Yii::t('app', 'The bill of {customer} can\'t be closed, reason: {reason}. Error: {error}', [
+                            'customer'=> $bill->customer->name, 'reason' => (is_array($message) ? implode('<br/>', $message ) : $message) , 'error' => $error
+                        ]);
+                    }
+                }
             }
+
 
         }
     }
