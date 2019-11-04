@@ -89,10 +89,10 @@ class ProviderBillController extends Controller
                             'itemsDataProvider' => null,
                             'from' => $from
                 ]);
-            } elseif ($model->save()) {
+            } elseif ($model->save() && $model->validate()) {
                 return $this->redirect(['provider-bill/update', 'id' => $model->provider_bill_id, 'from' => $from]);
             }
-        } else {
+        }
             \app\components\helpers\FlashHelper::flashErrors($model);
 
             return $this->render('create', [
@@ -101,7 +101,7 @@ class ProviderBillController extends Controller
                         'itemsDataProvider' => null,
                         'from' => $from
             ]);
-        }
+
     }
 
     /**

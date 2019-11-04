@@ -27,7 +27,7 @@ $payment_method_bank = Config::getValue('payment_method_bank');
 $payment_method_paycheck = Config::getValue('payment_method_paycheck');
 $payment_method_cash = Config::getValue('payment_method_cash');
 
-    Pjax::begin(['id' => 'new_item']);
+//    Pjax::begin(['id' => 'new_item']);
     $form = ActiveForm::begin([
         'id'=>'provider-payment-item',
         'action' => ['add-item', 'id' => $model->provider_payment_id],
@@ -61,14 +61,14 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         <?php } ?>
 
         <?php if (Yii::$app->getModule('accounting')  ) { ?>
-            <div class="col-sm-4">
+            <div class="col-sm-4" id="bank-selector">
                 <?= $form->field($item, 'money_box_id')->dropDownList(ArrayHelper::map(MoneyBox::findByMoneyBoxType( Config::getValue('money_box_smallbox'))->all(),'money_box_id', 'name'),[
                     'separator'=>'<br/>',
                     'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('accounting','Money Box')]),
                     'id' => 'money_box_id',
                 ])->label(Yii::t('paycheck', 'Money Box')); ?>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-4" id="money-box-selector">
 
             <?= $form->field($item, 'money_box_account_id')->widget(DepDrop::class, [
                     'options' => ['id' => 'money_box_account_id'],
@@ -102,7 +102,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
     </div>
 
     <?php ActiveForm::end();
-    yii\widgets\Pjax::end()
+//    yii\widgets\Pjax::end()
     ?>
 
 <script>
@@ -125,8 +125,12 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
                 if ( $(this).val() == <?php echo $payment_method_paycheck ?>) {
                     $('#paycheck-selector').show(100);
+                    $('#bank-selector').hide(100);
+                    $('#money-box-selector').hide(100);
                 }else{
                     $('#paycheck-selector').hide(100);
+                    $('#bank-selector').show(100);
+                    $('#money-box-selector').show(100);
                 }
 
                 $(document).off('keypress', "#item_amount")
@@ -146,9 +150,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
              }
             <?php } ?>
 
-            $("#payment_method_id").trigger("change");
-
-            $('#payment_method_id').on('change', function (e) {
+            $(document).on('change','#payment_method_id', function (e) {
                 if ( $('#payment_method_id').val() == <?= $payment_method_bank ?> || $('#payment_method_id').val() == <?= $payment_method_cash ?>) {
                     if ( $('#payment_method_id').val() == <?= $payment_method_bank ?> ){
                         var type = 'bank'
@@ -175,6 +177,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                         $("#money_box_id").trigger("change");
                     });
                 }
+                $("#money_box_id").trigger("change");
             });
         }
     }

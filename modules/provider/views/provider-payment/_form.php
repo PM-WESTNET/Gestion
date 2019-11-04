@@ -396,6 +396,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         }
 
         this.update = function() {
+            $('#item_amount').val('');
             $.ajax({
                 url: '<?=Url::to(['/provider/provider-payment/update', 'id'=>$model->provider_payment_id])?>',
                 dataType: 'html',
