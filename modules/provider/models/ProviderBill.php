@@ -320,6 +320,10 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     private function formatDatesBeforeSave()
     {
+        if ($this->date instanceof \DateTime) {
+            $this->date = $this->date->format('d-m-Y');
+        }
+
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
     }
 
