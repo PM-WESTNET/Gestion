@@ -380,9 +380,12 @@ class CustomerController extends Controller
                 ->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())
                 ->format('d-m-Y');
 
+            $real_date = (new \DateTime('now'))
+                ->setTimestamp(\app\modules\sale\models\Customer::getMaxDateRealPaymentExtension())
+                ->format('d-m-Y');
 
 
-            if($connection->force($due_date, $payment_extension_product->product_id, null, $create_pti)){
+            if($connection->force($real_date, $payment_extension_product->product_id, null, $create_pti)){
                 PaymentExtensionHistory::createPaymentExtensionHistory($contract->customer_id, PaymentExtensionHistory::FROM_IVR);
                 return [
                     'error' => 'false',
