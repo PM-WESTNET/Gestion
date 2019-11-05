@@ -239,6 +239,7 @@ class CustomerController extends Controller
     public function actionCanForce()
     {
         $data = \Yii::$app->request->post();
+        $default_message = \Yii::t('ivrapi','The customer exceeded the payment extension limit');
 
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
@@ -257,21 +258,13 @@ class CustomerController extends Controller
             ];
         }
 
-        if ($customer->isNewCustomer()){
-            \Yii::$app->response->setStatusCode(400);
-            return [
-                'error' => 'true',
-                'msg' => \Yii::t('ivrapi','The customer can`t request a payment extension')
-            ];
-        }
-
         //TODO: Eliminar segunda condicion al finalizar el desarrollo de IVR
         if (!$customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
 
             return [
                 'error' => 'true',
-                'msg' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
+                'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
 

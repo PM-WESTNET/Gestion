@@ -97,6 +97,9 @@ class Customer extends ActiveRecord {
     public $_email_fields_notifications;
     public $_notifications_way;
 
+    //Propiedad que se usa para devolver errores descriptivos cuando una función puede dar false por diferentes motivos.
+    public $detailed_error;
+
     /**
      * @inheritdoc
      */
@@ -124,7 +127,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
-            [['last_calculation_current_account_balance', 'current_account_balance'], 'safe'],
+            [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
@@ -1562,19 +1565,34 @@ class Customer extends ActiveRecord {
      * Logica de negocio: Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
      * es mayor al dia corriente, el cliente no puede solicitar una extensión de pago. Ej: 15 + 5 = 20
      * Si hoy es 16, puedo solicitar una extension de pago
-     * Si hoy es 21 ya no puedo solicitarla
+     * Si hoy es 21 ya no puedo solicitarla.
+     * IMPORTANTE: Se puede consultar un detalle de porqué devuelve false haciendo $this->detailed_error
      */
     public function canRequestPaymentExtension()
     {
-        //Sólo si el cliente no debe mas de una factura
-        if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
-            return false;
-        }
-
         $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
         $today = (new \DateTime('now'))->getTimestamp();
 
+        //Verifico que la fecha de hoy no sea mayor a la fecha máxima en la cual se puede solicitar la extension de pago
         if($today > $max_date_can_request_payment_extension) {
+            $this->detailed_error = Yii::t('app', "Today's date exceeds the maximun date");
+            return false;
+        }
+
+        //Sólo si el cliente no debe mas de una factura
+        if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
+            $this->detailed_error = Yii::t('app', 'The customer have debt bills');
+            return false;
+        }
+
+        if(!Customer::hasFirstBillPayed($this->customer_id)) {
+            $this->detailed_error = Yii::t('app', 'The customer doesnt have the first bill payed');
+            return false;
+        }
+
+        //Verifico que el cliente no sea nuevo
+        if($this->isNewCustomer()) {
+            $this->detailed_error = Yii::t('app', 'The customer is new');
             return false;
         }
 
@@ -1582,7 +1600,12 @@ class Customer extends ActiveRecord {
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
 
-        return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
+        if($payment_extension_qty > $maximun_payment_extension_qty) {
+            $this->detailed_error = Yii::t('app', 'The customer exceed the maximun payment extension quantity per month');
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1656,6 +1679,9 @@ class Customer extends ActiveRecord {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
     }
 
+    /**
+     * Determina si el cliente es nuevo en base de la fecha de validez del contrato.
+     */
     public function isNewCustomer()
     {
         if ($this->code === 27237) {
