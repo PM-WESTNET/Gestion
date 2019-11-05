@@ -127,6 +127,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'description',
                     'amount:currency',
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function ($model){
+                           if ($model->user) {
+                               return $model->user->username;
+                           }
+                        }
+                    ],
                 ],
                 'options'=>[
                     'style'=>'margin-top:10px;'
