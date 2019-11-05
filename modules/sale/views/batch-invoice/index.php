@@ -90,7 +90,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                                 </div>
                             </div>
                         <?php } else { ?>
-                            <h3 class="alert-info"> Procesando ... </h3>
+                            <h3 class="alert alert-dismissible alert-info"> Procesando ... </h3>
                         <?php } ?>
                     </div>
 
@@ -186,7 +186,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             $(document).off('click', "#btnInvoice").on('click', "#btnInvoice", function(ev){
                 var attr = $('#btnInvoice').attr('disabled');
                 if (typeof attr !== typeof undefined && attr !== false) {
-                        ev.preventDefault();
+                    ev.preventDefault();
                 } else {
                     BatchInvoice.facturar();
                 }
@@ -201,10 +201,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 method: 'GET',
                 datatType: 'json',
                 success: function (data) {
-                    console.log('se consulta');
-                    console.log(data);
                     if(data.invoice_process_started) {
-                        console.log('entra');
                         $('#panel-progress').show();
                         $('#panel-filtro').hide();
                         BatchInvoice.processing = true;
@@ -245,7 +242,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 'ContractSearch[date_new_from]': $('#contractsearch-date_new_from').val(),
                 'ContractSearch[date_new_to]': $('#contractsearch-date_new_to').val(),
             };
-            console.log()
             try {
                 var date = $('#contractsearch-period').kvDatepicker('getDate');
                 date =  "01-" +  (date.getMonth() + 1) + "-" + date.getFullYear();
@@ -316,7 +312,24 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             $('.progress-bar').html(parseInt( value) +'%');
                         } else {
                             $('.progress-bar').html('<?php echo Yii::t('app', 'Process finished') ?>');
+                            $('#process-label').addClass('hidden');
+                            if(data.total != 0 && data.qty != 0) {
+                                BatchInvoice.processing = false;
+                            }
                         }
+
+                        if(data.errors.length > 0) {
+                            var string = '';
+                            errores = data.errors.length;
+                            for (i in data.errors){
+                                string = string + data.errors[i] + "<br>";
+                            };
+
+                            $("#div-message").addClass('alert-danger');
+                            $("#div-message").find('#message').html(string);
+                            $("#div-message").show();
+                        }
+
                         if( BatchInvoice.processing ) {
                             BatchInvoice.getProceso();
                         }

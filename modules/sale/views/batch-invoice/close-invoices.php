@@ -106,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
                         </div>
                     <?php } else { ?>
-                        <h3 id="process-label" class="alert-info"> Procesando ... </h3>
+                        <h3 id="alert alert-dismissible process-label" class="alert-info"> Procesando ... </h3>
                     <?php } ?>
 
                     <?php ActiveForm::end(); ?>
@@ -285,6 +285,8 @@ $this->params['breadcrumbs'][] = $this->title;
             if(!BatchInvoice.processing) {
                 BatchInvoice.processing = true;
                 if (confirm('<?=Yii::t('app', 'You are sure to bill all contracts listed ?')?>')) {
+                    $('#btnInvoice').attr('disabled', 'disabled');
+                    $('#btnInvoice').html('Procesando ...');
                     $("#div-without-error").hide();
                     $("#div-with-error").hide();
                     $("#messages").hide();
@@ -301,6 +303,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             data: postdata,
                             dataType: 'json',
                             success: function (data, textStatus, jqXhr) {
+                                console.log(data);
                                 if (data.status == "success") {
                                     $("#div-message").addClass('alert-info');
                                     $("#div-message").find('#message').html(data.message);
@@ -338,7 +341,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         } else {
                             $('.progress-bar').html('<?= Yii::t('app', 'Process finished') ?>');
                             $('#process-label').addClass('hidden');
-                            BatchInvoice.processing = false;
+                            if(data.total != 0 && data.qty != 0) {
+                                BatchInvoice.processing = false;
+                            }
                         }
 
                         if(data.errors.length > 0) {

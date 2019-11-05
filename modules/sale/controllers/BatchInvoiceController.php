@@ -107,8 +107,8 @@ class BatchInvoiceController  extends Controller
             Yii::$app->response->format = 'json';
 
             Yii::$app->cache->set( '_invoice_all_', [
-                '_invoice_total_' => 0,
-                '_invoice_cantidad_', 0
+                'total' => 0,
+                'qty' => 0,
             ]);
 
             $company_id = Yii::$app->request->post('ContractSearch')['company_id'];
@@ -140,14 +140,10 @@ class BatchInvoiceController  extends Controller
 
         $process = Yii::$app->request->post('process');
 
-        $a = Yii::$app->cache->get($process, [
-            'total' => 0,
-            'qty'   => 0
-        ]);
+        $a = Yii::$app->cache->get($process);
 
         $creation_errors = Yii::$app->cache->get('_invoice_create_errors') ? [Yii::$app->cache->get('_invoice_create_errors')] : [];
         $close_errors = Yii::$app->cache->get('_invoice_close_errors') ? [Yii::$app->cache->get('_invoice_close_errors')] : [];
-
 
         $errors = [
             'errors' => array_merge($creation_errors, $close_errors)
@@ -204,7 +200,7 @@ class BatchInvoiceController  extends Controller
 
             return [
                 'status' => 'success',
-                'messages' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
+                'message' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
             ];
         }
     }
