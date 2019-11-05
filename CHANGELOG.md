@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
  - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor
  - Correcion de conteo de tickets
  - Correcion error duplicado de tickets en panel de cobranza
+ - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
  
  ## [2019.11.05.0] - 05-11-2019
  ### Modificado
