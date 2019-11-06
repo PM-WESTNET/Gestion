@@ -246,6 +246,7 @@ class CustomerController extends Controller
             return [
                 'error' => "true",
                 'deudor' => "false",
+                'nuevo' => 'false',
                 'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
@@ -257,6 +258,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -268,6 +270,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => $customer->debtor ? 'true' : 'false',
+                'nuevo' => $customer->isNew ? 'true' : 'false',
                 'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
@@ -275,6 +278,7 @@ class CustomerController extends Controller
         return [
             'error' => 'false',
             'deudor' => 'false',
+            'nuevo' => 'false',
             'data' => $customer->extendConnetionInfo()
         ];
     }
@@ -326,6 +330,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -337,6 +342,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -348,6 +354,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
@@ -359,6 +366,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
@@ -369,6 +377,7 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'deudor' => $contract->customer->debtor ? 'true' : 'false',
+                'nuevo' => $contract->customer->isNew ? 'true' : 'false',
                 'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
@@ -382,6 +391,7 @@ class CustomerController extends Controller
                 return [
                     'error' => 'true',
                     'deudor' => 'false',
+                    'nuevo' => 'false',
                     'msg' => Yii::t('ivrapi','Can`t create payment extension')
                 ];
             }
@@ -411,6 +421,8 @@ class CustomerController extends Controller
         Yii::$app->response->setStatusCode(400);
         return [
             'error' => 'true',
+            'deudor' => 'false',
+            'nuevo' => 'false',
             'msg' => Yii::t('ivrapi','Can`t create payment extension')
         ];
     }

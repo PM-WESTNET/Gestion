@@ -103,6 +103,9 @@ class Customer extends ActiveRecord {
     // Indica al IVR que el cliente es moroso
     public $debtor = false;
 
+    // Indica al IVR que el cliente es nuevo
+    public $isNew= false;
+
     /**
      * @inheritdoc
      */
@@ -1586,18 +1589,21 @@ class Customer extends ActiveRecord {
         if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
             $this->detailed_error = Yii::t('app', 'The customer have debt bills');
             $this->debtor = true;
-            return false;
         }
 
         if(!Customer::hasFirstBillPayed($this->customer_id, false)) {
             $this->detailed_error = Yii::t('app', 'The customer doesnt have the first bill payed');
             $this->debtor = true;
-            return false;
         }
 
         //Verifico que el cliente no sea nuevo
         if($this->isNewCustomer()) {
             $this->detailed_error = Yii::t('app', 'The customer is new');
+            $this->isNew = true;
+        }
+
+        //Si es deudor o es nuevo, recien salgo aca para que pase por las 3 validaciones
+        if ($this->debtor || $this->isNew) {
             return false;
         }
 
