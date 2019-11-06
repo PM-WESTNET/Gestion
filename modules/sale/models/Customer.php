@@ -100,6 +100,9 @@ class Customer extends ActiveRecord {
     //Propiedad que se usa para devolver errores descriptivos cuando una función puede dar false por diferentes motivos.
     public $detailed_error;
 
+    // Indica al IVR que el cliente es moroso
+    public $debtor = false;
+
     /**
      * @inheritdoc
      */
@@ -1582,11 +1585,13 @@ class Customer extends ActiveRecord {
         //Sólo si el cliente no debe mas de una factura
         if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
             $this->detailed_error = Yii::t('app', 'The customer have debt bills');
+            $this->debtor = true;
             return false;
         }
 
         if(!Customer::hasFirstBillPayed($this->customer_id)) {
             $this->detailed_error = Yii::t('app', 'The customer doesnt have the first bill payed');
+            $this->debtor = true;
             return false;
         }
 
@@ -1705,11 +1710,15 @@ class Customer extends ActiveRecord {
     /**
      * Indica si el cliente tiene la primer factura pagada.
      */
-    public static function hasFirstBillPayed($customer_id)
+    public static function hasFirstBillPayed($customer_id, $verify_bills = true)
     {
         $search = new CustomerSearch();
         $result = $search->searchDebtBills($customer_id);
-        return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+        if ($verify_bills) {
+            return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+        }
+
+        return $result['payed_bills'] >= 1;
     }
 
     /**

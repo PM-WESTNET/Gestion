@@ -244,7 +244,9 @@ class CustomerController extends Controller
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"code" param is required')
+                'error' => "true",
+                'deudor' => "false",
+                'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
 
@@ -254,6 +256,7 @@ class CustomerController extends Controller
             \Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
                 'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -264,12 +267,14 @@ class CustomerController extends Controller
 
             return [
                 'error' => 'true',
+                'deudor' => $customer->debtor ? 'true' : 'false',
                 'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
 
         return [
             'error' => 'false',
+            'deudor' => 'false',
             'data' => $customer->extendConnetionInfo()
         ];
     }
@@ -314,11 +319,13 @@ class CustomerController extends Controller
     public function actionForceConnection()
     {
         $data = Yii::$app->request->post();
+        $default_message = \Yii::t('ivrapi','The customer exceeded the payment extension limit');
 
         if (!isset($data['code'])){
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
                 'msg' => Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -329,6 +336,7 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
                 'msg' => Yii::t('ivrapi','Customer not found')
             ];
         }
@@ -339,6 +347,7 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
@@ -349,6 +358,7 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
@@ -358,7 +368,8 @@ class CustomerController extends Controller
 
             return [
                 'error' => 'true',
-                'msg' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
+                'deudor' => $contract->customer->debtor ? 'true' : 'false',
+                'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
 
@@ -370,6 +381,7 @@ class CustomerController extends Controller
                 Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
+                    'deudor' => 'false',
                     'msg' => Yii::t('ivrapi','Can`t create payment extension')
                 ];
             }
