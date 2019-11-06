@@ -1589,7 +1589,7 @@ class Customer extends ActiveRecord {
             return false;
         }
 
-        if(!Customer::hasFirstBillPayed($this->customer_id)) {
+        if(!Customer::hasFirstBillPayed($this->customer_id, false)) {
             $this->detailed_error = Yii::t('app', 'The customer doesnt have the first bill payed');
             $this->debtor = true;
             return false;
