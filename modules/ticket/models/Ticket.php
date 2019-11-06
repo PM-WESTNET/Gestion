@@ -14,6 +14,7 @@ use yii\httpclient\Client;
 use app\modules\ticket\TicketModule;
 use app\modules\ticket\models\query\TicketQuery;
 use app\modules\agenda\models\Task;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "ticket".
@@ -66,7 +67,6 @@ class Ticket extends \app\components\db\ActiveRecord {
 
     //Fecha que debe ser seteada si el estado del ticket genera una tarea.
     public $task_date;
-
     /**
      * @inheritdoc
      */
@@ -275,7 +275,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             $allUsers = $userClass::findAll([
                         'status' => $userClass::STATUS_ACTIVE
             ]);
-            $users = \yii\helpers\ArrayHelper::map($allUsers, 'id', 'id');
+            $users = ArrayHelper::map($allUsers, 'id', 'id');
         }
 
         //Si vienen grupos de usuarios, buscamos sus integrantes
@@ -858,5 +858,4 @@ class Ticket extends \app\components\db\ActiveRecord {
 
         return $ticket->save();
     }
-
 }

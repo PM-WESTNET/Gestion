@@ -2,6 +2,69 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [Pendiente de aprobación]
+ 
+ - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
+ - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
+ - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
+ - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
+ - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
+ - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
+ - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor
+ - Correcion de conteo de tickets
+ - Correcion error duplicado de tickets en panel de cobranza
+ - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
+ - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
+ - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+ - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
+ - IVR: Se agrega indicador si el cliente es nuevo o no
+ 
+ ## [2019.11.05.0] - 05-11-2019
+ ### Modificado
+  - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
+
+ ##[2019.11.01.0] - 01-11-2019
+ ### Modificado
+ - Vista de movimientos de cuentas monetarias: Se corrige error que se generaba al tildar un movimiento como verificado.
+ 
+ ## [2019.10.31.2] - 31-10-2019
+ ### Modificado
+ - Pagos a proveedores: Se limita la eliminación de pagos a proveedores.
+ - Pagos a proveedores: Se limita la eliminación de comprobantes a proveedores.
+ - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
+ - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
+ - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
+ 
+ ## [2019.10.31.1] - 31-10-2019
+ ### Modificado
+  - Cambio de Velocidad Programado: Solo se muestran contratos activos
+  - Cambio de Velocidad Programado: Solo se muestran planes
+  
+ ## [2019.10.31.0] - 31-10-2019
+ ### Agregado
+ - Resumenes bancarios: Importación de resumenes bancarios.
+ - Conciliaciones automática de cuentas.
+ - Contabilidad: Asignación de tiopos de operaciones y códigos a entidades bancarias.
+ - IVR: Habilitación de cliente 27237 para pruebas de IVR
+ ### Modificado
+  - Contabilidad:
+    - Cierre de movimientos contables: Al cerrar un movimiento de una cuenta monetaria, se cierran todos los movimientos
+    anteriores a ese.
+    - Limitación al eliminar o actualizar pagos a proveedor, Comprobantes a proveedor, Cheques, Comprobantes o pagos de 
+    clientes  cuando sus movimientos contables correspondientes ya están cerrados para evitar diferencias en las cajas.
+    - Los movimientos generados automáticamente a partir de un pago a proveedor por ejemplo, se hacen con la fecha actual
+    y no con la fecha del pago. Esto evita movientos en períodos en los cuales ya se han verificado todos los movimientos.
+  - Pagos a proveedores:
+    - Se limita la creación de los pago a proveedores a X dias para atrás desde el dia actual. La cantidad de dias es 
+    configurable.
+  
+## [2019.10.28.0] - 28-10-2019
+### Modificado
+ - Optimizacion de widget de notificaciones
+
+## [2019.10.25.0] - 25-10-2019
+### Modificado
+ - Correccion de número de Servicio Técnico mostrado en la app
 
 ## [2019.10.23.0] - 23-10-2019
 ### Agregado

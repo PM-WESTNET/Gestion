@@ -96,7 +96,7 @@ class AccountMovementRelation extends \app\components\db\ActiveRecord
     public function getModel()
     {
         $obj = new $this->class();
-        return $this->hasOne($this->class, ['model_id' => $obj->tableSchema->primaryKey[0]]);
+        return $this->hasOne($this->class, [$obj->tableSchema->primaryKey[0] => 'model_id']);
     }
     
 

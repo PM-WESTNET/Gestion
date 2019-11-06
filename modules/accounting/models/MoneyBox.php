@@ -2,9 +2,7 @@
 
 namespace app\modules\accounting\models;
 
-use app\modules\config\models\Config;
 use Yii;
-use yii\db\Query;
 
 /**
  * This is the model class for table "money_box".
@@ -168,13 +166,19 @@ class MoneyBox extends \app\components\db\ActiveRecord
         }
     }
 
-    /**
-     * @param $type
-     * @return \yii\db\ActiveQuery
-     * Busca los money box de acuerdo a su tipo
-     */
-    public static function findByMoneyBoxType($type_id)
+    public function findByMoneyBoxType($type)
     {
-        return MoneyBox::find()->where(['money_box_type_id' => $type_id]);
+        return MoneyBox::find()->andWhere(['=', 'money_box_type_id',$type]);
+    }
+
+    public function getUndefinedOperationTypes()
+    {
+        return $this->getMoneyBoxHasOperationTypes()
+            ->andWhere(['IS', 'operation_type_id', null]);
+    }
+
+    public function hasUndefinedOperationType()
+    {
+        return $this->getUndefinedOperationTypes()->exists();
     }
 }

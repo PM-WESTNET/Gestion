@@ -378,7 +378,6 @@ class Connection extends ActiveRecord {
         }
     }
 
-
     /**
      * Fuerza la conexion. Crea el contractDetail con el recargo y crea el producto a facturar
      * @param $data
@@ -460,5 +459,4 @@ class Connection extends ActiveRecord {
 
         $forcedHistory->save(false);
     }
-
 }

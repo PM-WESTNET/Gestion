@@ -42,11 +42,7 @@ if(!$model->company_id) {
                 ?>
             </div>
         </div>
-
-
     </div>
-
-
 
     <?php
         if (!$model->customer) {

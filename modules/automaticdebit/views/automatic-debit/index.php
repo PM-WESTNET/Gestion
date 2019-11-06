@@ -2,6 +2,9 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\ArrayHelper;
+use app\modules\automaticdebit\models\Bank;
+use app\modules\automaticdebit\models\AutomaticDebit;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\automaticdebit\models\AutomaticDebitSearch */
@@ -37,7 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function ($model) {
                     return $model->bank->name;
                 },
-                'filter' => \yii\helpers\ArrayHelper::map(\app\modules\automaticdebit\models\Bank::find()->all(), 'bank_id', 'name')
+                'filter' => ArrayHelper::map(Bank::find()->all(), 'bank_id', 'name')
             ],
             'cbu',
             [
@@ -46,8 +49,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->getStatusLabel();
                 },
                 'filter' => [
-                    \app\modules\automaticdebit\models\AutomaticDebit::ENABLED_STATUS => Yii::t('app','Enabled'),
-                    \app\modules\automaticdebit\models\AutomaticDebit::DISABLED_STATUS => Yii::t('app','Disabled')
+                    AutomaticDebit::ENABLED_STATUS => Yii::t('app','Enabled'),
+                    AutomaticDebit::DISABLED_STATUS => Yii::t('app','Disabled')
                 ]
             ],
 

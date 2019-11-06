@@ -215,6 +215,26 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getDeletable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse.
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
         if($this->status == ProviderPayment::STATUS_CLOSED) {
             return false;
         }

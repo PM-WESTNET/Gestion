@@ -236,19 +236,5 @@ class TicketTest extends \Codeception\Test\Unit
 
 
     }
-    /*
-         public static function createGestionADSTicket($customer_id)
-    {
-        $ticket = new Ticket([
-            'customer_id' => $customer_id,
-            'task_id' => null,
-            'category_id' => Config::getValue('ticket_category_gestion_ads'),
-            'title' => 'Gestionar ADS',
-            'content' => 'Instalación realizada. Se asignó la IP al cliente.'
-        ]);
-
-        return $ticket->save();
-    }
-     */
 //    TODO resto funciones anteriores de la clase
 }

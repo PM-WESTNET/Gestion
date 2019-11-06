@@ -11,6 +11,7 @@ namespace app\modules\mobileapp\v1\components;
 
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\AuthToken;
+use yii\filters\Cors;
 use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
 use yii\web\ForbiddenHttpException;
@@ -21,10 +22,48 @@ class Controller extends ActiveController
     protected $customer_token_validation= true;
     protected $exclude_actions= [];
 
+
+    public function behaviors()
+    {
+        $behaviors= parent::behaviors();
+
+        $behaviors['corsFilter'] = [
+            'class' => Cors::class,
+            'cors' => [
+                // restrict access to
+                'Origin' => ['*'],
+                'Access-Control-Allow-Origin' => ['*', 'http://localhost:8080'],
+                'Access-Control-Request-Method' => ['POST', 'PUT', 'OPTIONS', 'DELETE'],
+                // Allow only POST and PUT methods
+                'Access-Control-Request-Headers' => ['*'],
+                // Allow only headers 'X-Wsse'
+                'Access-Control-Allow-Credentials' => null,
+                // Allow OPTIONS caching
+                'Access-Control-Max-Age' => 0,
+                // Allow the X-Pagination-Current-Page header to be exposed to the browser.
+                'Access-Control-Expose-Headers' => ['X-Pagination-Per-Page',
+                    'X-Pagination-Total-Count',
+                    'X-private-token',
+                    'Auth-token',
+                    'X-Pagination-Total-Count',
+                    'X-Pagination-Current-Page',
+                    'X-Pagination-Page-Count'],
+            ],
+
+        ];
+
+        return $behaviors;
+    }
+
     public function beforeAction($action)
     {
 
         $parent = parent::beforeAction($action);
+
+        if (\Yii::$app->request->isOptions) {
+            return $parent;
+        }
+
         $headers =\Yii::$app->request->headers;
 
         if(in_array($action->id, ['bill-pdf', 'pdf'])){

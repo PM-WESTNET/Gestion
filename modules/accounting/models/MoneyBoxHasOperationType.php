@@ -11,6 +11,8 @@ use Yii;
  * @property integer $operation_type_id
  * @property integer $money_box_id
  * @property integer $account_id
+ * @property integer $money_box_account_id
+ * @property string $code
  *
  * @property MoneyBox $moneyBox
  * @property MoneyBoxAccount $moneyBoxAccount
@@ -66,13 +68,14 @@ class MoneyBoxHasOperationType extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['operation_type_id', 'money_box_id', 'account_id'], 'required'],
+            [['money_box_id', 'account_id'], 'required'],
             [['operation_type_id', 'money_box_id', 'account_id', 'money_box_account_id'], 'integer'],
-            [['moneyBox', 'operationType', 'account', 'moneyBoxAccount'], 'safe'],
-            [['operation_type_id', 'money_box_id', 'account_id'], 'unique',
+            [['code'], 'string'],
+            [['moneyBox', 'operationType', 'account', 'moneyBoxAccount','operation_type_id', 'code'], 'safe'],
+            /**[['operation_type_id', 'money_box_id', 'account_id'], 'unique',
                 'targetAttribute' => ['operation_type_id', 'money_box_id', 'account_id'],
                 'message' => Yii::t('accounting', 'The combination of Operation Type, Money Box and Account has already been used.')
-            ],
+            ],**/
         ];
     }
 
@@ -89,6 +92,7 @@ class MoneyBoxHasOperationType extends \app\components\db\ActiveRecord
             'moneyBoxAccount' => Yii::t('accounting', 'Money Box Account'),
             'operationType' => Yii::t('accounting', 'OperationType'),
             'account_id' => Yii::t('accounting', 'Account'),
+            'code' => Yii::t('accounting', 'Código'),
         ];
     }    
 

@@ -66,12 +66,11 @@ class BillMovement extends BaseMovement
                 }
 
                 $countMov = CountableMovement::getInstance();
-                if( !( $account_movement_id = $countMov->createMovement(($modelInstance->billType ? $modelInstance->billType->name . " - " . $modelInstance->number : ""),
+                if( !( $account_movement_id = $countMov->createMovement((($modelInstance->billType ? $modelInstance->billType->name . " - " . $modelInstance->number : "") . ' .Fecha del comprobante: ' . $modelInstance->date),
                         $modelInstance->company_id,
                         $items,
                         null,
-                        $modelInstance->partner_distribution_model_id,
-                        $modelInstance->date )) ) {
+                        $modelInstance->partner_distribution_model_id )) ) {
 
                     $this->addMessage('error', Yii::t('accounting', 'The movement is created with errors.'));
                     foreach($countMov->getErrors() as $error) {

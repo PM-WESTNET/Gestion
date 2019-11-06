@@ -108,7 +108,16 @@ class Account extends \app\components\db\ActiveRecord
      */
     public function getAccountMovementItems()
     {
-        return $this->hasMany(AccountMovementItem::className(), ['account_id' => 'account_id']);
+        return $this->hasMany(AccountMovementItem::class, ['account_id' => 'account_id']);
+    }
+
+    /**
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getMoneyBoxAccount()
+    {
+        return $this->hasOne(MoneyBoxAccount::class, ['account_id' => 'account_id']);
     }
     
     /**
@@ -207,5 +216,23 @@ class Account extends \app\components\db\ActiveRecord
             $this->updateCode($account->account_id);
             $i++;
         }
+    }
+
+    /**
+     * Retorna las cuentas que no estan asignadas a un money_box_account para ser listadas en los selects
+     *
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public static function getOnlyAvailableForSelect($parent = null)
+    {
+        return Account::find()
+            ->select(["node.account_id", "node.parent_account_id", "node.code", "CONCAT( REPEAT('&nbsp;&nbsp;', COUNT(parent.name) - 1), node.name ) as name", "(COUNT(parent.name) - 1) AS level", "node.lft", "node.rgt"])
+            ->from(['account AS node'])
+            ->innerJoin(['account AS parent'], 'node.lft BETWEEN parent.lft AND parent.rgt')
+            ->leftJoin('money_box_account mba', 'mba.account_id = node.account_id')
+            ->andFilterWhere(['=', 'parent.account_id', $parent])
+            ->andWhere(['mba.account_id' => null])
+            ->groupBy(['node.name', 'node.parent_account_id'])
+            ->orderBy('node.lft')->all();
     }
 }

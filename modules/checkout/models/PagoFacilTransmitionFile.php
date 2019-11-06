@@ -27,7 +27,6 @@ use yii\helpers\FileHelper;
  */
 class PagoFacilTransmitionFile extends ActiveRecord {
 
-
     const STATUS_DRAFT = 'draft';
     const STATUS_CLOSED = 'closed';
 
@@ -137,6 +136,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * Strong relations: None.
      */
     public function getDeletable() {
+
         if($this->status == self::STATUS_DRAFT && (!$this->getPayments()->exists())) {
             return true;
         }
@@ -353,7 +353,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
         foreach ($payments as $payment){
             $payment->paymentPayment->close();           
         }
-        
+
         $this->status = 'closed';
         $this->updateAttributes(['status']);
         return true;

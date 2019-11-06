@@ -436,9 +436,29 @@ class Payment extends  ActiveRecord  implements CountableInterface
      */
     public function getDeletable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
 
-        return true;//($this->status=='draft');
+        return true;
+    }
 
+    /**
+     * Modificar en caso de que el modelo no pueda ser actualizado
+     * Si el modelo se encuentra en la relacion de una cuenta monetaria no puede ser elimminado.
+     * @return boolean
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if ($this->status != self::PAYMENT_DRAFT) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getConfig()

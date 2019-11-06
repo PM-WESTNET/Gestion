@@ -45,7 +45,7 @@ use webvimark\extensions\BootstrapSwitch\BootstrapSwitch;
         </div>
     </div>
 
-	<?php if ( $model->isNewRecord ): ?>
+	<?php if ( $model->isNewRecord || empty($model->user)): ?>
             <div class="row">
                 <div class="col-sm-6">
                   <?= $form->field($user, 'password')->passwordInput(['maxlength' => 255, 'autocomplete'=>'off']) ?>

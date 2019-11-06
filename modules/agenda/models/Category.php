@@ -101,5 +101,4 @@ class Category extends \app\components\db\ActiveRecord {
     {
         return ArrayHelper::map(self::find()->all(), 'category_id', 'name');
     }
-
 }

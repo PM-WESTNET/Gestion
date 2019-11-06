@@ -133,7 +133,7 @@ if (!$embed) {
 
                 },
                 'update' => function ($url, $model, $key) {
-                    if($model->status == Paycheck::STATE_CREATED || $model->status == Paycheck::STATE_RECEIVED  ) {
+                    if($model->getUpdatable()) {
                         return '<a href="'.Url::toRoute(['paycheck/update', 'id'=>$model->paycheck_id]).'" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>';
                     }
                     return '';

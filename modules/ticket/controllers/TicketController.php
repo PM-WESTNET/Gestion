@@ -553,7 +553,6 @@ class TicketController extends Controller
         return $this->redirect([$redirect]);
     }
 
-
     public function actionCloseCollectionTicketsByPeriod(){
 
         $data = Yii::$app->request->get();
@@ -619,5 +618,4 @@ class TicketController extends Controller
 
         return ['status' => 'error', 'msj' => Yii::t('app','Ticket not found')];
     }
-
 }

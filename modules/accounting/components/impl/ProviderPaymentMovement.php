@@ -87,12 +87,11 @@ class ProviderPaymentMovement extends BaseMovement
                         }
                     }
                     $countMov = CountableMovement::getInstance();
-                    if( !( $account_movement_id = $countMov->createMovement(Yii::t('app', 'Provider Payment') . " - " . $modelInstance->description . " - " . $modelInstance->provider->name,
+                    if( !( $account_movement_id = $countMov->createMovement(Yii::t('app', 'Provider Payment') . " - " . $modelInstance->description . " - " . $modelInstance->provider->name . ' .Fecha del comprobante: ' . $modelInstance->date,
                         $modelInstance->company_id,
                         $items,
                         null,
-                        $modelInstance->partner_distribution_model_id,
-                        $modelInstance->date )) ) {
+                        $modelInstance->partner_distribution_model_id)) ) {
                         $this->addMessage('error', Yii::t('accounting', 'The movement is created with errors.'));
                         foreach($countMov->getErrors() as $error) {
                             Yii::$app->session->addFlash('error', $error);

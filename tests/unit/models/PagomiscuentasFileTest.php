@@ -154,8 +154,4 @@ class PagomiscuentasFileTest extends \Codeception\Test\Unit
         expect('Relation was build', count($relation) > 0)->true();
         expect('Relation bill is correct', $relation->bill_id)->equals($bill->bill_id);
     }
-
-
-
-
 }

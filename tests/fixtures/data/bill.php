@@ -13,7 +13,8 @@ return [
       'observation' => 'XXXXX',
       'bill_type_id' => 1,
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
   ],
   [
       'bill_id' => 2,
@@ -27,7 +28,8 @@ return [
       'observation' => 'XXXXX',
       'bill_type_id' => 1,
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
   ],
   [
       'bill_id' => 3,
@@ -41,7 +43,8 @@ return [
       'bill_type_id' => 1,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
   ],
   [
       'bill_id' => 4,
@@ -55,7 +58,8 @@ return [
       'bill_type_id' => 1,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
   ],
   [
       'bill_id' => 5,
@@ -69,7 +73,8 @@ return [
       'customer_id' => 45901,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1
   ],
   [
       'bill_id' => 6,
@@ -83,7 +88,8 @@ return [
       'customer_id' => 45901,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1
   ],
   [
       'bill_id' => 7,
@@ -96,7 +102,9 @@ return [
       'customer_id' => 45903,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
+      'bill_type_id' => 1,
   ],
   [
       'bill_id' => 8,
@@ -109,7 +117,9 @@ return [
       'customer_id' => 45903,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
+      'bill_type_id' => 1,
   ],
   [
       'bill_id' => 9,
@@ -122,7 +132,9 @@ return [
       'customer_id' => 45903,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
+      'bill_type_id' => 1,
   ],
   [
       'bill_id' => 10,
@@ -135,6 +147,8 @@ return [
       'customer_id' => 45904,
       'observation' => 'XXXXX',
       'user_id' => 1,
-      'partner_distribution_model_id' => 1
+      'partner_distribution_model_id' => 1,
+      'currency_id' => 1,
+      'bill_type_id' => 1,
   ],
 ];

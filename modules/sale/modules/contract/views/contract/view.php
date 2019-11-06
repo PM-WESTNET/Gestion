@@ -407,7 +407,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                     ])?>
                 </div>
 
-
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="force-conn-bton-cancel"><?php echo Yii::t('app', 'Cancel') ?></button>

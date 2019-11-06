@@ -132,7 +132,14 @@ Modal::end();?>
         this.init = function () {
             $('#create-tickets-btn').on('click', function (evt) {
                 evt.preventDefault();
-                var selection = $('#grid').yiiGridView('getSelectedRows');
+                //var selection = $('#grid').yiiGridView('getSelectedRows');
+                var selection= [];
+                $('#grid').find("input[name='selection[]']:checked").each(function () {
+                    if (!$(this).is(':disabled')) {
+                        selection.push($(this).parent().closest('tr').data('key'));
+                    }
+                });
+
                 if(selection.length  == 0) {
                     alert('Debe seleccionar al menos un elemento');
                 } else {

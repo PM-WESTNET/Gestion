@@ -15,29 +15,32 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use app\modules\accounting\models\MoneyBox;
+use kartik\depdrop\DepDrop;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\accounting\models\AccountConfig */
 /* @var $form yii\widgets\ActiveForm */
 
-$payment_method_bank = Config::getValue('payment_method_bank');;
+$payment_method_bank = Config::getValue('payment_method_bank');
 $payment_method_paycheck = Config::getValue('payment_method_paycheck');
 $payment_method_cash = Config::getValue('payment_method_cash');
 
-    yii\widgets\Pjax::begin(['id' => 'new_item']);
+//    Pjax::begin(['id' => 'new_item']);
     $form = ActiveForm::begin([
         'id'=>'provider-payment-item',
         'action' => ['add-item', 'id' => $model->provider_payment_id],
-        'options' => ['data-pjax' => true, 'onsubmit'=>'return false;' ]]); ?>
+        'options' => ['data-pjax' => true, 'onsubmit'=>'return false;' ]
+    ])?>
+
     <input type="hidden" name="ProviderPaymentItem[provider_payment_id]" value="<?=$model->provider_payment_id?>"/>
 
     <div class="row">
         <div class="col-sm-9 col-md-3">
             <div class="form-group">
                 <label><?= $item->getAttributeLabel('paymentMethod'); ?></label>
-                <?php
-                $methods = PaymentMethod::getPaymentMethods( !empty($model->customer_id)  );
-                ?>
+                <?php $methods = PaymentMethod::getPaymentMethods( !empty($model->customer_id)) ?>
                 <select name="ProviderPaymentItem[payment_method_id]" id="payment_method_id" class="form-control">
                     <?php
                     foreach ($methods as $method) {
@@ -58,9 +61,24 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         <?php } ?>
 
         <?php if (Yii::$app->getModule('accounting')  ) { ?>
-            <div class="col-sm-9 col-md-9">
-                <?= $this->render('@app/modules/accounting/views/money-box-account/_selector', ['model' => $item, 'id' => 'bank-account-selector', 'dropDownSuffix' => '_bank', 'moneyBoxType' => Config::getValue('money_box_bank'), 'form' => $form, 'style' => 'horizontal']); ?>
-                <?= $this->render('@app/modules/accounting/views/money-box-account/_selector', ['model' => $item, 'id' => 'smallbox-account-selector', 'dropDownSuffix' => '_small', 'moneyBoxType' => Config::getValue('money_box_smallbox'), 'form' => $form, 'style' => 'horizontal']); ?>
+            <div class="col-sm-4" id="bank-selector">
+                <?= $form->field($item, 'money_box_id')->dropDownList(ArrayHelper::map(MoneyBox::findByMoneyBoxType( Config::getValue('money_box_smallbox'))->all(),'money_box_id', 'name'),[
+                    'separator'=>'<br/>',
+                    'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('accounting','Money Box')]),
+                    'id' => 'money_box_id',
+                ])->label(Yii::t('paycheck', 'Money Box')); ?>
+            </div>
+            <div class="col-sm-4" id="money-box-selector">
+
+            <?= $form->field($item, 'money_box_account_id')->widget(DepDrop::class, [
+                    'options' => ['id' => 'money_box_account_id'],
+                    'pluginOptions' => [
+                        'depends' => ['money_box_id'],
+                        'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass' => Yii::t('paycheck', 'Money Box Account')]),
+                        'url' => Url::to(['/accounting/money-box-account/moneyboxaccounts'])
+                    ]
+                ])->label(Yii::t('accounting', 'Money Box Account'))?>
+
             </div>
         <div class="col-sm-9 col-md-2"  style="display:none"  id="register-number">
                 <?= $form->field($item, 'number')->textInput(['maxlength' => 45]) ?>
@@ -84,7 +102,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
     </div>
 
     <?php ActiveForm::end();
-    yii\widgets\Pjax::end()
+//    yii\widgets\Pjax::end()
     ?>
 
 <script>
@@ -105,22 +123,14 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                     $('#register-number').hide(100);
                 }
 
-                if ( $(this).val() == <?php echo $payment_method_bank ?>) {
-                    $('#bank-account-selector').show(100);
-                }else{
-                    $('#bank-account-selector').hide(100);
-                }
-
-                if ( $(this).val() == <?php echo $payment_method_cash ?>) {
-                    $('#smallbox-account-selector').show(100);
-                }else{
-                    $('#smallbox-account-selector').hide(100);
-                }
-
                 if ( $(this).val() == <?php echo $payment_method_paycheck ?>) {
                     $('#paycheck-selector').show(100);
+                    $('#bank-selector').hide(100);
+                    $('#money-box-selector').hide(100);
                 }else{
                     $('#paycheck-selector').hide(100);
+                    $('#bank-selector').show(100);
+                    $('#money-box-selector').show(100);
                 }
 
                 $(document).off('keypress', "#item_amount")
@@ -140,7 +150,35 @@ $payment_method_cash = Config::getValue('payment_method_cash');
              }
             <?php } ?>
 
-            $("#payment_method_id").trigger("change");
+            $(document).on('change','#payment_method_id', function (e) {
+                if ( $('#payment_method_id').val() == <?= $payment_method_bank ?> || $('#payment_method_id').val() == <?= $payment_method_cash ?>) {
+                    if ( $('#payment_method_id').val() == <?= $payment_method_bank ?> ){
+                        var type = 'bank'
+                    } else {
+                        var type = 'cash'
+                    }
+
+                    $.ajax({
+                        url: '<?=Url::to(['get-data-for-selector'])?>',
+                        data: {type: type},
+                        dataType: 'json',
+                        type: 'get'
+                    }).done(function(json){
+                        $('#money_box_id').empty();
+                        $(json).each(function (i) {
+                            $("<option />", {
+
+                                value: this.val,
+
+                                text: this.text
+
+                            }).appendTo($('#money_box_id'));
+                        });
+                        $("#money_box_id").trigger("change");
+                    });
+                }
+                $("#money_box_id").trigger("change");
+            });
         }
     }
 

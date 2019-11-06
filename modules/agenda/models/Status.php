@@ -135,5 +135,4 @@ class Status extends \app\components\db\ActiveRecord {
     {
         return ArrayHelper::map(self::find()->all(), 'status_id', 'name');
     }
-
 }

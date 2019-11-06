@@ -283,7 +283,7 @@ class PlanController extends Controller
                     throw new BadRequestHttpException('Customer not found');
                 }
 
-                $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
+                $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled', 'type' => Plan::TYPE]);
                 $queryPlans->joinWith('categories');
                 $customer_category = $customer->customerCategory;
 

@@ -21,7 +21,6 @@ class Action extends \app\components\db\ActiveRecord
     const TYPE_EVENT = 'event';
     const TYPE_DATA_EDITION = 'data-edition';
 
-
     public static function tableName()
     {
         return 'action';

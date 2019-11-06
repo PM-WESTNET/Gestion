@@ -300,6 +300,4 @@ class BankController extends Controller
         Yii::$app->session->addFlash('success', Yii::t('app','Payments has been closed successfully'));
         return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
     }
-
-
 }

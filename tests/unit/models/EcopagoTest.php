@@ -128,7 +128,6 @@ class EcopagoTest extends \Codeception\Test\Unit
         //TODO Test y fixture de cashiers
     }
 
-
     public function testFailDisableEcopago()
     {
         $model = Ecopago::findOne(2);
@@ -219,4 +218,3 @@ class EcopagoTest extends \Codeception\Test\Unit
             ->sum('amount');
     }
      */
-

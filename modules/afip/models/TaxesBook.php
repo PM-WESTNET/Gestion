@@ -223,7 +223,6 @@ class TaxesBook extends \app\components\companies\ActiveRecord
         $period = new \DateTime((new \DateTime($this->period))->format('Y-m-t'));
         $now = new \DateTime('now');
         return (WithWorkflow::can($new_state)  && ($period->diff($now)->format('%R%a') >= 0) );
-
     }
 
     /**
@@ -280,7 +279,6 @@ class TaxesBook extends \app\components\companies\ActiveRecord
      */
     private function updateItemsSaleBook()
     {
-
         $searchModel = new TaxesBookSearch();
         $searchModel->fromDate = $this->period;
         $searchModel->company_id = $this->company_id;
@@ -394,5 +392,4 @@ class TaxesBook extends \app\components\companies\ActiveRecord
             self::STATE_CLOSED => Yii::t('app', self::STATE_CLOSED)
         ];
     }
-
 }

@@ -5,6 +5,7 @@ namespace app\modules\provider\models;
 use app\modules\accounting\components\AccountMovementRelationManager;
 use app\modules\accounting\components\CountableInterface;
 use app\modules\accounting\components\CountableMovement;
+use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\TaxRate;
@@ -89,6 +90,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             ['number', 'unique', 'targetAttribute' => ['number', 'provider_id', 'bill_type_id']],
             ['number1', 'default' , 'value' => '0000'],
             ['number2', 'default', 'value' => '00000000'],
+            ['date', 'validateMinimunDate']
         ];
     }
 
@@ -205,6 +207,18 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     }
 
     /**
+     * Valida la fecha minima de creación del comprobante.
+     */
+    public function validateMinimunDate($attribute, $params) {
+        $days = Config::getValue('limit_days_to_create_provider_bill') ;
+        $min_date = (new \DateTime('now'))->modify("-$days days");
+
+        if((new \DateTime($this->date ))->getTimestamp() < $min_date->getTimestamp()) {
+            $this->addError($attribute, Yii::t('app', 'Date must be greater than {date}' , ['date' => $min_date->format('d-m-Y')]));
+        }
+    }
+
+    /**
      * @brief Sets TaxRateTaxRates relation on helper variable and handles events insert and update
      */
     public function setProviderPayments($providerPayments){
@@ -306,18 +320,41 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     private function formatDatesBeforeSave()
     {
+        if ($this->date instanceof \DateTime) {
+            $this->date = $this->date->format('d-m-Y');
+        }
+
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
     }
 
     /**
-     * Determina si el comprobante puede eliminarse
+     * @return bool
+     * Indica si el modelo puede eliminarse
      */
-    public function getDeletable(){
+    public function getDeletable()
+    {
+        if (count($this->providerBillHasProviderPayments) != 0) {
+            return false;
+        };
+
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
         if($this->status == ProviderBill::STATUS_CLOSED) {
             return false;
         }
 
-        if($this->getProviderBillHasProviderPayments()->exists()) {
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
             return false;
         }
 
@@ -332,6 +369,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
         $this->unlinkAll('providerPayments', true);
         $this->unlinkAll('providerBillHasTaxRates', true);
         $this->unlinkAll('providerBillItems', true);
+        AccountMovementRelationManager::delete($this);
     }
 
     /**
