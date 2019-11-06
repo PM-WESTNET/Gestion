@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
  - Correcion error duplicado de tickets en panel de cobranza
  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
+ - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+ - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
+ - IVR: Se agrega indicador si el cliente es nuevo o no
  
  ## [2019.11.05.0] - 05-11-2019
  ### Modificado
