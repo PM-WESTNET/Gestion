@@ -563,10 +563,10 @@ class Customer extends ActiveRecord {
             ->where(['and',
                 ['<=', 'customer_has_discount.from_date', $dateNow],
                 ['>=', 'customer_has_discount.to_date', $dateNow],
-                ['persistent' => null],
+                ['discount.persistent' => 0],
             ])
             ->orWhere(['and',
-                ['not', ['persistent' => null]],
+                ['not', ['discount.persistent' => null]],
                 ['customer_has_discount.to_date' => null],
             ])
             ->andWhere(['customer_has_discount.status' => CustomerHasDiscount::STATUS_ENABLED])

@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
  - Correcion de conteo de tickets
  - Correcion error duplicado de tickets en panel de cobranza
  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
+ - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
  
  ## [2019.11.05.0] - 05-11-2019
  ### Modificado
