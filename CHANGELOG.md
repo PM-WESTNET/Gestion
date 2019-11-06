@@ -6,7 +6,6 @@ All notable changes to this project will be documented in this file.
  
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
- - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
@@ -18,6 +17,11 @@ All notable changes to this project will be documented in this file.
  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
  - IVR: Se agrega indicador si el cliente es nuevo o no
+ 
+ ## [2019.11.06.0]
+ ### Modificado
+ - Informar Pago: Error al enviar foto capturada por la camara
+ - Actualizacion de app en android con ultimos cambios
  
  ## [2019.11.05.0] - 05-11-2019
  ### Modificado
