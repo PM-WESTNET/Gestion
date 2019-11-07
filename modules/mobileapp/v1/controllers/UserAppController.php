@@ -244,6 +244,25 @@ class UserAppController extends Controller
                 $userAppHasCustomer->save();
             }
 
+            /**
+             * Si el código de cliente es el configurado para las pruebas de ios, simulo que esta todo correcto
+             * y no mando ningun código devolviendo respuesta satisfactoria
+             */
+            if ($data['customer_code'] == Config::getValue('customer_code_ios_test')) {
+                if($isEmail) {
+                    return [
+                        'status' => 'success',
+                        'message' => Yii::t('app','Validation code has been sended {email}', ['email' => $model->email]),
+                    ];
+                } else {
+                    return [
+                        'status' => 'success',
+                        'message' => Yii::t('app', 'Validation code has been sended to {phone}', ['phone' => $data['destinatary']]),
+                    ];
+
+                }
+            }
+
             $validationCode= new ValidationCode(['user_app_has_customer_id' => $userAppHasCustomer->user_app_has_customer_id]);
             $validationCode->save();
             if($isEmail) {
@@ -291,6 +310,42 @@ class UserAppController extends Controller
                 'status' => 'error',
                 'error' =>  Yii::t('app','Code and Customer Code is required.'),
             ];
+        }
+
+        if ($data['customer_code'] == Config::getValue('customer_code_ios_test')) {
+            if ($data['code'] == Config::getValue('validation_code_ios_test')) {
+                $customer = Customer::findOne(['code' => $data['customer_code']]);
+
+                if (empty($customer)) {
+                    \Yii::$app->response->setStatusCode(400);
+                    return [
+                        'status' => 'error',
+                        'error' =>  Yii::t('app','Customer Not Found'),
+                    ];
+                }
+
+                $uahc = UserAppHasCustomer::findOne(['customer_code' => $customer->code]);
+
+                if (empty($uahc)) {
+                    \Yii::$app->response->setStatusCode(400);
+                    return [
+                        'status' => 'error',
+                        'error' =>  Yii::t('app','Customer Not Found'),
+                    ];
+                }
+
+                $uahc->customer_id = $customer->customer_id;
+                $uahc->userApp->status= 'active';
+                $uahc->updateAttributes(['customer_id']);
+                $uahc->userApp->updateAttributes(['status']);
+
+                return [
+                    'status' => 'success',
+                    //'customer' => $customer,
+                    'userApp' => $uahc->userApp,
+                    'token' => $uahc->userApp->getAuthToken()
+                ];
+            }
         }
 
         $validationCode= ValidationCode::find()
