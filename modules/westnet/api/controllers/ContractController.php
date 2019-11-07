@@ -332,7 +332,9 @@ class ContractController extends RestController
      */
     public function actionGetBrowserNotificationCustomers()
     {
-        $browser_notification_customers = Yii::$app->cache->get(['browser_notification_customers']);
+        $browser_notification_customers = \Yii::$app->cache->get('browser_notification_customers');
+
+        \Yii::trace($browser_notification_customers);;
         return $browser_notification_customers ? $browser_notification_customers : [];
     }
 }
