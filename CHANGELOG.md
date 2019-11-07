@@ -20,6 +20,12 @@ All notable changes to this project will be documented in this file.
  - IVR: Se agrega numeros de telefono a la info del cliente. 
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  
+ ## [2019.11.07.0]
+ ### Agregado
+ - Notificaciones por explorador: Se agrega comando de cron que guarda los clientes a los que se debe notificar.
+ - Notificaciones por explorador: Se agrega API para que el portal consulte los clientes que se tienen en cuenta en las 
+ notificaciones por explorador.
+ 
  ## [2019.11.06.0]
  ### Modificado
  - Informar Pago: Error al enviar foto capturada por la camara
