@@ -17,7 +17,10 @@ All notable changes to this project will be documented in this file.
  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
- - IVR: Se agrega indicador si el cliente es nuevo o no
+ - IVR: Se agrega indicador si el cliente es nuevo o no.
+ - Notificaciones por explorador: Se agrega comando de cron que guarda los clientes a los que se debe notificar. [browser-notification-customers]
+ - Notificaciones por explorador: Se agrega API para que el portal consulte los clientes que se tienen en cuenta en las 
+ notificaciones por explorador [browser-notification-customers]
  
  ## [2019.11.05.0] - 05-11-2019
  ### Modificado
