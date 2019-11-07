@@ -17,6 +17,8 @@ All notable changes to this project will be documented in this file.
  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
  - IVR: Se agrega indicador si el cliente es nuevo o no
+ - IVR: Se agrega numeros de telefono a la info del cliente. 
+ - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  
  ## [2019.11.06.0]
  ### Modificado

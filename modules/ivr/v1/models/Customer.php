@@ -30,6 +30,10 @@ class Customer extends \app\modules\sale\models\Customer
                 'document_number',
                 'code',
                 'payment_code',
+                'phone',
+                'phone2',
+                'phone3',
+                'phone4',
                 'contracts' => function($model) {
                     $contracts = [];
                     foreach ($model->contracts as $contract) {
@@ -137,4 +141,8 @@ class Customer extends \app\modules\sale\models\Customer
         return $clipped;
     }
 
+    public function hasContractAndConnectionActive()
+    {
+        return $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
 }
