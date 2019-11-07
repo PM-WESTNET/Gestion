@@ -750,9 +750,17 @@ class CustomerController extends Controller
                 ];
             }
 
-            $customer = Customer::findOne(['code' => $data['code']]);
+            $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
             if (empty($customer)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            if (!$customer->hasContractAndConnectionActive()) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
