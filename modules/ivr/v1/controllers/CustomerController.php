@@ -251,9 +251,19 @@ class CustomerController extends Controller
             ];
         }
 
-        $customer = Customer::findOne(['code' => $data['code']]);
+        $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
         if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        if (!$customer->hasContractAndConnectionActive()) {
             \Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
@@ -335,15 +345,15 @@ class CustomerController extends Controller
             ];
         }
 
-        $customer = Customer::findOne(['code' => $data['code']]);
+        $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
         if (empty($customer)) {
-            Yii::$app->response->setStatusCode(400);
+            \Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
                 'deudor' => 'false',
                 'nuevo' => 'false',
-                'msg' => Yii::t('ivrapi','Customer not found')
+                'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
@@ -740,9 +750,17 @@ class CustomerController extends Controller
                 ];
             }
 
-            $customer = Customer::findOne(['code' => $data['code']]);
+            $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
             if (empty($customer)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            if (!$customer->hasContractAndConnectionActive()) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
