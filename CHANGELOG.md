@@ -7,10 +7,6 @@ All notable changes to this project will be documented in this file.
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
- - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
- - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
- - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor
- - Correcion de conteo de tickets
  - Correcion error duplicado de tickets en panel de cobranza
  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
@@ -23,6 +19,18 @@ All notable changes to this project will be documented in this file.
  - Correción filtros asignación masiva de planes
  - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
    la fecha de la ultima actualizacion de los mismos
+ - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
+ - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+  del plan actual del cliente. [Ticket GES-489]
+  
+ ## [2019.11.08.0]
+ ### Modificado
+  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde".
+  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de
+  pago al primer item.
+  - Panel de tickets: Correcion de conteo de tickets.
+  - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor.
+  
  
  ## [2019.11.07.0]
  ### Agregado

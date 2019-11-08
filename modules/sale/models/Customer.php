@@ -1748,4 +1748,23 @@ class Customer extends ActiveRecord {
             ->orderBy(['programmed_plan_change.date' => SORT_DESC])
             ->one();
     }
+
+    /**
+     * Determina si el plan del contrato del cliente es un plan de fibra o no
+     * Si el cliente no tiene contrato devuelve false.
+     */
+    public function hasFibraPlan()
+    {
+        $contract = $this->getContracts()->one();
+
+        if(!$contract) {
+            return false;
+        }
+
+        if(!$contract->hasFibraPlan()){
+            return false;
+        }
+
+        return true;
+    }
 }

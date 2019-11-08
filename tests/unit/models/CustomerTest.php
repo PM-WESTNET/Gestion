@@ -8,6 +8,8 @@
 
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerHasCustomerMessage;
+use app\modules\sale\models\ProductHasCategory;
+use app\modules\sale\modules\contract\models\Plan;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\CustomerClassFixture;
@@ -28,6 +30,8 @@ use app\modules\checkout\models\Payment;
 use app\modules\sale\models\CustomerHasDiscount;
 use app\modules\sale\models\Discount;
 use app\modules\sale\modules\contract\models\Contract;
+use app\tests\fixtures\ProductFixture;
+use app\tests\fixtures\VendorFixture;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -68,6 +72,12 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'customer_message' => [
                 'class' => CustomerMessageFixture::class
+            ],
+            'product' => [
+                'class' => ProductFixture::class
+            ],
+            'vendor' => [
+                'class' => VendorFixture::class
             ]
         ];
     }
@@ -682,6 +692,49 @@ class CustomerTest extends \Codeception\Test\Unit
         $contract->refresh();
 
         expect('Customer is not new 2', $model->isNewCustomer())->false();
+    }
+
+    public function testHasfibraPlan()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456799',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $contract = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => $model->customer_id,
+            'from_date' => (new \DateTime('now'))->format('d-m-Y')
+        ]);
+        $contract->save();
+
+        $model->refresh();
+        $contract->refresh();
+
+        $contract->addContractDetail([
+            'contract_id' => $contract->contract_id,
+            'product_id' => 1,
+            'count' => 1,
+            'vendor_id' => 1
+        ]);
+
+        expect('Has fibra plan return false', $model->hasFibraPlan())->false();
+
+        $category_fibra = \app\modules\sale\models\Category::findOne(['system' => 'plan-fibra']);
+        $product_has_category = new ProductHasCategory([
+            'product_id' => 1,
+            'category_id' => $category_fibra->category_id,
+        ]);
+        $product_has_category->save();
+
+        expect("Has fibra plan return true", $model->hasFibraPlan())->true();
     }
 
     //TODO resto de la clase
