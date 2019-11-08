@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
  - IVR: Se agrega indicador si el cliente es nuevo o no
  - IVR: Se agrega numeros de telefono a la info del cliente. 
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+ - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos
  
  ## [2019.11.07.0]
  ### Agregado
