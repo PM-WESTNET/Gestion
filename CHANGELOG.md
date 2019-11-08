@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
   del plan actual del cliente. [Ticket GES-489]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
   
  ## [2019.11.08.0]
  ### Modificado
