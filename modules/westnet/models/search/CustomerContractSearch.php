@@ -92,7 +92,7 @@ class CustomerContractSearch extends Customer
 
         // Armo la consulta general, con los filtros por defecto, en caso de no tener parametros deberia de traer algo.
         $query
-            ->select([new Expression('distinct c.customer_id'), new Expression('concat(c.lastname, \' \',  c.name) as customer'), 'p.name as plan', 'co.contract_id', 'cd.contract_detail_id', 'con.connection_id'])
+            ->select([new Expression('c.customer_id'), new Expression('concat(c.lastname, \' \',  c.name) as customer'), 'p.name as plan', 'co.contract_id', 'cd.contract_detail_id', 'con.connection_id'])
             ->from('customer as c')
             ->leftJoin('customer_category_has_customer ccc', 'c.customer_id = ccc.customer_id')
             ->leftJoin('contract co', 'c.customer_id = co.customer_id')
@@ -142,6 +142,7 @@ class CustomerContractSearch extends Customer
         }
 
         $query->orderBy(['c.name'=>SORT_ASC]);
+        $query->distinct();
 
         return $query;
     }
