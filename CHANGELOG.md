@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos
  - Correción filtros asignación masiva de planes
+ - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
+   la fecha de la ultima actualizacion de los mismos
  
  ## [2019.11.07.0]
  ### Agregado

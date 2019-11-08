@@ -15,6 +15,7 @@ use app\modules\sale\models\Bill;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
+use function foo\func;
 
 class Customer extends \app\modules\sale\models\Customer
 {
@@ -34,6 +35,16 @@ class Customer extends \app\modules\sale\models\Customer
                 'phone2',
                 'phone3',
                 'phone4',
+                'last_update' => function($model){
+                    return \Yii::$app->formatter->asDate($model->last_update, 'dd-MM-yyyy');
+                },
+                'needsUpdate' => function($model){
+                    if ($model->needsUpdate) {
+                        return "true";
+                    }
+
+                    return "false";
+                },
                 'contracts' => function($model) {
                     $contracts = [
                         'contract_id' => '',
