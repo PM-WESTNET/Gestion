@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
  - IVR: Se agrega indicador si el cliente es nuevo o no
  - IVR: Se agrega numeros de telefono a la info del cliente. 
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+ - Correción filtros asignación masiva de planes
  
  ## [2019.11.07.0]
  ### Agregado
