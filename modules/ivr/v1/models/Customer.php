@@ -36,7 +36,11 @@ class Customer extends \app\modules\sale\models\Customer
                 'phone3',
                 'phone4',
                 'last_update' => function($model){
-                    return \Yii::$app->formatter->asDate($model->last_update, 'dd-MM-yyyy');
+                    if($model->last_update) {
+                        return \Yii::$app->formatter->asDate($model->last_update, 'dd-MM-yyyy');
+                    } else {
+                        return "false";
+                    }
                 },
                 'needsUpdate' => function($model){
                     if ($model->needsUpdate) {
