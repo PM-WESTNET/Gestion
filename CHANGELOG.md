@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos
  - Correción filtros asignación masiva de planes
+ - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+  del plan actual del cliente. [Ticket GES-489]
  
  ## [2019.11.07.0]
  ### Agregado

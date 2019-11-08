@@ -2,12 +2,14 @@
 
 namespace app\modules\sale\modules\contract\controllers;
 
+use app\modules\sale\models\Category;
 use app\modules\sale\models\Customer;
 use Yii;
 use app\modules\sale\modules\contract\models\Plan;
 use app\modules\sale\modules\contract\models\search\PlanSearch;
 use app\modules\sale\models\search\ProductSearch;
 use app\components\web\Controller;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -283,14 +285,33 @@ class PlanController extends Controller
                     throw new BadRequestHttpException('Customer not found');
                 }
 
-                $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled', 'type' => Plan::TYPE]);
-                $queryPlans->joinWith('categories');
+                $fibra_category = Category::findOne(['system' => 'plan-fibra']);
+                $fibra_products = (new Query())->select('product.product_id')
+                    ->from('product')
+                    ->leftJoin('product_has_category phc', 'phc.product_id = product.product_id')
+                    ->where(['type' => Plan::TYPE])
+                    ->andWhere(['phc.category_id' => $fibra_category->category_id]);
+
+                if($customer->hasFibraPlan()) {
+
+                    $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
+                    $queryPlans->joinWith('categories')
+                        ->where(['in','product.product_id', $fibra_products]);
+                } else {
+
+                    $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
+                    $queryPlans->joinWith('categories')
+                        ->where(['not',['in','product.product_id', $fibra_products]]);
+                }
+
                 $customer_category = $customer->customerCategory;
 
                 if ($customer_category->name == 'Familia') {
-                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-residencial']);
+                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-residencial'])
+                    ->andWhere(['product.type' => Plan::TYPE]);
                 }elseif  ($customer_category->name == 'Empresa') {
-                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-empresa']);
+                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-empresa'])
+                        ->andWhere(['product.type' => Plan::TYPE]);
                 }
 
                 foreach ($queryPlans->all() as $plan) {
