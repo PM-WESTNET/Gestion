@@ -11,6 +11,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\modules\contract\components\CompanyByNode;
 use app\modules\ticket\models\Category;
+use app\modules\westnet\isp\IspFactory;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\Vendor;
@@ -610,5 +611,60 @@ class Contract extends ActiveRecord {
             ->andWhere(['contract_id' => $this->contract_id, 'applied' => 0])
             ->orderBy(['date' => SORT_DESC])
             ->one();
+    }
+
+    /**
+     * ¡¡¡¡DANGER!!!!. Actualiza el contrato directamente contra el ISP
+     * Usar con responsabilidad.
+     * TODO: Ver la posibilidad de crear tests para probar esta función.
+     * @return bool
+     */
+    public function updateOnISP()
+    {
+        if ($this->status === self::STATUS_ACTIVE) {
+            if ($this->external_id) {
+                $server = $this->connection->server;
+
+                if ($server) {
+                    $factory =IspFactory::getInstance();
+                    $isp = $factory->getIsp($server);
+
+                    $contractApi= $isp->getContractApi();
+
+                    $plan = $this->getPlan();
+
+                    $plan_id = $plan ? $plan->plan_id : null;
+
+                    $contractObject= new \app\modules\westnet\isp\models\Contract($this, $this->connection, $plan_id);
+
+                    if($contractApi->update($contractObject) !== false) {
+                        return true;
+                    }
+
+                }
+            }else {
+                $server = $this->connection->server;
+
+                if ($server) {
+                    $factory =IspFactory::getInstance();
+                    $isp = $factory->getIsp($server);
+
+                    $contractApi= $isp->getContractApi();
+
+                    $plan = $this->getPlan();
+
+                    $plan_id = $plan ? $plan->plan_id : null;
+
+                    $contractObject= new \app\modules\westnet\isp\models\Contract($this, $this->connection, $plan_id);
+
+                    if($contractApi->create($contractObject) !== false) {
+                        return true;
+                    }
+
+                }
+            }
+        }
+
+        return false;
     }
 }

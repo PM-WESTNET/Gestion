@@ -1194,4 +1194,17 @@ class ContractController extends Controller {
             }
         }
     }
+
+    public function actionUpdateOnIsp($contract_id)
+    {
+        $contract = $this->findModel($contract_id);
+
+        if ($contract->updateOnISP()) {
+            Yii::$app->session->addFlash('success', Yii::t('app','Contract updated on ISP successfull'));
+            return $this->redirect(['view', 'id' => $contract->contract_id]);
+        }
+
+        Yii::$app->session->addFlash('error', Yii::t('app','Can`t update contract on ISP'));
+        return $this->redirect(['view', 'id' => $contract->contract_id]);
+    }
 }
