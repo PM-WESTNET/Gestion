@@ -22,7 +22,11 @@ All notable changes to this project will be documented in this file.
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
   del plan actual del cliente. [Ticket GES-489]
- - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
+ - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+ de cliente etc). [Ticket GES-568]
+ - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+ uno de los clientes. [Ticket GES-568]
   
  ## [2019.11.08.0]
  ### Modificado
