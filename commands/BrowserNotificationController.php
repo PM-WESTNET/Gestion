@@ -69,7 +69,7 @@ class BrowserNotificationController extends Controller
                                     'lastname' => trim($customer['lastname']),
                                     'code' => $customer['code'],
                                     'ip' => long2ip($customer['ipv4']),
-                                    'notification_content' => $browser_transport->replaceText($notification->content, $customer)
+                                    'notification_content' => utf8_encode($browser_transport->replaceText($notification->content, $customer))
                                 ]);
                             }
                         }
