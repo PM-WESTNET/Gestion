@@ -15,11 +15,12 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 ]); ?>
 
 <div class="row">
-    <div class="col-sm-3">
+    <div class="col-sm-2">
         <?= Yii::t('app', 'References') ?>:
     </div>
-    <div class="col-sm-9">
+    <div class="col-sm-10">
         <span class="reference label label-default" data-ref="@Nombre" id="lbl-nombre">@Nombre</span>
+        <span class="reference label label-info" data-ref="@CodigoDeCliente" id="lbl-codigo-de-cliente">@CodigoDeCliente</span>
         <span class="reference label label-primary" data-ref="@Telefono1" id="lbl-telefono1">@Telefono1</span>
         <span class="reference label label-success" data-ref="@Telefono2" id="lbl-telefono2">@Telefono2</span>
         <span class="reference label label-info" data-ref="@Code" id="lbl-codigo"></span>
