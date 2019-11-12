@@ -23,6 +23,8 @@ All notable changes to this project will be documented in this file.
  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
   del plan actual del cliente. [Ticket GES-489]
  - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+ - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
   
  ## [2019.11.08.0]
  ### Modificado
