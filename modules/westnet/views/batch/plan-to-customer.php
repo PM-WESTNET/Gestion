@@ -1,12 +1,18 @@
 <?php
 
 use app\modules\config\models\Config;
+use app\modules\sale\models\CustomerCategory;
+use app\modules\sale\modules\contract\models\Plan;
+use app\modules\westnet\models\Node;
+use app\modules\westnet\models\Server;
 use kartik\grid\GridView;
 use kartik\widgets\DatePicker;
 use kartik\widgets\DepDrop;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -39,7 +45,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                     <div class="row">
                         <div class="col-sm-6">
                             <?= $form->field($searchModel, 'product_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\modules\contract\models\Plan::find()->where(['type'=>'plan'])->orderBy(['name'=>SORT_ASC])->all(), 'product_id', 'name'),[
+                                ArrayHelper::map(Plan::find()->where(['type'=>'plan'])->orderBy(['name'=>SORT_ASC])->all(), 'product_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Plan')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -48,7 +54,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
 
                         <div class="col-sm-6">
                             <?= $form->field($searchModel, 'customer_category_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\models\CustomerCategory::find()->all(), 'customer_category_id', 'name'),[
+                                ArrayHelper::map(CustomerCategory::find()->all(), 'customer_category_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Customer Category')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -59,7 +65,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                     <div class="row">
                         <div class="col-sm-6">
                             <?= $form->field($searchModel, 'server_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Server::find()->all(), 'server_id', 'name'),[
+                                ArrayHelper::map(Server::find()->all(), 'server_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Server')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -67,7 +73,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                         </div>
                         <div class="col-sm-6">
                             <?= $form->field($searchModel, 'node_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Node::find()->all(), 'node_id', 'name'),[
+                                ArrayHelper::map(Node::find()->all(), 'node_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Node')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -88,7 +94,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                     <div class="row">
                         <div class="col-sm-6">
                             <?= $form->field($searchModel, 'new_product_id')->dropDownList(
-                                \yii\helpers\ArrayHelper::map(\app\modules\sale\modules\contract\models\Plan::find()->where(['type'=>'plan'])->orderBy(['name'=>SORT_ASC])->all(), 'product_id', 'name'),[
+                                ArrayHelper::map(Plan::find()->where(['type'=>'plan'])->orderBy(['name'=>SORT_ASC])->all(), 'product_id', 'name'),[
                                 'prompt'=> Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Plan')]),
                                 'encode'=>false,
                                 'separator'=>'<br/>',
@@ -148,8 +154,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                     <h3 class="panel-title"><?= Yii::t('westnet', 'Customers to Change') ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php
-                    \yii\widgets\Pjax::begin(
+                    <?php Pjax::begin(
                         [
                             'id' => 'contracts',
                             'enablePushState'=>FALSE
@@ -175,7 +180,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                         ]);
                     }
 
-                    \yii\widgets\Pjax::end() ?>
+                    Pjax::end() ?>
                 </div>
             </div> <!-- Fin Seleccion de datos para filtro de facturas -->
 
@@ -229,7 +234,6 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                             dataType: 'json',
                             success: function (data, textStatus, jqXhr) {
                                 if (data.status == 'success') {
-                                    BatchPlanToCustomer.processing = false;
                                     var errores = 0;
                                     var exitosos = 0;
                                     if(data.messages.error) {
@@ -253,7 +257,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                                         $("#div-with-error").show();
                                     } else {
                                         $('.progress-bar').css('width', data.total+'%').attr('aria-valuenow', data.total);
-                                        $('.progress-bar').html('<?php echo Yii::t('app', 'Process finished') ?>');
+                                        $('.progress-bar').html('<?= Yii::t('app', 'Process finished') ?>');
                                     }
 
                                 } else {
@@ -268,7 +272,6 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                         });
                     }, 500);
                 }
-                BatchPlanToCustomer.processing = false;
             }
             return false;
         }
@@ -277,7 +280,7 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
             setTimeout(function(){
                 $.ajax({
                     method: 'POST',
-                    url: '<?=Url::to(['/westnet/batch/get-process'])?>',
+                    url: '<?= Url::to(['/westnet/batch/get-process'])?>',
                     data: {
                         'process': '_batch_to_customer_'
                     },
@@ -291,7 +294,10 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Batch Process - Assign plans
                         if(data.total!=data.qty) {
                             $('.progress-bar').html(parseInt( value) +'%');
                         } else {
-                            $('.progress-bar').html('<?php echo Yii::t('app', 'Process finished') ?>');
+                            $('.progress-bar').html('<?= Yii::t('app', 'Process finished') ?>');
+                            if(data.total != 0 && data.qty != 0) {
+                                BatchPlanToCustomer.processing = false;
+                            }
                         }
                         if( BatchPlanToCustomer.processing ) {
                             BatchPlanToCustomer.getProceso();

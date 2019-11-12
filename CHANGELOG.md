@@ -25,6 +25,12 @@ All notable changes to this project will be documented in this file.
  - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
+ - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+ de cliente etc). [Ticket GES-568]
+ - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+ uno de los clientes. [Ticket GES-568]
+ - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
   
  ## [2019.11.08.0]
  ### Modificado

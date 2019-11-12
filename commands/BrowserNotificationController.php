@@ -7,6 +7,7 @@
  */
 namespace app\commands;
 
+use app\modules\westnet\notifications\components\transports\CPortalTransport;
 use app\modules\westnet\notifications\models\Notification;
 use app\modules\checkout\models\Payment;
 use app\modules\sale\models\Bill;
@@ -48,15 +49,18 @@ class BrowserNotificationController extends Controller
                     ->andWhere(["$date_of_the_week" => 1])
                     ->all();
 
-
                 $customers_array = [];
 
                 $notification_qty = count($notifications);
                 echo "Se encontraron $notification_qty notificaciones activas actualmente\n";
 
+
+
                 foreach ($notifications as $notification) {
                     foreach ($notification->destinataries as $destinataries) {
                         $query = $destinataries->getCustomersQuery(false);
+
+                        $browser_transport = new CPortalTransport();
 
                         foreach ($query->batch(1000) as $customers) {
                             foreach ($customers as $customer) {
@@ -65,7 +69,7 @@ class BrowserNotificationController extends Controller
                                     'lastname' => trim($customer['lastname']),
                                     'code' => $customer['code'],
                                     'ip' => long2ip($customer['ipv4']),
-                                    'notification_content' => $notification->content
+                                    'notification_content' => $browser_transport->replaceText($notification->content, $customer)
                                 ]);
                             }
                         }
