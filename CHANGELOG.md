@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file.
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
  uno de los clientes. [Ticket GES-568]
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
+ - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+ a diferentes pagos. [Ticket GES-547]
   
  ## [2019.11.08.0]
  ### Modificado
