@@ -130,7 +130,7 @@ class BatchClosureService
         /** @var ProviderBill $bill */
         $bill = new ProviderBill();
         $bill->bill_type_id = $type_id;
-        $bill->date = (new \DateTime('now'));
+        $bill->date = (new \DateTime('now'))->format('d-m-Y');
         $bill->company_id = $company->company_id;
         $bill->provider_id = $provider_id;
         $bill->partner_distribution_model_id = $company->partner_distribution_model_id;
