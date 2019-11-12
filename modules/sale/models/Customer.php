@@ -133,7 +133,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
-            [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error'], 'safe'],
+            [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error', 'document_image', 'tax_image'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
@@ -376,7 +376,9 @@ class Customer extends ActiveRecord {
             'needs_bill' => Yii::t('app', 'Needs Bill'),
             'phone4' => Yii::t('app', 'Cellphone 4'),
             'last_update' => Yii::t('app', 'Last update'),
-            'hourRanges' => Yii::t('app', 'Customer Hour range')
+            'hourRanges' => Yii::t('app', 'Customer Hour range'),
+            'document_image' => Yii::t('app', 'Document image'),
+            'tax_image' => Yii::t('app', 'Tax image'),
         ];
 
         //Labels adicionales definidos para los profiles
@@ -1767,4 +1769,22 @@ class Customer extends ActiveRecord {
 
         return true;
     }
+
+    /**
+     * Devuelve el path de la imagen del documento
+     */
+    public function getDocumentImageWebPath()
+    {
+        return (!$this->document_image ? null : 'uploads/document_images/' . basename($this->document_image));
+    }
+
+    /**
+     * Devuelve el path de la imagen del impuesto cargado
+     */
+    public function getTaxImageWebPath()
+    {
+        return (!$this->tax_image ? null : 'uploads/tax_images/' . basename($this->tax_image));
+    }
+
+
 }

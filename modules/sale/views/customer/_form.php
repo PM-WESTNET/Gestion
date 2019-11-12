@@ -18,6 +18,7 @@ use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
 use app\modules\sale\models\Company;
 use webvimark\modules\UserManagement\models\User;
+use kartik\widgets\FileInput;
 
 /**
  * @var yii\web\View $this
@@ -273,6 +274,33 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     </div>
 
     <div class="row">
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('document_image_update', null, ['id'=>'document_image_update']); ?>
+                <?= $form->field($model, 'document_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->document_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getDocumentImageWebPath(), ['class'=>'file-preview-image','style' =>'height:100%; width: 100%', 'alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
+        </div>
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('tax_image_update', null, ['id'=>'tax_image_update']); ?>
+                <?= $form->field($model, 'tax_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->tax_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getTaxImageWebPath(), ['class'=>'file-preview-image', 'style' =>'height:100%; width: 100%','alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-xs-12">
 
           <!-- Nav tabs -->
@@ -324,6 +352,50 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         ?>;
 
         this.init = function(){
+
+            $('#customer-document_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-document_image').val()==0) {
+                            $('#document_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-document_image').on('filebrowse', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileclear', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileselectnone', function(event) {
+                $('#document_image_update').val(0);
+            });
+
+            $('#customer-tax_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-tax_image').val()==0) {
+                            $('#tax_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-tax_image').on('filebrowse', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileclear', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileselectnone', function(event) {
+                $('#tax_image_update').val(0);
+            });
+
+
             $('#customer-tax_condition_id').on('change', function(e){
                 onTaxConditionChange(e);
             });
@@ -486,3 +558,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     };
 </script>
 <?php $this->registerJs('Customer.init();') ?>
+
+    <script>
+        var CompanyForm = new function() {
+
+            this.init = function() {
+
+            };
+        };
+    </script>
+    <?php  $this->registerJs("CompanyForm.init();"); ?>

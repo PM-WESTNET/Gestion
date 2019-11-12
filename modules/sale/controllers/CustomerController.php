@@ -205,6 +205,28 @@ class CustomerController extends Controller
      */
     public function actionCreate()
     {
+
+        /*
+         $model = new Company();
+
+        if ($model->load(Yii::$app->request->post())&&$model->validate()) {
+            $this->upload($model, 'certificate');
+            $this->upload($model, 'key');
+            $this->upload($model, 'logo');
+
+            if($model->save()){
+                return $this->redirect(['point-of-sale/create', 'company' => $model->company_id]);
+            }
+        } else {
+            foreach( $model->getErrors() as $error) {
+                Yii::$app->session->setFlash("error", Yii::t('app', $error[0]));
+            }
+        }
+
+        return $this->render('create', [
+            'model' => $model,
+        ]);
+         */
         $model = new Customer;
         $address= new Address;
         $address->scenario = 'insert';
@@ -213,6 +235,8 @@ class CustomerController extends Controller
         if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
             if($address->save()){
                 $model->setAddress($address);
+                $this->upload($model, 'document_image');
+                $this->upload($model, 'tax_image');
 
                 if($model->save()){
                     if(Yii::$app->params['plan_product']){
@@ -272,8 +296,25 @@ class CustomerController extends Controller
     {
         $model = $this->findModel($id);
         $address=  $model->address ? $model->address : new Address;
+        $document_image = $model->document_image;
+        $tax_image = $model->tax_image;
+        $docImageUpdate = Yii::$app->request->post('document_image_update', 0);
+        $taxImageUpdate =  Yii::$app->request->post('tax_image_update', 0);
+
         if($model->canUpdate()){
             if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
+
+                if ($docImageUpdate) {
+                    $this->upload($model, 'document_image');
+                } else {
+                    $model->document_image = $document_image;
+                }
+
+                if ($taxImageUpdate) {
+                    $this->upload($model, 'tax_image');
+                } else {
+                    $model->tax_image = $tax_image;
+                }
 
                 if ($address->save()) {
 
@@ -806,5 +847,29 @@ class CustomerController extends Controller
         }
 
         return $this->render('verify-emails', ['results' => $results]);
+    }
+
+    private function upload($model, $attr){
+
+        $file = UploadedFile::getInstance($model, $attr);
+
+        $folder = \yii\helpers\Inflector::pluralize($attr);
+
+        if ($file && $model->validate()) {
+            $filePath = Yii::$app->params['upload_directory'] . "$folder/". uniqid($attr) . '.' . $file->extension;
+
+            if (!file_exists(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/")) {
+                mkdir(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/", 0775, true);
+            }
+
+            $file->saveAs(Yii::getAlias('@webroot') . '/' . $filePath);
+
+            $model->$attr = $filePath;
+
+            return true;
+        } else {
+            return false;
+        }
+
     }
 }

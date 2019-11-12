@@ -308,6 +308,22 @@ $this->params['breadcrumbs'][] = $this->title;
         ];
     }
 
+    $attributes[] = [
+        'label' => Yii::t('app', 'Document image') ,
+        'value' => function ($model) {
+            return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Tax image') ,
+        'value' => function ($model) {
+            return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
+
     echo DetailView::widget([
         'model' => $model,
         'attributes' => $attributes,

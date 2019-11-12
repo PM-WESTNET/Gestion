@@ -1272,4 +1272,6 @@
     'The customer doesnt have the first bill payed' => 'El cliente no tiene la primera factura pagada',
     'The customer is new' => 'El cliente es nuevo',
     'The customer exceed the maximun payment extension quantity per month' => 'El cliente excede la cantidad de extensiones de pago por mes',
+    'Document image' => 'Imagen de documento',
+    'Tax image' => 'Imagen de impuesto',
 );
