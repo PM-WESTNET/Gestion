@@ -30,6 +30,8 @@ All notable changes to this project will be documented in this file.
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
  - Creación de cliente nuevo: Se agrega la posibilidad de adjuntar imagenes del documento e impuesto en el momento de 
  crear un nuevo cliente. [Ticket GES-576] [customer-images]
+ - Index de clientes: Se agregan columnas para identificar rápidamente aquellos clientes que no poseen foto del documento
+ o de un impuesto cargada. [Ticket GES-576] [customer-images]
   
  ## [2019.11.08.0]
  ### Modificado

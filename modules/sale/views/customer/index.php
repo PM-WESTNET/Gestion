@@ -91,6 +91,24 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         'document_number',
+        [
+            'label' => 'Foto doc.',
+            'value' => function($model) {
+                return $model->document_image ? '<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>' : '<span class="glyphicon glyphicon-remove" style="color: darkred"></span>';
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
+        [
+            'label' => 'Foto imp.',
+            'value' => function($model) {
+                return $model->tax_image ? '<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>' : '<span class="glyphicon glyphicon-remove" style="color: darkred"></span>';
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
         'phone',
     ];
 
