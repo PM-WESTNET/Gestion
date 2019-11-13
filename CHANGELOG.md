@@ -8,14 +8,9 @@ All notable changes to this project will be documented in this file.
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Correcion error duplicado de tickets en panel de cobranza
- - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
- - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
- - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
  - IVR: Se agrega indicador si el cliente es nuevo o no
- - IVR: Se agrega numeros de telefono a la info del cliente. 
  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
- - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos
  - Correción filtros asignación masiva de planes
  - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
    la fecha de la ultima actualizacion de los mismos
@@ -30,11 +25,20 @@ All notable changes to this project will be documented in this file.
  de cliente etc). [Ticket GES-568]
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
  uno de los clientes. [Ticket GES-568]
- - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
  a diferentes pagos. [Ticket GES-547]
- - Asignacion masiva de planes a clientes: Se corrige error que ocurria en el servidor con ciertos contratos [Ticket GES-557]
   
+ ## [2019.11.13.0]
+ ### Modificado
+  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso.
+  - Asignacion masiva de planes a clientes: Se corrige error que ocurria en el servidor con ciertos contratos.
+  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
+  - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos.
+  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
+  - IVR: Se agrega numeros de telefono a la info del cliente.
+  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
+   
+ 
  ## [2019.11.08.0]
  ### Modificado
   - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde".
