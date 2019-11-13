@@ -32,6 +32,8 @@ All notable changes to this project will be documented in this file.
  crear un nuevo cliente. [Ticket GES-576] [customer-images]
  - Index de clientes: Se agregan columnas para identificar rápidamente aquellos clientes que no poseen foto del documento
  o de un impuesto cargada. [Ticket GES-576] [customer-images]
+ - Index de clientes: Se agrega enlace para que al hacer click en los iconos que indican si tiene imagen de documento o
+ imagen de impuesto lleven a la vista del cliente o a la actualización del cliente [Ticket GES-576] [customer-images]
   
  ## [2019.11.08.0]
  ### Modificado

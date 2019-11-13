@@ -103,7 +103,10 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'label' => 'Foto imp.',
             'value' => function($model) {
-                return $model->tax_image ? '<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>' : '<span class="glyphicon glyphicon-remove" style="color: darkred"></span>';
+                $html_view = Html::a('<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>', ['view', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+                $html_update = Html::a('<span class="glyphicon glyphicon-remove" style="color: darkred"></span>', ['update', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+
+                return $model->tax_image ? $html_view : $html_update;
             },
             'format' => 'raw',
             'headerOptions' => ['max-width' => '70px'],
