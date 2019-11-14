@@ -28,6 +28,11 @@ All notable changes to this project will be documented in this file.
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
  a diferentes pagos. [Ticket GES-547]
+ 
+ ## [2019.11.14.1]
+ ### Modificado
+ - Pagos de clientes: Se registra el usuario que ha cargado un pago por transferencia
+ 
 
  ## [2019.11.14.0]
  ### Agregado
