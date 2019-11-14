@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\provider\models\ProviderBill;
+use yii\db\Expression;
 
 /**
  * ProviderBillSearch represents the model behind the search form about `app\modules\provider\models\ProviderBill`.
@@ -121,7 +122,14 @@ class ProviderBillSearch extends ProviderBill
         $query->addSelect(['provider_bill.*', 'sum(coalesce(pbhpp.amount, 0)) as amountApplied'])
             ->joinWith(['billType'])
             ->leftJoin('provider_bill_has_provider_payment pbhpp', 'provider_bill.provider_bill_id = pbhpp.provider_bill_id')
-            ->where(['pbhpp.provider_bill_id' => null]);
+            ->where(['or',
+                ['pbhpp.provider_bill_id' => null],
+                ['and',
+                    ['not', ['pbhpp.provider_bill_id' => null]],
+                    ['<','pbhpp.amount', (new Expression('`provider_bill`.`total`'))]
+                ]
+            ])
+            ;
 
         $this->load($params);
 
