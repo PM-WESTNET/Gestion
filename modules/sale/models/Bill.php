@@ -938,8 +938,9 @@ class Bill extends ActiveRecord implements CountableInterface
 
             } else {
                 if($detail->unit_net_discount != 0 ) {
-
-                    $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    if(!$fixedDiscount) {
+                        $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    }
 
                 } elseif($detail->unit_net_price != 0) {
 

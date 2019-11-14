@@ -1266,5 +1266,12 @@
     'The customer has pending programmed plan change for {date}' => 'El cliente posee un cambio de velocidad programado para el día {date}',
     'This contract has pending programmed plan change for {date}' => 'Este contrato posee un cambio de velocidad programado para el día {date}',
     'Programmed Plan Change created successfull' => 'Cambio de velocidad programado realizado con éxito',
-    'created' => 'Borrador'
+    'created' => 'Borrador',
+    "Today's date exceeds the maximun date" => "La fecha actual excede la fecha máxima",
+    'The customer have debt bills' => 'El cliente posee facturas adeudadas',
+    'The customer doesnt have the first bill payed' => 'El cliente no tiene la primera factura pagada',
+    'The customer is new' => 'El cliente es nuevo',
+    'The customer exceed the maximun payment extension quantity per month' => 'El cliente excede la cantidad de extensiones de pago por mes',
+    'Document image' => 'Imagen de documento',
+    'Tax image' => 'Imagen de impuesto',
 );

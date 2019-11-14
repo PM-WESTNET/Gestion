@@ -73,12 +73,12 @@ class BatchController extends Controller
             // Seteo la cantidad en la session
             $total = $query->count();
             Yii::$app->session->set( '_batch_to_customer_', [
-                'total' => $total,
+                'total' => (int)$total,
                 'qty' => 0
             ]);
-            $i = 1;
+            $i = 0;
             foreach ( $query->all() as $key => $value) {
-                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$value['contract_detail_id']]);
+                $contractDetail = ContractDetail::findOne(['contract_detail_id' => $value['contract_detail_id']]);
                 $contractDetailOld = clone($contractDetail);
                 $contractDetail->product_id = $new_product_id;
 
@@ -91,20 +91,16 @@ class BatchController extends Controller
                     $contractDetail->from_date = (new \DateTime('now'))->format('d-m-Y');
                     $contractDetail->applied = false;
                     $contractDetail->save(false,['from_date', 'status', 'product_id', 'applied']);
-
-                    // Actualizo la conexion
-                    /*$connection = Connection::findOne(['connection_id'=>$value['connection_id']]);
-                    $contract   = Contract::findOne(['contract_id'=>$value['contract_id']]);
-                    SecureConnectionUpdate::update($connection, $contract, false);*/
                 }
+
+                $i++;
 
                 // Seteo la cantidad en la session
                 Yii::$app->session->set( '_batch_to_customer_', [
-                    'total' => $total,
+                    'total' => (int)$total,
                     'qty' => $i
                 ]);
                 Yii::$app->session->close();
-                $i++;
             }
 
             return [

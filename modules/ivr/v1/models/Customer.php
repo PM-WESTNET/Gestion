@@ -15,6 +15,7 @@ use app\modules\sale\models\Bill;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
+use function foo\func;
 
 class Customer extends \app\modules\sale\models\Customer
 {
@@ -30,15 +31,35 @@ class Customer extends \app\modules\sale\models\Customer
                 'document_number',
                 'code',
                 'payment_code',
+                'phone',
+                'phone2',
+                'phone3',
+                'phone4',
+                'last_update' => function($model){
+                    if($model->last_update) {
+                        return \Yii::$app->formatter->asDate($model->last_update, 'dd-MM-yyyy');
+                    } else {
+                        return "false";
+                    }
+                },
+                'needsUpdate' => function($model){
+                    if ($model->needsUpdate) {
+                        return "true";
+                    }
+
+                    return "false";
+                },
                 'contracts' => function($model) {
-                    $contracts = [];
-                    foreach ($model->contracts as $contract) {
-                        if($contract->status === Contract::STATUS_ACTIVE){
-                            $contracts[] = [
-                                'contract_id' => $contract->contract_id,
-                                'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
-                            ];
-                        }
+                    $contracts = [
+                        'contract_id' => '',
+                        'service_address' => ''
+                    ];
+                    $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
+                    if($contract){
+                        $contracts= [
+                            'contract_id' => $contract->contract_id,
+                            'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
+                        ];
                     }
 
                     return $contracts;
@@ -95,11 +116,15 @@ class Customer extends \app\modules\sale\models\Customer
     {
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
 
-        $contracts = [];
+        $contracts = [
+            'contract_id' => '',
+            'service_address' => '',
+        ];
         $payment_extension_requested = $this->getPaymentExtensionQtyRequest();
+        $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
 
-        foreach ($this->contracts as $contract) {
-            $contracts[] = [
+        if ($contract) {
+            $contracts = [
                 'contract_id' => $contract->contract_id,
                 'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
             ];
@@ -137,4 +162,8 @@ class Customer extends \app\modules\sale\models\Customer
         return $clipped;
     }
 
+    public function hasContractAndConnectionActive()
+    {
+        return $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
 }

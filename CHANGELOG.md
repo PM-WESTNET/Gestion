@@ -6,15 +6,73 @@ All notable changes to this project will be documented in this file.
  
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
- - Informar Pago: Error al enviar foto capturada por la camara [informesPagosDuplicados]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
- - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde". 30-10-2019
- - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de pago al primer item 31-10-2019
- - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
- - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor
- - Correcion de conteo de tickets
  - Correcion error duplicado de tickets en panel de cobranza
+ - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+ - IVR: Se agrega indicador si el cliente es nuevo o no
+ - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+ - Correción filtros asignación masiva de planes
+ - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
+   la fecha de la ultima actualizacion de los mismos
+ - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
+ - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+  del plan actual del cliente. [Ticket GES-489]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+ - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
+ - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+ de cliente etc). [Ticket GES-568]
+ - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+ uno de los clientes. [Ticket GES-568]
+ - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
+ - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+ a diferentes pagos. [Ticket GES-547]
+
+ ## [2019.11.14.0]
+ ### Agregado
+  - Creación de cliente nuevo: Se agrega la posibilidad de adjuntar imagenes del documento e impuesto en el momento de 
+  crear un nuevo cliente.
+  - Index de clientes: Se agregan columnas para identificar rápidamente aquellos clientes que no poseen foto del documento
+  o de un impuesto cargada.
+  - Index de clientes: Se agrega enlace para que al hacer click en los iconos que indican si tiene imagen de documento o
+  imagen de impuesto lleven a la vista del cliente o a la actualización del cliente.
+  
+ ## [2019.11.13.0]
+ ### Modificado
+  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso.
+  - Asignacion masiva de planes a clientes: Se corrige error que ocurria en el servidor con ciertos contratos.
+  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
+  - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos.
+  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
+  - IVR: Se agrega numeros de telefono a la info del cliente.
+  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
+   
  
+ ## [2019.11.08.0]
+ ### Modificado
+  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde".
+  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de
+  pago al primer item.
+  - Panel de tickets: Correcion de conteo de tickets.
+  - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor.
+  
+ 
+ ## [2019.11.07.0]
+ ### Agregado
+ - Notificaciones por explorador: Se agrega comando de cron que guarda los clientes a los que se debe notificar.
+ - Notificaciones por explorador: Se agrega API para que el portal consulte los clientes que se tienen en cuenta en las 
+ notificaciones por explorador.
+ 
+ ## [2019.11.06.0]
+ ### Modificado
+ - Informar Pago: Error al enviar foto capturada por la camara
+ - Actualizacion de app en android con ultimos cambios
+ 
+ ## [2019.11.05.0] - 05-11-2019
+ ### Modificado
+  - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
+
  ##[2019.11.01.0] - 01-11-2019
  ### Modificado
  - Vista de movimientos de cuentas monetarias: Se corrige error que se generaba al tildar un movimiento como verificado.

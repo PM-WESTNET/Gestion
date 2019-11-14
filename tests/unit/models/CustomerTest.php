@@ -8,6 +8,8 @@
 
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerHasCustomerMessage;
+use app\modules\sale\models\ProductHasCategory;
+use app\modules\sale\modules\contract\models\Plan;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\CustomerClassFixture;
@@ -27,6 +29,9 @@ use app\modules\sale\models\Bill;
 use app\modules\checkout\models\Payment;
 use app\modules\sale\models\CustomerHasDiscount;
 use app\modules\sale\models\Discount;
+use app\modules\sale\modules\contract\models\Contract;
+use app\tests\fixtures\ProductFixture;
+use app\tests\fixtures\VendorFixture;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -67,6 +72,12 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'customer_message' => [
                 'class' => CustomerMessageFixture::class
+            ],
+            'product' => [
+                'class' => ProductFixture::class
+            ],
+            'vendor' => [
+                'class' => VendorFixture::class
             ]
         ];
     }
@@ -633,6 +644,97 @@ class CustomerTest extends \Codeception\Test\Unit
         $chd->updateAttributes(['from_date' => (new \DateTime('now'))->modify('+1 days')->format('Y-m-d')]);
 
         expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+    }
+
+    public function testIsNewCustomer()
+    {
+        $days_qty = Config::getValue('new_contracts_days');
+
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456799',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $old_date = $days_qty + 1;
+        $new_date = $days_qty - 1;
+
+        $contract = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => $model->customer_id,
+            'from_date' => (new \DateTime('now'))->modify("-$old_date days")->format('d-m-Y')
+        ]);
+        $contract->save();
+
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is not new', $model->isNewCustomer())->false();
+
+        $contract->from_date = (new \DateTime('now'))->modify("-$new_date days")->format('d-m-Y');
+        $contract->to_date = (new \DateTime('now'))->modify("+1 month")->format('d-m-Y');
+        $contract->save();
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is new', $model->isNewCustomer())->true();
+
+        $contract->from_date = (new \DateTime('now'))->modify("-$days_qty days")->format('d-m-Y');
+        $contract->to_date = (new \DateTime('now'))->modify("+1 month")->format('d-m-Y');
+        $contract->save();
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is not new 2', $model->isNewCustomer())->false();
+    }
+
+    public function testHasfibraPlan()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456799',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $contract = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => $model->customer_id,
+            'from_date' => (new \DateTime('now'))->format('d-m-Y')
+        ]);
+        $contract->save();
+
+        $model->refresh();
+        $contract->refresh();
+
+        $contract->addContractDetail([
+            'contract_id' => $contract->contract_id,
+            'product_id' => 1,
+            'count' => 1,
+            'vendor_id' => 1
+        ]);
+
+        expect('Has fibra plan return false', $model->hasFibraPlan())->false();
+
+        $category_fibra = \app\modules\sale\models\Category::findOne(['system' => 'plan-fibra']);
+        $product_has_category = new ProductHasCategory([
+            'product_id' => 1,
+            'category_id' => $category_fibra->category_id,
+        ]);
+        $product_has_category->save();
+
+        expect("Has fibra plan return true", $model->hasFibraPlan())->true();
     }
 
     //TODO resto de la clase

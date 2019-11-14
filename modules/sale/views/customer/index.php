@@ -91,6 +91,30 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         'document_number',
+        [
+            'label' => 'Foto doc.',
+            'value' => function($model) {
+                $html_view = Html::a('<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>', ['view', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+                $html_update = Html::a('<span class="glyphicon glyphicon-remove" style="color: darkred"></span>', ['update', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+
+                return $model->document_image ? $html_view : $html_update;
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
+        [
+            'label' => 'Foto imp.',
+            'value' => function($model) {
+                $html_view = Html::a('<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>', ['view', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+                $html_update = Html::a('<span class="glyphicon glyphicon-remove" style="color: darkred"></span>', ['update', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+
+                return $model->tax_image ? $html_view : $html_update;
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
         'phone',
     ];
 

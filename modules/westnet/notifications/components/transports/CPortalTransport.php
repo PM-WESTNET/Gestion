@@ -91,4 +91,29 @@ class CPortalTransport implements TransportInterface{
             ];
         }
     }
+
+    /**
+     * Reemplaza el texto con los datos del cliente.
+     */
+    public function replaceText($text, $customer)
+    {
+        $replaced_text = $text;
+
+        $replace_max_string = SMSIntegratechTransport::getMaxLengthReplacement();
+        $replaced_text = str_replace('@Nombre', trim(substr($customer['name'], 0, $replace_max_string['@Nombre'])), $replaced_text);
+        $replaced_text = str_replace('@CodigoDeCliente', trim(substr($customer['code'], 0, $replace_max_string['@CodigoDeCliente'])), $replaced_text);
+        $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
+        $replaced_text = str_replace('@Telefono2', substr($customer['phone2'], 0, $replace_max_string['@Telefono2']), $replaced_text);
+        $replaced_text = str_replace('@Code', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
+        $replaced_text = str_replace('@PaymentCode', substr($customer['payment_code'], 0, $replace_max_string['@CodigoDePago']), $replaced_text);
+        $replaced_text = str_replace('@Nodo', substr($customer['node'], 0, $replace_max_string['@Nodo']), $replaced_text);
+        $replaced_text = str_replace('@Saldo', substr($customer['saldo'], 0, $replace_max_string['@Saldo']), $replaced_text);
+        $replaced_text = str_replace('@CompanyCode', substr($customer['company_code'], 0, $replace_max_string['@CodigoEmpresa']), $replaced_text);
+        $replaced_text = str_replace('@FacturasAdeudadas', substr($customer['debt_bills'], 0, $replace_max_string['@FacturasAdeudadas']), $replaced_text);
+        $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
+        $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
+
+        return $replaced_text;
+
+    }
 }
