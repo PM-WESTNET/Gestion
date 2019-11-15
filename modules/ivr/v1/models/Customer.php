@@ -26,7 +26,9 @@ class Customer extends \app\modules\sale\models\Customer
         if ($this->scenario === 'full'){
             return [
                 'customer_id',
-                'fullName',
+                'fullName' => function($model) {
+                    return ucwords(strtolower($this->lastname .', '. $this->name));
+                },
                 'documentType',
                 'document_number',
                 'code',
