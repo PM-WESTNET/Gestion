@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
  a diferentes pagos. [Ticket GES-547]
+ - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
  
  ## [2019.11.14.1]
  ### Modificado
