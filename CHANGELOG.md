@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
  a diferentes pagos. [Ticket GES-547]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
+ - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
  
  ## [2019.11.14.1]
  ### Modificado
