@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file.
  la condición del cliente.
  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
  
+ ## [2019.11.15.0]
+ - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
+ 
  ## [2019.11.14.1]
  ### Modificado
  - Pagos de clientes: Se registra el usuario que ha cargado un pago por transferencia
