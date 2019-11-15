@@ -1588,7 +1588,7 @@ class Customer extends ActiveRecord {
         }
 
         //Sólo si el cliente no debe mas de una factura
-        if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
+        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
             $this->detailed_error = Yii::t('app', 'The customer have debt bills');
             $this->debtor = true;
         }
