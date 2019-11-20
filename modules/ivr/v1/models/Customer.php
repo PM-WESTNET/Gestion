@@ -29,7 +29,12 @@ class Customer extends \app\modules\sale\models\Customer
                 'fullName' => function($model) {
                     return ucwords(strtolower($this->lastname .', '. $this->name));
                 },
-                'documentType',
+                'document_type_id' => function ($model) {
+                    return $model->documentType->document_type_id;
+                },
+                'document_type_name' => function ($model) {
+                    return $model->documentType->name;
+                },
                 'document_number',
                 'code',
                 'payment_code',
@@ -51,27 +56,32 @@ class Customer extends \app\modules\sale\models\Customer
 
                     return "false";
                 },
-                'contracts' => function($model) {
-                    $contracts = [
-                        'contract_id' => '',
-                        'service_address' => ''
-                    ];
-                    $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
+                'contract_id' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
                     if($contract){
-                        $contracts= [
-                            'contract_id' => $contract->contract_id,
-                            'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
-                        ];
+                        return $contract->contract_id;
                     }
 
-                    return $contracts;
+                    return '';
+                },
+                'services_address' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
+                    if($contract){
+                        return ($contract->address ? $contract->address->fullAddress : $model->address);
+                    }
+
+                    return '';
                 },
                 'balance' => function($model){
                     return $model->current_account_balance;
                 },
-                'last_payment' => function($model) {
+                'last_payment_amount' => function($model) {
                     $account = $model->accountInfo();
-                    return $account['last_payment'];
+                    return $account['last_payment']['amount'];
+                },
+                'last_payment_date' => function($model) {
+                    $account = $model->accountInfo();
+                    return $account['last_payment']['date'];
                 },
                 'clipped' => function($model) {
                     if ($model->hasClippedForDebt()) {
