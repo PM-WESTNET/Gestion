@@ -48,7 +48,8 @@
         "joshtronic/php-loremipsum": "^1.0",
         "kartik-v/yii2-editable": "dev-master",
         "conquer/oauth2": "^1.7",
-        "light/yii2-swagger": "^1.0"
+        "light/yii2-swagger": "^1.0",
+        "lavrentiev/yii2-toastr": "^2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "*",
