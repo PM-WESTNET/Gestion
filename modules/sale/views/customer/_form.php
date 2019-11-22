@@ -237,11 +237,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                     'web' => Yii::t('app', 'web'), 
                     'other_customer' => Yii::t('app', 'other_customer'), 
                     'facebook' => Yii::t('app', 'facebook'), 
-                    'street_banner' => Yii::t('app', 'street_banner'), 
-                    'magazine' => Yii::t('app', 'magazine'), 
+                    'street_banner' => Yii::t('app', 'street_banner'),
                     'door_to_door' => Yii::t('app', 'door_to_door'), 
                     'competition' => Yii::t('app', 'competition'),
-                    'brochure' => Yii::t('app', 'brochure'),
+                    'instagram' => Yii::t('app', 'Instagram'),
+                    'gigantografía' => Yii::t('app', 'Gigantografía'),
+                    'pantalla-led' => Yii::t('app', 'Pantalla led')
                 ], ['prompt' => Yii::t('app', 'Select an option...')]);
             ?>
         </div>

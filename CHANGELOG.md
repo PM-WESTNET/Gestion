@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
  - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
  - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
  - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
+ - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
+ las opciones de gigantografia, pantalla led e instagram [GES-644] 
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
