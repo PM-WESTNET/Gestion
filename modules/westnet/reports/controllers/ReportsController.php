@@ -8,6 +8,7 @@ use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
+use app\modules\westnet\reports\search\CustomerSearch;
 use app\modules\westnet\reports\search\ReportSearch;
 use Yii;
 use app\components\web\Controller;
@@ -637,5 +638,14 @@ class ReportsController extends Controller
             'paymentsStatistics' => $paymentsStatistics,
             'paymentExtensionStatistics' => $paymentExtensionStatistics
         ]);
+    }
+
+    public function actionCustomersByNode()
+    {
+        $search = new CustomerSearch();
+
+        $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
+
+        return $this->render('customer-by-node', ['dataProvider' => $dataProvider, 'search' => $search]);
     }
 }

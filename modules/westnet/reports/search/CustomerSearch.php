@@ -13,6 +13,8 @@ use app\components\helpers\DbHelper;
 use app\modules\westnet\reports\ReportsModule;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -123,5 +125,17 @@ GROUP BY periodo
         }
 
         return $query->all();
+    }
+
+    public function findByNode($params) {
+        $cS= new \app\modules\sale\models\search\CustomerSearch();
+
+        $query = $cS->buildSearchQuery($params);
+
+        $query->select(['n.name as node', 'COUNT(customer.customer_id) as total']);
+        $query->innerJoin('node n', 'n.node_id=connection.node_id');
+        $query->groupBy(['n.node_id']);
+
+        return new ArrayDataProvider(['models' => $query->all()]);
     }
 }
