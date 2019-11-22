@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file.
  la condición del cliente.
  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
  - IVR : Cambio en salida de endpoint get-customer para que le quede comodo a Federico de Iperfex
+ - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
+ - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
+ - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint

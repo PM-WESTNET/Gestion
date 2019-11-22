@@ -62,7 +62,13 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         return [
             'account' => [
                 'class'=> 'app\modules\accounting\behaviors\AccountMovementBehavior'
-            ]
+            ],
+            'unix_timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                ],
+            ],
         ];
     }
 
