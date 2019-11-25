@@ -581,4 +581,25 @@ class ReportSearch extends Model
         return $query->all();
     }
 
+    public function searchCustomerByPublicityShape($params) {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('date_format(c.date_new, \'%Y-%m\') AS period'),
+                new Expression('count(c.customer_id) as customer_qty'),
+                'c.publicity_shape'
+            ])->from('customer c')
+            ->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
+
+        if($this->date_from) {
+            $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
+        }
+
+        if($this->date_to) {
+            $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
+        }
+
+        return $query->all();
+    }
 }

@@ -1275,4 +1275,5 @@
     'Document image' => 'Imagen de documento',
     'Tax image' => 'Imagen de impuesto',
     'Created at' => 'Creado el',
+    'Customers by publicity shape' => 'Clientes por canales de publicidad',
 );

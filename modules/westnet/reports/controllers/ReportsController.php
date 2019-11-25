@@ -4,6 +4,7 @@ namespace app\modules\westnet\reports\controllers;
 
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\reports\models\ReportData;
@@ -12,6 +13,8 @@ use app\modules\westnet\reports\search\ReportSearch;
 use Yii;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * CustomerController
@@ -636,6 +639,79 @@ class ReportsController extends Controller
             'statistics' => $statistics,
             'paymentsStatistics' => $paymentsStatistics,
             'paymentExtensionStatistics' => $paymentExtensionStatistics
+        ]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de clientes por medio de publicidad.
+     */
+    public function actionCustomerByPublicityShape()
+    {
+        $search = new ReportSearch();
+        $search->load((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        if(!$search->date_from) {
+            $search->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if(!$search->date_to) {
+            $search->date_from = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $data = $search->searchCustomerByPublicityShape((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $datas = [];
+        $cols = [];
+        $colors = [];
+        $border_colors = [];
+
+        $asigned_color = [
+            'banner' => 'rgba(249, 192, 191)',
+            'poster' => 'rgba(254, 229, 206)',
+            'web' => 'rgba(255, 241, 195)',
+            'other_customer' => 'rgba(243, 255, 195)',
+            'facebook' => 'rgba(199, 255, 192)',
+            'street_banner' => 'rgba(194, 255, 235)',
+            'magazine' => 'rgba(194, 248, 254)',
+            'door_to_door' => 'rgba(194, 230, 255)',
+            'competition' => 'rgba(194, 208, 255)',
+            'brochure' => 'rgba(211, 192, 255)',
+            'gigantografía' => 'rgba(232, 195, 255)',
+            'pantalla-led' => 'rgba(255, 194, 222)',
+            'instagram' => 'rgba(255, 193, 221)'
+        ];
+
+        $border_asigned_color = [
+            'banner' => 'rgba(241, 134, 132)',
+            'poster' => 'rgba(241, 183, 132)',
+            'web' => 'rgba(241, 216, 132)',
+            'other_customer' => 'rgba(220, 241, 132)',
+            'facebook' => 'rgba(144, 241, 132)',
+            'street_banner' => 'rgba(132, 241, 205)',
+            'magazine' => 'rgba(132, 231, 241)',
+            'door_to_door' => 'rgba(132, 196, 241)',
+            'competition' => 'rgba(132, 158, 241)',
+            'brochure' => 'rgba(165, 132, 241)',
+            'gigantografía' => 'rgba(200, 132, 241)',
+            'pantalla-led' => 'rgba(241, 132, 233)',
+            'instagram' => 'rgba(241, 132, 182)'
+        ];
+
+        foreach ($data as $item) {
+            $date = new \DateTime($item['period'] . '-01');
+            $cols[] = $date->format('m-Y') . ' - '. $item['publicity_shape'];
+            $datas[] = $item['customer_qty'];
+            array_push($colors, $asigned_color[$item['publicity_shape']]);
+            array_push($border_colors, $border_asigned_color[$item['publicity_shape']]);
+        }
+
+
+        return $this->render('customer-by-publicity-shape',[
+            'model' => $search,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => $colors,
+            'border_colors' => $border_colors
         ]);
     }
 }

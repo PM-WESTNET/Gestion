@@ -334,6 +334,22 @@ class Customer extends ActiveRecord {
         $this->on(self::EVENT_AFTER_VALIDATE, $docNumberValidation);
     }
 
+    public function behaviors()
+    {
+        return [
+            'date_new' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date_new'],
+                ],
+                'value' => function(){
+                    return (new \DateTime('now'))->format('Y-m-d');
+                }
+            ],
+        ];
+    }
+
+
     /**
      * @inheritdoc
      */
