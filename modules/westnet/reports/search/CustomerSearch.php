@@ -10,6 +10,7 @@ namespace app\modules\westnet\reports\search;
 
 
 use app\components\helpers\DbHelper;
+use app\modules\westnet\models\Node;
 use app\modules\westnet\reports\ReportsModule;
 use Yii;
 use yii\base\Model;
@@ -130,12 +131,110 @@ GROUP BY periodo
     public function findByNode($params) {
         $cS= new \app\modules\sale\models\search\CustomerSearch();
 
-        $query = $cS->buildSearchQuery($params);
+        $subquery = $cS->buildSearchQuery($params);
 
-        $query->select(['n.name as node', 'COUNT(customer.customer_id) as total']);
-        $query->innerJoin('node n', 'n.node_id=connection.node_id');
-        $query->groupBy(['n.node_id']);
+        $subquery->select(['customer.*','n.name as node', 'n.node_id as node_id']);
+        $subquery->innerJoin('node n', 'n.node_id=connection.node_id');
 
-        return new ArrayDataProvider(['models' => $query->all()]);
+        Yii::info($subquery->createCommand()->getRawSql());
+
+        $query= (new Query())
+            ->select(['c100.node_id', 'c100.node', 'COUNT(c100.customer_id) as total'])
+            ->from(['c100' => $subquery])
+            ->groupBy(['c100.node_id']);
+
+        $data = $query->all();
+
+        $result= [];
+
+        $nodes = Node::find()->all();
+
+        Yii::info($data);
+        Yii::info($nodes);
+
+        foreach ($nodes as $node) {
+            $result[$node->node_id]= [
+                'node' => $node->name,
+                'total' => 0
+            ] ;
+        }
+
+        foreach ($data as $node) {
+
+            $result[$node['node_id']] = [
+                'node' => $node['node'],
+                'total' => $node['total']
+            ];
+        }
+
+        Yii::info($result);
+
+        $dataProvider = new ArrayDataProvider(['allModels' => $result]);
+
+        return $dataProvider;
+
+    }
+
+    private function filterByNode($query){
+        if (!empty($this->node_id)) {
+            $query->andWhere(['connection.node_id' => $this->node_id]);
+        }
+    }
+
+    private function filterByNodes($query){
+        if (!empty($this->nodes)) {
+            $query->andWhere(['connection.node_id' => $this->nodes]);
+        }
+    }
+
+    private function filterByPlan($query){
+        if (!empty($this->plan_id)) {
+            $query->andWhere(['contract_detail.product_id' => $this->plan_id]);
+        }
+    }
+
+    private function filterByStatusAccount($query){
+        if (!empty($this->connection_status)) {
+            $query->andWhere(['connection.status_account' => $this->connection_status]);
+        }
+    }
+
+    private function filterByContractStatus($query){
+
+        if (!empty($this->contract_status)) {
+            $query->andWhere(['contract.status' => $this->contract_status]);
+        }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
+        }
+    }
+
+    private function filterByZone($query){
+        if (!empty($this->zone_id)) {
+            $query->andWhere(['add.zone_id' => $this->zone_id]);
+        }
+    }
+
+    private function filterByCompany($query, $parent = false){
+        if (!empty($this->company_id)) {
+            if($parent) {
+                $query->andWhere(['customer.parent_company_id' => $this->company_id]);
+            } else {
+                $query->andWhere(['customer.company_id' => $this->company_id]);
+            }
+        }
+    }
+
+    private function filterByClass($query){
+        if (!empty($this->customer_class_id)) {
+            $query->andWhere(['cchc.customer_class_id' => $this->customer_class_id]);
+        }
+    }
+
+    private function filterByCategory($query){
+        if (!empty($this->customer_category_id)) {
+            $query->andWhere(['ccathc.customer_category_id' => $this->customer_category_id]);
+        }
     }
 }

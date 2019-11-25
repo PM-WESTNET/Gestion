@@ -1274,4 +1274,5 @@
     'The customer exceed the maximun payment extension quantity per month' => 'El cliente excede la cantidad de extensiones de pago por mes',
     'Document image' => 'Imagen de documento',
     'Tax image' => 'Imagen de impuesto',
+    'Customers By Node' => 'Clientes por Nodo'
 );

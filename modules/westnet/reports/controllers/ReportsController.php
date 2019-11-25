@@ -646,6 +646,6 @@ class ReportsController extends Controller
 
         $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
 
-        return $this->render('customer-by-node', ['dataProvider' => $dataProvider, 'search' => $search]);
+        return $this->render('customer-by-node', ['dataProvider' => $dataProvider]);
     }
 }
