@@ -1276,4 +1276,7 @@
     'Tax image' => 'Imagen de impuesto',
     'Created at' => 'Creado el',
     'Customers by publicity shape' => 'Clientes por canales de publicidad',
+    'gigantografía' => 'Gigantografía',
+    'instagram' => 'Instagram',
+    'pantalla-led' => 'Pantalla led',
 );

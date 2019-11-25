@@ -699,7 +699,7 @@ class ReportsController extends Controller
 
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
-            $cols[] = $date->format('m-Y') . ' - '. $item['publicity_shape'];
+            $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
             $datas[] = $item['customer_qty'];
             array_push($colors, $asigned_color[$item['publicity_shape']]);
             array_push($border_colors, $border_asigned_color[$item['publicity_shape']]);

@@ -79,7 +79,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'labels' => $cols,
                         'datasets' => [
                                 [
-                                        'label' => 'Medios y períodos',
+                                        'label' => 'Clientes',
                                         'data' => $data,
                                         'backgroundColor' => $colors,
                                         'borderColor' => $border_colors,
