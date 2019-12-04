@@ -89,9 +89,14 @@ class EmailTransport implements TransportInterface {
         foreach($notification->destinataries as $destinataries){
             $emails = array_merge($emails, $destinataries->getEmails());
         }
+
+        Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess');
+        Yii::$app->cache->set('total_'.$notification->notification_id, count($emails));
+
         $chunks = array_chunk($emails, 50, true);
         
         $ok = 0;
+        $fail= 0;
         $error = 'Error: ';
 
         try {
@@ -126,11 +131,16 @@ class EmailTransport implements TransportInterface {
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;
+                $fail += (count($messages) - $ok);
+                Yii::$app->cache->set('success_'.$notification->notification_id, $ok);
+                Yii::$app->cache->set('error_'.$notification->notification_id, $fail);
             }
         } catch(\Exception $ex) {
             $error = $ex->getMessage();
             $ok = false;
         }
+
+
 
         if($ok){
             return [
