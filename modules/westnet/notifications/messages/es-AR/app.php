@@ -52,10 +52,14 @@ return array(
     'The notification has been deactivated.' => 'La notificación ha sido desactivada.',
     'The notification has been activated.' => 'La notificación ha sido activada.',
     'Subject' => 'Asunto',
-    
+    'Process'  => 'Proceso',
+    'Processing...'  => 'Procesando...',
+    'Finished'  => 'Finalizado',
+
     //Notification status
     'Created' => 'Creada',
     'Pending' => 'Pendiente',
+    'In_process' => 'En Proceso',
     'Sent' => 'Enviada',
     'Last Sent' => 'Último Envío',
     'The notifications has been sent.' => 'La notificación ha sido enviada.',
