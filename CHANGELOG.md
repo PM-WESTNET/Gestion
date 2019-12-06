@@ -38,6 +38,8 @@ All notable changes to this project will be documented in this file.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [GES-644]
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
+ - Notificaciones por email: envio en segundo plano [GES-614]
+ - Notificaciones masiva a la app [GES-665]
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
