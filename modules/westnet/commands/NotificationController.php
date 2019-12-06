@@ -96,4 +96,22 @@ class NotificationController extends Controller
         echo 'Respuestas: '. $response['count'];
         echo "\n";
     }
+
+    public function actionSendEmails() {
+
+        $notifications = Notification::find()
+            ->innerJoin('transport t', 't.transport_id=notification.transport_id')
+            ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
+            ->all();
+
+        foreach ($notifications as $notification) {
+            if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
+                $notification->updateAttributes(['status' => 'in_process']);
+                $transport = $notification->transport;
+                $transport->send($notification);
+            }
+
+            \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+        }
+    }
 }
