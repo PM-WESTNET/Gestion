@@ -104,6 +104,7 @@ class CountableMovement
             } else {
                 $this->setErrors(Yii::t('accounting', 'The debit and credit is not equal.'));
             }
+            \Yii::info('---------------- FALLA AL CREAR MOVIMIENTO: ' . $description .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
         }
         return $movement->account_movement_id;
     }

@@ -69,6 +69,7 @@ class AccountMovementRelationManager
             } else {
                 echo  Yii::t('accounting', 'The Account Movement Relation can\'t be saved.');
             }
+            \Yii::info('---------------- ID MOVIMIENTO: ' . $movement_id .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
         }
     }
 

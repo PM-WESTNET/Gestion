@@ -40,6 +40,8 @@ All notable changes to this project will be documented in this file.
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
  - Notificaciones por email: envio en segundo plano [GES-614]
  - Notificaciones masiva a la app [GES-665]
+ - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
+
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
