@@ -149,6 +149,13 @@ class BatchInvoiceController  extends Controller
             'errors' => array_merge($creation_errors, $close_errors)
         ];
 
+        if (empty($a)) {
+            $a = [
+                'total' => 0,
+                'qty' => 0
+            ];
+        }
+
         return array_merge($a, $errors);
     }
 

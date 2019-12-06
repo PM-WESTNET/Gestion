@@ -110,6 +110,9 @@ return [
             'class' => 'yii\swiftmailer\Mailer',
             'useFileTransport' => true,
         ],
+        'mutex' => [
+            'class' => 'yii\mutex\FileMutex'
+        ],
     ],
     'modules' => [
         'sale' => [

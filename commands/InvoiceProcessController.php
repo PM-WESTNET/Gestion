@@ -29,29 +29,28 @@ class InvoiceProcessController extends Controller
 
         if($pending_invoice_process) {
             try {
-                if(Yii::$app->mutex_create_bills->acquire('mutex')) {
+                if(Yii::$app->mutex->acquire('mutex_create_bills')) {
                     Yii::$app->cache->set('_invoice_create_errors', []);
                     $this->invoiceAll($pending_invoice_process);
                 }
             } catch (\Exception $ex) {
-                echo "ERROR__________". $ex->getTraceAsString();
-                \Yii::info('ERROR ________________ ' .$ex->getTraceAsString(), 'facturacion-creacion');
+                echo "ERROR__________". $ex->getMessage() ."\n" .$ex->getTraceAsString();
+                \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
             }
         }
 
         if($pending_close_invoice_process) {
             try {
-                if(Yii::$app->mutex_close_bills->acquire('mutex')) {
+                if(Yii::$app->mutex->acquire('mutex_close_bills')) {
                    Yii::$app->cache->set('_invoice_close_errors' ,[]);
                     $this->closePendingBills($pending_close_invoice_process);
                 }
             } catch (\Exception $ex) {
-                echo "ERROR__________". $ex->getTraceAsString();
-                \Yii::info('ERROR ________________ ' .$ex->getTraceAsString(), 'facturacion-cerrado');
+                echo "ERROR__________". $ex->getMessage() ."\n" . $ex->getTraceAsString();
+                \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-cerrado');
             }
         }
     }
-
 
     public function invoiceAll(InvoiceProcess $invoice_process)
     {
