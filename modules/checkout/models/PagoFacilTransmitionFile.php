@@ -29,6 +29,7 @@ class PagoFacilTransmitionFile extends ActiveRecord {
 
     const STATUS_DRAFT = 'draft';
     const STATUS_CLOSED = 'closed';
+    const STATUS_PENDING = 'pending';
 
     public $file;
 
@@ -346,16 +347,21 @@ class PagoFacilTransmitionFile extends ActiveRecord {
     public function payments(){
         return $this->getPayments();
     }
-    
-    public function confirmFile(){
-        $payments = $this->payments;
-        
-        foreach ($payments as $payment){
-            $payment->paymentPayment->close();           
-        }
 
-        $this->status = 'closed';
-        $this->updateAttributes(['status']);
+    /**
+     * Cambia el estado del archivo a pendiente para que el cron cierre todos los pagos que corresponden a ese archivo.
+    //TODO poner nombre del cron
+     */
+    public function confirmFile(){
+        $this->updateAttributes(['status' => PagoFacilTransmitionFile::STATUS_PENDING]);
+//        $payments = $this->payments;
+//
+//        foreach ($payments as $payment){
+//            $payment->paymentPayment->close();
+//        }
+//
+//        $this->status = 'closed';
+//        $this->updateAttributes(['status']);
         return true;
     }
 

@@ -577,7 +577,7 @@ class PaymentController extends Controller {
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
         
         if ($model->confirmFile()) {
-            Yii::$app->session->setFlash('success', 'Archivo de pagos confirmado con éxito');
+            Yii::$app->session->setFlash('success', 'Archivo confirmado con éxito. Dentro de unos minutos comenzarán a procesarse los pagos.');
             Yii::$app->response->format= \yii\web\Response::FORMAT_JSON;       
             return ['status'=> 'ok'];
     
