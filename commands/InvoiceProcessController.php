@@ -22,10 +22,9 @@ class InvoiceProcessController extends Controller
         parent::init();
     }
 
-    public function actionControlInvoiceProcess()
+    public function actionControlCreationInvoiceProcess()
     {
         $pending_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
-        $pending_close_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
 
         if($pending_invoice_process) {
             try {
@@ -38,11 +37,16 @@ class InvoiceProcessController extends Controller
                 \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
             }
         }
+    }
+
+    public function actionControlCloseInvoiceProcess()
+    {
+        $pending_close_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
 
         if($pending_close_invoice_process) {
             try {
                 if(Yii::$app->mutex->acquire('mutex_close_bills')) {
-                   Yii::$app->cache->set('_invoice_close_errors' ,[]);
+                    Yii::$app->cache->set('_invoice_close_errors' ,[]);
                     $this->closePendingBills($pending_close_invoice_process);
                 }
             } catch (\Exception $ex) {
