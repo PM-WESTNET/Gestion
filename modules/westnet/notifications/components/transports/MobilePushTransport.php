@@ -40,7 +40,7 @@ class MobilePushTransport extends Transport implements TransportInterface
         $destinataries= $notification->destinataries;
 
         foreach ($destinataries as $destinatary){
-            $customers= $destinatary->getCustomerQuery()->all();
+            $customers= $destinatary->getCustomersQuery()->all();
             if (count($customers) === 0) {
                 return [
                     'status' => 'error'

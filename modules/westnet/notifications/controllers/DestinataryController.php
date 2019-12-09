@@ -56,10 +56,16 @@ class DestinataryController extends Controller {
     public function actionView($id) {
         $destinatary = $this->findModel($id);
 
+        $customerQuery = $destinatary->getCustomersQuery( $destinatary->notification->transport->slug != 'sms');
+
+        if ($destinatary->notification->transport->slug === 'email') {
+            $customerQuery->andWhere(['email_status' => 'active']);
+        }
+
         $dataProvider = new ActiveDataProvider([
-            'query' => $destinatary->getCustomersQuery( $destinatary->notification->transport->slug != 'sms')->andWhere(['email_status' => 'active'])
+            'query' => $customerQuery
         ]);
-        
+
         return $this->render('view', [
             'dataProvider' => $dataProvider,
             'model' => $destinatary,
