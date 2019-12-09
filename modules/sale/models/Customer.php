@@ -1380,7 +1380,7 @@ class Customer extends ActiveRecord {
         ];
     }
 
-    public static function verifyEmails($data, $field = "email")
+    public static function verifyEmails($data, $field = "email", $type = 'elastic')
     {
         $row_index = 0;
         $results = [
@@ -1392,16 +1392,29 @@ class Customer extends ActiveRecord {
         while (($row = fgetcsv($data)) !== false) {
             Yii::info(print_r($row, 1), 'data');
             if ($row_index > 0) {
-                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+                if ($type == 'elastic') {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+    
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = strtolower($row[1]);
+                        $customer->updateAttributes([$status_field]);
+    
+                        $results['total']++;
+                        $results[strtolower($row[1])]++;
+    
+                    }
+                } else {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
 
-                foreach ($customers as $customer) {
-                    $status_field = $field.'_status';
-                    $customer->$status_field = strtolower($row[1]);
-                    $customer->updateAttributes([$status_field]);
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = 'inactive';
+                        $customer->updateAttributes([$status_field]);
 
-                    $results['total']++;
-                    $results[strtolower($row[1])]++;
-
+                        $results['total']++;
+                        $results['inactive']++;
+                    }
                 }
             }
 
