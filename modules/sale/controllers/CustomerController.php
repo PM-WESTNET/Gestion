@@ -834,7 +834,7 @@ class CustomerController extends Controller
                     return $this->render('verify-emails', ['results' => $results]);
                 }
 
-                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'), Yii::$app->request->post('type'));
 
                 foreach ($partial_result as $key => $r) {
                     if (isset($results[$key])) {
