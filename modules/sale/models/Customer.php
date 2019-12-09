@@ -1736,13 +1736,23 @@ class Customer extends ActiveRecord {
      */
     public static function hasFirstBillPayed($customer_id, $verify_bills = true)
     {
-        $search = new CustomerSearch();
-        $result = $search->searchDebtBills($customer_id);
-        if ($verify_bills) {
-            return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+        $bill = Bill::find()->where(['customer_id' => $customer_id, 'status' => 'closed'])->orderBy(['bill_id' => SORT_ASC])->one();
+
+        if(!$bill) {
+            return false;
         }
 
-        return $result['payed_bills'] >= 1;
+        $total_payed = (new Query())
+            ->select('SUM(amount) as total')
+            ->from('payment')
+            ->where(['customer_id' => $customer_id, 'status' => 'closed'])
+            ->one();
+
+        if($total_payed['total'] >= $bill->total) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
