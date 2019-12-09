@@ -77,7 +77,7 @@ class InvoiceProcessController extends Controller
 
     public function closePendingBills($invoice_process)
     {
-        $i = 1;
+        $i = 0;
         $searchModel = new BillSearch();
         $query = $searchModel->searchPendingToClose([
             'BillSearch' => [
@@ -96,14 +96,16 @@ class InvoiceProcessController extends Controller
 
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
-                echo "$bill->bill_id \n";
                 $bill->verifyNumberAndDate();
+
                 if($bill->close()){
+                    $i++;
                     Yii::$app->cache->set('_invoice_close_', [
                         'total' => $total,
                         'qty' => $i
                     ]);
-                    $i++;
+                } else {
+                    $bill->addErrorToCacheOrSession("El comprobante $bill->bill_id no pudo cerrarse \n");
                 }
             }
         }
