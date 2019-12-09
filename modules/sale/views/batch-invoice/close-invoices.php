@@ -328,7 +328,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     url: '<?=Url::to(['/sale/batch-invoice/get-process'])?>',
                     dataType: 'json',
                     data: {
-                        'process': '_invoice_close_'
+                        'process': '_invoice_close_process_'
                     },
                     success: function(data, textStatus, jqXhr) {
                         var value = ((data.qty*100)/data.total);

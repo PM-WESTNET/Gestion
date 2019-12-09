@@ -186,7 +186,7 @@ class BatchInvoiceController  extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
-            Yii::$app->cache->set( '_invoice_close_', [
+            Yii::$app->cache->set( '_invoice_close_process_', [
                 'total' => 0,
                 'qty' => 0
             ]);

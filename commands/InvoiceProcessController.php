@@ -89,7 +89,7 @@ class InvoiceProcessController extends Controller
 
         $total = $query->count();
 
-        Yii::$app->cache->set('_invoice_close_', [
+        Yii::$app->cache->set('_invoice_close_process_', [
             'total' => $total,
             'qty' => $i
         ]);
@@ -100,7 +100,7 @@ class InvoiceProcessController extends Controller
 
                 if($bill->close()){
                     $i++;
-                    Yii::$app->cache->set('_invoice_close_', [
+                    Yii::$app->cache->set('_invoice_close_process_', [
                         'total' => $total,
                         'qty' => $i
                     ]);
