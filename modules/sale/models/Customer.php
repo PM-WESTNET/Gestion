@@ -1728,7 +1728,7 @@ class Customer extends ActiveRecord {
                 $billType = BillType::findOne(['name' => 'Nota Crédito A']);
                 $amount = abs($debt) - (abs($debt) * 0.21);
             }else {
-                if ($this->company_id !== Config::getValue('ecopago_batch_closure_company_id')){
+                if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
                     $billType = BillType::findOne(['name' => 'Nota Crédito B']);
                 }else {
                     $billType = BillType::findOne(['name' => 'Descuento']);
@@ -1741,6 +1741,16 @@ class Customer extends ActiveRecord {
 
             if(!class_exists($billType->class)){
                 return false;
+            }
+
+            $point_of_sale = $this->company->getPointOfSale()->andWhere(['default' => 1])->one;
+
+            if (empty($point_of_sale)) {
+                $point_of_sale = $this->company->getPointOfSale()->one();
+                if (empty($point_of_sale)) {
+                    Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                    return false;
+                }
             }
 
             $bill = Yii::createObject($billType->class);
