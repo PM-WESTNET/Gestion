@@ -1757,7 +1757,7 @@ class Customer extends ActiveRecord {
             $bill->bill_type_id = $billType->bill_type_id;
             $bill->date = date('d-m-Y');
             $bill->status = Bill::STATUS_DRAFT;
-
+            $bill->point_of_sale = $point_of_sale->point_of_sale_id;
             $bill->class = $billType->class;
             $bill->customer_id = $this->customer_id;
             $bill->company_id = $this->company_id;
