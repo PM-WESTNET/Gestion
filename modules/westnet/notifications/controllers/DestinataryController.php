@@ -117,8 +117,12 @@ class DestinataryController extends Controller {
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->redirect(['view', 'id' => $model->destinatary_id]);
         } else {
+
+            $notification = Notification::findOne($model->notification_id);
+
             return $this->render('update', [
-                        'model' => $model,
+                'model' => $model,
+                'notification' => $notification
             ]);
         }
     }
