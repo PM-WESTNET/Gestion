@@ -8,6 +8,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
+use app\modules\sale\models\InvoiceProcess;
 use yii\db\Expression;
 use yii\widgets\Pjax;
 
@@ -70,23 +71,29 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             ?>
                         </div>
                     </div>
-                    <div>
+                    <div class="row">
                         <div class="col-sm-12">
                             <label> <?= Yii::t('app', 'Informative message')?></label>
                             <input class="form-control" id="bill-observation">
                         </div>
-                        <div class="col-sm-3">
-                            <div class="form-group field-button">
-                                <label>&nbsp;</label>
-                                <?= Html::submitButton(Yii::t('app', 'Find Contracts'), ['class' => 'btn btn-warning form-control', 'id' => 'btnFind', 'data-loading-text' =>  Yii::t('app', 'Processing') ]) ?>
+                    </div>
+                    <div>
+                        <?php if(!InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) { ?>
+                            <div class="col-sm-3">
+                                <div class="form-group field-button">
+                                    <label>&nbsp;</label>
+                                    <?= Html::submitButton(Yii::t('app', 'Find Contracts'), ['class' => 'btn btn-warning form-control', 'id' => 'btnFind', 'data-loading-text' =>  Yii::t('app', 'Processing') ]) ?>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-group field-button">
-                                <label>&nbsp;</label>
-                                <?= Html::a(Yii::t('app', 'Is Invoiced'), null, ['class' => 'btn btn-success form-control', 'id'=> 'btnInvoice', 'data-loading-text' =>  Yii::t('app', 'Processing')]) ?>
+                            <div class="col-sm-3">
+                                <div class="form-group field-button">
+                                    <label>&nbsp;</label>
+                                    <?= Html::a(Yii::t('app', 'Is Invoiced'), null, ['class' => 'btn btn-success form-control', 'id'=> 'btnInvoice', 'data-loading-text' =>  Yii::t('app', 'Processing')]) ?>
+                                </div>
                             </div>
-                        </div>
+                        <?php } else { ?>
+                            <h3 class="alert alert-dismissible alert-info"> Procesando ... </h3>
+                        <?php } ?>
                     </div>
 
                     <?php ActiveForm::end(); ?>
@@ -177,13 +184,34 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             $(document).off('change', "#contractsearch-company_id").on('change', "#contractsearch-company_id", function(){
                 BatchInvoice.cargarBillType();
             });
-            $(document).off('click', "#btnInvoice").on('click', "#btnInvoice", function(){
-                BatchInvoice.facturar();
+            $(document).off('click', "#btnInvoice").on('click', "#btnInvoice", function(ev){
+                var attr = $('#btnInvoice').attr('disabled');
+                if (typeof attr !== typeof undefined && attr !== false) {
+                    ev.preventDefault();
+                } else {
+                    BatchInvoice.facturar();
+                }
             });
 
             BatchInvoice.cargarBillType();
             $('#panel-progress').hide();
             $('#panel-filtro').show();
+
+            $.ajax({
+                url: '<?= Url::to(["invoice-process-create-bill-is-started"])?>',
+                method: 'GET',
+                datatType: 'json',
+                success: function (data) {
+                    if(data.invoice_process_started) {
+                        $('#panel-progress').show();
+                        $('#panel-filtro').hide();
+                        BatchInvoice.processing = true;
+                        setTimeout(BatchInvoice.getProceso(), 500);
+                    } else {
+                        BatchInvoice.processing = false;
+                    }
+                }
+            })
         }
 
         this.cargarBillType = function (){
@@ -232,6 +260,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             if(!BatchInvoice.processing) {
                 BatchInvoice.processing = true;
                 if (confirm('<?=Yii::t('app', 'You are sure to bill all contracts listed ?')?>')) {
+                    $('#btnInvoice').attr('disabled', 'disabled');
+                    $('#btnInvoice').html('Procesando ...');
                     $("#div-without-error").hide();
                     $("#div-with-error").hide();
                     $("#messages").hide();
@@ -247,38 +277,14 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             data: postdata,
                             dataType: 'json',
                             success: function (data, textStatus, jqXhr) {
-                                if (data.status == 'success') {
-                                    BatchInvoice.processing = false;
-                                    var errores = 0;
-                                    var exitosos = 0;
-                                    if(data.messages.error) {
-                                        errores = data.messages.error.length;
-                                        for (i in data.messages.error){
-                                            var div = $("#div-message").clone();
-                                            div.addClass('alert-danger');
-                                            div.find('#message').html(data.messages.error[i]);
-                                            div.show();
-                                            div.appendTo("#messages");
-
-                                        };
-                                        $("#messages").show();
-
-                                        if(data.messages.success) {
-                                            exitosos = data.messages.success.length;
-                                        }
-                                        $("#without-error").html(exitosos);
-                                        $("#with-error").html(errores);
-                                        $("#div-without-error").show();
-                                        $("#div-with-error").show();
-                                    }
-
+                                if (data.status == "success") {
+                                    $("#div-message").addClass('alert-info');
+                                    $("#div-message").find('#message').html(data.message);
+                                    $("#div-message").show();
                                 } else {
-                                    for (error in data.errors) {
-
-                                        $('.field-' + error).addClass('has-error');
-                                        $('.field-' + error + ' .help-block').text(data.errors[error]);
-
-                                    }
+                                    $("#div-message").addClass('alert-danger');
+                                    $("#div-message").find('#message').html(data.message);
+                                    $("#div-message").show();
                                 }
                             }
                         });
@@ -307,7 +313,24 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             $('.progress-bar').html(parseInt( value) +'%');
                         } else {
                             $('.progress-bar').html('<?php echo Yii::t('app', 'Process finished') ?>');
+                            $('#process-label').addClass('hidden');
+                            if(data.total != 0 && data.qty != 0) {
+                                BatchInvoice.processing = false;
+                            }
                         }
+
+                        if(data.errors.length > 0) {
+                            var string = '';
+                            errores = data.errors.length;
+                            for (i in data.errors){
+                                string = string + data.errors[i] + "<br>";
+                            };
+
+                            $("#div-message").addClass('alert-danger');
+                            $("#div-message").find('#message').html(string);
+                            $("#div-message").show();
+                        }
+
                         if( BatchInvoice.processing ) {
                             BatchInvoice.getProceso();
                         }
