@@ -43,6 +43,15 @@ All notable changes to this project will be documented in this file.
  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  
+ ## [2019.12.10.0]
+ ### Agregado
+ - Se agrega proceso de facturación por lotes en segundo plano
+ - Se configura cron para que el proceso de facturación por lotes se levante automáticamente cuando por una razón 
+ externa ha sido interrumpido.
+ ### Modificado
+ - Se modifica el proceso de facturación por lotes de manera que no bloquee las tareas en el sistema al usuario que 
+ inicia el proceso.
+ 
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
  
