@@ -1746,7 +1746,7 @@ class Customer extends ActiveRecord {
             $point_of_sale = $this->company->getPointOfSale()->andWhere(['default' => 1])->one;
 
             if (empty($point_of_sale)) {
-                $point_of_sale = $this->company->getPointOfSale()->one();
+                $point_of_sale = $this->company->getPointsOfSale()->one();
                 if (empty($point_of_sale)) {
                     Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
                     return false;
