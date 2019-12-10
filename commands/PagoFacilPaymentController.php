@@ -36,20 +36,28 @@ class PagoFacilPaymentController extends Controller
 
         echo "Hay $pending_pago_facil_files_qty archivos para ser procesados\n";
 
-        if(Yii::$app->mutex->acquire('pago_facil_mutex')) {
+        if(Yii::$app->mutex->acquire('pago_facil_mutex') && $pending_pago_facil_files) {
+            echo "Iniciando proceso\n";
             $i = 0;
 
-            Yii::$app->cache->set('pago_facil_payments', [
-                'total' => $pending_pago_facil_files_qty,
-                'qty' => $i
-            ]);
-
             foreach ($pending_pago_facil_files as $file) {
-                foreach ($file->payments as $payment) {
-                    if($payment->paymentPayment->close()){
+                echo "$file->pago_facil_transmition_file_id\n";
+
+                //Solo se tienen en cuenta los pagos que están pendientes de cerrarse.
+                $payments = $file->getCheckoutPayments()->where(['payment.status' => 'draft'])->all();
+
+                echo "Pagos pendientes de cerrar de archivo $file->pago_facil_transmition_file_id". count($payments) ."\n";
+
+                Yii::$app->cache->set('close_pago_facil_payments', [
+                    'total' => count($payments),
+                    'qty' => $i
+                ]);
+
+                foreach ($payments as $payment) {
+                    if($payment->close()){
                         $i++;
-                        Yii::$app->cache->set('pago_facil_payments', [
-                            'total' => $pending_pago_facil_files_qty,
+                        Yii::$app->cache->set('close_pago_facil_payments', [
+                            'total' => count($payments),
                             'qty' => $i
                         ]);
                     }

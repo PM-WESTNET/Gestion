@@ -1279,4 +1279,5 @@
     'gigantografía' => 'Gigantografía',
     'instagram' => 'Instagram',
     'pantalla-led' => 'Pantalla led',
+    'Progress' => 'Proceso',
 );

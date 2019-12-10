@@ -42,6 +42,7 @@ All notable changes to this project will be documented in this file.
  - Notificaciones masiva a la app [GES-665]
  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
+ - Se agrega proceso en segundo plano que cierra los pagos creados con un archivo de pago facil [GES-628] [pago-facil-payments]
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint

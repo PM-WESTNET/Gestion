@@ -690,4 +690,32 @@ class PaymentController extends Controller {
             return $this->redirect(['view', 'customer' => $model->customer_id]);
         }
     }
+
+    /**
+     * Verifica que el proceso de cierre de pagos de un archivo se esté procesando
+     */
+    public function actionClosePaymentProcessStarted($pago_facil_transmition_file_id)
+    {
+        Yii::$app->response->format = 'json';
+
+        if(PagoFacilTransmitionFile::getPendingClosePaymentProcess($pago_facil_transmition_file_id)) {
+            return ['process_started' => true];
+        }
+
+        return ['process_started' => false];
+    }
+
+    /**
+     * Retorna el estado del proceso actual.
+     * @return array
+     */
+    public function actionGetClosePaymentProcess()
+    {
+        Yii::$app->response->format = 'json';
+
+        return Yii::$app->cache->get('close_pago_facil_payments', [
+            'total' => 0,
+            'qty' => 0
+        ]);
+    }
 }

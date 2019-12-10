@@ -343,26 +343,48 @@ class PagoFacilTransmitionFile extends ActiveRecord {
     {
         return $this->hasMany(PagoFacilPayment::class, ['pago_facil_transmition_file_pago_facil_transmition_file_id' => 'pago_facil_transmition_file_id']);
     }
+
+    /**
+     *
+     * @return ActiveQuery
+     */
+    public function getCheckoutPayments()
+    {
+        return Payment::find()
+            ->leftJoin('pago_facil_payment pfp', 'pfp.payment_payment_id = payment.payment_id')
+            ->leftJoin('pago_facil_transmition_file pftf', 'pftf.pago_facil_transmition_file_id = pfp.pago_facil_transmition_file_pago_facil_transmition_file_id')
+            ->where(['pftf.pago_facil_transmition_file_id' => $this->pago_facil_transmition_file_id]);
+    }
     
     public function payments(){
         return $this->getPayments();
     }
 
     /**
-     * Cambia el estado del archivo a pendiente para que el cron cierre todos los pagos que corresponden a ese archivo.
-    //TODO poner nombre del cron
+     * Cambia el estado del archivo a pendiente para que el cron (pago-facil-payment/close-pago-facil-payments)
+     * cierre todos los pagos que corresponden a ese archivo.
      */
     public function confirmFile(){
         $this->updateAttributes(['status' => PagoFacilTransmitionFile::STATUS_PENDING]);
-//        $payments = $this->payments;
-//
-//        foreach ($payments as $payment){
-//            $payment->paymentPayment->close();
-//        }
-//
-//        $this->status = 'closed';
-//        $this->updateAttributes(['status']);
         return true;
+    }
+
+    /**
+     * Determina si el proceso de cierre de pagos ha empezado y está en el estado correcto para que el cron cierre los pagos
+     */
+    public static function getPendingClosePaymentProcess($pago_facil_transmition_file_id)
+    {
+        $pago_facil_transmition_file = PagoFacilTransmitionFile::findOne($pago_facil_transmition_file_id);
+
+        if(!$pago_facil_transmition_file) {
+            return false;
+        }
+
+        if($pago_facil_transmition_file->status == PagoFacilTransmitionFile::STATUS_PENDING) {
+            return true;
+        }
+
+        return false;
     }
 
 }
