@@ -34,7 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
     
     <div class="row">
         <div class="col-sm-6">
-            <?= $form->field($searchModel, 'fromDate')->widget(DatePicker::className(), [
+            <?= $form->field($searchModel, 'fromDate')->widget(DatePicker::class, [
                 'language' => 'es',
                 'model' => $searchModel,
                 'dateFormat' => 'dd-MM-yyyy',
@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ?>
         </div>
         <div class="col-sm-6">
-            <?= $form->field($searchModel, 'toDate')->widget(DatePicker::className(), [
+            <?= $form->field($searchModel, 'toDate')->widget(DatePicker::class, [
                 'language' => 'es',
                 'model' => $searchModel,
                 'dateFormat' => 'dd-MM-yyyy',

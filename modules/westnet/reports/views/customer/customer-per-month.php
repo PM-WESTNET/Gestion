@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
 use yiier\chartjs\ChartJs;
+use yii\jui\DatePicker;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
@@ -26,8 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_from'); ?>
-                        <?php
-                        echo yii\jui\DatePicker::widget([
+                        <?= DatePicker::widget([
                             'language' => Yii::$app->language,
                             'model' => $model,
                             'attribute' => 'date_from',
@@ -43,8 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_to'); ?>
-                        <?php
-                        echo yii\jui\DatePicker::widget([
+                        <?= DatePicker::widget([
                             'language' => Yii::$app->language,
                             'model' => $model,
                             'attribute' => 'date_to',

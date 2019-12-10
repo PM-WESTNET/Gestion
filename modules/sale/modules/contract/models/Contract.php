@@ -83,7 +83,6 @@ class Contract extends ActiveRecord {
                     ],
                 ];
             }
-
             $is_developer_mode = Config::getValue('is_developer_mode');
             if(!$is_developer_mode) {
                 //  Se sobreescribe la propiedad events del behavior para evitar que se distare cuando el contrato se

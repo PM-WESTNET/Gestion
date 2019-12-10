@@ -70,7 +70,12 @@ $this->params['breadcrumbs'][] = $this->title;
                         },
                     ],
                     'account.name',
+                    [
+                        'label' => Yii::t("accounting", "Money Box Account"),
+                        'attribute' => 'moneyBoxAccount.number'
+                    ],
                     'operationType.is_debit:boolean',
+                    'code'
                 ]
             ]);
             ?>

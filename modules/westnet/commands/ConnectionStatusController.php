@@ -777,5 +777,4 @@ class ConnectionStatusController extends Controller
         }
         $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
     }
-
 }

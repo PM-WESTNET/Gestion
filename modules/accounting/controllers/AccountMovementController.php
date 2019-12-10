@@ -462,13 +462,13 @@ class AccountMovementController extends Controller
      * @return string
      * @throws NotFoundHttpException
      */
-    public function actionClose($id, $from='view', $from_date= '', $to_date= '', $money_box_account_id= null)
+    public function actionClose($id, $from = 'view', $from_date = '', $to_date = '', $money_box_account_id = null)
     {        
         $model = $this->findModel($id);
 
         $model->close();
 
-        if($from=='view'){
+        if($from == 'view'){
             return $this->actionView($id);
         } else {
             if ($from === 'movements' && !empty($money_box_account_id)) {// Si llamo la accion desde la pantalla de movimientos, vuelvo a la misma pantalla

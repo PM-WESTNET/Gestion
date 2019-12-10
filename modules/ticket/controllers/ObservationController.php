@@ -74,5 +74,4 @@ class ObservationController extends \app\components\web\Controller {
         ];
 
     }
-
 }

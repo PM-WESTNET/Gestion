@@ -23,5 +23,4 @@ $tax_rate = [
     ['tax_rate_id' => '15','pct' => '0.025','tax_id' => '1','code' => '9']
 ];
 
-
 return $tax_rate;

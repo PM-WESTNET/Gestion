@@ -85,6 +85,15 @@ $config = [
                     'logFile' => '@runtime/logs/app_active_contract.log'
 
                 ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['browser-notification-customers'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/browser-notification-customers.log'
+
+                ],
             ],
         ],
         'db' => $db['db'],
@@ -301,6 +310,9 @@ $config = [
         ],
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
+        ],
+        'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit',
         ],
         'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',

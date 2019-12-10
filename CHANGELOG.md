@@ -3,11 +3,140 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## [Pendiente de aprobación]
+ 
+ - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
+ - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
+ - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
+ - Correcion error duplicado de tickets en panel de cobranza
+ - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+ - IVR: Se agrega indicador si el cliente es nuevo o no
+ - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+ - Correción filtros asignación masiva de planes
+ - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
+   la fecha de la ultima actualizacion de los mismos
+ - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
+ - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+  del plan actual del cliente. [Ticket GES-489]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+ - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
+ - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
+ - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+ de cliente etc). [Ticket GES-568]
+ - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+ uno de los clientes. [Ticket GES-568]
+ - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
+ - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+ a diferentes pagos. [Ticket GES-547]
+ - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
+ la condición del cliente.
+ - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
+ - IVR : Cambio en salida de endpoint get-customer para que le quede comodo a Federico de Iperfex
+ - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
+ - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
+ - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
+ - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
+ las opciones de gigantografia, pantalla led e instagram [GES-644]
+ - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
+ - Notificaciones por email: envio en segundo plano [GES-614]
+ - Notificaciones masiva a la app [GES-665]
+ - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
+ - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
+ 
+ ## [2019.11.15.0]
+ - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint
+ 
+ ## [2019.11.14.1]
+ ### Modificado
+ - Pagos de clientes: Se registra el usuario que ha cargado un pago por transferencia
+ 
+
+ ## [2019.11.14.0]
+ ### Agregado
+  - Creación de cliente nuevo: Se agrega la posibilidad de adjuntar imagenes del documento e impuesto en el momento de 
+  crear un nuevo cliente.
+  - Index de clientes: Se agregan columnas para identificar rápidamente aquellos clientes que no poseen foto del documento
+  o de un impuesto cargada.
+  - Index de clientes: Se agrega enlace para que al hacer click en los iconos que indican si tiene imagen de documento o
+  imagen de impuesto lleven a la vista del cliente o a la actualización del cliente.
+  
+ ## [2019.11.13.0]
+ ### Modificado
+  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso.
+  - Asignacion masiva de planes a clientes: Se corrige error que ocurria en el servidor con ciertos contratos.
+  - Cierre de facturas: Se corrige error que se generaba al cerrar una factura con un descuento fijo aplicado al cliente.
+  - Cierre de comprobantes: Cambios en xml enviado a AFIP cuando el comprobante tiene descuentos fijos.
+  - IVR: Se limita la posibilidad de crear extensiones de pago solo cuando no son clientes nuevos y han pagado su primera factura.
+  - IVR: Se agrega numeros de telefono a la info del cliente.
+  - IVR: Al no poder crear extension de pago se indica si el motivo es por morosidad o no
+   
+ 
+ ## [2019.11.08.0]
+ ### Modificado
+  - Panel de tickets de cobranza: Se arregla error que se presentaba al aplicar el filtro de estado "No responde".
+  - Pagos a proveedores: Se corrige error que se generaba al agregar el segundo item de un pago con diferente medio de
+  pago al primer item.
+  - Panel de tickets: Correcion de conteo de tickets.
+  - Liquidacion de Vendedor: Se corrige error al crear factura de proveedor.
+  
+ 
+ ## [2019.11.07.0]
+ ### Agregado
+ - Notificaciones por explorador: Se agrega comando de cron que guarda los clientes a los que se debe notificar.
+ - Notificaciones por explorador: Se agrega API para que el portal consulte los clientes que se tienen en cuenta en las 
+ notificaciones por explorador.
+ 
+ ## [2019.11.06.0]
+ ### Modificado
+ - Informar Pago: Error al enviar foto capturada por la camara
+ - Actualizacion de app en android con ultimos cambios
+ 
+ ## [2019.11.05.0] - 05-11-2019
+ ### Modificado
+  - Comprobantes a proveedores: Se corrige error que se generaba al crear un comprobante nuevo.
+
+ ##[2019.11.01.0] - 01-11-2019
+ ### Modificado
+ - Vista de movimientos de cuentas monetarias: Se corrige error que se generaba al tildar un movimiento como verificado.
+ 
+ ## [2019.10.31.2] - 31-10-2019
+ ### Modificado
  - Pagos a proveedores: Se limita la eliminación de pagos a proveedores.
  - Pagos a proveedores: Se limita la eliminación de comprobantes a proveedores.
  - Pagos a proveedores: Se agrega botón par aguardar pagos a proveedor en estado borrador.
  - Pagos a proveedores: Se agrega el estado del pago en la vista del mismo.
  - Pagos a proveedores: Se agrega el estado del pago en el listado de pagos a proveedor.
+ 
+ ## [2019.10.31.1] - 31-10-2019
+ ### Modificado
+  - Cambio de Velocidad Programado: Solo se muestran contratos activos
+  - Cambio de Velocidad Programado: Solo se muestran planes
+  
+ ## [2019.10.31.0] - 31-10-2019
+ ### Agregado
+ - Resumenes bancarios: Importación de resumenes bancarios.
+ - Conciliaciones automática de cuentas.
+ - Contabilidad: Asignación de tiopos de operaciones y códigos a entidades bancarias.
+ - IVR: Habilitación de cliente 27237 para pruebas de IVR
+ ### Modificado
+  - Contabilidad:
+    - Cierre de movimientos contables: Al cerrar un movimiento de una cuenta monetaria, se cierran todos los movimientos
+    anteriores a ese.
+    - Limitación al eliminar o actualizar pagos a proveedor, Comprobantes a proveedor, Cheques, Comprobantes o pagos de 
+    clientes  cuando sus movimientos contables correspondientes ya están cerrados para evitar diferencias en las cajas.
+    - Los movimientos generados automáticamente a partir de un pago a proveedor por ejemplo, se hacen con la fecha actual
+    y no con la fecha del pago. Esto evita movientos en períodos en los cuales ya se han verificado todos los movimientos.
+  - Pagos a proveedores:
+    - Se limita la creación de los pago a proveedores a X dias para atrás desde el dia actual. La cantidad de dias es 
+    configurable.
+  
+## [2019.10.28.0] - 28-10-2019
+### Modificado
+ - Optimizacion de widget de notificaciones
+
+## [2019.10.25.0] - 25-10-2019
+### Modificado
+ - Correccion de número de Servicio Técnico mostrado en la app
 
 ## [2019.10.23.0] - 23-10-2019
 ### Agregado

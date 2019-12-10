@@ -40,7 +40,6 @@ class TaskSearch extends Task {
         ]);
     }
 
-
     public function scenarios() {
         // bypass scenarios() implementation in the parent class
         return Model::scenarios();
@@ -82,7 +81,6 @@ class TaskSearch extends Task {
     public function searchAgenda() {
 
         $query = Task::find();
-
         $query->leftJoin('notification n', 'n.task_id = task.task_id');
 
         $query->andFilterWhere([
@@ -114,12 +112,6 @@ class TaskSearch extends Task {
             $query->andFilterWhere(['<=', 'date', $this->to_date]);
         }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
-
-        \Yii::trace($query->createCommand()->getRawSql());
-//        return $dataProvider;
         return $query->all();
     }
 

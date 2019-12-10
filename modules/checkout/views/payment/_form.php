@@ -42,11 +42,7 @@ if(!$model->company_id) {
                 ?>
             </div>
         </div>
-
-
     </div>
-
-
 
     <?php
         if (!$model->customer) {
@@ -123,6 +119,14 @@ if(!$model->company_id) {
                     ],
                     'description',
                     'amount:currency',
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function ($model){
+                            if ($model->user) {
+                                return $model->user->username;
+                            }
+                        }
+                    ],
                     [
                         'class' => 'app\components\grid\ActionColumn',
                         'template'=>'{delete}',

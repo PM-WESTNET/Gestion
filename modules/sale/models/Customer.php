@@ -97,6 +97,15 @@ class Customer extends ActiveRecord {
     public $_email_fields_notifications;
     public $_notifications_way;
 
+    //Propiedad que se usa para devolver errores descriptivos cuando una función puede dar false por diferentes motivos.
+    public $detailed_error;
+
+    // Indica al IVR que el cliente es moroso
+    public $debtor = false;
+
+    // Indica al IVR que el cliente es nuevo
+    public $isNew= false;
+
     /**
      * @inheritdoc
      */
@@ -124,7 +133,7 @@ class Customer extends ActiveRecord {
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
-            [['last_calculation_current_account_balance', 'current_account_balance'], 'safe'],
+            [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error', 'document_image', 'tax_image'], 'safe'],
             //['document_number', 'validateCustomer', 'on' => 'insert']
         ];
 
@@ -325,6 +334,22 @@ class Customer extends ActiveRecord {
         $this->on(self::EVENT_AFTER_VALIDATE, $docNumberValidation);
     }
 
+    public function behaviors()
+    {
+        return [
+            'date_new' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date_new'],
+                ],
+                'value' => function(){
+                    return (new \DateTime('now'))->format('Y-m-d');
+                }
+            ],
+        ];
+    }
+
+
     /**
      * @inheritdoc
      */
@@ -367,7 +392,9 @@ class Customer extends ActiveRecord {
             'needs_bill' => Yii::t('app', 'Needs Bill'),
             'phone4' => Yii::t('app', 'Cellphone 4'),
             'last_update' => Yii::t('app', 'Last update'),
-            'hourRanges' => Yii::t('app', 'Customer Hour range')
+            'hourRanges' => Yii::t('app', 'Customer Hour range'),
+            'document_image' => Yii::t('app', 'Document image'),
+            'tax_image' => Yii::t('app', 'Tax image'),
         ];
 
         //Labels adicionales definidos para los profiles
@@ -560,10 +587,10 @@ class Customer extends ActiveRecord {
             ->where(['and',
                 ['<=', 'customer_has_discount.from_date', $dateNow],
                 ['>=', 'customer_has_discount.to_date', $dateNow],
-                ['persistent' => null],
+                ['discount.persistent' => 0],
             ])
             ->orWhere(['and',
-                ['not', ['persistent' => null]],
+                ['not', ['discount.persistent' => null]],
                 ['customer_has_discount.to_date' => null],
             ])
             ->andWhere(['customer_has_discount.status' => CustomerHasDiscount::STATUS_ENABLED])
@@ -605,7 +632,6 @@ class Customer extends ActiveRecord {
      * @return null | app\modules\sale\models\Profile
      */
     public function getProfile($class_id) {
-
         $class = ProfileClass::find()->where(['profile_class_id' => $class_id])->one();
 
         //Si el profile soporta multiples valores, devolvemos un array con todos los valores
@@ -720,7 +746,6 @@ class Customer extends ActiveRecord {
                 $p->delete();
 
             $this->unlinkAll('hourRanges', $this);
-
             return true;
         } else {
             return false;
@@ -1100,6 +1125,7 @@ class Customer extends ActiveRecord {
             Debug::debug('Tolerance :'. Yii::$app->params['account_tolerance'] );
         }
 
+
         if ($total < -(Yii::$app->params['account_tolerance'])) {
             return true;
         } else {
@@ -1354,7 +1380,7 @@ class Customer extends ActiveRecord {
         ];
     }
 
-    public static function verifyEmails($data, $field = "email")
+    public static function verifyEmails($data, $field = "email", $type = 'elastic')
     {
         $row_index = 0;
         $results = [
@@ -1366,16 +1392,29 @@ class Customer extends ActiveRecord {
         while (($row = fgetcsv($data)) !== false) {
             Yii::info(print_r($row, 1), 'data');
             if ($row_index > 0) {
-                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+                if ($type == 'elastic') {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+    
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = strtolower($row[1]);
+                        $customer->updateAttributes([$status_field]);
+    
+                        $results['total']++;
+                        $results[strtolower($row[1])]++;
+    
+                    }
+                } else {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
 
-                foreach ($customers as $customer) {
-                    $status_field = $field.'_status';
-                    $customer->$status_field = strtolower($row[1]);
-                    $customer->updateAttributes([$status_field]);
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = 'inactive';
+                        $customer->updateAttributes([$status_field]);
 
-                    $results['total']++;
-                    $results[strtolower($row[1])]++;
-
+                        $results['total']++;
+                        $results['inactive']++;
+                    }
                 }
             }
 
@@ -1563,19 +1602,39 @@ class Customer extends ActiveRecord {
      * Logica de negocio: Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
      * es mayor al dia corriente, el cliente no puede solicitar una extensión de pago. Ej: 15 + 5 = 20
      * Si hoy es 16, puedo solicitar una extension de pago
-     * Si hoy es 21 ya no puedo solicitarla
+     * Si hoy es 21 ya no puedo solicitarla.
+     * IMPORTANTE: Se puede consultar un detalle de porqué devuelve false haciendo $this->detailed_error
      */
     public function canRequestPaymentExtension()
     {
-        //Sólo si el cliente no debe mas de una factura
-        if(Customer::getOwedBills($this->customer_id) >= (int)Config::getValue('payment_extension_debt_bills')) {
-            return false;
-        }
-
         $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
         $today = (new \DateTime('now'))->getTimestamp();
 
+        //Verifico que la fecha de hoy no sea mayor a la fecha máxima en la cual se puede solicitar la extension de pago
         if($today > $max_date_can_request_payment_extension) {
+            $this->detailed_error = Yii::t('app', "Today's date exceeds the maximun date");
+            return false;
+        }
+
+        //Sólo si el cliente no debe mas de una factura
+        if(Customer::getOwedBills($this->customer_id) > (int)Config::getValue('payment_extension_debt_bills')) {
+            $this->detailed_error = Yii::t('app', 'The customer have debt bills');
+            $this->debtor = true;
+        }
+
+        if(!Customer::hasFirstBillPayed($this->customer_id, false)) {
+            $this->detailed_error = Yii::t('app', 'The customer doesnt have the first bill payed');
+            $this->debtor = true;
+        }
+
+        //Verifico que el cliente no sea nuevo
+        if($this->isNewCustomer()) {
+            $this->detailed_error = Yii::t('app', 'The customer is new');
+            $this->isNew = true;
+        }
+
+        //Si es deudor o es nuevo, recien salgo aca para que pase por las 3 validaciones
+        if ($this->debtor || $this->isNew) {
             return false;
         }
 
@@ -1583,7 +1642,12 @@ class Customer extends ActiveRecord {
         $maximun_payment_extension_qty = Config::getValue('payment_extension_qty_per_month');
         $payment_extension_qty = $this->getPaymentExtensionQtyRequest();
 
-        return $payment_extension_qty < $maximun_payment_extension_qty ? true : false;
+        if($payment_extension_qty > $maximun_payment_extension_qty) {
+            $this->detailed_error = Yii::t('app', 'The customer exceed the maximun payment extension quantity per month');
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -1657,8 +1721,15 @@ class Customer extends ActiveRecord {
         return $this->getContracts()->where(['status' => Contract::STATUS_ACTIVE])->exists();
     }
 
+    /**
+     * Determina si el cliente es nuevo en base de la fecha de validez del contrato.
+     */
     public function isNewCustomer()
     {
+        if ($this->code === 27237) {
+           return false;
+        }
+
         $contracts = $this->contracts;
         foreach ($contracts as $contract) {
             if (empty($contract->from_date) || $contract->from_date === Yii::t('app', 'Undetermined time')){
@@ -1676,11 +1747,25 @@ class Customer extends ActiveRecord {
     /**
      * Indica si el cliente tiene la primer factura pagada.
      */
-    public static function hasFirstBillPayed($customer_id)
+    public static function hasFirstBillPayed($customer_id, $verify_bills = true)
     {
-        $search = new CustomerSearch();
-        $result = $search->searchDebtBills($customer_id);
-        return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+        $bill = Bill::find()->where(['customer_id' => $customer_id, 'status' => 'closed'])->orderBy(['bill_id' => SORT_ASC])->one();
+
+        if(!$bill) {
+            return false;
+        }
+
+        $total_payed = (new Query())
+            ->select('SUM(amount) as total')
+            ->from('payment')
+            ->where(['customer_id' => $customer_id, 'status' => 'closed'])
+            ->one();
+
+        if($total_payed['total'] >= $bill->total) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1704,4 +1789,41 @@ class Customer extends ActiveRecord {
             ->orderBy(['programmed_plan_change.date' => SORT_DESC])
             ->one();
     }
+
+    /**
+     * Determina si el plan del contrato del cliente es un plan de fibra o no
+     * Si el cliente no tiene contrato devuelve false.
+     */
+    public function hasFibraPlan()
+    {
+        $contract = $this->getContracts()->one();
+
+        if(!$contract) {
+            return false;
+        }
+
+        if(!$contract->hasFibraPlan()){
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Devuelve el path de la imagen del documento
+     */
+    public function getDocumentImageWebPath()
+    {
+        return (!$this->document_image ? null : 'uploads/document_images/' . basename($this->document_image));
+    }
+
+    /**
+     * Devuelve el path de la imagen del impuesto cargado
+     */
+    public function getTaxImageWebPath()
+    {
+        return (!$this->tax_image ? null : 'uploads/tax_images/' . basename($this->tax_image));
+    }
+
+
 }

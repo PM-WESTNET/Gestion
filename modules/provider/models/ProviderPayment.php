@@ -62,7 +62,13 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         return [
             'account' => [
                 'class'=> 'app\modules\accounting\behaviors\AccountMovementBehavior'
-            ]
+            ],
+            'unix_timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                ],
+            ],
         ];
     }
 
@@ -215,6 +221,26 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getDeletable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse.
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
         if($this->status == ProviderPayment::STATUS_CLOSED) {
             return false;
         }

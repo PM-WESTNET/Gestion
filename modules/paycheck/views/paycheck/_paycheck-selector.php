@@ -10,7 +10,7 @@ use yii\helpers\Html;
     <div class="toggle-paycheck">
         <input type="hidden" value="<?=(!$model->paycheck ? "" : $model->paycheck->paycheck_id )?>" id="paycheck_id" name="<?=end(explode('\\', get_class($model)))?>[paycheck_id]"/>
 
-        <div class="search" style="<?=(!$model->paycheck ? "" : "display: none;" )?>">
+        <div id="div-inputs" class="search" style="<?=(!$model->paycheck ? "" : "display: none;" )?>">
             <div class="input-group">
                 <?= Html::textInput('paycheck_search', '', ['class'=>'form-control paycheck_search', 'id'=>'paycheck_search']) ?>
                 <span class="input-group-btn">
@@ -25,7 +25,7 @@ use yii\helpers\Html;
         </div>
 
 
-        <div class="paycheck" style="<?=($model->paycheck ? "" : "display: none;" )?>">
+        <div id="div-remove" class="paycheck" style="<?=($model->paycheck ? "" : "display: none;" )?>">
             <div class="input-group">
                 <?= Html::textInput('paycheck_data', ( !$model->paycheck ? "" : $model->paycheck->getFullDescription()), ['class'=>'form-control', 'disabled'=>'disabled', 'data-paycheck-id'=>($model->paycheck ? $model->paycheck->paycheck_id: "")]) ?>
                 <span class="input-group-btn">

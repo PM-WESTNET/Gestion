@@ -16,6 +16,9 @@ use app\components\companies\CompanySelector;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
+use app\modules\sale\models\Company;
+use webvimark\modules\UserManagement\models\User;
+use kartik\widgets\FileInput;
 
 /**
  * @var yii\web\View $this
@@ -49,7 +52,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             $search = new CompanySearch();
             $data = [];
             if(isset($model->parent_company_id)) {
-                $data = ArrayHelper::map( \app\modules\sale\models\Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
+                $data = ArrayHelper::map( Company::findAll(["parent_id"=>$model->parent_company_id]), 'company_id','name');
             }
             ?>
             <div class="form-group field-company_id">
@@ -64,7 +67,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
     </div>
     <div class="row">
-
         <div class="col-sm-12">
             <?= $form->field($model, 'tax_condition_id')->dropDownList(
                 ArrayHelper::map(TaxCondition::find()->orderBy(['name'=>SORT_ASC])->all(), 'tax_condition_id', 'name' )) ?>
@@ -85,7 +87,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         <div class="col-sm-3 col-xs-12">
             <?php
-                if (!\webvimark\modules\UserManagement\models\User::hasRole('superadmin')){
+                if (!User::hasRole('superadmin')){
                     $document_types= DocumentType::find()->andWhere(['<>','code', 99]);
                 }else{
                     $document_types= DocumentType::find();
@@ -151,7 +153,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         </div>
         <div class="col-sm-6 col-xs-12">
-
             <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
@@ -182,7 +183,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?php if (Yii::$app->getModule("accounting")) { ?>
             <div class="form-group field-provider-account">
                 <?= $form->field($model, 'account_id')->widget(Select2::className(),[
-                    'data' => yii\helpers\ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+                    'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
                     'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                     'pluginOptions' => [
                         'allowClear' => true
@@ -236,11 +237,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                     'web' => Yii::t('app', 'web'), 
                     'other_customer' => Yii::t('app', 'other_customer'), 
                     'facebook' => Yii::t('app', 'facebook'), 
-                    'street_banner' => Yii::t('app', 'street_banner'), 
-                    'magazine' => Yii::t('app', 'magazine'), 
+                    'street_banner' => Yii::t('app', 'street_banner'),
                     'door_to_door' => Yii::t('app', 'door_to_door'), 
                     'competition' => Yii::t('app', 'competition'),
-                    'brochure' => Yii::t('app', 'brochure'),
+                    'instagram' => Yii::t('app', 'Instagram'),
+                    'gigantografía' => Yii::t('app', 'Gigantografía'),
+                    'pantalla-led' => Yii::t('app', 'Pantalla led')
                 ], ['prompt' => Yii::t('app', 'Select an option...')]);
             ?>
         </div>
@@ -253,7 +255,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         }    
     ?>    
         
-    <div class="row" <?=(webvimark\modules\UserManagement\models\User::hasRole('seller', false) && !(webvimark\modules\UserManagement\models\User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
+    <div class="row" <?=(User::hasRole('seller', false) && !(User::hasRole('seller-office', false)) ? 'style="display: none;"' : '') ?>>
         <div class="col-sm-4 col-xs-4" >
             <?= $form->field($model, '_notifications_way')->checkboxList(Customer::getNotificationWays(), ['id' => 'notifications_way'])?>
         </div>
@@ -269,6 +271,33 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-12">
             <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('document_image_update', null, ['id'=>'document_image_update']); ?>
+                <?= $form->field($model, 'document_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->document_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getDocumentImageWebPath(), ['class'=>'file-preview-image','style' =>'height:100%; width: 100%', 'alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
+        </div>
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('tax_image_update', null, ['id'=>'tax_image_update']); ?>
+                <?= $form->field($model, 'tax_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->tax_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getTaxImageWebPath(), ['class'=>'file-preview-image', 'style' =>'height:100%; width: 100%','alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
         </div>
     </div>
 
@@ -324,6 +353,50 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         ?>;
 
         this.init = function(){
+
+            $('#customer-document_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-document_image').val()==0) {
+                            $('#document_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-document_image').on('filebrowse', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileclear', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileselectnone', function(event) {
+                $('#document_image_update').val(0);
+            });
+
+            $('#customer-tax_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-tax_image').val()==0) {
+                            $('#tax_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-tax_image').on('filebrowse', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileclear', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileselectnone', function(event) {
+                $('#tax_image_update').val(0);
+            });
+
+
             $('#customer-tax_condition_id').on('change', function(e){
                 onTaxConditionChange(e);
             });
@@ -486,3 +559,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     };
 </script>
 <?php $this->registerJs('Customer.init();') ?>
+
+    <script>
+        var CompanyForm = new function() {
+
+            this.init = function() {
+
+            };
+        };
+    </script>
+    <?php  $this->registerJs("CompanyForm.init();"); ?>

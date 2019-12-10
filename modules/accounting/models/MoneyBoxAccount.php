@@ -84,7 +84,8 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
                 'whenClient' => "function (attribute, value) {
                     return $('#moneyboxaccount-small_box').is(':checked');
                 }"
-            ]
+            ],
+            ['account_id', 'validateAccountIsNotUsedByOtherMoneyBoxAccount']
         ];
 
         if (Yii::$app->params['companies']['enabled']) {
@@ -114,6 +115,19 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
             'small_box' => Yii::t('app', 'Small Box?'),
             'type' => Yii::t('app', 'Type'),
         ];
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     * Valida que la cuenta no este siendo usada en otra cuenta monetaria (money_box_account)
+     */
+    public function validateAccountIsNotUsedByOtherMoneyBoxAccount($attribute, $params, $validator)
+    {
+        if (MoneyBoxAccount::find()->where(['account_id' => $this->account_id])->exists()) {
+            $this->addError($attribute, Yii::t('app', 'That account its used in another money box account.'));
+        }
     }
 
     /**
@@ -210,13 +224,15 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
             throw new \yii\web\HttpException(405, $body);
         }
         
-        $account = $this->account;
-        
         $items = $this->account->getAccountMovementItems()->joinWith(['accountMovement' => function($query) use($date){ return $query->andWhere(['date' => $date]); }])->where(['account_movement_item.status' => 'draft'])->all();
+
+        //Se realiza el proceso en un bloque atómico para evitar inconsistencias.
+        $transaction = Yii::$app->db->beginTransaction();
         foreach($items as $item){
             $status = $item->accountMovement->close();
             
             if($status != true){
+                $transaction->rollBack();
                 throw new \yii\web\HttpException(500, Yii::t('app', 'Can\'t close movement {movement}', ['movement' => $item->account_movement_id]));
             }
         }
@@ -225,6 +241,8 @@ class MoneyBoxAccount extends \app\components\companies\ActiveRecord
             'daily_box_last_closing_date' => $date,
             'daily_box_last_closing_time' => date('H:i:s')
         ]);
+
+        $transaction->commit();
         
         return true;
         

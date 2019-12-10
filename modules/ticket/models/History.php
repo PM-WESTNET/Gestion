@@ -3,6 +3,7 @@
 namespace app\modules\ticket\models;
 
 use Yii;
+use app\modules\ticket\TicketModule;
 
 /**
  * This is the model class for table "history".
@@ -113,15 +114,15 @@ class History extends \app\components\db\ActiveRecord {
      */
     public function attributeLabels() {
         return [
-            'history_id' => \app\modules\ticket\TicketModule::t('app', 'ID'),
-            'title' => \app\modules\ticket\TicketModule::t('app', 'Title'),
-            'date' => \app\modules\ticket\TicketModule::t('app', 'Date'),
-            'time' => \app\modules\ticket\TicketModule::t('app', 'Time'),
-            'datetime' => \app\modules\ticket\TicketModule::t('app', 'Datetime'),
-            'ticket_id' => \app\modules\ticket\TicketModule::t('app', 'Ticket ID'),
-            'user_id' => \app\modules\ticket\TicketModule::t('app', 'User ID'),
-            'ticket' => \app\modules\ticket\TicketModule::t('app', 'Ticket'),
-            'user' => \app\modules\ticket\TicketModule::t('app', 'User'),
+            'history_id' => TicketModule::t('app', 'ID'),
+            'title' => TicketModule::t('app', 'Title'),
+            'date' => TicketModule::t('app', 'Date'),
+            'time' => TicketModule::t('app', 'Time'),
+            'datetime' => TicketModule::t('app', 'Datetime'),
+            'ticket_id' => TicketModule::t('app', 'Ticket ID'),
+            'user_id' => TicketModule::t('app', 'User ID'),
+            'ticket' => TicketModule::t('app', 'Ticket'),
+            'user' => TicketModule::t('app', 'User'),
         ];
     }
 
@@ -131,13 +132,13 @@ class History extends \app\components\db\ActiveRecord {
      */
     public static function titleLabels() {
         return [
-            'created' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been created'),
-            'updated' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been updated'),
-            'closed' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been closed'),
-            'reopened' => \app\modules\ticket\TicketModule::t('app', 'Ticket has been reopened'),
-            'new_observation' => \app\modules\ticket\TicketModule::t('app', 'New observation created'),
-            'new_assignation' => \app\modules\ticket\TicketModule::t('app', 'New assignation'),
-            'delete_assignation' => \app\modules\ticket\TicketModule::t('app', 'Delete assignation'),
+            'created' => TicketModule::t('app', 'Ticket has been created'),
+            'updated' => TicketModule::t('app', 'Ticket has been updated'),
+            'closed' => TicketModule::t('app', 'Ticket has been closed'),
+            'reopened' => TicketModule::t('app', 'Ticket has been reopened'),
+            'new_observation' => TicketModule::t('app', 'New observation created'),
+            'new_assignation' => TicketModule::t('app', 'New assignation'),
+            'delete_assignation' => TicketModule::t('app', 'Delete assignation'),
         ];
     }
 
@@ -154,7 +155,7 @@ class History extends \app\components\db\ActiveRecord {
      * @return \yii\db\ActiveQuery
      */
     public function getTicket() {
-        return $this->hasOne(Ticket::className(), ['ticket_id' => 'ticket_id']);
+        return $this->hasOne(Ticket::class, ['ticket_id' => 'ticket_id']);
     }
 
     /**

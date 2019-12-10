@@ -161,5 +161,4 @@ class EcopagoController extends Controller {
 
         return $this->redirect(['view', 'id' => $model->ecopago_id]);
     }
-
 }

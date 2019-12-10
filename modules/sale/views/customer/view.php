@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use webvimark\modules\UserManagement\models\User;
+
  /**
  * @var View $this
  * @var Customer $model
@@ -91,7 +92,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= UserA::a('<span class="glyphicon glyphicon-time"></span> '.Yii::t('app', 'Create programmed plan change'), ['/sale/contract/programmed-plan-change/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning pull-right']) ?>
                 <?php endif; ?>
                 <?= UserA::a(Yii::t('app', 'Customer Log'), ['/sale/customer-log/index', 'customer_id' => $model->customer_id], ['class' => 'btn btn-info']) ?>
-
             </p>
         </div>
     </div>
@@ -106,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => 'btn btn-warning',
                         'id'=>'customer-tickets',
                     ])?>
-            
+
             <?php if(User::canRoute('/sale/customer/change-company')): ?>
             <?= Html::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('westnet', 'Change Company'), null, [
                         'class' => 'btn btn-warning',
@@ -247,7 +247,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ];
     }
     
-    $profileClasses = \app\modules\sale\models\Customer::getEnabledProfileClasses();
+    $profileClasses = Customer::getEnabledProfileClasses();
     
     foreach($profileClasses as $class){
         $attributes[] = $class->attr;
@@ -307,6 +307,22 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ];
     }
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Document image') ,
+        'value' => function ($model) {
+            return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Tax image') ,
+        'value' => function ($model) {
+            return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
 
     echo DetailView::widget([
         'model' => $model,
@@ -387,6 +403,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 <script>
     var CustomerView= new function(){
         

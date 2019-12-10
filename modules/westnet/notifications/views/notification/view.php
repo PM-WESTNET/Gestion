@@ -16,6 +16,9 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Notifications'), 'ur
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notification-view">
+    <div class="messages">
+        
+    </div>
     <div class="name title">
         <h1><?= Html::encode($this->title) ?></h1>
     </div>
@@ -54,6 +57,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?= Html::a('<span class="glyphicon glyphicon-off"></span> ' . NotificationsModule::t('app', 'Abort send'), ['notification/abort-send', 'notification_id' => $model->notification_id], ['class' => 'btn btn-danger pull-right']) ?>
         </p>
+
+    <?php
+        if ($model->status === 'in_process' || $model->status === 'pending') {
+            echo $this->render('_email_status', ['model' => $model]);
+        }
+    ?>
 
     <?php $attributes = [
             'notification_id',

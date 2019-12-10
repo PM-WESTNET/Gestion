@@ -150,7 +150,6 @@ class Category extends \app\components\db\ActiveRecord {
             return false;
         }
         return true;
-
     }
 
     /**

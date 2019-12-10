@@ -16,6 +16,8 @@ use \app\modules\sale\modules\invoice\components\Invoice;
 use yii\helpers\ArrayHelper;
 use yii\web\Application;
 use app\modules\mailing\components\sender\MailSender;
+use app\modules\accounting\components\AccountMovementRelationManager;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * This is the model class for table "bill".
@@ -897,6 +899,10 @@ class Bill extends ActiveRecord implements CountableInterface
             return false;
         }
 
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -904,6 +910,7 @@ class Bill extends ActiveRecord implements CountableInterface
     public function beforeDelete() {
         $this->unLinkAll('billDetails', true);
         BillHasPayment::deleteAll(['bill_id' => $this->bill_id]);
+        AccountMovementRelationManager::delete($this);
         parent::beforeDelete();
         return true;
     }
@@ -954,8 +961,9 @@ class Bill extends ActiveRecord implements CountableInterface
 
             } else {
                 if($detail->unit_net_discount != 0 ) {
-
-                    $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    if(!$fixedDiscount) {
+                        $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    }
 
                 } elseif($detail->unit_net_price != 0) {
 
@@ -1295,13 +1303,15 @@ class Bill extends ActiveRecord implements CountableInterface
 
     public function getIsEditable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
 
-        if($this->status == 'draft' || $this->status == 'pending' && \webvimark\modules\UserManagement\models\User::hasPermission('user-can-update-pending-order',true)){
+        if ($this->status == 'draft' || $this->status == 'pending' && User::hasPermission('user-can-update-pending-order', true)) {
             return true;
         }
 
         return false;
-
     }
 
     /**

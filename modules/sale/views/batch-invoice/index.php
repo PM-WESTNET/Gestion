@@ -9,6 +9,8 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
 use app\modules\sale\models\InvoiceProcess;
+use yii\db\Expression;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -38,7 +40,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                     <?php $form = ActiveForm::begin(['id'=>'bill-form', 'method' => 'get']); ?>
                     <div class="row">
                         <div class="col-sm-6">
-                            <?= CompanySelector::widget(['model'=>$searchModel, 'id'=>'company_id', 'conditions'=>['parent_id' => new \yii\db\Expression('parent_id is not null')]]); ?>
+                            <?= CompanySelector::widget(['model' => $searchModel, 'id' => 'company_id', 'conditions' => ['parent_id' => new Expression('parent_id is not null')]]); ?>
                         </div>
 
                         <div class="col-sm-6">
@@ -140,8 +142,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                     <h3 class="panel-title"><?= Yii::t('app', 'Contract to Invoice') ?></h3>
                 </div>
                 <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php
-                    \yii\widgets\Pjax::begin(
+                    <?php Pjax::begin(
                         [
                             'id' => 'contracts',
                             'enablePushState'=>FALSE
@@ -169,7 +170,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                         ]);
                     }
 
-                    \yii\widgets\Pjax::end() ?>
+                    Pjax::end() ?>
                 </div>
             </div> <!-- Fin Seleccion de datos para filtro de facturas -->
 

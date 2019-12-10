@@ -1185,7 +1185,8 @@ class ContractController extends Controller {
                 }
 
                 $selected = 0;
-                foreach ($customer->contracts as $contract) {
+                $contracts = $customer->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->all();
+                foreach ($contracts as $contract) {
                     $out[] = ['id' => $contract->contract_id, 'name' => "[$contract->contract_id] Contracto en " .$contract->address->shortAddress];
                 }
 

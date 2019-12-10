@@ -5,6 +5,8 @@ use app\modules\sale\models\Currency;
 use kartik\widgets\Select2;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\ArrayHelper;
+use app\modules\accounting\models\MoneyBox;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\accounting\models\MoneyBoxAccount */
@@ -21,9 +23,9 @@ use yii\widgets\ActiveForm;
     
     <?= app\components\companies\CompanySelector::widget(['model'=>$model]); ?>
 
-    <?= $form->field($model, 'money_box_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\accounting\models\MoneyBox::find()->all(), 'money_box_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app','Select an option...')]) ?>
+    <?= $form->field($model, 'money_box_id')->dropdownList(ArrayHelper::map(MoneyBox::find()->all(), 'money_box_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app','Select an option...')]) ?>
 
-    <?= $form->field($model, 'currency_id')->dropdownList(yii\helpers\ArrayHelper::map(Currency::find()->all(), 'currency_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app','Select an option...')]) ?>
+    <?= $form->field($model, 'currency_id')->dropdownList(ArrayHelper::map(Currency::find()->all(), 'currency_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app','Select an option...')]) ?>
 
     <?= $form->field($model, 'number')->textInput(['maxlength' => 45]) ?>
 
@@ -36,8 +38,8 @@ use yii\widgets\ActiveForm;
     
     
     <div class="form-group">
-        <?= $form->field($model, 'account_id')->widget(Select2::className(),[
-            'data' => yii\helpers\ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+        <?= $form->field($model, 'account_id')->widget(Select2::class,[
+            'data' => ArrayHelper::map(Account::getOnlyAvailableForSelect(), 'account_id', 'name' ),
             'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
             'pluginOptions' => [
                 'allowClear' => true

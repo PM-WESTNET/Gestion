@@ -23,7 +23,7 @@ class NotifyPaymentSearch extends NotifyPayment
     {
         return [
             [['notify_payment_id', 'payment_method_id', 'created_at'], 'integer'],
-            [['date', 'image_receipt', 'from_date', 'to_date', 'customer_id'], 'safe'],
+            [['date', 'image_receipt', 'from_date', 'to_date', 'customer_id', 'from'], 'safe'],
             [['amount'], 'number'],
         ];
     }
@@ -76,6 +76,7 @@ class NotifyPaymentSearch extends NotifyPayment
             'date' => $this->date,
             'amount' => $this->amount,
             'payment_method_id' => $this->payment_method_id,
+            'from' => $this->from,
             'created_at' => $this->created_at,
             'customer_id' => $this->customer_id,
         ]);

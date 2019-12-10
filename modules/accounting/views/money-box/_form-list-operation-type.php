@@ -29,6 +29,7 @@ echo GridView::widget([
             'attribute' => 'moneyBoxAccount.number'
         ],
         'operationType.is_debit:boolean',
+        'code',
         [
             'class' => 'app\components\grid\ActionColumn',
             'template'=>'{update} {delete}',

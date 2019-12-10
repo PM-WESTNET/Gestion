@@ -69,6 +69,7 @@ class AccountMovementRelationManager
             } else {
                 echo  Yii::t('accounting', 'The Account Movement Relation can\'t be saved.');
             }
+            \Yii::info('---------------- ID MOVIMIENTO: ' . $movement_id .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
         }
     }
 
@@ -91,5 +92,26 @@ class AccountMovementRelationManager
         }
 
         return false;
+    }
+
+    /**
+     * @param $obj
+     * @return bool
+     * Indica si el objeto se puede eliminar bajo los siguientes criterios:
+     *  - Que el movimiento que esta relacionado con el objeto no este en estado cerrado
+     */
+    public static function isDeletable($obj)
+    {
+        $relation = AccountMovementRelationManager::find($obj);
+
+        if($relation) {
+            if($relation->accountMovement->status == AccountMovement::STATE_CLOSED) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        return true;
     }
 }

@@ -550,7 +550,7 @@ class PaymentController extends Controller {
     }
     
     public function actionPagofacilPaymentsIndex(){
-        
+
         $pagofacilFiles= PagoFacilTransmitionFile::find()->orderBy(['pago_facil_transmition_file_id' => SORT_DESC]);
         
         $dataProvider = new ActiveDataProvider(['query' => $pagofacilFiles]);
@@ -562,13 +562,16 @@ class PaymentController extends Controller {
         $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
-        
+
         return $this->render('pagofacil-payment-view', [
             'model' => $model,
             'payments' => $payments,
         ]);
     }
-    
+
+    /**
+     * Cierra el archivo de pago fácil y los pagos que corresponden al mismo
+     */
     public function actionConfirmFile($idFile){
         set_time_limit(0);
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);

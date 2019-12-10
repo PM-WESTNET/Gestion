@@ -160,7 +160,6 @@ class ContractToInvoice
             Debug::debug('Excepcion sale por false: ' . $ex->getTraceAsString());
             Yii::info($ex->getTraceAsString(), 'Active_Contract');
             error_log($ex->getMessage());
-            Debug::debug($ex);
             return false;
         }
     }
@@ -600,6 +599,7 @@ class ContractToInvoice
                         $bill->close();
                     }
                 }
+
 
                 // Si es electronica y no se emitio es por error en AFIP y corto proceso.
 //                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {

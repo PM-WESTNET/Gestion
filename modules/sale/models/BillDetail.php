@@ -171,6 +171,12 @@ class BillDetail extends \app\components\db\ActiveRecord
     public function getTotalDiscount($withTaxes = false)
     {
         if($withTaxes) {
+            //Si el descuento es fijo, se saltean los impuestos.
+            if($this->discount) {
+                if($this->discount->type == Discount::TYPE_FIXED) {
+                    return round($this->qty * $this->unit_net_discount, 2);
+                }
+            }
             return round($this->qty * ($this->unit_net_discount * 1.21), 2);
         }
 

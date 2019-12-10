@@ -12,7 +12,7 @@ use yii\bootstrap\Modal;
 use yii\grid\GridView;
 use yii\helpers\Url;
 use yii\web\View;
-
+use app\modules\config\models\Config;
 
 /**
  * @var View $this
@@ -183,7 +183,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <input class="text form-control" name="title" id="massive-assign-title">
 
         <input class="text hidden" name="customer_codes" id="massive-assign-customer-codes">
-        <input class="text hidden" name="category_id" id="massive-assign-category_id" value="<?php echo \app\modules\config\models\Config::getValue('installations_category_id')?>">
+        <input class="text hidden" name="category_id" id="massive-assign-category_id" value="<?= Config::getValue('installations_category_id')?>">
 
         <label style="padding-top: 20px"> <?= Yii::t('app', 'Assign to')?> : </label>
         <?= Select2::widget([
@@ -239,7 +239,7 @@ Modal::end();?>
             $.ajax({
                 url: '<?= Url::to(['/ticket/ticket/customers-has-category-ticket'])?>',
                 method: 'POST',
-                data: {customer_codes: codes, category_id: "<?php echo \app\modules\config\models\Config::getValue('installations_category_id')?>"},
+                data: {customer_codes: codes, category_id: "<?= Config::getValue('installations_category_id')?>"},
                 dataType: 'json',
                 success: function(data){
                     $.each(data, function( index, value ) {

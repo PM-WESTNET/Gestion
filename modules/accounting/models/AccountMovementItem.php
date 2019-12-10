@@ -16,6 +16,7 @@ use Yii;
  * @property double $credit
  * @property string $status
  * @property integer $check
+ * @property boolean $ready
  * 
  *
  * @property Account $account
@@ -74,6 +75,8 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
                     }
                 }
             ],
+            [['ready'], 'boolean'],
+            [['ready'], 'default', 'value' => false]
                     
         ];
     }
@@ -100,7 +103,7 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
      */
     public function getAccount()
     {
-        return $this->hasOne(Account::className(), ['account_id' => 'account_id']);
+        return $this->hasOne(Account::class, ['account_id' => 'account_id']);
     }
 
     /**
@@ -192,4 +195,11 @@ class AccountMovementItem extends \app\components\db\ActiveRecord
      * @return mixed
      */
     public function getWorkflowCreateLog(){}
+
+    public function getCustomer() {
+        Yii::trace($this->account_movement_id);
+        die();
+
+        return $this->accountMovement->customer;
+    }
 }

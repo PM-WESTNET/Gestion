@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
-use app\components\widgets\agenda\notification\Notification;
+use lavrentiev\widgets\toastr\Notification;
 use app\components\widgets\agenda\task\Task;
 use app\assets\AppAsset;
 use app\components\widgets\agenda\ticket\TicketBundle;
@@ -54,31 +54,35 @@ AppAsset::register($this);
                 <div class="col-xs-12">
                     <?php
                     $flashes = Yii::$app->getSession()->getAllFlashes();
-                    foreach($flashes as $class=>$flash):
-                        if($class == 'error') {
-                            $class = 'danger';
-                        }
-                        if(is_array($flash)){
-                            foreach($flash as $flashito) {
-                                echo \yii\bootstrap\Alert::widget([
+                    foreach($flashes as $class=>$flash) {
+                        if (is_array($flash)) {
+                            foreach ($flash as $flashito) {
+                                Notification::widget([
+                                    'type' => $class,
+                                    'message' => $flashito,
                                     'options' => [
-                                        'class' => 'alert-' . $class
-                                    ],
-                                    'body' => $flashito
+                                        "newestOnTop" => true,
+                                        "showDuration" => "0",
+                                        "hideDuration" => "0",
+                                        "timeOut" => "0",
+                                        "extendedTimeOut" => "0",
+                                    ]
                                 ]);
                             }
                         } else {
-                            echo \yii\bootstrap\Alert::widget([
+                            Notification::widget([
+                                'type' => $class,
+                                'message' => $flash,
                                 'options' => [
-                                    'class' => 'alert-' . $class
-                                ],
-                                'body' => $flash
+                                    "newestOnTop" => true,
+                                    "showDuration" => "0",
+                                    "hideDuration" => "0",
+                                    "timeOut" => "0",
+                                    "extendedTimeOut" => "0",
+                                ]
                             ]);
                         }
-                        ?>
-                    <?php
-                    endforeach;
-                    ?>
+                    } ?>
                 </div>
             </div>
             <?= $content ?>

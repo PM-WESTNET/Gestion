@@ -93,7 +93,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'label' => Yii::t('app', 'Provider'),
-                'value' => ($model->provider_id ? $model->provider->name  : '')
+                'value' => ($model->provider ? $model->provider->name  : '')
             ],
         ],
     ]) ?>

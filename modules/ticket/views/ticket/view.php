@@ -55,10 +55,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 $bill_cat_id= Config::getValue('bill-category-id');
 
                 if($model->category_id === (int)$credit_bill_cat_id || $model->category_id === (int)$bill_cat_id){
+                    $billTypesCustomer = $model->customer->taxCondition->billTypes;
                     $billTypes2Create = $model->customer->company->billTypes;
+
+                    $bill_types = [];
+
+                    foreach ($billTypesCustomer as $bill_type_customer) {
+
+                        foreach ($billTypes2Create as $bill_type_company) {
+                            if($bill_type_customer->bill_type_id == $bill_type_company->bill_type_id) {
+                                array_push($bill_types, $bill_type_customer);
+                            }
+                        }
+                    }
+
                     $billItems = [];
 
-                    foreach ($billTypes2Create as $item) {
+                    foreach ($bill_types as $item) {
 
                         $billItems[] = ['label' => $item->name, 'url' => ['/sale/bill/create', 'type' => $item->bill_type_id, 'customer_id'=> $model->customer_id, 'company_id' => $model->customer->company_id ]];
                     }

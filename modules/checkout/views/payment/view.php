@@ -23,7 +23,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <p>
             <?php
-            if ($model->status =='draft') {
+            if ($model->getUpdatable()) {
                 echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " .Yii::t('app', 'Update'), ['update', 'id' => $model->payment_id], ['class' => 'btn btn-primary']);
             }
             if ($model->status !== 'draft'){
@@ -38,6 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]);
             }
+
             if($model->deletable){
                 echo Html::a("<span class='glyphicon glyphicon-remove'></span> " .Yii::t('app', 'Delete'), ['delete', 'id' => $model->payment_id], [
                     'class' => 'btn btn-danger',
@@ -77,6 +78,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             'date:date',
+            [
+                'attribute' => 'timestamp',
+                'value' => function($model) {
+                    return $model->timestamp ? (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y') : '';
+                }
+            ],
             'number',
             [
                 'attribute' => 'status',
@@ -126,6 +133,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'description',
                     'amount:currency',
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function ($model){
+                           if ($model->user) {
+                               return $model->user->username;
+                           }
+                        }
+                    ],
                 ],
                 'options'=>[
                     'style'=>'margin-top:10px;'

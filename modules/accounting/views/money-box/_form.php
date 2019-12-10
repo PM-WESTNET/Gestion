@@ -81,6 +81,11 @@ $money_box_type_bank = Config::getValue('money_box_bank');
                 MoneyBox.operationType($(this).val());
             });
 
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                MoneyBox.loadItems($(this).data('page'));
+            });
+
             MoneyBox.loadItems();
             MoneyBox.addItem(true);
             MoneyBox.operationType($('#money_box_type_id').val());
@@ -95,9 +100,17 @@ $money_box_type_bank = Config::getValue('money_box_bank');
             }
         }
 
-        this.loadItems = function(){
+        this.loadItems = function(page){
+
+            var url = '<?php echo Url::toRoute(['/accounting/money-box/list-operation-type']) ?>&money_box_id='+$('#moneybox-money_box_id').val();
+
+            if (page !== undefined) {
+                url = url + '&page=' + (parseInt(page) + 1);
+            }
+
+
             $.ajax({
-                url: '<?php echo Url::toRoute(['/accounting/money-box/list-operation-type']) ?>&money_box_id='+$('#moneybox-money_box_id').val(),
+                url: url,
                 method: 'GET',
                 dataType: 'html',
                 success: function(data) {
@@ -126,6 +139,9 @@ $money_box_type_bank = Config::getValue('money_box_bank');
                 dataType: 'html',
                 success: function(data) {
                     $('#form-operation_type').html(data);
+                    $('html,body').animate({
+                        scrollTop: ($('#form-operation_type').top - 5)
+                    }, 'slow')
                 }
             });
         }

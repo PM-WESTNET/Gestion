@@ -233,7 +233,6 @@ class CustomerSearch extends Customer {
             ;
 
         $this->load($params);
-
         if($normal){
             $this->filterByCategory($query);
             $this->filterByClass($query);
@@ -878,13 +877,8 @@ class CustomerSearch extends Customer {
             new Expression('@customer_ant:=customer_id'),
             new Expression('if(i>0,1,0) AS qty'),])
             ->from(['a'=> $queryBill->union($queryPayment,true) ])
-            ->orderBy(['customer_id'=>SORT_ASC, 'i'=>SORT_ASC, 'date'=>SORT_ASC])
-            
-        ;
-        
-        
+            ->orderBy(['customer_id'=>SORT_ASC, 'i'=>SORT_ASC, 'date'=>SORT_ASC]);
 
-              
         $mainQuery = (new Query());
         $mainQuery
             ->select(["customer_id",  "sum(if(qty>0, 1, 0)) as bills"])

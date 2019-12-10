@@ -20,6 +20,7 @@ use Yii;
  * @property Customer $customer
  * @property CustomerMessage $customerMessage
  */
+
 class CustomerHasCustomerMessage extends ActiveRecord
 {
     public static function tableName()

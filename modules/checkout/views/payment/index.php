@@ -121,7 +121,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 },
                 'update' => function ($url, $model, $key) {
-                    return $model->status == 'draft' ? Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, ['class' => 'btn btn-primary']) : '';
+                    return $model->getUpdatable() ? Html::a('<span class="glyphicon glyphicon-pencil"></span>', $url, ['class' => 'btn btn-primary']) : '';
                 },
             ]
         ]

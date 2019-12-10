@@ -8,7 +8,6 @@
 
 namespace app\modules\sale\controllers;
 
-
 use app\modules\config\models\Config;
 use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\BillType;
@@ -345,5 +344,4 @@ class BatchInvoiceController  extends Controller
 
         return [ 'invoice_process_started' => false ];
     }
-
 }
