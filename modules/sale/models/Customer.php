@@ -1743,7 +1743,7 @@ class Customer extends ActiveRecord {
                 return false;
             }
 
-            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one;
+            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
 
             if (empty($point_of_sale)) {
                 $point_of_sale = $this->company->getPointsOfSale()->one();
