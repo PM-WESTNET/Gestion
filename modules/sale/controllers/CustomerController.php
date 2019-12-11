@@ -205,28 +205,6 @@ class CustomerController extends Controller
      */
     public function actionCreate()
     {
-
-        /*
-         $model = new Company();
-
-        if ($model->load(Yii::$app->request->post())&&$model->validate()) {
-            $this->upload($model, 'certificate');
-            $this->upload($model, 'key');
-            $this->upload($model, 'logo');
-
-            if($model->save()){
-                return $this->redirect(['point-of-sale/create', 'company' => $model->company_id]);
-            }
-        } else {
-            foreach( $model->getErrors() as $error) {
-                Yii::$app->session->setFlash("error", Yii::t('app', $error[0]));
-            }
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-         */
         $model = new Customer;
         $address= new Address;
         $address->scenario = 'insert';

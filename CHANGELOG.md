@@ -45,6 +45,8 @@ All notable changes to this project will be documented in this file.
  - Eliminación de telefonos duplicados por cliente [GES-693]
  - Limitacion al crear un cliente: Los telefonos no pueden estar repetidos [GES-693]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
+ - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663]
+ - Se agrega instructivo para configurar empresa de facturacion para clientes nuevos [GES-663]
  
  ## [2019.12.10.0]
  ### Agregado
