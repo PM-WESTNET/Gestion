@@ -46,7 +46,7 @@ class PagoFacilPaymentController extends Controller
                 //Solo se tienen en cuenta los pagos que están pendientes de cerrarse.
                 $payments = $file->getCheckoutPayments()->where(['payment.status' => 'draft'])->all();
 
-                echo "Pagos pendientes de cerrar de archivo $file->pago_facil_transmition_file_id". count($payments) ."\n";
+                echo "Pagos pendientes de cerrar de archivo id $file->pago_facil_transmition_file_id: ". count($payments) ."\n";
 
                 Yii::$app->cache->set('close_pago_facil_payments', [
                     'total' => count($payments),
