@@ -801,6 +801,8 @@ class CustomerSearch extends Customer {
                     $query->andFilterWhere(['not',['uahc.customer_id' => null]])
                         ->andFilterWhere(['not',['uaa.user_app_id' => null]])
                         ->andFilterWhere(['<=','uaa.last_activity_datetime', $date_min_last_activity]);
+
+                    $query->orWhere(['uahc.customer_id' => null]);
                 }
 
                 if($this->mobile_app_status[0] == 'installed') {
