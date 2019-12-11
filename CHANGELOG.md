@@ -44,6 +44,7 @@ All notable changes to this project will be documented in this file.
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Eliminación de telefonos duplicados por cliente [GES-693]
  - Limitacion al crear un cliente: Los telefonos no pueden estar repetidos [GES-693]
+ - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  
  ## [2019.12.10.0]
  ### Agregado
