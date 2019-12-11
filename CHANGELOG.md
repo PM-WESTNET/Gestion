@@ -42,6 +42,8 @@ All notable changes to this project will be documented in this file.
  - Notificaciones masiva a la app [GES-665]
  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
+ - Eliminación de telefonos duplicados por cliente [GES-693]
+ - Limitacion al crear un cliente: Los telefonos no pueden estar repetidos [GES-693]
  
  ## [2019.12.10.0]
  ### Agregado
