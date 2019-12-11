@@ -7,6 +7,7 @@ use app\components\helpers\EmptyLogger;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\components\PagoFacilReader;
 use app\modules\sale\models\Customer;
+use Codeception\Util\Debug;
 use Yii;
 use yii\db\Expression;
 use yii\web\UploadedFile;
@@ -75,13 +76,21 @@ class PagoFacilTransmitionFile extends ActiveRecord {
      * @inheritdoc
      */
     public function rules() {
-        return [
+
+        $rules = [
             [['money_box_account_id', 'money_box_id'], 'required'],
             [['upload_date', 'header_file'], 'safe'],
             [['upload_date'], 'date'],
             [['header_file'], 'string', 'max' => 256],
-            [['file'], 'file', 'skipOnEmpty' => false, 'extensions' => '900'],
         ];
+
+        if(YII_ENV_TEST) {
+            $rules = array_merge($rules, [[['file'], 'file', 'skipOnEmpty' => false]]);
+        } else {
+            $rules = array_merge($rules, [[['file'], 'file', 'skipOnEmpty' => false, 'extensions' => '900']]);
+        }
+
+        return $rules;
     }
 
     /**
