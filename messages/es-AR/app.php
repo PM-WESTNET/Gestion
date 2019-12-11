@@ -1283,4 +1283,5 @@
     'instagram' => 'Instagram',
     'pantalla-led' => 'Pantalla led',
     'File Type' => 'Tipo de Archivo',
+    'Phones cant be repeated' => 'Los teléfonos no pueden repetirse',
 );
