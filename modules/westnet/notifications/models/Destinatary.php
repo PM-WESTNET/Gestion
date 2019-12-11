@@ -604,6 +604,7 @@ class Destinatary extends ActiveRecord {
 
         $query->leftJoin(['n' => $subquery], 'b.customer_id = n.customer_integratech');
 
+
         return $query;
     }
 
@@ -721,5 +722,8 @@ class Destinatary extends ActiveRecord {
                 }
             }
         }
+
+        $query->groupBy(['uahc.customer_id']);
+
     }
 }
