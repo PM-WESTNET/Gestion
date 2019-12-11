@@ -723,7 +723,6 @@ class Destinatary extends ActiveRecord {
             }
         }
 
-        $query->groupBy(['uahc.customer_id']);
 
     }
 }
