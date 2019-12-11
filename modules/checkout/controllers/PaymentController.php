@@ -529,6 +529,7 @@ class PaymentController extends Controller {
     public function actionPagofacilPaymentsImport() {
 
         $transmition_file = new PagoFacilTransmitionFile();
+        $transmition_file->status = PagoFacilTransmitionFile::STATUS_DRAFT;
 
         if ($transmition_file->load(Yii::$app->request->post()) && $this->upload($transmition_file, 'file')) {
             $import = $transmition_file->import();

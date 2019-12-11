@@ -81,7 +81,8 @@ class PagoFacilTransmitionFile extends ActiveRecord {
             [['money_box_account_id', 'money_box_id'], 'required'],
             [['upload_date', 'header_file'], 'safe'],
             [['upload_date'], 'date'],
-            [['header_file'], 'string', 'max' => 256],
+            [['header_file', 'status'], 'string', 'max' => 256],
+            [['status'], 'default', 'value' => PagoFacilTransmitionFile::STATUS_DRAFT]
         ];
 
         if(YII_ENV_TEST) {
