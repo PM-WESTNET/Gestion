@@ -134,8 +134,25 @@ class Customer extends ActiveRecord {
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
             [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error', 'document_image', 'tax_image'], 'safe'],
-            //['document_number', 'validateCustomer', 'on' => 'insert']
-        ];
+
+            //Validacion de teléfonos
+            ['phone', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+
+            ['phone2', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone2', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone2', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+
+            ['phone3', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone3', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone3', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+
+            ['phone4', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+
+                        ];
 
         if (Yii::$app->getModule('accounting')) {
             $rules[] = [['account_id'], 'number'];
