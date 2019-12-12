@@ -134,12 +134,13 @@ class EmailTransport implements TransportInterface {
                 $fail += (count($chunk) - $ok);
                 Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 3600);
                 Yii::$app->cache->set('error_'.$notification->notification_id, $fail, 3600);
+                Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,3600);
             }
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
-            Yii::$app->cache->set('error_message_$notification->notification_id', $ex->getMessage());
+            Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 3600);
             $error = $ex->getMessage();
             $ok = false;
         }

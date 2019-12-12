@@ -643,7 +643,7 @@ class Destinatary extends ActiveRecord {
 
         //Obtenemos la query de deudores y le agregamos una condicion
         $query = $this->getCustomersQuery();
-        $query->andWhere('email IS NOT NULL');
+        $query->andWhere(['IS NOT','b.email',  NULL]);
         if ($this->notification->transport->class === EmailTransport::class) {
             $query->andWhere(['email_status' => 'active']);
         }
