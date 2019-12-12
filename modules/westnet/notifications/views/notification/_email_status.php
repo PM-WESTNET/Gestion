@@ -72,7 +72,7 @@ if ($total) {
                             $("#bar").css('background-color', 'green');
                             $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
                         }
-                    }else if (response.status === 'Error') {
+                    }else if (response.status === 'error') {
                         clearInterval(EmailStatus.interval);
                         $('#message').html(response.message);
                         $("#bar").css('background-color', 'red');
