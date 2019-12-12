@@ -8,10 +8,9 @@
 
 $total = Yii::$app->cache->get('total_'.$model->notification_id);
 $success = Yii::$app->cache->get('success_'.$model->notification_id);
-$error = Yii::$app->cache->get('error_'.$model->notification_id);
 $process = 0;
 if ($total) {
-    $process = (((int)$success + (int)$error) * 100) / (int)$total;
+    $process = (((int)$success) * 100) / (int)$total;
 }
 
 ?>
@@ -37,7 +36,6 @@ if ($total) {
         <div class="col-xs-12">
             <h5>Total de correos: <span id="total"><?php echo Yii::$app->cache->get('total_'.$model->notification_id)?></span></h5>
             <h5>Enviados: <span id="success"><?php echo Yii::$app->cache->get('success_'.$model->notification_id)?></span></h5>
-            <h5>Erroneos: <span id="error"><?php echo Yii::$app->cache->get('error_'.$model->notification_id)?></span></h5>
             <h5 class="text-danger"><span id="message"></span></h5>
         </div>
     </div>
@@ -63,7 +61,7 @@ if ($total) {
                 if (status === 'success') {
                     if (response.status === 'Pending' || response.status === 'In_process') {
 
-                        var process = ((parseInt(response.success) + parseInt(response.error)) * 100) / parseInt(response.total);
+                        var process = ((parseInt(response.success)) * 100) / parseInt(response.total);
                         $("#bar").css('width', process + '%');
                         $('#total').html(response.total);
                         $('#success').html(response.success);
