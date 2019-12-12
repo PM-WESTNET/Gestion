@@ -59,7 +59,7 @@ if ($total) {
                 dataType: 'json'
             }).done(function(response, status){
                 if (status === 'success') {
-                    if (response.status === 'Pending' || response.status === 'In_process') {
+                    if (response.status === 'pending' || response.status === 'in_process') {
 
                         var process = ((parseInt(response.success)) * 100) / parseInt(response.total);
                         $("#bar").css('width', process + '%');
