@@ -136,6 +136,7 @@ class EmailTransport implements TransportInterface {
                 $ok += $result;
                 Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                 Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
+                Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
                 //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
                 sleep(3);
