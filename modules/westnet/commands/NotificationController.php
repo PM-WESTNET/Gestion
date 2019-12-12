@@ -111,7 +111,7 @@ class NotificationController extends Controller
                 $transport->send($notification);
             }
 
-            \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+            //\Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
         }
     }
 }
