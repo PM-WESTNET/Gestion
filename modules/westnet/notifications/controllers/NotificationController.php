@@ -449,7 +449,7 @@ class NotificationController extends Controller {
             Yii::$app->response->format= Response::FORMAT_JSON;
 
             return [
-                'status' => Yii::t('app', ucfirst($status)),
+                'status' => $status,
                 'total' => $total,
                 'success' => $ok,
                 'error' => $error,
