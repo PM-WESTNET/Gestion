@@ -51,7 +51,7 @@ if ($total) {
         this.interval;
 
         this.init = function () {
-            EmailStatus.interval = setInterval(EmailStatus.getProcess, 3000);
+            EmailStatus.interval = setInterval(function(){ EmailStatus.getProcess()}, 3000);
         };
 
         this.getProcess = function () {
@@ -90,4 +90,3 @@ if ($total) {
 
 </script>
 
-<?php $this->registerJs('EmailStatus.init()')?>
