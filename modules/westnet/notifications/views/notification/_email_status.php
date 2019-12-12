@@ -38,6 +38,7 @@ if ($total) {
             <h5>Total de correos: <span id="total"><?php echo Yii::$app->cache->get('total_'.$model->notification_id)?></span></h5>
             <h5>Enviados: <span id="success"><?php echo Yii::$app->cache->get('success_'.$model->notification_id)?></span></h5>
             <h5>Erroneos: <span id="error"><?php echo Yii::$app->cache->get('error_'.$model->notification_id)?></span></h5>
+
         </div>
     </div>
 </div>
@@ -75,6 +76,7 @@ if ($total) {
                         }
                     }else if (response.status === 'Error') {
                         clearInterval(EmailStatus.interval);
+                        $('#error').html(response.message);
                         $("#bar").css('background-color', 'red');
                         $("#bar").css('width', '100%');
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Error')?>")

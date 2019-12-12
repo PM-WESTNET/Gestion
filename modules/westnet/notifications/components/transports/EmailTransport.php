@@ -139,6 +139,7 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
+            Yii::$app->cache->delete('error_message_'.$ex->getMessage());
             $error = $ex->getMessage();
             $ok = false;
         }

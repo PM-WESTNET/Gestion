@@ -444,6 +444,7 @@ class NotificationController extends Controller {
             $status = Yii::$app->cache->get('status_'.$id) ? Yii::$app->cache->get('status_'.$id) : $model->status;
             $ok = (int)Yii::$app->cache->get('success_'.$id);
             $error = (int)Yii::$app->cache->get('error_'.$id);
+            $message = (int)Yii::$app->cache->get('error_message'.$id);
 
             Yii::$app->response->format= Response::FORMAT_JSON;
 
@@ -452,6 +453,7 @@ class NotificationController extends Controller {
                 'total' => $total,
                 'success' => $ok,
                 'error' => $error,
+                'message' => $message
             ];
         }
     }
