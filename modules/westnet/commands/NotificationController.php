@@ -110,6 +110,7 @@ class NotificationController extends Controller
                 $transport = $notification->transport;
                 $transport->send($notification);
 
+                $notification->updateAttributes(['status' => 'sent']);
                 \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
             }
 
