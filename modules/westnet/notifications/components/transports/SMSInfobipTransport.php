@@ -117,7 +117,10 @@ class SMSInfobipTransport implements TransportInterface
                 ->setCellValue('K1', Yii::t('app', 'Status'))
                 ->setCellValue('L1', Yii::t('app', 'Category'))
                 ->setCellValue('M1', Yii::t('app', 'Plan'))
-                ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'));
+                ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'))
+                ->setCellValue('O1', Yii::t('app', 'Document Number'))
+                ->setCellValue('P1', Yii::t('app', 'Email'))
+                ->setCellValue('Q1', Yii::t('app', 'Email 2'));
 
             $i = 2;
 
@@ -131,6 +134,9 @@ class SMSInfobipTransport implements TransportInterface
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
                         $company = Company::findOne($customer['customer_company']);
+                        $document_number = $customer['document_number'];
+                        $email = $customer['customer.email'];
+                        $email2 = $customer['customer.email2'];
                         $phones = [];
                         $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
                         $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
@@ -168,7 +174,10 @@ class SMSInfobipTransport implements TransportInterface
                                 ->setCellValue('K' .$i, Yii::t('westnet', ucfirst($customer['status'])))
                                 ->setCellValue('L' .$i, $customer['category'])
                                 ->setCellValue('M' .$i, $plan ? $plan->name : '')
-                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '');
+                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '')
+                                ->setCellValue('O' .$i, $document_number)
+                                ->setCellValue('P' .$i, $email)
+                                ->setCellValue('Q' .$i, $email2);
                             $i++;
 
                         }
