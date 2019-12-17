@@ -599,7 +599,7 @@ class PaymentController extends Controller {
         
         $payment->customer_id= $new_customer_id;
         
-        if ($payment->save()) {
+        if ($payment->updateAttributes(['customer_id'])) {
             \Yii::$app->session->setFlash('success', \Yii::t('app', 'Customer changed successfull'));
             $this->redirect(['view', 'id' => $payment->payment_id]);
         }else{
