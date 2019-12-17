@@ -47,6 +47,8 @@ All notable changes to this project will be documented in this file.
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663]
  - Se agrega instructivo para configurar empresa de facturacion para clientes nuevos [GES-663]
+ - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
+ - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709] 
  
  ## [2019.12.10.0]
  ### Agregado
