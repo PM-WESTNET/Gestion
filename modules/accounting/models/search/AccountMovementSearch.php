@@ -39,6 +39,7 @@ class AccountMovementSearch extends AccountMovement {
     public $account;
     public $account_id;
     //Tiempo
+    public $fromTime;
     public $toTime;
 
     //Conciliaciones
@@ -126,6 +127,7 @@ class AccountMovementSearch extends AccountMovement {
          **/
         $this->filterDates($subQuery, 'am');
         $this->filterTimes($subQuery, 'am');
+        $this->filterStatus($subQuery, 'am');
         $rsTotals = $this->statusAccount(true);
 
         $this->totalDebit = $rsTotals['debit'];
@@ -354,17 +356,16 @@ class AccountMovementSearch extends AccountMovement {
      * "in". Sino aplica un "=" con status
      * @param ActiveQuery $query
      */
-    private function filterStatus($query) {
+    private function filterStatus($query, $alias = 'account_movement') {
 
         if (!empty($this->statuses)) {
-
             $query->andFilterWhere([
-                'account_movement.status' => $this->statuses,
+                "$alias.status" => $this->statuses,
             ]);
         } else {
 
             $query->andFilterWhere([
-                'account_movement.status' => $this->status,
+                "$alias.status" => $this->status,
             ]);
         }
     }
@@ -405,6 +406,10 @@ class AccountMovementSearch extends AccountMovement {
     private function filterTimes($query, $alias = null)
     {
         $table = $alias ? $alias : 'account_movement';
+        if ($this->fromTime) {
+            $query->andFilterWhere(['>', "$table.time", $this->fromTime]);
+        }
+
         if ($this->toTime) {
             $query->andFilterWhere(['<=', "$table.time", $this->toTime]);
         }
