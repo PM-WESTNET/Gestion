@@ -43,7 +43,7 @@ class AccountMovementTest extends \Codeception\Test\Unit
                 'class' => AccountFixture::class
             ],
             'account_movement_item' => [
-                'class' => \app\tests\fixtures\AccountMovementFixture::class
+                'class' => \app\tests\fixtures\AccountMovementItemFixture::class
             ],
             'money_box_account' => [
                 'class' => \app\tests\fixtures\MoneyBoxAccountFixture::class
