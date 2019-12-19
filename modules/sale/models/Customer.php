@@ -1718,7 +1718,7 @@ class Customer extends ActiveRecord {
         $paymentSearch = new PaymentSearch();
         $paymentSearch->customer_id = $this->customer_id;
 
-        $debt = $paymentSearch->accountTotal();
+        $debt = round((float)$paymentSearch->accountTotal(), 2);
 
         Yii::info($debt, 'Deuda');
 
@@ -1728,9 +1728,10 @@ class Customer extends ActiveRecord {
                 $lastBillType = $this->getLastBillType();
                 if ($lastBillType && $lastBillType->name === 'Factura A') {
                     $billType = BillType::findOne(['name' => 'Nota Crédito A']);
-                    $unit_amount = abs($debt) - (abs($debt) * 0.21);
+                    $unit_amount = round(abs($debt) - (abs($debt) * 0.21),2);
                 }else {
                     $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    $unit_amount = abs($amount);
                 }
             }else {
                 if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
@@ -1778,6 +1779,8 @@ class Customer extends ActiveRecord {
                 'unit_id' =>  Config::getValue('default_unit_id'),
                 'unit_net_price' => abs($unit_amount),
                 'unit_final_price' => abs($amount),
+                'line_subtotal' => abs($unit_amount),
+                'line_total' => abs($amount),
                 'concept' => 'Cancelación por baja(Automático)'
             ]);
             Yii::info($detail, 'Deuda');
