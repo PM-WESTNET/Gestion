@@ -424,7 +424,7 @@
   'Observation is too short.' => 'El motivo es muy corto.',
   'Observations' => 'Observaciones',
   'October' => 'Octubre',
-  'Only numbers. You must input the area code without 0 and in cell phone number case without 15.' => 'Solo numeros. Debe introducir el codigo de area sin 0 y en caso de teléfono celular sin el 15',
+  'Only numbers. You must input the area code without 0 and in cell phone number case without 15.' => 'Solo números. Debe introducir el código de area sin 0 y en caso de teléfono celular sin el 15',
   'Open' => 'Abrir',
   'Open Tickets' => 'Tickets abiertos',
   'Open {modelClass}' => 'Abrir {modelClass}',
@@ -1284,4 +1284,6 @@
     'pantalla-led' => 'Pantalla led',
     'File Type' => 'Tipo de Archivo',
     'Phones cant be repeated' => 'Los teléfonos no pueden repetirse',
+    'The document number must be beetwen 7 and 8 characters' => 'Número de Documento debe tener entre 7 y 8 caracteres',
+    'Invalid document number' => 'Número de documento Inválido',
 );
