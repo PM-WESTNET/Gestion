@@ -1725,14 +1725,21 @@ class Customer extends ActiveRecord {
         if ($debt < 0) {
             $amount = abs($debt);
             if ($this->taxCondition->name === 'IVA Inscripto') {
-                $billType = BillType::findOne(['name' => 'Nota Crédito A']);
-                $amount = abs($debt) - (abs($debt) * 0.21);
+                $lastBillType = $this->getLastBillType();
+                if ($lastBillType && $lastBillType->name === 'Factura A') {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito A']);
+                    $unit_amount = abs($debt) - (abs($debt) * 0.21);
+                }else {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                }
             }else {
                 if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
                     $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+
                 }else {
                     $billType = BillType::findOne(['name' => 'Descuento']);
                 }
+                $unit_amount = abs($amount);
             }
 
             if (empty($billType)) {
@@ -1769,7 +1776,7 @@ class Customer extends ActiveRecord {
             $detail = $bill->addDetail([
                 'qty' => 1,
                 'unit_id' =>  Config::getValue('default_unit_id'),
-                'unit_net_price' => abs($amount),
+                'unit_net_price' => abs($unit_amount),
                 'unit_final_price' => abs($amount),
                 'concept' => 'Cancelación por baja(Automático)'
             ]);
@@ -1786,6 +1793,25 @@ class Customer extends ActiveRecord {
         }
 
         return true;
+
+    }
+
+    public function getLastBillType()
+    {
+        $bill = Bill::find()
+            ->innerJoin('bill_type bt', 'bt.bill_type_id = bill.bill_type_id')
+            ->andWhere([
+                'bill.customer_id' => $this->customer_id,
+                'bt.multiplier' => '1'
+            ])
+            ->orderBy(['timestamp' => SORT_DESC])
+            ->one();
+
+        if ($bill) {
+            return $bill->billType;
+        }
+
+        return null;
 
     }
 }
