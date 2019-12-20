@@ -60,7 +60,6 @@ if($real_total < -(Yii::$app->params['account_tolerance'])){
             <td>
                 <h3 class="<?= $totalClass; ?>" style="margin: 0px">
                     <?= Yii::$app->formatter->asCurrency($total); ?>
-                    <?= round($total, 2); ?>
                 </h3>
             </td>
         </tr>
