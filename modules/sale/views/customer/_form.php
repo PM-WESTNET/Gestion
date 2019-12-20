@@ -119,12 +119,22 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     </div>
 
     <div class="row">
-        <div class="col-sm-6 col-xs-12">
+        <div class="col-sm-4 col-xs-12">
+
+            <?= $form->field($model, 'birthdate')->widget(\kartik\date\DatePicker::class, [
+                'pluginOptions' => [
+                    'autoclose'=>true,
+                    'format' => 'dd-mm-yyyy'
+                ]
+            ]) ?>
+
+        </div>
+        <div class="col-sm-4 col-xs-12">
 
             <?= $form->field($model, 'email')->textInput(['maxlength' => 45]) ?>
 
         </div>
-        <div class="col-sm-6 col-xs-12">
+        <div class="col-sm-4 col-xs-12">
 
             <?= $form->field($model, 'email2')->textInput(['maxlength' => 45]) ?>
 
