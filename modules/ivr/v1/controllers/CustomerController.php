@@ -895,11 +895,9 @@ class CustomerController extends Controller
                 ];
             }
 
-            $active_customers['customer_qty'] = $customer_qty;
-
             return [
                 'error' => 'false',
-                'customer_qty' => 0,
+                'customer_qty' => $customer_qty,
                 'data' => $active_customers,
             ];
         } catch (Exception $ex) {
