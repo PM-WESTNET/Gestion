@@ -152,7 +152,9 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
 
-                        ];
+        ];
+
+        $this->validatePhones();
 
         if (Yii::$app->getModule('accounting')) {
             $rules[] = [['account_id'], 'number'];
@@ -361,6 +363,58 @@ class Customer extends ActiveRecord {
         };
         $this->on(self::EVENT_AFTER_VALIDATE, $docNumberValidation);
     }
+
+    public function validatePhones()
+    {
+        $validation = function (){
+            if ($this->phone) {
+                $phone_array = str_split($this->phone);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone2) {
+                $phone_array = str_split($this->phone2);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone2', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone3) {
+                $phone_array = str_split($this->phone3);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone3', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone4) {
+                $phone_array = str_split($this->phone4);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone4', Yii::t('app','Invalid Phone'));
+                }
+            }
+        };
+
+        $this->on(self::EVENT_AFTER_VALIDATE, $validation);
+    }
+
 
     public function behaviors()
     {
