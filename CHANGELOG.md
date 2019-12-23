@@ -49,7 +49,15 @@ All notable changes to this project will be documented in this file.
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
+ - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT [GES-712]
+ - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 [GES-712]
+ - Alta Cliente: validación de número de documento no puede empezar con 0 [GES-712]
+ - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres [GES-712]
  
+ ## [2019.12.23.1]
+  ### Agregado
+  - Al iniciar proceso de baja se genera nota de crédito por el total de la deuda del cliente
+   
  ## [2019.12.23.0]
  ### Modificado
   - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante

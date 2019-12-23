@@ -1034,8 +1034,11 @@ class ContractController extends Controller {
         try {
             $date = new \DateTime(Yii::$app->request->post('date'));
             $category_id = Yii::$app->request->post('category_id');
+            $credit = Yii::$app->request->post('credit');
 
-            $service->startLowProcess($contract, $date, $category_id);
+            if($service->startLowProcess($contract, $date, $category_id, $credit)){
+                Yii::$app->session->addFlash('success', Yii::t('app','Low proccess begin successfull'));
+            }
 
         } catch(\Exception $ex) {
             error_log($ex->getTraceAsString());

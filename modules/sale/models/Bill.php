@@ -528,7 +528,11 @@ class Bill extends ActiveRecord implements CountableInterface
 
             //Generamos el detalle
             $billDetail = new BillDetail();
+            Yii::info($detail, 'Deuda');
+
             $billDetail->setAttributes($detail);
+            Yii::info($billDetail, 'Deuda');
+
 
             $this->link('billDetails',$billDetail);
 
