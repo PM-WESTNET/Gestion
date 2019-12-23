@@ -50,6 +50,7 @@ All notable changes to this project will be documented in this file.
  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
+ - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
  
  ## [2019.12.10.0]
  ### Agregado
