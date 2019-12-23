@@ -26,8 +26,6 @@ All notable changes to this project will be documented in this file.
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
  uno de los clientes. [Ticket GES-568]
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
- - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
- a diferentes pagos. [Ticket GES-547]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
@@ -51,6 +49,11 @@ All notable changes to this project will be documented in this file.
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
+ 
+ ## [2019.12.23.0]
+ ### Modificado
+  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+  a diferentes pagos.
  
  ## [2019.12.10.0]
  ### Agregado
