@@ -8,8 +8,10 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\sale\models\Customer;
 use app\modules\westnet\models\NotifyPayment;
+use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
+use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\search\ReportSearch;
@@ -755,7 +757,7 @@ class ReportsController extends Controller
      * Torta: muestra la cantidad de informes de pago discriminados por medios de pago y si son de la app o ivr
      * Líneas: muestra la cantidad de informes de pago discriminados por otigen, es decir, si son de la app o ivr
      */
-    public function actionNotifyPayments()
+    public function actionNotifyPaymentsGraphics()
     {
         $search = new ReportSearch();
         $search->load((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
@@ -770,7 +772,7 @@ class ReportsController extends Controller
         }
 
         if(!$search->date_to) {
-            $search->date_from = (new \DateTime('now'))->format('Y-m-01');
+            $search->date_to = (new \DateTime('now'))->format('Y-m-01');
         }
 
         $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
@@ -836,6 +838,76 @@ class ReportsController extends Controller
             'colors' => self::COLORS,
             'border_colors' => self::BORDER_COLORS,
 
+            'colslineal' => $colslineal,
+            'data_app' => $data_app,
+            'data_ivr' => $data_ivr
+        ]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de informes de pago en dos gráficos:
+     * Torta: muestra la cantidad de informes de pago discriminados por medios de pago y si son de la app o ivr
+     * Líneas: muestra la cantidad de informes de pago discriminados por otigen, es decir, si son de la app o ivr
+     */
+    public function actionPaymentExtensionGraphics()
+    {
+        $searchModel = new ReportSearch();
+        $colslineal = [];
+
+        if (!$searchModel->date_from) {
+            $searchModel->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if (!$searchModel->date_to) {
+            $searchModel->date_to = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $datas = $searchModel->searchPaymentExtensionQty((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $graph = new GraphData([
+            'fromdate' => (new \DateTime($searchModel->date_from))->format('Y-m-d'),
+            'todate' => (new \DateTime($searchModel->date_to))->format('Y-m-d'),
+        ]);
+        $colslineal = $graph->getSteps();
+
+        $data_app = [];
+        $data_ivr = [];
+
+        //Completo los array con las fechas que comprenden el período
+        foreach ($colslineal as $item) {
+            $from_app = false;
+            $from_ivr = false;
+
+            foreach ($datas as $data) {
+                if ($data['from'] == PaymentExtensionHistory::FROM_APP) {
+                    if ($data['date'] == $item) {
+                        array_push($data_app, (int)$data['qty']);
+                        $from_app = true;
+                    }
+                }
+
+                if ($data['from'] == PaymentExtensionHistory::FROM_IVR) {
+                    if ($data['date'] == $item) {
+                        array_push($data_ivr, (int)$data['qty']);
+                        $from_ivr = true;
+                    }
+                }
+            }
+
+            //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
+            if (!$from_app) {
+                array_push($data_app, 0);
+                $from_app = false;
+            }
+
+            if (!$from_ivr) {
+                array_push($data_ivr, 0);
+                $from_ivr = false;
+            }
+        }
+
+        return $this->render('payment-extension-graphic', [
+            'model' => $searchModel,
             'colslineal' => $colslineal,
             'data_app' => $data_app,
             'data_ivr' => $data_ivr

@@ -664,4 +664,33 @@ class ReportSearch extends Model
 
         return $query->all();
     }
+
+    /**
+     * Grafica la cantidad de extensiones de pago por períodos
+     */
+    public function searchPaymentExtensionQty($params) {
+
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('date'),
+                new Expression('`from`')
+            ])->from(['payment_extension_history'])
+            ->groupBy(['date'])
+            ->orderBy('date');
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', 'date', $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=','date', $date_to]);
+        }
+
+        return $query->all();
+    }
 }

@@ -13,7 +13,7 @@ use yii\jui\DatePicker;
 /* @var $searchModel NodeSearch */
 /* @var $dataProvider ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Notify payments graphics');
+$this->title = Yii::t('app', 'Payment extension graphic');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
     <div class="customer-index">
@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'labels' => $colslineal,
                             'datasets' => [
                                 [
-                                    'label' => "Informes de pago desde APP",
+                                    'label' => "Extensiones de pago desde APP",
                                     'fill' => false,
                                     'lineTension' => 0.1,
                                     'backgroundColor' => "rgba(249, 192, 191)",
@@ -83,7 +83,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'fill' => true
                                 ],
                                 [
-                                    'label' => "Informes de pago desde IVR",
+                                    'label' => "Extensiones de pago desde IVR",
                                     'fill' => false,
                                     'lineTension' => 0.1,
                                     'backgroundColor' => "rgba(254, 229, 206)",
@@ -109,42 +109,6 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]
                     ]
                 ); ?>
-            </div>
-        </div>
-
-        <div class="row" style="padding-top: 100px">
-            <div class="col-md-12 text-center">
-                <?= ChartJs::widget([
-                    'type' => 'polarArea',
-                    'options' => [
-                        'width' => 800,
-                        'height' => 400,
-                    ],
-                    'data' => [
-                        'labels' => $cols,
-                        'datasets' => [
-                                [
-                                        'label' => 'Clientes',
-                                        'data' => $data,
-                                        'backgroundColor' => $colors,
-                                        'borderColor' => $border_colors,
-                                        'borderWidth' => 1
-                                ]]
-                    ],
-                    'options' => [
-                        'scales' => [
-                            'yAxes' => [
-                                [
-                                    'ticks' => [
-                                        'beginAtZero' => true
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-
-                ]);
-                ?>
             </div>
         </div>
     </div>

@@ -1284,4 +1284,6 @@
     'pantalla-led' => 'Pantalla led',
     'File Type' => 'Tipo de Archivo',
     'Phones cant be repeated' => 'Los teléfonos no pueden repetirse',
+    'Notify payments graphics' => 'Gráficos de informes de pago',
+    'Payment extension graphic' => 'Gráfico de extensiones de pago'
 );
