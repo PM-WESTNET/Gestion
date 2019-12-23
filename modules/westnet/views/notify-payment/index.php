@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\chartjs\ChartJs;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\bootstrap\Collapse;
@@ -41,6 +42,33 @@ if($payment_method_tranferencia) {
         ]
         ]);
         ?>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <?= ChartJs::widget([
+                'type' => 'polarArea',
+                'options' => [
+                    'width' => 800,
+                    'height' => 400,
+                ],
+                'data' => [
+                    'labels' => $cols,
+                    'datasets' => [
+                        [
+                            'label' => \Yii::t('app', 'Ticket quantity'),
+                            'backgroundColor' => "#84C9F1",
+                            'borderColor' => "#178DD0",
+                            'pointBorderColor' => '#178DD0',
+                            'pointBackgroundColor' => '#178DD0',
+                            'data' => $data,
+                            'fill'=> true,
+                        ],
+                    ]
+                ]
+            ]);
+            ?>
+        </div>
     </div>
 
     <?= GridView::widget([

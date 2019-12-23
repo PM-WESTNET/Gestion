@@ -2,9 +2,12 @@
 
 namespace app\modules\westnet\reports\controllers;
 
+use app\components\helpers\GraphData;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\sale\models\Customer;
+use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\reports\models\ReportData;
@@ -23,6 +26,38 @@ use yii\db\Query;
  */
 class ReportsController extends Controller
 {
+
+    const COLORS = [
+            'rgba(249, 192, 191)',
+            'rgba(254, 229, 206)',
+            'rgba(255, 241, 195)',
+            'rgba(243, 255, 195)',
+            'rgba(199, 255, 192)',
+            'rgba(194, 255, 235)',
+            'rgba(194, 248, 254)',
+            'rgba(194, 230, 255)',
+            'rgba(194, 208, 255)',
+            'rgba(211, 192, 255)',
+            'rgba(232, 195, 255)',
+            'rgba(255, 194, 222)',
+            'rgba(255, 193, 221)'
+        ];
+
+    const BORDER_COLORS = [
+            'rgba(241, 134, 132)',
+            'rgba(241, 183, 132)',
+            'rgba(241, 216, 132)',
+            'rgba(220, 241, 132)',
+            'rgba(144, 241, 132)',
+            'rgba(132, 241, 205)',
+            'rgba(132, 231, 241)',
+            'rgba(132, 196, 241)',
+            'rgba(132, 158, 241)',
+            'rgba(165, 132, 241)',
+            'rgba(200, 132, 241)',
+            'rgba(241, 132, 233)',
+            'rgba(241, 132, 182)'
+        ];
 
     /**
      * List Customers per month
@@ -712,6 +747,144 @@ class ReportsController extends Controller
             'data' => $datas,
             'colors' => $colors,
             'border_colors' => $border_colors
+        ]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de clientes por medio de publicidad.
+     */
+    public function actionNotifyPayments()
+    {
+        $search = new ReportSearch();
+        $search->load((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $datas = [];
+        $cols = [];
+
+        $dataslineal = [];
+        $colslineal = [];
+
+        if(!$search->date_from) {
+            $search->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if(!$search->date_to) {
+            $search->date_from = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $dataLineal = $search->searchNotifyPaymentsByDate((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $first_date = $dataLineal[0];
+        $last_date = end($dataLineal);
+
+        $graph  = new GraphData([
+            'fromdate' => $dataLineal[0]['date'],
+            'todate' => end($dataLineal)['date'],
+        ]);
+
+//        var_dump($graph->getSteps());
+        $colslineal = $graph->getSteps();
+
+//        var_dump($dataLineal);
+//        die();
+
+//        public $fromdate;
+//        public $todate;
+//        public $interval = 'P1D';
+//
+//        public $dataProvider;
+//
+//        public $xAttribute;
+//        public $yAttribute;
+//        public $idAttribute;
+//
+//        public $colorAttribute;
+//
+//        public $steps;
+
+//        var_dump($dataLineal);
+//        var_dump($first_date);
+//        var_dump($last_date);
+//        die();
+
+        foreach ($data as $item) {
+            $cols[] = $item['name'];
+            $datas[] = $item['qty'];
+        }
+
+        $data_app = [];
+        $data_ivr = [];
+
+//        foreach ($dataLineal as $datal) {
+//            if($datal['from'] == NotifyPayment::FROM_APP) {
+//                if()
+//            } else {
+//
+//            }
+//        }
+
+
+        foreach ($colslineal as $item) {
+            $item_con_misma_fecha = false;
+            $from_app = false;
+            $from_ivr = false;
+
+            foreach ($dataLineal as $datal) {
+                if($item == $datal['date']) {
+                    $item_con_misma_fecha = true;
+                    if($datal['from'] == NotifyPayment::FROM_IVR){
+                        $from_ivr = true;
+                    }
+                }
+            }
+
+//                if($item == $datal['date']) {
+//                    array_push($data_ivr, $datal['qty']);
+//                } else {
+//                    array_push($data_ivr, 0);
+//                }
+////                if($item == $datal['date']) {
+////                    var_dump("Entra -----");
+////                    var_dump('data '.$datal['date']);
+////                    var_dump('col '.$item);
+//////                    var_dump('qty '.$da);
+////                    if($datal['from'] == NotifyPayment::FROM_IVR) {
+////                        array_push($da, $datal['qty']);
+////                    }
+//////                    else {
+//////                        array_push($data_ivr, $datal['qty']);
+//////                    }
+////                } else {
+//////                    if($datal['from'] == NotifyPayment::FROM_APP) {
+//////                        array_push($data_app, 0);
+//////                    }
+//////                    else {
+////                        array_push($data_ivr, 0);
+//////                    }
+////                }
+//            }
+
+//            var_dump($data_ivr);
+//            var_dump("");
+
+//            $colslineal[] = $item[]
+        }
+
+//        die();
+//        var_dump($data_app);
+//        var_dump($data_ivr);
+//        die();
+
+        return $this->render('notify-payments',[
+            'model' => $search,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => self::COLORS,
+            'border_colors' => self::BORDER_COLORS,
+
+            'colslineal' => $colslineal,
+            'data_app' => $data_app,
+            'data_ivr' => $data_ivr
         ]);
     }
 }

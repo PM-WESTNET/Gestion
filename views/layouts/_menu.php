@@ -211,6 +211,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Customers by publicity shape'), 'url' => ['/reports/reports/customer-by-publicity-shape']],
         ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
         ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
+        ['label' => Yii::t('app', 'Notify payments'), 'url' => ['/reports/reports/notify-payments']],
     ]];
 
     //Reportes por empresa
