@@ -1286,4 +1286,5 @@
     'Phones cant be repeated' => 'Los teléfonos no pueden repetirse',
     'The document number must be beetwen 7 and 8 characters' => 'Número de Documento debe tener entre 7 y 8 caracteres',
     'Invalid document number' => 'Número de documento Inválido',
+    'Document number can`t start with 0' => 'Número de Documento no puede empezar con 0'
 );

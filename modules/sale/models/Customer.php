@@ -206,15 +206,18 @@ class Customer extends ActiveRecord {
                 $this->addError('document_number', Yii::t('app','The document number must be beetwen 7 and 8 characters'));
             }
 
-            $array_caracters = array_count_values(str_split($this->document_number));
+            $array_document = str_split($this->document_number);
+            $array_caracters = array_count_values($array_document);
 
-            Yii::info($array_caracters);
             Yii::info(count($array_caracters));
 
             if(count($array_caracters) == 1 && (array_key_exists('0', $array_caracters) || array_key_exists('9', $array_caracters))) {
                 $this->addError('document_number', Yii::t('app','Invalid document number'));
             }
 
+            if ($array_document[0] == '0') {
+                $this->addError('document_number', Yii::t('app','Document number can`t start with 0'));
+            }
 
         } else {
             $validator = new CuitValidator();
