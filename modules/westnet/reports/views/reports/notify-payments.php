@@ -27,8 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <?= Html::activeLabel($model, 'date_from'); ?>
-                        <?= DatePicker::widget([
+                        <?= $form->field($model, 'date_from')->widget(DatePicker::class, [
                             'language' => Yii::$app->language,
                             'model' => $model,
                             'attribute' => 'date_from',
@@ -37,24 +36,21 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'class'=>'form-control filter dates',
                                 'placeholder'=>Yii::t('app','Date')
                             ]
-                        ]);
-                        ?>
+                        ])?>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <?= Html::activeLabel($model, 'date_to'); ?>
-                        <?= DatePicker::widget([
+                        <?= $form->field($model, 'date_to')->widget(DatePicker::class, [
                             'language' => Yii::$app->language,
                             'model' => $model,
-                            'attribute' => 'date_to',
+                            'attribute' => 'date_from',
                             'dateFormat' => 'dd-MM-yyyy',
                             'options'=>[
                                 'class'=>'form-control filter dates',
                                 'placeholder'=>Yii::t('app','Date')
                             ]
-                        ]);
-                        ?>
+                        ])?>
                     </div>
                 </div>
             </div>
@@ -76,26 +72,26 @@ $this->params['breadcrumbs'][] = $this->title;
                             'labels' => $colslineal,
                             'datasets' => [
                                 [
-                                    'label' => "My First dataset",
+                                    'label' => "Informes de pago desde APP",
                                     'fill' => false,
                                     'lineTension' => 0.1,
-                                    'backgroundColor' => "rgba(75,192,192,0.4)",
-                                    'borderColor' => "rgba(75,192,192,1)",
-                                    'borderCapStyle' => 'butt',
+                                    'backgroundColor' => "rgba(249, 192, 191)",
+                                    'borderColor' => "rgba(241, 134, 132)",
+                                    'borderCapStyle' => 'round',
                                     'borderDash' => [],
                                     'data' => $data_app,
-                                    // ...
+                                    'fill' => true
                                 ],
                                 [
-                                    'label' => "My First dataset",
+                                    'label' => "Informes de pago desde IVR",
                                     'fill' => false,
                                     'lineTension' => 0.1,
-                                    'backgroundColor' => "rgba(75,192,192,0.4)",
-                                    'borderColor' => "rgba(254,192,192,1)",
-                                    'borderCapStyle' => 'butt',
+                                    'backgroundColor' => "rgba(254, 229, 206)",
+                                    'borderColor' => "rgba(241, 183, 132)",
+                                    'borderCapStyle' => 'round',
                                     'borderDash' => [],
                                     'data' => $data_ivr,
-                                    // ...
+                                    'fill' => true
                                 ]
                             ],
                         ],

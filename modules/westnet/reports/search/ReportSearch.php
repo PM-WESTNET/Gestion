@@ -622,23 +622,15 @@ class ReportSearch extends Model
         ->groupBy(['notify_payment.payment_method_id', 'from'])
         ;
 
-//        if(!$this->from) {
-//            $this->from = NotifyPayment::FROM_IVR;
-//        }
-//
-//        if($this->from) {
-//            $query->andWhere(['notify_payment.from' => $this->from]);
-//        }
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
 
-
-//        if($this->date_from) {
-//            $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
-//        }
-//
-//        if($this->date_to) {
-//            $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
-//        }
-
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
 
         return $query->all();
     }
@@ -660,24 +652,15 @@ class ReportSearch extends Model
             ->orderBy('date')
         ;
 
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
 
-//        if(!$this->from) {
-//            $this->from = NotifyPayment::FROM_IVR;
-//        }
-//
-//        if($this->from) {
-//            $query->andWhere(['notify_payment.from' => $this->from]);
-//        }
-
-
-//        if($this->date_from) {
-//            $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
-//        }
-//
-//        if($this->date_to) {
-//            $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
-//        }
-
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
 
         return $query->all();
     }

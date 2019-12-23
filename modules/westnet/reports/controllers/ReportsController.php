@@ -751,7 +751,9 @@ class ReportsController extends Controller
     }
 
     /**
-     * Muestra un reporte de la cantidad de clientes por medio de publicidad.
+     * Muestra un reporte de la cantidad de informes de pago en dos gráficos:
+     * Torta: muestra la cantidad de informes de pago discriminados por medios de pago y si son de la app o ivr
+     * Líneas: muestra la cantidad de informes de pago discriminados por otigen, es decir, si son de la app o ivr
      */
     public function actionNotifyPayments()
     {
@@ -774,39 +776,17 @@ class ReportsController extends Controller
         $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
         $dataLineal = $search->searchNotifyPaymentsByDate((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
 
-        $first_date = $dataLineal[0];
-        $last_date = end($dataLineal);
+        $first_date = array_key_exists(0, $dataLineal) ? $dataLineal[0] : $search->date_from ;
+        $last_date = end($dataLineal) ? end($dataLineal) : $search->date_to;
 
         $graph  = new GraphData([
             'fromdate' => $dataLineal[0]['date'],
             'todate' => end($dataLineal)['date'],
         ]);
 
-//        var_dump($graph->getSteps());
         $colslineal = $graph->getSteps();
 
-//        var_dump($dataLineal);
-//        die();
-
-//        public $fromdate;
-//        public $todate;
-//        public $interval = 'P1D';
-//
-//        public $dataProvider;
-//
-//        public $xAttribute;
-//        public $yAttribute;
-//        public $idAttribute;
-//
-//        public $colorAttribute;
-//
-//        public $steps;
-
-//        var_dump($dataLineal);
-//        var_dump($first_date);
-//        var_dump($last_date);
-//        die();
-
+        //Columnas del grafico de torta
         foreach ($data as $item) {
             $cols[] = $item['name'];
             $datas[] = $item['qty'];
@@ -815,65 +795,39 @@ class ReportsController extends Controller
         $data_app = [];
         $data_ivr = [];
 
-//        foreach ($dataLineal as $datal) {
-//            if($datal['from'] == NotifyPayment::FROM_APP) {
-//                if()
-//            } else {
-//
-//            }
-//        }
-
-
+        //Completo los array con las fechas que comprenden el período
         foreach ($colslineal as $item) {
-            $item_con_misma_fecha = false;
             $from_app = false;
             $from_ivr = false;
 
             foreach ($dataLineal as $datal) {
-                if($item == $datal['date']) {
-                    $item_con_misma_fecha = true;
-                    if($datal['from'] == NotifyPayment::FROM_IVR){
+                if($datal['from'] == NotifyPayment::FROM_APP) {
+                    if($datal['date'] == $item) {
+                        array_push($data_app, (int)$datal['qty']);
+                        $from_app = true;
+                    }
+                }
+
+                if($datal['from'] == NotifyPayment::FROM_IVR) {
+                    if($datal['date'] == $item) {
+                        array_push($data_ivr, (int)$datal['qty']);
                         $from_ivr = true;
                     }
                 }
             }
 
-//                if($item == $datal['date']) {
-//                    array_push($data_ivr, $datal['qty']);
-//                } else {
-//                    array_push($data_ivr, 0);
-//                }
-////                if($item == $datal['date']) {
-////                    var_dump("Entra -----");
-////                    var_dump('data '.$datal['date']);
-////                    var_dump('col '.$item);
-//////                    var_dump('qty '.$da);
-////                    if($datal['from'] == NotifyPayment::FROM_IVR) {
-////                        array_push($da, $datal['qty']);
-////                    }
-//////                    else {
-//////                        array_push($data_ivr, $datal['qty']);
-//////                    }
-////                } else {
-//////                    if($datal['from'] == NotifyPayment::FROM_APP) {
-//////                        array_push($data_app, 0);
-//////                    }
-//////                    else {
-////                        array_push($data_ivr, 0);
-//////                    }
-////                }
-//            }
+            //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
+            if(!$from_app ) {
+                array_push($data_app, 0);
+                $from_app = false;
+            }
 
-//            var_dump($data_ivr);
-//            var_dump("");
-
-//            $colslineal[] = $item[]
+            if(!$from_ivr ) {
+                array_push($data_ivr, 0);
+                $from_ivr = false;
+            }
         }
 
-//        die();
-//        var_dump($data_app);
-//        var_dump($data_ivr);
-//        die();
 
         return $this->render('notify-payments',[
             'model' => $search,
