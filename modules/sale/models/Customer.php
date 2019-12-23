@@ -208,6 +208,9 @@ class Customer extends ActiveRecord {
 
             $array_caracters = array_count_values(str_split($this->document_number));
 
+            Yii::info($array_caracters);
+            Yii::info(count($array_caracters));
+
             if(count($array_caracters) == 1 && (array_key_exists('0', $array_caracters) || array_key_exists('9', $array_caracters))) {
                 $this->addError('document_number', Yii::t('app','Invalid document number'));
             }

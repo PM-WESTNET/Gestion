@@ -449,7 +449,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         this.changeDocumentType = function(){
             var options;
-            $("#customer-document_number").inputmask("remove");
+            $("#document_number_input").inputmask("remove");
             // Si es CUIT
             if($("#document_type").val()==1) {
                 options = 'cuit';
@@ -461,7 +461,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 $('#div-validation').addClass('hidden')
             }
 
-            $("#customer-document_number").inputmask(options);
+            $("#document_number_input").inputmask(options);
         }
 
 
@@ -520,7 +520,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         this.validateCustomer = function () {
             $.ajax({
                 url: "<?php echo Url::to(['validate-customer'])?>",
-                data: {Customer:{document_number: $('#document_number_input').val()}},
+                data: {Customer:{document_number: $('#document_number_input').val(), document_type_id:$('#document_type').val() }},
                 method: 'POST',
                 dataType: 'json'
             }).done(function (response) {
