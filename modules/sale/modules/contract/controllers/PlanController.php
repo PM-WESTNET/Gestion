@@ -286,11 +286,17 @@ class PlanController extends Controller
                 }
 
                 $fibra_category = Category::findOne(['system' => 'plan-fibra']);
+                $wifi_category = Category::findOne(['system' => 'plan-wifi']);
                 $fibra_products = (new Query())->select('product.product_id')
                     ->from('product')
                     ->leftJoin('product_has_category phc', 'phc.product_id = product.product_id')
                     ->where(['type' => Plan::TYPE])
                     ->andWhere(['phc.category_id' => $fibra_category->category_id]);
+                $wifi_products = (new Query())->select('product.product_id')
+                    ->from('product')
+                    ->leftJoin('product_has_category phc', 'phc.product_id = product.product_id')
+                    ->where(['type' => Plan::TYPE])
+                    ->andWhere(['phc.category_id' => $wifi_category->category_id]);
 
                 if($customer->hasFibraPlan()) {
 
@@ -301,7 +307,7 @@ class PlanController extends Controller
 
                     $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
                     $queryPlans->joinWith('categories')
-                        ->where(['not',['in','product.product_id', $fibra_products]]);
+                        ->where(['in','product.product_id', $wifi_products]);
                 }
 
                 $customer_category = $customer->customerCategory;
