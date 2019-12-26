@@ -26,8 +26,6 @@ All notable changes to this project will be documented in this file.
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
  uno de los clientes. [Ticket GES-568]
  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
- - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
- a diferentes pagos. [Ticket GES-547]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
@@ -50,6 +48,20 @@ All notable changes to this project will be documented in this file.
  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
+ - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
+ - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT [GES-712]
+ - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 [GES-712]
+ - Alta Cliente: validación de número de documento no puede empezar con 0 [GES-712]
+ - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres [GES-712]
+ 
+ ## [2019.12.23.1]
+  ### Agregado
+  - Al iniciar proceso de baja se genera nota de crédito por el total de la deuda del cliente
+   
+ ## [2019.12.23.0]
+ ### Modificado
+  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+  a diferentes pagos.
  
  ## [2019.12.10.0]
  ### Agregado

@@ -11,6 +11,7 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\sale\models\bills\Credit;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
@@ -1411,15 +1412,15 @@ class Customer extends ActiveRecord {
             if ($row_index > 0) {
                 if ($type == 'elastic') {
                     $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
-    
+
                     foreach ($customers as $customer) {
                         $status_field = $field.'_status';
                         $customer->$status_field = strtolower($row[1]);
                         $customer->updateAttributes([$status_field]);
-    
+
                         $results['total']++;
                         $results[strtolower($row[1])]++;
-    
+
                     }
                 } else {
                     $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
@@ -1843,4 +1844,111 @@ class Customer extends ActiveRecord {
     }
 
 
+
+    /**
+     * Crea una nota de crédito por el total de la deuda del cliente, para darlo de baja
+     * @return bool
+     */
+    public function createCreditForDebt()
+    {
+        $paymentSearch = new PaymentSearch();
+        $paymentSearch->customer_id = $this->customer_id;
+
+        $debt = round((float)$paymentSearch->accountTotal(), 2);
+
+        Yii::info($debt, 'Deuda');
+
+        if ($debt < 0) {
+            $amount = abs($debt);
+            if ($this->taxCondition->name === 'IVA Inscripto') {
+                $lastBillType = $this->getLastBillType();
+                if ($lastBillType && $lastBillType->name === 'Factura A') {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito A']);
+                    $unit_amount = round(abs($debt),2);
+                }else {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    $unit_amount = abs($amount);
+                }
+            }else {
+                if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
+                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+
+                }else {
+                    $billType = BillType::findOne(['name' => 'Descuento']);
+                }
+                $unit_amount = abs($amount);
+            }
+
+            if (empty($billType)) {
+                return false;
+            }
+
+            if(!class_exists($billType->class)){
+                return false;
+            }
+
+            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
+
+            if (empty($point_of_sale)) {
+                $point_of_sale = $this->company->getPointsOfSale()->one();
+                if (empty($point_of_sale)) {
+                    Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                    return false;
+                }
+            }
+
+            $bill = Yii::createObject($billType->class);
+            $bill->bill_type_id = $billType->bill_type_id;
+            $bill->date = date('d-m-Y');
+            $bill->status = Bill::STATUS_DRAFT;
+            $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
+            $bill->class = $billType->class;
+            $bill->customer_id = $this->customer_id;
+            $bill->company_id = $this->company_id;
+            $bill->save();
+
+            Yii::info($bill->getErrors(), 'Nota');
+            Yii::info($debt, 'Deuda');
+
+            $detail = $bill->addDetail([
+                'qty' => 1,
+                'unit_id' =>  Config::getValue('default_unit_id'),
+                'unit_net_price' => abs($unit_amount),
+                'unit_final_price' => abs($amount),
+                'concept' => 'Cancelación por baja(Automático)'
+            ]);
+            Yii::info($detail, 'Deuda');
+
+
+            if ($detail == false) {
+                return false;
+            }
+
+            $detail->save();
+
+            return $bill->close();
+        }
+
+        return true;
+
+    }
+
+    public function getLastBillType()
+    {
+        $bill = Bill::find()
+            ->innerJoin('bill_type bt', 'bt.bill_type_id = bill.bill_type_id')
+            ->andWhere([
+                'bill.customer_id' => $this->customer_id,
+                'bt.multiplier' => '1'
+            ])
+            ->orderBy(['timestamp' => SORT_DESC])
+            ->one();
+
+        if ($bill) {
+            return $bill->billType;
+        }
+
+        return null;
+
+    }
 }

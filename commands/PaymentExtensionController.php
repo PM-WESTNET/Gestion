@@ -36,6 +36,10 @@ class PaymentExtensionController extends Controller
                 'contract.status' => Contract::STATUS_ACTIVE,
                 'conn.status_account' => Connection::STATUS_ACCOUNT_FORCED
             ])
+            ->orWhere([
+                'contract.status' => Contract::STATUS_ACTIVE,
+                'conn.status_account' => Connection::STATUS_ENABLED
+            ])
             ->all();
 
         echo 'Contratos encontrados sin activar: ' . count($contracts);
