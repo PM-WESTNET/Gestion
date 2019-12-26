@@ -111,4 +111,39 @@ $this->params['breadcrumbs'][] = $this->title;
                 ); ?>
             </div>
         </div>
+        <div class="row" style="padding-top: 100px">
+            <div class="col-md-12 text-center">
+                <?= ChartJs::widget([
+                    'type' => 'polarArea',
+                    'options' => [
+                        'width' => 800,
+                        'height' => 400,
+                    ],
+                    'data' => [
+                        'labels' => $cols_tart,
+                        'datasets' => [
+                            [
+                                'label' => 'Clientes',
+                                'data' => $data_tart,
+                                'backgroundColor' => $colors,
+                                'borderColor' => $border_colors,
+                                'borderWidth' => 1
+                            ]]
+                    ],
+                    'options' => [
+                        'scales' => [
+                            'yAxes' => [
+                                [
+                                    'ticks' => [
+                                        'beginAtZero' => true
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+
+                ]);
+                ?>
+            </div>
+        </div>
     </div>

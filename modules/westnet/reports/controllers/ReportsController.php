@@ -853,6 +853,8 @@ class ReportsController extends Controller
     {
         $searchModel = new ReportSearch();
         $colslineal = [];
+        $cols_tart = [];
+        $data_tart = [];
 
         if (!$searchModel->date_from) {
             $searchModel->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
@@ -863,6 +865,7 @@ class ReportsController extends Controller
         }
 
         $datas = $searchModel->searchPaymentExtensionQty((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $dataFromQty = $searchModel->searchPaymentExtensionQtyFrom((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
 
         $graph = new GraphData([
             'fromdate' => (new \DateTime($searchModel->date_from))->format('Y-m-d'),
@@ -872,6 +875,12 @@ class ReportsController extends Controller
 
         $data_app = [];
         $data_ivr = [];
+
+        //Columnas del grafico de torta
+        foreach ($dataFromQty as $item) {
+            $cols_tart[] = $item['from'];
+            $data_tart[] = $item['qty'];
+        }
 
         //Completo los array con las fechas que comprenden el período
         foreach ($colslineal as $item) {
@@ -910,7 +919,11 @@ class ReportsController extends Controller
             'model' => $searchModel,
             'colslineal' => $colslineal,
             'data_app' => $data_app,
-            'data_ivr' => $data_ivr
+            'data_ivr' => $data_ivr,
+            'cols_tart' => $cols_tart,
+            'data_tart' => $data_tart,
+            'colors' => self::COLORS,
+            'border_colors' => self::BORDER_COLORS
         ]);
     }
 }
