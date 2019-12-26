@@ -72,6 +72,18 @@ class Customer extends \app\modules\sale\models\Customer
 
                     return '';
                 },
+                'fibra' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->orWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract) {
+                        if($contract->hasFibraPlan()) {
+                            return "true";
+                        }
+
+                        return "false";
+                    }
+
+                    return "false";
+                },
                 'balance' => function($model){
                     return $model->current_account_balance;
                 },

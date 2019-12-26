@@ -53,7 +53,8 @@ All notable changes to this project will be documented in this file.
  - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 [GES-712]
  - Alta Cliente: validación de número de documento no puede empezar con 0 [GES-712]
  - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres [GES-712]
- - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-]
+ - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
+ - API IVR: se agrega campo que indique si el contrato es de fibra o no [GES-734]
  
  ## [2019.12.26.0] 
  ## Agregado
