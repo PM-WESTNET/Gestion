@@ -57,6 +57,7 @@ All notable changes to this project will be documented in this file.
  - Grafico de línea extensiones de pago [GES-652] [GES-725]
  - Grafico de torta informes de pago [GES-652] [GES-722]
  - Grafico de línea informes de pago [GES-652] [GES-723]
+ - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-]
  
  ## [2019.12.23.1]
   ### Agregado

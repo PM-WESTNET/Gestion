@@ -760,7 +760,7 @@ class CustomerController extends Controller
                 ];
             }
 
-            if (!$customer->hasContractAndConnectionActive()) {
+            if (!$customer->hasActiveOrLowProcessContract()) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
@@ -869,7 +869,7 @@ class CustomerController extends Controller
             }
 
             foreach ($customers as $customer) {
-                if ($customer->hasContractAndConnectionActive()) {
+                if ($customer->hasActiveOrLowProcessContract()) {
                     $customer->scenario = 'full';
                     array_push($active_customers, $customer);
                     $customer_qty ++;

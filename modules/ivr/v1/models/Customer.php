@@ -89,6 +89,13 @@ class Customer extends \app\modules\sale\models\Customer
                     }
 
                     return 'enabled';
+                },
+                'low_process' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract){
+                        return "true";
+                    }
+                    return "false";
                 }
             ];
         }else {
@@ -177,5 +184,16 @@ class Customer extends \app\modules\sale\models\Customer
     public function hasContractAndConnectionActive()
     {
         return $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    /**
+     * Indica si posee un contrato activo o en proceso de baja
+     */
+    public function hasActiveOrLowProcessContract()
+    {
+        return $this->getContracts()
+            ->andWhere(['status' => Contract::STATUS_ACTIVE])
+            ->orWhere(['status' => Contract::STATUS_LOW_PROCESS])
+            ->exists();
     }
 }
