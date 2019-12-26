@@ -53,6 +53,10 @@ All notable changes to this project will be documented in this file.
  - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 [GES-712]
  - Alta Cliente: validación de número de documento no puede empezar con 0 [GES-712]
  - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres [GES-712]
+ - Grafico de torta extensiones de pago [GES-652] [GES-724]
+ - Grafico de línea extensiones de pago [GES-652] [GES-725]
+ - Grafico de torta informes de pago [GES-652] [GES-722]
+ - Grafico de línea informes de pago [GES-652] [GES-723]
  
  ## [2019.12.23.1]
   ### Agregado
