@@ -1814,17 +1814,19 @@ class Customer extends ActiveRecord {
      */
     public function hasFibraPlan()
     {
-        $contract = $this->getContracts()->one();
+        $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
 
+        //Si no tengo activos busco cualquiera
+        if(!$contract) {
+            $contract = $this->getContracts()->orderBy(['contract_id' => SORT_DESC])->one();
+        }
+
+        //Verifico que tenga un contrato
         if(!$contract) {
             return false;
         }
 
-        if(!$contract->hasFibraPlan()){
-            return false;
-        }
-
-        return true;
+        return $contract->hasFibraPlan();
     }
 
     /**
