@@ -83,6 +83,20 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
 
     </div>
+
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
+
+            <?= $form->field($model, 'birthdate')->widget(\kartik\date\DatePicker::class, [
+                'pluginOptions' => [
+                    'format' =>  'dd-mm-yyyy',
+                    'autoclose' => true,
+                ]
+            ]) ?>
+
+        </div>
+    </div>
+
     <div class="row">
 
         <div class="col-sm-3 col-xs-12">
@@ -117,6 +131,8 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="customer_validation hidden">
 
     </div>
+
+
 
     <div class="row">
         <div class="col-sm-6 col-xs-12">
