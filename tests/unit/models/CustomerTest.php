@@ -737,5 +737,113 @@ class CustomerTest extends \Codeception\Test\Unit
         expect("Has fibra plan return true", $model->hasFibraPlan())->true();
     }
 
+
+    public function testValidateDniSuccess8Characters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "35875225";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+
+    public function testValidateDniSuccess7Characters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "5875225";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+    public function testValidateCuitSuccess()
+    {
+        $document_type = DocumentType::findOne(['name' => 'CUIT']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "20358752250";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+    public function testValidateDniFailLessCharacters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "20358752250";
+
+        expect('Not validated', $customer->validate(['document_number']))->false();
+
+    }
+
+    public function testValidateDniFailSameCharacter()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "99999";
+
+        expect('Not validated', $customer->validate(['document_number']))->false();
+
+    }
+
+    public function testValidatePhonesOnlyNumbers()
+    {
+        $customer = new Customer();
+        $customer->phone = '2616260580';
+        $customer->phone2 = '2616260581';
+        $customer->phone3 = '2616260582';
+        $customer->phone4 = '2616260583';
+
+        $validate = $customer->validate(['phone', 'phone2', 'phone3', 'phone4']);
+
+        \Codeception\Util\Debug::debug($customer->getErrors());
+
+        expect('Not validated', $validate)->true();
+    }
+
+    public function testValidatePhonesFail()
+    {
+        $customer = new Customer();
+        $customer->phone = '2616260580 :)';
+        $customer->phone2 = '2616260581 (El de mi mujer)';
+        $customer->phone3 = '2616260582';
+        $customer->phone4 = '2616260583';
+
+        expect('Not validated', $customer->validate(['phone', 'phone2', 'phone3', 'phone4']))->false();
+    }
+
     //TODO resto de la clase
 }

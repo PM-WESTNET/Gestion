@@ -49,12 +49,16 @@ All notable changes to this project will be documented in this file.
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
- - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT [GES-712]
- - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 [GES-712]
- - Alta Cliente: validación de número de documento no puede empezar con 0 [GES-712]
- - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres [GES-712]
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
  - API IVR: se agrega campo que indique si el contrato es de fibra o no [GES-734]
+ - Alta cliente: se agrega fecha de nacimiento [GES-667] [fNacimiento]
+ 
+ ## [2019.12.27.0]
+ ## Modificado
+  - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT
+  - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 
+  - Alta Cliente: validación de número de documento no puede empezar con 0 
+  - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres 
  
  ## [2019.12.26.0] 
  ## Agregado

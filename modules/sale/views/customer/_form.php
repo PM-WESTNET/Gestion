@@ -135,12 +135,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
+            <?= $form->field($model, 'phone')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone2')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone2')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
 
@@ -149,11 +149,11 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone3')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone3')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone4')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
@@ -445,23 +445,24 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             });
 
             self.changeDocumentType();
+            self.phonesMask();
         }
 
         this.changeDocumentType = function(){
             var options;
-            $("#customer-document_number").inputmask("remove");
+            $("#document_number_input").inputmask("remove");
             // Si es CUIT
             if($("#document_type").val()==1) {
                 options = 'cuit';
                 $('#div-validation').removeClass('hidden');
             } else {
                 options = {
-                    'mask': '99999999'
+                    'mask': '99999999',
                 };
                 $('#div-validation').addClass('hidden')
             }
 
-            $("#customer-document_number").inputmask(options);
+            $("#document_number_input").inputmask(options);
         }
 
 
@@ -520,7 +521,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         this.validateCustomer = function () {
             $.ajax({
                 url: "<?php echo Url::to(['validate-customer'])?>",
-                data: {Customer:{document_number: $('#document_number_input').val()}},
+                data: {Customer:{document_number: $('#document_number_input').val(), document_type_id:$('#document_type').val() }},
                 method: 'POST',
                 dataType: 'json'
             }).done(function (response) {
@@ -555,6 +556,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                         break;
                 }
             });
+        }
+
+        this.phonesMask = function () {
+            $('.phone').inputmask({
+                mask: '9999999999'
+            })
         }
     };
 </script>

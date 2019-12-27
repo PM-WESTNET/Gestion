@@ -125,8 +125,8 @@ class Customer extends ActiveRecord {
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
             [['document_type_id', 'address_id', 'needs_bill'], 'integer'],
-            [['phone','phone2', 'phone3'], 'integer', 'on' => 'insert', 'message' => Yii::t('app', 'Only numbers. You must input the area code without 0 and in cell phone number case without 15.')],
-            [['phone','phone2', 'phone3', 'phone4'], 'string', 'on' => 'update'],
+            [['phone','phone2', 'phone3','phone4'], 'integer' /**,'on' => 'insert'**/,  'max' => 9999999999 , 'message' => Yii::t('app', 'Only numbers. You must input the area code without 0 and in cell phone number case without 15.')],
+            //[['phone','phone2', 'phone3', 'phone4'], 'string', 'on' => 'update'],
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
@@ -153,7 +153,9 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
 
-                        ];
+        ];
+
+        $this->validatePhones();
 
         if (Yii::$app->getModule('accounting')) {
             $rules[] = [['account_id'], 'number'];
@@ -191,10 +193,10 @@ class Customer extends ActiveRecord {
         $this->regexValitation();
 
         // SI SI, HARDCODEADO!! Hay que cambiar los modelos para poder parametrizarlo, o meter config y eso...
-        if($this->document_type_id != 1) {
-            $this->docNumberValidation();
-            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
-        }
+//        if($this->document_type_id != 1) {
+//            $this->docNumberValidation();
+//            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
+//        }
 
         return $rules;
     }
@@ -202,13 +204,24 @@ class Customer extends ActiveRecord {
     public function compareDocument()
     {
         if($this->document_type_id != 1) {
-            if($this->document_number <= 999999) {
-                $this->addError('document_number', Yii::t('app', 'The document number must be geater than 999999.'));
+
+            if (strlen($this->document_number) < 7 ||  strlen($this->document_number) > 8) {
+                $this->addError('document_number', Yii::t('app','The document number must be beetwen 7 and 8 characters'));
             }
 
-            if (count($this->getErrors($this->document_number)) > 8 && (integer)$this->document_number >=100000000) {
-                $this->addError('document_number', Yii::t('app','The document number must be less than 100000000.'));
+            $array_document = str_split($this->document_number);
+            $array_caracters = array_count_values($array_document);
+
+            Yii::info(count($array_caracters));
+
+            if(count($array_caracters) == 1 && (array_key_exists('0', $array_caracters) || array_key_exists('9', $array_caracters))) {
+                $this->addError('document_number', Yii::t('app','Invalid document number'));
             }
+
+            if ($array_document[0] == '0') {
+                $this->addError('document_number', Yii::t('app','Document number can`t start with 0'));
+            }
+
         } else {
             $validator = new CuitValidator();
             $validator->validateAttribute($this, 'document_number');
@@ -351,6 +364,58 @@ class Customer extends ActiveRecord {
         };
         $this->on(self::EVENT_AFTER_VALIDATE, $docNumberValidation);
     }
+
+    public function validatePhones()
+    {
+        $validation = function (){
+            if ($this->phone) {
+                $phone_array = str_split($this->phone);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone2) {
+                $phone_array = str_split($this->phone2);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone2', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone3) {
+                $phone_array = str_split($this->phone3);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone3', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone4) {
+                $phone_array = str_split($this->phone4);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone4', Yii::t('app','Invalid Phone'));
+                }
+            }
+        };
+
+        $this->on(self::EVENT_AFTER_VALIDATE, $validation);
+    }
+
 
     public function behaviors()
     {
