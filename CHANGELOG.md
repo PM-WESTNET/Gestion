@@ -17,10 +17,8 @@ All notable changes to this project will be documented in this file.
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
   del plan actual del cliente. [Ticket GES-489]
- - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
- - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
  - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
  de cliente etc). [Ticket GES-568]
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
@@ -53,6 +51,10 @@ All notable changes to this project will be documented in this file.
  - API IVR: se agrega campo que indique si el contrato es de fibra o no [GES-734]
  - Alta cliente: se agrega fecha de nacimiento [GES-667] [fNacimiento]
  
+  ## [2019.12.30.0]
+  ### Modificado
+   - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+   
  ## [2019.12.27.0]
  ## Modificado
   - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT
