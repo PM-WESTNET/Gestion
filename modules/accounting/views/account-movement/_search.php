@@ -33,7 +33,7 @@ use yii\jui\DatePicker;
             ], ['separator' => '<br>']) ?>
         </div>
         <div class="col-sm-7">
-            <?= CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')]]) ?>
+            <?= CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')], 'setDefaultCompany' => false]) ?>
 
             <?= $form->field($model, 'account_id')->widget(Select2::class, [
                 'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),

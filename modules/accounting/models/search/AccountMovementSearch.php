@@ -4,6 +4,7 @@ namespace app\modules\accounting\models\search;
 
 use app\modules\accounting\models\Account;
 use app\modules\accounting\models\AccountMovement;
+use Codeception\Util\Debug;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -39,7 +40,10 @@ class AccountMovementSearch extends AccountMovement {
     public $account;
     public $account_id;
     //Tiempo
+    public $fromTime;
     public $toTime;
+    public $fromDatetime;
+    public $toDatetime;
 
     //Conciliaciones
     public $cuit;
@@ -57,7 +61,7 @@ class AccountMovementSearch extends AccountMovement {
             [['status'], 'in', 'range' => $statuses],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
             ['company_id', 'integer'],
-            [['account_movement_id', 'toTime', 'description'], 'safe']
+            [['account_movement_id', 'toTime', 'description', 'fromDate', 'fromDatetime', 'toDatetime'], 'safe']
         ];
     }
 
@@ -93,7 +97,7 @@ class AccountMovementSearch extends AccountMovement {
      * @param array $params
      * @return ActiveDataProvider
      */
-    public function search($params, $mode = 0) {
+    public function search($params, $mode = 0, $all = false) {
 
         $this->load($params);
 
@@ -124,8 +128,10 @@ class AccountMovementSearch extends AccountMovement {
         $queryTotals->select(['sum(c.debit) as debit', 'sum(c.credit) as credit']);
         $queryTotals->from(['c' => $subQuery]);
          **/
-        $this->filterDates($subQuery, 'am');
+        $this->filterDates($subQuery, 'am', $all);
         $this->filterTimes($subQuery, 'am');
+        $this->filterDatetime($subQuery, 'am');
+        $this->filterStatus($subQuery, 'am');
         $rsTotals = $this->statusAccount(true);
 
         $this->totalDebit = $rsTotals['debit'];
@@ -152,6 +158,7 @@ class AccountMovementSearch extends AccountMovement {
         if ($mode == 0) {
             return $dataProvider;
         } else {
+            Debug::debug($query->createCommand()->getRawSql());
             return $query->all();
         }
     }
@@ -354,17 +361,16 @@ class AccountMovementSearch extends AccountMovement {
      * "in". Sino aplica un "=" con status
      * @param ActiveQuery $query
      */
-    private function filterStatus($query) {
+    private function filterStatus($query, $alias = 'account_movement') {
 
         if (!empty($this->statuses)) {
-
             $query->andFilterWhere([
-                'account_movement.status' => $this->statuses,
+                "$alias.status" => $this->statuses,
             ]);
         } else {
 
             $query->andFilterWhere([
-                'account_movement.status' => $this->status,
+                "$alias.status" => $this->status,
             ]);
         }
     }
@@ -373,24 +379,29 @@ class AccountMovementSearch extends AccountMovement {
      * Agrega queries para filtrar por fechas
      * @param type $query
      */
-    private function filterDates($query, $alias = null) {
-        if (isset($this->date) && (!isset($this->fromDate) && !isset($this->toDate) )) {
+    private function filterDates($query, $alias = null, $all= false) {
+        if (isset($this->date) && !empty($this->date) && (!isset($this->fromDate) && !isset($this->toDate) )) {
             if ($alias != null) {
                 $query->andFilterWhere([$alias . '.date' => Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd')]);
             } else {
                 $query->andFilterWhere(['account_movement.date' => Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd')]);
             }
         } else {
-            if (empty($this->fromDate)) {
+            if (empty($this->fromDate) && !$all) {
                 $this->fromDate = (new \DateTime('first day of this month'))->format('d-m-Y');
             }
 
-            if (empty($this->toDate)) {
+            if (empty($this->toDate) && !$all) {
                 $this->toDate = (new \DateTime('last day of this month'))->format('d-m-Y');
             }
             if ($alias != null) {
-                $query->andFilterWhere(['>=', $alias . '.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
-                $query->andFilterWhere(['<=', $alias . '.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
+                if (!empty($this->fromDate)){
+                    $query->andFilterWhere(['>=', $alias . '.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
+                }
+
+                if (!empty(($this->toDate))) {
+                    $query->andFilterWhere(['<=', $alias . '.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
+                }
             } else {
                 $query->andFilterWhere(['>=', 'account_movement.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
                 $query->andFilterWhere(['<=', 'account_movement.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
@@ -405,8 +416,26 @@ class AccountMovementSearch extends AccountMovement {
     private function filterTimes($query, $alias = null)
     {
         $table = $alias ? $alias : 'account_movement';
+        if ($this->fromTime) {
+            $query->andFilterWhere(['>', "$table.time", $this->fromTime]);
+        }
+
         if ($this->toTime) {
             $query->andFilterWhere(['<=', "$table.time", $this->toTime]);
+        }
+    }
+
+    /*
+     * Aplica el filtro desde una fecha y hora especificas hasya una fecha y hora especificas
+     * Los filtro filterDates y filterTimes si se usan juntos generan un comportamiento inesperado
+     */
+    private function filterDatetime($query, $alias = 'account_movement') {
+        if ($this->fromDatetime && empty($this->fromDate) && empty($this->toDate) && empty($this->fromTime) && empty($this->toTime)){
+            $query->andFilterWhere(['>', "UNIX_TIMESTAMP(concat($alias.date, ' ', $alias.time))", strtotime($this->fromDatetime)]);
+        }
+
+        if ($this->toDatetime && empty($this->fromDate) && empty($this->toDate) && empty($this->fromTime) && empty($this->toTime)){
+            $query->andFilterWhere(['<=', "UNIX_TIMESTAMP(concat($alias.date, ' ', $alias.time))", strtotime($this->toDatetime)]);
         }
     }
 
