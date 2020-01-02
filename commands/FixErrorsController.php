@@ -15,6 +15,8 @@ use app\modules\sale\models\BillType;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\PointOfSale;
 use app\modules\sale\models\TaxCondition;
+use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\components\SecureConnectionUpdate;
 use yii\db\Query;
 
 class FixErrorsController extends \yii\console\Controller
@@ -179,5 +181,33 @@ class FixErrorsController extends \yii\console\Controller
             $trasaction->rollBack();
             return false;
         }
+    }
+
+
+    /**
+     * Actualiza el contrato pasado en el isp
+     */
+    public function actionUpdateContract($contract_id) {
+
+        $contract = Contract::findOne($contract_id);
+
+        if (empty($contract)) {
+            echo 'Contrato no encontrado';
+            echo "\n";
+            return false;
+        }
+
+        if (empty($contract->connection)) {
+            echo 'Conexion no encontrada';
+            echo "\n";
+            return false;
+        }
+
+        $scu = new SecureConnectionUpdate();
+
+        $scu->update($contract->connection, $contract);
+
+
+
     }
 }
