@@ -55,6 +55,11 @@ class SecureConnectionUpdate
                 if(Yii::$app->session) {
                     Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => "Problema con el Cliente. " . $ex->getMessage()]));
                 }
+
+                if (Yii::$app->request->isConsoleRequest) {
+                    echo Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => "Problema con el Cliente. " . $ex->getMessage()]);
+                    echo "\n";
+                }
             }
             $deleted = false;
             // Si se cambio de nodo tengo que borrar en el nodo anterior y crear en el nuevo
@@ -71,6 +76,11 @@ class SecureConnectionUpdate
                     $connection->revertChangeNode();
                     if(isset(Yii::$app->session)) {
                         Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo']));
+                    }
+
+                    if (Yii::$app->request->isConsoleRequest) {
+                        echo Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo']);
+                        echo "\n";
                     }
                 } else {
                     $deleted = true;
@@ -92,6 +102,11 @@ class SecureConnectionUpdate
                         if(isset(Yii::$app->session)) {
                             Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Servidor']));
                         }
+
+                        if(Yii::$app->request->isConsoleRequest) {
+                            echo Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Servidor']);
+                            echo "\n";
+                        }
                     } else {
                         $contract->external_id = null;
                     }
@@ -110,6 +125,11 @@ class SecureConnectionUpdate
                 if(!$plan) {
                     if (isset(Yii::$app->session)) {
                         Yii::$app->session->addFlash('error', Yii::t('westnet', 'The plan not exist in the Server. {error}', ['']));
+                    }
+
+                    if (Yii::$app->request->isConsoleRequest) {
+                        echo Yii::t('westnet', 'The plan not exist in the Server. {error}', ['']);
+                        echo "\n";
                     }
                     return;
                 }
@@ -167,6 +187,11 @@ class SecureConnectionUpdate
                         if(isset(Yii::$app->session)) {
                             Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => '']));
                         }
+
+                        if (Yii::$app->request->isConsoleRequest) {
+                            echo Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => '']);
+                            echo "\n";
+                        }
                     }
                 } catch( \Exception $ex) {
                     if(isset(Yii::$app->session)) {
@@ -174,6 +199,11 @@ class SecureConnectionUpdate
                     }
                     error_log($ex->getFile() . " - " . $ex->getLine() . " - " . $ex->getMessage());
                     error_log($ex->getTraceAsString());
+
+                    if (Yii::$app->request->isConsoleRequest) {
+                        echo Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error'=> "Problema con la Conexion: ".$ex->getMessage()]);
+                        echo "\n";
+                    }
                 }
             }
         }
