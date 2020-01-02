@@ -56,120 +56,11 @@ class ConnectionStatusController extends Controller
     /**
      * Actualizo los cambios de plan.
      */
-    public function actionUpdatePlan($date = null)
+    public function actionUpdatePlan($date = null, $from_date = null, $limit = null)
     {
-        $this->stdout("Westnet - Proceso de actualizacion de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
-
-        if ($date == null) {
-            $date = (new \DateTime('now'))->format('Y-m-d');
+        if (Yii::$app->mutex->acquire('update_plans_cron')) {
+            $this->updatePlans($date, $from_date, $limit);
         }
-
-        $subQuery = (new Query())
-            ->select(['product_id'])
-            ->from(['contract_detail_log cdl'])
-            ->where('cdl.contract_detail_id = cd.contract_detail_id')
-            ->orderBy(['contract_detail_log_id' => SORT_DESC])
-            ->limit(1);
-
-        $query = (new Query())
-            ->select(['c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
-                'p.system', 's.server_id', 's.url', 's.token', new Expression('inet_ntoa(ip4_1) as ip')])
-            ->from('contract c')
-            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
-            ->leftJoin('customer cus', 'c.customer_id = cus.customer_id')
-            ->leftJoin('product p', 'cd.product_id = p.product_id')
-            ->leftJoin('connection con', 'c.contract_id = con.contract_id')
-            ->leftJoin('server s', 'con.server_id = s.server_id')
-            ->where(['p.type' => 'plan', 'cd.applied' => 0])
-            ->andWhere(['<=', 'cd.from_date', $date])
-            ->andWhere(['<>', 'cd.product_id', $subQuery])
-        ;
-
-        $contracts = $query->all();
-
-        $contractRequests = [];
-        $planes = [];
-        $apis = [];
-        foreach ( Server::find()->all() as $server ) {
-            $apis[$server->server_id] = IspFactory::getInstance()->getIsp($server);
-        }
-
-        $iguales = 0;
-        $distintos = 0;
-        try {
-            $wispro = new SecureConnectionUpdate();
-
-            foreach( $contracts as $contractRes) {
-                if(array_key_exists($contractRes['server_id'], $contractRequests)===false) {
-                    $contractRequests[$contractRes['server_id']] = $apis[$contractRes['server_id']]->getContractApi();
-                }
-                if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
-                    $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
-                    $plans = $plansRequest->listAll();
-                    foreach( $plans as $plan) {
-                        $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
-                    }
-                }
-
-                $contractRequest =  $contractRequests[$contractRes['server_id']];
-
-                // Verifico que exista el plan
-                if( array_key_exists($contractRes['server_id'] ."_". $contractRes['system'], $planes ) !== false ) {
-
-                    $plan_id = (string)$planes[ $contractRes['server_id'] ."_". $contractRes['system'] ];
-
-                    $contract = Contract::findOne(['contract_id'=> $contractRes['contract_id']]);
-                    $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
-
-                    $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
-
-                    $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
-                    try {
-                        // Busco el contrato por IP
-                        $contract_api = $contractRequest->find($contractRest->ip, ContractRequest::Q_IP);
-                        $contract_api = is_array($contract_api) ? $contract_api[0] : null;
-                        if($contract_api!==null) {
-                            if($contract_api->plan_id == $plan_id) {
-                                $iguales++;
-                            } else {
-                                $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
-                                if($contract_api->id != $contract->external_id) {
-                                    $contract->external_id = $contract_api->id;
-                                    $this->stdout("actualizo external_id: " . $contract_api->id );
-                                    $contract->updateAttributes(['external_id']);
-                                }
-
-                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
-                                $contractDetail->applied = true;
-                                $contractDetail->updateAttributes(['applied']);
-
-                                $wispro->update($connection, $contract, true);
-                                $distintos++;
-
-                            }
-                        } else {
-                            $this->stdout("No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
-                        }
-                    } catch( \Exception $ex) {
-                        $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
-                        $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
-                        $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
-                    }
-                } else {
-                    $this->stdout("Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", Console::BOLD, Console::FG_RED);
-                }
-            }
-        } catch(\Exception $ex){
-            $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
-            $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
-            $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
-        }
-
-        $this->stdout("Totales"."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("Iguales: ". $iguales."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("Distintos: ". $distintos."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
-
     }
 
     /**
@@ -785,5 +676,128 @@ class ConnectionStatusController extends Controller
             $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
         }
         $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+    }
+
+    public function updatePlans($date = null, $from_date = null, $limit= null)
+    {
+        $this->stdout("Westnet - Proceso de actualizacion de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+
+        if ($date == null || $date == 'null') {
+            $date = (new \DateTime('now'))->format('Y-m-d');
+        }
+
+        $subQuery = (new Query())
+            ->select(['product_id'])
+            ->from(['contract_detail_log cdl'])
+            ->where('cdl.contract_detail_id = cd.contract_detail_id')
+            ->orderBy(['contract_detail_log_id' => SORT_DESC])
+            ->limit(1);
+
+        $query = (new Query())
+            ->select(['c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
+                'p.system', 's.server_id', 's.url', 's.token', new Expression('inet_ntoa(ip4_1) as ip')])
+            ->from('contract c')
+            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+            ->leftJoin('customer cus', 'c.customer_id = cus.customer_id')
+            ->leftJoin('product p', 'cd.product_id = p.product_id')
+            ->leftJoin('connection con', 'c.contract_id = con.contract_id')
+            ->leftJoin('server s', 'con.server_id = s.server_id')
+            ->where(['p.type' => 'plan', 'cd.applied' => 0])
+            ->andWhere(['<=', 'cd.from_date', $date])
+            ->andFilterWhere(['>=', 'cd.from_date', $from_date])
+            //->andWhere(['<>', 'cd.product_id', $subQuery])
+        ;
+
+        if (!empty($limit)) {
+            $query->limit($limit);
+        }
+
+        echo $query->createCommand()->getRawSql();
+
+        $contracts = $query->all();
+
+        $contractRequests = [];
+        $planes = [];
+        $apis = [];
+        foreach ( Server::find()->all() as $server ) {
+            $apis[$server->server_id] = IspFactory::getInstance()->getIsp($server);
+        }
+
+        $iguales = 0;
+        $distintos = 0;
+        try {
+            $wispro = new SecureConnectionUpdate();
+
+            foreach( $contracts as $contractRes) {
+                if(array_key_exists($contractRes['server_id'], $contractRequests)===false) {
+                    $contractRequests[$contractRes['server_id']] = $apis[$contractRes['server_id']]->getContractApi();
+                }
+                if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
+                    $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
+                    $plans = $plansRequest->listAll();
+                    foreach( $plans as $plan) {
+                        $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
+                    }
+                }
+
+                $contractRequest =  $contractRequests[$contractRes['server_id']];
+
+                // Verifico que exista el plan
+                if( array_key_exists($contractRes['server_id'] ."_". $contractRes['system'], $planes ) !== false ) {
+
+                    $plan_id = (string)$planes[ $contractRes['server_id'] ."_". $contractRes['system'] ];
+
+                    $contract = Contract::findOne(['contract_id'=> $contractRes['contract_id']]);
+                    $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
+
+                    $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+
+                    $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
+                    try {
+                        // Busco el contrato por IP
+                        $contract_api = $contractRequest->find($contractRest->ip, ContractRequest::Q_IP);
+                        $contract_api = is_array($contract_api) ? $contract_api[0] : null;
+                        if($contract_api!==null) {
+                            if($contract_api->plan_id == $plan_id) {
+                                $iguales++;
+                            } else {
+                                $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
+                                if($contract_api->id != $contract->external_id) {
+                                    $contract->external_id = $contract_api->id;
+                                    $this->stdout("actualizo external_id: " . $contract_api->id );
+                                    $contract->updateAttributes(['external_id']);
+                                }
+
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->applied = true;
+                                $contractDetail->updateAttributes(['applied']);
+
+                                $wispro->update($connection, $contract, true);
+                                $distintos++;
+
+                            }
+                        } else {
+                            $this->stdout("No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+                        }
+                    } catch( \Exception $ex) {
+                        $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+                    }
+                } else {
+                    $this->stdout("Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", Console::BOLD, Console::FG_RED);
+                }
+            }
+        } catch(\Exception $ex){
+            $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+        }
+
+        $this->stdout("Totales"."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Iguales: ". $iguales."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Distintos: ". $distintos."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+
     }
 }

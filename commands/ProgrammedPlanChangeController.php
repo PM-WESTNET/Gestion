@@ -65,7 +65,8 @@ class ProgrammedPlanChangeController extends Controller
                         $customerLog->createUpdateLog($contract->customer_id, 'Plan', $old_plan->name, $new_plan->name, 'Contract', $plan_change->contract_id);
                         $actual_contract_detail_plan->product_id = $plan_change->product_id;
                         $actual_contract_detail_plan->from_date = (new \DateTime('now'))->format('d-m-Y');
-                        $actual_contract_detail_plan->save(false, ['from_date', 'status', 'product_id']);
+                        $actual_contract_detail_plan->applied = 0;
+                        $actual_contract_detail_plan->save(false, ['from_date', 'status', 'product_id', 'applied']);
                         $plan_change->updateAttributes(['applied' => 1]);
                     } else {
                         \Yii::info('Falló al crear el contract log de '.$actual_contract_detail_plan->contract_detail_id, 'cambio-de-velocidad-programada');
