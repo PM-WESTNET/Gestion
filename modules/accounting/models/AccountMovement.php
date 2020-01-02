@@ -3,7 +3,9 @@
 namespace app\modules\accounting\models;
 
 use app\components\workflow\WithWorkflow;
+use app\modules\accounting\models\search\AccountMovementSearch;
 use app\modules\partner\models\PartnerDistributionModel;
+use Codeception\Util\Debug;
 use Yii;
 
 /**
@@ -176,7 +178,78 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     public function getDeletable()
     {
-        return ($this->status == AccountMovement::STATE_DRAFT || $this->status == AccountMovement::STATE_BROKEN);
+        if ($this->status == AccountMovement::STATE_DRAFT || $this->status == AccountMovement::STATE_BROKEN) {
+            foreach ($this->accountMovementItems as $item) {
+                $money_box_account = MoneyBoxAccount::findOne(['account_id' => $item->account_id]);
+
+                // Si el item pertence a una caja de cierre diario, verificamos que la caja no haya sido cerrada para la fecha del item
+                if ($money_box_account && $money_box_account->type === 'daily') {
+                    if (strtotime(Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd')) <
+                        strtotime(Yii::$app->formatter->asDateTime($money_box_account->daily_box_last_closing_date . ' ' . $money_box_account->daily_box_last_closing_time, 'yyyy-MM-dd HH:mm:ss'))) {
+                        return false;
+                    }
+                }
+
+                $search = new AccountMovementSearch();
+                $params = [
+                    'AccountMovementSearch' => [
+                        'account_id_from' => $item->account->lft,
+                        'account_id_to' => $item->account->rgt,
+                        'fromDatetime' => $this->date . ' ' . $this->time,
+                        'statuses' => [AccountMovementItem::STATE_CLOSED, AccountMovementItem::STATE_CONCILED],
+                        'date' => null
+                    ]
+                ];
+
+                $afterMovements = $search->search($params, 1, true);
+
+                if (count($afterMovements) > 0) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        }
+        return false;
+    }
+
+    public function getUpdatable()
+    {
+        if ($this->status == AccountMovement::STATE_DRAFT || $this->status == AccountMovement::STATE_BROKEN) {
+            foreach ($this->accountMovementItems as $item) {
+                $money_box_account = MoneyBoxAccount::findOne(['account_id' => $item->account_id]);
+
+                // Si el item pertence a una caja de cierre diario, verificamos que la caja no haya sido cerrada para la fecha del item
+                if ($money_box_account && $money_box_account->type === 'daily') {
+                    if (strtotime(Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd')) <
+                        strtotime(Yii::$app->formatter->asDateTime($money_box_account->daily_box_last_closing_date . ' ' . $money_box_account->daily_box_last_closing_time, 'yyyy-MM-dd HH:mm:ss'))) {
+                        return false;
+                    }
+                }
+
+                $search = new AccountMovementSearch();
+                $params = [
+                    'AccountMovementSearch' => [
+                        'account_id_from' => $item->account->lft,
+                        'account_id_to' => $item->account->rgt,
+                        'fromDatetime' => $this->date . ' ' . $this->time,
+                        'statuses' => [AccountMovementItem::STATE_CLOSED, AccountMovementItem::STATE_CONCILED],
+                        'date' => null
+                    ]
+                ];
+
+                $afterMovements = $search->search($params, 1, true);
+
+                if (count($afterMovements) > 0) {
+                    return false;
+                }
+            }
+
+            return true;
+
+        }
+        return false;
     }
     
     /**
@@ -185,6 +258,8 @@ class AccountMovement extends \app\components\companies\ActiveRecord
      */
     protected function unlinkWeakRelations(){
         $this->unlinkAll('accountMovementItems', true);
+
+        AccountMovementRelation::deleteAll(['account_movement_id' => $this->account_movement_id]);
     }
     
     /**
@@ -374,4 +449,13 @@ class AccountMovement extends \app\components\companies\ActiveRecord
 
         return null;
     }
+
+    /**
+     * Indica si el movimiento es generado manualmente
+     */
+    public function isManualMovement() {
+        return !AccountMovementRelation::find()->andWhere(['account_movement_id' => $this->account_movement_id])->exists();
+    }
+
+
 }

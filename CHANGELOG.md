@@ -51,6 +51,11 @@ All notable changes to this project will be documented in this file.
  - API IVR: se agrega campo que indique si el contrato es de fibra o no [GES-734]
  - Alta cliente: se agrega fecha de nacimiento [GES-667] [fNacimiento]
  
+  ## [2019.12.30.1]
+  ### Modificado
+   - Movimientos: Se agrega rol de usuario el cual es el unico permitido a modificar y eliminar movimiento. Los movimientos se 
+   pueden modificar o eliminar si no hay movimientos posteriores en estado cerrado.
+   
   ## [2019.12.30.0]
   ### Modificado
    - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
