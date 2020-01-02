@@ -48,17 +48,21 @@ All notable changes to this project will be documented in this file.
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
- - API IVR: se agrega campo que indique si el contrato es de fibra o no [GES-734]
+
  - Alta cliente: se agrega fecha de nacimiento [GES-667] [fNacimiento]
  
-  ## [2019.12.30.1]
-  ### Modificado
+ ## [2020.01.02.0]
+ ### Agregado
+  - API IVR: se agrega campo que indique si el contrato es de fibra o no.
+  
+ ## [2019.12.30.1]
+   ### Modificado
    - Movimientos: Se agrega rol de usuario el cual es el unico permitido a modificar y eliminar movimiento. Los movimientos se 
    pueden modificar o eliminar si no hay movimientos posteriores en estado cerrado.
    
-  ## [2019.12.30.0]
-  ### Modificado
-   - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+ ## [2019.12.30.0]
+ ### Modificado
+  - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
    
  ## [2019.12.27.0]
  ## Modificado

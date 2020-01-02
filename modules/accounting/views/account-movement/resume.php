@@ -1,6 +1,7 @@
 <?php
 
 use kartik\export\ExportMenu;
+use yii\bootstrap\Collapse;
 use yii\helpers\Html;
 use kartik\grid\GridView;
 
@@ -14,14 +15,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?php
-
-    $item = '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters');
-
-    echo \yii\bootstrap\Collapse::widget([
+    <?= Collapse::widget([
         'items' => [
             [
-                'label' => $item,
+                'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
                 'content' => $this->render('_search', ['model' => $searchModel]),
                 'encode' => false,
             ],

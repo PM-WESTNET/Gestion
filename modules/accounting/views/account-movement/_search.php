@@ -33,7 +33,12 @@ use yii\jui\DatePicker;
             ], ['separator' => '<br>']) ?>
         </div>
         <div class="col-sm-7">
-            <?= CompanySelector::widget(['model' => $model, 'inputOptions' => ['prompt' => Yii::t('app', 'All')], 'setDefaultCompany' => false]) ?>
+            <?= CompanySelector::widget(['model' => $model,
+                'inputOptions' => [
+                    'prompt' => Yii::t('app', 'All')
+                ],
+                'setDefaultCompany' => false
+            ])?>
 
             <?= $form->field($model, 'account_id')->widget(Select2::class, [
                 'data' => ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
@@ -79,9 +84,7 @@ use yii\jui\DatePicker;
     
     <hr>
     <div class="form-group">
-        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
-        <?= Html::resetButton(Yii::t('app', 'Reset'), ['class' => 'btn btn-warning']) ?>
-        <?= Html::a(Yii::t('app', 'Clear'), $form->action, ['class' => 'btn btn-info pull-right']) ?>
+        <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success pull-right']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
