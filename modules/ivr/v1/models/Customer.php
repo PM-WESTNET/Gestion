@@ -67,7 +67,7 @@ class Customer extends \app\modules\sale\models\Customer
                 'services_address' => function($model) {
                     $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
                     if($contract){
-                        return ($contract->address ? $contract->address->fullAddress : $model->address);
+                        return ($contract->address ? $contract->address->shortAddress : $model->address);
                     }
 
                     return '';
