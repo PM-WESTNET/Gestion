@@ -82,7 +82,7 @@ class SMSInfobipTransport implements TransportInterface
      */
     public function export($notification)
     {
-        Yii::setLogger(new EmptyLogger());
+        //Yii::setLogger(new EmptyLogger());
         set_time_limit(0);
 
         //Nombre de archivo
@@ -130,13 +130,14 @@ class SMSInfobipTransport implements TransportInterface
 
 
                 foreach($query->batch(1000) as $customers) {
+                    Yii::trace($customers);
                     foreach ($customers as $customer) {
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
                         $company = Company::findOne($customer['customer_company']);
                         $document_number = $customer['document_number'];
-                        $email = $customer['customer.email'];
-                        $email2 = $customer['customer.email2'];
+                        $email = $customer['email'];
+                        $email2 = $customer['email2'];
                         $phones = [];
                         $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
                         $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
@@ -194,8 +195,9 @@ class SMSInfobipTransport implements TransportInterface
             $objWriter->save('php://output');
 
         }catch (\Exception $ex){
-
-            error_log($ex->getMessage());
+            Yii::trace($ex->getTraceAsString());
+            throw $ex;
+            //error_log($ex->getMessage());
         }
 
 
