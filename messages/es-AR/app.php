@@ -1275,4 +1275,5 @@
     'Contract updated on ISP successfull' => 'Contrato actualizado en el ISP con éxito',
     'Can`t update contract on ISP' => 'No se puede actualizar el contrato en el ISP',
     'Update on ISP' => 'Actualizar en ISP',
+    'Errors occurred at update contract on ISP' => 'Ocurrieron errores ',
 );

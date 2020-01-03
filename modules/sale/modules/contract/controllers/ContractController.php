@@ -1204,7 +1204,7 @@ class ContractController extends Controller {
             return $this->redirect(['view', 'id' => $contract->contract_id]);
         }
 
-        Yii::$app->session->addFlash('error', Yii::t('app','Can`t update contract on ISP'));
+        Yii::$app->session->addFlash('error', Yii::t('app','Errors occurred at update contract on ISP'));
         return $this->redirect(['view', 'id' => $contract->contract_id]);
     }
 }

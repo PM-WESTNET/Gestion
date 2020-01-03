@@ -11,6 +11,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\modules\contract\components\CompanyByNode;
 use app\modules\ticket\models\Category;
+use app\modules\westnet\components\SecureConnectionUpdate;
 use app\modules\westnet\isp\IspFactory;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
@@ -622,47 +623,7 @@ class Contract extends ActiveRecord {
     public function updateOnISP()
     {
         if ($this->status === self::STATUS_ACTIVE) {
-            if ($this->external_id) {
-                $server = $this->connection->server;
-
-                if ($server) {
-                    $factory =IspFactory::getInstance();
-                    $isp = $factory->getIsp($server);
-
-                    $contractApi= $isp->getContractApi();
-
-                    $plan = $this->getPlan();
-
-                    $plan_id = $plan ? $plan->plan_id : null;
-
-                    $contractObject= new \app\modules\westnet\isp\models\Contract($this, $this->connection, $plan_id);
-
-                    if($contractApi->update($contractObject) !== false) {
-                        return true;
-                    }
-
-                }
-            }else {
-                $server = $this->connection->server;
-
-                if ($server) {
-                    $factory =IspFactory::getInstance();
-                    $isp = $factory->getIsp($server);
-
-                    $contractApi= $isp->getContractApi();
-
-                    $plan = $this->getPlan();
-
-                    $plan_id = $plan ? $plan->plan_id : null;
-
-                    $contractObject= new \app\modules\westnet\isp\models\Contract($this, $this->connection, $plan_id);
-
-                    if($contractApi->create($contractObject) !== false) {
-                        return true;
-                    }
-
-                }
-            }
+            return SecureConnectionUpdate::update($this->connection, $this, true);
         }
 
         return false;

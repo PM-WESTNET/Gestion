@@ -27,7 +27,7 @@ class SecureConnectionUpdate
 {
     public static function update(Connection $connection, Contract $contract, $updateConnection = false)
     {
-
+        $has_errors = false;
         /** @var Connection $connection */
         if ($connection) {
             /** @var IspInterface $api */
@@ -52,6 +52,7 @@ class SecureConnectionUpdate
                     }
                 }
             } catch(\Exception $ex) {
+                $has_errors= true;
                 if(Yii::$app->session) {
                     Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => "Problema con el Cliente. " . $ex->getMessage()]));
                 }
@@ -72,6 +73,7 @@ class SecureConnectionUpdate
                     if(isset(Yii::$app->session)) {
                         Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo']));
                     }
+                    $has_errors= true;
                 } else {
                     $deleted = true;
                     $contract->external_id = null;
@@ -92,6 +94,7 @@ class SecureConnectionUpdate
                         if(isset(Yii::$app->session)) {
                             Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Servidor']));
                         }
+                        $has_errors= true;
                     } else {
                         $contract->external_id = null;
                     }
@@ -111,7 +114,8 @@ class SecureConnectionUpdate
                     if (isset(Yii::$app->session)) {
                         Yii::$app->session->addFlash('error', Yii::t('westnet', 'The plan not exist in the Server. {error}', ['']));
                     }
-                    return;
+                    $has_errors = true;
+                    return !$has_errors;
                 }
 
                 $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan['id']);
@@ -167,15 +171,22 @@ class SecureConnectionUpdate
                         if(isset(Yii::$app->session)) {
                             Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error' => '']));
                         }
+                        $has_errors = true;
                     }
+
+                    // Devuelvo el valor de has_errors negado para saber si el proceso fue exitoso o hubieron errores en el medio
+                    return !$has_errors;
                 } catch( \Exception $ex) {
                     if(isset(Yii::$app->session)) {
                         Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be updated in Server. {error}', ['error'=> "Problema con la Conexion: ".$ex->getMessage()]));
                     }
                     error_log($ex->getFile() . " - " . $ex->getLine() . " - " . $ex->getMessage());
                     error_log($ex->getTraceAsString());
+                    return false;
                 }
             }
         }
+
+        return !$has_errors;
     }
 }
