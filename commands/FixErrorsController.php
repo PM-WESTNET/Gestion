@@ -210,4 +210,9 @@ class FixErrorsController extends \yii\console\Controller
 
 
     }
+
+    public function actionFreeProcess($process)
+    {
+        \Yii::$app->mutex->release($process);
+    }
 }

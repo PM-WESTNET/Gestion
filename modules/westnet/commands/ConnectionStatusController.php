@@ -60,6 +60,7 @@ class ConnectionStatusController extends Controller
     {
         if (Yii::$app->mutex->acquire('update_plans_cron')) {
             $this->updatePlans($date, $from_date, $limit);
+            Yii::$app->mutex->release('update_plans_cron');
         }
     }
 
