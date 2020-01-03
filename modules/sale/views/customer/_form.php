@@ -87,10 +87,14 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'birthdate')->widget(\kartik\date\DatePicker::class, [
-                'pluginOptions' => [
+            <?= $form->field($model, 'birthdate')->widget(\yii\jui\DatePicker::class, [
+                'clientOptions' => [
                     'format' =>  'dd-mm-yyyy',
                     'autoclose' => true,
+                    'maxDate' => Yii::$app->formatter->asDate((time() - ((86400 * 365)* 18)),'dd-MM-yyyy')
+                ],
+                'options'=>[
+                    'class'=>'form-control dates',
                 ]
             ]) ?>
 

@@ -1291,5 +1291,6 @@
     'Low proccess begin successfull' => 'Proceso de baja iniciado con éxito',
     'Create Credit Note' => 'Crear Nota de Crédito',
     'Can`t create the credit note' => 'No se pudo crear Nota de Crédito',
-    'Can`t request a notify payment' => 'No se puede crear el informe de pago. Ya existe un informe para este mes'
+    'Can`t request a notify payment' => 'No se puede crear el informe de pago. Ya existe un informe para este mes',
+    'The customer must be older than 18 years old' => 'El cliente debe ser mayor de 18 años'
 );

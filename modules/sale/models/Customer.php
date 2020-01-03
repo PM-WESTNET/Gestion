@@ -157,7 +157,7 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
-
+            ['birthdate', 'validateBirthdate'],
                         ];
 
         if (Yii::$app->getModule('accounting')) {
@@ -248,6 +248,19 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    public function validateBirthdate()
+    {
+        if (!empty($this->birthdate)) {
+            $time = time();
+            $birtdate_timestamp = strtotime(Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd'));
+
+            if (($time - $birtdate_timestamp) < ((86400 * 365) * 18)) {
+                $this->addError('birthdate', Yii::t('app','The customer must be older than 18 years old'));
+                return false;
+            }
+        }
     }
 
     public function insertRules()
