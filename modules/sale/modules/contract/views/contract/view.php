@@ -80,9 +80,11 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             if ($model->status == Contract::STATUS_ACTIVE) {
                 echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
                 echo UserA::a(Yii::t('app', 'Create programmed plan change'), ['programmed-plan-change/create', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning']);
+                echo UserA::a(Yii::t('app','Update on ISP'), ['update-on-isp', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning', 'data-confirm' => '¿Está seguro que desea actualizar este contrato en el ISP?']);
             }
             if ($model->status == Contract::STATUS_LOW_PROCESS) {
                 echo UserA::a(Yii::t('app', 'Definitive Low'), ['cancel-contract', 'id' => $model->contract_id], ['class' => 'btn btn-danger', 'id' => 'btn-definitive-low' ]);
+                echo UserA::a(Yii::t('app','Update on ISP'), ['update-on-isp', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning', 'data-confirm' => '¿Está seguro que desea actualizar este contrato en el ISP?']);
             }
             if ($model->status == Contract::STATUS_DRAFT) {
                 echo UserA::a(Yii::t('app', 'No want the Service'), ['rejected-service', 'id' => $model->contract_id, 'type' => Contract::STATUS_NO_WANT], ['class' => 'btn btn-danger']);

@@ -1295,5 +1295,9 @@
     'The document number must be beetwen 7 and 8 characters' => 'Número de Documento debe tener entre 7 y 8 caracteres',
     'Invalid document number' => 'Número de documento Inválido',
     'Document number can`t start with 0' => 'Número de Documento no puede empezar con 0',
-    'Invalid Phone' => 'Télefono Inválido'
+    'Invalid Phone' => 'Télefono Inválido',
+    'Contract updated on ISP successfull' => 'Contrato actualizado en el ISP con éxito',
+    'Can`t update contract on ISP' => 'No se puede actualizar el contrato en el ISP',
+    'Update on ISP' => 'Actualizar en ISP',
+    'Errors occurred at update contract on ISP' => 'Ocurrieron errores ',
 );

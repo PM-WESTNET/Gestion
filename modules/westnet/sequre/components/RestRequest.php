@@ -179,6 +179,8 @@ class RestRequest
             $response['errorno']    = -1;
         }
 
+        Yii::info($response);
+
         return $response;
     }
 
