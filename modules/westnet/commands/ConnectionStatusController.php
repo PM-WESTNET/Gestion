@@ -736,8 +736,12 @@ class ConnectionStatusController extends Controller
                 if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
                     $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
                     $plans = $plansRequest->listAll();
-                    foreach( $plans as $plan) {
-                        $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
+                    if (is_array($plans)){
+                        foreach( $plans as $plan) {
+                            $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
+                        }
+                    }else {
+                        $this->stdout("Error al traer contratos del server ". $contractRes['server_id']);
                     }
                 }
 
