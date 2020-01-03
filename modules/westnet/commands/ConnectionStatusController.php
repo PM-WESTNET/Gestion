@@ -761,6 +761,8 @@ class ConnectionStatusController extends Controller
                         if($contract_api!==null) {
                             if($contract_api->plan_id == $plan_id) {
                                 $iguales++;
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->updateAttributes(['applied' => 1]);
                             } else {
                                 $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
                                 if($contract_api->id != $contract->external_id) {
