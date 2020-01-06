@@ -1292,6 +1292,8 @@
     'Create Credit Note' => 'Crear Nota de Crédito',
     'Can`t create the credit note' => 'No se pudo crear Nota de Crédito',
     'Can`t request a notify payment' => 'No se puede crear el informe de pago. Ya existe un informe para este mes',
+    'The customer must be older than 18 years old' => 'El cliente debe ser mayor de 18 años',
+    'Can`t request a notify payment' => 'No se puede crear el informe de pago. Ya existe un informe para este mes',
     'The document number must be beetwen 7 and 8 characters' => 'Número de Documento debe tener entre 7 y 8 caracteres',
     'Invalid document number' => 'Número de documento Inválido',
     'Document number can`t start with 0' => 'Número de Documento no puede empezar con 0',

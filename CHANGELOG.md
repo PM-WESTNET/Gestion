@@ -49,7 +49,9 @@ All notable changes to this project will be documented in this file.
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
 
- - Alta cliente: se agrega fecha de nacimiento [GES-667] [fNacimiento]
+ ## [2020.01.06.0]
+ ### Agregado
+ - Alta cliente: se agrega fecha de nacimiento
  
  ## [2020.01.02.0]
  ### Agregado

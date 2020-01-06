@@ -60,6 +60,8 @@ use app\modules\ticket\models\Ticket;
  * @property string $email_fields_notifications
  * @property integer $parent_company_id
  * @property integer $needs_bill
+ * @property string $birthdate
+ *
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -119,7 +121,7 @@ class Customer extends ActiveRecord {
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname'],'required', 'on' => 'insert'],
+            [['name', 'lastname', 'birthdate'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
@@ -130,7 +132,10 @@ class Customer extends ActiveRecord {
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
-            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges' ], 'safe'],
+            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
+                'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
+                'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
+                'phone4', 'last_update', 'hourRanges', 'birthdate'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -152,8 +157,8 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
-
-        ];
+            ['birthdate', 'validateBirthdate'],
+                        ];
 
         $this->validatePhones();
 
@@ -256,6 +261,19 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    public function validateBirthdate()
+    {
+        if (!empty($this->birthdate)) {
+            $time = time();
+            $birtdate_timestamp = strtotime(Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd'));
+
+            if (($time - $birtdate_timestamp) < ((86400 * 365) * 18)) {
+                $this->addError('birthdate', Yii::t('app','The customer must be older than 18 years old'));
+                return false;
+            }
+        }
     }
 
     public function insertRules()
@@ -478,6 +496,7 @@ class Customer extends ActiveRecord {
             'hourRanges' => Yii::t('app', 'Customer Hour range'),
             'document_image' => Yii::t('app', 'Document image'),
             'tax_image' => Yii::t('app', 'Tax image'),
+            'birthdate' => Yii::t('app','Birthdate')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -840,11 +859,16 @@ class Customer extends ActiveRecord {
      * @param type $insert
      */
     public function beforeSave($insert) {
+
         if($this->isNewRecord  && !$this->company_id) {
             self::$companyRequired = false;
         }
+
+
         if (parent::beforeSave($insert)) {
-            
+
+            $this->formatDateBeforeSave();
+
             if (in_array('screen', $this->_notifications_way)) {
                  $this->screen_notification= true;                      
             }else{
@@ -1083,6 +1107,9 @@ class Customer extends ActiveRecord {
           if(Yii::$app->params['category_customer_required'])
           $this->customerCategory=$this->getCustomerCategory();
          */
+
+        $this->formatDateAfterFind();
+
         $this->old_company_id = $this->company_id;
         
         $sms_fields= explode(',', $this->sms_fields_notifications);
@@ -2017,5 +2044,17 @@ class Customer extends ActiveRecord {
 
         return null;
 
+    }
+
+    private function formatDateBeforeSave() {
+        if ($this->birthdate) {
+            $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd');
+        }
+    }
+
+    private function formatDateAfterFind() {
+        if ($this->birthdate) {
+            $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'dd-MM-yyyy');
+        }
     }
 }
