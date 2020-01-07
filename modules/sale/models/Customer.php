@@ -121,7 +121,7 @@ class Customer extends ActiveRecord {
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname', 'birthdate'],'required', 'on' => 'insert'],
+            [['name', 'lastname'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
@@ -157,8 +157,9 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
-            ['birthdate', 'validateBirthdate'],
-                        ];
+            //['birthdate', 'validateBirthdate']
+        ];
+
 
         $this->validatePhones();
 
@@ -263,8 +264,32 @@ class Customer extends ActiveRecord {
         return false;
     }
 
+    /**
+     * Valida la fecha de nacimiento:
+     * -Si el customer es Iva inscripto no requiere fecha de nacimiento
+     * -Si el customer es nuevo y no es iva inscrpto, requiere fecha de nacimiento
+     * -Si el customer no es nuevo y no es iva inscripto, si ya tenia fecha de nacimiento no permite dejar el campo vacio,
+     * si no tenia fecha de nacimiento y tampoco se setea al actualizar valida como correcto el campo
+     *
+     * @return boolean true si el campo fecha de nacimiento es válido
+     */
     public function validateBirthdate()
     {
+        if ($this->tax_condition_id == 1) {
+            return true;
+        }
+
+        if ($this->isNewRecord && empty($this->birthdate)) {
+            $this->addError('birthdate', Yii::t('app','Birthdate can`t be empty'));
+            return false;
+        } else {
+            if (empty($this->birthdate) && !empty($this->oldAttributes['birthdate'])){
+                $this->addError('birthdate', Yii::t('app','Birthdate can`t be empty'));
+                return false;
+            }
+
+        }
+
         if (!empty($this->birthdate)) {
             $time = time();
             $birtdate_timestamp = strtotime(Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd'));
@@ -274,6 +299,8 @@ class Customer extends ActiveRecord {
                 return false;
             }
         }
+
+        return true;
     }
 
     public function insertRules()
@@ -862,6 +889,10 @@ class Customer extends ActiveRecord {
 
         if($this->isNewRecord  && !$this->company_id) {
             self::$companyRequired = false;
+        }
+
+        if (!$this->validateBirthdate()) {
+            return false;
         }
 
 
