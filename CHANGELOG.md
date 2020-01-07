@@ -48,6 +48,8 @@ All notable changes to this project will be documented in this file.
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
  - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
+ - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
+ cuenta los teléfonos fijos. [GES-726]
 
  ## [2020.01.06.0]
  ### Agregado
