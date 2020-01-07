@@ -15,8 +15,6 @@ All notable changes to this project will be documented in this file.
  - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
    la fecha de la ultima actualizacion de los mismos
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
-  del plan actual del cliente. [Ticket GES-489]
  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
  - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
@@ -46,10 +44,16 @@ All notable changes to this project will be documented in this file.
  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
  - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
- - Se modifica cron para que tenga en cuenta conexiones en estado activo, y no solo las forzadas [GES-410]
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
+ 
+ ## [2020.01.07.0]
+ ### Modificado
+  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+   del plan actual del cliente.
+  - Activacion de items de extension de pago automáticas: Se modifica cron para que tenga en cuenta conexiones en estado 
+  activo, y no solo las forzadas.
 
  ## [2020.01.06.0]
  ### Agregado
