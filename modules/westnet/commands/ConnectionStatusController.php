@@ -840,7 +840,7 @@ class ConnectionStatusController extends Controller
             ->leftJoin('product p', 'cd.product_id = p.product_id')
             ->leftJoin('connection con', 'c.contract_id = con.contract_id')
             ->leftJoin('server s', 'con.server_id = s.server_id')
-            ->andWhere(['c.status' => Contract::STATUS_ACTIVE])
+            ->andWhere(['IN', 'c.status', [Contract::STATUS_ACTIVE, Contract::STATUS_LOW_PROCESS]])
             ->andWhere(['IS NOT', 's.server_id', NULL])
             //->andWhere(['p.type' => 'plan', 'cd.applied' => 0])
             ->andWhere(['<=', 'cd.from_date', $date])
@@ -848,6 +848,8 @@ class ConnectionStatusController extends Controller
             ->andFilterWhere(['p.product_id' => $plan_id])
             //->andWhere(['<>', 'cd.product_id', $subQuery])
         ;
+
+
 
         if (!empty($limit)) {
             $query->limit($limit);
@@ -912,8 +914,8 @@ class ConnectionStatusController extends Controller
                         $contract_api = is_array($contract_api) ? $contract_api[0] : null;
                         if($contract_api!==null) {
                             file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Contrato Encontrado', FILE_APPEND);
-                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en Gestion: '. $contractRes['system'], FILE_APPEND);
-                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en ISP'. $contract_api->plan_id, FILE_APPEND);
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en Gestion: '. $contractRes['system'] . "\n", FILE_APPEND);
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en ISP '. $contract_api->plan_id . "\n", FILE_APPEND);
 
                             if($contract_api->plan_id == $plan_id) {
                                 file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan correcto en ambos lados. No realizo cambio' . "\n", FILE_APPEND);
@@ -922,7 +924,7 @@ class ConnectionStatusController extends Controller
                                 $contractDetail->updateAttributes(['applied' => 1]);
                             } else {
                                 $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
-                                file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Cambio plan de '. $plan_id. ' a '. $contract_api->plan_id . "\n", FILE_APPEND);
+                                file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Cambio plan de '.  $contract_api->plan_id. ' a '. $plan_id. "\n", FILE_APPEND);
                                 if($contract_api->id != $contract->external_id) {
                                     $contract->external_id = $contract_api->id;
                                     $this->stdout("actualizo external_id: " . $contract_api->id );
