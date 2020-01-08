@@ -134,7 +134,6 @@ class SecureConnectionUpdate
                         echo Yii::t('westnet', 'The plan not exist in the Server. {error}', ['']);
                         echo "\n";
                     }
-                    return;
                     $has_errors = true;
                     return !$has_errors;
                 }
