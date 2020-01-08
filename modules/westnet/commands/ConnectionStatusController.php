@@ -903,7 +903,7 @@ class ConnectionStatusController extends Controller
                     $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
 
                     $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
-                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Buscando contrato: ". $contractRes['contract_id'] . " en ISP " . $contractRes['server']." - Customer: " . $contractRes['cus.code']."\n", FILE_APPEND);
+                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Buscando contrato: ". $contractRes['contract_id'] . " en ISP " . $contractRes['server']." - Customer: " . $contractRes['code']."\n", FILE_APPEND);
 
                     $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
                     try {
