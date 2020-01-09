@@ -64,7 +64,7 @@ class ConnectionStatusController extends Controller
         }
     }
 
-    public function actionCorregirPlans($server_id = null, $plan_id= null, $limit= null) {
+    public function actionCorregirPlans(array $server_id = null, array $plan_id= null, $limit= null) {
         if (Yii::$app->mutex->acquire('corregir_planes')) {
             $this->corregirPlanes($limit, $server_id, $plan_id);
             Yii::$app->mutex->release('corregir_planes');
@@ -844,12 +844,20 @@ class ConnectionStatusController extends Controller
             ->andWhere(['IS NOT', 's.server_id', NULL])
             //->andWhere(['p.type' => 'plan', 'cd.applied' => 0])
             ->andWhere(['<=', 'cd.from_date', $date])
-            ->andFilterWhere(['s.server_id' => $server_id])
-            ->andFilterWhere(['p.product_id' => $plan_id])
             //->andWhere(['<>', 'cd.product_id', $subQuery])
         ;
 
+        if(is_array($server_id)) {
+            $query->andFilterWhere(['IN', 's.server_id', $server_id]);
+        }else {
+            $query->andFilterWhere(['s.server_id' => $server_id]);
+        }
 
+        if(is_array($plan_id)) {
+            $query->andFilterWhere(['IN', 'p.product_id', $plan_id]);
+        }else {
+            $query->andFilterWhere(['p.product_id' => $plan_id]);
+        }
 
         if (!empty($limit)) {
             $query->limit($limit);
