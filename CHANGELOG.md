@@ -48,6 +48,13 @@ All notable changes to this project will be documented in this file.
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
  
+ 
+ ## [2020.01.07.1]
+ ### Modificado
+  - Fecha de nacimiento: se requiere solo cuando no es empresa
+  - Notificaciones: Se agregan columnas DNI, email y email secundario a la exportacion de infobip   
+ 
+ 
  ## [2020.01.07.0]
  ### Modificado
   - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
