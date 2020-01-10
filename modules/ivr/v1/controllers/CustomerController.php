@@ -1008,7 +1008,7 @@ class CustomerController extends Controller
             'amount' => $data['amount'],
             'payment_method_id' => $data['payment_method_id'],
             'contract_id' => $data['contract_id'],
-            'from' => 'IVR'
+            'from' => NotifyPayment::FROM_IVR
         ]);
 
         $trasanction = Yii::$app->db->beginTransaction();
