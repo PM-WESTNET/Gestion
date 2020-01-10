@@ -47,6 +47,7 @@ All notable changes to this project will be documented in this file.
  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
+ - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  
  
  ## [2020.01.07.1]
