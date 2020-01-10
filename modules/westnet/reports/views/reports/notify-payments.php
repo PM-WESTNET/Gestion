@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'model' => $model,
                             'attribute' => 'date_from',
                             'dateFormat' => 'dd-MM-yyyy',
-                            'options'=>[
+                            'options'=> [
                                 'class'=>'form-control filter dates',
                                 'placeholder'=>Yii::t('app','Date')
                             ]
@@ -46,7 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'model' => $model,
                             'attribute' => 'date_to',
                             'dateFormat' => 'dd-MM-yyyy',
-                            'options'=>[
+                            'options'=> [
                                 'class'=>'form-control filter dates',
                                 'placeholder'=>Yii::t('app','Date')
                             ]
@@ -80,7 +80,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'borderCapStyle' => 'round',
                                     'borderDash' => [],
                                     'data' => $data_app,
-                                    'fill' => true
                                 ],
                                 [
                                     'label' => "Informes de pago desde IVR",
@@ -91,7 +90,6 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'borderCapStyle' => 'round',
                                     'borderDash' => [],
                                     'data' => $data_ivr,
-                                    'fill' => true
                                 ]
                             ],
                         ],
