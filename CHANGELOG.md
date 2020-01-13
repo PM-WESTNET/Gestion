@@ -8,12 +8,7 @@ All notable changes to this project will be documented in this file.
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Correcion error duplicado de tickets en panel de cobranza
- - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
- - IVR: Se agrega indicador si el cliente es nuevo o no
- - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  - Correción filtros asignación masiva de planes
- - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
-   la fecha de la ultima actualizacion de los mismos
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
@@ -25,7 +20,6 @@ All notable changes to this project will be documented in this file.
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
- - IVR : Cambio en salida de endpoint get-customer para que le quede comodo a Federico de Iperfex
  - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
  - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
  - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
@@ -43,13 +37,22 @@ All notable changes to this project will be documented in this file.
  - Se agrega instructivo para configurar empresa de facturacion para clientes nuevos [GES-663]
  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
- - Se agrega endpoint para IVR get-customer-by-document-number [GES-719]
- - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja [GES-733]
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  
- 
+ ## [2020.01.13.0]
+ ### Agregado
+  - IVR: Se agrega indicador si el cliente es nuevo o no
+  - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
+   la fecha de la ultima actualizacion de los mismos
+  - Se agrega endpoint para IVR get-customer-by-document-number.
+  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja.
+ ### Modificado
+  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+  - IVR : Cambio en salida de endpoint get-customer.
+
  ## [2020.01.07.1]
  ### Modificado
   - Fecha de nacimiento: se requiere solo cuando no es empresa
