@@ -678,7 +678,7 @@ class ReportSearch extends Model
                 new Expression('date'),
                 new Expression('`from`')
             ])->from(['payment_extension_history'])
-            ->groupBy(['date'])
+            ->groupBy(['date', 'from'])
             ->orderBy('date');
 
         if($this->date_from) {
