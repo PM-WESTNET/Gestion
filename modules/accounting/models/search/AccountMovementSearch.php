@@ -132,7 +132,7 @@ class AccountMovementSearch extends AccountMovement {
         $this->filterTimes($subQuery, 'am');
         $this->filterDatetime($subQuery, 'am');
         $this->filterStatus($subQuery, 'am');
-        $rsTotals = $this->statusAccount(true);
+        $rsTotals = $this->statusAccount();
 
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
@@ -140,7 +140,6 @@ class AccountMovementSearch extends AccountMovement {
         if (isset($this->toDate)) {
             $this->date = $this->toDate;
         }
-
 
         $status_account = $this->statusAccount();
         Yii::$app->db->createCommand('set @partial_balance := ' . $status_account['balance'] . ';')->execute();
@@ -460,9 +459,16 @@ class AccountMovementSearch extends AccountMovement {
                     ->leftJoin('account_movement_item ami', 'am.account_movement_id = ami.account_movement_id')
                     ->leftJoin('account ac', 'ami.account_id = ac.account_id')
                     ->where('ac.lft between ' . $this->account_id_from . ' and ' . $this->account_id_to)
-                    ->andFilterWhere(['<'.($all?'=':''), 'am.date', Yii::$app->formatter->asDate(($all ? (new \DateTime('now'))->format('d-m-Y') : $this->fromDate), 'yyyy-MM-dd')])
                     ->groupBy(['am.date', 'ami.account_movement_item_id', 'ami.status'])
                     ->orderBy('am.date');
+
+            if($this->fromDate) {
+                $subQuery->andFilterWhere(['>'.($all?'=':''), 'am.date', ($all ? (new \DateTime('now'))->format('Y-m-d') : (new \DateTime($this->fromDate))->format('Y-m-d'))]);
+            }
+
+            if($this->toDate) {
+                $subQuery->andFilterWhere(['<'.($all?'=':''), 'am.date', ($all ? (new \DateTime('now'))->format('Y-m-d') : (new \DateTime($this->toDate))->format('Y-m-d'))]);
+            }
 
             $queryTotals = new Query();
             $queryTotals->select(['sum(c.debit) as debit', 'sum(c.credit) as credit']);

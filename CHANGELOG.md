@@ -30,7 +30,6 @@ All notable changes to this project will be documented in this file.
  - Notificaciones masiva a la app [GES-665]
  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
-
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663]
  - Se agrega instructivo para configurar empresa de facturacion para clientes nuevos [GES-663]
@@ -39,6 +38,7 @@ All notable changes to this project will be documented in this file.
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
+ - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  
  ## [2020.01.14.0]
  ### Modificado
