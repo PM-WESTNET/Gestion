@@ -10,36 +10,37 @@ All notable changes to this project will be documented in this file.
  - Correcion error duplicado de tickets en panel de cobranza
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
- - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
- - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
- de cliente etc). [Ticket GES-568]
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
  - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
  uno de los clientes. [Ticket GES-568]
- - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
- - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
- - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
- - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
- - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [GES-644]
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
- - Notificaciones por email: envio en segundo plano [GES-614]
- - Notificaciones masiva a la app [GES-665]
- - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
-
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663]
- - Se agrega instructivo para configurar empresa de facturacion para clientes nuevos [GES-663]
- - Al cambiar el cliente de un pago no se duplica movimiento [GES-650]
- - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-709]
+ - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710]
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  
+ ## [2020.01.15.0]
+ ### Modificado
+  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago [GES-574] Solicitado y aprobado por Elizabeth
+  - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+   de cliente etc). [Ticket GES-568] Solicitado y aprobado por Joaquin
+  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557] Solicitado y aprobado por Camila
+  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620] Solicitado y aprobado por Camila
+  - Notificaciones por email: envio en segundo plano [GES-614] Solicitado y aprobado por Camila
+  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669] Solicitado y aprobado por Marian
+  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650] Solicitado y aprobado por Marian
+ 
+ ### Agregado
+  - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641] Solicitado por Marian y aprobado por Elizabeth
+  - Notificaciones masiva a la app [GES-665] Solicitado por Elizabeth y aprobado por Camila
+  - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663] Solicitado y aprobado por Camila   
+  
  ## [2020.01.14.0]
  ### Modificado
   - Eliminación de telefonos duplicados por cliente
