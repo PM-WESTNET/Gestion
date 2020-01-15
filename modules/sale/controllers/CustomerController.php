@@ -171,7 +171,7 @@ class CustomerController extends Controller
             }
 
             if($model->needsUpdate) {
-                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data'));
+                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data. Last update: {date}', ['date' => ( new \DateTime($model->last_update))->format('d-m-Y')]));
             }
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();

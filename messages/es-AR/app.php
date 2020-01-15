@@ -1004,7 +1004,7 @@
     'The customer exists in database but he has debt.' => 'El cliente existe en la base de datos pero posee deuda.',
     "The customer exists in database" => 'El cliente existe en la base de datos',
     'The customer not exists in database' => 'El cliente no existe en la base de datos',
-    'This customer needs to confirm data' => 'El cliente necesita confirmar sus datos',
+    'This customer needs to confirm data. Last update: {date}' => 'El cliente necesita confirmar sus datos. Ultima actualización {date}',
     'Last update' => 'Última actualización',
     'The customer not exists in database' => 'El cliente no existe en la base de datos',
     'Future' => 'Futuro',
@@ -1303,4 +1303,6 @@
     'Update on ISP' => 'Actualizar en ISP',
     'Errors occurred at update contract on ISP' => 'Ocurrieron errores ',
     'Birthdate can`t be empty' => 'Fecha de nacimiento no puede estar vacio',
+    'Cell Phone 1 can`t be empty' => 'Celular 1 no puede estar vacío',
+    'Cell Phone 2 can`t be empty' => 'Celular 2 no puede estar vacío',
  );

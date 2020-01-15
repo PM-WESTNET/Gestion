@@ -121,7 +121,7 @@ class Customer extends ActiveRecord {
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname'],'required', 'on' => 'insert'],
+            [['name', 'lastname', 'phone2', 'phone3'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
@@ -433,6 +433,8 @@ class Customer extends ActiveRecord {
                 if (count($phone_characters) == 1) {
                     $this->addError('phone2', Yii::t('app','Invalid Phone'));
                 }
+            } elseif (isset($this->oldAttributes['phone2']) && !empty($this->oldAttributes['phone2'])) {
+                $this->addError('phone2', Yii::t('app', 'Cell Phone 1 can`t be empty'));
             }
 
             if ($this->phone3) {
@@ -444,7 +446,10 @@ class Customer extends ActiveRecord {
                 if (count($phone_characters) == 1) {
                     $this->addError('phone3', Yii::t('app','Invalid Phone'));
                 }
+            } elseif (isset($this->oldAttributes['phone3']) && !empty($this->oldAttributes['phone3'])) {
+                $this->addError('phone3', Yii::t('app', 'Cell Phone 2 can`t be empty'));
             }
+
 
             if ($this->phone4) {
                 $phone_array = str_split($this->phone4);
@@ -632,9 +637,9 @@ class Customer extends ActiveRecord {
             } else {
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
+//                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
-                        }
+//                        }
 
                         if ($attr === 'email') {
                             $this->updateAttributes(['email_status' => 'invalid']);
@@ -1485,6 +1490,12 @@ class Customer extends ActiveRecord {
         $date_last_update = new \DateTime($this->last_update);
         $date_now = new \DateTime('now');
         $month_difference = $date_last_update->diff($date_now)->m + ($date_last_update->diff($date_now)->y*12);
+
+        Yii::trace($this->last_update);
+        Yii::trace($maximun_months_update);
+        Yii::trace($date_last_update->diff($date_now)->m);
+        Yii::trace(($date_last_update->diff($date_now)->y*1));
+        Yii::trace('diferencia '. $month_difference );
 
         if($month_difference >= $maximun_months_update) {
             return true;
