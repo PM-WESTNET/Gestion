@@ -132,7 +132,11 @@ class AccountMovementSearch extends AccountMovement {
         $this->filterTimes($subQuery, 'am');
         $this->filterDatetime($subQuery, 'am');
         $this->filterStatus($subQuery, 'am');
-        $rsTotals = $this->statusAccount();
+        $rsTotals = (new Query())
+            ->select([
+                new Expression('SUM(total.debit) as debit'),
+                new Expression('SUM(total.credit) as credit')
+            ])->from(['total' => $subQuery])->one();
 
         $this->totalDebit = $rsTotals['debit'];
         $this->totalCredit = $rsTotals['credit'];
@@ -448,6 +452,10 @@ class AccountMovementSearch extends AccountMovement {
         }
     }
 
+    /**
+     * TODO Revisar que la query se comporte como se espera, ya que en el caso de la vista de moviemtos los totales que
+     * devolvia no eran los reales.
+     */
     public function statusAccount($all= false) {
         if(isset($this->fromDate)){
             $subQuery = (new Query())
