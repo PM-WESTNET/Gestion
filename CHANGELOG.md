@@ -26,6 +26,10 @@ All notable changes to this project will be documented in this file.
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  
+ ## [2020.01.16.0]
+ ### Modificado
+ - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
+ 
  ## [2020.01.15.0]
  ### Modificado
   - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago [GES-574] Solicitado y aprobado por Elizabeth
