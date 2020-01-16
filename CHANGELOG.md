@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
+ - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  
  ## [2020.01.15.0]
  ### Modificado
