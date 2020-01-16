@@ -1305,4 +1305,10 @@
     'Birthdate can`t be empty' => 'Fecha de nacimiento no puede estar vacio',
     'Cell Phone 1 can`t be empty' => 'Celular 1 no puede estar vacío',
     'Cell Phone 2 can`t be empty' => 'Celular 2 no puede estar vacío',
+    'Updated Customers' => 'Clientes Actualizados',
+    'Updated Customers Report' => 'Reporte de Clientes Actualizados',
+    'Last Year' => 'Último Año',
+    'Last Month' => 'Último Mes',
+    'Last Week' => 'Última Semana',
+    'Time Range' => 'Rango de Tiempo'
  );
