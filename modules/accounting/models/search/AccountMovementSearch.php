@@ -459,6 +459,7 @@ class AccountMovementSearch extends AccountMovement {
                     ->leftJoin('account_movement_item ami', 'am.account_movement_id = ami.account_movement_id')
                     ->leftJoin('account ac', 'ami.account_id = ac.account_id')
                     ->where('ac.lft between ' . $this->account_id_from . ' and ' . $this->account_id_to)
+                    ->andFilterWhere(['<'.($all?'=':''), 'am.date', Yii::$app->formatter->asDate(($all ? (new \DateTime('now'))->format('d-m-Y') : $this->fromDate), 'yyyy-MM-dd')])
                     ->groupBy(['am.date', 'ami.account_movement_item_id', 'ami.status'])
                     ->orderBy('am.date');
 
