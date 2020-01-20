@@ -224,6 +224,11 @@ class ContractController extends RestController
             ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
             ->andWhere(['in', 'con.status_account', ['defaulter','clipped']])
+            ->andWhere([
+                'cus.status' => Customer::STATUS_ENABLED,
+                'contract.status' => Contract::STATUS_ACTIVE,
+                'con.status' => Connection::STATUS_ENABLED
+            ])
         ;
 
         if($multiple) {
