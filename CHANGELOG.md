@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
  - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
  - Reporte de clientes actualizados [GES-764]
+ - Alta de cliente: Agregado campo observaciones [GES-626]
  
  
  ## [2020.01.16.0]
