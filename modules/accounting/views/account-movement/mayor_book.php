@@ -14,7 +14,31 @@ $this->params['breadcrumbs'][] = $this->title;
             <h3 class="panel-title"><?php echo Yii::t('app', 'Filters')?></h3>
         </div>
         <div class="panel-body">
-            <?php $form = ?>
+            <?php $form =  \yii\bootstrap\ActiveForm::begin(['method' => 'GET'])?>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <?php echo $form->field($search, 'fromDate')->widget(\kartik\date\DatePicker::class,[
+                            'pluginOptions' => [
+                                'format'  => 'dd-mm-yyyy',
+                                'autoclose' => true
+                            ]
+                        ])?>
+                    </div>
+                    <div class="col-lg-6">
+                        <?php echo $form->field($search, 'toDate')->widget(\kartik\date\DatePicker::class,[
+                            'pluginOptions' => [
+                                'format'  => 'dd-mm-yyyy',
+                                'autoclose' => true
+                            ]
+                        ])?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <?php echo \yii\helpers\Html::submitButton(Yii::t('app', 'Filter'), ['class' => 'btn btn-primary'])?>
+                    </div>
+                </div>
+            <?php \yii\bootstrap\ActiveForm::end()?>
         </div>
     </div>
 

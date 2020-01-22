@@ -1303,4 +1303,5 @@
     'Update on ISP' => 'Actualizar en ISP',
     'Errors occurred at update contract on ISP' => 'Ocurrieron errores ',
     'Birthdate can`t be empty' => 'Fecha de nacimiento no puede estar vacio',
+    'Mayor Book' => 'Libro Mayor'
  );
