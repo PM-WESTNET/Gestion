@@ -61,6 +61,7 @@ use app\modules\ticket\models\Ticket;
  * @property integer $parent_company_id
  * @property integer $needs_bill
  * @property string $birthdate
+ * @property string $observations
  *
  *
  * @property Bill[] $bills
@@ -135,7 +136,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -528,7 +529,8 @@ class Customer extends ActiveRecord {
             'hourRanges' => Yii::t('app', 'Customer Hour range'),
             'document_image' => Yii::t('app', 'Document image'),
             'tax_image' => Yii::t('app', 'Tax image'),
-            'birthdate' => Yii::t('app','Birthdate')
+            'birthdate' => Yii::t('app','Birthdate'),
+            'observations' => Yii::t('app', 'Observations')
         ];
 
         //Labels adicionales definidos para los profiles
