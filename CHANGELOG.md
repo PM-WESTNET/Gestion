@@ -11,8 +11,6 @@ All notable changes to this project will be documented in this file.
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
- - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
- uno de los clientes. [Ticket GES-568]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
@@ -30,7 +28,11 @@ All notable changes to this project will be documented in this file.
  - Reporte de clientes actualizados [GES-764]
  - Alta de cliente: Agregado campo observaciones [GES-626]
  
- 
+  ## [2020.01.22.0]
+  ### Agregado 
+   - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+   uno de los clientes. [Ticket GES-568] Solicitado y aprobado por Joaquin
+     
  ## [2020.01.16.0]
  ### Modificado
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
