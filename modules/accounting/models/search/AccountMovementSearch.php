@@ -523,4 +523,34 @@ class AccountMovementSearch extends AccountMovement {
         return $movements;
     }
 
+    public function searchMayorBook($params)
+    {
+        $this->load($params);
+
+        Yii::$app->db->createCommand('set @balance := 0')->execute();
+
+        $query = (new Query())
+            ->select(['ami.account_movement_id', 'ami.debit', 'ami.credit', 'ami.status', 'am.description',
+                '@balance := IF(ami.debit > 0, (@balance + ami.debit),(@balance - ami.credit)) as balance',
+                'ami.created_at'
+            ])
+            ->from('account_movement_item ami')
+            ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id');
+
+        if ($this->fromDate) {
+            $query->andWhere(['>=', 'ami.created_at', strtotime(Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd'))]);
+        }
+
+        if ($this->toDate) {
+            $query->andWhere(['<', 'ami.created_at', (strtotime(Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')) + 86400)]);
+        }
+
+        $query->andWhere(['ami.account_id' => $this->account_id]);
+
+        $query->orderBy(['created_at' => SORT_ASC]);
+
+        return $query;
+
+    }
+
 }
