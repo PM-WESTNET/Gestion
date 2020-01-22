@@ -141,7 +141,6 @@ class AccountMovementSearch extends AccountMovement {
             $this->date = $this->toDate;
         }
 
-
         $status_account = $this->statusAccount();
         Yii::$app->db->createCommand('set @partial_balance := ' . $status_account['balance'] . ';')->execute();
 
