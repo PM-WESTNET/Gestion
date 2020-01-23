@@ -532,7 +532,7 @@ class AccountMovementSearch extends AccountMovement {
         if ($this->fromDate) {
             Yii::$app->db->createCommand('set @init_balance := 0')->execute();
             $initBalanceQuery = (new Query())
-                ->select(['@init_balance := IF(ami.debit > 0, (@init_balance + ami.debit),(@init_balance - ami.credit)) as init_balance'])
+                ->select(['@init_balance := @init_balance + (coalesce(ami.debit,0) - coalesce(ami.credit,0)) as init_balance'])
                 ->from('account_movement_item ami')
                 ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id')
                 ->andWhere(['ami.account_id' => $this->account_id])
@@ -549,7 +549,7 @@ class AccountMovementSearch extends AccountMovement {
 
         $query = (new Query())
             ->select(['ami.account_movement_id', 'ami.debit', 'ami.credit', 'ami.status', 'am.description',
-                '@balance := IF(ami.debit > 0, (@balance + ami.debit),(@balance - ami.credit)) as balance',
+                '@balance := @balance + (coalesce(ami.debit,0) - coalesce(ami.credit, 0)) as balance',
                 'am.date'
             ])
             ->from('account_movement_item ami')
