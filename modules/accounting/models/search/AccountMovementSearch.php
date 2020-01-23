@@ -527,7 +527,24 @@ class AccountMovementSearch extends AccountMovement {
     {
         $this->load($params);
 
-        Yii::$app->db->createCommand('set @balance := 0')->execute();
+        $initBalance = 0;
+        //Si viene el filtro de fechas calculamos el saldo inicial
+        if ($this->fromDate) {
+            Yii::$app->db->createCommand('set @init_balance := 0')->execute();
+            $initBalanceQuery = (new Query())
+                ->select(['@init_balance := IF(ami.debit > 0, (@init_balance + ami.debit),(@init_balance - ami.credit)) as init_balance'])
+                ->from('account_movement_item ami')
+                ->andWhere(['ami.account_id' => $this->account_id])
+                ->andWhere(['<', 'ami.created_at', (strtotime(Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')))])
+                ->orderBy(['created_at' => SORT_ASC]);
+
+            $initBalanceResult = $initBalanceQuery->all();
+            if (!empty($initBalanceResult)) {
+                $initBalance = end($initBalanceResult)['init_balance'];
+            }
+        }
+
+        Yii::$app->db->createCommand('set @balance := '.$initBalance)->execute();
 
         $query = (new Query())
             ->select(['ami.account_movement_id', 'ami.debit', 'ami.credit', 'ami.status', 'am.description',
