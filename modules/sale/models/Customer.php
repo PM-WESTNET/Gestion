@@ -122,7 +122,7 @@ class Customer extends ActiveRecord {
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname', 'phone2', 'phone3'],'required', 'on' => 'insert'],
+            [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
@@ -447,8 +447,6 @@ class Customer extends ActiveRecord {
                 if (count($phone_characters) == 1) {
                     $this->addError('phone3', Yii::t('app','Invalid Phone'));
                 }
-            } elseif (isset($this->oldAttributes['phone3']) && !empty($this->oldAttributes['phone3'])) {
-                $this->addError('phone3', Yii::t('app', 'Cell Phone 2 can`t be empty'));
             }
 
 
