@@ -48,10 +48,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'dataProvider' => $dataProvider,
             'columns' => [
                 [
-                    'attribute' => 'created_at',
+                    'attribute' => 'date',
                     'label' => Yii::t('app', 'Date'),
                     'value' => function ($model) {
-                        return Yii::$app->formatter->asDate($model['created_at'], 'dd-MM-yyyy');
+                        return Yii::$app->formatter->asDate($model['date'], 'dd-MM-yyyy');
                     },
                     'format' => 'raw'
                 ],

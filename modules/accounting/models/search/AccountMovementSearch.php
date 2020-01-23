@@ -534,9 +534,10 @@ class AccountMovementSearch extends AccountMovement {
             $initBalanceQuery = (new Query())
                 ->select(['@init_balance := IF(ami.debit > 0, (@init_balance + ami.debit),(@init_balance - ami.credit)) as init_balance'])
                 ->from('account_movement_item ami')
+                ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id')
                 ->andWhere(['ami.account_id' => $this->account_id])
-                ->andWhere(['<', 'ami.created_at', (strtotime(Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')))])
-                ->orderBy(['created_at' => SORT_ASC]);
+                ->andWhere(['<', 'am.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')])
+                ->orderBy(['am.date' => SORT_ASC, 'am.time' => SORT_ASC]);
 
             $initBalanceResult = $initBalanceQuery->all();
             if (!empty($initBalanceResult)) {
@@ -549,22 +550,22 @@ class AccountMovementSearch extends AccountMovement {
         $query = (new Query())
             ->select(['ami.account_movement_id', 'ami.debit', 'ami.credit', 'ami.status', 'am.description',
                 '@balance := IF(ami.debit > 0, (@balance + ami.debit),(@balance - ami.credit)) as balance',
-                'ami.created_at'
+                'am.date'
             ])
             ->from('account_movement_item ami')
             ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id');
 
         if ($this->fromDate) {
-            $query->andWhere(['>=', 'ami.created_at', strtotime(Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd'))]);
+            $query->andWhere(['>=', 'am.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
         }
 
         if ($this->toDate) {
-            $query->andWhere(['<', 'ami.created_at', (strtotime(Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')) + 86400)]);
+            $query->andWhere(['<=', 'am.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
         }
 
         $query->andWhere(['ami.account_id' => $this->account_id]);
 
-        $query->orderBy(['created_at' => SORT_ASC]);
+        $query->orderBy(['am.date' => SORT_ASC, 'am.time' => SORT_ASC]);
 
         return $query;
 
