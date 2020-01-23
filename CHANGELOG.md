@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file.
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
- 
+ - Celular 2 no requerido [GES-788]
  
   ## [2020.01.22.1]
   ### Agregado
