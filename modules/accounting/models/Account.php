@@ -15,6 +15,7 @@ use yii\db\ActiveRecord;
  * @property string $code
  * @property integer $lft
  * @property integer $rgt
+ * @property string $status
  *
  * @property Account $parentAccount
  * @property Account[] $accounts
@@ -22,6 +23,10 @@ use yii\db\ActiveRecord;
  */
 class Account extends \app\components\db\ActiveRecord
 {
+
+    const ENABLED_STATUS = 'enabled';
+    const DISABLED_STATUS = 'disabled';
+
     private $old_parent_account_id;
 
     /**
@@ -58,7 +63,7 @@ class Account extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
+            [['name', 'status'], 'required'],
             [['parent_account_id', 'is_usable', 'lft', 'rgt'], 'integer'],
             [['parentAccount'], 'safe'],
             [['name'], 'string', 'max' => 150],
@@ -82,6 +87,7 @@ class Account extends \app\components\db\ActiveRecord
             'accountConfigs' => Yii::t('accounting', 'Account Configs'),
             'accountConfigs0' => Yii::t('accounting', 'Account Configs'),
             'accountMovements' => Yii::t('accounting', 'Account Movements'),
+            'status' => Yii::t('app', 'Status')
         ];
     }    
 
@@ -171,6 +177,7 @@ class Account extends \app\components\db\ActiveRecord
             ->select(["node.account_id", "node.parent_account_id", "node.code", "CONCAT( REPEAT('&nbsp;&nbsp;', COUNT(parent.name) - 1), node.name ) as name", "(COUNT(parent.name) - 1) AS level", "node.lft", "node.rgt"])
             ->from(['account AS node'])
             ->innerJoin(['account AS parent'], 'node.lft BETWEEN parent.lft AND parent.rgt' )
+            ->andWhere(['node.status' => self::ENABLED_STATUS])
             ->andFilterWhere(['=', 'parent.account_id',$parent])
             ->groupBy(['node.name', 'node.parent_account_id'])
             ->orderBy('node.lft')->all();

@@ -33,6 +33,11 @@ $this->title = ($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'U
 
     <?= $form->field($model, 'name')->textInput(['maxlength' => 150]) ?>
 
+    <?php echo $form->field($model, 'status')->dropDownList([
+        Account::ENABLED_STATUS => Yii::t('app', 'Active'),
+        Account::DISABLED_STATUS => Yii::t('app', 'Disabled'),
+    ]) ?>
+
     <?= $form->field($model, 'is_usable')->checkbox() ?>
 
     <div class="form-group">

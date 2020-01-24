@@ -34,6 +34,16 @@ $this->title = $model->name;
             ],
             'name',
             'code',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    if ($model->status === \app\modules\accounting\models\Account::ENABLED_STATUS){
+                        return Yii::t('app', 'Active');
+                    }
+
+                    return Yii::t('app', 'Disabled');
+                }
+            ],
             'is_usable:boolean',
         ],
     ]) ?>
