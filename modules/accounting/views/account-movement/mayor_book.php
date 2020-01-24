@@ -69,11 +69,11 @@ $this->params['breadcrumbs'][] = $this->title;
                     'label' => Yii::t('app', 'Credit'),
                     'format' => 'currency'
                 ],
-                [
-                    'attribute' => 'balance',
-                    'label' => Yii::t('app', 'Balance'),
-                    'format' => 'currency'
-                ],
+//                [
+//                    'attribute' => 'balance',
+//                    'label' => Yii::t('app', 'Balance'),
+//                    'format' => 'currency'
+//                ],
 
                 [
                     'class' => \app\components\grid\ActionColumn::class,
@@ -93,6 +93,36 @@ $this->params['breadcrumbs'][] = $this->title;
         ])
 
     ?>
+
+    <?php $totals = $totalQuery->all() ?>
+
+<!--    --><?php //var_dump($totals); die();?>
+    <br>
+    <div class="row">
+        <div class="col-lg-3" style="border: 1px solid rgba(190,190,190,0.87); color: #FFFFFF;">
+            <h4>
+                Para dar alto
+            </h4>
+        </div>
+        <div class="col-lg-3" style="border: 1px solid rgba(190,190,190,0.87)">
+            <h4>
+                <?php echo Yii::t('accounting', 'Debit')?>:
+                <?php echo Yii::$app->formatter->asCurrency($totals[0]['debit'])?>
+            </h4>
+        </div>
+        <div class="col-lg-3" style="border: 1px solid rgba(190,190,190,0.87)">
+            <h4>
+                <?php echo Yii::t('accounting', 'Credit')?>:
+                <?php echo Yii::$app->formatter->asCurrency($totals[0]['credit'])?>
+            </h4>
+        </div>
+        <div class="col-lg-3" style="border: 1px solid rgba(190,190,190,0.87)">
+            <h4>
+                <?php echo Yii::t('app', 'Balance')?>:
+                <?php echo Yii::$app->formatter->asCurrency(($totals[0]['debit'] - $totals[0]['credit']))?>
+            </h4>
+        </div>
+    </div>
 
 </div>
 

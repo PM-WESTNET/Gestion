@@ -567,7 +567,13 @@ class AccountMovementSearch extends AccountMovement {
 
         $query->orderBy(['am.date' => SORT_ASC, 'am.time' => SORT_ASC]);
 
-        return $query;
+        $totalQuery = clone $query;
+        $totalQuery->select(['SUM(ami.debit) as debit', 'SUM(ami.credit) as credit']);
+
+        return [
+            'query' => $query,
+            'totalQuery' => $totalQuery
+        ];
 
     }
 

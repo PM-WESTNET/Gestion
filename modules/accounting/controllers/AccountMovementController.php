@@ -523,10 +523,17 @@ class AccountMovementController extends Controller
         $search = new AccountMovementSearch();
         $search->account_id = $account->account_id;
 
-        $dataProvider = new ActiveDataProvider(['query' => $search->searchMayorBook(Yii::$app->request->getQueryParams()), 'pagination' => false]);
+        $result = $search->searchMayorBook(Yii::$app->request->getQueryParams());
+
+        $dataProvider = new ActiveDataProvider(['query' => $result['query'], 'pagination' => false]);
 
 
-        return $this->render('mayor_book', ['dataProvider' => $dataProvider, 'account' => $account, 'search' => $search]);
+        return $this->render('mayor_book', [
+            'dataProvider' => $dataProvider,
+            'account' => $account,
+            'search' => $search,
+            'totalQuery' => $result['totalQuery']
+        ]);
 
     }
 
