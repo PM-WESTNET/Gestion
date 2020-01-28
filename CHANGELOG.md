@@ -27,6 +27,10 @@ All notable changes to this project will be documented in this file.
  - Celular 2 no requerido [GES-788]
  - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos
  
+  ## [2020.01.28.0]
+  ### Agregado
+  - Libro Mayor [GES-783]
+  
   ## [2020.01.22.1]
   ### Agregado
   - Reporte de clientes actualizados [GES-764]
