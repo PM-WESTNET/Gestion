@@ -1,21 +1,21 @@
 <?php
 
-namespace app\modules\provider\models;
+namespace app\modules\employee\models;
 
 use app\modules\sale\models\TaxRate;
 use Yii;
 
 /**
- * This is the model class for table "provider_bill_has_tax_rate".
+ * This is the model class for table "employee_bill_has_tax_rate".
  *
- * @property integer $provider_bill_id
+ * @property integer $employee_bill_id
  * @property integer $tax_rate_id
  * @property double $amount
  *
- * @property ProviderBill $providerBill
+ * @property EmployeeBill $employeeBill
  * @property TaxRate $taxRate
  */
-class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
+class EmployeeBillHasTaxRate extends \app\components\db\ActiveRecord
 {
 
 
@@ -24,7 +24,7 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'provider_bill_has_tax_rate';
+        return 'employee_bill_has_tax_rate';
     }
     
     /**
@@ -64,10 +64,10 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['provider_bill_id', 'tax_rate_id', 'amount'], 'required'],
-            [['provider_bill_id', 'tax_rate_id'], 'integer'],
+            [['employee_bill_id', 'tax_rate_id', 'amount'], 'required'],
+            [['employee_bill_id', 'tax_rate_id'], 'integer'],
             [['amount'], 'number'],
-            [['providerBill', 'taxRate', 'net'], 'safe']
+            [['employeeBill', 'taxRate', 'net'], 'safe']
         ];
     }
 
@@ -77,10 +77,10 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'provider_bill_id' => Yii::t('app', 'Provider Bill'),
+            'employee_bill_id' => Yii::t('app', 'Employee Bill'),
             'tax_rate_id' => Yii::t('app', 'Tax Rate'),
             'amount' => Yii::t('app', 'Amount'),
-            'providerBill' => Yii::t('app', 'Provider Bill'),
+            'employeeBill' => Yii::t('app', 'Employee Bill'),
             'taxRate' => Yii::t('app', 'Tax Rate'),
             'net' => Yii::t('app', 'Net')
         ];
@@ -90,9 +90,9 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderBill()
+    public function getEmployeeBill()
     {
-        return $this->hasOne(ProviderBill::className(), ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasOne(EmployeeBill::className(), ['employee_bill_id' => 'employee_bill_id']);
     }
 
     /**
@@ -115,7 +115,7 @@ class ProviderBillHasTaxRate extends \app\components\db\ActiveRecord
     
     /**
      * @brief Deletes weak relations for this model on delete
-     * Weak relations: ProviderBill, TaxRate.
+     * Weak relations: EmployeeBill, TaxRate.
      */
     protected function unlinkWeakRelations(){
     }

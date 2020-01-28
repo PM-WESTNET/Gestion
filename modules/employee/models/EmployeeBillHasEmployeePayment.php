@@ -1,20 +1,20 @@
 <?php
 
-namespace app\modules\provider\models;
+namespace app\modules\employee\models;
 
 use Yii;
 
 /**
- * This is the model class for table "provider_bill_has_provider_payment".
+ * This is the model class for table "employee_bill_has_employee_payment".
  *
- * @property integer $provider_bill_id
- * @property integer $provider_payment_id
+ * @property integer $employee_bill_id
+ * @property integer $employee_payment_id
  * @property double $amount
  *
- * @property ProviderBill $providerBill
- * @property ProviderPayment $providerPayment
+ * @property EmployeeBill $employeeBill
+ * @property EmployeePayment $employeePayment
  */
-class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
+class EmployeeBillHasEmployeePayment extends \app\components\db\ActiveRecord
 {
 
 
@@ -23,7 +23,7 @@ class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'provider_bill_has_provider_payment';
+        return 'employee_bill_has_employee_payment';
     }
     
     /**
@@ -63,10 +63,10 @@ class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['provider_bill_id', 'provider_payment_id'], 'required'],
-            [['provider_bill_id', 'provider_payment_id'], 'integer'],
+            [['employee_bill_id', 'employee_payment_id'], 'required'],
+            [['employee_bill_id', 'employee_payment_id'], 'integer'],
             [['amount'], 'number'],
-            [['providerBill', 'providerPayment'], 'safe']
+            [['employeeBill', 'employeePayment'], 'safe']
         ];
     }
 
@@ -76,11 +76,11 @@ class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'provider_bill_id' => Yii::t('app', 'Provider Bill ID'),
-            'provider_payment_id' => Yii::t('app', 'Provider Payment ID'),
+            'employee_bill_id' => Yii::t('app', 'Employee Bill ID'),
+            'employee_payment_id' => Yii::t('app', 'Employee Payment ID'),
             'amount' => Yii::t('app', 'Amount'),
-            'providerBill' => Yii::t('app', 'ProviderBill'),
-            'providerPayment' => Yii::t('app', 'ProviderPayment'),
+            'employeeBill' => Yii::t('app', 'EmployeeBill'),
+            'employeePayment' => Yii::t('app', 'EmployeePayment'),
         ];
     }    
 
@@ -88,17 +88,17 @@ class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderBill()
+    public function getEmployeeBill()
     {
-        return $this->hasOne(ProviderBill::className(), ['provider_bill_id' => 'provider_bill_id']);
+        return $this->hasOne(EmployeeBill::className(), ['employee_bill_id' => 'employee_bill_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderPayment()
+    public function getEmployeePayment()
     {
-        return $this->hasOne(ProviderPayment::className(), ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasOne(EmployeePayment::className(), ['employee_payment_id' => 'employee_payment_id']);
     }
     
     /**
@@ -112,7 +112,7 @@ class ProviderBillHasProviderPayment extends \app\components\db\ActiveRecord
     
     /**
      * @brief Deletes weak relations for this model on delete
-     * Weak relations: ProviderBill, ProviderPayment.
+     * Weak relations: EmployeeBill, EmployeePayment.
      */
     protected function unlinkWeakRelations(){
     }

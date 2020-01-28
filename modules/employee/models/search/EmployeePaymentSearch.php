@@ -1,19 +1,19 @@
 <?php
 
-namespace app\modules\provider\models\search;
+namespace app\modules\employee\models\search;
 
 use app\components\db\BigDataProvider;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\provider\models\ProviderPayment;
+use app\modules\employee\models\EmployeePayment;
 use yii\db\Expression;
 use yii\db\Query;
 
 /**
- * ProviderPaymentSearch represents the model behind the search form about `app\modules\provider\models\ProviderPayment`.
+ * EmployeePaymentSearch represents the model behind the search form about `app\modules\employee\models\EmployeePayment`.
  */
-class ProviderPaymentSearch extends ProviderPayment
+class EmployeePaymentSearch extends EmployeePayment
 {
     public $start_date;
     public $finish_date;
@@ -29,7 +29,7 @@ class ProviderPaymentSearch extends ProviderPayment
     public function rules()
     {
         return [
-            [['provider_payment_id', 'provider_id'], 'integer'],
+            [['employee_payment_id', 'employee_id'], 'integer'],
             [['date', 'description', 'start_date', 'finish_date', 'bill_type_id', 'company_id', 'number', 'type'], 'safe'],
             [['type'], 'string'],
             [['type'], 'default', 'value'=>'all'],
@@ -57,7 +57,7 @@ class ProviderPaymentSearch extends ProviderPayment
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -65,20 +65,20 @@ class ProviderPaymentSearch extends ProviderPayment
      */
     public function search($params)
     {
-        $query = (new Query())->from('provider_payment')
+        $query = (new Query())->from('employee_payment')
         ;
 
-        $dataProvider = new ActiveDataProvider([
+        $dataEmployee = new ActiveDataProvider([
             'query' => $query,
         ]);
 
         $query
-            ->leftJoin('provider_payment_item ppi', 'provider_payment.provider_payment_id = ppi.provider_payment_id')
+            ->leftJoin('employee_payment_item ppi', 'employee_payment.employee_payment_id = ppi.employee_payment_id')
             ->leftJoin('payment_method pm', 'ppi.payment_method_id = pm.payment_method_id')
-            ->leftJoin('provider_bill_has_provider_payment pbhpp', 'pbhpp.provider_payment_id = provider_payment.provider_payment_id')
-            ->leftJoin('provider_bill pb', 'pb.provider_bill_id= pbhpp.provider_bill_id')
-            ->leftJoin('company comp', 'comp.company_id= provider_payment.company_id')
-            ->leftJoin('provider pro', 'provider_payment.provider_id = pro.provider_id')
+            ->leftJoin('employee_bill_has_employee_payment pbhpp', 'pbhpp.employee_payment_id = employee_payment.employee_payment_id')
+            ->leftJoin('employee_bill pb', 'pb.employee_bill_id= pbhpp.employee_bill_id')
+            ->leftJoin('company comp', 'comp.company_id= employee_payment.company_id')
+            ->leftJoin('employee pro', 'employee_payment.employee_id = pro.employee_id')
         ;
 
         $this->load($params);
@@ -94,45 +94,45 @@ class ProviderPaymentSearch extends ProviderPayment
         $this->filterByBillType($query);
 
         $query->andFilterWhere([
-            'provider_payment.provider_id' => $this->provider_id,
+            'employee_payment.employee_id' => $this->employee_id,
         ]);
 
         $query->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like', 'description', $this->description])
-            ->andFilterWhere(['>=', 'provider_payment.amount', $this->amount]);
+            ->andFilterWhere(['>=', 'employee_payment.amount', $this->amount]);
 
         $query->select([
-            'provider_payment.provider_payment_id', 'pro.provider_id', 'pro.name as provider', 'provider_payment.date',
-            'provider_payment.status',
-            new Expression('GROUP_CONCAT(pm.name) as payment_method'), 'provider_payment.amount'
+            'employee_payment.employee_payment_id', 'pro.employee_id', 'pro.name as employee', 'employee_payment.date',
+            'employee_payment.status',
+            new Expression('GROUP_CONCAT(pm.name) as payment_method'), 'employee_payment.amount'
         ]);
         $query->groupBy([
-            'provider_payment.provider_payment_id',
-            'provider_payment.status',
-            'pro.provider_id',
+            'employee_payment.employee_payment_id',
+            'employee_payment.status',
+            'pro.employee_id',
             'pro.name',
-            'provider_payment.date',
-            'provider_payment.amount']
+            'employee_payment.date',
+            'employee_payment.amount']
         );
 
-        $query->orderBy(['provider_payment.date' => SORT_DESC]);
+        $query->orderBy(['employee_payment.date' => SORT_DESC]);
 
         return $dataProvider;
     }
     
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
-     * @return ActiveDataProvider
+     * @return ActiveDataEmployee
      */
     public function total()
     {
-        $query = ProviderPayment::find();
+        $query = EmployeePayment::find();
 
         $query->where([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
 
         $amount = $query->sum('amount');
@@ -143,11 +143,11 @@ class ProviderPaymentSearch extends ProviderPayment
 
     private function filterByDates($query){
         if (!empty($this->start_date)) {
-            $query->andFilterWhere(['>=','provider_payment.date', Yii::$app->formatter->asDate($this->start_date, 'yyyy-MM-dd')]);
+            $query->andFilterWhere(['>=','employee_payment.date', Yii::$app->formatter->asDate($this->start_date, 'yyyy-MM-dd')]);
         }
 
         if (!empty($this->finish_date)) {
-            $query->andFilterWhere(['<=','provider_payment.date', Yii::$app->formatter->asDate($this->finish_date, 'yyyy-MM-dd')]);
+            $query->andFilterWhere(['<=','employee_payment.date', Yii::$app->formatter->asDate($this->finish_date, 'yyyy-MM-dd')]);
         }
     }
 
@@ -165,22 +165,22 @@ class ProviderPaymentSearch extends ProviderPayment
     }
 
 
-    public function searchAccount($provider_id, $params)
+    public function searchAccount($employee_id, $params)
     {
         // Armo la consulta para las facturas de proveedor
         // Siempre filtro por proveedor y los multiplicadores
         $qBill = (new Query())
-            ->select([new Expression('0 as orden'), 'bt.name AS type', 'p.provider_id',
-                'p.name AS name', 'pb.provider_bill_id', new Expression('0 AS provider_payment_id'),
+            ->select([new Expression('0 as orden'), 'bt.name AS type', 'p.employee_id',
+                'p.name AS name', 'pb.employee_bill_id', new Expression('0 AS employee_payment_id'),
                 'pb.date', 'pb.number', new Expression('(pb.total * bt.multiplier) AS total'),
                 'pb.status', new Expression("'' AS payment_method"), new Expression("'' AS bill_numbers"),
                 'c.name AS company_name'])
-            ->from('provider_bill pb')
+            ->from('employee_bill pb')
             ->leftJoin('bill_type bt', 'pb.bill_type_id = bt.bill_type_id')
-            ->leftJoin('provider p', 'pb.provider_id = p.provider_id' )
+            ->leftJoin('employee p', 'pb.employee_id = p.employee_id' )
             ->leftJoin('company c', 'pb.company_id = c.company_id' )
             ->where([
-                'pb.provider_id'=>$provider_id,
+                'pb.employee_id'=>$employee_id,
                 'bt.multiplier' => [-1,1]
             ]);
         ;
@@ -188,23 +188,23 @@ class ProviderPaymentSearch extends ProviderPayment
         // Armo las consulta de pagos, y le incluyo todas las facturas que paga
         $qPayment = (new Query())
             ->select([
-                new Expression('1 as orden'), new Expression("'Payment' AS type"), 'p.provider_id',
-                'p.name AS name', new Expression('0 AS provider_bill_id'), 'pp.provider_payment_id',
+                new Expression('1 as orden'), new Expression("'Payment' AS type"), 'p.employee_id',
+                'p.name AS name', new Expression('0 AS employee_bill_id'), 'pp.employee_payment_id',
                 'pp.date', new Expression('0 as number'), 'pp.amount as total',
                 'pp.status', 'GROUP_CONCAT(DISTINCT pm.name) AS payment_method',
-                new Expression("(select GROUP_CONCAT(DISTINCT coalesce(pb.number, concat('Nro.: ', pb.provider_bill_id))) AS bill_numbers from provider_bill_has_provider_payment pbhpp
-      LEFT JOIN provider_bill pb ON pbhpp.provider_bill_id = pb.provider_bill_id where pbhpp.provider_payment_id = pp.provider_payment_id) AS bill_numbers"),
+                new Expression("(select GROUP_CONCAT(DISTINCT coalesce(pb.number, concat('Nro.: ', pb.employee_bill_id))) AS bill_numbers from employee_bill_has_employee_payment pbhpp
+      LEFT JOIN employee_bill pb ON pbhpp.employee_bill_id = pb.employee_bill_id where pbhpp.employee_payment_id = pp.employee_payment_id) AS bill_numbers"),
                 'c.name as company_name'
             ])
-            ->from('provider_payment pp')
-            ->leftJoin('provider p', 'pp.provider_id = p.provider_id')
-            ->leftJoin('provider_payment_item pmi', 'pp.provider_payment_id = pmi.provider_payment_id')
+            ->from('employee_payment pp')
+            ->leftJoin('employee p', 'pp.employee_id = p.employee_id')
+            ->leftJoin('employee_payment_item pmi', 'pp.employee_payment_id = pmi.employee_payment_id')
             ->leftJoin('payment_method pm', 'pmi.payment_method_id = pm.payment_method_id')
             ->leftJoin('company c', 'pp.company_id = c.company_id')
             ->where([
-                'pp.provider_id'=>$provider_id,
+                'pp.employee_id'=>$employee_id,
             ])
-            ->groupBy(['p.provider_id', 'p.name', 'pp.provider_payment_id', 'pp.amount', 'pp.date', 'pp.status', 'c.name'])
+            ->groupBy(['p.employee_id', 'p.name', 'pp.employee_payment_id', 'pp.amount', 'pp.date', 'pp.status', 'c.name'])
         ;
 
         $this->load($params);
@@ -233,39 +233,39 @@ class ProviderPaymentSearch extends ProviderPayment
         // Saco los saldos, redondeo a 2 decimales para que no traiga muchos 00000000000
         $qSaldo = (new Query())
             ->select(['b.*',
-                new Expression('(@saldo := @saldo + if(b.provider_bill_id > 0, b.total, -b.total)) AS saldo2'),
+                new Expression('(@saldo := @saldo + if(b.employee_bill_id > 0, b.total, -b.total)) AS saldo2'),
                 new Expression('(SELECT round(@saldo,2)) AS saldo')
             ])
             ->from(['b' => $qBill])
             ->orderBy(['date'=>SORT_ASC, 'orden'=> SORT_ASC])
         ;
 
-        // Al fin.... termino de armar la consulta que se ejecuta. Hace join a provider para que no traiga
+        // Al fin.... termino de armar la consulta que se ejecuta. Hace join a employee para que no traiga
         // nada que no tenga proveedor
         $query = (new Query())
             ->select([ new Expression('SQL_CALC_FOUND_ROWS b.type'),
-                'b.provider_id', 'b.name', 'b.provider_bill_id', 'b.provider_payment_id',
+                'b.employee_id', 'b.name', 'b.employee_bill_id', 'b.employee_payment_id',
                 'b.date', 'b.number', 'b.total', 'b.status', 'b.payment_method', 'b.bill_numbers',
                 'b.company_name', 'b.saldo'
             ])
-            ->from('provider as p')
-            ->leftJoin(['b'=> $qSaldo], 'b.provider_id = p.provider_id')
-            ->where('b.provider_id IS NOT NULL')->orderBy('b.date DESC');
+            ->from('employee as p')
+            ->leftJoin(['b'=> $qSaldo], 'b.employee_id = p.employee_id')
+            ->where('b.employee_id IS NOT NULL')->orderBy('b.date DESC');
 
         // Busco el saldo inicial
         $saldoInicial = (new Query())
             ->select([new Expression('sum(total * multiplier)')])
-            ->from('provider_bill')
-            ->leftJoin('bill_type', 'provider_bill.bill_type_id = bill_type.bill_type_id')
-            ->where(['provider_id'=>$provider_id])
+            ->from('employee_bill')
+            ->leftJoin('bill_type', 'employee_bill.bill_type_id = bill_type.bill_type_id')
+            ->where(['employee_id'=>$employee_id])
             ->andWhere(['<', 'date', $desde])
             ->scalar()
         ;
 
         $saldoInicial -= (new Query())
             ->select([new Expression('sum(amount)')])
-            ->from('provider_payment')
-            ->where(['provider_id'=>$provider_id])
+            ->from('employee_payment')
+            ->where(['employee_id'=>$employee_id])
             ->andWhere(['<', 'date', $desde ])
             ->scalar()
         ;
@@ -283,25 +283,25 @@ class ProviderPaymentSearch extends ProviderPayment
         return $dataProvider;
     }
 
-    public function searchPendingBills($provider_id, $provider_payment_id)
+    public function searchPendingBills($employee_id, $employee_payment_id)
     {
         $query = (new Query())
-            ->select(['pb.provider_bill_id', 'pb.date','pb.type','pb.number','pb.net','pb.taxes',
-                        'pb.total','pb.provider_id','bt.multiplier','bt.name AS bill_type','pp.amount',
-                        new Expression('sum(coalesce(if(pbpy.provider_payment_id = '.$provider_payment_id.', pbpy.amount, 0), 0)) AS total_amount'),
+            ->select(['pb.employee_bill_id', 'pb.date','pb.type','pb.number','pb.net','pb.taxes',
+                        'pb.total','pb.employee_id','bt.multiplier','bt.name AS bill_type','pp.amount',
+                        new Expression('sum(coalesce(if(pbpy.employee_payment_id = '.$employee_payment_id.', pbpy.amount, 0), 0)) AS total_amount'),
                     new Expression('pb.total - sum(coalesce(pbpy.amount, 0)) AS balance')
             ] )
-            ->from('provider_bill pb')
-            ->leftJoin('provider_bill_has_provider_payment pbpy', 'pb.provider_bill_id = pbpy.provider_bill_id')
-            ->leftJoin('provider_payment pp', 'pbpy.provider_payment_id = pp.provider_payment_id')
+            ->from('employee_bill pb')
+            ->leftJoin('employee_bill_has_employee_payment pbpy', 'pb.employee_bill_id = pbpy.employee_bill_id')
+            ->leftJoin('employee_payment pp', 'pbpy.employee_payment_id = pp.employee_payment_id')
             ->leftJoin('bill_type bt', 'pb.bill_type_id = bt.bill_type_id')
-            ->where(['pb.provider_id'=>$provider_id])
-            ->groupBy(['pb.provider_bill_id', 'pb.date', 'pb.type', 'pb.number', 'pb.net', 'pb.taxes', 'pb.total',
-                        'pb.provider_id', 'bt.multiplier', 'bt.name'])
-            ->having('sum(coalesce(pbpy.amount, 0)) < pb.total or sum(coalesce(pbpy.amount, 0)) = 0 or sum(coalesce(if(pbpy.provider_payment_id = '.$provider_payment_id.', pbpy.amount, 0), 0)) > 0')
+            ->where(['pb.employee_id'=>$employee_id])
+            ->groupBy(['pb.employee_bill_id', 'pb.date', 'pb.type', 'pb.number', 'pb.net', 'pb.taxes', 'pb.total',
+                        'pb.employee_id', 'bt.multiplier', 'bt.name'])
+            ->having('sum(coalesce(pbpy.amount, 0)) < pb.total or sum(coalesce(pbpy.amount, 0)) = 0 or sum(coalesce(if(pbpy.employee_payment_id = '.$employee_payment_id.', pbpy.amount, 0), 0)) > 0')
         ;
 
-        return $query->orderBy(['provider_bill_id'=>SORT_ASC]);
+        return $query->orderBy(['employee_bill_id'=>SORT_ASC]);
 
     }
 }

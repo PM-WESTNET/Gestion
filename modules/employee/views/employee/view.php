@@ -4,22 +4,22 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\Provider */
+/* @var $model app\modules\employee\models\Employee */
 
 $this->title = $model->name;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Providers'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employees'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-view">
+<div class="employee-view">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
             <?= Html::a('<span class="glyphicon glyphicon-eye-open"></span> '.Yii::t('app','Account'),
-                        ['provider/current-account','id'=>$model->provider_id], ['class'=>'btn btn-default']) ?>
-            <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_id], ['class' => 'btn btn-primary']) ?>
-            <?php if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_id], [
+                        ['employee/current-account','id'=>$model->employee_id], ['class'=>'btn btn-default']) ?>
+            <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->employee_id], ['class' => 'btn btn-primary']) ?>
+            <?php if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->employee_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
     $attributes = [
-        'provider_id',
+        'employee_id',
         'name',
         'business_name',
         [

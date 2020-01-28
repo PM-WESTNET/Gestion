@@ -1,17 +1,17 @@
 <?php
 
-namespace app\modules\provider\models\search;
+namespace app\modules\employee\models\search;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\provider\models\ProviderBill;
+use app\modules\employee\models\EmployeeBill;
 use yii\db\Expression;
 
 /**
- * ProviderBillSearch represents the model behind the search form about `app\modules\provider\models\ProviderBill`.
+ * EmployeeBillSearch represents the model behind the search form about `app\modules\employee\models\EmployeeBill`.
  */
-class ProviderBillSearch extends ProviderBill
+class EmployeeBillSearch extends EmployeeBill
 {
 
     public $start_date;
@@ -25,7 +25,7 @@ class ProviderBillSearch extends ProviderBill
     public function rules()
     {
         return [
-            [['provider_bill_id', 'provider_id'], 'integer'],
+            [['employee_bill_id', 'employee_id'], 'integer'],
             [['date', 'type', 'number', 'description', 'start_date', 'finish_date', 'company_id', 'bill_type_id'], 'safe'],
             [['net', 'taxes', 'total'], 'number'],
         ];
@@ -49,7 +49,7 @@ class ProviderBillSearch extends ProviderBill
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -57,13 +57,13 @@ class ProviderBillSearch extends ProviderBill
      */
     public function search($params)
     {
-        $query = ProviderBill::find();
+        $query = EmployeeBill::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 
-        $query->leftJoin('company comp', 'comp.company_id = provider_bill.company_id');
+        $query->leftJoin('company comp', 'comp.company_id = employee_bill.company_id');
 
         $this->load($params);
 
@@ -77,7 +77,7 @@ class ProviderBillSearch extends ProviderBill
         $this->filterByDates($query);
 
         $query->andFilterWhere([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
             'bill_type_id'=>$this->bill_type_id,
         ]);
 
@@ -119,14 +119,14 @@ class ProviderBillSearch extends ProviderBill
             ]
         ]);
 
-        $query->addSelect(['provider_bill.*', 'sum(coalesce(pbhpp.amount, 0)) as amountApplied'])
+        $query->addSelect(['employee_bill.*', 'sum(coalesce(pbhpp.amount, 0)) as amountApplied'])
             ->joinWith(['billType'])
-            ->leftJoin('provider_bill_has_provider_payment pbhpp', 'provider_bill.provider_bill_id = pbhpp.provider_bill_id')
+            ->leftJoin('employee_bill_has_employee_payment pbhpp', 'employee_bill.employee_bill_id = pbhpp.employee_bill_id')
             ->where(['or',
-                ['pbhpp.provider_bill_id' => null],
+                ['pbhpp.employee_bill_id' => null],
                 ['and',
-                    ['not', ['pbhpp.provider_bill_id' => null]],
-                    ['<','pbhpp.amount', (new Expression('`provider_bill`.`total`'))]
+                    ['not', ['pbhpp.employee_bill_id' => null]],
+                    ['<','pbhpp.amount', (new Expression('`employee_bill`.`total`'))]
                 ]
             ])
             ;
@@ -138,17 +138,17 @@ class ProviderBillSearch extends ProviderBill
             return $dataProvider;
         }
 
-        if($this->provider_id) {
+        if($this->employee_id) {
             $query->andFilterWhere([
-                'provider_bill.provider_id' => $this->provider_id,
+                'employee_bill.employee_id' => $this->employee_id,
                 'bill_type.multiplier' => [-1, 1]
             ]);
         }
 
         //Fix pagination
-        $query->groupBy('provider_bill.provider_bill_id');
-        $query->having("sum(coalesce(pbhpp.amount, 0)) < provider_bill.total");
+        $query->groupBy('employee_bill.employee_bill_id');
+        $query->having("sum(coalesce(pbhpp.amount, 0)) < employee_bill.total");
 
-        return $dataProvider;
+        return $dataEmployee;
     }
 }

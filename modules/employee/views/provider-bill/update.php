@@ -3,16 +3,16 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderBill */
+/* @var $model app\modules\employee\models\EmployeeBill */
 
 $this->title = Yii::t('app', 'Update {modelClass}: ', [
-    'modelClass' => Yii::t('app', 'Provider Bill'),
-]) . ' ' . $model->provider->name;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Provider Bills'), 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->provider_bill_id, 'url' => ['view', 'id' => $model->provider_bill_id]];
+    'modelClass' => Yii::t('app', 'Employee Bill'),
+]) . ' ' . $model->employee->name;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employee Bills'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => $model->employee_bill_id, 'url' => ['view', 'id' => $model->employee_bill_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 ?>
-<div class="provider-bill-update">
+<div class="employee-bill-update">
 
     <div class="row">
     	<div class="col-sm-12">

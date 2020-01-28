@@ -1,16 +1,16 @@
 <?php
 
-namespace app\modules\provider\models\search;
+namespace app\modules\employee\models\search;
 
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\provider\models\Provider;
+use app\modules\employee\models\Employee;
 
 /**
- * ProviderSearch represents the model behind the search form about `app\modules\provider\models\Provider`.
+ * EmployeeSearch represents the model behind the search form about `app\modules\employee\models\Employee`.
  */
-class AccountSearch extends Provider
+class AccountSearch extends Employee
 {
     
     public $fromDate;
@@ -22,7 +22,7 @@ class AccountSearch extends Provider
     public function rules()
     {
         return [
-            [['provider_id'], 'integer'],
+            [['employee_id'], 'integer'],
             [['fromDate', 'toDate'], 'safe'],
         ];
     }
@@ -44,11 +44,11 @@ class AccountSearch extends Provider
         $payments = $this->searchPayment($params)->getModels();
         
         foreach($bills as $bill){
-            $account[strtotime($bill->date) + $bill->provider_bill_id] = $bill;
+            $account[strtotime($bill->date) + $bill->employee_bill_id] = $bill;
         }
         
         foreach($payments as $payment){
-            $account[strtotime($payment->date) + $payment->provider_payment_id] = $payment;
+            $account[strtotime($payment->date) + $payment->employee_payment_id] = $payment;
         }
         
         return $account;
@@ -56,7 +56,7 @@ class AccountSearch extends Provider
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -64,7 +64,7 @@ class AccountSearch extends Provider
      */
     public function searchBill($params)
     {
-        $query = ProviderBillSearch::find();
+        $query = EmployeeBillSearch::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -83,7 +83,7 @@ class AccountSearch extends Provider
         }
 
         $query->andFilterWhere([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
         
 //        $query->andWhere("date >= '$this->fromDate'");
@@ -94,7 +94,7 @@ class AccountSearch extends Provider
     
     public function searchPayment($params)
     {
-        $query = ProviderPaymentSearch::find();
+        $query = EmployeePaymentSearch::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -113,7 +113,7 @@ class AccountSearch extends Provider
         }
 
         $query->andFilterWhere([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
         
     //    $query->andWhere("date >= '$this->fromDate'");

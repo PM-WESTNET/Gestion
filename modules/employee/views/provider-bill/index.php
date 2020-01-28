@@ -7,27 +7,27 @@ use kartik\export\ExportMenu;
 use yii\bootstrap\Collapse;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
+/* @var $searchModel app\modules\employee\models\search\EmployeeBillSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Provider Bills') . ( $provider !== null ?  " - " . $provider->name : "" ) ;
+$this->title = Yii::t('app', 'Employee Bills') . ( $employee !== null ?  " - " . $employee->name : "" ) ;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-bill-index">
+<div class="employee-bill-index">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
         <p>
             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create {modelClass}', [
-                    'modelClass' => Yii::t('app','Provider Bill'),
-                ]), ['provider-bill/create', 'provider'=>($provider ? $provider->provider_id : null )], ['class' => 'btn btn-success']) ?>
+                    'modelClass' => Yii::t('app','Employee Bill'),
+                ]), ['employee-bill/create', 'employee'=>($employee ? $employee->employee_id : null )], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
     <?= Collapse::widget([
             'items' => [
                 [
                     'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
-                    'content' => $this->render('_provider-bill-filters', ['model' => $searchModel]),
+                    'content' => $this->render('_employee-bill-filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
             ],
@@ -38,11 +38,11 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
     <?php
     $columns[] = ['class' => 'yii\grid\SerialColumn'];
-    if ($provider===null) {
+    if ($employee===null) {
         $columns[] = [
-            'header' => Yii::t('app','Provider'),
-            'attribute' => 'provider_id',
-            'value' => function($model){ return $model->provider->name; },
+            'header' => Yii::t('app','Employee'),
+            'attribute' => 'employee_id',
+            'value' => function($model){ return $model->employee->name; },
         ];
     }
     $columns[] = [
@@ -69,18 +69,18 @@ $this->params['breadcrumbs'][] = $this->title;
         'buttons' => [
             'update' => function ($url, $model, $key) {
                 if ($model->getUpdatable()) {
-                    return '<a href="' . Url::toRoute(['provider-bill/update', 'id' => $model->provider_bill_id]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>';
+                    return '<a href="' . Url::toRoute(['employee-bill/update', 'id' => $model->employee_bill_id]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>';
                 }
             },
             'view' => function ($url, $model, $key) {
-                return '<a href="'.Url::toRoute(['provider-bill/view', 'id'=>$model->provider_bill_id]).'" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>';
+                return '<a href="'.Url::toRoute(['employee-bill/view', 'id'=>$model->employee_bill_id]).'" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>';
             },
             'delete' => function ($url, $model, $key) {
-                return (!$model->deletable ? "" : '<a href="'.Url::toRoute(['provider-bill/delete', 'id'=>$model->provider_bill_id]).
+                return (!$model->deletable ? "" : '<a href="'.Url::toRoute(['employee-bill/delete', 'id'=>$model->employee_bill_id]).
                 '" title="'.Yii::t('app','Delete').'" data-confirm="'.Yii::t('yii','Are you sure you want to delete this item?').'" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>');
             },
             'items' => function ($url, $model, $key) {
-                return '<a href="#" data-id="'.$model->provider_bill_id.'"class="btn btn-warning btn-view-items"><span class="glyphicon glyphicon-list"></span></a>';
+                return '<a href="#" data-id="'.$model->employee_bill_id.'"class="btn btn-warning btn-view-items"><span class="glyphicon glyphicon-list"></span></a>';
             },
         ]
     ];
@@ -119,17 +119,17 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
 <script>
-    var ProviderBill = new function(){
+    var EmployeeBill = new function(){
         this.init = function() {
             $(document).off('click', '.btn-view-items').on('click', '.btn-view-items', function(evt){
                 evt.preventDefault();
-                ProviderBill.viewItems($(this).data('id'));
+                EmployeeBill.viewItems($(this).data('id'));
             });
         }
 
         this.viewItems = function(id){
             $.ajax({
-                url: '<?php echo Url::toRoute(['provider-bill/list-items']) ?>&provider_bill_id='+id,
+                url: '<?php echo Url::toRoute(['employee-bill/list-items']) ?>&employee_bill_id='+id,
             }).done(function(data){
                 $("#modal-items .modal-body").html(data);
                 $("#modal-items").modal('show');
@@ -137,4 +137,4 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     }
 </script>
-<?php $this->registerJs('ProviderBill.init()') ?>
+<?php $this->registerJs('EmployeeBill.init()') ?>

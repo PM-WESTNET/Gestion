@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\provider\models;
+namespace app\modules\employee\models;
 
 use app\components\helpers\CuitValidator;
 use app\modules\accounting\models\Account;
@@ -8,9 +8,9 @@ use app\modules\sale\models\TaxCondition;
 use Yii;
 
 /**
- * This is the model class for table "provider".
+ * This is the model class for table "employee".
  *
- * @property integer $provider_id
+ * @property integer $employee_id
  * @property string $name
  * @property string $business_name
  * @property string $tax_identification
@@ -22,17 +22,17 @@ use Yii;
  *
  * @property TaxCondition $taxCondition
  * @property Account $account
- * @property ProviderBill[] $providerBills
- * @property ProviderPayment[] $providerPayments
+ * @property ProviderBill[] $employeeBills
+ * @property ProviderPayment[] $employeePayments
  */
-class Provider extends \app\components\db\ActiveRecord
+class Employee extends \app\components\db\ActiveRecord
 {
     /**
      * @inheritdoc
      */
     public static function tableName()
     {
-        return 'provider';
+        return 'employee';
     }
 
     /**
@@ -63,7 +63,7 @@ class Provider extends \app\components\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'provider_id' => Yii::t('app', 'Provider'),
+            'employee_id' => Yii::t('app', 'Employee'),
             'name' => Yii::t('app', 'Name'),
             'business_name' => Yii::t('app', 'Business Name'),
             'tax_identification' => Yii::t('app', 'Tax Identification'),
@@ -81,17 +81,17 @@ class Provider extends \app\components\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderBills()
+    public function getEmployeeBills()
     {
-        return $this->hasMany(ProviderBill::className(), ['provider_id' => 'provider_id']);
+        return $this->hasMany(EmployeeBill::className(), ['employee_id' => 'employee_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderPayments()
+    public function getEmployeePayments()
     {
-        return $this->hasMany(ProviderPayment::className(), ['provider_id' => 'provider_id']);
+        return $this->hasMany(EmployeePayment::className(), ['employee_id' => 'employee_id']);
     }
 
     /**
@@ -112,10 +112,10 @@ class Provider extends \app\components\db\ActiveRecord
 
     public function getDeletable(){
     
-        if($this->getProviderBills()->exists()){
+        if($this->getEmployeeBills()->exists()){
             return false;
         }
-        if($this->getProviderPayments()->exists()){
+        if($this->getEmployeePayments()->exists()){
             return false;
         }
         return true;

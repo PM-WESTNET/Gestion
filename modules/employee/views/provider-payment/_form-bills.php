@@ -2,8 +2,8 @@
 <?php
 
 use app\modules\accounting\models\Account;
-use app\modules\provider\models\ProviderBill;
-use app\modules\provider\models\ProviderBillHasProviderPayment;
+use app\modules\employee\models\EmployeeBill;
+use app\modules\employee\models\EmployeeBillHasEmployeePayment;
 use app\modules\sale\models\Tax;
 use app\modules\sale\models\TaxRate;
 use kartik\widgets\Select2;
@@ -25,10 +25,10 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin([
             'id'=>'bill-add-form',
-            'action' => ['add-bill', 'id' => $model->provider_payment_id],
+            'action' => ['add-bill', 'id' => $model->employee_payment_id],
             'options'=> ['onsubmit' =>'return false']
         ]); ?>
-        <input type="hidden" name="ProviderBillHasProviderPayment[provider_payment_id]" value="<?=$model->provider_payment_id?>"/>
+        <input type="hidden" name="EmployeeBillHasEmployeePayment[employee_payment_id]" value="<?=$model->employee_payment_id?>"/>
 
         <div class="row">
             <div class="col-sm-12 col-md-12">
@@ -44,7 +44,7 @@ use yii\widgets\ActiveForm;
                             'class' => 'yii\grid\CheckboxColumn',
                             'checkboxOptions' => function($model, $key, $index, $column) {
                                 return [
-                                    'value'     => $model['provider_bill_id'],
+                                    'value'     => $model['employee_bill_id'],
                                     'checked'   => ($model['total_amount']>0 ? true : false ),
                                     'class'     => 'checkbill'
                                 ];

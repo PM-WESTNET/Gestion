@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\provider\models;
+namespace app\modules\employee\models;
 
 use app\components\db\ActiveRecord;
 use app\modules\accounting\components\AccountMovementRelationManager;
@@ -14,29 +14,29 @@ use yii\base\InvalidParamException;
 use yii\helpers\ArrayHelper;
 
 /**
- * This is the model class for table "provider_payment".
+ * This is the model class for table "employee_payment".
  *
- * @property integer $provider_payment_id
+ * @property integer $employee_payment_id
  * @property string $date
  * @property double $amount
  * @property string $description
- * @property integer $provider_id
+ * @property integer $employee_id
  * @property integer $timestamp
  * @property double $balance
  * @property string $status;
  * @property integer $partner_distribution_model_id
  * @property integer $company_id
  *
- * @property ProviderBillHasProviderPayment[] $providerBillHasProviderPayments
- * @property ProviderBill[] $providerBills
- * @property Provider $provider
+ * @property EmployeeBillHasEmployeePayment[] $employeeBillHasEmployeePayments
+ * @property EmployeeBill[] $employeeBills
+ * @property Employee $employee
  * @property PartnerDistributionModel $partnerDistributionModel
- * @property ProviderPaymentItem[] $providerPaymentItems
+ * @property EmployeePaymentItem[] $employeePaymentItems
  */
-class ProviderPayment extends \app\components\companies\ActiveRecord implements CountableInterface
+class EmployeePayment extends \app\components\companies\ActiveRecord implements CountableInterface
 {
 
-    private $_providerBills;
+    private $_employeeBills;
     private $_oldBills;
 
     const STATUS_CREATED = 'created';
@@ -54,7 +54,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public static function tableName()
     {
-        return 'provider_payment';
+        return 'employee_payment';
     }
 
     public function behaviors()
@@ -80,12 +80,12 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         $statuses = ['created', 'closed', 'tabulated', 'conciled'];
 
         return [
-            [['date', 'providerBills', 'provider', 'company_id'], 'safe'],
+            [['date', 'employeeBills', 'employee', 'company_id'], 'safe'],
             [['date'], 'date'],
             [['balance'], 'number'],
             [['status'], 'string'],
-            [['provider_id'], 'required'],
-            [['provider_id', 'timestamp','partner_distribution_model_id', 'company_id'], 'integer'],
+            [['employee_id'], 'required'],
+            [['employee_id', 'timestamp','partner_distribution_model_id', 'company_id'], 'integer'],
             [['description'], 'string', 'max' => 255],
             [['status'], 'in', 'range' => $statuses],
             [['status'], 'default', 'value' => 'created'],
@@ -98,18 +98,18 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     public function attributeLabels()
     {
         return [
-            'provider_payment_id' => Yii::t('app', 'Provider Payment'),
+            'employee_payment_id' => Yii::t('app', 'Employee Payment'),
             'date' => Yii::t('app', 'Date'),
             'amount' => Yii::t('app', 'Amount'),
             'description' => Yii::t('app', 'Observations') . ' ' . Yii::t('app', '(optional)'),
-            'provider_id' => Yii::t('app', 'Provider'),
+            'employee_id' => Yii::t('app', 'Employee'),
             'timestamp' => Yii::t('app', 'Timestamp'),
             'balance' => Yii::t('app', 'Balance'),
-            'providerBillHasProviderPayments' => Yii::t('app', 'ProviderBillHasProviderPayments'),
-            'providerBills' => Yii::t('app', 'Provider Bills'),
-            'provider' => Yii::t('app', 'Provider'),
+            'employeeBillHasEmployeePayments' => Yii::t('app', 'EmployeeBillHasEmployeePayments'),
+            'employeeBills' => Yii::t('app', 'Employee Bills'),
+            'employee' => Yii::t('app', 'Employee'),
             'status' => Yii::t('app', 'Status'),
-            'provider_bill_id' => Yii::t('app', 'Provider Bill'),
+            'employee_bill_id' => Yii::t('app', 'Employee Bill'),
             'partnerDistributionModel' => Yii::t('partner', 'Partner Distribution Model'),
         ];
     }    
@@ -118,26 +118,26 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderBillHasProviderPayments()
+    public function getEmployeeBillHasEmployeePayments()
     {
-        return $this->hasMany(ProviderBillHasProviderPayment::class, ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(EmployeeBillHasEmployeePayment::class, ['employee_payment_id' => 'employee_payment_id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderBills()
+    public function getEmployeeBills()
     {
-        return $this->hasMany(ProviderBill::class, ['provider_bill_id' => 'provider_bill_id'])->viaTable('provider_bill_has_provider_payment', ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(EmployeeBill::class, ['employee_bill_id' => 'employee_bill_id'])->viaTable('employee_bill_has_employee_payment', ['employee_payment_id' => 'employee_payment_id']);
     }
 
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProvider()
+    public function getEmployee()
     {
-        return $this->hasOne(Provider::className(), ['provider_id' => 'provider_id']);
+        return $this->hasOne(Employee::className(), ['employee_id' => 'employee_id']);
     }
 
     /**
@@ -148,31 +148,31 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         return $this->hasOne(PartnerDistributionModel::className(), ['partner_distribution_model_id' => 'partner_distribution_model_id']);
     }
 
-    public function getProviderPaymentItems()
+    public function getEmployeePaymentItems()
     {
-        return $this->hasMany(ProviderPaymentItem::className(), ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasMany(EmployeePaymentItem::className(), ['employee_payment_id' => 'employee_payment_id']);
     }
 
     /**
-     * @brief Sets ProviderBills relation on helper variable and handles events insert and update
+     * @brief Sets EmployeeBills relation on helper variable and handles events insert and update
      */
-    public function setProviderBills($providerBills){
+    public function setEmployeeBills($employeeBills){
 
-        if(empty($providerBills)){
-            $providerBills = [];
+        if(empty($employeeBills)){
+            $employeeBills = [];
         }
 
-        $this->_providerBills = $providerBills;
+        $this->_employeeBills = $employeeBills;
 
-        $saveProviderBills = function($event){
-            $this->unlinkAll('providerBills', true);
+        $saveEmployeeBills = function($event){
+            $this->unlinkAll('employeeBills', true);
 
-            foreach ($this->_providerBills as $id) {
-                $this->link('providerBills', ProviderBill::findOne($id));
+            foreach ($this->_employeeBills as $id) {
+                $this->link('employeeBills', EmployeeBill::findOne($id));
             }
         };
-        $this->on(self::EVENT_AFTER_INSERT, $saveProviderBills);
-        $this->on(self::EVENT_AFTER_UPDATE, $saveProviderBills);
+        $this->on(self::EVENT_AFTER_INSERT, $saveEmployeeBills);
+        $this->on(self::EVENT_AFTER_UPDATE, $saveEmployeeBills);
     }
     
     /**
@@ -225,7 +225,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
             return false;
         }
 
-        if($this->status == ProviderPayment::STATUS_CLOSED) {
+        if($this->status == EmployeePayment::STATUS_CLOSED) {
             return false;
         }
 
@@ -241,7 +241,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         if(!AccountMovementRelationManager::isDeletable($this)) {
             return false;
         }
-        if($this->status == ProviderPayment::STATUS_CLOSED) {
+        if($this->status == EmployeePayment::STATUS_CLOSED) {
             return false;
         }
 
@@ -250,11 +250,11 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     
     /**
      * @brief Deletes weak relations for this model on delete
-     * Weak relations: ProviderBillHasProviderPayments, ProviderBills, PaymentMethod, Provider.
+     * Weak relations: EmployeeBillHasEmployeePayments, EmployeeBills, PaymentMethod, Employee.
      */
     protected function unlinkWeakRelations(){
-        $this->unlinkAll('providerBills', true);
-        $this->unlinkAll('providerPaymentItems', true);
+        $this->unlinkAll('employeeBills', true);
+        $this->unlinkAll('employeePaymentItems', true);
         if($this->status != 'created' ){
             AccountMovementRelationManager::delete($this);
         }
@@ -267,7 +267,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     {
         if (parent::beforeDelete()) {
             if($this->getDeletable()){
-                $this->_oldBills = $this->getProviderBills()->all();
+                $this->_oldBills = $this->getEmployeeBills()->all();
                 /*if ($this->paycheck != null) {
                     $this->paycheck->revertState();
                 }*/
@@ -304,7 +304,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function updateBalanceBill($update=true)
     {
-        $bills = ($update ? $this->getProviderBills()->all() : $this->_oldBills );
+        $bills = ($update ? $this->getEmployeeBills()->all() : $this->_oldBills );
         foreach ($bills as $bill) {
             $bill->calculateTotal();
         }
@@ -314,17 +314,17 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      * Agrega una factura
      *
      * @param $bill
-     * @return ProviderBillHasProviderPayment|null|static
+     * @return EmployeeBillHasEmployeePayment|null|static
      */
     public function addBill($bill)
     {
-        if($bill['provider_bill_id']){
-            $pay = ProviderBillHasProviderPayment::findOne([
-                'provider_bill_id'=> $bill['provider_bill_id'],
-                'provider_payment_id'=> $bill['provider_payment_id']]);
+        if($bill['employee_bill_id']){
+            $pay = EmployeeBillHasEmployeePayment::findOne([
+                'employee_bill_id'=> $bill['employee_bill_id'],
+                'employee_payment_id'=> $bill['employee_payment_id']]);
         }
         if(empty($pay)) {
-            $pay = new ProviderBillHasProviderPayment();
+            $pay = new EmployeeBillHasEmployeePayment();
         }
         $pay->setAttributes($bill);
         $pay->save();
@@ -336,17 +336,17 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      * Agrega una factura
      *
      * @param $bill
-     * @return ProviderBillItem|null|static
+     * @return EmployeeBillItem|null|static
      */
     public function addItem($item)
     {
-        if($item['provider_payment_item_id']){
-            $itemDb = ProviderPaymentItem::findOne([
-                'provider_payment_item_id'=> $item['provider_payment_item_id']]);
+        if($item['employee_payment_item_id']){
+            $itemDb = EmployeePaymentItem::findOne([
+                'employee_payment_item_id'=> $item['employee_payment_item_id']]);
         }
 
         if(empty($itemDb)) {
-            $itemDb = new ProviderPaymentItem();
+            $itemDb = new EmployeePaymentItem();
             $itemDb->setAttributes($item);
             $itemDb->validate();
             $itemDb->save();
@@ -368,7 +368,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     public function calculateTotal()
     {
         $amount = 0;
-        foreach( $this->getProviderPaymentItems()->all()  as $item) {
+        foreach( $this->getEmployeePaymentItems()->all()  as $item) {
             $amount += $item->amount;
         }
         $this->updateAttributes(['amount'=>round($amount,2)]);
@@ -383,8 +383,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     public function calculateTotalPayed()
     {
         $amount = 0;
-        foreach( $this->getProviderBillHasProviderPayments()->all()  as $bill) {
-            $amount += ($bill->amount * $bill->providerBill->billType->multiplier);
+        foreach( $this->getEmployeeBillHasEmployeePayments()->all()  as $bill) {
+            $amount += ($bill->amount * $bill->employeeBill->billType->multiplier);
         }
         return round($amount,2);
     }
@@ -403,7 +403,7 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     {
         $paymentMethods = [];
         $paymentMethods['total'][] = $this->amount;
-        foreach($this->providerPaymentItems as $item) {
+        foreach($this->employeePaymentItems as $item) {
             $paymentMethods[$item->payment_method_id][] = $item->amount;
         }
         return $paymentMethods;
@@ -423,10 +423,10 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     {
         $modelDate = new \DateTime(($newDate ? $newDate : $this->date ));
         error_log( $modelDate->format('Y-m-d') . " <= " );
-        /** @var ProviderPaymentItem $providerPaymentItem */
-        foreach ($this->providerPaymentItems as $providerPaymentItem) {
-            if($providerPaymentItem->moneyBoxAccount->small_box)  {
-                $date = new \DateTime($providerPaymentItem->moneyBoxAccount->daily_box_last_closing_date);
+        /** @var EmployeePaymentItem $employeePaymentItem */
+        foreach ($this->employeePaymentItems as $employeePaymentItem) {
+            if($employeePaymentItem->moneyBoxAccount->small_box)  {
+                $date = new \DateTime($employeePaymentItem->moneyBoxAccount->daily_box_last_closing_date);
 
                 if($modelDate <= $date ) {
                     return false;
@@ -439,22 +439,22 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
 
 
     /**
-     *  Aplica un provider_payment a una o mas provider_bills, de la mas vieja a la mas nueva
+     *  Aplica un employee_payment a una o mas employee_bills, de la mas vieja a la mas nueva
      * y actualiza el valor de balance
      */
-    public function associateProviderBills($provider_bill_ids)
+    public function associateEmployeeBills($employee_bill_ids)
     {
         $return = true;
-        if (count($provider_bill_ids) > 0) {
-            $provider_bills = ProviderBill::find()->where(['provider_bill_id' => $provider_bill_ids])->orderBy(['date' => SORT_ASC])->all();
+        if (count($employee_bill_ids) > 0) {
+            $employee_bills = EmployeeBill::find()->where(['employee_bill_id' => $employee_bill_ids])->orderBy(['date' => SORT_ASC])->all();
             $saldo = $this->balance;
-            foreach ($provider_bills as $provider_bill) {
+            foreach ($employee_bills as $employee_bill) {
                 if ($saldo > 0) {
-                    $debt = $provider_bill->getDebt();
+                    $debt = $employee_bill->getDebt();
 
-                    $pbhpp = new ProviderBillHasProviderPayment([
-                        'provider_bill_id' => $provider_bill->provider_bill_id,
-                        'provider_payment_id' => $this->provider_payment_id
+                    $pbhpp = new EmployeeBillHasEmployeePayment([
+                        'employee_bill_id' => $employee_bill->employee_bill_id,
+                        'employee_payment_id' => $this->employee_payment_id
                     ]);
 
                     if ($saldo >= $debt) {
@@ -478,12 +478,12 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     }
 
     /**
-     * Elimina la asociación con provider bills
+     * Elimina la asociación con employee bills
      */
-    public function disassociateProviderBills($provider_bill_ids)
+    public function disassociateEmployeeBills($employee_bill_ids)
     {
-        if (count($provider_bill_ids) > 0) {
-            ProviderBillHasProviderPayment::deleteAll(['provider_payment_id' => $this->provider_payment_id, 'provider_bill_id' => $provider_bill_ids]);
+        if (count($employee_bill_ids) > 0) {
+            EmployeeBillHasEmployeePayment::deleteAll(['employee_payment_id' => $this->employee_payment_id, 'employee_bill_id' => $employee_bill_ids]);
             //Actualizamos el balance
             $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
             return true;

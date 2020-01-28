@@ -3,7 +3,7 @@
 use yii\grid\GridView;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
+/* @var $searchModel app\modules\employee\models\search\EmployeeBillSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 ?>
 <div class="row">

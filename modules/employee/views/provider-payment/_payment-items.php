@@ -4,12 +4,12 @@
 use app\modules\accounting\models\Account;
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
-use app\modules\provider\models\ProviderBill;
-use app\modules\provider\models\ProviderBillHasProviderPayment;
+use app\modules\employee\models\EmployeeBill;
+use app\modules\employee\models\EmployeeBillHasEmployeePayment;
 use app\modules\sale\models\Tax;
 use app\modules\sale\models\TaxRate;
 use kartik\widgets\Select2;
-use yii\data\ActiveDataProvider;
+use yii\data\ActiveDataEmployee;
 use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -29,19 +29,19 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
 //    Pjax::begin(['id' => 'new_item']);
     $form = ActiveForm::begin([
-        'id'=>'provider-payment-item',
-        'action' => ['add-item', 'id' => $model->provider_payment_id],
+        'id'=>'employee-payment-item',
+        'action' => ['add-item', 'id' => $model->employee_payment_id],
         'options' => ['data-pjax' => true, 'onsubmit'=>'return false;' ]
     ])?>
 
-    <input type="hidden" name="ProviderPaymentItem[provider_payment_id]" value="<?=$model->provider_payment_id?>"/>
+    <input type="hidden" name="EmployeePaymentItem[employee_payment_id]" value="<?=$model->employee_payment_id?>"/>
 
     <div class="row">
         <div class="col-sm-9 col-md-3">
             <div class="form-group">
                 <label><?= $item->getAttributeLabel('paymentMethod'); ?></label>
                 <?php $methods = PaymentMethod::getPaymentMethods( !empty($model->customer_id)) ?>
-                <select name="ProviderPaymentItem[payment_method_id]" id="payment_method_id" class="form-control">
+                <select name="EmployeePaymentItem[payment_method_id]" id="payment_method_id" class="form-control">
                     <?php
                     foreach ($methods as $method) {
                         echo '<option value="'.$method->payment_method_id.'" '.($method->payment_method_id==$item->payment_method_id ? "selected" : "" ).
@@ -106,7 +106,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
     ?>
 
 <script>
-    var ProviderPaymentItem = new function(){
+    var EmployeePaymentItem = new function(){
         this.init = function() {
             $(document).off("change", "#payment_method_id")
                 .on("change", "#payment_method_id", function(){
@@ -142,7 +142,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                         var keycode = (event.keyCode ? event.keyCode : event.which);
                         var self = event.target;
                         if (keycode == 13) {
-                            ProviderPayment.addItem();
+                            EmployeePayment.addItem();
                         }
                 });
 
@@ -186,4 +186,4 @@ $payment_method_cash = Config::getValue('payment_method_cash');
     }
 
 </script>
-<?php $this->registerJs('ProviderPaymentItem.init();'); ?>
+<?php $this->registerJs('EmployeePaymentItem.init();'); ?>

@@ -4,23 +4,23 @@ use app\modules\paycheck\models\Paycheck;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\helpers\Url;
-use app\modules\provider\models\ProviderPayment;
+use app\modules\employee\models\EmployeePayment;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\provider\models\search\ProviderPaymentSearch */
+/* @var $searchModel app\modules\employee\models\search\EmployeePaymentSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Provider Payments') . ( $provider!==null ?  " - " . $provider->name : "" ) ;
+$this->title = Yii::t('app', 'Employee Payments') . ( $employee!==null ?  " - " . $employee->name : "" ) ;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-payment-index">
+<div class="employee-payment-index">
     
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
         <p>
             <?= Html::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create {modelClass}', [
-                    'modelClass' => Yii::t('app','Provider Payment'),
-                ]), ['provider-payment/create', 'provider'=>($provider ? $provider->provider_id : null )], ['class' => 'btn btn-success']) ?>
+                    'modelClass' => Yii::t('app','Employee Payment'),
+                ]), ['employee-payment/create', 'employee'=>($employee ? $employee->employee_id : null )], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
 <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'items' => [
                 [
                     'label' => $item,
-                    'content' => $this->render('_provider-payment-filters', ['model' => $searchModel]),
+                    'content' => $this->render('_employee-payment-filters', ['model' => $searchModel]),
                     'encode' => false,
                 ],
             ],
@@ -45,10 +45,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
         $columns[] = ['class' => 'yii\grid\SerialColumn'];
-        if ($provider===null) {
+        if ($employee===null) {
             $columns[] = [
-                'header' => Yii::t('app','Provider'),
-                'value' => function($model){  return $model['provider']; },
+                'header' => Yii::t('app','Employee'),
+                'value' => function($model){  return $model['employee']; },
             ];
         }
 
@@ -73,21 +73,21 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template'=>'{view} {update} {delete}',
                 'buttons'=>[
                     'view' => function ($url, $model, $key) {
-                        return '<a href="'.Url::toRoute(['provider-payment/view', 'id'=>$model['provider_payment_id']]).'" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>';
+                        return '<a href="'.Url::toRoute(['employee-payment/view', 'id'=>$model['employee_payment_id']]).'" class="btn btn-view"><span class="glyphicon glyphicon-eye-open"></span></a>';
 
                     },
                     'update' => function ($url, $model, $key) {
-                        $provider_payment = ProviderPayment::findOne($model['provider_payment_id']);
-                        if ($provider_payment->getUpdatable()) {
-                            return ($model['status'] != 'created' ? '' : '<a href="' . Url::toRoute(['provider-payment/update', 'id' => $model['provider_payment_id']]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
+                        $employee_payment = EmployeePayment::findOne($model['employee_payment_id']);
+                        if ($employee_payment->getUpdatable()) {
+                            return ($model['status'] != 'created' ? '' : '<a href="' . Url::toRoute(['employee-payment/update', 'id' => $model['employee_payment_id']]) . '" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span></a>');
                         }
 
                     },
                     'delete' => function ($url, $model, $key) {
-                        $payment = ProviderPayment::findOne($model['provider_payment_id']);
+                        $payment = EmployeePayment::findOne($model['employee_payment_id']);
                         if($payment) {
                             if($payment->getDeletable()) {
-                                return '<a href="' . Url::toRoute(['provider-payment/delete', 'id' => $model['provider_payment_id']]) .
+                                return '<a href="' . Url::toRoute(['employee-payment/delete', 'id' => $model['employee_payment_id']]) .
                                     '" title="' . Yii::t('app', 'Delete') . '" data-confirm="' . Yii::t('yii', 'Are you sure you want to delete this item?') . '" data-method="post" data-pjax="0" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>';
                             }
                         }

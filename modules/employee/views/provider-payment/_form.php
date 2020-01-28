@@ -2,18 +2,18 @@
 
 use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
-use app\modules\provider\models\Provider;
-use app\modules\provider\models\ProviderBillHasProviderPayment;
+use app\modules\employee\models\Employee;
+use app\modules\employee\models\EmployeeBillHasEmployeePayment;
 use kartik\widgets\Select2;
-use yii\data\ActiveDataProvider;
+use yii\data\ActiveDataEmployee;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
-use \app\modules\provider\models\ProviderPaymentItem;
+use \app\modules\employee\models\EmployeePaymentItem;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderPayment */
+/* @var $model app\modules\employee\models\EmployeePayment */
 /* @var $form yii\widgets\ActiveForm */
 
 $payment_method_bank = Config::getValue('payment_method_bank');;
@@ -22,14 +22,14 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
 ?>
 
-<div class="provider-payment-form">
+<div class="employee-payment-form">
 
     <?php
-        $form = ActiveForm::begin(['id'=>'provider-payment-form']);
-        echo Html::hiddenInput('ProviderPayment[provider_payment_id]', $model->provider_payment_id, ['id'=>'provider_payment_id']);
+        $form = ActiveForm::begin(['id'=>'employee-payment-form']);
+        echo Html::hiddenInput('EmployeePayment[employee_payment_id]', $model->employee_payment_id, ['id'=>'employee_payment_id']);
     ?>
     
-    <?= Html::hiddenInput('ProviderPayment[status]', $model->status, ['id'=>'payment_status']) ?>
+    <?= Html::hiddenInput('EmployeePayment[status]', $model->status, ['id'=>'payment_status']) ?>
 
     <?= app\components\companies\CompanySelector::widget(['model'=>$model]); ?>
 
@@ -38,27 +38,27 @@ $payment_method_cash = Config::getValue('payment_method_cash');
     ?>
 
     
-    <div class="form-group<?= $model->hasErrors('provider_id') ? ' has-error' : '' ?>">
+    <div class="form-group<?= $model->hasErrors('employee_id') ? ' has-error' : '' ?>">
         <?php
-        if (!$model->provider) {
+        if (!$model->employee) {
             ?>
             <div class="input-group" style="z-index:0;">
-                <?= Html::label(Yii::t('app', "Provider"), ['provider_id']) ?>
+                <?= Html::label(Yii::t('app', "Employee"), ['employee_id']) ?>
                 <?=Select2::widget([
                     'model' => $model,
-                    'attribute' => 'provider_id',
-                    'data' => yii\helpers\ArrayHelper::map(Provider::find()->all(), 'provider_id', 'name' ),
+                    'attribute' => 'employee_id',
+                    'data' => yii\helpers\ArrayHelper::map(Employee::find()->all(), 'employee_id', 'name' ),
                     'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                     'pluginOptions' => [
                         'allowClear' => true
                     ]
                 ]);
-                echo Html::error($model, 'provider_id', ['class' => 'help-block']);
+                echo Html::error($model, 'employee_id', ['class' => 'help-block']);
                 ?>
             </div>
         <?php } else {
-            echo Html::activeLabel($model, 'provider') ;
-            echo '<div class="form-control filter dates hasDatepicker">'.$model->provider->name.'</div>';
+            echo Html::activeLabel($model, 'employee') ;
+            echo '<div class="form-control filter dates hasDatepicker">'.$model->employee->name.'</div>';
         } ?>
     </div>
 
@@ -77,7 +77,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                 'autocomplete' => "off"
             ],
             'clientOptions' => [
-                    'onSelect' => new \yii\web\JsExpression('function(dateText, inst) { return ProviderPayment.changeDate(dateText, inst) }')
+                    'onSelect' => new \yii\web\JsExpression('function(dateText, inst) { return EmployeePayment.changeDate(dateText, inst) }')
             ]
         ]);
         ?>
@@ -95,12 +95,12 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         </div>
         <div class="panel-body">
             <?php
-                echo $this->render('_payment-items', ['model'=>$model, 'item'=>new ProviderPaymentItem()]);
+                echo $this->render('_payment-items', ['model'=>$model, 'item'=>new EmployeePaymentItem()]);
                 // Listado de detalles
                 \yii\widgets\Pjax::begin(['id'=>'w_items']);
 
                 $dataProvider = new ActiveDataProvider([
-                    'query' => $model->getProviderPaymentItems()
+                    'query' => $model->getEmployeePaymentItems()
                 ]);
             ?>
             <div class="row">
@@ -130,7 +130,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                                     'delete'=>function ($url, $model, $key) {
                                         return Html::a('<span class="glyphicon glyphicon-trash"></span>', "#",
                                             [
-                                                'data-url' => yii\helpers\Url::toRoute(['provider-payment/delete-item', 'provider_payment_item_id'=>$key]),
+                                                'data-url' => yii\helpers\Url::toRoute(['employee-payment/delete-item', 'employee_payment_item_id'=>$key]),
                                                 'title' => Yii::t('yii', 'Delete'),
                                                 'data-confirms' => Yii::t('yii', 'Are you sure you want to delete this item?'),
                                                 'class' => 'payment-item-delete btn btn-danger'
@@ -159,7 +159,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
     </div>
         <?php
-            echo $this->render('_form-bills', ['model'=>$model,'dataProvider'=>$billDataProvider, 'pbp'=>new ProviderBillHasProviderPayment()]);
+            echo $this->render('_form-bills', ['model'=>$model,'dataProvider'=>$billDataProvider, 'pbp'=>new EmployeeBillHasEmployeePayment()]);
         ?>
     <?php
     }
@@ -172,43 +172,43 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         </a>
         <a id="savePayment" class="btn btn-success"><?= Yii::t('app',($model->isNewRecord ? 'Next' : 'Add Detail')); ?></a>
         <?php if(!$model->isNewRecord) {
-            echo Html::a(Yii::t('app', 'Save draft'),['view' , 'id' => $model->provider_payment_id], [
+            echo Html::a(Yii::t('app', 'Save draft'),['view' , 'id' => $model->employee_payment_id], [
                 'class' => 'btn btn-warning',
             ]);
         }?>
     </div>
-    <input type="hidden" id="provider_bill_amount" value="<?php echo $model->calculateTotalPayed()?>" />
+    <input type="hidden" id="employee_bill_amount" value="<?php echo $model->calculateTotalPayed()?>" />
     <input type="hidden" id="amount_total" value="<?php echo $model->amount?>" />
 </div>
 <script>
-    var ProviderPayment = new function() {
+    var EmployeePayment = new function() {
 
         this.init = function() {
 
             $(document).on("click", "#bill-add", function(){
-                ProviderPayment.addBill();
+                EmployeePayment.addBill();
             });
 
             $(document).off('click', '#item-add')
                 .on('click', '#item-add', function(){
-                    ProviderPayment.addItem();
+                    EmployeePayment.addItem();
                 });
             $(document).off('click', '.payment-item-delete')
                 .on('click', '.payment-item-delete', function(){
-                    ProviderPayment.removeItem(this);
+                    EmployeePayment.removeItem(this);
                 });
 
-            $(document).on("keyup", "#provider_bill_amount", function(){
-                ProviderPayment.validateAmount();
+            $(document).on("keyup", "#employee_bill_amount", function(){
+                EmployeePayment.validateAmount();
             });
 
             $(document).off("click", "#closePayment")
                 .on("click", "#closePayment", function(){
-                ProviderPayment.close();
+                EmployeePayment.close();
             });
             $(document).off("click", "#savePayment")
                 .on("click", "#savePayment", function(){
-                ProviderPayment.save();
+                EmployeePayment.save();
             });
 
             $(document).off('click', '.checkbill')
@@ -217,25 +217,25 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                 if($(this).is(':checked')) {
                     input.removeAttr('disabled');
                     input.val(input.data('max'));
-                    ProviderPayment.addBill(this);
+                    EmployeePayment.addBill(this);
                 } else {
                     input.attr('disabled', true);
                     input.val(0);
-                    ProviderPayment.removeBill(this);
+                    EmployeePayment.removeBill(this);
                 }
             });
 
             $(document).off('blur', '.total_amount')
                 .on('blur', '.total_amount', function(event){
                     event.stopPropagation();
-                    ProviderPayment.updateAmount(this);
+                    EmployeePayment.updateAmount(this);
             });
 
             $(document).off('keypress', '.total_amount')
                 .on('keypress', '.total_amount', function(e){
                     e.stopPropagation();
                     if((e.keyCode || e.which) == 13) {
-                        ProviderPayment.updateAmount(this);
+                        EmployeePayment.updateAmount(this);
                     }
 
                 });
@@ -243,30 +243,30 @@ $payment_method_cash = Config::getValue('payment_method_cash');
             $("#payment_method_id").trigger("change");
 
 
-            <?php if (Yii::$app->getModule('paycheck') && $model->provider_payment_id ) { ?>
+            <?php if (Yii::$app->getModule('paycheck') && $model->employee_payment_id ) { ?>
                 SearchPaycheck.onSelect = function (json){
-                    $("#providerpayment-amount").val(json.paycheck.amount);
+                    $("#employeepayment-amount").val(json.paycheck.amount);
                 }
             <?php } ?>
 
-            $(document).off('change', '#providerpayment-date').on('change', '#providerpayment-date', function(){
+            $(document).off('change', '#employeepayment-date').on('change', '#employeepayment-date', function(){
                 $('.ui-datepicker-current-day').click();
             });
         }
 
         this.save = function() {
-            $("#provider-payment-form").submit();
+            $("#employee-payment-form").submit();
         }
 
         this.close = function() {
             if (confirm('<?=Yii::t('app', 'Are you sure you want to close the Payment?' )?>')) {
-                $("#provider-payment-form").attr('action', "<?=Url::to(['/provider/provider-payment/close', 'id'=>$model->provider_payment_id])?>" );
-                $("#provider-payment-form").submit();
+                $("#employee-payment-form").attr('action', "<?=Url::to(['/employee/employee-payment/close', 'id'=>$model->employee_payment_id])?>" );
+                $("#employee-payment-form").submit();
             }
         }
 
         this.validateAmount = function() {
-            var billAmount  = parseFloat($("#provider_bill_amount").val());
+            var billAmount  = parseFloat($("#employee_bill_amount").val());
             var amountTotal = parseFloat($("#amount_total").val());
 
             $("#message").hide();
@@ -291,7 +291,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                     $(elem).val(max)
                     return false;
                 } else {
-                    ProviderPayment.addBill($(elem).closest('tr').find('.checkbill'));
+                    EmployeePayment.addBill($(elem).closest('tr').find('.checkbill'));
                 }
             }
         }
@@ -299,15 +299,15 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
         this.addBill = function(elem) {
             var data = {
-                'ProviderBillHasProviderPayment': {
-                    'provider_bill_id': $(elem).val(),
-                    'provider_payment_id': <?php echo ($model->provider_payment_id ? $model->provider_payment_id: "''" )  ?>,
+                'EmployeeBillHasEmployeePayment': {
+                    'employee_bill_id': $(elem).val(),
+                    'employee_payment_id': <?php echo ($model->employee_payment_id ? $model->employee_payment_id: "''" )  ?>,
                     'amount': $(elem).closest('tr').find('.total_amount').val()
                 }
             };
 
             $.ajax({
-                url: '<?=Url::to(['/provider/provider-payment/add-bill', 'id'=>$model->provider_payment_id])?>',
+                url: '<?=Url::to(['/employee/employee-payment/add-bill', 'id'=>$model->employee_payment_id])?>',
                 data: data,
                 dataType: 'json',
                 type: 'post'
@@ -315,7 +315,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
                 if(json.detail){
 
-                    ProviderPayment.update();
+                    EmployeePayment.update();
 
                 }else{
 
@@ -339,12 +339,12 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
             if(confirm('<?php echo Yii::t('app', 'You are sure to cancel the bill selection ?') ?>')){
                 $.ajax({
-                    url: '<?=Url::to(['/provider/provider-payment/delete-bill', 'provider_payment_id'=>$model->provider_payment_id])?>&provider_bill_id='+$elem.val(),
+                    url: '<?=Url::to(['/employee/employee-payment/delete-bill', 'employee_payment_id'=>$model->employee_payment_id])?>&employee_bill_id='+$elem.val(),
                     dataType: 'json',
                     type: 'post'
                 }).done(function(json){
                     if(json.status=='success'){
-                        ProviderPayment.update();
+                        EmployeePayment.update();
                     }else{
                     }
                 });
@@ -352,7 +352,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         }
 
         this.addItem = function() {
-            var $form = $("#provider-payment-item");
+            var $form = $("#employee-payment-item");
             var data = $form.serialize();
 
             $.ajax({
@@ -362,7 +362,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                 type: 'post'
             }).done(function(json){
                 if(json.status=='success'){
-                    ProviderPayment.update();
+                    EmployeePayment.update();
                 }else if(json.status=='error'){
                     //Importante:
                     //https://github.com/yiisoft/yii2/issues/5991 #7260
@@ -372,8 +372,8 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                         $('.field-paymentitem-'+error+' .help-block').text(json.errors[error]);
                     }
                 }else if(json.status=='error_account'){
-                    $('.field-providerpaymentitem-money_box_account_id').addClass('has-error');
-                    $('.field-providerpaymentitem-money_box_account_id .help-block').text(json.errors);
+                    $('.field-employeepaymentitem-money_box_account_id').addClass('has-error');
+                    $('.field-employeepaymentitem-money_box_account_id .help-block').text(json.errors);
                 }
             });
         }
@@ -388,7 +388,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                     type: 'post'
                 }).done(function(json){
                     if(json.status=='success'){
-                        ProviderPayment.update();
+                        EmployeePayment.update();
                     }else{
                     }
                 });
@@ -398,7 +398,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         this.update = function() {
             $('#item_amount').val('');
             $.ajax({
-                url: '<?=Url::to(['/provider/provider-payment/update', 'id'=>$model->provider_payment_id])?>',
+                url: '<?=Url::to(['/employee/employee-payment/update', 'id'=>$model->employee_payment_id])?>',
                 dataType: 'html',
                 type: 'post'
             }).done(function(html){
@@ -423,14 +423,14 @@ $payment_method_cash = Config::getValue('payment_method_cash');
         this.changeDate = function(dateText, inst) {
             if(inst.lastVal!="") {
                 if(!confirm("<?php echo Yii::t('app', 'Are you sure you want change the date?') ?>")) {
-                    $('#providerpayment-date').datepicker( "setDate", inst.lastVal );
+                    $('#employeepayment-date').datepicker( "setDate", inst.lastVal );
                 } else {
                     $.ajax({
                         method: 'POST',
-                        url: '<?php echo Url::to(['/provider/provider-payment/update-date']) ?>',
+                        url: '<?php echo Url::to(['/employee/employee-payment/update-date']) ?>',
                         data: {
-                            "provider_payment_id": $("#provider_payment_id").val(),
-                            "date": $("#providerpayment-date").val()
+                            "employee_payment_id": $("#employee_payment_id").val(),
+                            "date": $("#employeepayment-date").val()
                         },
                         dataType: 'json'
                     }).done(function(data){
@@ -439,7 +439,7 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                             if(data.date) {
                                 date = data.date;
                             }
-                            $('#providerpayment-date').datepicker( "setDate", date );
+                            $('#employeepayment-date').datepicker( "setDate", date );
                             alert("<?php echo Yii::t('app', 'The date cant be changed.') ?>");
                         }
                     });
@@ -450,4 +450,4 @@ $payment_method_cash = Config::getValue('payment_method_cash');
 
 
 </script>
-<?php $this->registerJs("ProviderPayment.init();"); ?>
+<?php $this->registerJs("EmployeePayment.init();"); ?>

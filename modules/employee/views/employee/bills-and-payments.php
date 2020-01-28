@@ -11,10 +11,10 @@ use kartik\export\ExportMenu;
  * @var app\modules\sale\models\search\CustomerSearch $searchModel
  */
 
-$this->title = Yii::t('app', 'Provider Bills And Payments');
+$this->title = Yii::t('app', 'Employee Bills And Payments');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-index">
+<div class="employee-index">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
@@ -82,7 +82,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'label' => Yii::t('app', 'Provider'),
+                'label' => Yii::t('app', 'Employee'),
                 'attribute'=>'name',
             ],
             [
@@ -110,7 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $columns = [
         [
-            'label' => Yii::t('app', 'Provider'),
+            'label' => Yii::t('app', 'Employee'),
             'attribute'=>'name',
         ],
         [
@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'class' => '\kartik\grid\DataColumn',
             'content' => function($model, $key, $index, $column){
-                return Html::a('<span class="glyphicon glyphicon-usd"></span> '.Yii::t('app','Account'), ['/provider/provider/current-account','id'=>$model['provider_id']], ['class'=>'btn btn-width btn-default']);
+                return Html::a('<span class="glyphicon glyphicon-usd"></span> '.Yii::t('app','Account'), ['/employee/employee/current-account','id'=>$model['employee_id']], ['class'=>'btn btn-width btn-default']);
             },
             'format'=>'html',
         ]

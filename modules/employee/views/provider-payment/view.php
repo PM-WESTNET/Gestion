@@ -4,16 +4,16 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use app\modules\provider\models\ProviderPayment;
+use app\modules\employee\models\EmployeePayment;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderPayment */
+/* @var $model app\modules\employee\models\EmployeePayment */
 
-$this->title = Yii::t('app', 'Payment to') . $model->provider->name;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Provider Payments'), 'url' => ['index']];
+$this->title = Yii::t('app', 'Payment to') . $model->employee->name;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employee Payments'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-payment-view">
+<div class="employee-payment-view">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
@@ -21,17 +21,17 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             <?php
             if($model->canClose()) {
-                echo Html::a("<span class='glyphicon glyphicon-repeat'></span> " . Yii::t('app', 'Close'), ['close', 'id' => $model->provider_payment_id], ['class' => 'btn btn-warning']);
+                echo Html::a("<span class='glyphicon glyphicon-repeat'></span> " . Yii::t('app', 'Close'), ['close', 'id' => $model->employee_payment_id], ['class' => 'btn btn-warning']);
                 if ($model->getUpdatable()) {
-                    echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_payment_id], ['class' => 'btn btn-primary']);
+                    echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->employee_payment_id], ['class' => 'btn btn-primary']);
                 }
             }
 
-            if ($model->status == ProviderPayment::STATUS_CLOSED){
-                echo Html::a("<span class='glyphicon glyphicon-indent-right'></span> " .Yii::t('app', 'Apply to bill'), ['apply', 'provider_payment_id' => $model->provider_payment_id], ['class' => 'btn btn-warning']);
+            if ($model->status == EmployeePayment::STATUS_CLOSED){
+                echo Html::a("<span class='glyphicon glyphicon-indent-right'></span> " .Yii::t('app', 'Apply to bill'), ['apply', 'employee_payment_id' => $model->employee_payment_id], ['class' => 'btn btn-warning']);
             }
 
-            if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_payment_id], [
+            if($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->employee_payment_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
@@ -56,8 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
     $attributes = array_merge($attributes, [
         [
-            'value' => $model->provider->name,
-            'label' => Yii::t('app', 'Provider')
+            'value' => $model->employee->name,
+            'label' => Yii::t('app', 'Employee')
         ],
 
         'date:date',
@@ -91,7 +91,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => new ActiveDataProvider([
-                    'query' => $model->getProviderPaymentItems()
+                    'query' => $model->getEmployeePaymentItems()
                 ]),
                 'options' => ['class' => 'table-responsive'],
                 'columns' => [
@@ -141,7 +141,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => new ActiveDataProvider([
-                    'query' => $model->getProviderBillHasProviderPayments(),
+                    'query' => $model->getEmployeeBillHasEmployeePayments(),
                 ]),
                 'options' => ['class' => 'table-responsive'],
                 'columns' => [
@@ -149,25 +149,25 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => Yii::t('app', 'Bill Type'),
                         'value'=> function($model, $key){
-                            return ($model->providerBill!==null ? $model->providerBill->billType->name: "" ) ;
+                            return ($model->employeeBill!==null ? $model->employeeBill->billType->name: "" ) ;
                         }
                     ],
                     [
                         'label' => Yii::t('app', 'Date'),
                         'value'=> function($model, $key){
-                            return ($model->providerBill!==null ? Yii::$app->formatter->asDate($model->providerBill->date) : "" );
+                            return ($model->employeeBill!==null ? Yii::$app->formatter->asDate($model->employeeBill->date) : "" );
                         }
                     ],
                     [
                         'label' => Yii::t('app', 'Amount'),
                         'value'=> function($model, $key){
-                            return ($model->providerBill!==null ? Yii::$app->formatter->asCurrency($model->providerBill->total) : "");
+                            return ($model->employeeBill!==null ? Yii::$app->formatter->asCurrency($model->employeeBill->total) : "");
                         }
                     ],
                     [
                         'label' => Yii::t('app', 'Balance'),
                         'value'=> function($model, $key){
-                            return ($model->providerBill!==null ? Yii::$app->formatter->asCurrency($model->providerBill->balance) : "");
+                            return ($model->employeeBill!==null ? Yii::$app->formatter->asCurrency($model->employeeBill->balance) : "");
                         }
                     ]
                 ],

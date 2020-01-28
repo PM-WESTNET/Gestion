@@ -1,21 +1,21 @@
 <?php
 
-namespace app\modules\provider\models\search;
+namespace app\modules\employee\models\search;
 
-use app\modules\provider\models\ProviderBill;
-use app\modules\provider\models\ProviderPayment;
+use app\modules\employee\models\EmployeeBill;
+use app\modules\employee\models\EmployeePayment;
 use Other\Space\Extender;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use app\modules\provider\models\Provider;
+use app\modules\employee\models\Employee;
 use yii\db\Expression;
 use yii\db\Query;
 
 /**
- * ProviderSearch represents the model behind the search form about `app\modules\provider\models\Provider`.
+ * EmployeeSearch represents the model behind the search form about `app\modules\employee\models\Employee`.
  */
-class ProviderSearch extends Provider
+class EmployeeSearch extends Employee
 {
     public $balance;
     public $fromDate;
@@ -27,7 +27,7 @@ class ProviderSearch extends Provider
     public function rules()
     {
         return [
-            [['provider_id'], 'integer'],
+            [['employee_id'], 'integer'],
             [['name', 'business_name', 'tax_identification', 'address', 'bill_type', 'phone', 'phone2', 'description', 'fromDate', 'toDate'], 'safe'],
         ];
     }
@@ -59,7 +59,7 @@ class ProviderSearch extends Provider
     public function searchBy($by)
     {
         /** @var Query $query */
-        $query = Provider::find();
+        $query = Employee::find();
         $query->orWhere(['like', 'name', $by ])
             ->orWhere(['like', 'business_name', $by ])
             ->orWhere(['like', 'tax_identification', $by ])
@@ -70,7 +70,7 @@ class ProviderSearch extends Provider
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -78,7 +78,7 @@ class ProviderSearch extends Provider
      */
     public function search($params)
     {
-        $query = Provider::find();
+        $query = Employee::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -93,7 +93,7 @@ class ProviderSearch extends Provider
         }
 
         $query->andFilterWhere([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
@@ -118,18 +118,18 @@ class ProviderSearch extends Provider
 
 
         $qBill = (new Query())
-            ->select(['p.provider_id', 'p.name', new Expression('sum(pb.total*bt.multiplier) AS debt'), new Expression('0 as payment')])
-            ->from('provider as p')
-            ->leftJoin('provider_bill as pb', 'p.provider_id = pb.provider_id')
+            ->select(['p.employee_id', 'p.name', new Expression('sum(pb.total*bt.multiplier) AS debt'), new Expression('0 as payment')])
+            ->from('employee as p')
+            ->leftJoin('employee_bill as pb', 'p.employee_id = pb.employee_id')
             ->leftJoin('bill_type as bt', 'pb.bill_type_id = bt.bill_type_id')
-            ->groupBy(['p.provider_id', 'p.name']);
+            ->groupBy(['p.employee_id', 'p.name']);
         ;
 
         $qPayment = (new Query())
-            ->select(['p.provider_id', 'p.name', new Expression('0 AS debt'), new Expression('sum(pp.amount) as payment')])
-            ->from('provider as p')
-            ->leftJoin('provider_payment as pp', 'pp.provider_id = p.provider_id')
-            ->groupBy(['p.provider_id', 'p.name']);
+            ->select(['p.employee_id', 'p.name', new Expression('0 AS debt'), new Expression('sum(pp.amount) as payment')])
+            ->from('employee as p')
+            ->leftJoin('employee_payment as pp', 'pp.employee_id = p.employee_id')
+            ->groupBy(['p.employee_id', 'p.name']);
         ;
 
         if($toDate) {
@@ -140,17 +140,17 @@ class ProviderSearch extends Provider
         $qBill->union($qPayment, true);
 
         $query = (new Query())
-            ->select(['provider_id', 'name', new Expression('sum(debt) as debt'), new Expression('sum(payment) as payment'),
+            ->select(['employee_id', 'name', new Expression('sum(debt) as debt'), new Expression('sum(payment) as payment'),
                 new Expression('sum(debt) - sum(payment) as balance')
             ])
             ->from(['a'=>$qBill])
-            ->groupBy(['provider_id', 'name'])
+            ->groupBy(['employee_id', 'name'])
             ->having(new Expression('round((sum(debt) - sum(payment))) <> 0'));
 
 
 
-        if($this->provider_id) {
-            $query->andWhere(['provider_id' => $this->provider_id]);
+        if($this->employee_id) {
+            $query->andWhere(['employee_id' => $this->employee_id]);
         }
 
         $dataProvider = new ActiveDataProvider([
@@ -169,7 +169,7 @@ class ProviderSearch extends Provider
 
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -178,11 +178,11 @@ class ProviderSearch extends Provider
     public function accountTotalBills()
     {
 
-        $query = ProviderBill::find();
+        $query = EmployeeBill::find();
         $query->joinWith(['billType']);
 
         $query->where([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
 
         $query->addSelect(['bill_type.multiplier']);
@@ -191,7 +191,7 @@ class ProviderSearch extends Provider
     }
 
     /**
-     * Creates data provider instance with search query applied
+     * Creates data employee instance with search query applied
      *
      * @param array $params
      *
@@ -200,10 +200,10 @@ class ProviderSearch extends Provider
     public function accountTotalPayed()
     {
 
-        $query = ProviderPayment::find();
+        $query = EmployeePayment::find();
 
         $query->where([
-            'provider_id' => $this->provider_id,
+            'employee_id' => $this->employee_id,
         ]);
         return $query->sum('amount');
     }
@@ -232,21 +232,21 @@ class ProviderSearch extends Provider
 
         $subQuery = new Query();
         $subQuery
-            ->select(['provider_id', 'sum(pb.total * pt.multiplier) AS billed'])
-            ->from('provider_bill pb')
+            ->select(['employee_id', 'sum(pb.total * pt.multiplier) AS billed'])
+            ->from('employee_bill pb')
             ->leftJoin('bill_type pt','pb.bill_type_id = pt.bill_type_id')
             ->andWhere(['and', ['>=', 'pb.date', $fromDate], ['<=', 'pb.date', $toDate] ])
-            ->groupBy(['provider_id'])
+            ->groupBy(['employee_id'])
         ;
 
 
         $query = new Query();
         $query
-            ->select(['p.provider_id', 'p.name', 'pb.billed as facturado', 'sum(pp.amount) as pagos'])
-            ->from('provider p')
-            ->leftJoin(['pb'=>$subQuery], 'p.provider_id = pb.provider_id')
-            ->leftJoin('provider_payment pp', 'p.provider_id = pp.provider_id')
-            ->groupBy(['p.provider_id', 'p.name'])
+            ->select(['p.employee_id', 'p.name', 'pb.billed as facturado', 'sum(pp.amount) as pagos'])
+            ->from('employee p')
+            ->leftJoin(['pb'=>$subQuery], 'p.employee_id = pb.employee_id')
+            ->leftJoin('employee_payment pp', 'p.employee_id = pp.employee_id')
+            ->groupBy(['p.employee_id', 'p.name'])
         ;
 
 

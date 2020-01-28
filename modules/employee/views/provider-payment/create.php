@@ -4,21 +4,21 @@ use yii\helpers\Html;
 
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderBill */
+/* @var $model app\modules\employee\models\EmployeeBill */
 
 $this->title = Yii::t('app', 'Create {modelClass}', [
-	'modelClass' => Yii::t('app', 'Provider Payment'),
+	'modelClass' => Yii::t('app', 'Employee Payment'),
 ]);
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Provider Bills'), 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employee Bills'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-payment-create">
+<div class="employee-payment-create">
 
 	<div class="row">
 		<div class="col-sm-8 col-sm-offset-2">
 			<h1>
 				<?= Html::encode($this->title) ?>
-				<small><?= ($model->provider ? $model->provider->name : "" )?></small>
+				<small><?= ($model->employee ? $model->employee->name : "" )?></small>
 			</h1>
 
 			<?= $this->render('_form', [

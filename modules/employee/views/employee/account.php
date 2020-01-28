@@ -6,30 +6,30 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $searchModel app\modules\provider\models\search\ProviderSearch */
-/* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $searchModel app\modules\employee\models\search\EmployeeSearch */
+/* @var $dataEmployee yii\data\ActiveDataEmployee */
 
-$this->title = Yii::t('app', 'Provider Account'). " $model->name";
+$this->title = Yii::t('app', 'Employee Account'). " $model->name";
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-<div class="provider-index">
+<div class="employee-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?=$this->render('_account-detail', ['providerSearch' => $providerSearch]);?>
+    <?=$this->render('_account-detail', ['employeeSearch' => $employeeSearch]);?>
     
     <div class="title">
         
         <p>
             <span>
                 <?= Html::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create {modelClass}', [
-                    'modelClass' => Yii::t('app','Provider Bill'),
-                ]), ['provider-bill/create', 'provider'=>$model->provider_id, 'from'=>'account'], ['class' => 'btn btn-success']) ?>                
+                    'modelClass' => Yii::t('app','Employee Bill'),
+                ]), ['employee-bill/create', 'employee'=>$model->employee_id, 'from'=>'account'], ['class' => 'btn btn-success']) ?>
             </span>
              <?= Html::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create {modelClass}', [
-                'modelClass' => Yii::t('app','Provider Payment'),
-            ]), ['provider-payment/create', 'provider'=>$model->provider_id, 'from'=>'account'], ['class' => 'btn btn-success']) ?>
+                'modelClass' => Yii::t('app','Employee Payment'),
+            ]), ['employee-payment/create', 'employee'=>$model->employee_id, 'from'=>'account'], ['class' => 'btn btn-success']) ?>
         </p>
     </div>
 
@@ -39,7 +39,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="text-center">
         <?php $form = ActiveForm::begin([
             'method' => 'get',
-            'action' => ['provider/current-account', 'id'=>$model->provider_id]
+            'action' => ['employee/current-account', 'id'=>$model->employee_id]
         ]); ?>
         <div class="row">
             <div class="col-md-4"></div>
@@ -99,7 +99,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app', 'Debit'),
                 'value'=>function($model) {
-                    return Yii::$app->formatter->asCurrency( ($model['provider_bill_id']> 0) ?  $model['total'] : 0 );
+                    return Yii::$app->formatter->asCurrency( ($model['employee_bill_id']> 0) ?  $model['total'] : 0 );
                 },
                 'contentOptions'=>['class'=>'text-right'],
                 'format' => 'raw'
@@ -107,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app', 'Credit'),
                 'value'=>function($model){
-                    return Yii::$app->formatter->asCurrency( ($model['provider_payment_id']> 0) ?  $model['total'] : 0 );
+                    return Yii::$app->formatter->asCurrency( ($model['employee_payment_id']> 0) ?  $model['total'] : 0 );
                 },
                 'contentOptions'=>['class'=>'text-right'],
                 'format' => 'raw'
@@ -124,14 +124,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>'{update} {view} {pdf} {open} {delete} {items}',
                 'urlCreator' => function($action, $model, $key, $index) {
-                    if($model['provider_bill_id']>0) {
-                        $params['id'] = $model['provider_bill_id'];
-                        $params[0] = '/provider/provider-bill/' . $action;
+                    if($model['employee_bill_id']>0) {
+                        $params['id'] = $model['employee_bill_id'];
+                        $params[0] = '/employee/employee-bill/' . $action;
                     } else {
-                        $params['id'] = $model['provider_payment_id'];
-                        $params[0] = 'provider-payment/' . $action;
+                        $params['id'] = $model['employee_payment_id'];
+                        $params[0] = 'employee-payment/' . $action;
                     }
-                    $params['return'] =  '/provider/provider-payment/current-account&provider_id='.$model['provider_id'];
+                    $params['return'] =  '/employee/employee-payment/current-account&employee_id='.$model['employee_id'];
                     return Url::toRoute($params);
                 },
                 'buttons'=>[
@@ -153,8 +153,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         }
                     },
                     'items' => function ($url, $model, $key) {
-                        if(($model['provider_bill_id']> 0)) {
-                            return '<a href="#" data-id="'.$model['provider_bill_id'].'" class="btn btn-warning btn-view-items"><span class="glyphicon glyphicon-list"></span></a>';
+                        if(($model['employee_bill_id']> 0)) {
+                            return '<a href="#" data-id="'.$model['employee_bill_id'].'" class="btn btn-warning btn-view-items"><span class="glyphicon glyphicon-list"></span></a>';
                         }
                         return "";
                     },
@@ -181,17 +181,17 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 </div>
     <script>
-        var ProviderBill = new function(){
+        var EmployeeBill = new function(){
             this.init = function() {
                 $(document).off('click', '.btn-view-items').on('click', '.btn-view-items', function(evt){
                     evt.preventDefault();
-                    ProviderBill.viewItems($(this).data('id'));
+                    EmployeeBill.viewItems($(this).data('id'));
                 });
             }
 
             this.viewItems = function(id){
                 $.ajax({
-                    url: '<?php echo Url::toRoute(['provider-bill/list-items']) ?>&provider_bill_id='+id,
+                    url: '<?php echo Url::toRoute(['employee-bill/list-items']) ?>&employee_bill_id='+id,
                 }).done(function(data){
                     $("#modal-items .modal-body").html(data);
                     $("#modal-items").modal('show');
@@ -199,4 +199,4 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         }
     </script>
-<?php $this->registerJs('ProviderBill.init()') ?>
+<?php $this->registerJs('EmployeeBill.init()') ?>

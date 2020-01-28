@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\search\ProviderPaymentSearch */
+/* @var $model app\modules\employee\models\search\EmployeePaymentSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="provider-payment-search">
+<div class="employee-payment-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'provider_payment_id') ?>
+    <?= $form->field($model, 'employee_payment_id') ?>
 
     <?= $form->field($model, 'date') ?>
 
@@ -23,7 +23,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'description') ?>
 
-    <?= $form->field($model, 'provider_id') ?>
+    <?= $form->field($model, 'employee_id') ?>
 
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>

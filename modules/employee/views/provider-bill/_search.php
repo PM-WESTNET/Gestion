@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\search\ProviderBillSearch */
+/* @var $model app\modules\employee\models\search\EmployeeBillSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="provider-bill-search">
+<div class="employee-bill-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'provider_bill_id') ?>
+    <?= $form->field($model, 'employee_bill_id') ?>
 
     <?= $form->field($model, 'date') ?>
 
@@ -29,7 +29,7 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'total') ?>
 
-    <?php // echo $form->field($model, 'provider_id') ?>
+    <?php // echo $form->field($model, 'employee_id') ?>
 
     <?php // echo $form->field($model, 'description') ?>
 

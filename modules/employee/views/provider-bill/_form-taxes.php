@@ -21,11 +21,11 @@ use yii\widgets\ActiveForm;
     yii\widgets\Pjax::begin(['id' => 'new_tax']);
         $form = ActiveForm::begin([
         'id'=>'tax-add-form',
-        'action' => ['add-tax', 'id' => $model->provider_bill_id],
+        'action' => ['add-tax', 'id' => $model->employee_bill_id],
         'options' => ['data-pjax' => true ]]);
 ?>
 
-<input type="hidden" name="ProviderBillHasTaxRate[provider_bill_id]" value="<?=$model->provider_bill_id?>"/>
+<input type="hidden" name="EmployeeBillHasTaxRate[employee_bill_id]" value="<?=$model->employee_bill_id?>"/>
 
 <div class="row">
     <div class="col-sm-9 col-md-3">

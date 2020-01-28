@@ -11,10 +11,10 @@ use kartik\export\ExportMenu;
  * @var app\modules\sale\models\search\CustomerSearch $searchModel
  */
 
-$this->title = Yii::t('app', 'Provider Debts');
+$this->title = Yii::t('app', 'Employee Debts');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-index">
+<div class="employee-index">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>        
@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <div class="row hidden-print">
             <div class="col-sm-12">
                 <?php
-                echo $this->render('@app/modules/provider/views/provider/_find-with-autocomplete', ['form'=> $form, 'model' => $searchModel, 'attribute' => 'provider_id', 'label'=>Yii::t('app', 'Provider')]);
+                echo $this->render('@app/modules/employee/views/employee/_find-with-autocomplete', ['form'=> $form, 'model' => $searchModel, 'attribute' => 'employee_id', 'label'=>Yii::t('app', 'Employee')]);
                 ?>
             </div>
         </div>
@@ -75,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
-                'label' => Yii::t('app', 'Provider'),
+                'label' => Yii::t('app', 'Employee'),
                 'attribute'=>'name',
             ],
             [
@@ -106,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
     $columns = [
         ['class' => 'yii\grid\SerialColumn'],
         [
-            'label' => Yii::t('app', 'Provider'),
+            'label' => Yii::t('app', 'Employee'),
             'attribute'=>'name',
         ],
         [
@@ -130,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
         [
             'class' => '\yii\grid\DataColumn',
             'content' => function($model, $key, $index, $column){
-                return Html::a('<span class="glyphicon glyphicon-usd"></span> '.Yii::t('app','Account'), ['/provider/provider/current-account','id'=>$model['provider_id']], ['class'=>'btn btn-width btn-default']);
+                return Html::a('<span class="glyphicon glyphicon-usd"></span> '.Yii::t('app','Account'), ['/employee/employee/current-account','id'=>$model['employee_id']], ['class'=>'btn btn-width btn-default']);
             },
             'format'=>'html',
         ]

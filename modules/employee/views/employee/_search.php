@@ -4,18 +4,18 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\search\ProviderSearch */
+/* @var $model app\modules\employee\models\search\EmployeeSearch */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="provider-search">
+<div class="employee-search">
 
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
     ]); ?>
 
-    <?= $form->field($model, 'provider_id') ?>
+    <?= $form->field($model, 'employee_id') ?>
 
     <?= $form->field($model, 'name') ?>
 

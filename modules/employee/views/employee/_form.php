@@ -7,14 +7,14 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\helpers\Url;
-use app\modules\provider\models\Provider;
+use app\modules\employee\models\Employee;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\Provider */
+/* @var $model app\modules\employee\models\Employee */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="provider-form">
+<div class="employee-form">
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="row">
@@ -52,7 +52,7 @@ use app\modules\provider\models\Provider;
 
         <div class="col-sm-8 col-xs-12">
             <?php if (Yii::$app->getModule("accounting")) { ?>
-                <div class="form-group field-provider-account">
+                <div class="form-group field-employee-account">
                     <?=Html::label(Yii::t('accounting', "Account"), ['account_id'])?>
                     <?=Select2::widget([
                         'model' => $model,
@@ -69,7 +69,7 @@ use app\modules\provider\models\Provider;
             
         </div>
         <div class="col-sm-4 col-xs-12">
-            <?= $form->field($model, 'bill_type')->dropDownList(Provider::getAllBillTypes()) ?>
+            <?= $form->field($model, 'bill_type')->dropDownList(Employee::getAllBillTypes()) ?>
         </div>
 
         <div class="col-xs-12">
@@ -99,7 +99,7 @@ use app\modules\provider\models\Provider;
 </div>
 
 <script>
-    var Provider = new function() {
+    var Employee = new function() {
         var self = this;
 
         this.init = function() {
@@ -118,7 +118,7 @@ use app\modules\provider\models\Provider;
 
         this.changeDocumentType = function(){
             var options;
-            $("#provider-tax_identification").inputmask("remove");
+            $("#employee-tax_identification").inputmask("remove");
             // Si es CUIT
             if($("#tax_condition").val()!=3) {
                 options = 'cuit';
@@ -129,19 +129,19 @@ use app\modules\provider\models\Provider;
                 };
             }
 
-            $("#provider-tax_identification").inputmask(options);
+            $("#employee-tax_identification").inputmask(options);
         }
 
         this.afipValidation = function() {
-            var cuit = $("#provider-tax_identification").val();
+            var cuit = $("#employee-tax_identification").val();
             console.log(cuit);
             $.ajax({
-                url: '<?= Url::to(['/provider/provider/afip-validation']) ?>&document=' + cuit ,
+                url: '<?= Url::to(['/employee/employee/afip-validation']) ?>&document=' + cuit ,
                 method: 'GET',
             }).done(function(data){
                 console.log(data);
                 $('#afip-validation').button('reset');
-                $('#provider-phone').focus();
+                $('#employee-phone').focus();
                 if(data.status){
                   $('#validation-afip-informer-ok').removeClass('hidden');
                   $('#validation-afip-informer-error').addClass('hidden');
@@ -155,15 +155,15 @@ use app\modules\provider\models\Provider;
 
         this.loadFieldsFromAfip = function(data) {
             if(data.legal_name !== ''){
-                document.getElementById("provider-name").value = data.legal_name;
+                document.getElementById("employee-name").value = data.legal_name;
             } else {
-                document.getElementById("provider-name").value = data.name + data.lastname;
+                document.getElementById("employee-name").value = data.name + data.lastname;
             }
             if(data.tax_id !== ''){
                 document.getElementById("tax_condition").value = data.tax_id;
             }
             if(data.address.address !== ''){
-                document.getElementById("provider-address").value = data.address.province + ', '+ data.address.location + ', '+ data.address.address;
+                document.getElementById("employee-address").value = data.address.province + ', '+ data.address.location + ', '+ data.address.address;
             }
             if(data.tax_id !== ''){
                 document.getElementById("customer-tax_condition_id").value = data.tax_id;
@@ -171,4 +171,4 @@ use app\modules\provider\models\Provider;
         };
     };
 </script>
-<?php $this->registerJs('Provider.init();') ?>
+<?php $this->registerJs('Employee.init();') ?>

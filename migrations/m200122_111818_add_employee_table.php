@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Class m200114_160537_created_at_customer_has_discount
  */
-class m200114_160537_created_at_customer_has_discount extends Migration
+class m200122_111818_add_employee_table extends Migration
 {
 
     public function safeUp()
@@ -31,7 +31,7 @@ class m200114_160537_created_at_customer_has_discount extends Migration
         $this->addForeignKey('fk_employee_tax_company_id', 'employee', 'company_id', 'company', 'company_id');
 
         $this->createTable('employee_bill', [
-            'provider_bill_id' => $this->primaryKey(),
+            'employee_bill_id' => $this->primaryKey(),
             'date' => $this->date()->defaultValue(null),
             'number' => $this->string(),
             'net' => $this->double(),
@@ -67,11 +67,11 @@ class m200114_160537_created_at_customer_has_discount extends Migration
             'updater_user_id' => $this->integer()
         ]);
 
-        $this->addForeignKey('fk_employee_bill_item_employee_bill_id', 'employee_bill_item', 'employee_bill', 'employee_bill_id');
+        $this->addForeignKey('fk_employee_bill_item_employee_bill_id', 'employee_bill_item', 'employee_bill_id', 'employee_bill', 'employee_bill_id');
         $this->addForeignKey('fk_employee_bill_item_account_id', 'employee_bill_item', 'account', 'account_id');
 
         $this->createTable('employee_bill_has_tax_rate', [
-            'employee_bill_has_tax_rate_id' => $this->$this->primaryKey(),
+            'employee_bill_has_tax_rate_id' => $this->primaryKey(),
             'employee_bill_id' => $this->integer(),
             'tax_rate_id' => $this->integer(),
             'amount' => $this->double(),
@@ -111,7 +111,7 @@ class m200114_160537_created_at_customer_has_discount extends Migration
         $this->addForeignKey('fk_employee_payment_item_employee_payment_id', 'employee_payment_item', 'employee_payment_id', 'employee_payment', 'employee_payment_id');
         $this->addForeignKey('fk_employee_payment_item_payment_method_id', 'employee_payment_item', 'payment_method_id', 'payment_method', 'payment_method_id');
         $this->addForeignKey('fk_employee_item_paycheck_id', 'employee_payment_item', 'paycheck_id', 'paycheck', 'paycheck_id');
-        $this->addForeignKey('fk_employee_payment_item_money_box_account_id', 'employee_payment_item', 'money_box_account_id', 'money_box_account', 'money_box_account_id')
+        $this->addForeignKey('fk_employee_payment_item_money_box_account_id', 'employee_payment_item', 'money_box_account_id', 'money_box_account', 'money_box_account_id');
 
         $this->createTable('employee_bill_has_employee_payment', [
             'employee_bill_has_employee_payment_id' => $this->primaryKey(),
@@ -121,7 +121,7 @@ class m200114_160537_created_at_customer_has_discount extends Migration
         ]);
 
         $this->addForeignKey('fk_employee_bill_has_employee_payment_employee_bill_id', 'employee_bill_has_employee_payment', 'employee_bill_id', 'employee_bill', 'employee_bill_id');
-        $this->addForeignKey('fk_employee_bill_has_employee_payment_employee_bill_id', 'employee_bill_has_employee_payment', 'employee_payment_id', 'employee_payment', 'employee_payment_id');
+        $this->addForeignKey('fk_employee_bill_has_employee_payment_employee_payment_id', 'employee_bill_has_employee_payment', 'employee_payment_id', 'employee_payment', 'employee_payment_id');
     }
 
     /**

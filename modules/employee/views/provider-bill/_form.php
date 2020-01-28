@@ -1,8 +1,8 @@
 <?php
 
-use app\modules\provider\models\Provider;
-use app\modules\provider\models\ProviderBillHasTaxRate;
-use app\modules\provider\models\ProviderBillItem;
+use app\modules\employee\models\Employee;
+use app\modules\employee\models\EmployeeBillHasTaxRate;
+use app\modules\employee\models\EmployeeBillItem;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\TaxRate;
 use kartik\widgets\Select2;
@@ -16,15 +16,15 @@ use yii\widgets\Pjax;
 use yii\jui\DatePicker;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderBill */
+/* @var $model app\modules\employee\models\EmployeeBill */
 /* @var $form yii\widgets\ActiveForm */
 ?>
 
-<div class="provider-bill-form">
+<div class="employee-bill-form">
 
-    <?php $form = ActiveForm::begin(['id'=>'provider-bill-form', 'action' => [ ( $model->isNewRecord ? 'create' : 'update' ), 'id'=>$model->provider_bill_id ,'provider' => $model->provider_id, 'from'=>$from] ]); ?>
+    <?php $form = ActiveForm::begin(['id'=>'employee-bill-form', 'action' => [ ( $model->isNewRecord ? 'create' : 'update' ), 'id'=>$model->employee_bill_id ,'employee' => $model->employee_id, 'from'=>$from] ]); ?>
 
-    <?= Html::hiddenInput('ProviderBill[status]', $model->status, ['id'=>'bill_status']) ?>
+    <?= Html::hiddenInput('EmployeeBill[status]', $model->status, ['id'=>'bill_status']) ?>
     <?= Html::hiddenInput('pay_after_save', 'false', ['id'=>'pay_after_save']) ?>
 
     <?= CompanySelector::widget(['model'=>$model]); ?>
@@ -34,10 +34,10 @@ use yii\jui\DatePicker;
     ?>
 
     <div class="form-group">
-    <?php if (!$model->provider) { ?>
+    <?php if (!$model->employee) { ?>
         <div class="input-group" style="z-index:0;">
-            <?= $form->field($model, 'provider_id')->widget(Select2::class,[
-                'data' => ArrayHelper::map(Provider::find()->all(), 'provider_id', 'fullname'),
+            <?= $form->field($model, 'employee_id')->widget(Select2::class,[
+                'data' => ArrayHelper::map(Employee::find()->all(), 'employee_id', 'fullname'),
                 'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -84,7 +84,7 @@ use yii\jui\DatePicker;
         <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
             <?php
                 // Formulario para los Items
-                echo $this->render('_form-items', ['model'=>$model,'dataProvider'=>$itemsDataProvider, 'item'=>new ProviderBillItem()]);
+                echo $this->render('_form-items', ['model'=>$model,'dataProvider'=>$itemsDataProvider, 'item'=>new EmployeeBillItem()]);
 
                 // Listado de Items
                 Pjax::begin(['id'=>'items']);
@@ -106,7 +106,7 @@ use yii\jui\DatePicker;
                             'template'=>'{delete}',
                             'buttons'=>[
                                 'delete'=>function ($url, $model, $key) {
-                                    return '<a class="removeItem btn btn-danger" href="#" data-url="'.Url::toRoute(['provider-bill/delete-item', 'provider_bill_id'=>$model->provider_bill_id, 'provider_bill_item_id'=>$model->provider_bill_item_id]).
+                                    return '<a class="removeItem btn btn-danger" href="#" data-url="'.Url::toRoute(['employee-bill/delete-item', 'employee_bill_id'=>$model->employee_bill_id, 'employee_bill_item_id'=>$model->employee_bill_item_id]).
                                     '" title="'.Yii::t('app','Delete').'" data-confirm-text="'.Yii::t('yii','Are you sure you want to delete this item?').'" ><span class="glyphicon glyphicon-trash"></span></a>';
                                 }
                             ]
@@ -137,7 +137,7 @@ use yii\jui\DatePicker;
         <div class="panel-body collapse in" id="panel-body-taxes" aria-expanded="true">
             <?php
             // Formulario para los impuestos
-            echo $this->render('_form-taxes', ['model'=>$model,'dataProvider'=>$dataProvider, 'pbt'=>new ProviderBillHasTaxRate()]);
+            echo $this->render('_form-taxes', ['model'=>$model,'dataProvider'=>$dataProvider, 'pbt'=>new EmployeeBillHasTaxRate()]);
 
             // Listado de impuestos
             Pjax::begin(['id'=>'taxes']);
@@ -159,7 +159,7 @@ use yii\jui\DatePicker;
                         'template'=>'{delete}',
                         'buttons'=>[
                             'delete'=>function ($url, $model, $key) {
-                                return '<a class="removeTax btn btn-danger" href="#" data-url="'.Url::toRoute(['provider-bill/delete-tax', 'provider_bill_id'=>$model->provider_bill_id, 'tax_rate_id'=>$model->tax_rate_id]).
+                                return '<a class="removeTax btn btn-danger" href="#" data-url="'.Url::toRoute(['employee-bill/delete-tax', 'employee_bill_id'=>$model->employee_bill_id, 'tax_rate_id'=>$model->tax_rate_id]).
                                 '" title="'.Yii::t('app','Delete').'" data-confirm-text="'.Yii::t('yii','Are you sure you want to delete this item?').'"><span class="glyphicon glyphicon-trash"></span></a>';
                             }
                         ]
@@ -199,20 +199,20 @@ use yii\jui\DatePicker;
 
     <div class="col-sm-12 col-xs-12 no-padding row">
         <?php if ($model->isNewRecord) { ?>
-            <a id="saveBill" onclick="ProviderBill.save();" class="btn <?=($model->isNewRecord ? 'btn btn-success' : 'btn btn-success')?>">
+            <a id="saveBill" onclick="EmployeeBill.save();" class="btn <?=($model->isNewRecord ? 'btn btn-success' : 'btn btn-success')?>">
                 <!-- <span class='glyphicon glyphicon-plus'></span>              -->
                 <?= Yii::t('app','Add Detail'); ?>
             </a>
         <?php } ?>
 
         <?php if (!$model->isNewRecord ) { ?>
-        <a id="closeBill" onclick="ProviderBill.closeAndPay();" class="btn btn-success" style="<?=($model->calculateTotal() == ( $model->calculateItems() + $model->calculateTaxes() ) &&
+        <a id="closeBill" onclick="EmployeeBill.closeAndPay();" class="btn btn-success" style="<?=($model->calculateTotal() == ( $model->calculateItems() + $model->calculateTaxes() ) &&
             $model->total == ( $model->calculateItems() + $model->calculateTaxes() ) &&
             $model->calculateTotal() > 0 ? '' : 'none' ) ?>">
                 <!-- <span class='glyphicon glyphicon-remove'></span>  -->
                 <?=Yii::t('app','Pay'); ?>
             </a>
-            <a id="closeBill" onclick="ProviderBill.close();" class="btn btn-info" style="<?=($model->calculateTotal() == ( $model->calculateItems() + $model->calculateTaxes() ) &&
+            <a id="closeBill" onclick="EmployeeBill.close();" class="btn btn-info" style="<?=($model->calculateTotal() == ( $model->calculateItems() + $model->calculateTaxes() ) &&
             $model->total == ( $model->calculateItems() + $model->calculateTaxes() ) &&
             $model->calculateTotal() > 0 ? '' : 'none' ) ?>">
                 <!-- <span class='glyphicon glyphicon-remove'></span>  -->
@@ -223,7 +223,7 @@ use yii\jui\DatePicker;
 </div>
 
 <script>
-    var ProviderBill = new function() {
+    var EmployeeBill = new function() {
         this.init = function () {
 
             $('#number1').inputmask('9999', { numericInput: true, placeholder: "0" });
@@ -238,7 +238,7 @@ use yii\jui\DatePicker;
 
             // Eventos de impuestos
             $(document).on("click","#tax-add", function(){
-                ProviderBill.addTax();
+                EmployeeBill.addTax();
             });
             $("#new_tax").on("pjax:end", function() {
                 $.pjax.reload({container:"#taxes", async:false});
@@ -246,38 +246,38 @@ use yii\jui\DatePicker;
             });
 
             $(document).on("click",".removeTax", function(event){
-                ProviderBill.removeTax(this, event);
+                EmployeeBill.removeTax(this, event);
             });
 
-            $(document).on("blur","#providerbill-net", function(event){
-                ProviderBill.calculateTotals();
+            $(document).on("blur","#employeebill-net", function(event){
+                EmployeeBill.calculateTotals();
             });
 
             // Eventos de Items
             $(document).on("click","#item-add", function(){
-                ProviderBill.addItem();
+                EmployeeBill.addItem();
             });
 
             $(document).on("click",".removeItem", function(event){
-                ProviderBill.removeItem(this, event);
+                EmployeeBill.removeItem(this, event);
             });
             $("#new_item").on("pjax:end", function() {
                 $.pjax.reload({container:"#items", async:false});
                 $.pjax.reload({container:"#totals", async:false});
             });
             $(document).on('pjax:complete', function() {
-                ProviderBill.calculateTotals();
+                EmployeeBill.calculateTotals();
             });
-            ProviderBill.calculateTotals();
+            EmployeeBill.calculateTotals();
 
         }
 
         this.save = function() {
-            $("#provider-bill-form").submit();
+            $("#employee-bill-form").submit();
         }
 
         this.calculateTotals = function() {
-            // var totalBill  = new Number($('#providerbill-net').val());
+            // var totalBill  = new Number($('#employeebill-net').val());
             var totalItems = new Number($('#total_items').val());
             var totalTaxes = new Number($('#total_taxes').val());
             var total = (isNaN( parseFloat(totalItems+totalTaxes)) ? 0 : parseFloat(totalItems+totalTaxes) );
@@ -290,10 +290,10 @@ use yii\jui\DatePicker;
         }
 
         this.close = function() {
-            if (ProviderBill.calculateTotals()) {
+            if (EmployeeBill.calculateTotals()) {
                 if (confirm('<?=Yii::t('app', 'Are you sure you want to close the bill?') . "\\n" . Yii::t('app', 'We will apply the accounting movements.')?>')) {
                     $("#bill_status").val("closed");
-                    $("#provider-bill-form").submit();
+                    $("#employee-bill-form").submit();
                 }
             } else {
                 alert('<?=Yii::t('app', 'The total must be greater than 0.')?>');
@@ -301,11 +301,11 @@ use yii\jui\DatePicker;
         }
 
         this.closeAndPay = function() {
-            if (ProviderBill.calculateTotals()) {
+            if (EmployeeBill.calculateTotals()) {
                 if (confirm('<?=Yii::t('app', 'Are you sure you want to close the bill?') . "\\n" . Yii::t('app', 'We will apply the accounting movements.')?>')) {
                     $("#bill_status").val("closed");
                     $("#pay_after_save").val("true");
-                    $("#provider-bill-form").submit();
+                    $("#employee-bill-form").submit();
                 }
             } else {
                 alert('<?=Yii::t('app', 'The total must be greater than 0.')?>');
@@ -327,7 +327,7 @@ use yii\jui\DatePicker;
                 }).done(function(data) {
                     $.pjax.reload({container:"#taxes", async:false});
                     $.pjax.reload({container:"#totals", async:false});
-                    ProviderBill.calculateTotals();
+                    EmployeeBill.calculateTotals();
                 });
             }
         }
@@ -347,7 +347,7 @@ use yii\jui\DatePicker;
                 }).done(function(data) {
                     $.pjax.reload({container:"#items", async:false});
                     $.pjax.reload({container:"#totals", async:false});
-                    ProviderBill.calculateTotals();
+                    EmployeeBill.calculateTotals();
                 });
             }
 
@@ -355,4 +355,4 @@ use yii\jui\DatePicker;
     }
 
 </script>
-<?php  $this->registerJs("ProviderBill.init();"); ?>
+<?php  $this->registerJs("EmployeeBill.init();"); ?>

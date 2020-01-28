@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\provider\models;
+namespace app\modules\employee\models;
 
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\checkout\models\PaymentMethod;
@@ -9,10 +9,10 @@ use app\modules\paycheck\models\Paycheck;
 use Yii;
 
 /**
- * This is the model class for table "provider_payment_item".
+ * This is the model class for table "employee_payment_item".
  *
- * @property integer $provider_payment_item_id
- * @property integer $provider_payment_id
+ * @property integer $employee_payment_item_id
+ * @property integer $employee_payment_id
  * @property string $description
  * @property string $number
  * @property double $amount
@@ -23,9 +23,9 @@ use Yii;
  * @property MoneyBoxAccount $moneyBoxAccount
  * @property Paycheck $paycheck
  * @property PaymentMethod $paymentMethod
- * @property ProviderPayment $providerPayment
+ * @property EmployeePayment $employeePayment
  */
-class ProviderPaymentItem extends \app\components\db\ActiveRecord
+class EmployeePaymentItem extends \app\components\db\ActiveRecord
 {
     public $money_box_id;
 
@@ -34,7 +34,7 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'provider_payment_item';
+        return 'employee_payment_item';
     }
     
     /**
@@ -74,10 +74,10 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['provider_payment_id'], 'required'],
-            [['provider_payment_id', 'payment_method_id', 'paycheck_id', 'money_box_account_id'], 'integer'],
+            [['employee_payment_id'], 'required'],
+            [['employee_payment_id', 'payment_method_id', 'paycheck_id', 'money_box_account_id'], 'integer'],
             [['amount'], 'number'],
-            [['moneyBoxAccount', 'paycheck', 'paymentMethod', 'providerPayment'], 'safe'],
+            [['moneyBoxAccount', 'paycheck', 'paymentMethod', 'employeePayment'], 'safe'],
             [['description'], 'string', 'max' => 255],
             [['number'], 'string', 'max' => 45],
             ['money_box_account_id', 'required', 'when' => function($model){
@@ -92,8 +92,8 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'provider_payment_item_id' => Yii::t('app', 'Provider Payment Item ID'),
-            'provider_payment_id' => Yii::t('app', 'Provider Payment ID'),
+            'employee_payment_item_id' => Yii::t('app', 'Employee Payment Item ID'),
+            'employee_payment_id' => Yii::t('app', 'Employee Payment ID'),
             'description' => Yii::t('app', 'Description'),
             'number' => Yii::t('app', 'Number'),
             'amount' => Yii::t('app', 'Amount'),
@@ -103,7 +103,7 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
             'moneyBoxAccount' => Yii::t('app', 'Money Box Account'),
             'paycheck' => Yii::t('app', 'Paycheck'),
             'paymentMethod' => Yii::t('app', 'Payment Method'),
-            'providerPayment' => Yii::t('app', 'Provider Payment'),
+            'employeePayment' => Yii::t('app', 'Employee Payment'),
         ];
     }    
 
@@ -135,9 +135,9 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getProviderPayment()
+    public function getEmployeePayment()
     {
-        return $this->hasOne(ProviderPayment::className(), ['provider_payment_id' => 'provider_payment_id']);
+        return $this->hasOne(EmployeePayment::className(), ['employee_payment_id' => 'employee_payment_id']);
     }
     
     /**
@@ -151,7 +151,7 @@ class ProviderPaymentItem extends \app\components\db\ActiveRecord
     
     /**
      * @brief Deletes weak relations for this model on delete
-     * Weak relations: MoneyBoxAccount, Paycheck, PaymentMethod, ProviderPayment.
+     * Weak relations: MoneyBoxAccount, Paycheck, PaymentMethod, EmployeePayment.
      */
     protected function unlinkWeakRelations(){
     }

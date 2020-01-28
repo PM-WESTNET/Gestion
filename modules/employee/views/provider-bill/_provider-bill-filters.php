@@ -1,6 +1,6 @@
 <?php
 
-use app\modules\provider\models\Provider;
+use app\modules\employee\models\Employee;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Company;
 use kartik\select2\Select2;
@@ -12,7 +12,7 @@ use yii\widgets\ActiveForm;
 use app\components\companies\CompanySelector;
 
 ?>
-<div class="provider-bill-filters">
+<div class="employee-bill-filters">
 
     <?php
     if (empty($model->start_date)) {
@@ -56,8 +56,8 @@ use app\components\companies\CompanySelector;
 
         <div class="col-sm-6">
             <?=
-            $form->field($model, 'provider_id')->widget(Select2::className(), [
-                'data' => ArrayHelper::map(Provider::find()->all(), 'provider_id', 'name'),
+            $form->field($model, 'employee_id')->widget(Select2::className(), [
+                'data' => ArrayHelper::map(Employee::find()->all(), 'employee_id', 'name'),
                 'options' => ['placeholder' => 'Buscar Proveedor', 'encode' => false],
                 'pluginOptions' => [
                     'allowClear' => true
@@ -79,7 +79,7 @@ use app\components\companies\CompanySelector;
             <?=  Html::submitInput('Filtrar', ['class'=> 'btn btn-primary'])?>
         </div>
         <div class="col-sm-1">
-            <?= Html::a('Borrar Filtros', Url::to(['provider-bill/index']), ['class' => 'btn btn-default'])?>
+            <?= Html::a('Borrar Filtros', Url::to(['employee-bill/index']), ['class' => 'btn btn-default'])?>
         </div>
     </div>
 

@@ -4,25 +4,25 @@ use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use app\modules\provider\models\ProviderBill;
+use app\modules\employee\models\EmployeeBill;
 
 /* @var $this yii\web\View */
-/* @var $model app\modules\provider\models\ProviderBill */
+/* @var $model app\modules\employee\models\EmployeeBill */
 
-$this->title = Yii::t('app','Bill') .' - '. $model->provider->name . " - " . $model->billType->name . " " . $model->number;
-$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Provider Bills'), 'url' => ['index']];
+$this->title = Yii::t('app','Bill') .' - '. $model->employee->name . " - " . $model->billType->name . " " . $model->number;
+$this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employee Bills'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="provider-bill-view">
+<div class="employee-bill-view">
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
             <?php if ($model->getUpdatable()) {
-                echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->provider_bill_id], ['class' => 'btn btn-primary']);
+                echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->employee_bill_id], ['class' => 'btn btn-primary']);
             } ?>
-            <?php if ($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->provider_bill_id], [
+            <?php if ($model->deletable) echo Html::a("<span class='glyphicon glyphicon-remove'></span> " . Yii::t('app', 'Delete'), ['delete', 'id' => $model->employee_bill_id], [
                 'class' => 'btn btn-danger',
                 'data' => [
                     'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?=GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => new ActiveDataProvider([
-                    'query' => $model->getProviderBillItems()
+                    'query' => $model->getEmployeeBillItems()
                 ]),
                 'columns' => [
                     ['class' => 'yii\grid\SerialColumn'],
@@ -119,7 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?=GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => new ActiveDataProvider([
-                    'query' => $model->getProviderBillHasTaxRates()
+                    'query' => $model->getEmployeeBillHasTaxRates()
                 ]),
                 'options' => ['class' => 'table-responsive'],
                 'columns' => [
@@ -150,7 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?=GridView::widget([
                 'id'=>'grid',
                 'dataProvider' => new ActiveDataProvider([
-                    'query' => $model->getProviderPayments()
+                    'query' => $model->getEmployeePayments()
                 ]),
                 'options' => ['class' => 'table-responsive'],
                 'columns' => [

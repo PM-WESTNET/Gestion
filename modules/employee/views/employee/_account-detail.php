@@ -1,6 +1,6 @@
 <?php
-$debt = $providerSearch->accountTotalBills();
-$payed = $providerSearch->accountTotalPayed();
+$debt = $employeeSearch->accountTotalBills();
+$payed = $employeeSearch->accountTotalPayed();
 
 $total =  $debt - $payed;
 

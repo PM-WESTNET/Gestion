@@ -10,12 +10,12 @@ use yii\widgets\Pjax;
 /* @var $this yii\web\View */
 /* @var $model app\modules\checkout\models\Payment */
 
-$this->title = Yii::t('app','Payment').' '.$model->provider_payment_id;
+$this->title = Yii::t('app','Payment').' '.$model->employee_payment_id;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Payments'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="payment-view">
-    <input type="hidden" value="<?=$model->provider_payment_id?>" name="payment_id" id="payment_id"/>
+    <input type="hidden" value="<?=$model->employee_payment_id?>" name="payment_id" id="payment_id"/>
     <h1><?= Html::encode($this->title) ?></h1>
 
 
@@ -71,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'class' => 'yii\grid\CheckboxColumn',
                             'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->provider_bill_id];
+                                return ['value' => $model->employee_bill_id];
                             }
                         ],
                         [
@@ -120,7 +120,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'class' => 'yii\grid\CheckboxColumn',
                             'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->provider_bill_id];
+                                return ['value' => $model->employee_bill_id];
                             }
                         ],
                         [
@@ -169,10 +169,10 @@ $this->params['breadcrumbs'][] = $this->title;
             var url = "";
             if (type=='apply') {
                 data.bills = $('#grid_bills').yiiGridView('getSelectedRows');
-                url = '<?=Url::toRoute(['asociate-provider-bill', 'id' => $model->provider_payment_id])?>';
+                url = '<?=Url::toRoute(['asociate-employee-bill', 'id' => $model->employee_payment_id])?>';
             } else {
                 data.bills = $('#grid_applied_bills').yiiGridView('getSelectedRows');
-                url = '<?=Url::toRoute(['remove-association-with-provider-bill', 'id'=>$model->provider_payment_id])?>';
+                url = '<?=Url::toRoute(['remove-association-with-employee-bill', 'id'=>$model->employee_payment_id])?>';
             }
 
             if (data.bills.length > 0) {
