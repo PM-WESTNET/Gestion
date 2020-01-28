@@ -81,7 +81,8 @@ class EmployeeBillSearch extends EmployeeBill
             'bill_type_id'=>$this->bill_type_id,
         ]);
 
-        $query->andFilterWhere(['like', 'type', $this->type])
+        $query
+            //->andFilterWhere(['like', 'type', $this->type])
             ->andFilterWhere(['like', 'number', $this->number])
             ->andFilterWhere(['like', 'description', $this->description]);
 

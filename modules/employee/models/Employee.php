@@ -4,6 +4,10 @@ namespace app\modules\employee\models;
 
 use app\components\helpers\CuitValidator;
 use app\modules\accounting\models\Account;
+use app\modules\sale\models\Address;
+use app\modules\sale\models\BillType;
+use app\modules\sale\models\Company;
+use app\modules\sale\models\DocumentType;
 use app\modules\sale\models\TaxCondition;
 use Yii;
 
@@ -12,18 +16,23 @@ use Yii;
  *
  * @property integer $employee_id
  * @property string $name
- * @property string $business_name
- * @property string $tax_identification
- * @property string $address
- * @property string $bill_type
+ * @property string $lastname
+ * @property string $document_number
+ * @property integer $document_type_id
+ * @property integer $address_id
  * @property string $phone
- * @property string $phone2
- * @property string $description
+ * @property string $email
+ * @property integer $account_id
+ * @property integer $tax_condition_id
+ * @property integer $company_id
+ * @property string $birthday
  *
  * @property TaxCondition $taxCondition
+ * @property DocumentType $documentType
+ * @property Company $company
  * @property Account $account
- * @property ProviderBill[] $employeeBills
- * @property ProviderPayment[] $employeePayments
+ * @property EmployeeBill[] $employeeBills
+ * @property EmployeePayment[] $employeePayments
  */
 class Employee extends \app\components\db\ActiveRecord
 {
@@ -40,16 +49,16 @@ class Employee extends \app\components\db\ActiveRecord
      */
     public function rules()
     {
-        return [
-            [['name','bill_type', 'tax_condition_id', 'tax_identification'], 'required'],
+        $rules = [
+            [['name','lastname', 'tax_condition_id', 'document_type_id', 'document_number', 'address_id', 'company_id'], 'required'],
             [['account_id'], 'safe'],
-            [['description'], 'string'],
-            [['name', 'business_name', 'address'], 'string', 'max' => 255],
-            [['tax_identification', 'phone', 'phone2'], 'string', 'max' => 45],
-            [['bill_type'], 'in', 'range' => ['A','B','C']],
-            [['account_id'], 'number'],
-            ['tax_identification', CuitValidator::className()]
+            [['birthday'], 'string'],
+            [['name', 'lastname'], 'string', 'max' => 255],
+            [['phone'], 'string', 'max' => 45],
+            [['account_id', 'address_id', 'company_id'], 'number'],
+            ['document_number', 'compareDocument']
         ];
+
         if (Yii::$app->getModule('accounting')) {
             $rules[] = [['account_id'], 'number'];
         }
@@ -65,17 +74,42 @@ class Employee extends \app\components\db\ActiveRecord
         return [
             'employee_id' => Yii::t('app', 'Employee'),
             'name' => Yii::t('app', 'Name'),
-            'business_name' => Yii::t('app', 'Business Name'),
-            'tax_identification' => Yii::t('app', 'Tax Identification'),
-            'address' => Yii::t('app', 'Address'),
-            'bill_type' => Yii::t('app', 'Bill Type'),
+            'lastname' => Yii::t('app', 'Lastname'),
+            'document_number' => Yii::t('app', 'Document Number'),
+            'address_id' => Yii::t('app', 'Address'),
             'phone' => Yii::t('app', 'Phone'),
-            'phone2' => Yii::t('app', 'Phone 2'),
-            'description' => Yii::t('app', 'Description'),
             'account_id' => Yii::t('accounting', 'Account'),
             'tax_condition_id' => Yii::t('app', 'Tax Condition'),
+            'birthday' => Yii::t('app', 'Birthdate')
 
         ];
+    }
+
+    public function compareDocument()
+    {
+        if($this->document_type_id != 1) {
+
+            if (strlen($this->document_number) < 7 ||  strlen($this->document_number) > 8) {
+                $this->addError('document_number', Yii::t('app','The document number must be beetwen 7 and 8 characters'));
+            }
+
+            $array_document = str_split($this->document_number);
+            $array_caracters = array_count_values($array_document);
+
+            Yii::info(count($array_caracters));
+
+            if(count($array_caracters) == 1 && (array_key_exists('0', $array_caracters) || array_key_exists('9', $array_caracters))) {
+                $this->addError('document_number', Yii::t('app','Invalid document number'));
+            }
+
+            if ($array_document[0] == '0') {
+                $this->addError('document_number', Yii::t('app','Document number can`t start with 0'));
+            }
+
+        } else {
+            $validator = new CuitValidator();
+            $validator->validateAttribute($this, 'document_number');
+        }
     }
 
     /**
@@ -83,7 +117,7 @@ class Employee extends \app\components\db\ActiveRecord
      */
     public function getEmployeeBills()
     {
-        return $this->hasMany(EmployeeBill::className(), ['employee_id' => 'employee_id']);
+        return $this->hasMany(EmployeeBill::class, ['employee_id' => 'employee_id']);
     }
 
     /**
@@ -91,7 +125,7 @@ class Employee extends \app\components\db\ActiveRecord
      */
     public function getEmployeePayments()
     {
-        return $this->hasMany(EmployeePayment::className(), ['employee_id' => 'employee_id']);
+        return $this->hasMany(EmployeePayment::class, ['employee_id' => 'employee_id']);
     }
 
     /**
@@ -99,7 +133,7 @@ class Employee extends \app\components\db\ActiveRecord
      */
     public function getAccount()
     {
-        return $this->hasOne(Account::className(), ['account_id' => 'account_id']);
+        return $this->hasOne(Account::class, ['account_id' => 'account_id']);
     }
 
     /**
@@ -107,7 +141,23 @@ class Employee extends \app\components\db\ActiveRecord
      */
     public function getTaxCondition()
     {
-        return $this->hasOne(TaxCondition::className(), ['tax_condition_id' => 'tax_condition_id']);
+        return $this->hasOne(TaxCondition::class, ['tax_condition_id' => 'tax_condition_id']);
+    }
+
+    public function getDocumentType() {
+        return $this->hasOne(DocumentType::class, ['document_Type_id' => 'document_type_id']);
+    }
+
+    public function getCompany() {
+        return $this->hasOne(Company::class, ['company_id' => 'company_id']);
+    }
+
+    public function getAddress() {
+        return $this->hasOne(Address::class, ['address_id' => 'address_id']);
+    }
+
+    public function getFullName() {
+        return $this->name . ' '. $this->lastname;
     }
 
     public function getDeletable(){
@@ -121,9 +171,6 @@ class Employee extends \app\components\db\ActiveRecord
         return true;
     }
 
-    public function getFullname() {
-        return $this->name . ' (' .$this->tax_identification . ')';
-    }
 
     /**
      * @return array
@@ -136,5 +183,65 @@ class Employee extends \app\components\db\ActiveRecord
             'B' => 'B',
             'C' => 'C'
         ];
+    }
+
+    public function beforeSave($insert)
+    {
+        $this->formatDateBeforeSave();
+
+        return parent::beforeSave($insert);
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->formatDateAfterFind();
+    }
+
+    private function formatDateBeforeSave() {
+        if ($this->birthday) {
+            $this->birthday = Yii::$app->formatter->asDate($this->birthday, 'yyyy-MM-dd');
+        }
+    }
+
+    private function formatDateAfterFind() {
+        if ($this->birthday) {
+            $this->birthday = Yii::$app->formatter->asDate($this->birthday, 'dd-MM-yyyy');
+        }
+    }
+
+    /**
+     * Devuelve el BillType del empleado de acuerdo al TaxCondition y a la empresa que pertenece
+     */
+    public function getBillType() {
+        //Por defecto traigo factura B
+        $billType = BillType::findOne(['name' => 'Factura B']);
+
+        if ($this->taxCondition->name === 'IVA Inscripto') {
+            // Si es Inscripto verifico que la empresa admita Factura A
+            $ABillType = BillType::findOne(['Factura A']);
+            if ($this->company->checkBillType($ABillType)){
+                return $ABillType;
+            }
+
+            //Si no admite Factura A, verifico con Factura B
+            if ($this->company->checkBillType($billType)){
+                return $billType;
+            }
+
+            // Si hasta este punto no pude validar los billTypes anteriores, devuelvo el tipo por defecto de la empresa
+            $billType = $this->company->defaultBillType;
+        }else {
+            //Verifico si admite Factura B
+            if ($this->company->checkBillType($billType)) {
+                return $billType;
+            }
+
+            // De no admitir Factura B devuelvo el tipo por defecto de la empresa
+            $billType = $this->company->defaultBillType;
+        }
+
+        return $billType;
     }
 }

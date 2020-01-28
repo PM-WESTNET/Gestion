@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\employee\models\Employee */
 
-$this->title = $model->name;
+$this->title = Yii::t('app', 'Employee').': '. $model->fullName;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employees'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -33,18 +33,31 @@ $this->params['breadcrumbs'][] = $this->title;
     $attributes = [
         'employee_id',
         'name',
-        'business_name',
+        'lastname',
         [
 
             'label'=> Yii::t('app', 'Tax Condition'),
             'attribute' => 'taxCondition.name',
         ],
-        'tax_identification',
-        'address',
-        'bill_type',
+        [
+
+            'label'=> Yii::t('app', 'Document Type'),
+            'attribute' => 'documentType.name',
+        ],
+        'document_number',
+        [
+            'attribute' => 'address_id',
+            'value' => function ($model) {
+                return $model->address->fullAddress;
+            }
+        ],
         'phone',
-        'phone2',
-        'description:ntext'
+        [
+            'attribute' => 'company_id',
+            'value' => function ($model) {
+                return $model->company->name;
+            }
+        ]
     ];
 
     if (Yii::$app->getModule('accounting') ) {

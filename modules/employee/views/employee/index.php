@@ -26,15 +26,19 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
-        'options' => ['class' => 'table-responsive'],
+        'tableOptions' => ['class' => 'table table-striped table-bordered table-responsive'],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
             'employee_id',
-            'name',
-            'business_name',
-            'tax_identification',
-            'address',
+            'fullName',
+            'document_number',
+            [
+                'attribute' => 'address_id',
+                'value' => function($model) {
+                    return $model->address->fullAddress;
+                }
+            ],
             [
                 'label' => Yii::t('app','Bills'),
                 'value'=> function ($model){

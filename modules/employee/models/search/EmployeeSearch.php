@@ -28,7 +28,7 @@ class EmployeeSearch extends Employee
     {
         return [
             [['employee_id'], 'integer'],
-            [['name', 'business_name', 'tax_identification', 'address', 'bill_type', 'phone', 'phone2', 'description', 'fromDate', 'toDate'], 'safe'],
+            [['name', 'lastname', 'document_number',  'phone', 'fromDate', 'toDate'], 'safe'],
         ];
     }
 
@@ -61,8 +61,8 @@ class EmployeeSearch extends Employee
         /** @var Query $query */
         $query = Employee::find();
         $query->orWhere(['like', 'name', $by ])
-            ->orWhere(['like', 'business_name', $by ])
-            ->orWhere(['like', 'tax_identification', $by ])
+            ->orWhere(['like', 'lastname', $by ])
+            ->orWhere(['like', 'document_number', $by ])
             ->orderBy(['name'=>SORT_ASC]);
 
         return $query;
@@ -97,13 +97,9 @@ class EmployeeSearch extends Employee
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'business_name', $this->business_name])
-            ->andFilterWhere(['tax_identification' => $this->tax_identification])
-            ->andFilterWhere(['like', 'address', $this->address])
-            ->andFilterWhere(['bill_type' => $this->bill_type])
-            ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'phone2', $this->phone2])
-            ->andFilterWhere(['like', 'description', $this->description]);
+            ->andFilterWhere(['like', 'lastname', $this->lastname])
+            ->andFilterWhere(['document_number' => $this->document_number])
+            ->andFilterWhere(['like', 'phone', $this->phone]);
 
         return $dataProvider;
     }

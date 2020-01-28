@@ -18,23 +18,49 @@ use app\modules\employee\models\Employee;
     <?php $form = ActiveForm::begin(); ?>
 
     <div class="row">
+        <div class="col-lg-12">
+            <?php echo \app\components\companies\CompanySelector::widget([
+                'form' => $form,
+                'model' => $model,
+                'setDefaultCompany' => false,
+            ])?>
+        </div>
+    </div>
+    <div class="row">
 
         <div class="col-sm-6 col-xs-12">
             <?= $form->field($model, 'name')->textInput(['maxlength' => 255]) ?>            
         </div>
 
         <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'business_name')->textInput(['maxlength' => 255]) ?>            
+            <?= $form->field($model, 'lastname')->textInput(['maxlength' => 255]) ?>
         </div>
-
-        <div class="col-sm-4 col-xs-12">
+    </div>
+    <div class="row">
+        <div class="col-lg-6">
+            <?php echo $form->field($model, 'birthday')->widget(\kartik\date\DatePicker::class, [
+                'pluginOptions' => [
+                    'autoclose'=>true,
+                    'format' => 'dd-mm-yyyy'
+                ]
+            ])?>
+        </div>
+        <div class="col-sm-6 col-xs-12">
             <?= $form->field($model, 'tax_condition_id')->dropDownList(
                 ArrayHelper::map(TaxCondition::find()->orderBy(['name'=>SORT_ASC])->all(), 'tax_condition_id', 'name' )
+                ,['id'=>'tax_condition']) ?>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-sm-4 col-xs-12">
+            <?= $form->field($model, 'document_type_id')->dropDownList(
+                ArrayHelper::map(\app\modules\sale\models\DocumentType::find()->all(), 'document_type_id', 'name' )
                 ,['id'=>'tax_condition']) ?>            
         </div>
 
         <div class="col-sm-4 col-xs-12">
-            <?= $form->field($model, 'tax_identification')->textInput(['maxlength' => 45]) ?>            
+            <?= $form->field($model, 'document_number')->textInput(['maxlength' => 45]) ?>
         </div>
 
         <div class="col-sm-3 col-xs-6 form-group">
@@ -44,13 +70,17 @@ use app\modules\employee\models\Employee;
                 <span id="afip-validation"></span>
             </div>
         </div>
+
         <div class="col-sm-1 col-xs-6 form-groups">
             <label class="control-label">&nbsp;</label>
             <span id="validation-afip-informer-ok" class="btn glyphicon glyphicon-ok hidden" style="color: green;"></span>
             <span id="validation-afip-informer-error" class="btn glyphicon glyphicon-remove hidden" style="color: red;"></span>
         </div>
+    </div>
 
-        <div class="col-sm-8 col-xs-12">
+
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
             <?php if (Yii::$app->getModule("accounting")) { ?>
                 <div class="form-group field-employee-account">
                     <?=Html::label(Yii::t('accounting', "Account"), ['account_id'])?>
@@ -68,33 +98,22 @@ use app\modules\employee\models\Employee;
             <?php } ?>
             
         </div>
-        <div class="col-sm-4 col-xs-12">
-            <?= $form->field($model, 'bill_type')->dropDownList(Employee::getAllBillTypes()) ?>
-        </div>
-
-        <div class="col-xs-12">
-            <?= $form->field($model, 'address')->textInput(['maxlength' => 255]) ?>            
-        </div>
 
         <div class="col-sm-6 col-xs-12">
             <?= $form->field($model, 'phone')->textInput(['maxlength' => 45]) ?>            
         </div>
+    </div>
 
-        <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'phone2')->textInput(['maxlength' => 45]) ?>            
-        </div>
-
-        <div class="col-xs-12">
-            <?= $form->field($model, 'description')->textarea(['rows' => 3]) ?>            
-        </div>
-
+        <h3><?php echo Yii::t('app','Address')?></h3>
+        <?php echo $this->render('../../../sale/views/customer/_address', ['form' => $form, 'address' => $address])?>
+    <div class="row">
         <div class="col-xs-12">
             <div class="form-group">
                 <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-success']) ?>
-            </div>            
+            </div>
         </div>
-        
     </div>
+
     <?php ActiveForm::end(); ?>
 </div>
 

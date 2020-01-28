@@ -81,7 +81,6 @@ class EmployeeBill extends \app\components\companies\ActiveRecord implements Cou
             [['billType', 'employee', 'date', 'partnerDistributionModel'], 'safe'],
             [['date','bill_type_id', 'employee_id'], 'required'],
             [['net', 'taxes', 'total', 'partner_distribution_model_id'], 'number'],
-            [['type'], 'string', 'max' => 1],
             [['number', 'status'], 'string', 'max' => 45],
             [['description'], 'string', 'max' => 255],
             [['payed'],'boolean'],
@@ -210,7 +209,7 @@ class EmployeeBill extends \app\components\companies\ActiveRecord implements Cou
      * Valida la fecha minima de creación del comprobante.
      */
     public function validateMinimunDate($attribute, $params) {
-        $days = Config::getValue('limit_days_to_create_employee_bill') ;
+        $days = Config::getValue('limit_days_to_create_provider_bill') ;
         $min_date = (new \DateTime('now'))->modify("-$days days");
 
         if((new \DateTime($this->date ))->getTimestamp() < $min_date->getTimestamp()) {

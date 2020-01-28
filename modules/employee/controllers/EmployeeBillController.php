@@ -72,7 +72,8 @@ class EmployeeBillController extends Controller
         if ($employee) {
             $employee = $this->findEmployee($employee);
             $model->employee_id = $employee->employee_id;
-            $model->type = $employee->bill_type;
+            $model->bill_type_id = $employee->billType->bill_type_id;
+            $model->company_id = $employee->company_id;
         }
 
         if (empty($model->company_id)){
@@ -129,14 +130,14 @@ class EmployeeBillController extends Controller
                 'query' => $model->getEmployeeBillHasTaxRates(),
             ]);
 
-            $itemsDataProvider = new ActiveDataProvider([
+            $itemsDataEmployee = new ActiveDataProvider([
                 'query' => $model->getEmployeeBillItems()
             ]);
 
             return $this->render('update', [
                 'model' => $model,
                 'dataProvider' => $dataProvider,
-                'itemsDataProvider' => $itemsDataProvider,
+                'itemsDataEmployee' => $itemsDataEmployee,
                 'from' => $from
             ]);
         }
@@ -222,14 +223,14 @@ class EmployeeBillController extends Controller
             'query' => $model->getEmployeeBillHasTaxRates(),
         ]);
 
-        $itemsDataProvider = new ActiveDataProvider([
+        $itemsDataEmployee = new ActiveDataProvider([
             'query' => $model->getEmployeeBillItems(),
         ]);
 
         return $this->render('update', [
             'model' => $model,
             'dataProvider' => $dataProvider,
-            'itemsDataProvider' => $itemsDataProvider,
+            'itemsDataEmployee' => $itemsDataEmployee,
             'from' => 'index'
         ]);
     }
@@ -251,7 +252,7 @@ class EmployeeBillController extends Controller
 
         $model = $this->findModel($employee_bill_id);
 
-        $itemsDataProvider = new ActiveDataProvider([
+        $itemsDataEmployee = new ActiveDataProvider([
             'query' => $model->getEmployeeBillItems(),
         ]);
 
@@ -263,7 +264,7 @@ class EmployeeBillController extends Controller
             'model' => $model,
             'dataProvider' => $dataProvider,
             'from' => 'index',
-            'itemsDataProvider' => $itemsDataProvider,
+            'itemsDataEmployee' => $itemsDataEmployee,
         ]);
 
     }
@@ -293,14 +294,14 @@ class EmployeeBillController extends Controller
             'query' => $model->getEmployeeBillHasTaxRates(),
         ]);
 
-        $itemsDataProvider = new ActiveDataProvider([
+        $itemsDataEmployee = new ActiveDataProvider([
             'query' => $model->getEmployeeBillItems(),
         ]);
 
         return $this->render('update', [
             'model' => $model,
             'dataProvider' => $dataProvider,
-            'itemsDataProvider' => $itemsDataProvider,
+            'itemsDataEmployee' => $itemsDataEmployee,
             'from' => 'index'
         ]);
     }
@@ -326,14 +327,14 @@ class EmployeeBillController extends Controller
             'query' => $model->getEmployeeBillHasTaxRates(),
         ]);
 
-        $itemsDataProvider = new ActiveDataProvider([
+        $itemsDataEmployee = new ActiveDataProvider([
             'query' => $model->getEmployeeBillItems(),
         ]);
 
         return $this->render('update', [
             'model' => $model,
             'dataProvider' => $dataProvider,
-            'itemsDataProvider' => $itemsDataProvider,
+            'itemsDataEmployee' => $itemsDataEmployee,
             'from' => 'index'
         ]);
 

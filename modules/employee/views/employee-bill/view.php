@@ -9,7 +9,7 @@ use app\modules\employee\models\EmployeeBill;
 /* @var $this yii\web\View */
 /* @var $model app\modules\employee\models\EmployeeBill */
 
-$this->title = Yii::t('app','Bill') .' - '. $model->employee->name . " - " . $model->billType->name . " " . $model->number;
+$this->title = Yii::t('app','Bill') .' - '. $model->employee->fullName . " - " . $model->billType->name . " " . $model->number;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Employee Bills'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

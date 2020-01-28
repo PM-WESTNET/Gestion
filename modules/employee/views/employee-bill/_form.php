@@ -84,13 +84,13 @@ use yii\jui\DatePicker;
         <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
             <?php
                 // Formulario para los Items
-                echo $this->render('_form-items', ['model'=>$model,'dataProvider'=>$itemsDataProvider, 'item'=>new EmployeeBillItem()]);
+                echo $this->render('_form-items', ['model'=>$model,'dataProvider'=>$itemsDataEmployee, 'item'=>new EmployeeBillItem()]);
 
                 // Listado de Items
                 Pjax::begin(['id'=>'items']);
                 echo GridView::widget([
                     'id'=>'grid',
-                    'dataProvider' => $itemsDataProvider,
+                    'dataProvider' => $itemsDataEmployee,
                     'columns' => [
                         ['class' => 'yii\grid\SerialColumn'],
                         'description',

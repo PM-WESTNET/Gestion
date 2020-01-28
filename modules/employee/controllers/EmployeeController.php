@@ -2,6 +2,7 @@
 
 namespace app\modules\employee\controllers;
 
+use app\modules\sale\models\Address;
 use Yii;
 use app\modules\employee\models\Employee;
 use app\modules\employee\models\search\EmployeeSearch;
@@ -64,14 +65,22 @@ class EmployeeController extends Controller
     public function actionCreate()
     {
         $model = new Employee();
+        $address = new Address();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->employee_id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
+            if ($address->save()) {
+                $model->address_id = $address->address_id;
+                if ($model->save()) {
+                    return $this->redirect(['view', 'id' => $model->employee_id]);
+                }
+            }
         }
+        Yii::trace($model->getErrors());
+        return $this->render('create', [
+            'model' => $model,
+            'address' => $address
+        ]);
+
     }
 
     /**
@@ -83,14 +92,19 @@ class EmployeeController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $address = $model->address;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())
+            && $address->save() && $model->save()) {
             return $this->redirect(['view', 'id' => $model->employee_id]);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
         }
+
+
+        return $this->render('update', [
+            'model' => $model,
+            'address' => $address
+        ]);
+
     }
 
     /**
