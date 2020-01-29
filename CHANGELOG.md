@@ -21,13 +21,16 @@ All notable changes to this project will be documented in this file.
  - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710]
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
  cuenta los teléfonos fijos. [GES-726]
- - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
- - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
- - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
  - Celular 2 no requerido [GES-788]
  - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654]
  - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786]
  
+ ## [2020.01.29.0]
+ ### Modificado
+  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746] Solicitado y aprobado por Camila
+  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
+  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775] Solicitado y aprobado por Joaquin
+   
   ## [2020.01.28.0]
   ### Agregado
   - Libro Mayor [GES-783]
