@@ -25,7 +25,8 @@ All notable changes to this project will be documented in this file.
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
  - Celular 2 no requerido [GES-788]
- - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos
+ - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654]
+ - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786]
  
   ## [2020.01.28.0]
   ### Agregado
