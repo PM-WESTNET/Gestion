@@ -6,6 +6,7 @@ use app\modules\employee\models\Employee;
 use app\modules\employee\models\EmployeeBillHasEmployeePayment;
 use kartik\widgets\Select2;
 use yii\data\ActiveDataEmployee;
+use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\helpers\Url;

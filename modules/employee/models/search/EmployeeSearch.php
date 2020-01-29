@@ -216,10 +216,10 @@ class EmployeeSearch extends Employee
         $toDate = $this->toDate;
         $fromDate = $this->fromDate;
         if (empty($toDate)){
-            $toDate = (new \DateTime('first day of this month'))->format('d-m-Y');
+            $toDate = (new \DateTime('last day of this month'))->format('d-m-Y');
         }
         if (empty($fromDate)){
-            $fromDate = (new \DateTime('last day of this month'))->format('d-m-Y');
+            $fromDate = (new \DateTime('first day of this month'))->format('d-m-Y');
         }
 
         $toDate = Yii::$app->getFormatter()->asDate($toDate, 'yyyy-MM-dd');

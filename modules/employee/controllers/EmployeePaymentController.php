@@ -2,9 +2,16 @@
 
 namespace app\modules\employee\controllers;
 
+use app\modules\employee\models\Employee;
+use app\modules\employee\models\EmployeeBill;
+use app\modules\employee\models\EmployeeBillHasEmployeePayment;
+use app\modules\employee\models\EmployeePayment;
+use app\modules\employee\models\EmployeePaymentItem;
 use app\modules\employee\models\ProviderBill;
 use app\modules\employee\models\ProviderBillHasProviderPayment;
 use app\modules\employee\models\ProviderPaymentItem;
+use app\modules\employee\models\search\EmployeeBillSearch;
+use app\modules\employee\models\search\EmployeePaymentSearch;
 use app\modules\employee\models\search\ProviderBillSearch;
 use Yii;
 use app\modules\employee\models\ProviderPayment;
@@ -34,10 +41,10 @@ class EmployeePaymentController extends Controller {
      */
     public function actionIndex($employee_id = 0) {
         $employee = null;
-        $searchModel = new ProviderPaymentSearch();
+        $searchModel = new EmployeePaymentSearch();
         if ($employee_id != 0) {
             $searchModel->employee_id = $employee_id;
-            $employee = $this->findProvider($employee_id);
+            $employee = $this->findEmployee($employee_id);
         }
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
@@ -65,13 +72,13 @@ class EmployeePaymentController extends Controller {
      * @return mixed
      */
     public function actionCreate($employee = 0, $employee_payment = 0) {
-        $model = new ProviderPayment();
+        $model = new EmployeePayment();
         if ($employee_payment != 0) {
             $model = $this->findModel($employee_payment);
         }
 
         if ($employee != 0) {
-            $employee = $this->findProvider($employee);
+            $employee = $this->findEmployee($employee);
             $model->employee_id = $employee->employee_id;
         }
 
@@ -106,13 +113,13 @@ class EmployeePaymentController extends Controller {
             }
             Yii::$app->session->addFlash('error', Yii::t('app', 'The Money Box Account is Closed. Change the date of the Payment.'));
         }
-        $search = new ProviderPaymentSearch();
+        $search = new EmployeePaymentSearch();
         $billDataProvider = new ActiveDataProvider([
             'query' =>$search->searchPendingBills($model->employee_id, $model->employee_payment_id)
         ]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $model->getProviderBillHasProviderPayments(),
+            'query' => $model->getEmployeeBillHasEmployeePayments(),
         ]);
         return $this->render('update', [
             'model' => $model,
@@ -162,11 +169,11 @@ class EmployeePaymentController extends Controller {
      * Finds the ProviderPayment model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return ProviderPayment the loaded model
+     * @return EmployeePayment the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findModel($id) {
-        if (($model = ProviderPayment::findOne($id)) !== null) {
+        if (($model = EmployeePayment::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -177,11 +184,11 @@ class EmployeePaymentController extends Controller {
      * Finds the Provider model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return Provider the loaded model
+     * @return Employee the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findProvider($id) {
-        if (($model = \app\modules\employee\models\Provider::findOne($id)) !== null) {
+    protected function findEmployee($id) {
+        if (($model = \app\modules\employee\models\Employee::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -192,11 +199,11 @@ class EmployeePaymentController extends Controller {
      * Finds the Provider Bill model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
-     * @return ProviderBill the loaded model
+     * @return EmployeeBill the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
     protected function findBill($id) {
-        if (($model = \app\modules\employee\models\ProviderBill::findOne($id)) !== null) {
+        if (($model = \app\modules\employee\models\EmployeeBill::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -211,7 +218,7 @@ class EmployeePaymentController extends Controller {
     public function actionAddBill($id) {
         Yii::$app->response->format = Response::FORMAT_JSON;
 
-        $bill = new ProviderBillHasProviderPayment();
+        $bill = new EmployeeBillHasEmployeePayment();
         $bill->load(Yii::$app->request->post());
 
         if ($bill->validate()) {
@@ -244,7 +251,7 @@ class EmployeePaymentController extends Controller {
      */
     public function actionDeleteBill($employee_bill_id, $employee_payment_id) {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $modelDelete = ProviderBillHasProviderPayment::findOne([
+        $modelDelete = EmployeeBillHasEmployeePayment::findOne([
                     'employee_bill_id' => $employee_bill_id,
                     'employee_payment_id' => $employee_payment_id]);
         if (!empty($modelDelete)) {
@@ -268,7 +275,7 @@ class EmployeePaymentController extends Controller {
 
         $model = $this->findModel($id);
 
-        $item = new ProviderPaymentItem();
+        $item = new EmployeePaymentItem();
         $item->load(Yii::$app->request->post());
 
         if($item->moneyBoxAccount) {
@@ -319,7 +326,7 @@ class EmployeePaymentController extends Controller {
     public function actionDeleteItem($employee_payment_item_id) {
         Yii::$app->response->format = 'json';
         $status = 'error';
-        if (ProviderPaymentItem::findOne($employee_payment_item_id)->delete()) {
+        if (EmployeePaymentItem::findOne($employee_payment_item_id)->delete()) {
             return [
                 'status' => 'success'
             ];
@@ -344,7 +351,7 @@ class EmployeePaymentController extends Controller {
         $employee_payment_id = Yii::$app->request->post('employee_payment_id');
         $date = Yii::$app->request->post('date');
         $status = 'error';
-        if (($model = ProviderPayment::findOne($employee_payment_id))!==false) {
+        if (($model = EmployeePayment::findOne($employee_payment_id))!==false) {
 
             if($model->verifyItems($date)) {
                 $model->date = $date;
@@ -374,13 +381,13 @@ class EmployeePaymentController extends Controller {
      * @throws NotFoundHttpException
      */
     public function actionApply($employee_payment_id) {
-        $model = ProviderPayment::findOne($employee_payment_id);
-        $searchModel = new ProviderBillSearch();
+        $model = EmployeePayment::findOne($employee_payment_id);
+        $searchModel = new EmployeeBillSearch();
         $searchModel->employee_id = $model->employee_id;
         $billDataProvider = $searchModel->searchWithDebt([]);
 
         $appliedDataProvider = new ActiveDataProvider([
-            'query' => $model->getProviderBills(),
+            'query' => $model->getEmployeeBills(),
             'sort' => [
                 //'defaultOrder' => ['bill.date'=>SORT_ASC]
             ]
@@ -406,7 +413,7 @@ class EmployeePaymentController extends Controller {
 
         $bills_ids = Yii::$app->request->post('bills');
         $model = $this->findModel($id);
-        if (!$model->associateProviderBills($bills_ids)) {
+        if (!$model->associateEmployeeBills($bills_ids)) {
             $message = Yii::t('app', 'One or more employee bills cant be applied correctly');
         }
 
@@ -429,7 +436,7 @@ class EmployeePaymentController extends Controller {
 
         $bills_ids = Yii::$app->request->post('bills');
         $model = $this->findModel($id);
-        if (!$model->disassociateProviderBills($bills_ids)) {
+        if (!$model->disassociateEmployeeBills($bills_ids)) {
             $message = Yii::t('app', 'One or more employee bills cant be disassociated');
         }
 

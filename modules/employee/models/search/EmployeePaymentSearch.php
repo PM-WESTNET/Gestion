@@ -68,7 +68,7 @@ class EmployeePaymentSearch extends EmployeePayment
         $query = (new Query())->from('employee_payment')
         ;
 
-        $dataEmployee = new ActiveDataProvider([
+        $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
 
@@ -286,7 +286,7 @@ class EmployeePaymentSearch extends EmployeePayment
     public function searchPendingBills($employee_id, $employee_payment_id)
     {
         $query = (new Query())
-            ->select(['pb.employee_bill_id', 'pb.date','pb.type','pb.number','pb.net','pb.taxes',
+            ->select(['pb.employee_bill_id', 'pb.date', 'pb.number','pb.net','pb.taxes',
                         'pb.total','pb.employee_id','bt.multiplier','bt.name AS bill_type','pp.amount',
                         new Expression('sum(coalesce(if(pbpy.employee_payment_id = '.$employee_payment_id.', pbpy.amount, 0), 0)) AS total_amount'),
                     new Expression('pb.total - sum(coalesce(pbpy.amount, 0)) AS balance')
@@ -296,7 +296,7 @@ class EmployeePaymentSearch extends EmployeePayment
             ->leftJoin('employee_payment pp', 'pbpy.employee_payment_id = pp.employee_payment_id')
             ->leftJoin('bill_type bt', 'pb.bill_type_id = bt.bill_type_id')
             ->where(['pb.employee_id'=>$employee_id])
-            ->groupBy(['pb.employee_bill_id', 'pb.date', 'pb.type', 'pb.number', 'pb.net', 'pb.taxes', 'pb.total',
+            ->groupBy(['pb.employee_bill_id', 'pb.date', 'pb.number', 'pb.net', 'pb.taxes', 'pb.total',
                         'pb.employee_id', 'bt.multiplier', 'bt.name'])
             ->having('sum(coalesce(pbpy.amount, 0)) < pb.total or sum(coalesce(pbpy.amount, 0)) = 0 or sum(coalesce(if(pbpy.employee_payment_id = '.$employee_payment_id.', pbpy.amount, 0), 0)) > 0')
         ;
