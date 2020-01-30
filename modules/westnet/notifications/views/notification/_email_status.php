@@ -8,10 +8,9 @@
 
 $total = Yii::$app->cache->get('total_'.$model->notification_id);
 $success = Yii::$app->cache->get('success_'.$model->notification_id);
-$error = Yii::$app->cache->get('error_'.$model->notification_id);
 $process = 0;
 if ($total) {
-    $process = (((int)$success + (int)$error) * 100) / (int)$total;
+    $process = (((int)$success) * 100) / (int)$total;
 }
 
 ?>
@@ -37,7 +36,7 @@ if ($total) {
         <div class="col-xs-12">
             <h5>Total de correos: <span id="total"><?php echo Yii::$app->cache->get('total_'.$model->notification_id)?></span></h5>
             <h5>Enviados: <span id="success"><?php echo Yii::$app->cache->get('success_'.$model->notification_id)?></span></h5>
-            <h5>Erroneos: <span id="error"><?php echo Yii::$app->cache->get('error_'.$model->notification_id)?></span></h5>
+            <h5 class="text-danger"><span id="message"></span></h5>
         </div>
     </div>
 </div>
@@ -50,7 +49,7 @@ if ($total) {
         this.interval;
 
         this.init = function () {
-            EmailStatus.interval = setInterval(EmailStatus.getProcess, 3000);
+            EmailStatus.interval = setInterval(function(){ EmailStatus.getProcess()}, 3000);
         };
 
         this.getProcess = function () {
@@ -60,9 +59,9 @@ if ($total) {
                 dataType: 'json'
             }).done(function(response, status){
                 if (status === 'success') {
-                    if (response.status === 'Pending' || response.status === 'In_process') {
+                    if (response.status === 'pending' || response.status === 'in_process') {
 
-                        var process = ((parseInt(response.success) + parseInt(response.error)) * 100) / parseInt(response.total);
+                        var process = ((parseInt(response.success)) * 100) / parseInt(response.total);
                         $("#bar").css('width', process + '%');
                         $('#total').html(response.total);
                         $('#success').html(response.success);
@@ -73,8 +72,9 @@ if ($total) {
                             $("#bar").css('background-color', 'green');
                             $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
                         }
-                    }else if (response.status === 'Error') {
+                    }else if (response.status === 'error') {
                         clearInterval(EmailStatus.interval);
+                        $('#message').html(response.message);
                         $("#bar").css('background-color', 'red');
                         $("#bar").css('width', '100%');
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Error')?>")
@@ -88,4 +88,3 @@ if ($total) {
 
 </script>
 
-<?php $this->registerJs('EmailStatus.init()')?>

@@ -140,6 +140,10 @@ class Transport extends \app\components\db\ActiveRecord {
         
         $response = $transport->send($notification, $force_send);
 
+        if(Yii::$app->request->isConsoleRequest) {
+            echo "Respuesta final: ". print_r($response, 1);
+            echo "\n";
+        }
         Yii::trace($response);
 
         if($response['status'] == 'success'){

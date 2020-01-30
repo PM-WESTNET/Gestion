@@ -1,5 +1,6 @@
 <?php
 
+use app\modules\westnet\models\NotifyPayment;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\jui\DatePicker;
@@ -33,10 +34,7 @@ use app\modules\checkout\models\PaymentMethod;
         </div>
         <div class="col-sm-4">
             <?= $form->field($model,'from')->widget(Select2::class, [
-                'data' => [
-                    'App' => Yii::t('app','Mobile App'),
-                    'IVR' => Yii::t('app','IVR'),
-                ],
+                'data' => NotifyPayment::getFormForSelect(),
                 'options' => ['placeholder' => Yii::t('app','Select an option')]
             ]);?>
         </div>

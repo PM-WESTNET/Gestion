@@ -8,41 +8,145 @@ All notable changes to this project will be documented in this file.
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
  - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Correcion error duplicado de tickets en panel de cobranza
- - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
- - IVR: Se agrega indicador si el cliente es nuevo o no
- - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
  - Correción filtros asignación masiva de planes
- - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
-   la fecha de la ultima actualizacion de los mismos
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
-  del plan actual del cliente. [Ticket GES-489]
- - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
- - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago
- - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-574][actualizaContratoManualISP]
- - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago [Ticket GES-554]
- - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
- de cliente etc). [Ticket GES-568]
- - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
- uno de los clientes. [Ticket GES-568]
- - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557]
- - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
- a diferentes pagos. [Ticket GES-547]
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
- - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620]
- - IVR : Cambio en salida de endpoint get-customer para que le quede comodo a Federico de Iperfex
- - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641]
- - Comprobantes de proveedores: Se agrega fecha de creación en vista [GES-641]
- - Pagos de clientes: Se agrega fecha de creación en vista [GES-641]
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [GES-644]
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
- - Notificaciones por email: envio en segundo plano [GES-614]
- - Notificaciones masiva a la app [GES-665]
- - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Se agrega proceso en segundo plano que cierra los pagos creados con un archivo de pago facil [GES-628] [pago-facil-payments]
+ - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
+ - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710]
+ - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
+ cuenta los teléfonos fijos. [GES-726]
+ - Celular 2 no requerido [GES-788]
+ - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654]
+ - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786]
+ 
+ ## [2020.01.29.0]
+ ### Modificado
+  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746] Solicitado y aprobado por Camila
+  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
+  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775] Solicitado y aprobado por Joaquin
+   
+  ## [2020.01.28.0]
+  ### Agregado
+  - Libro Mayor [GES-783]
+  
+  ## [2020.01.22.1]
+  ### Agregado
+  - Reporte de clientes actualizados [GES-764]
+  - Alta de cliente: Agregado campo observaciones [GES-626]
+  
+  ### Modificado
+  - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
+  
+  ## [2020.01.22.0]
+  ### Agregado 
+   - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+   uno de los clientes. [Ticket GES-568] Solicitado y aprobado por Joaquin
+     
+ ## [2020.01.16.0]
+ ### Modificado
+ - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
+ 
+ ## [2020.01.15.0]
+ ### Modificado
+  - Cierre de Lote de Ecopago: Se corrige error al crear la comision del ecopago [GES-574] Solicitado y aprobado por Elizabeth
+  - Notificaciones por Explorador: Se añaden etiquetas reemplazables en el contenido de la notificación (Saldo, nombre
+   de cliente etc). [Ticket GES-568] Solicitado y aprobado por Joaquin
+  - Asignación masiva de planes a clientes: Se corrige la barra que indica el progreso del proceso [Ticket GES-557] Solicitado y aprobado por Camila
+  - Extension de pago desde app: Correccion error que no permitia forzar a clientes con 1 factura adeudada [Ticket GES-620] Solicitado y aprobado por Camila
+  - Notificaciones por email: envio en segundo plano [GES-614] Solicitado y aprobado por Camila
+  - Registro de errores al crear movimientos desde pagos de proveedores [GES-648] [GES-669] Solicitado y aprobado por Marian
+  - Al cambiar el cliente de un pago no se duplica movimiento [GES-650] Solicitado y aprobado por Marian
+ 
+ ### Agregado
+  - Pagos a proveedores: Se agrega fecha de creación en vista [GES-641] Solicitado por Marian y aprobado por Elizabeth
+  - Notificaciones masiva a la app [GES-665] Solicitado por Elizabeth y aprobado por Camila
+  - Se agrega rol con permisos para poder configurar la empresa de facturacion que se le asignará a los clientes nuevos [GES-663] Solicitado y aprobado por Camila   
+  
+ ## [2020.01.14.0]
+ ### Modificado
+  - Eliminación de telefonos duplicados por cliente
+  - Limitacion al crear un cliente: Los telefonos no pueden estar repetidos
+  
+ ## [2020.01.13.0]
+ ### Agregado
+  - IVR: Se agrega indicador si el cliente es nuevo o no
+  - IVR: Se agrega indicador para identificar a los clientes que se les debe verificar los datos, y ademas
+   la fecha de la ultima actualizacion de los mismos
+  - Se agrega endpoint para IVR get-customer-by-document-number.
+  - API IVR: se agrega campo en customer que indica si el cliente tiene un contrato en estado de baja.
+ ### Modificado
+  - IVR: Correcion al error que definia la fecha de vencimiento de la extension de pago igual a la fecha que se le notificaba al cliente.
+  - IVR: Se valida que el cliente no este de baja y tenga contratos activos. 
+  - IVR : Cambio en salida de endpoint get-customer.
+
+ ## [2020.01.07.1]
+ ### Modificado
+  - Fecha de nacimiento: se requiere solo cuando no es empresa
+  - Notificaciones: Se agregan columnas DNI, email y email secundario a la exportacion de infobip   
+ 
+ 
+ ## [2020.01.07.0]
+ ### Modificado
+  - Cambios de velocidad programada: Se limita el selector de nuevo plan a que muestre planes de fibra o WIFI dependiendo
+   del plan actual del cliente.
+  - Activacion de items de extension de pago automáticas: Se modifica cron para que tenga en cuenta conexiones en estado 
+  activo, y no solo las forzadas.
+
+ ## [2020.01.06.0]
+ ### Agregado
+ - Alta cliente: se agrega fecha de nacimiento
+ 
+ ## [2020.01.02.0]
+ ### Agregado
+  - API IVR: se agrega campo que indique si el contrato es de fibra o no.
+  
+ ## [2019.12.30.1]
+   ### Modificado
+   - Movimientos: Se agrega rol de usuario el cual es el unico permitido a modificar y eliminar movimiento. Los movimientos se 
+   pueden modificar o eliminar si no hay movimientos posteriores en estado cerrado.
+   
+ ## [2019.12.30.0]
+ ### Modificado
+  - Pagos a proveedores: Se corrige error que no permite cargar mas de un cheque a un mismo pago.
+   
+ ## [2019.12.27.0]
+ ## Modificado
+  - Alta Cliente: validación de número de documento solo permitir números, limitar de 7 a 8 caracteres cuando no es CUIT
+  - Alta Cliente: validación de número de documento no puede ser del tipo 0000 o 9999 
+  - Alta Cliente: validación de número de documento no puede empezar con 0 
+  - Alta Cliente: validación de telefonos, solo permite ingresar numeros, se limita a  10 caracteres 
+ 
+ ## [2019.12.26.0] 
+ ## Agregado
+  - Reportes: Grafico de torta extensiones de pago.
+  - Reportes: Grafico de línea extensiones de pago.
+  - Reportes: Grafico de torta informes de pago.
+  - Reportes: Grafico de línea informes de pago.
+ 
+ ## [2019.12.23.1]
+  ### Agregado
+  - Al iniciar proceso de baja se genera nota de crédito por el total de la deuda del cliente
+   
+ ## [2019.12.23.0]
+ ### Modificado
+  - Comprobantes a proveedores: Se modifica vista de pago "Aplicar a comprobante" para que permita aplicar el mismo comprobante
+  a diferentes pagos.
+ 
+ ## [2019.12.10.0]
+ ### Agregado
+ - Se agrega proceso de facturación por lotes en segundo plano
+ - Se configura cron para que el proceso de facturación por lotes se levante automáticamente cuando por una razón 
+ externa ha sido interrumpido.
+ ### Modificado
+ - Se modifica el proceso de facturación por lotes de manera que no bloquee las tareas en el sistema al usuario que 
+ inicia el proceso.
  
  ## [2019.11.15.0]
  - IVR: Se modifica el formato del nombre del cliente en la respuesta de endpoint

@@ -10,6 +10,7 @@ namespace app\modules\westnet\reports\search;
 
 
 use app\components\helpers\DbHelper;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\reports\ReportsModule;
 use Yii;
 use yii\base\Model;
@@ -18,8 +19,16 @@ use yii\db\Query;
 
 class CustomerSearch extends Model
 {
+
+    const LAST_WEEK_RANGE= 'last_week';
+    const LAST_MONTH_RANGE = 'last_month';
+    const LAST_YEAR_RANGE = 'last_year';
+
     public $date_from;
     public $date_to;
+
+    // Rango de tiempo para el reporte de clientes actualizados
+    public $range;
 
     public function init()
     {
@@ -34,7 +43,7 @@ class CustomerSearch extends Model
     public function rules() {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to'], 'safe']
+            [['date_from', 'date_to', 'range'], 'safe']
         ];
     }
 
@@ -43,6 +52,7 @@ class CustomerSearch extends Model
         return [
             'date_from' => ReportsModule::t('app', 'Date From'),
             'date_to' => ReportsModule::t('app', 'Date To'),
+            'range' => Yii::t('app', 'Time Range')
         ];
     }
 
@@ -124,4 +134,108 @@ GROUP BY periodo
 
         return $query->all();
     }
+
+
+    /**
+     * Datos para reporte de Clientes Actualizdos
+     */
+    public function findByCustomersUpdated($params)
+    {
+        $this->load($params);
+
+        $from_date = null;
+        $to_date = null;
+        $labels = [];
+        $points = [];
+
+        /**
+         * Según el rango calculo la fecha mínima y máxima
+         * Por cada fecha que se muestra en el gráfico cuento los clientes actualizados entre el punto anterior y el actual
+         */
+        switch($this->range) {
+            case self::LAST_WEEK_RANGE:
+                $from_date = (new \DateTime())->modify('-7 days');
+                $to_date = (new \DateTime());
+
+                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day = $day + 86400) {
+                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
+                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
+                        'y' => $qty
+                    ];
+                }
+
+                break;
+            case self::LAST_MONTH_RANGE:
+                $from_date = (new \DateTime())->modify('-30 days');
+                $to_date = (new \DateTime());
+                $before = null;
+                for ($month= $from_date->getTimestamp(); $month <= $to_date->getTimestamp(); $month = $month + (86400 * 5)) {
+                    $labels[] = Yii::$app->formatter->asDate($month, 'dd/MM');
+                    $qty = Customer::find()
+                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
+                        ->andFilterWhere(['>=', 'last_update', $before])
+                        ->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($month, 'dd/MM'),
+                        'y' => $qty
+                    ];
+
+                    $before = Yii::$app->formatter->asDate($month, 'yyyy-MM-dd');
+                }
+
+                break;
+            case self::LAST_YEAR_RANGE:
+                $from_date = (new \DateTime())->modify('-1 year');
+                $to_date = (new \DateTime());
+
+                $before = null;
+
+                for ($year= $from_date->getTimestamp(); $year <= $to_date->getTimestamp(); $year=$year + (86400 * 30)) {
+                    $labels[] = Yii::$app->formatter->asDate($year, 'MM/yyyy');
+
+                    $qty = Customer::find()
+                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                        ->andFilterWhere(['>=', 'last_update', $before])
+                        ->count();
+
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
+                        'y' => $qty
+                    ];
+
+                    $before = Yii::$app->formatter->asDate($year, 'yyyy-MM-dd');
+                }
+                break;
+            default :
+                $from_date = (new \DateTime())->modify('-7 days');
+                $to_date = (new \DateTime());
+
+//                var_dump($from_date->format('d-m-Y'));
+//                die();
+
+                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day=86400 + $day) {
+                    //var_dump($day);
+
+                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
+                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
+                        'y' => $qty
+                    ];
+                }
+
+                break;
+        }
+        //die();
+        return [
+            'labels' => $labels,
+            'points' => $points,
+        ];
+
+
+    }
+
+
 }

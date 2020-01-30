@@ -138,35 +138,38 @@ class Log extends \app\components\db\ActiveRecord
         $log = new Log();
         $log->route = Yii::$app->requestedRoute ? Yii::$app->requestedRoute : 'site/index';
 
-        if ( Yii::$app instanceof \yii\console\Application ) {
-            $log->user_id = User::findOne(['username'=>'superadmin'])->id;
-        } else {
-            $log->user_id = Yii::$app->user->getId();
-        }
-        $log->model = $model;
-        $log->model_id = $model_id;
-        $log->attribute = self::concatValues($attributes);
-        $log->old_value = self::concatValues($old_values);
-        $log->new_value = self::concatValues($new_values);
+        if ($log->route != 'mobileapp/v1/user-app/create-notify-payment') {
 
-        if (empty($post) && !(Yii::$app instanceof \yii\console\Application)) {
-            $post = self::prettyArray(Yii::$app->request->getBodyParams());
-            if (Yii::$app->request->post()) {
-                $post .= "\n\nDatos:\n" . self::prettyArray(Yii::$app->request->post());
+            if (Yii::$app instanceof \yii\console\Application) {
+                $log->user_id = User::findOne(['username' => 'superadmin'])->id;
+            } else {
+                $log->user_id = Yii::$app->user->getId();
             }
-        }
+            $log->model = $model;
+            $log->model_id = $model_id;
+            $log->attribute = self::concatValues($attributes);
+            $log->old_value = self::concatValues($old_values);
+            $log->new_value = self::concatValues($new_values);
 
-        if (empty($get) && !(Yii::$app instanceof \yii\console\Application)) {
-            $get = self::prettyArray(Yii::$app->request->getQueryParams());
-            if (Yii::$app->request->get()) {
-                $get .= "\n\nDatos:\n" . self::prettyArray(Yii::$app->request->get());
+            if (empty($post) && !(Yii::$app instanceof \yii\console\Application)) {
+                $post = self::prettyArray(Yii::$app->request->getBodyParams());
+                if (Yii::$app->request->post()) {
+                    $post .= "\n\nDatos:\n" . self::prettyArray(Yii::$app->request->post());
+                }
             }
+
+            if (empty($get) && !(Yii::$app instanceof \yii\console\Application)) {
+                $get = self::prettyArray(Yii::$app->request->getQueryParams());
+                if (Yii::$app->request->get()) {
+                    $get .= "\n\nDatos:\n" . self::prettyArray(Yii::$app->request->get());
+                }
+            }
+
+            $log->post = $post;
+            $log->get = $get;
+
+            $log->save();
         }
-
-        $log->post = $post;
-        $log->get = $get;
-
-        $log->save();
     }
 
     private static function prettyArray($data)

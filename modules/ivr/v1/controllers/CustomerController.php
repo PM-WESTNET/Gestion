@@ -760,7 +760,7 @@ class CustomerController extends Controller
                 ];
             }
 
-            if (!$customer->hasContractAndConnectionActive()) {
+            if (!$customer->hasActiveOrLowProcessContract()) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
@@ -778,6 +778,133 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @SWG\Post(path="/customer/get-customer-by-document-number",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Número de documento del cliente"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'error': 'false',
+     *               'data': {
+     *                   'customer_id': 39932,
+     *                   'fullName': 'LEZCANO, NADIA ETHEL ',
+     *                   'documentType': {
+     *                   'document_type_id': 2,
+     *                   'name': 'DNI',
+     *                   'code': 96,
+     *                   'regex': ''
+     *                  },
+     *                   'document_number': '39382763',
+     *                   'code': 47745,
+     *                   'balance': -1035.03,
+     *                   'last_payment': {
+     *                   'amount': 1110,
+     *                   'date': '17-07-2019'
+     *                   },
+     *                   'clipped': 'enabled'
+     *               }
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomerByDocumentNumber()
+    {
+        try {
+
+            $data = Yii::$app->request->post();
+            $customer_qty = 0;
+            $active_customers = [];
+
+            if (!isset($data['document_number']) || empty($data['document_number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','"document_number" param is required')
+                ];
+            }
+
+            $customers = Customer::find()->where(['document_number' => $data['document_number'], 'status' => Customer::STATUS_ENABLED])->all();
+
+            if (empty($customers)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            foreach ($customers as $customer) {
+                if ($customer->hasActiveOrLowProcessContract()) {
+                    $customer->scenario = 'full';
+                    array_push($active_customers, $customer);
+                    $customer_qty ++;
+                }
+            }
+
+            //Si no hay ningun cliente activo
+            if($customer_qty <= 0) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            //Se pide específicamente que si el resultado es uno solo NO se devuelva dentro de un array
+            if(count($active_customers) == 1) {
+                return [
+                    'error' => 'false',
+                    'data' => $active_customers[0],
+                    'customer_qty' => 1
+                ];
+            }
+
+            return [
+                'error' => 'false',
+                'customer_qty' => $customer_qty,
+                'data' => $active_customers,
+            ];
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'customer_qty' => 0,
                 'msg' => $ex->getMessage()
             ];
         }
@@ -881,7 +1008,7 @@ class CustomerController extends Controller
             'amount' => $data['amount'],
             'payment_method_id' => $data['payment_method_id'],
             'contract_id' => $data['contract_id'],
-            'from' => 'IVR'
+            'from' => NotifyPayment::FROM_IVR
         ]);
 
         $trasanction = Yii::$app->db->beginTransaction();

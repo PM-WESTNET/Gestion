@@ -1,5 +1,6 @@
 <?php
 
+use dosamigos\chartjs\ChartJs;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\bootstrap\Collapse;

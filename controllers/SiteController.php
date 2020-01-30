@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\westnet\models\NotifyPayment;
 use Yii;
 use yii\filters\AccessControl;
@@ -86,6 +87,14 @@ class SiteController extends Controller
 
     public function actionAbout()
     {
+        $paymentSearch = new PaymentSearch();
+        $paymentSearch->customer_id = 6;
+
+        $debt = round((float)$paymentSearch->accountTotal(), 2);
+
+        var_dump($debt);
+        Yii::trace($debt);
+        die();
         return $this->render('about');
     }
 }

@@ -190,5 +190,7 @@ return array(
     'Datetime' => 'Fecha',
     'Integratech received sms' => 'Mensajes recibidos de integratech',
     'Integratech sms filters' => 'Filtros de SMS recibidos',
-    'Category' => 'Categoria'
+    'Category' => 'Categoria',
+    'Installed' => 'Instalada',
+    'Not Installed' => 'No Instalada'
 );
