@@ -277,6 +277,51 @@ class TaxesBookController extends \app\components\web\Controller
         ]);
     }
 
+    public function buyEmployeeBills($id)
+    {
+        $model = $this->findModel($id);
+
+        $searchModel  = new TaxesBookSearch();
+        $searchModel->taxes_book_id = $id;
+        $searchModel->company_id = $model->company_id;
+        $searchModel->toDate = (new \DateTime($model->period))->format('Y-m-t');
+        $searchModel->employee_id = Yii::$app->request->post('employee_id', Yii::$app->request->get('employee_id', null));
+        $searchModel->bill_types =  Yii::$app->request->post('bill_types', Yii::$app->request->get('bill_types', null));
+
+        if(!$searchModel->bill_types) {
+            foreach($model->company->taxCondition->getBillTypesBuy()->select(['bill_type_id'])->asArray()->all() as $bt) {
+                $searchModel->bill_types[] = $bt['bill_type_id'];
+            }
+        } else {
+            if(strpos($searchModel->bill_types[0], ',')!==false) {
+                $searchModel->bill_types = explode(',', $searchModel->bill_types[0]);
+            }
+        }
+
+        $dataProvider = $searchModel->findBuyEmployeeBills(Yii::$app->request->getQueryParams());
+
+        $paginator = $dataProvider->getPagination();
+        $paginator->params = [
+            'id'=>$searchModel->taxes_book_id,
+            'per-page' => 10,
+        ];
+
+        if($searchModel->employee_id){
+            $paginator->params['employee_id'] = $searchModel->employee_id;
+        }
+
+        $paginator->page = Yii::$app->request->get('page-bills', Yii::$app->request->post('page',1))-1;
+        $dataProvider->setPagination($paginator);
+
+        $this->layout = '//embed';
+        return $this->renderAjax('_buy-employee-bills', [
+            'model' => $model,
+            'dataProvider'  => $dataProvider,
+            'searchModel'   => $searchModel,
+            'bills' => true
+        ]);
+    }
+
     public function buyBillsAdded($id)
     {
         $model = $this->findModel($id);
@@ -585,12 +630,14 @@ class TaxesBookController extends \app\components\web\Controller
     {
         Yii::$app->response->format = 'json';
         $buy_bills_view = $this->buyBills($id);
+        $buy_employee_bills_view = $this->buyEmployeeBills($id);
         $buy_bills_added_view = $this->buyBillsAdded($id);
         $total_view = $this->buyBillsTotals($id);
 
         return [
             'status' => 'success',
             'buy_bills' => $buy_bills_view,
+            'buy_employee_bills' => $buy_employee_bills_view,
             'buy_bills_added' => $buy_bills_added_view,
             'total' => $total_view
         ];

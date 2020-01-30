@@ -34,6 +34,7 @@ class TaxesBookSearch extends ProviderBill
     public $company_id;
 
     public $provider_id;
+    public $employee_id;
 
     public $taxes_book_item_id;
 
@@ -45,7 +46,7 @@ class TaxesBookSearch extends ProviderBill
     public function rules()
     {
         return [
-            [['provider_id', 'company_id', 'taxes_book_item_id'], 'integer'],
+            [['provider_id', 'employee_id', 'company_id', 'taxes_book_item_id'], 'integer'],
             [['toDate', 'fromDate', 'for_print', 'bill_types', 'period', 'status', 'number'], 'safe'],
             [['fromDate'], 'default', 'value'=> date('Y-m-01')],
             [['toDate'], 'default', 'value'=> date('Y-m-t')]
@@ -268,6 +269,83 @@ class TaxesBookSearch extends ProviderBill
         }
     }
 
+    private function getBaseQueryEmployeeBuy($total=false)
+    {
+
+        $subQuery = new Query();
+        $subQuery
+            ->select(['pb.employee_bill_id', 'tbi.taxes_book_item_id', 'CONCAT(p.name, " ", p.lastname) as fullName', 'p.document_number', 'pb.date',
+                'bt.name AS bill_type', 'pb.number', 'tbi.page', new Expression('(pb.net * bt.multiplier) as net'),
+                new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount')])
+            ->from('employee_bill pb')
+            ->leftJoin('employee p', 'pb.employee_id = p.employee_id ' )
+            ->leftJoin('bill_type AS bt', 'pb.bill_type_id = bt.bill_type_id ' )
+            ->leftJoin('employee_bill_has_tax_rate pbhtr', 'pb.employee_bill_id = pbhtr.employee_bill_id ' )
+            ->leftJoin('tax_rate AS tr', 'pbhtr.tax_rate_id = tr.tax_rate_id ' )
+            ->leftJoin('taxes_book_item tbi', 'pb.employee_bill_id = tbi.employee_bill_id ' )
+            ->where('pb.status = \'closed\' ')
+            ->andWhere(['pb.company_id' => $this->company_id])
+            ->andWhere(['bt.applies_to_buy_book' => 1])
+
+        ;
+        if(!empty($this->bill_types)){
+            $subQuery->andWhere(['in', 'pb.bill_type_id', $this->bill_types]);
+        }
+
+        if(!empty($this->fromDate)){
+            $subQuery->andWhere(['>=', 'pb.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
+        }
+
+        if(!empty($this->toDate)){
+            $subQuery->andWhere(['<=', 'pb.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
+        }
+
+        if (!empty($this->employee_id)) {
+            $subQuery->andWhere(['=', 'pb.employee_id', $this->employee_id]);
+        }
+
+        if (!empty($this->taxes_book_id) &&  !$this->for_print && !$total) {
+            $subQuery->andWhere(['or', 'tbi.taxes_book_id is null', 'tbi.taxes_book_id = :taxes_book_id']);
+        } else if ($total || (!empty($this->taxes_book_id) &&  $this->for_print )) {
+            $subQuery->andWhere('tbi.taxes_book_id= :taxes_book_id');
+        }
+
+        $subQuery->addParams([':taxes_book_id' => $this->taxes_book_id]);
+
+
+        $mainQuery = new Query();
+        $mainQuery
+            ->select(['employee_bill_id', 'taxes_book_item_id', 'fullName',
+                'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+            ->from(['c'=>$subQuery])
+            ->groupBy(['fullName', 'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+            ->orderBy(['page'=>SORT_ASC, 'date'=>SORT_ASC])
+        ;
+
+        // Recorro los impuestos para cargar las columnas de cada uno
+        foreach(TaxRate::find()->all() as $tax) {
+            $mainQuery->addSelect(new Expression('sum(CASE WHEN tax_rate_id = ' . $tax->tax_rate_id . ' THEN amount ELSE 0 END) as \'' . $tax->tax->name . ' ' . ($tax->pct*100) . '%\''));
+        }
+
+
+        // Armo la consulta general
+        if ($total) {
+            $query = new Query();
+            $query
+                ->select(new Expression('round(sum(net),2) as Subtotal'))
+                ->from(['b'=> $mainQuery]);
+
+            foreach(TaxRate::find()->all() as $tax) {
+                $query->addSelect(new Expression('sum(`'. $tax->tax->name . ' ' . ($tax->pct*100) . '%`) as `'.$tax->tax->name . ' ' . ($tax->pct*100) .'%`'));
+            }
+            $query->addSelect(new Expression('round(sum(total),2) as Total'));
+
+            return $query;
+        } else {
+            return $mainQuery;
+        }
+    }
+
 
     /**
      * Retorna todos los comprobantes pagados dentro de los parametros seteados.
@@ -279,6 +357,22 @@ class TaxesBookSearch extends ProviderBill
     {
         $this->load($params);
         $sql = $this->getBaseQueryBuy();
+
+        return new ActiveDataProvider([
+            'query' => $sql,
+        ]);
+    }
+
+    /**
+     * Retorna todos los comprobantes de empleados pagados dentro de los parametros seteados.
+     *
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function findBuyEmployeeBills($params)
+    {
+        $this->load($params);
+        $sql = $this->getBaseQueryEmployeeBuy();
 
         return new ActiveDataProvider([
             'query' => $sql,

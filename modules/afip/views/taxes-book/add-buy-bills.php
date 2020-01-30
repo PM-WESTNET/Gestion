@@ -82,6 +82,8 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                 <div class="row" id="col_bills">
                 </div>
             <?php } ?>
+            <div class="row" id="col_employee_bills">
+            </div>
             <div class="row" id="col_bills_added">
             </div>
         </div>
@@ -115,7 +117,30 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                 }
 
                 (new Promise(function(resolve, reject){
-                    AddBuyBills.add(ids, page);
+                    AddBuyBills.add(ids, page, 'provider');
+                    resolve(true);
+                }));
+            });
+
+            $(document).off('click', '#w_employee_bills input[type=checkbox]').on('click', '#w_employee_bills input[type=checkbox]', function(){
+                var ids = [];
+                var me = this;
+                var page = $('#col_bills .pagination li.active a').data('page');
+
+                if ($(this).hasClass("select-on-check-all")) {
+                    $('#w_employee_employee_bills input[type=checkbox]').each(function(){
+                        if(me != this) {
+                            ids.push($(this).val());
+                        }
+                        page = 0;
+                    });
+                } else {
+                    ids.push($(this).val());
+                    page = page +1 ;
+                }
+
+                (new Promise(function(resolve, reject){
+                    AddBuyBills.add(ids, page, 'employee');
                     resolve(true);
                 }));
             });
@@ -182,6 +207,7 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                     dataType: 'json',
                     success: function(data){
                         $('#col_bills').html(data.buy_bills);
+                        $('#col_employee_bills').html(data.buy_employee_bills);
                         $('#col_bills_added').html(data.buy_bills_added);
                         $('#col_totals').html(data.total);
                     }
@@ -200,6 +226,7 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                     dataType: 'json',
                     success: function (data) {
                         $('#col_bills').html(data.buy_bills);
+                        $('#col_employee_bills').html(data.buy_employee_bills);
                         $('#col_bills_added').html(data.buy_bills_added);
                         $('#col_totals').html(data.total);
                     }
@@ -214,17 +241,27 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                 dataType: 'json',
                 success: function (data) {
                     $('#col_bills').html(data.buy_bills);
+                    $('#col_employee_bills').html(data.buy_employee_bills);
                     $('#col_bills_added').html(data.buy_bills_added);
                     $('#col_totals').html(data.total);
                 }
             });
         }
 
-        this.add = function (value, page) {
+        this.add = function (value, page, type) {
+            var data;
+            if (type === 'provider') {
+                data = {'provider_bill_id': value}
+            }
+
+            if (type === 'employee') {
+                data = {'employee_bill_id': value}
+            }
+
             $.ajax({
                 url: '<?= Url::toRoute(['/afip/taxes-book/add-bill', 'id' => $model->taxes_book_id]) ?>'+'&page-bills='+page,
                 method: 'POST',
-                data: {'provider_bill_id': value},
+                data: data,
                 dataType: 'json',
                 success: function (data) {
                     $('#col_bills').html(data.buy_bills);
