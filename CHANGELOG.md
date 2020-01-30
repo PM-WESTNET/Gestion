@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
  cuenta los teléfonos fijos. [GES-726]
  - Celular 2 no requerido [GES-788]
  - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654]
+ - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786]
  
  ## [2020.01.29.0]
  ### Modificado
