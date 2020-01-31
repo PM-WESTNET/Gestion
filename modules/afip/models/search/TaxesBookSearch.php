@@ -391,8 +391,23 @@ class TaxesBookSearch extends ProviderBill
         $this->load($params);
 
         $query = $this->getBaseQueryBuy(true);
+        $query2 = $this->getBaseQueryEmployeeBuy(true);
 
-        $this->totals = $query->one();
+        $query->union($query2);
+
+        $masterQuery = new Query();
+        $masterQuery
+            ->select(new Expression('round(sum(Subtotal),2) as Subtotal'))
+            ->from(['b'=> $query]);
+
+        foreach(TaxRate::find()->all() as $tax) {
+            $masterQuery->addSelect(new Expression('sum(`'. $tax->tax->name . ' ' . ($tax->pct*100) . '%`) as `'.$tax->tax->name . ' ' . ($tax->pct*100) .'%`'));
+        }
+        $masterQuery->addSelect(new Expression('round(sum(Total),2) as Total'));
+
+
+
+        $this->totals = $masterQuery->one();
         return $this->totals;
     }
 

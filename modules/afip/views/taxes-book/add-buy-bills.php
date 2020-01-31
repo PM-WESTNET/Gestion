@@ -81,9 +81,9 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
             <?php if($model->status != TaxesBook::STATE_CLOSED){ ?>
                 <div class="row" id="col_bills">
                 </div>
+                <div class="row" id="col_employee_bills">
+                </div>
             <?php } ?>
-            <div class="row" id="col_employee_bills">
-            </div>
             <div class="row" id="col_bills_added">
             </div>
         </div>
@@ -265,6 +265,7 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
                 dataType: 'json',
                 success: function (data) {
                     $('#col_bills').html(data.buy_bills);
+                    $('#col_employee_bills').html(data.buy_employee_bills);
                     $('#col_bills_added').html(data.buy_bills_added);
                     $('#col_totals').html(data.total);
                 }

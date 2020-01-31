@@ -333,6 +333,9 @@ class TaxesBookController extends \app\components\web\Controller
         $searchModel->bill_types =  ArrayHelper::getColumn( $model->company->taxCondition->billTypesBuy, 'bill_type_id');
         $dataProvider = $searchModel->findBuyBills(Yii::$app->request->getQueryParams());
 
+        $dataProvider2 = $searchModel->findBuyEmployeeBills(Yii::$app->request->getQueryParams());
+        $dataProvider->query->union($dataProvider2->query);
+
         $paginator = $dataProvider->getPagination();
         $paginator->params = [
             'id'=>$searchModel->taxes_book_id,
@@ -373,6 +376,8 @@ class TaxesBookController extends \app\components\web\Controller
         Yii::$app->response->format = 'json';
 
         $provider_bill_id = Yii::$app->request->post('provider_bill_id', null);
+        $employee_bill_id = Yii::$app->request->post('employee_bill_id', null);
+
         if ($provider_bill_id !== null) {
             foreach ($provider_bill_id as $bill) {
                 if (empty(TaxesBookItem::find()->where(['taxes_book_id' => $id, 'provider_bill_id' => $bill])->one())) {
@@ -386,20 +391,50 @@ class TaxesBookController extends \app\components\web\Controller
             }
 
             $buy_bills_view = $this->buyBills($id);
+            $buy_employee_bills_view = $this->buyEmployeeBills($id);
             $buy_bills_added_view = $this->buyBillsAdded($id);
             $total_view = $this->buyBillsTotals($id);
 
             return [
                 'status' => 'success',
                 'buy_bills' => $buy_bills_view,
+                'buy__employee_bills' => $buy_employee_bills_view,
                 'buy_bills_added' => $buy_bills_added_view,
                 'total' => $total_view
             ];
-        } else {
+        }
+
+        if ($employee_bill_id !== null) {
+            foreach ($employee_bill_id as $bill) {
+                if (empty(TaxesBookItem::find()->where(['taxes_book_id' => $id, 'employee_bill_id' => $bill])->one())) {
+                    $item = new TaxesBookItem();
+                    $item->taxes_book_id = $id;
+                    $item->page = 0;
+                    $item->employee_bill_id = $bill;
+                    $item->taxes_book_id = $id;
+                    $item->save();
+                }
+            }
+
+            $buy_bills_view = $this->buyBills($id);
+            $buy_employee_bills_view = $this->buyEmployeeBills($id);
+            $buy_bills_added_view = $this->buyBillsAdded($id);
+            $total_view = $this->buyBillsTotals($id);
+
             return [
-                'status' => 'fail'
+                'status' => 'success',
+                'buy_bills' => $buy_bills_view,
+                'buy__employee_bills' => $buy_employee_bills_view,
+                'buy_bills_added' => $buy_bills_added_view,
+                'total' => $total_view
             ];
         }
+
+
+        return [
+            'status' => 'fail'
+        ];
+
     }
 
     public function actionRemoveBill($id)
