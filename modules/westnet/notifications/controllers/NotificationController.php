@@ -127,6 +127,16 @@ class NotificationController extends Controller {
         }
         
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
+            $transport = $model->transport;
+            /**
+             * Si le transport es Email, la marcamos como pendiente solamente
+             * Luego el comando en segundo plano se encargara de realizar el envio
+             */
+            if ($transport->name === 'Email') {
+                $model->updateAttributes(['status' => 'pending']);
+                Yii::$app->session->setFlash('success', NotificationsModule::t('app', 'The notifications has been sent.'));
+                return $this->redirect(['view', 'id' => $id]);
+            }
 
             if ($model->save()) {
                 
@@ -293,6 +303,9 @@ class NotificationController extends Controller {
         $notification = $this->findModel($id);
 
         $transport = $notification->transport;
+
+
+
         try {
             $status = $transport->send($notification, $force_send);
             if($status['status'] == 'success'){
@@ -421,5 +434,27 @@ class NotificationController extends Controller {
         $integratech_received_sms->charcode = Yii::$app->request->post('CHARCODE') ? Yii::$app->request->post('CHARCODE') : '';
         $integratech_received_sms->sourceaddr = Yii::$app->request->post('SOURCEADDR') ? Yii::$app->request->post('SOURCEADDR') : '';
         $integratech_received_sms->save();
+    }
+
+    public function actionNotificationProccessStatus($id){
+        if (Yii::$app->request->isAjax) {
+            $model= $this->findModel($id);
+
+            $total = Yii::$app->cache->get('total_'.$id);
+            $status = $model->status;
+            $ok = (int)Yii::$app->cache->get('success_'.$id);
+            $error = (int)Yii::$app->cache->get('error_'.$id);
+            $message = Yii::$app->cache->get('error_message_'.$id);
+
+            Yii::$app->response->format= Response::FORMAT_JSON;
+
+            return [
+                'status' => $status,
+                'total' => $total,
+                'success' => $ok,
+                'error' => $error,
+                'message' => $message
+            ];
+        }
     }
 }

@@ -159,4 +159,15 @@ class NotifyPayment extends \yii\db\ActiveRecord
         return $this->save();
     }
 
+    /**
+     * Devuelve los tipos de valores que pueden ir en el campo from
+     */
+    public static function getFormForSelect()
+    {
+        return [
+            self::FROM_APP => Yii::t('app', self::FROM_APP),
+            self::FROM_IVR => Yii::t('app', self::FROM_IVR)
+        ];
+    }
+
 }

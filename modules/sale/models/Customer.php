@@ -11,6 +11,7 @@ use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\UserApp;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\sale\models\bills\Credit;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
@@ -59,6 +60,9 @@ use app\modules\ticket\models\Ticket;
  * @property string $email_fields_notifications
  * @property integer $parent_company_id
  * @property integer $needs_bill
+ * @property string $birthdate
+ * @property string $observations
+ *
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -118,24 +122,47 @@ class Customer extends ActiveRecord {
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname'],'required', 'on' => 'insert'],
+            [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
             [['document_type_id', 'address_id', 'needs_bill'], 'integer'],
-            [['phone','phone2', 'phone3'], 'integer', 'on' => 'insert', 'message' => Yii::t('app', 'Only numbers. You must input the area code without 0 and in cell phone number case without 15.')],
-            [['phone','phone2', 'phone3', 'phone4'], 'string', 'on' => 'update'],
+            [['phone','phone2', 'phone3','phone4'], 'integer' /**,'on' => 'insert'**/,  'max' => 9999999999 , 'message' => Yii::t('app', 'Only numbers. You must input the area code without 0 and in cell phone number case without 15.')],
+            //[['phone','phone2', 'phone3', 'phone4'], 'string', 'on' => 'update'],
             [['sex'], 'string', 'max' => 10],
             [['email', 'email2'], 'email'],
             [['account_id'], 'number'],
-            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3', 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications', 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications', 'phone4', 'last_update', 'hourRanges' ], 'safe'],
+            [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
+                'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
+                'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
             [['last_calculation_current_account_balance', 'current_account_balance', 'detailed_error', 'document_image', 'tax_image'], 'safe'],
-            //['document_number', 'validateCustomer', 'on' => 'insert']
+
+            //Validacion de teléfonos
+            ['phone', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+
+            ['phone2', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone2', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+            ['phone2', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app','Phones cant be repeated')],
+
+            ['phone3', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone3', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone3', 'compare', 'compareAttribute' => 'phone4', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+
+            ['phone4', 'compare', 'compareAttribute' => 'phone', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
+            //['birthdate', 'validateBirthdate']
         ];
+
+
+        $this->validatePhones();
 
         if (Yii::$app->getModule('accounting')) {
             $rules[] = [['account_id'], 'number'];
@@ -173,10 +200,10 @@ class Customer extends ActiveRecord {
         $this->regexValitation();
 
         // SI SI, HARDCODEADO!! Hay que cambiar los modelos para poder parametrizarlo, o meter config y eso...
-        if($this->document_type_id != 1) {
-            $this->docNumberValidation();
-            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
-        }
+//        if($this->document_type_id != 1) {
+//            $this->docNumberValidation();
+//            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
+//        }
 
         return $rules;
     }
@@ -184,13 +211,24 @@ class Customer extends ActiveRecord {
     public function compareDocument()
     {
         if($this->document_type_id != 1) {
-            if($this->document_number <= 999999) {
-                $this->addError('document_number', Yii::t('app', 'The document number must be geater than 999999.'));
+
+            if (strlen($this->document_number) < 7 ||  strlen($this->document_number) > 8) {
+                $this->addError('document_number', Yii::t('app','The document number must be beetwen 7 and 8 characters'));
             }
 
-            if (count($this->getErrors($this->document_number)) > 8 && (integer)$this->document_number >=100000000) {
-                $this->addError('document_number', Yii::t('app','The document number must be less than 100000000.'));
+            $array_document = str_split($this->document_number);
+            $array_caracters = array_count_values($array_document);
+
+            Yii::info(count($array_caracters));
+
+            if(count($array_caracters) == 1 && (array_key_exists('0', $array_caracters) || array_key_exists('9', $array_caracters))) {
+                $this->addError('document_number', Yii::t('app','Invalid document number'));
             }
+
+            if ($array_document[0] == '0') {
+                $this->addError('document_number', Yii::t('app','Document number can`t start with 0'));
+            }
+
         } else {
             $validator = new CuitValidator();
             $validator->validateAttribute($this, 'document_number');
@@ -225,6 +263,45 @@ class Customer extends ActiveRecord {
         }
 
         return false;
+    }
+
+    /**
+     * Valida la fecha de nacimiento:
+     * -Si el customer es Iva inscripto no requiere fecha de nacimiento
+     * -Si el customer es nuevo y no es iva inscrpto, requiere fecha de nacimiento
+     * -Si el customer no es nuevo y no es iva inscripto, si ya tenia fecha de nacimiento no permite dejar el campo vacio,
+     * si no tenia fecha de nacimiento y tampoco se setea al actualizar valida como correcto el campo
+     *
+     * @return boolean true si el campo fecha de nacimiento es válido
+     */
+    public function validateBirthdate()
+    {
+        if ($this->tax_condition_id == 1) {
+            return true;
+        }
+
+        if ($this->isNewRecord && empty($this->birthdate)) {
+            $this->addError('birthdate', Yii::t('app','Birthdate can`t be empty'));
+            return false;
+        } else {
+            if (empty($this->birthdate) && !empty($this->oldAttributes['birthdate'])){
+                $this->addError('birthdate', Yii::t('app','Birthdate can`t be empty'));
+                return false;
+            }
+
+        }
+
+        if (!empty($this->birthdate)) {
+            $time = time();
+            $birtdate_timestamp = strtotime(Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd'));
+
+            if (($time - $birtdate_timestamp) < ((86400 * 365) * 18)) {
+                $this->addError('birthdate', Yii::t('app','The customer must be older than 18 years old'));
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function insertRules()
@@ -334,6 +411,77 @@ class Customer extends ActiveRecord {
         $this->on(self::EVENT_AFTER_VALIDATE, $docNumberValidation);
     }
 
+    public function validatePhones()
+    {
+        $validation = function (){
+            if ($this->phone) {
+                $phone_array = str_split($this->phone);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+            if ($this->phone2) {
+                $phone_array = str_split($this->phone2);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone2', Yii::t('app','Invalid Phone'));
+                }
+            } elseif (isset($this->oldAttributes['phone2']) && !empty($this->oldAttributes['phone2'])) {
+                $this->addError('phone2', Yii::t('app', 'Cell Phone 1 can`t be empty'));
+            }
+
+            if ($this->phone3) {
+                $phone_array = str_split($this->phone3);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone3', Yii::t('app','Invalid Phone'));
+                }
+            }
+
+
+            if ($this->phone4) {
+                $phone_array = str_split($this->phone4);
+                $phone_characters = array_count_values($phone_array);
+
+                Yii::info($phone_characters);
+
+                if (count($phone_characters) == 1) {
+                    $this->addError('phone4', Yii::t('app','Invalid Phone'));
+                }
+            }
+        };
+
+        $this->on(self::EVENT_AFTER_VALIDATE, $validation);
+    }
+
+
+    public function behaviors()
+    {
+        return [
+            'date_new' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date_new'],
+                ],
+                'value' => function(){
+                    return (new \DateTime('now'))->format('Y-m-d');
+                }
+            ],
+        ];
+    }
+
+
     /**
      * @inheritdoc
      */
@@ -379,6 +527,8 @@ class Customer extends ActiveRecord {
             'hourRanges' => Yii::t('app', 'Customer Hour range'),
             'document_image' => Yii::t('app', 'Document image'),
             'tax_image' => Yii::t('app', 'Tax image'),
+            'birthdate' => Yii::t('app','Birthdate'),
+            'observations' => Yii::t('app', 'Observations')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -487,9 +637,9 @@ class Customer extends ActiveRecord {
             } else {
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
+//                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
-                        }
+//                        }
 
                         if ($attr === 'email') {
                             $this->updateAttributes(['email_status' => 'invalid']);
@@ -741,11 +891,20 @@ class Customer extends ActiveRecord {
      * @param type $insert
      */
     public function beforeSave($insert) {
+
         if($this->isNewRecord  && !$this->company_id) {
             self::$companyRequired = false;
         }
+
+        if (!$this->validateBirthdate()) {
+            return false;
+        }
+
+
         if (parent::beforeSave($insert)) {
-            
+
+            $this->formatDateBeforeSave();
+
             if (in_array('screen', $this->_notifications_way)) {
                  $this->screen_notification= true;                      
             }else{
@@ -984,6 +1143,9 @@ class Customer extends ActiveRecord {
           if(Yii::$app->params['category_customer_required'])
           $this->customerCategory=$this->getCustomerCategory();
          */
+
+        $this->formatDateAfterFind();
+
         $this->old_company_id = $this->company_id;
         
         $sms_fields= explode(',', $this->sms_fields_notifications);
@@ -1329,6 +1491,12 @@ class Customer extends ActiveRecord {
         $date_now = new \DateTime('now');
         $month_difference = $date_last_update->diff($date_now)->m + ($date_last_update->diff($date_now)->y*12);
 
+        Yii::trace($this->last_update);
+        Yii::trace($maximun_months_update);
+        Yii::trace($date_last_update->diff($date_now)->m);
+        Yii::trace(($date_last_update->diff($date_now)->y*1));
+        Yii::trace('diferencia '. $month_difference );
+
         if($month_difference >= $maximun_months_update) {
             return true;
         }
@@ -1364,7 +1532,7 @@ class Customer extends ActiveRecord {
         ];
     }
 
-    public static function verifyEmails($data, $field = "email")
+    public static function verifyEmails($data, $field = "email", $type = 'elastic')
     {
         $row_index = 0;
         $results = [
@@ -1376,16 +1544,29 @@ class Customer extends ActiveRecord {
         while (($row = fgetcsv($data)) !== false) {
             Yii::info(print_r($row, 1), 'data');
             if ($row_index > 0) {
-                $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+                if ($type == 'elastic') {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
 
-                foreach ($customers as $customer) {
-                    $status_field = $field.'_status';
-                    $customer->$status_field = strtolower($row[1]);
-                    $customer->updateAttributes([$status_field]);
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = strtolower($row[1]);
+                        $customer->updateAttributes([$status_field]);
 
-                    $results['total']++;
-                    $results[strtolower($row[1])]++;
+                        $results['total']++;
+                        $results[strtolower($row[1])]++;
 
+                    }
+                } else {
+                    $customers = Customer::find()->andWhere([$field => $row[0], 'status' => 'enabled'])->all();
+
+                    foreach ($customers as $customer) {
+                        $status_field = $field.'_status';
+                        $customer->$status_field = 'inactive';
+                        $customer->updateAttributes([$status_field]);
+
+                        $results['total']++;
+                        $results['inactive']++;
+                    }
                 }
             }
 
@@ -1720,13 +1901,23 @@ class Customer extends ActiveRecord {
      */
     public static function hasFirstBillPayed($customer_id, $verify_bills = true)
     {
-        $search = new CustomerSearch();
-        $result = $search->searchDebtBills($customer_id);
-        if ($verify_bills) {
-            return $result['debt_bills'] == 0 && $result['payed_bills'] == 1;
+        $bill = Bill::find()->where(['customer_id' => $customer_id, 'status' => 'closed'])->orderBy(['bill_id' => SORT_ASC])->one();
+
+        if(!$bill) {
+            return false;
         }
 
-        return $result['payed_bills'] >= 1;
+        $total_payed = (new Query())
+            ->select('SUM(amount) as total')
+            ->from('payment')
+            ->where(['customer_id' => $customer_id, 'status' => 'closed'])
+            ->one();
+
+        if($total_payed['total'] >= $bill->total) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -1757,17 +1948,19 @@ class Customer extends ActiveRecord {
      */
     public function hasFibraPlan()
     {
-        $contract = $this->getContracts()->one();
+        $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
 
+        //Si no tengo activos busco cualquiera
+        if(!$contract) {
+            $contract = $this->getContracts()->orderBy(['contract_id' => SORT_DESC])->one();
+        }
+
+        //Verifico que tenga un contrato
         if(!$contract) {
             return false;
         }
 
-        if(!$contract->hasFibraPlan()){
-            return false;
-        }
-
-        return true;
+        return $contract->hasFibraPlan();
     }
 
     /**
@@ -1787,4 +1980,125 @@ class Customer extends ActiveRecord {
     }
 
 
+
+    /**
+     * Crea una nota de crédito por el total de la deuda del cliente, para darlo de baja
+     * @return bool
+     */
+    public function createCreditForDebt()
+    {
+        $paymentSearch = new PaymentSearch();
+        $paymentSearch->customer_id = $this->customer_id;
+
+        $debt = round((float)$paymentSearch->accountTotal(), 2);
+
+        Yii::info($debt, 'Deuda');
+
+        if ($debt < 0) {
+            $amount = abs($debt);
+            if ($this->taxCondition->name === 'IVA Inscripto') {
+                $lastBillType = $this->getLastBillType();
+                if ($lastBillType && $lastBillType->name === 'Factura A') {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito A']);
+                }else {
+                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                }
+            }else {
+                if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
+                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                }else {
+                    $billType = BillType::findOne(['name' => 'Descuento']);
+                }
+            }
+
+            $unit_final_price = $amount;
+            $unit_net_price = (($amount * 100) / ((0.21 * 100) + 100));
+
+            if (empty($billType)) {
+                return false;
+            }
+
+            if(!class_exists($billType->class)){
+                return false;
+            }
+
+            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
+
+            if (empty($point_of_sale)) {
+                $point_of_sale = $this->company->getPointsOfSale()->one();
+                if (empty($point_of_sale)) {
+                    Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                    return false;
+                }
+            }
+
+            $bill = Yii::createObject($billType->class);
+            $bill->bill_type_id = $billType->bill_type_id;
+            $bill->date = date('d-m-Y');
+            $bill->status = Bill::STATUS_DRAFT;
+            $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
+            $bill->class = $billType->class;
+            $bill->customer_id = $this->customer_id;
+            $bill->company_id = $this->company_id;
+            $bill->save();
+
+            Yii::info($bill->getErrors(), 'Nota');
+            Yii::info($debt, 'Deuda');
+
+            $detail = $bill->addDetail([
+                'product_id' => Config::getValue('baja_product_id'),
+                'qty' => 1,
+                'unit_id' =>  Config::getValue('default_unit_id'),
+                'unit_net_price' => $unit_net_price,
+                'unit_final_price' => $unit_final_price,
+                'line_subtotal' => $unit_net_price,
+                'line_total' => $unit_final_price,
+                'concept' => 'Cancelación por baja(Automático)'
+            ]);
+            Yii::info($detail, 'Deuda');
+
+
+            if ($detail == false) {
+                return false;
+            }
+
+            $detail->save();
+
+            return $bill->close();
+        }
+
+        return true;
+
+    }
+
+    public function getLastBillType()
+    {
+        $bill = Bill::find()
+            ->innerJoin('bill_type bt', 'bt.bill_type_id = bill.bill_type_id')
+            ->andWhere([
+                'bill.customer_id' => $this->customer_id,
+                'bt.multiplier' => '1'
+            ])
+            ->orderBy(['timestamp' => SORT_DESC])
+            ->one();
+
+        if ($bill) {
+            return $bill->billType;
+        }
+
+        return null;
+
+    }
+
+    private function formatDateBeforeSave() {
+        if ($this->birthdate) {
+            $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'yyyy-MM-dd');
+        }
+    }
+
+    private function formatDateAfterFind() {
+        if ($this->birthdate) {
+            $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'dd-MM-yyyy');
+        }
+    }
 }

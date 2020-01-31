@@ -1034,8 +1034,11 @@ class ContractController extends Controller {
         try {
             $date = new \DateTime(Yii::$app->request->post('date'));
             $category_id = Yii::$app->request->post('category_id');
+            $credit = Yii::$app->request->post('credit');
 
-            $service->startLowProcess($contract, $date, $category_id);
+            if($service->startLowProcess($contract, $date, $category_id, $credit)){
+                Yii::$app->session->addFlash('success', Yii::t('app','Low proccess begin successfull'));
+            }
 
         } catch(\Exception $ex) {
             error_log($ex->getTraceAsString());
@@ -1193,5 +1196,18 @@ class ContractController extends Controller {
                 return ['output' => $out, 'selected'=> $pre_selected_contract_id ? $pre_selected_contract_id : $selected];
             }
         }
+    }
+
+    public function actionUpdateOnIsp($contract_id)
+    {
+        $contract = $this->findModel($contract_id);
+
+        if ($contract->updateOnISP()) {
+            Yii::$app->session->addFlash('success', Yii::t('app','Contract updated on ISP successfull'));
+            return $this->redirect(['view', 'id' => $contract->contract_id]);
+        }
+
+        Yii::$app->session->addFlash('error', Yii::t('app','Errors occurred at update contract on ISP'));
+        return $this->redirect(['view', 'id' => $contract->contract_id]);
     }
 }

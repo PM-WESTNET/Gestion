@@ -13,6 +13,7 @@ use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\InvoiceProcess;
 use app\modules\sale\models\PointOfSale;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\TaxCondition;
@@ -104,19 +105,26 @@ class BatchInvoiceController  extends Controller
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
-            Yii::$app->session->set( '_invoice_all_', [
-                '_invoice_total_' => 0,
-                '_invoice_cantidad_', 0
+            Yii::$app->cache->set( '_invoice_all_', [
+                'total' => 0,
+                'qty' => 0,
             ]);
 
-            $cti = new ContractToInvoice();
-            $cti->invoiceAll(Yii::$app->request->post());
+            $company_id = Yii::$app->request->post('ContractSearch')['company_id'];
+            $bill_type_id = Yii::$app->request->post('ContractSearch')['bill_type_id'];
+            $period = Yii::$app->request->post('ContractSearch')['period'];
+            $observation = array_key_exists('bill_observation', Yii::$app->request->post()) ? Yii::$app->request->post('bill_observation') : '';
 
-            $messages = $cti->getMessages();
+            if(!InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, $period, $observation, InvoiceProcess::TYPE_CREATE_BILLS, null, null)) {
+                return [
+                    'status' => 'error',
+                    'message' => Yii::t('app', 'Invoice process cannot be started, reload the page to see the real state of the process')
+                ];
+            };
 
             return [
                 'status' => 'success',
-                'messages' => $messages
+                'message' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
             ];
         }
     }
@@ -131,11 +139,23 @@ class BatchInvoiceController  extends Controller
 
         $process = Yii::$app->request->post('process');
 
-        return Yii::$app->session->get($process, [
-            'total' => 0,
-            'qty'   => 0
-        ]);
+        $a = Yii::$app->cache->get($process);
 
+        $creation_errors = Yii::$app->cache->get('_invoice_create_errors') ? [Yii::$app->cache->get('_invoice_create_errors')] : [];
+        $close_errors = Yii::$app->cache->get('_invoice_close_errors') ? [Yii::$app->cache->get('_invoice_close_errors')] : [];
+
+        $errors = [
+            'errors' => array_merge($creation_errors, $close_errors)
+        ];
+
+        if (empty($a)) {
+            $a = [
+                'total' => 0,
+                'qty' => 0
+            ];
+        }
+
+        return array_merge($a, $errors);
     }
 
     /**
@@ -161,52 +181,32 @@ class BatchInvoiceController  extends Controller
     public function actionCloseInvoices()
     {
         set_time_limit(0);
+
         if (Yii::$app->request->isAjax) {
             Yii::$app->response->format = 'json';
 
-            Yii::$app->session->set( '_invoice_close_', [
+            Yii::$app->cache->set( '_invoice_close_process_', [
                 'total' => 0,
                 'qty' => 0
             ]);
-            $i = 1;
-            $searchModel = new BillSearch();
-            $query = $searchModel->searchPendingToClose(Yii::$app->request->post());
-            $total = $query->count();
-            $retMessages = [];
 
-            foreach ($query->batch() as $bills) {
-                foreach ($bills as $bill) {
-                    $bill->verifyNumberAndDate();
-                    $bill->close();
+            $company_id = Yii::$app->request->post('BillSearch')['company_id'];
+            $bill_type_id = Yii::$app->request->post('BillSearch')['bill_type_id'];
+            $fromDate = Yii::$app->request->post('BillSearch')['fromDate'];
+            $toDate = Yii::$app->request->post('BillSearch')['toDate'];
 
-                   $messages = Yii::$app->session->getAllFlashes();
-                    $fn = function ($messages) {
-                        $rtn = [];
-                        if(is_array($messages)) {
-                            foreach ($messages as $message) {
-                                $rtn[] = Yii::t('afip', $message);
-                            }
-                        }
 
-                        return $rtn;
-                    };
-                    foreach ($messages as $key => $message) {
-                        $retMessages[$key][] = ($bill->customer ? $bill->customer->name : '') . " - " . Yii::t('app', 'Bill') . ' ' .
-                            Yii::t('app', 'Status') . ' ' . Yii::t('app', $bill->status) . ' - ' . implode('<br/>', $fn($message));
-                    }
+            if(!InvoiceProcess::createInvoiceProcess($company_id, $bill_type_id, null, '', InvoiceProcess::TYPE_CLOSE_BILLS, $fromDate, $toDate)) {
+                return [
+                    'status' => 'error',
+                    'message' => Yii::t('app', 'Invoice process cannot be started, reload the page to see the real state of the process')
 
-                    Yii::$app->session->set('_invoice_close_', [
-                        'total' => $total,
-                        'qty' => $i
-                    ]);
-                    Yii::$app->session->close();
-                    $i++;
-                }
+                ];
             }
 
             return [
                 'status' => 'success',
-                'messages' => $retMessages
+                'message' => Yii::t('app', 'Invoice process has been started, please wait some minutes...')
             ];
         }
     }
@@ -315,5 +315,33 @@ class BatchInvoiceController  extends Controller
         $bill->fillNumber();
 
         return $bill;
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionInvoiceProcessCreateBillIsStarted()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+            return [ 'invoice_process_started' => true ];
+        }
+
+        return [ 'invoice_process_started' => false ];
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionInvoiceProcessCloseBillIsStarted()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) {
+            return [ 'invoice_process_started' => true ];
+        }
+
+        return [ 'invoice_process_started' => false ];
     }
 }

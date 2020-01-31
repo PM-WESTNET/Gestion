@@ -110,6 +110,15 @@ return [
             'class' => 'yii\swiftmailer\Mailer',
             'useFileTransport' => true,
         ],
+        'mutex' => [
+            'class' => 'yii\mutex\FileMutex'
+        ],
+        'urlManager' => [
+            'class' => 'yii\web\UrlManager',
+            'baseUrl' => 'https://gestion.westnet.com.ar',
+            'hostInfo' => 'https://gestion.westnet.com.ar',
+
+        ]
     ],
     'modules' => [
         'sale' => [

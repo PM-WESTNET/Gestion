@@ -2,10 +2,16 @@
 
 namespace app\modules\westnet\reports\controllers;
 
+use app\components\helpers\GraphData;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\sale\models\Customer;
+use app\modules\westnet\models\NotifyPayment;
+use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
+use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\search\CustomerSearch;
@@ -13,6 +19,8 @@ use app\modules\westnet\reports\search\ReportSearch;
 use Yii;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * CustomerController
@@ -21,6 +29,38 @@ use yii\data\ActiveDataProvider;
  */
 class ReportsController extends Controller
 {
+
+    const COLORS = [
+            'rgba(249, 192, 191)',
+            'rgba(254, 229, 206)',
+            'rgba(255, 241, 195)',
+            'rgba(243, 255, 195)',
+            'rgba(199, 255, 192)',
+            'rgba(194, 255, 235)',
+            'rgba(194, 248, 254)',
+            'rgba(194, 230, 255)',
+            'rgba(194, 208, 255)',
+            'rgba(211, 192, 255)',
+            'rgba(232, 195, 255)',
+            'rgba(255, 194, 222)',
+            'rgba(255, 193, 221)'
+        ];
+
+    const BORDER_COLORS = [
+            'rgba(241, 134, 132)',
+            'rgba(241, 183, 132)',
+            'rgba(241, 216, 132)',
+            'rgba(220, 241, 132)',
+            'rgba(144, 241, 132)',
+            'rgba(132, 241, 205)',
+            'rgba(132, 231, 241)',
+            'rgba(132, 196, 241)',
+            'rgba(132, 158, 241)',
+            'rgba(165, 132, 241)',
+            'rgba(200, 132, 241)',
+            'rgba(241, 132, 233)',
+            'rgba(241, 132, 182)'
+        ];
 
     /**
      * List Customers per month
@@ -640,6 +680,7 @@ class ReportsController extends Controller
         ]);
     }
 
+
     public function actionCustomersByNode()
     {
         $search = new CustomerSearch();
@@ -647,5 +688,253 @@ class ReportsController extends Controller
         $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
 
         return $this->render('customer-by-node', ['dataProvider' => $dataProvider]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de clientes por medio de publicidad.
+     */
+    public function actionCustomerByPublicityShape()
+    {
+        $search = new ReportSearch();
+        $search->load((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        if(!$search->date_from) {
+            $search->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if(!$search->date_to) {
+            $search->date_from = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $data = $search->searchCustomerByPublicityShape((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $datas = [];
+        $cols = [];
+        $colors = [];
+        $border_colors = [];
+
+        $asigned_color = [
+            'banner' => 'rgba(249, 192, 191)',
+            'poster' => 'rgba(254, 229, 206)',
+            'web' => 'rgba(255, 241, 195)',
+            'other_customer' => 'rgba(243, 255, 195)',
+            'facebook' => 'rgba(199, 255, 192)',
+            'street_banner' => 'rgba(194, 255, 235)',
+            'magazine' => 'rgba(194, 248, 254)',
+            'door_to_door' => 'rgba(194, 230, 255)',
+            'competition' => 'rgba(194, 208, 255)',
+            'brochure' => 'rgba(211, 192, 255)',
+            'gigantografía' => 'rgba(232, 195, 255)',
+            'pantalla-led' => 'rgba(255, 194, 222)',
+            'instagram' => 'rgba(255, 193, 221)'
+        ];
+
+        $border_asigned_color = [
+            'banner' => 'rgba(241, 134, 132)',
+            'poster' => 'rgba(241, 183, 132)',
+            'web' => 'rgba(241, 216, 132)',
+            'other_customer' => 'rgba(220, 241, 132)',
+            'facebook' => 'rgba(144, 241, 132)',
+            'street_banner' => 'rgba(132, 241, 205)',
+            'magazine' => 'rgba(132, 231, 241)',
+            'door_to_door' => 'rgba(132, 196, 241)',
+            'competition' => 'rgba(132, 158, 241)',
+            'brochure' => 'rgba(165, 132, 241)',
+            'gigantografía' => 'rgba(200, 132, 241)',
+            'pantalla-led' => 'rgba(241, 132, 233)',
+            'instagram' => 'rgba(241, 132, 182)'
+        ];
+
+        foreach ($data as $item) {
+            $date = new \DateTime($item['period'] . '-01');
+            $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
+            $datas[] = $item['customer_qty'];
+            array_push($colors, $asigned_color[$item['publicity_shape']]);
+            array_push($border_colors, $border_asigned_color[$item['publicity_shape']]);
+        }
+
+
+        return $this->render('customer-by-publicity-shape',[
+            'model' => $search,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => $colors,
+            'border_colors' => $border_colors
+        ]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de informes de pago en dos gráficos:
+     * Torta: muestra la cantidad de informes de pago discriminados por medios de pago y si son de la app o ivr
+     * Líneas: muestra la cantidad de informes de pago discriminados por otigen, es decir, si son de la app o ivr
+     */
+    public function actionNotifyPaymentsGraphics()
+    {
+        $search = new ReportSearch();
+        $search->load((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $datas = [];
+        $cols = [];
+
+        $dataslineal = [];
+        $colslineal = [];
+
+        if(!$search->date_from) {
+            $search->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if(!$search->date_to) {
+            $search->date_to = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $dataLineal = $search->searchNotifyPaymentsByDate((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $first_date = array_key_exists(0, $dataLineal) ? $dataLineal[0] : $search->date_from ;
+        $last_date = end($dataLineal) ? end($dataLineal) : $search->date_to;
+
+        $graph  = new GraphData([
+            'fromdate' => $dataLineal[0]['date'],
+            'todate' => end($dataLineal)['date'],
+        ]);
+
+        $colslineal = $graph->getSteps();
+
+        //Columnas del grafico de torta
+        foreach ($data as $item) {
+            $cols[] = $item['name'];
+            $datas[] = $item['qty'];
+        }
+
+        $data_app = [];
+        $data_ivr = [];
+
+        //Completo los array con las fechas que comprenden el período
+        foreach ($colslineal as $item) {
+            $from_app = false;
+            $from_ivr = false;
+
+            foreach ($dataLineal as $datal) {
+                if($datal['from'] == NotifyPayment::FROM_APP) {
+                    if($datal['date'] == $item) {
+                        array_push($data_app, (int)$datal['qty']);
+                        $from_app = true;
+                    }
+                }
+
+                if($datal['from'] == NotifyPayment::FROM_IVR) {
+                    if($datal['date'] == $item) {
+                        array_push($data_ivr, (int)$datal['qty']);
+                        $from_ivr = true;
+                    }
+                }
+            }
+
+            //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
+            if(!$from_app ) {
+                array_push($data_app, 0);
+                $from_app = false;
+            }
+
+            if(!$from_ivr ) {
+                array_push($data_ivr, 0);
+                $from_ivr = false;
+            }
+        }
+
+
+        return $this->render('notify-payments',[
+            'model' => $search,
+            'cols' => $cols,
+            'data' => $datas,
+            'colors' => self::COLORS,
+            'border_colors' => self::BORDER_COLORS,
+
+            'colslineal' => $colslineal,
+            'data_app' => $data_app,
+            'data_ivr' => $data_ivr
+        ]);
+    }
+
+    /**
+     * Muestra un reporte de la cantidad de informes de pago en dos gráficos:
+     * Torta: muestra la cantidad de informes de pago discriminados por medios de pago y si son de la app o ivr
+     * Líneas: muestra la cantidad de informes de pago discriminados por otigen, es decir, si son de la app o ivr
+     */
+    public function actionPaymentExtensionGraphics()
+    {
+        $searchModel = new ReportSearch();
+        $colslineal = [];
+        $cols_tart = [];
+        $data_tart = [];
+
+        if (!$searchModel->date_from) {
+            $searchModel->date_from = (new \DateTime('now'))->modify('-1 month')->format('Y-m-01');
+        }
+
+        if (!$searchModel->date_to) {
+            $searchModel->date_to = (new \DateTime('now'))->format('Y-m-01');
+        }
+
+        $datas = $searchModel->searchPaymentExtensionQty((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        $dataFromQty = $searchModel->searchPaymentExtensionQtyFrom((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        $graph = new GraphData([
+            'fromdate' => (new \DateTime($searchModel->date_from))->format('Y-m-d'),
+            'todate' => (new \DateTime($searchModel->date_to))->format('Y-m-d'),
+        ]);
+        $colslineal = $graph->getSteps();
+
+        $data_app = [];
+        $data_ivr = [];
+
+        //Columnas del grafico de torta
+        foreach ($dataFromQty as $item) {
+            $cols_tart[] = $item['from'];
+            $data_tart[] = $item['qty'];
+        }
+
+        //Completo los array con las fechas que comprenden el período
+        foreach ($colslineal as $item) {
+            $from_app = false;
+            $from_ivr = false;
+
+            foreach ($datas as $data) {
+                if ($data['from'] == PaymentExtensionHistory::FROM_APP) {
+                    if ($data['date'] == $item) {
+                        array_push($data_app, (int)$data['qty']);
+                        $from_app = true;
+                    }
+                }
+
+                if ($data['from'] == PaymentExtensionHistory::FROM_IVR) {
+                    if ($data['date'] == $item) {
+                        array_push($data_ivr, (int)$data['qty']);
+                        $from_ivr = true;
+                    }
+                }
+            }
+
+            //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
+            if (!$from_app) {
+                array_push($data_app, 0);
+                $from_app = false;
+            }
+
+            if (!$from_ivr) {
+                array_push($data_ivr, 0);
+                $from_ivr = false;
+            }
+        }
+
+        return $this->render('payment-extension-graphic', [
+            'model' => $searchModel,
+            'colslineal' => $colslineal,
+            'data_app' => $data_app,
+            'data_ivr' => $data_ivr,
+            'cols_tart' => $cols_tart,
+            'data_tart' => $data_tart,
+            'colors' => self::COLORS,
+            'border_colors' => self::BORDER_COLORS
+        ]);
     }
 }

@@ -23,6 +23,7 @@ class ReportSearch extends Model
     public $date_from;
     public $date_to;
     public $company_id;
+    public $from;
 
     public function init()
     {
@@ -38,7 +39,7 @@ class ReportSearch extends Model
     {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'company_id'], 'safe']
+            [['date_from', 'date_to', 'company_id', 'from'], 'safe']
         ];
     }
 
@@ -581,4 +582,145 @@ class ReportSearch extends Model
         return $query->all();
     }
 
+    public function searchCustomerByPublicityShape($params) {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('date_format(c.date_new, \'%Y-%m\') AS period'),
+                new Expression('count(c.customer_id) as customer_qty'),
+                'c.publicity_shape'
+            ])->from('customer c')
+            ->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
+
+        if($this->date_from) {
+            $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
+        }
+
+        if($this->date_to) {
+            $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de informes de pago diferenciados por medio de pago
+     */
+    public function searchNotifyPayments($params)
+    {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression("CONCAT(`from`, ' - ', payment_method.name) as name"),
+                new Expression('payment_method.payment_method_id'),
+                new Expression('`from`')
+            ])->from('notify_payment')
+        ->leftJoin('payment_method', 'payment_method.payment_method_id = notify_payment.payment_method_id')
+        ->groupBy(['notify_payment.payment_method_id', 'from'])
+        ;
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de informes de pago diferenciados por medio de pago
+     */
+    public function searchNotifyPaymentsByDate($params)
+    {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('date_format(date, \'%Y-%m-%d\') as date'),
+                new Expression('`from`')
+            ])->from('notify_payment')
+            ->groupBy(['from', 'date'])
+            ->orderBy('date')
+        ;
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de extensiones de pago por períodos
+     */
+    public function searchPaymentExtensionQty($params) {
+
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('date'),
+                new Expression('`from`')
+            ])->from(['payment_extension_history'])
+            ->groupBy(['date', 'from'])
+            ->orderBy('date');
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', 'date', $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=','date', $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de extensiones de pago por origen
+     */
+    public function searchPaymentExtensionQtyFrom($params) {
+
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('`from`')
+            ])->from(['payment_extension_history'])
+            ->groupBy(['date'])
+            ->orderBy('date');
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', 'date', $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=','date', $date_to]);
+        }
+
+        $query->groupBy(['from']);
+
+        return $query->all();
+    }
 }
