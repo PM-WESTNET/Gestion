@@ -568,7 +568,10 @@ class PaymentController extends Controller {
             'payments' => $payments,
         ]);
     }
-    
+
+    /**
+     * Cierra el archivo de pago fácil y los pagos que corresponden al mismo
+     */
     public function actionConfirmFile($idFile){
         set_time_limit(0);
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
@@ -596,7 +599,7 @@ class PaymentController extends Controller {
         
         $payment->customer_id= $new_customer_id;
         
-        if ($payment->save()) {
+        if ($payment->updateAttributes(['customer_id'])) {
             \Yii::$app->session->setFlash('success', \Yii::t('app', 'Customer changed successfull'));
             $this->redirect(['view', 'id' => $payment->payment_id]);
         }else{

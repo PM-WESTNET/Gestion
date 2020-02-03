@@ -61,6 +61,12 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         'date:date',
+        [
+            'attribute' => 'timestamp',
+            'value' => function($model) {
+                return $model->timestamp ? (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y') : '';
+            }
+        ],
         'amount:currency',
         'description',
         [

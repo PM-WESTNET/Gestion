@@ -244,6 +244,25 @@ class UserAppController extends Controller
                 $userAppHasCustomer->save();
             }
 
+            /**
+             * Si el código de cliente es el configurado para las pruebas de ios, simulo que esta todo correcto
+             * y no mando ningun código devolviendo respuesta satisfactoria
+             */
+            if ($data['customer_code'] == Config::getValue('customer_code_ios_test')) {
+                if($isEmail) {
+                    return [
+                        'status' => 'success',
+                        'message' => Yii::t('app','Validation code has been sended {email}', ['email' => $model->email]),
+                    ];
+                } else {
+                    return [
+                        'status' => 'success',
+                        'message' => Yii::t('app', 'Validation code has been sended to {phone}', ['phone' => $data['destinatary']]),
+                    ];
+
+                }
+            }
+
             $validationCode= new ValidationCode(['user_app_has_customer_id' => $userAppHasCustomer->user_app_has_customer_id]);
             $validationCode->save();
             if($isEmail) {
@@ -291,6 +310,42 @@ class UserAppController extends Controller
                 'status' => 'error',
                 'error' =>  Yii::t('app','Code and Customer Code is required.'),
             ];
+        }
+
+        if ($data['customer_code'] == Config::getValue('customer_code_ios_test')) {
+            if ($data['code'] == Config::getValue('validation_code_ios_test')) {
+                $customer = Customer::findOne(['code' => $data['customer_code']]);
+
+                if (empty($customer)) {
+                    \Yii::$app->response->setStatusCode(400);
+                    return [
+                        'status' => 'error',
+                        'error' =>  Yii::t('app','Customer Not Found'),
+                    ];
+                }
+
+                $uahc = UserAppHasCustomer::findOne(['customer_code' => $customer->code]);
+
+                if (empty($uahc)) {
+                    \Yii::$app->response->setStatusCode(400);
+                    return [
+                        'status' => 'error',
+                        'error' =>  Yii::t('app','Customer Not Found'),
+                    ];
+                }
+
+                $uahc->customer_id = $customer->customer_id;
+                $uahc->userApp->status= 'active';
+                $uahc->updateAttributes(['customer_id']);
+                $uahc->userApp->updateAttributes(['status']);
+
+                return [
+                    'status' => 'success',
+                    //'customer' => $customer,
+                    'userApp' => $uahc->userApp,
+                    'token' => $uahc->userApp->getAuthToken()
+                ];
+            }
         }
 
         $validationCode= ValidationCode::find()
@@ -1026,6 +1081,25 @@ class UserAppController extends Controller
     {
         $data = Yii::$app->request->post();
 
+        $customer = Customer::findOne($data['customer']);
+
+        if (empty($customer)) {
+            return [
+                'status' => false,
+                'notify_payment_id' => null,
+                'message' => Yii::t('app','Customer not found')
+            ];
+        }
+
+        if (!$customer->canNotifyPayment()) {
+            return [
+                'status' => false,
+                'notify_payment_id' => null,
+                'message' => Yii::t('app','Can`t request a notify payment')
+            ];
+        }
+
+
         $notify_payment = new NotifyPayment([
             'customer_id' => $data['customer'],
             'date' => $data['date'],
@@ -1034,10 +1108,30 @@ class UserAppController extends Controller
             'contract_id' => $data['contract'],
         ]);
 
+        /**
+         * Si image_receipt viene en los datos, viene con la imagen capturada por la camara en base64
+         * por lo que debemos crear el archivo con el contenido de image_receipt
+         */
+        if ($data['image_receipt']){
+            $relativeName = 'uploads/payments/'. time() . rand(0, 99).'.jpg';
+            $filename= Yii::getAlias('@webroot/'.$relativeName);
+            $save= file_put_contents($filename, base64_decode($data['image_receipt']));
+
+            if ($save === false) {
+                return [
+                    'status' => false,
+                    'notify_payment_id' => null,
+                    'message' =>  Yii::t('app', 'Your notify payment can`t be created')
+                ];
+            }
+
+            $notify_payment->image_receipt = $relativeName;
+        }
+
         $trasanction = Yii::$app->db->beginTransaction();
 
         $result = $this->createPaymentExtensionAndForce($data['contract']);
-        if($notify_payment->save() && $result['status']) {
+        if($result['status'] && $notify_payment->save()) {
             $trasanction->commit();
             return [
                 'status' => true,

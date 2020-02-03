@@ -24,7 +24,9 @@ class AccountMovementTest extends \Codeception\Test\Unit
     public function _before()
     {
         $this->accounting_period_id = $this->tester->haveRecord(AccountingPeriod::class, [
-            'name' => '2018'
+            'name' => '2018',
+            'date_from' => '2018-01-01',
+            'date_to' => '2018-12-31',
         ]);
     }
 
@@ -39,6 +41,12 @@ class AccountMovementTest extends \Codeception\Test\Unit
             ],
             'account' => [
                 'class' => AccountFixture::class
+            ],
+            'account_movement_item' => [
+                'class' => \app\tests\fixtures\AccountMovementItemFixture::class
+            ],
+            'money_box_account' => [
+                'class' => \app\tests\fixtures\MoneyBoxAccountFixture::class
             ]
         ];
     }
@@ -282,4 +290,32 @@ class AccountMovementTest extends \Codeception\Test\Unit
 
     }
      */
+
+    public function testCanDeleteSuccessCommonAccount()
+    {
+        $movement = AccountMovement::findOne(4);
+
+        expect('Cant delete', $movement->getDeletable())->true();
+    }
+
+    public function testCanDeleteSuccessDailyAccount()
+    {
+        $movement = AccountMovement::findOne(6);
+
+        expect('Cant delete', $movement->getDeletable())->true();
+    }
+
+    public function testCanDeleteFailForAfterMovementsClosed()
+    {
+        $movement = AccountMovement::findOne(2);
+
+        expect('Deleted', $movement->getDeletable())->false();
+    }
+
+    public function testCanDeleteFailForDailyBoxClosed()
+    {
+        $movement = AccountMovement::findOne(5);
+
+        expect('Deleted', $movement->getDeletable())->false();
+    }
 }

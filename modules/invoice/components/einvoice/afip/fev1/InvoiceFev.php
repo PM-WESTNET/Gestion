@@ -86,13 +86,15 @@ class InvoiceFev extends InvoiceDTO
                 if($aTax['amount']>0) {
                     $tax = TaxRate::findOne(['tax_id'=>$aTax['tax_id']]);
                     if(array_key_exists($tax->code, $this->taxes)===false) {
-                        $this->taxes[$tax->code] = [
-                            'Id' => $tax->code,
-                            'Importe' => round((float)(array_key_exists($tax->code, $this->taxes) !== false ? $this->taxes[$tax->code]['Importe'] : 0) + ($aTax['amount']),2),
-                            'BaseImp' => round((float)(array_key_exists($tax->code, $this->taxes) !== false ? $this->taxes[$tax->code]['BaseImp']  : 0) + ($aTax['base']),2)
-                        ];
-                        $this->taxedPrice += $aTax['base'];
-                        $this->taxesPrices += ($this->bill->customer->taxCondition->exempt ? 0 : $aTax['amount']);
+                        if($tax->code != null) {
+                            $this->taxes[$tax->code] = [
+                                'Id' => $tax->code,
+                                'Importe' => round((float)(array_key_exists($tax->code, $this->taxes) !== false ? $this->taxes[$tax->code]['Importe'] : 0) + ($aTax['amount']),2),
+                                'BaseImp' => round((float)(array_key_exists($tax->code, $this->taxes) !== false ? $this->taxes[$tax->code]['BaseImp']  : 0) + ($aTax['base']),2)
+                            ];
+                            $this->taxedPrice += $aTax['base'];
+                            $this->taxesPrices += ($this->bill->customer->taxCondition->exempt ? 0 : $aTax['amount']);
+                        }
                     }
                 }
             }

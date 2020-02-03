@@ -47,383 +47,28 @@ class ConnectionStatusController extends Controller
      */
     public function actionUpdate($save=false)
     {
-        $debug = false;
-        $due_day = Config::getValue('bill_due_day');
-        if(!$due_day) {
-            $due_day = 15;
+        if (Yii::$app->mutex->acquire('update_connections_cron')) {
+            $this->updateConnections($save);
         }
-        $newContractsDays = Config::getValue('new_contracts_days');
-        if(!$newContractsDays) {
-            $newContractsDays = 0;
-        }
-
-        $invoice_next_month = Config::getValue('contract_days_for_invoice_next_month');
-
-        $due_date = new \DateTime(date('Y-m-').$due_day);
-        $due_forced = null;
-        $date = new \DateTime('now');
-        $newContracts = new \DateTime('now +'.$newContractsDays . " days");
-        $last_bill_date = new \DateTime( (new \DateTime( 'now - 1 month'))->format('Y-m-'.$invoice_next_month) );
-        $bill_date = new \DateTime( 'last day of this month');
-
-        $estados = [];
-        $estadosAnteriores = [];
-
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_ENABLED] = 0;
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_DISABLED] = 0;
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_FORCED] = 0;
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
-        $estadosAnteriores[Connection::STATUS_ACCOUNT_LOW] = 0;
-
-        $estados[Connection::STATUS_ACCOUNT_ENABLED] = 0;
-        $estados[Connection::STATUS_ACCOUNT_DISABLED] = 0;
-        $estados[Connection::STATUS_ACCOUNT_FORCED] = 0;
-        $estados[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
-        $estados[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
-        $estados[Connection::STATUS_ACCOUNT_LOW] = 0;
-
-        // Traigo todos los customer para poder iterar.
-        $queryCustomer = Customer::find()->andWhere(['status' => 'enabled']);
-
-
-        if($debug) {//1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression( 'customer_id in (12748)'));
-        }
-        $customers = $queryCustomer->all();
-
-        $subprice = (new Query())
-            ->select(['product_id', new Expression('max(date) maxdate') ])
-            ->from('product_price')
-            ->groupBy(['product_id']);
-
-
-        $query_plan = (new Query())
-            ->select(['(net_price + taxes) as price'])
-            ->from(['contract c'])
-            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
-            ->leftJoin('product p', 'cd.product_id = p.product_id')
-            ->leftJoin('product_price pp', 'p.product_id = pp.product_id')
-            ->innerJoin(['ppppim'=> $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
-            ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
-            ->orderBy(['pp.date'=>SORT_DESC])
-        ;
-
-        $this->stdout("Westnet - Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
-        $r=0;
-        $i = 0;
-        try{
-            error_log( "customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$" );
-
-            foreach($customers as $customer) {
-                /** @var CustomerClass $customerClass */
-                $customerClass = $customer->getCustomerClass()->one();
-
-                $aviso_date = clone $due_date;
-                $cortado_date = clone $due_date;
-                $aviso_date->modify('+'.$customerClass->tolerance_days.' day');
-                $cortado_date->modify('+'.$customerClass->days_duration.' day');
-
-                $contracts = [];
-
-                // Si no tiene deuda o la deuda es menor a la tolerancia, habilito.
-                $payment = new Payment();
-                $payment->customer_id = $customer->customer_id;
-                $amount = round($payment->accountTotal());
-                $contracts = Contract::findAll(['customer_id'=>$customer->customer_id]);
-
-                //TODO Si el contrato tiene fecha de hoy y tiene deuda se corta
-                foreach($contracts as $contract) {
-                    $connection = Connection::findOne(['contract_id'=>$contract->contract_id]);
-
-                    $precio_plan = clone $query_plan;
-
-                    $precioPlan = $query_plan->addParams([
-                        ':customer_id' => $contract->customer_id,
-                        ':contract_id' => $contract->contract_id
-                    ])->scalar();
-
-                    try {
-                        $from_date = new \DateTime( ($contract->from_date ? $contract->from_date : $contract->date) );
-                    }catch(\Exception $ex){
-                        continue;
-                    }
-
-                    if($connection) {
-                        $status_old = $connection->status_account;
-                        if(is_null($status_old)) {
-                            $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
-                        }
-                        $estadosAnteriores[$connection->status_account]++;
-
-                        // Si la conexion esta forzada,
-                        // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda
-                        // y demas.
-                        if($connection->status_account == Connection::STATUS_ACCOUNT_FORCED ) {
-                            $due_forced = $date;
-                            try{
-                                $due_forced = new \DateTime($connection->due_date);
-                            } catch(\Exception $ex){
-                                $connection->due_date = null;
-                            }
-                            // Si la fecha de forzado es mayor a hoy, es porque todavia no se cumple y lo tengo que omitir
-                            if($due_forced >= $date ) {
-                                $estados[$connection->status_account]++;
-                                continue;
-                            }
-                        }
-
-
-                        $debtLastBill = $this->debtLastBill($customer->customer_id);
-
-                        //$bills = $this->getBills($customer->customer_id);
-
-                        $newContractsFromDate = clone $from_date;
-                        $newContractsFromDate->modify('+'.$newContractsDays . " days");
-
-                        if($debug) {
-                            error_log( ": " . $contract->customer_id . " " .
-                                " - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
-                                " - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
-                                " - aviso_date: " . $aviso_date->format('Y-m-d') .
-                                " - cortado_date: " . $cortado_date->format('Y-m-d') .
-                                " - due_date: " . $due_date->format('Y-m-d') .
-                                " - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '' ).
-                                " - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
-                                " - debtLastBill: " . $debtLastBill .
-                                " - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
-                            );
-                        }
-
-                        // Si no esta en proceso de baja
-                        if ( $contract->status != Contract::STATUS_LOW_PROCESS &&
-                             $contract->status != Contract::STATUS_LOW &&
-                             $connection->status_account != Connection::STATUS_ACCOUNT_LOW ) {
-                            /** Habilito
-                             *  - es free o
-                             *  - No tiene deuda o
-                             *  - Tiene deuda menor al porcentaje de tolerancia y hoy es menor a la fecha de corte y menor a la fecha de corte por nuevo y debe una o menos facturas
-                             *
-                             */
-                            $tiene_deuda = ($amount <= 0);
-                            $tiene_deuda_sobre_tolerante = ( round(abs($amount)) >= $customerClass->percentage_tolerance_debt );
-                            $es_nueva_instalacion = ($date->diff($from_date)->days<=$newContractsDays);
-                            $avisa = ($date >= $aviso_date && $date < $cortado_date);
-                            $corta = ($date >= $cortado_date);
-                            $es_nuevo = ( $from_date >= $last_bill_date && $from_date <= $bill_date  );
-
-                            if($debug) {
-                                error_log('tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's': 'n' ) . " - " . ' tiene_deuda: ' . ($tiene_deuda ? 's': 'n' )
-                                . ' - es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's': 'n' )
-                                .' - avisa: ' . ($avisa ? 's': 'n' )
-                                . ' - corta: ' . ($corta ? 's': 'n' )
-                                . ' - es_nuevo: ' . ($es_nuevo ? 's': 'n' )
-                                . ' - last_bill_date: ' .$last_bill_date->format('Y-m-d'));
-
-                            }
-
-
-                            if ( strtolower($customerClass->name) == 'free' ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                            } else if ($es_nueva_instalacion ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                            } else if( $es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-
-                            } else if( $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED ) {
-                                $dateLastBill = new \DateTime( $this->getLastBill($customer->customer_id) );
-                                /**
-                                 * Habilito si:
-                                 *  - solo debe la factura del mes actual y la fecha es menor a la de corte
-                                 */
-                                if( !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) || ( $debtLastBill <= 1 && $date->format('Y-m') == $dateLastBill->format('Y-m') && $date < $cortado_date ) ) {
-                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                                }
-                            } else if(
-                                (!$tiene_deuda ||
-                                    ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) ||
-                                    ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && !$corta && !$avisa )
-                                )
-                            ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-
-                            } else if( ($tiene_deuda && $tiene_deuda_sobre_tolerante ) && $avisa && $debtLastBill <= 1) {
-                                /**
-                                 * Deudor:
-                                 *  -  No esta en proceso de baja
-                                 *  -  Tiene deuda mayor a la tolerancia.
-                                 *  -  Hoy es mayor a la fecha de aviso y menor a la de corte o
-                                 *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
-                                 */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
-                            } else if(
-                                ( ($tiene_deuda && $tiene_deuda_sobre_tolerante ) &&
-                                    ( $corta && $debtLastBill >= 1 ) ||
-                                    ($debtLastBill >= 1 && !$es_nueva_instalacion ) ) &&
-                                ( ( $connection->status_account == Connection::STATUS_ACCOUNT_FORCED &&  ($due_date && $due_forced ? $date > $due_forced : false ) ) || $connection->status_account != Connection::STATUS_ACCOUNT_FORCED  ) ||
-                                $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED )
-                            {
-                                /**
-                                 * Cortado
-                                 *  -  Si tiene deuda mayor a la tolerancia y
-                                 *      -  debe una o mas facturas y
-                                 *      -  hoy es mayor a la fecha de aviso y menor a la fecha de corte
-                                 *  -  Esta forzado y hoy es mayor a la fecha de forzado
-                                 *  -  No esta en proceso de baja
-                                 */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill2['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-                            }
-                        }
-
-                        $estados[$connection->status_account]++;
-                        if($save) {
-                            if($status_old != $connection->status_account) {
-                                $connection->detachBehaviors();
-                                $connection->update(false);
-                            }
-                        }
-                        $i++;
-                        if(($i%1000)== 0) {
-                            $this->stdout("Westnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
-                        }
-                    }
-
-                }
-            }
-        }catch(\Exception $ex) {
-            echo $ex->getMessage();
-            echo $ex->getLine();
-            echo $ex->getTraceAsString();
-        }
-
-        foreach($estados as $key=>$value) {
-            $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
-        }
-        $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
     }
 
 
     /**
      * Actualizo los cambios de plan.
      */
-    public function actionUpdatePlan($date = null)
+    public function actionUpdatePlan($date = null, $from_date = null, $limit = null)
     {
-        $this->stdout("Westnet - Proceso de actualizacion de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
-
-        if ($date == null) {
-            $date = (new \DateTime('now'))->format('Y-m-d');
+        if (Yii::$app->mutex->acquire('update_plans_cron')) {
+            $this->updatePlans($date, $from_date, $limit);
+            Yii::$app->mutex->release('update_plans_cron');
         }
+    }
 
-        $subQuery = (new Query())
-            ->select(['product_id'])
-            ->from(['contract_detail_log cdl'])
-            ->where('cdl.contract_detail_id = cd.contract_detail_id')
-            ->orderBy(['contract_detail_log_id' => SORT_DESC])
-            ->limit(1);
-
-        $query = (new Query())
-            ->select(['c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
-                'p.system', 's.server_id', 's.url', 's.token', new Expression('inet_ntoa(ip4_1) as ip')])
-            ->from('contract c')
-            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
-            ->leftJoin('customer cus', 'c.customer_id = cus.customer_id')
-            ->leftJoin('product p', 'cd.product_id = p.product_id')
-            ->leftJoin('connection con', 'c.contract_id = con.contract_id')
-            ->leftJoin('server s', 'con.server_id = s.server_id')
-            ->where(['p.type' => 'plan', 'cd.applied' => 0])
-            ->andWhere(['<=', 'cd.from_date', $date])
-            ->andWhere(['<>', 'cd.product_id', $subQuery])
-        ;
-
-        $contracts = $query->all();
-
-        $contractRequests = [];
-        $planes = [];
-        $apis = [];
-        foreach ( Server::find()->all() as $server ) {
-            $apis[$server->server_id] = IspFactory::getInstance()->getIsp($server);
+    public function actionCorregirPlans(array $server_id = null, array $plan_id= null, $limit= null) {
+        if (Yii::$app->mutex->acquire('corregir_planes')) {
+            $this->corregirPlanes($limit, $server_id, $plan_id);
+            Yii::$app->mutex->release('corregir_planes');
         }
-
-        $iguales = 0;
-        $distintos = 0;
-        try {
-            $wispro = new SecureConnectionUpdate();
-
-            foreach( $contracts as $contractRes) {
-                if(array_key_exists($contractRes['server_id'], $contractRequests)===false) {
-                    $contractRequests[$contractRes['server_id']] = $apis[$contractRes['server_id']]->getContractApi();
-                }
-                if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
-                    $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
-                    $plans = $plansRequest->listAll();
-                    foreach( $plans as $plan) {
-                        $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
-                    }
-                }
-
-                $contractRequest =  $contractRequests[$contractRes['server_id']];
-
-                // Verifico que exista el plan
-                if( array_key_exists($contractRes['server_id'] ."_". $contractRes['system'], $planes ) !== false ) {
-
-                    $plan_id = (string)$planes[ $contractRes['server_id'] ."_". $contractRes['system'] ];
-
-                    $contract = Contract::findOne(['contract_id'=> $contractRes['contract_id']]);
-                    $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
-
-                    $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
-
-                    $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
-                    try {
-                        // Busco el contrato por IP
-                        $contract_api = $contractRequest->find($contractRest->ip, ContractRequest::Q_IP);
-                        $contract_api = is_array($contract_api) ? $contract_api[0] : null;
-                        if($contract_api!==null) {
-                            if($contract_api->plan_id == $plan_id) {
-                                $iguales++;
-                            } else {
-                                $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
-                                if($contract_api->id != $contract->external_id) {
-                                    $contract->external_id = $contract_api->id;
-                                    $this->stdout("actualizo external_id: " . $contract_api->id );
-                                    $contract->updateAttributes(['external_id']);
-                                }
-
-                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
-                                $contractDetail->applied = true;
-                                $contractDetail->updateAttributes(['applied']);
-
-                                $wispro->update($connection, $contract, true);
-                                $distintos++;
-
-                            }
-                        } else {
-                            $this->stdout("No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
-                        }
-                    } catch( \Exception $ex) {
-                        $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
-                        $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
-                        $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
-                    }
-                } else {
-                    $this->stdout("Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", Console::BOLD, Console::FG_RED);
-                }
-            }
-        } catch(\Exception $ex){
-            $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
-            $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
-            $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
-        }
-
-        $this->stdout("Totales"."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("Iguales: ". $iguales."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("Distintos: ". $distintos."\n", Console::BOLD, Console::FG_RED);
-        $this->stdout("-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
-
     }
 
     /**
@@ -776,5 +421,582 @@ class ConnectionStatusController extends Controller
             $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
         }
         $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+    }
+
+    /*
+     * Actualiza el estado de las conexiones
+     */
+    private function updateConnections($save = false) {
+        $debug = false;
+        $due_day = Config::getValue('bill_due_day');
+        if(!$due_day) {
+            $due_day = 15;
+        }
+        $newContractsDays = Config::getValue('new_contracts_days');
+        if(!$newContractsDays) {
+            $newContractsDays = 0;
+        }
+
+        $invoice_next_month = Config::getValue('contract_days_for_invoice_next_month');
+
+        $due_date = new \DateTime(date('Y-m-').$due_day);
+        $due_forced = null;
+        $date = new \DateTime('now');
+        $newContracts = new \DateTime('now +'.$newContractsDays . " days");
+        $last_bill_date = new \DateTime( (new \DateTime( 'now - 1 month'))->format('Y-m-'.$invoice_next_month) );
+        $bill_date = new \DateTime( 'last day of this month');
+
+        $estados = [];
+        $estadosAnteriores = [];
+
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_ENABLED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_DISABLED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_FORCED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
+        $estadosAnteriores[Connection::STATUS_ACCOUNT_LOW] = 0;
+
+        $estados[Connection::STATUS_ACCOUNT_ENABLED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_DISABLED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_FORCED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_DEFAULTER] = 0;
+        $estados[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
+        $estados[Connection::STATUS_ACCOUNT_LOW] = 0;
+
+        // Traigo todos los customer para poder iterar.
+        $queryCustomer = Customer::find()->andWhere(['status' => 'enabled']);
+
+
+        if($debug) {//1403,1533,2303, 25372
+            $queryCustomer->andWhere(new Expression( 'customer_id in (12748)'));
+        }
+        $customers = $queryCustomer->all();
+
+        $subprice = (new Query())
+            ->select(['product_id', new Expression('max(date) maxdate') ])
+            ->from('product_price')
+            ->groupBy(['product_id']);
+
+
+        $query_plan = (new Query())
+            ->select(['(net_price + taxes) as price'])
+            ->from(['contract c'])
+            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+            ->leftJoin('product p', 'cd.product_id = p.product_id')
+            ->leftJoin('product_price pp', 'p.product_id = pp.product_id')
+            ->innerJoin(['ppppim'=> $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
+            ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
+            ->orderBy(['pp.date'=>SORT_DESC])
+        ;
+
+        $this->stdout("Westnet - Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+        $r=0;
+        $i = 0;
+        try{
+            error_log( "customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$" );
+
+            foreach($customers as $customer) {
+                /** @var CustomerClass $customerClass */
+                $customerClass = $customer->getCustomerClass()->one();
+
+                $aviso_date = clone $due_date;
+                $cortado_date = clone $due_date;
+                $aviso_date->modify('+'.$customerClass->tolerance_days.' day');
+                $cortado_date->modify('+'.$customerClass->days_duration.' day');
+
+                $contracts = [];
+
+                // Si no tiene deuda o la deuda es menor a la tolerancia, habilito.
+                $payment = new Payment();
+                $payment->customer_id = $customer->customer_id;
+                $amount = round($payment->accountTotal());
+                $contracts = Contract::findAll(['customer_id'=>$customer->customer_id]);
+
+                //TODO Si el contrato tiene fecha de hoy y tiene deuda se corta
+                foreach($contracts as $contract) {
+                    $connection = Connection::findOne(['contract_id'=>$contract->contract_id]);
+
+                    $precio_plan = clone $query_plan;
+
+                    $precioPlan = $query_plan->addParams([
+                        ':customer_id' => $contract->customer_id,
+                        ':contract_id' => $contract->contract_id
+                    ])->scalar();
+
+                    try {
+                        $from_date = new \DateTime( ($contract->from_date ? $contract->from_date : $contract->date) );
+                    }catch(\Exception $ex){
+                        continue;
+                    }
+
+                    if($connection) {
+                        $status_old = $connection->status_account;
+                        if(is_null($status_old)) {
+                            $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
+                        }
+                        $estadosAnteriores[$connection->status_account]++;
+
+                        // Si la conexion esta forzada,
+                        // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda
+                        // y demas.
+                        if($connection->status_account == Connection::STATUS_ACCOUNT_FORCED ) {
+                            $due_forced = $date;
+                            try{
+                                $due_forced = new \DateTime($connection->due_date);
+                            } catch(\Exception $ex){
+                                $connection->due_date = null;
+                            }
+                            // Si la fecha de forzado es mayor a hoy, es porque todavia no se cumple y lo tengo que omitir
+                            if($due_forced >= $date ) {
+                                $estados[$connection->status_account]++;
+                                continue;
+                            }
+                        }
+
+
+                        $debtLastBill = $this->debtLastBill($customer->customer_id);
+
+                        //$bills = $this->getBills($customer->customer_id);
+
+                        $newContractsFromDate = clone $from_date;
+                        $newContractsFromDate->modify('+'.$newContractsDays . " days");
+
+                        if($debug) {
+                            error_log( ": " . $contract->customer_id . " " .
+                                " - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
+                                " - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
+                                " - aviso_date: " . $aviso_date->format('Y-m-d') .
+                                " - cortado_date: " . $cortado_date->format('Y-m-d') .
+                                " - due_date: " . $due_date->format('Y-m-d') .
+                                " - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '' ).
+                                " - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
+                                " - debtLastBill: " . $debtLastBill .
+                                " - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
+                            );
+                        }
+
+                        // Si no esta en proceso de baja
+                        if ( $contract->status != Contract::STATUS_LOW_PROCESS &&
+                            $contract->status != Contract::STATUS_LOW &&
+                            $connection->status_account != Connection::STATUS_ACCOUNT_LOW ) {
+                            /** Habilito
+                             *  - es free o
+                             *  - No tiene deuda o
+                             *  - Tiene deuda menor al porcentaje de tolerancia y hoy es menor a la fecha de corte y menor a la fecha de corte por nuevo y debe una o menos facturas
+                             *
+                             */
+                            $tiene_deuda = ($amount <= 0);
+                            $tiene_deuda_sobre_tolerante = ( round(abs($amount)) >= $customerClass->percentage_tolerance_debt );
+                            $es_nueva_instalacion = ($date->diff($from_date)->days<=$newContractsDays);
+                            $avisa = ($date >= $aviso_date && $date < $cortado_date);
+                            $corta = ($date >= $cortado_date);
+                            $es_nuevo = ( $from_date >= $last_bill_date && $from_date <= $bill_date  );
+
+                            if($debug) {
+                                error_log('tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's': 'n' ) . " - " . ' tiene_deuda: ' . ($tiene_deuda ? 's': 'n' )
+                                    . ' - es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's': 'n' )
+                                    .' - avisa: ' . ($avisa ? 's': 'n' )
+                                    . ' - corta: ' . ($corta ? 's': 'n' )
+                                    . ' - es_nuevo: ' . ($es_nuevo ? 's': 'n' )
+                                    . ' - last_bill_date: ' .$last_bill_date->format('Y-m-d'));
+
+                            }
+
+
+                            if ( strtolower($customerClass->name) == 'free' ) {
+                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                            } else if ($es_nueva_instalacion ) {
+                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                            } else if( $es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante ) {
+                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+
+                            } else if( $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED ) {
+                                $dateLastBill = new \DateTime( $this->getLastBill($customer->customer_id) );
+                                /**
+                                 * Habilito si:
+                                 *  - solo debe la factura del mes actual y la fecha es menor a la de corte
+                                 */
+                                if( !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) || ( $debtLastBill <= 1 && $date->format('Y-m') == $dateLastBill->format('Y-m') && $date < $cortado_date ) ) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                }
+                            } else if(
+                            (!$tiene_deuda ||
+                                ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) ||
+                                ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && !$corta && !$avisa )
+                            )
+                            ) {
+                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+
+                            } else if( ($tiene_deuda && $tiene_deuda_sobre_tolerante ) && $avisa && $debtLastBill <= 1) {
+                                /**
+                                 * Deudor:
+                                 *  -  No esta en proceso de baja
+                                 *  -  Tiene deuda mayor a la tolerancia.
+                                 *  -  Hoy es mayor a la fecha de aviso y menor a la de corte o
+                                 *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
+                                 */
+                                $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
+                            } else if(
+                                ( ($tiene_deuda && $tiene_deuda_sobre_tolerante ) &&
+                                    ( $corta && $debtLastBill >= 1 ) ||
+                                    ($debtLastBill >= 1 && !$es_nueva_instalacion ) ) &&
+                                ( ( $connection->status_account == Connection::STATUS_ACCOUNT_FORCED &&  ($due_date && $due_forced ? $date > $due_forced : false ) ) || $connection->status_account != Connection::STATUS_ACCOUNT_FORCED  ) ||
+                                $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED )
+                            {
+                                /**
+                                 * Cortado
+                                 *  -  Si tiene deuda mayor a la tolerancia y
+                                 *      -  debe una o mas facturas y
+                                 *      -  hoy es mayor a la fecha de aviso y menor a la fecha de corte
+                                 *  -  Esta forzado y hoy es mayor a la fecha de forzado
+                                 *  -  No esta en proceso de baja
+                                 */
+                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill2['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                            }
+                        }
+
+                        $estados[$connection->status_account]++;
+                        if($save) {
+                            if($status_old != $connection->status_account) {
+                                $connection->detachBehaviors();
+                                $connection->update(false);
+                            }
+                        }
+                        $i++;
+                        if(($i%1000)== 0) {
+                            $this->stdout("Westnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
+                        }
+                    }
+
+                }
+            }
+        }catch(\Exception $ex) {
+            echo $ex->getMessage();
+            echo $ex->getLine();
+            echo $ex->getTraceAsString();
+        }
+
+        foreach($estados as $key=>$value) {
+            $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
+        }
+        $this->stdout("Westnet - Fin de Proceso de actualizacion de conexiones - ". (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
+    }
+
+    public function updatePlans($date = null, $from_date = null, $limit= null)
+    {
+        $this->stdout("Westnet - Proceso de actualizacion de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+
+        if ($date == null || $date == 'null') {
+            $date = (new \DateTime('now'))->format('Y-m-d');
+        }
+
+        $subQuery = (new Query())
+            ->select(['product_id'])
+            ->from(['contract_detail_log cdl'])
+            ->where('cdl.contract_detail_id = cd.contract_detail_id')
+            ->orderBy(['contract_detail_log_id' => SORT_DESC])
+            ->limit(1);
+
+        $query = (new Query())
+            ->select(['c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
+                'p.system', 's.server_id', 's.url', 's.token', new Expression('inet_ntoa(ip4_1) as ip')])
+            ->from('contract c')
+            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+            ->leftJoin('customer cus', 'c.customer_id = cus.customer_id')
+            ->leftJoin('product p', 'cd.product_id = p.product_id')
+            ->leftJoin('connection con', 'c.contract_id = con.contract_id')
+            ->leftJoin('server s', 'con.server_id = s.server_id')
+            ->andWhere(['c.status' => Contract::STATUS_ACTIVE])
+            ->andWhere(['IS NOT', 's.server_id', NULL])
+            ->andWhere(['p.type' => 'plan', 'cd.applied' => 0])
+            ->andWhere(['<=', 'cd.from_date', $date])
+            ->andFilterWhere(['>=', 'cd.from_date', $from_date])
+            //->andWhere(['<>', 'cd.product_id', $subQuery])
+        ;
+
+        if (!empty($limit)) {
+            $query->limit($limit);
+        }
+
+        echo $query->createCommand()->getRawSql();
+
+        $contracts = $query->all();
+
+        $contractRequests = [];
+        $planes = [];
+        $apis = [];
+        foreach ( Server::find()->all() as $server ) {
+            $apis[$server->server_id] = IspFactory::getInstance()->getIsp($server);
+        }
+
+        $iguales = 0;
+        $distintos = 0;
+        try {
+            $wispro = new SecureConnectionUpdate();
+
+            foreach( $contracts as $contractRes) {
+                if(array_key_exists($contractRes['server_id'], $contractRequests)===false) {
+                    $contractRequests[$contractRes['server_id']] = $apis[$contractRes['server_id']]->getContractApi();
+                }
+                if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
+                    $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
+                    $plans = $plansRequest->listAll();
+                    if (is_array($plans)){
+                        foreach( $plans as $plan) {
+                            $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
+                        }
+                    }else {
+                        $this->stdout("Error al traer contratos del server ". $contractRes['server_id']);
+                    }
+                }
+
+                $contractRequest =  $contractRequests[$contractRes['server_id']];
+
+                // Verifico que exista el plan
+                if( array_key_exists($contractRes['server_id'] ."_". $contractRes['system'], $planes ) !== false ) {
+
+                    $plan_id = (string)$planes[ $contractRes['server_id'] ."_". $contractRes['system'] ];
+
+                    $contract = Contract::findOne(['contract_id'=> $contractRes['contract_id']]);
+                    $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
+
+                    $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+
+                    $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
+                    try {
+                        // Busco el contrato por IP
+                        $contract_api = $contractRequest->find($contractRest->ip, ContractRequest::Q_IP);
+                        $contract_api = is_array($contract_api) ? $contract_api[0] : null;
+                        if($contract_api!==null) {
+                            if($contract_api->plan_id == $plan_id) {
+                                $iguales++;
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->updateAttributes(['applied' => 1]);
+                            } else {
+                                $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
+                                if($contract_api->id != $contract->external_id) {
+                                    $contract->external_id = $contract_api->id;
+                                    $this->stdout("actualizo external_id: " . $contract_api->id );
+                                    $contract->updateAttributes(['external_id']);
+                                }
+
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->applied = true;
+                                $contractDetail->updateAttributes(['applied']);
+
+                                $wispro->update($connection, $contract, true);
+                                $distintos++;
+
+                            }
+                        } else {
+                            $this->stdout("No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+                        }
+                    } catch( \Exception $ex) {
+                        $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+                    }
+                } else {
+                    $this->stdout("Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", Console::BOLD, Console::FG_RED);
+                }
+            }
+        } catch(\Exception $ex){
+            $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+        }
+
+        $this->stdout("Totales"."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Iguales: ". $iguales."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Distintos: ". $distintos."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+
+    }
+
+    public function corregirPlanes($limit= null, $server_id = null, $plan_id= null)
+    {
+        $this->stdout("Westnet - Proceso de correción de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Westnet - Proceso de correción de planes - ".(new \DateTime())->format('d-m-Y H:i:s')."\n", FILE_APPEND);
+
+        $date = (new \DateTime('now'))->format('Y-m-d');
+
+        $subQuery = (new Query())
+            ->select(['product_id'])
+            ->from(['contract_detail_log cdl'])
+            ->where('cdl.contract_detail_id = cd.contract_detail_id')
+            ->orderBy(['contract_detail_log_id' => SORT_DESC])
+            ->limit(1);
+
+        $query = (new Query())
+            ->select(['c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id', 'p.name as plan',
+                'p.system', 's.server_id','s.name as server', 's.url', 's.token', new Expression('inet_ntoa(ip4_1) as ip')])
+            ->from('contract c')
+            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+            ->leftJoin('customer cus', 'c.customer_id = cus.customer_id')
+            ->leftJoin('product p', 'cd.product_id = p.product_id')
+            ->leftJoin('connection con', 'c.contract_id = con.contract_id')
+            ->leftJoin('server s', 'con.server_id = s.server_id')
+            ->andWhere(['IN', 'c.status', [Contract::STATUS_ACTIVE, Contract::STATUS_LOW_PROCESS]])
+            ->andWhere(['IS NOT', 's.server_id', NULL])
+            //->andWhere(['p.type' => 'plan', 'cd.applied' => 0])
+            ->andWhere(['<=', 'cd.from_date', $date])
+            //->andWhere(['<>', 'cd.product_id', $subQuery])
+        ;
+
+        if(is_array($server_id)) {
+            $query->andFilterWhere(['IN', 's.server_id', $server_id]);
+        }else {
+            $query->andFilterWhere(['s.server_id' => $server_id]);
+        }
+
+        if(is_array($plan_id)) {
+            $query->andFilterWhere(['IN', 'p.product_id', $plan_id]);
+        }else {
+            $query->andFilterWhere(['p.product_id' => $plan_id]);
+        }
+
+        if (!empty($limit)) {
+            $query->limit($limit);
+        }
+
+        echo $query->createCommand()->getRawSql();
+
+        $contracts = $query->all();
+
+        $this->stdout('Contratos encontrados: ' . count($contracts). "\n");
+
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Contratos encontrados: ' . count($contracts). "\n", FILE_APPEND);
+
+        $contractRequests = [];
+        $planes = [];
+        $apis = [];
+        foreach ( Server::find()->all() as $server ) {
+            $apis[$server->server_id] = IspFactory::getInstance()->getIsp($server);
+        }
+
+        $iguales = 0;
+        $distintos = 0;
+        $errors = 0;
+        try {
+            $wispro = new SecureConnectionUpdate();
+
+            foreach( $contracts as $contractRes) {
+                if(array_key_exists($contractRes['server_id'], $contractRequests)===false) {
+                    $contractRequests[$contractRes['server_id']] = $apis[$contractRes['server_id']]->getContractApi();
+                }
+                if(array_key_exists($contractRes['server_id'] ."_".$contractRes['system'],  $planes)===false) {
+                    $plansRequest = $apis[$contractRes['server_id']]->getPlanApi();
+                    $plans = $plansRequest->listAll();
+                    if (is_array($plans)){
+                        foreach( $plans as $plan) {
+                            $planes[ $contractRes['server_id'] ."_". preg_replace("[ |/]", "-", strtolower($plan['plan']['name'])) ] = $plan['plan']['id'];
+                        }
+                    }else {
+                        $this->stdout("Error al traer contratos del server ". $contractRes['server_id']);
+                        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Error al traer contratos del server ". $contractRes['server']. "\n", FILE_APPEND);
+                        $errors++;
+                    }
+                }
+
+                $contractRequest =  $contractRequests[$contractRes['server_id']];
+
+                // Verifico que exista el plan
+                if( array_key_exists($contractRes['server_id'] ."_". $contractRes['system'], $planes ) !== false ) {
+
+                    $plan_id = (string)$planes[ $contractRes['server_id'] ."_". $contractRes['system'] ];
+
+                    $contract = Contract::findOne(['contract_id'=> $contractRes['contract_id']]);
+                    $connection = Connection::findOne(['contract_id'=> $contractRes['contract_id']]);
+
+                    $this->stdout("Buscando contrato: ". $contractRes['contract_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Buscando contrato: ". $contractRes['contract_id'] . " en ISP " . $contractRes['server']." - Customer: " . $contractRes['code']."\n", FILE_APPEND);
+
+                    $contractRest = new \app\modules\westnet\isp\models\Contract($contract, $connection, $plan_id);
+                    try {
+                        // Busco el contrato por IP
+                        $contract_api = $contractRequest->find($contractRest->ip, ContractRequest::Q_IP);
+                        $contract_api = is_array($contract_api) ? $contract_api[0] : null;
+                        if($contract_api!==null) {
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Contrato Encontrado', FILE_APPEND);
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en Gestion: '. $contractRes['system'] . "\n", FILE_APPEND);
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan en ISP '. $contract_api->plan_id . "\n", FILE_APPEND);
+
+                            if($contract_api->plan_id == $plan_id) {
+                                file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan correcto en ambos lados. No realizo cambio' . "\n", FILE_APPEND);
+                                $iguales++;
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->updateAttributes(['applied' => 1]);
+                            } else {
+                                $this->stdout("Customer code: ". $contractRes['code'] . " - " . $contract_api->plan_id . "=> " . $plan_id . " - " . $contractRes['external_id'] . " - " . $contractRest->client_id."\n", Console::BOLD, Console::FG_GREEN);
+                                file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Cambio plan de '.  $contract_api->plan_id. ' a '. $plan_id. "\n", FILE_APPEND);
+                                if($contract_api->id != $contract->external_id) {
+                                    $contract->external_id = $contract_api->id;
+                                    $this->stdout("actualizo external_id: " . $contract_api->id );
+                                    $contract->updateAttributes(['external_id']);
+                                }
+
+                                $contractDetail = ContractDetail::findOne(['contract_detail_id'=>$contractRes['contract_detail_id']]);
+                                $contractDetail->applied = true;
+                                $contractDetail->updateAttributes(['applied']);
+
+                                $result = $wispro->update($connection, $contract, true);
+
+                                if ($result) {
+                                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Plan cambiado con éxito' . "\n", FILE_APPEND);
+                                    $distintos++;
+                                }else {
+                                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), 'Error durante la comunicacion con isp' . "\n", FILE_APPEND);
+                                    $errors++;
+                                }
+
+                            }
+                        } else {
+                            $this->stdout("No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", Console::BOLD, Console::FG_RED);
+                            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "No Encontrado. Server: ". $contractRes['server_id'] . " - Customer: " . $contractRes['customer_id']."\n", FILE_APPEND);
+
+                            $errors++;
+                        }
+                    } catch( \Exception $ex) {
+                        $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+                        $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+                    }
+                } else {
+                    $this->stdout("Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", Console::BOLD, Console::FG_RED);
+                    file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Plan No Encontrado: ". $contractRes['customer_id'] . " - " . $contractRes['server_id'] ."_". $contractRes['system'] ."\n", FILE_APPEND);
+
+                    $errors++;
+                }
+                file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "----------------------------------------------------------------------------------------------"."\n", FILE_APPEND);
+
+            }
+        } catch(\Exception $ex){
+            $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
+            $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Exepcion.\n", FILE_APPEND);
+            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), $ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), FILE_APPEND);
+            file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), $ex->getTraceAsString()."\n", FILE_APPEND);
+
+
+        }
+
+        $this->stdout("Totales"."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Iguales: ". $iguales."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Distintos: ". $distintos."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("Erroneos: ". $errors."\n", Console::BOLD, Console::FG_RED);
+        $this->stdout("-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", Console::BOLD, Console::FG_CYAN);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Totales"."\n", FILE_APPEND);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Iguales: ". $iguales."\n", FILE_APPEND);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Distintos: ". $distintos."\n", FILE_APPEND);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "Erroneos: ". $errors."\n", FILE_APPEND);
+        file_put_contents(Yii::getAlias('@runtime/logs/correcion_planes_log.txt'), "-----------------------------------------------------".(new \DateTime())->format('d-m-Y H:i:s')."\n", FILE_APPEND);
+
+
+
     }
 }

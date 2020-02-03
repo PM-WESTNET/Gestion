@@ -82,7 +82,7 @@ class SMSInfobipTransport implements TransportInterface
      */
     public function export($notification)
     {
-        Yii::setLogger(new EmptyLogger());
+        //Yii::setLogger(new EmptyLogger());
         set_time_limit(0);
 
         //Nombre de archivo
@@ -117,7 +117,10 @@ class SMSInfobipTransport implements TransportInterface
                 ->setCellValue('K1', Yii::t('app', 'Status'))
                 ->setCellValue('L1', Yii::t('app', 'Category'))
                 ->setCellValue('M1', Yii::t('app', 'Plan'))
-                ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'));
+                ->setCellValue('N1', Yii::t('app', 'Valor futuro del plan'))
+                ->setCellValue('O1', Yii::t('app', 'Document Number'))
+                ->setCellValue('P1', Yii::t('app', 'Email'))
+                ->setCellValue('Q1', Yii::t('app', 'Email 2'));
 
             $i = 2;
 
@@ -127,29 +130,28 @@ class SMSInfobipTransport implements TransportInterface
 
 
                 foreach($query->batch(1000) as $customers) {
+                    Yii::trace($customers);
                     foreach ($customers as $customer) {
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
                         $company = Company::findOne($customer['customer_company']);
+                        $document_number = $customer['document_number'];
+                        $email = $customer['email'];
+                        $email2 = $customer['email2'];
                         $phones = [];
-                        $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
                         $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
                         $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
                         $p4 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone4']));
 
-                        if(strlen($p1) > 7 ) {
-                            $phones[] = (string)$p1;
-                        }
-
-                        if(strlen($p2) > 7 && $p1 != $p2 ) {
+                        if(strlen($p2) > 7) {
                             $phones[] = (string)$p2;
                         }
 
-                        if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
+                        if(strlen($p3) > 7 && $p3 != $p2 ) {
                             $phones[] = (string)$p3;
                         }
 
-                        if(strlen($p4) > 7 && $p4 != $p1 && $p4 != $p2  && $p4 != $p3) {
+                        if(strlen($p4) > 7 && $p4 != $p2  && $p4 != $p3) {
                             $phones[] = (string)$p4;
                         }
 
@@ -168,7 +170,10 @@ class SMSInfobipTransport implements TransportInterface
                                 ->setCellValue('K' .$i, Yii::t('westnet', ucfirst($customer['status'])))
                                 ->setCellValue('L' .$i, $customer['category'])
                                 ->setCellValue('M' .$i, $plan ? $plan->name : '')
-                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '');
+                                ->setCellValue('N' .$i, $future_price ? Yii::$app->formatter->asCurrency($future_price) : '')
+                                ->setCellValue('O' .$i, $document_number)
+                                ->setCellValue('P' .$i, $email)
+                                ->setCellValue('Q' .$i, $email2);
                             $i++;
 
                         }
@@ -185,8 +190,9 @@ class SMSInfobipTransport implements TransportInterface
             $objWriter->save('php://output');
 
         }catch (\Exception $ex){
-
-            error_log($ex->getMessage());
+            Yii::trace($ex->getTraceAsString());
+            throw $ex;
+            //error_log($ex->getMessage());
         }
 
 
@@ -195,19 +201,15 @@ class SMSInfobipTransport implements TransportInterface
     private function getPhones($customer){
         $phones = [];
 
-        $p1 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone']));
         $p2 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone2']));
         $p3 = trim(preg_replace('/[?&%$() \/-][A-Za-z]*/', '', $customer['phone3']));
 
-        if(strlen($p1) > 7 ) {
-            $phones[] = '549'.(string)$p1;
-        }
 
-        if(strlen($p2) > 7 && $p1 != $p2 ) {
+        if(strlen($p2) > 7 ) {
             $phones[] = '549'.(string)$p2;
         }
 
-        if(strlen($p3) > 7 && $p3 != $p1 && $p3 != $p2 ) {
+        if(strlen($p3) > 7 && $p3 != $p2 ) {
             $phones[] = '549'.(string)$p3;
         }
 

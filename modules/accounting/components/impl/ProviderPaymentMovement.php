@@ -111,6 +111,8 @@ class ProviderPaymentMovement extends BaseMovement
             } else {
                 echo Yii::t('accounting', 'The movement could not be created.') . $ex->getMessage();
             }
+
+            \Yii::info('---------------- MODELO: ' . get_class($modelInstance) . ' ---  ACCION: '. $action .' ---- KEY: '.$modelInstance->primaryKey .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
         }
         return false;
 

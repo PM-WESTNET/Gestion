@@ -117,6 +117,9 @@ $payment_method_cash = Config::getValue('payment_method_cash');
                     $('#money_box_id_bank').val('');
                     $('#money_box_id_small').val('');
                     $('#money_box_account_id_small').val('');
+                    SearchPaycheck.remove();
+                    $('#div-remove').css('display', 'none');
+                    $('#div-inputs').css('display', 'block');
                 if ($(this).find("option:selected").data('register-number') == 1) {
                     $('#register-number').show(100);
                 }else{

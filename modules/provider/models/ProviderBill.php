@@ -110,7 +110,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             'provider_id' => Yii::t('app', 'Provider'),
             'description' => Yii::t('app', 'Observations'),
             'payed' => Yii::t('app', 'Bill payed'),
-
+            'timestamp' => Yii::t('app', 'Created at'),
             'bill_type_id' => Yii::t('app', 'Bill Type'),
             'billType' => Yii::t('app', 'Bill Type'),
             'provider' => Yii::t('app', 'Provider'),

@@ -24,7 +24,7 @@ class ContractLowService
      * @param $date
      * @param $category_low_id
      */
-    public function startLowProcess($contract, \DateTime $date, $category_low_id=null)
+    public function startLowProcess($contract, \DateTime $date, $category_low_id=null, $create_credit = false)
     {
         if ($contract->status === Contract::STATUS_ACTIVE) {
             $transaction= \Yii::$app->getDb()->beginTransaction();
@@ -38,6 +38,12 @@ class ContractLowService
                 }
                 if ($contract->updateAttributes($fields)) {
                     $transaction->commit();
+                    //Creo nota de credito por la deuda del cliente
+                    if ($create_credit) {
+                        if (!$contract->customer->createCreditForDebt()) {
+                            Yii::$app->session->addFlash('error', Yii::t('app','Can`t create the credit note'));
+                        }
+                    }
                     return true;
                 } else {
                     throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
@@ -52,6 +58,12 @@ class ContractLowService
                     if ($connection->updateAttributes(['status_account'])) {
                         $this->createTicketLow($contract);
                         $transaction->commit();
+                        //Creo nota de credito por la deuda del cliente
+                        if ($create_credit) {
+                            if (!$contract->customer->createCreditForDebt()) {
+                                Yii::$app->session->addFlash('error', Yii::t('app','Can`t create the credit note'));
+                            }
+                        }
                         return true;
                     } else {
                         $transaction->rollBack();

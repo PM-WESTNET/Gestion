@@ -110,9 +110,12 @@ class AccountMovementBehavior extends Behavior
                     $movement_id = $movement->move($action, $event->sender, $config);
                     if($movement_id) {
                         AccountMovementRelationManager::save($movement_id, $event->sender);
+                    } else {
+                        \Yii::info('---------------- MOVIMIENTO NO PUEDE SER CREADO: ' . $senderClass . ' ---  ACCION: '. $action .' ---- KEY: '.$event->sender->primaryKey, 'account-movement');
                     }
                 }
             } catch(\Exception $ex){
+                \Yii::info('---------------- MODELO: ' . $senderClass . ' ---  ACCION: '. $action .' ---- KEY: '.$event->sender->primaryKey .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
                 throw $ex;
             }
         }

@@ -537,6 +537,9 @@ class BillSearch extends Bill
     public function searchPendingToClose($params)
     {
         $this->load($params);
+
+        echo 'company '.$this->company_id."\n";
+        echo 'bill_type '.$this->bill_type_id."\n";
         $query = $this->find()
             ->where(['in','status',['draft', 'completed']])
             ->andFilterWhere(['automatically_generated' => 1])

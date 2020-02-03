@@ -85,6 +85,15 @@ $config = [
                     'logFile' => '@runtime/logs/app_active_contract.log'
 
                 ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['browser-notification-customers'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/browser-notification-customers.log'
+
+                ],
             ],
         ],
         'db' => $db['db'],

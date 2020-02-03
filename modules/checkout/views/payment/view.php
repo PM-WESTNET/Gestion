@@ -78,6 +78,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             'date:date',
+            [
+                'attribute' => 'timestamp',
+                'value' => function($model) {
+                    return $model->timestamp ? (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y') : '';
+                }
+            ],
             'number',
             [
                 'attribute' => 'status',
@@ -127,6 +133,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                     'description',
                     'amount:currency',
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function ($model){
+                           if ($model->user) {
+                               return $model->user->username;
+                           }
+                        }
+                    ],
                 ],
                 'options'=>[
                     'style'=>'margin-top:10px;'

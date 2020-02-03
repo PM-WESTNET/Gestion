@@ -15,6 +15,7 @@ use app\modules\sale\models\Bill;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\Connection;
+use function foo\func;
 
 class Customer extends \app\modules\sale\models\Customer
 {
@@ -25,30 +26,74 @@ class Customer extends \app\modules\sale\models\Customer
         if ($this->scenario === 'full'){
             return [
                 'customer_id',
-                'fullName',
-                'documentType',
+                'fullName' => function($model) {
+                    return ucwords(strtolower($this->lastname .', '. $this->name));
+                },
+                'document_type_id' => function ($model) {
+                    return $model->documentType->document_type_id;
+                },
+                'document_type_name' => function ($model) {
+                    return $model->documentType->name;
+                },
                 'document_number',
                 'code',
                 'payment_code',
-                'contracts' => function($model) {
-                    $contracts = [];
-                    foreach ($model->contracts as $contract) {
-                        if($contract->status === Contract::STATUS_ACTIVE){
-                            $contracts[] = [
-                                'contract_id' => $contract->contract_id,
-                                'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
-                            ];
-                        }
+                'phone',
+                'phone2',
+                'phone3',
+                'phone4',
+                'last_update' => function($model){
+                    if($model->last_update) {
+                        return \Yii::$app->formatter->asDate($model->last_update, 'dd-MM-yyyy');
+                    } else {
+                        return "false";
+                    }
+                },
+                'needsUpdate' => function($model){
+                    if ($model->needsUpdate) {
+                        return "true";
                     }
 
-                    return $contracts;
+                    return "false";
+                },
+                'contract_id' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
+                    if($contract){
+                        return $contract->contract_id;
+                    }
+
+                    return '';
+                },
+                'services_address' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
+                    if($contract){
+                        return ($contract->address ? $contract->address->shortAddress : $model->address);
+                    }
+
+                    return '';
+                },
+                'fibra' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->orWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract) {
+                        if($contract->hasFibraPlan()) {
+                            return "true";
+                        }
+
+                        return "false";
+                    }
+
+                    return "false";
                 },
                 'balance' => function($model){
                     return $model->current_account_balance;
                 },
-                'last_payment' => function($model) {
+                'last_payment_amount' => function($model) {
                     $account = $model->accountInfo();
-                    return $account['last_payment'];
+                    return $account['last_payment']['amount'];
+                },
+                'last_payment_date' => function($model) {
+                    $account = $model->accountInfo();
+                    return $account['last_payment']['date'];
                 },
                 'clipped' => function($model) {
                     if ($model->hasClippedForDebt()) {
@@ -56,6 +101,13 @@ class Customer extends \app\modules\sale\models\Customer
                     }
 
                     return 'enabled';
+                },
+                'low_process' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract){
+                        return "true";
+                    }
+                    return "false";
                 }
             ];
         }else {
@@ -95,11 +147,15 @@ class Customer extends \app\modules\sale\models\Customer
     {
         $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
 
-        $contracts = [];
+        $contracts = [
+            'contract_id' => '',
+            'service_address' => '',
+        ];
         $payment_extension_requested = $this->getPaymentExtensionQtyRequest();
+        $contract = $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
 
-        foreach ($this->contracts as $contract) {
-            $contracts[] = [
+        if ($contract) {
+            $contracts = [
                 'contract_id' => $contract->contract_id,
                 'service_address' => $contract->address ? $contract->address->fullAddress : $this->address,
             ];
@@ -137,4 +193,19 @@ class Customer extends \app\modules\sale\models\Customer
         return $clipped;
     }
 
+    public function hasContractAndConnectionActive()
+    {
+        return $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    /**
+     * Indica si posee un contrato activo o en proceso de baja
+     */
+    public function hasActiveOrLowProcessContract()
+    {
+        return $this->getContracts()
+            ->andWhere(['status' => Contract::STATUS_ACTIVE])
+            ->orWhere(['status' => Contract::STATUS_LOW_PROCESS])
+            ->exists();
+    }
 }

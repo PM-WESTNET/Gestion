@@ -57,6 +57,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'date',
                 'value'=>Yii::$app->formatter->asDate($model->date)
             ],
+            [
+                'attribute'=>'timestamp',
+                'value'=> function($model) {
+                    return (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y');
+                }
+            ],
             'net:currency',
             [
                 'label'     => Yii::t('app', 'Taxes'),

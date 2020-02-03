@@ -80,9 +80,11 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             if ($model->status == Contract::STATUS_ACTIVE) {
                 echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id'=>$model->contract_id]);
                 echo UserA::a(Yii::t('app', 'Create programmed plan change'), ['programmed-plan-change/create', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning']);
+                echo UserA::a(Yii::t('app','Update on ISP'), ['update-on-isp', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning', 'data-confirm' => '¿Está seguro que desea actualizar este contrato en el ISP?']);
             }
             if ($model->status == Contract::STATUS_LOW_PROCESS) {
                 echo UserA::a(Yii::t('app', 'Definitive Low'), ['cancel-contract', 'id' => $model->contract_id], ['class' => 'btn btn-danger', 'id' => 'btn-definitive-low' ]);
+                echo UserA::a(Yii::t('app','Update on ISP'), ['update-on-isp', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning', 'data-confirm' => '¿Está seguro que desea actualizar este contrato en el ISP?']);
             }
             if ($model->status == Contract::STATUS_DRAFT) {
                 echo UserA::a(Yii::t('app', 'No want the Service'), ['rejected-service', 'id' => $model->contract_id, 'type' => Contract::STATUS_NO_WANT], ['class' => 'btn btn-danger']);
@@ -544,7 +546,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="start-low-process-modal" tabindex="-1" role="dialog" aria-labelledby="start-low-process-label" aria-hidden="true">
+<div class="modal fade" id="start-low-process-modal" role="dialog" aria-labelledby="start-low-process-label" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -594,6 +596,13 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                                 ]
                             ]);
                             ?>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <?php echo \yii\bootstrap\Html::checkbox('credit', false, ['id' => 'credit_note'])?>
+                            <label for=""><?php echo Yii::t('app','Create Credit Note')?></label>
                         </div>
                     </div>
             </div>
@@ -697,13 +706,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 evt.preventDefault();
                 var category_id = $('#start-low-process-modal select').val();
                 var date = $('#start-low-process-modal #date_low').val();
+                var credit = 0;
+
+                if($('#credit_note').is(':checked')) {
+                    credit = 1;
+                }
                 $('#start-low-process-modal').modal('hide');
                 if(category_id) {
                     $.ajax({
                         url: '<?php echo Url::to(['/sale/contract/contract/low-process-contract', 'contract_id'=>$model->contract_id]) ?>',
                         data: {
                             category_id: category_id,
-                            date: date
+                            date: date,
+                            credit: credit
                         },
                         method: 'POST',
                     }).done(function(data){

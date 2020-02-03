@@ -15,6 +15,8 @@ use app\modules\sale\models\BillType;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\PointOfSale;
 use app\modules\sale\models\TaxCondition;
+use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\components\SecureConnectionUpdate;
 use yii\db\Query;
 
 class FixErrorsController extends \yii\console\Controller
@@ -111,5 +113,106 @@ class FixErrorsController extends \yii\console\Controller
                 }
             }
         }
+    }
+
+    /**
+     *
+     * Corrige los valores de debe y haber de una conciliacion, invirtiendo dichos valores en el resumen y corrgiendo los
+     * movimientos generados por la conciliacion
+     * @param $name
+     * @return bool
+     */
+    public function actionFixConciliation($name) {
+
+        $trasaction = \Yii::$app->db->beginTransaction();
+
+        try {
+
+            $conciliation = \app\modules\accounting\models\Conciliation::findOne(['name' => $name]);
+
+            if ($conciliation) {
+                $resume = $conciliation->resume;
+
+                foreach ($resume->resumeItems as $resumeItem) {
+
+                    if ($resumeItem->debit > 0) {
+                        $resumeItem->credit = $resumeItem->debit;
+                        $resumeItem->debit = 0;
+                        $resumeItem->updateAttributes(['debit', 'credit']);
+                    }else {
+                        $resumeItem->debit = $resumeItem->credit;
+                        $resumeItem->credit = 0;
+                        $resumeItem->updateAttributes(['debit', 'credit']);
+                    }
+
+                }
+
+                $conciliationItems = $conciliation->conciliationItems;
+
+                foreach ($conciliationItems as $conciliationItem) {
+                    $amount = 0;
+                    if (strpos($conciliationItem->description, 'Conciliacion de') === false) {
+                        $movements = $conciliationItem->accountMovementItems;
+
+                        foreach ($movements as $movement) {
+
+                            if ($movement->debit > 0) {
+                                $movement->credit = $movement->debit;
+                                $movement->debit = 0;
+                                $movement->updateAttributes(['credit', 'debit']);
+                            }else {
+                                $movement->debit = $movement->credit;
+                                $movement->credit = 0;
+                                $movement->updateAttributes(['credit', 'debit']);
+                            }
+                        }
+                    }
+
+                    foreach ($conciliationItem->resumeItems as $resumeItem) {
+                        $amount += $resumeItem->debit - $resumeItem->credit;
+                    }
+
+                    $conciliationItem->updateAttributes(['amount' => $amount]);
+
+                }
+            }
+            $trasaction->commit();
+        } catch (\Exception $exception) {
+            $trasaction->rollBack();
+            return false;
+        }
+    }
+
+
+    /**
+     * Actualiza el contrato pasado en el isp
+     */
+    public function actionUpdateContract($contract_id) {
+
+        $contract = Contract::findOne($contract_id);
+
+        if (empty($contract)) {
+            echo 'Contrato no encontrado';
+            echo "\n";
+            return false;
+        }
+
+        if (empty($contract->connection)) {
+            echo 'Conexion no encontrada';
+            echo "\n";
+            return false;
+        }
+
+        $scu = new SecureConnectionUpdate();
+
+        $scu->update($contract->connection, $contract);
+
+
+
+    }
+
+    public function actionFreeProcess($process)
+    {
+        \Yii::$app->mutex->release($process);
     }
 }

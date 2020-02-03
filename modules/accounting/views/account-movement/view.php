@@ -28,7 +28,10 @@ $diferencia = round($model->getDebt(), 2) - round($model->getCredit(),2);
             }
             
             if($model->status == \app\modules\accounting\models\AccountMovement::STATE_DRAFT) {
-                echo Html::a('<span class=\'glyphicon glyphicon-pencil\'></span>' . Yii::t('app', 'Update'), ['update', 'id' => $model->account_movement_id], ['class' => 'btn btn-primary']);
+                if ($model->isManualMovement() || ($model->getUpdatable() && \webvimark\modules\UserManagement\models\User::hasRole('modify-account-movement'))){
+                    echo Html::a('<span class=\'glyphicon glyphicon-pencil\'></span>' . Yii::t('app', 'Update'), ['update', 'id' => $model->account_movement_id], ['class' => 'btn btn-primary']);
+                }
+
 
                 if($diferencia == 0) {
                     echo Html::a('<span class=\'glyphicon glyphicon-repeat\'></span>'.Yii::t('app', 'Close'), ['close', 'id' => $model->account_movement_id], [
@@ -40,7 +43,7 @@ $diferencia = round($model->getDebt(), 2) - round($model->getCredit(),2);
                 }
 
             }
-            if($model->deletable) {
+            if($model->deletable && \webvimark\modules\UserManagement\models\User::hasRole('modify-account-movement')) {
                 echo Html::a('<span class=\'glyphicon glyphicon-remove\'></span>'.Yii::t('app', 'Delete'), ['delete', 'id' => $model->account_movement_id], [
                     'class' => 'btn btn-danger',
                     'data' => [

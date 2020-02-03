@@ -227,6 +227,8 @@ class PaymentSearch extends Payment
             "company.name AS company_name"
         ]);
 
+        $queryPayments->orderBy(['payment.timestamp' => SORT_DESC]);
+
         /** @var Query $queryBills */
         $queryBills = Bill::find();
         $queryBills->select([

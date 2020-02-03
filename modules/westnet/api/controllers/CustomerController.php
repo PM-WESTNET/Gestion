@@ -383,7 +383,7 @@ class CustomerController extends RestController
                 'phone3'            => $customer->phone3,
                 'phone4'            => $customer->phone4,
                 'fullAddress'       => ($customer->address ? $customer->address->getFullAddress() : '' ),
-                'geocode'           => $customer->address->geocode,
+                'geocode'           => ($customer->address ? $customer->address->geocode : ''),
                 'status'            => $customer->status,
                 'taxCondition'      => $customer->taxCondition,
                 'company'           => [

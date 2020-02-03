@@ -47,6 +47,8 @@ class Notification extends ActiveRecord {
     const STATUS_SENT = 'sent';
     const STATUS_ERROR = 'error';
     const STATUS_CANCELLED = 'cancelled';
+    const STATUS_PENDING = 'pending';
+    const STATUS_IN_PROCESS = 'in_process';
 
 
     public function init() {
@@ -185,6 +187,8 @@ class Notification extends ActiveRecord {
             static::STATUS_DISABLED => NotificationsModule::t('app', 'Disabled'),
             static::STATUS_SENT => NotificationsModule::t('app', 'Sent'),
             static::STATUS_ERROR => NotificationsModule::t('app', 'Error'),
+            static::STATUS_PENDING => NotificationsModule::t('app', 'Pending'),
+            static::STATUS_IN_PROCESS => NotificationsModule::t('app', 'In Process'),
         ];
     }
 

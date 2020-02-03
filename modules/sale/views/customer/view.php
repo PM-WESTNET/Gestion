@@ -181,6 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value'=>$model->documentType ? $model->documentType->name : null,
         ],
         'document_number',
+        'birthdate',
         [
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
@@ -217,6 +218,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => Yii::t('app', $model->publicity_shape)
         ],
      ];
+
+    $attributes[] = [
+        'attribute' => 'observations',
+    ];
    
     $attributes[] = [
         'label'=>Yii::t('app', 'Address'),
@@ -307,6 +312,22 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ];
     }
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Document image') ,
+        'value' => function ($model) {
+            return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Tax image') ,
+        'value' => function ($model) {
+            return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
 
     echo DetailView::widget([
         'model' => $model,

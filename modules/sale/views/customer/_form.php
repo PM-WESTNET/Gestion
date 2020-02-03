@@ -18,6 +18,7 @@ use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
 use app\modules\sale\models\Company;
 use webvimark\modules\UserManagement\models\User;
+use kartik\widgets\FileInput;
 
 /**
  * @var yii\web\View $this
@@ -82,6 +83,24 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
 
     </div>
+
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
+
+            <?= $form->field($model, 'birthdate')->widget(\yii\jui\DatePicker::class, [
+                'clientOptions' => [
+                    'format' =>  'dd-mm-yyyy',
+                    'autoclose' => true,
+                    'maxDate' => Yii::$app->formatter->asDate((time() - ((86400 * 365)* 18)),'dd-MM-yyyy')
+                ],
+                'options'=>[
+                    'class'=>'form-control dates',
+                ]
+            ]) ?>
+
+        </div>
+    </div>
+
     <div class="row">
 
         <div class="col-sm-3 col-xs-12">
@@ -117,6 +136,8 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
     </div>
 
+
+
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
@@ -134,12 +155,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
+            <?= $form->field($model, 'phone')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone2')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone2')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
 
@@ -148,11 +169,11 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone3')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone3')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone4')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
@@ -236,11 +257,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                     'web' => Yii::t('app', 'web'), 
                     'other_customer' => Yii::t('app', 'other_customer'), 
                     'facebook' => Yii::t('app', 'facebook'), 
-                    'street_banner' => Yii::t('app', 'street_banner'), 
-                    'magazine' => Yii::t('app', 'magazine'), 
+                    'street_banner' => Yii::t('app', 'street_banner'),
                     'door_to_door' => Yii::t('app', 'door_to_door'), 
                     'competition' => Yii::t('app', 'competition'),
-                    'brochure' => Yii::t('app', 'brochure'),
+                    'instagram' => Yii::t('app', 'Instagram'),
+                    'gigantografía' => Yii::t('app', 'Gigantografía'),
+                    'pantalla-led' => Yii::t('app', 'Pantalla led')
                 ], ['prompt' => Yii::t('app', 'Select an option...')]);
             ?>
         </div>
@@ -269,6 +291,39 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-12">
             <?= $form->field($model, 'hourRanges')->checkboxList(HourRange::getHourRangeForCheckList())?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('document_image_update', null, ['id'=>'document_image_update']); ?>
+                <?= $form->field($model, 'document_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->document_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getDocumentImageWebPath(), ['class'=>'file-preview-image','style' =>'height:100%; width: 100%', 'alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
+        </div>
+        <div class="col-sm-6">
+                <?=Html::hiddenInput('tax_image_update', null, ['id'=>'tax_image_update']); ?>
+                <?= $form->field($model, 'tax_image')->widget(FileInput::class, [
+                    'pluginOptions' => [
+                        'showPreview' => true,
+                        'showCaption' => true,
+                        'showRemove' => true,
+                        'showUpload' => false,
+                        'overwriteInitial' => true,
+                        'initialPreview'=>($model->tax_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getTaxImageWebPath(), ['class'=>'file-preview-image', 'style' =>'height:100%; width: 100%','alt'=>'', 'title'=>''])] : false ),
+                    ]]); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <?php echo $form->field($model, 'observations')->textarea(['rows' => 3, 'cols' => 10])?>
         </div>
     </div>
 
@@ -324,6 +379,50 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         ?>;
 
         this.init = function(){
+
+            $('#customer-document_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-document_image').val()==0) {
+                            $('#document_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-document_image').on('filebrowse', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileclear', function(event) {
+                $('#document_image_update').val(1);
+            });
+            $('#customer-document_image').on('fileselectnone', function(event) {
+                $('#document_image_update').val(0);
+            });
+
+            $('#customer-tax_image').on('click', function(event) {
+                document.body.onfocus = function() {
+                    setTimeout(function(){
+                        if ($('#customer-tax_image').val()==0) {
+                            $('#tax_image_update').val(0);
+                        }
+                        document.body.onfocus = null;
+                    }, 100);
+                };
+            });
+
+            $('#customer-tax_image').on('filebrowse', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileclear', function(event) {
+                $('#tax_image_update').val(1);
+            });
+            $('#customer-tax_image').on('fileselectnone', function(event) {
+                $('#tax_image_update').val(0);
+            });
+
+
             $('#customer-tax_condition_id').on('change', function(e){
                 onTaxConditionChange(e);
             });
@@ -372,23 +471,24 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             });
 
             self.changeDocumentType();
+            self.phonesMask();
         }
 
         this.changeDocumentType = function(){
             var options;
-            $("#customer-document_number").inputmask("remove");
+            $("#document_number_input").inputmask("remove");
             // Si es CUIT
             if($("#document_type").val()==1) {
                 options = 'cuit';
                 $('#div-validation').removeClass('hidden');
             } else {
                 options = {
-                    'mask': '99999999'
+                    'mask': '99999999',
                 };
                 $('#div-validation').addClass('hidden')
             }
 
-            $("#customer-document_number").inputmask(options);
+            $("#document_number_input").inputmask(options);
         }
 
 
@@ -447,7 +547,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         this.validateCustomer = function () {
             $.ajax({
                 url: "<?php echo Url::to(['validate-customer'])?>",
-                data: {Customer:{document_number: $('#document_number_input').val()}},
+                data: {Customer:{document_number: $('#document_number_input').val(), document_type_id:$('#document_type').val() }},
                 method: 'POST',
                 dataType: 'json'
             }).done(function (response) {
@@ -483,6 +583,22 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 }
             });
         }
+
+        this.phonesMask = function () {
+            $('.phone').inputmask({
+                mask: '9999999999'
+            })
+        }
     };
 </script>
 <?php $this->registerJs('Customer.init();') ?>
+
+    <script>
+        var CompanyForm = new function() {
+
+            this.init = function() {
+
+            };
+        };
+    </script>
+    <?php  $this->registerJs("CompanyForm.init();"); ?>
