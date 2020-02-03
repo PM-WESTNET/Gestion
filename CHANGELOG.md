@@ -10,7 +10,6 @@ All notable changes to this project will be documented in this file.
  - Correcion error duplicado de tickets en panel de cobranza
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
@@ -18,12 +17,16 @@ All notable changes to this project will be documented in this file.
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710]
- - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
- cuenta los teléfonos fijos. [GES-726]
  - Celular 2 no requerido [GES-788]
- - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654]
- - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786]
+ 
+ ## [2020.02.03.0]
+ ### Modificado
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] Solicitado y aprobado por Joaquin
+ - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710] Aprobado por Camila
+ - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
+  cuenta los teléfonos fijos. [GES-726] Solicitado y aprobado por Camila
+ - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654] Solicitado y aprobado por Camila
+ - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786] Solicitado por Camila y aprobado por Maria Laura
  
  ## [2020.01.29.0]
  ### Modificado
