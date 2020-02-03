@@ -536,7 +536,7 @@ class TaxesBookController extends \app\components\web\Controller
     public function actionExportExcel($id)
     {
         set_time_limit(0);
-        Yii::setLogger(new EmptyLogger());
+        //Yii::setLogger(new EmptyLogger());
 
         $model = $this->findModel($id);
         Yii::$app->htmlToPdf->options['orientation'] = 'landscape';
