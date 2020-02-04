@@ -157,7 +157,13 @@ GROUP BY periodo
 
         $result= [];
 
-        $nodes = Node::find()->all();
+        $nodesQuery = Node::find();
+
+        if (isset($params['CustomerSearch']['node_id']) && !empty($params['CustomerSearch']['node_id'])){
+            $nodesQuery->andFilterWhere(['node_id' => $params['CustomerSearch']['node_id']]);
+        }
+
+        $nodes = $nodesQuery->all();
 
         Yii::info($data);
         Yii::info($nodes);
