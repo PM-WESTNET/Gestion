@@ -178,7 +178,7 @@ $model->load(Yii::$app->request->getQueryParams())
 
                 // Remuevo todos los campos ocultos del formulario, esto campos se generan por cada vez que se filtra pero los
                 //del filtro anterior no se eliminan y es eso lo que produce que la url crezca
-                $('CustomerSearch[customer_id]').remove();
+                //$('CustomerSearch[customer_id]').remove();
                 $('CustomerSearch[company_id]').remove();
                 $('CustomerSearch[zone_id]').remove();
                 $('CustomerSearch[customer_category_id]').remove();
@@ -188,20 +188,18 @@ $model->load(Yii::$app->request->getQueryParams())
                 $('CustomerSearch[customer_status]').remove();
                 $('CustomerSearch[connection_status]').remove();
                 $('CustomerSearch[contract_status]').remove();
-                $('CustomerSearch[document_number]').remove();
+                //$('CustomerSearch[document_number]').remove();
                 $('CustomerSearch[email_status]').remove();
                 $('CustomerSearch[email2_status]').remove();
                 $('CustomerSearch[mobile_app_status]').remove();
 
                 //Creo la cadena de parametros de la url, con los valores seteados en los campos del filtro
-                var params= 'CustomerSearch%5Bcustomer_id%5D='+ $('#customersearch-customer_id').val() +
-                    '&CustomerSearch%5Bcompany_id%5D='+ $('#company_id').val() +
+                var params= 'CustomerSearch%5Bcompany_id%5D='+ $('#company_id').val() +
                     '&CustomerSearch%5Bzone_id%5D='+ $('#customersearch-zone_id').val() +
                     '&CustomerSearch%5Bcustomer_category_id%5D='+ $('#customer_category_id').val() +
                     '&CustomerSearch%5Bcustomer_class_id%5D='+ $('#customer_class_id').val() +
                     '&CustomerSearch%5Bnode_id%5D='+ $('#node_id').val() +
                     '&CustomerSearch%5Bplan_id%5D='+ $('#plan_id').val() +
-                    '&CustomerSearch%5Bdocument_number%5D='+ $('#document_number').val() +
                     customerStatus+
                     connectionStatus +
                     contractStatus +
