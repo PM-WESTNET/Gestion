@@ -1304,8 +1304,13 @@
     'Errors occurred at update contract on ISP' => 'Ocurrieron errores ',
     'Birthdate can`t be empty' => 'Fecha de nacimiento no puede estar vacio',
     'Employees' => 'Empleados',
+    'Employee' => 'Empleado',
     'Employee Debts' => 'Deuda a empleados',
     'Employee Bills' => 'Comprobantes de empleados',
     'Employee Payments' => 'Pagos de empleados',
-    'Employee Bills And Payments' => 'Comprobantes y pagos de empleados'
+    'Employee Bills And Payments' => 'Comprobantes y pagos de empleados',
+    'Employee Account' => 'Cuenta de Empleado',
+    'Employee Bill' => 'Comprobante de Empleado',
+    'Employee Payment' => 'Pago de Empleado',
+    'Employee payments' => 'Pagos de Empleados'
  );

@@ -9,7 +9,7 @@ use yii\widgets\ActiveForm;
 /* @var $searchModel app\modules\employee\models\search\EmployeeSearch */
 /* @var $dataEmployee yii\data\ActiveDataEmployee */
 
-$this->title = Yii::t('app', 'Employee Account'). " $model->name";
+$this->title = Yii::t('app', 'Employee Account'). " $model->fullName";
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>

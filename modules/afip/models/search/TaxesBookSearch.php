@@ -199,7 +199,8 @@ class TaxesBookSearch extends ProviderBill
         $subQuery
             ->select(['pb.provider_bill_id', 'tbi.taxes_book_item_id', 'p.name as business_name', 'p.tax_identification', 'pb.date',
                             'bt.name AS bill_type', 'pb.number', 'tbi.page', new Expression('(pb.net * bt.multiplier) as net'),
-                            new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount')])
+                            new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount'),
+                            new Expression('"provider" as type')])
             ->from('provider_bill pb')
             ->leftJoin('provider p', 'pb.provider_id = p.provider_id ' )
             ->leftJoin('bill_type AS bt', 'pb.bill_type_id = bt.bill_type_id ' )
@@ -239,7 +240,7 @@ class TaxesBookSearch extends ProviderBill
         $mainQuery = new Query();
         $mainQuery
             ->select(['provider_bill_id', 'taxes_book_item_id', 'business_name',
-            'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+            'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total', 'type'])
             ->from(['c'=>$subQuery])
             ->groupBy(['business_name', 'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
             ->orderBy(['page'=>SORT_ASC, 'date'=>SORT_ASC])
@@ -276,7 +277,8 @@ class TaxesBookSearch extends ProviderBill
         $subQuery
             ->select(['pb.employee_bill_id', 'tbi.taxes_book_item_id', 'CONCAT(p.name, " ", p.lastname) as fullName', 'p.document_number', 'pb.date',
                 'bt.name AS bill_type', 'pb.number', 'tbi.page', new Expression('(pb.net * bt.multiplier) as net'),
-                new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount')])
+                new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount'),
+                new Expression('"employee" as type')])
             ->from('employee_bill pb')
             ->leftJoin('employee p', 'pb.employee_id = p.employee_id ' )
             ->leftJoin('bill_type AS bt', 'pb.bill_type_id = bt.bill_type_id ' )
@@ -316,7 +318,7 @@ class TaxesBookSearch extends ProviderBill
         $mainQuery = new Query();
         $mainQuery
             ->select(['employee_bill_id', 'taxes_book_item_id', 'fullName',
-                'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+                'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total', 'type'])
             ->from(['c'=>$subQuery])
             ->groupBy(['fullName', 'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
             ->orderBy(['page'=>SORT_ASC, 'date'=>SORT_ASC])

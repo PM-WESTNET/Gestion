@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
     <div class="panel panel-primary">
         <div class="panel-heading">
             <strong>
-                <?=Yii::t('app', ($bills ? 'Bills': 'Bills Added' ))?>
+                <?=Yii::t('app', ($bills ? 'Employee Bills': 'Bills Added' ))?>
             </strong>
         </div>
         <div class="panel-body">

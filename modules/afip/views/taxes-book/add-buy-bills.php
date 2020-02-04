@@ -148,23 +148,35 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
             $(document).off('click', '#w_bills_added input[type=checkbox]').on('click', '#w_bills_added input[type=checkbox]', function(){
 
                 var ids = [];
+                var providers= [];
+                var employees = [];
                 var me = this;
                 var page = $('#col_bills-added .pagination li.active a').data('page');
 
                 if ($(this).hasClass("select-on-check-all")) {
                     $('#w_bills_added input[type=checkbox]').each(function(){
-                        if(me != this) {
-                            ids.push($(this).val());
+                        if(me != this && $(this).data('type') === 'provider') {
+                            providers.push($(this).val());
+                        }
+
+                        if(me != this && $(this).data('type') === 'employee') {
+                            employees.push($(this).val());
                         }
                         page = 0;
                     });
                 } else {
-                    ids.push($(this).val());
+                    if($(me).data('type') === 'provider') {
+                        providers.push($(me).val());
+                    }
+
+                    if($(me).data('type') === 'employee') {
+                        employees.push($(this).val());
+                    }
                     page = page +1 ;
                 }
 
                 (new Promise(function(resolve, reject){
-                    AddBuyBills.remove(ids, page);
+                    AddBuyBills.remove(providers, employees, page);
                     resolve(true);
                 }));
             });
@@ -272,15 +284,23 @@ $this->params['breadcrumbs'][] =  (!($model->status==TaxesBook::STATE_CLOSED) ? 
             });
         }
 
-        this.remove = function (value, page) {
+        this.remove = function (providers, employees, page) {
+            var data;
+
+            data = {
+                'provider_bill_id': providers,
+                'employee_bill_id': employees
+            };
+
             $.ajax({
                 url: '<?= Url::toRoute(['/afip/taxes-book/remove-bill', 'id' => $model->taxes_book_id]) ?>'+'&page-added='+page,
                 method: 'POST',
-                data: {'provider_bill_id': value},
+                data: data,
                 dataType: 'json',
                 success: function (data) {
                     $('#col_bills').html(data.buy_bills);
                     $('#col_bills_added').html(data.buy_bills_added);
+                    $('#col_employee_bills').html(data.buy_employee_bills);
                     $('#col_totals').html(data.total);
                 }
             });

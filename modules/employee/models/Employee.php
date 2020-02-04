@@ -80,7 +80,8 @@ class Employee extends \app\components\db\ActiveRecord
             'phone' => Yii::t('app', 'Phone'),
             'account_id' => Yii::t('accounting', 'Account'),
             'tax_condition_id' => Yii::t('app', 'Tax Condition'),
-            'birthday' => Yii::t('app', 'Birthdate')
+            'birthday' => Yii::t('app', 'Birthdate'),
+            'fullName' => Yii::t('app', 'Name')
 
         ];
     }

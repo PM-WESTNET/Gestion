@@ -336,6 +336,8 @@ class TaxesBookController extends \app\components\web\Controller
         $dataProvider2 = $searchModel->findBuyEmployeeBills(Yii::$app->request->getQueryParams());
         $dataProvider->query->union($dataProvider2->query);
 
+        Yii::trace($dataProvider->query->createCommand()->getRawSql());
+
         $paginator = $dataProvider->getPagination();
         $paginator->params = [
             'id'=>$searchModel->taxes_book_id,
@@ -443,26 +445,39 @@ class TaxesBookController extends \app\components\web\Controller
         Yii::$app->response->format = 'json';
 
         $provider_bill_id = Yii::$app->request->post('provider_bill_id', null);
-        if ($provider_bill_id !== null) {
-            foreach ($provider_bill_id as $bill) {
-                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'provider_bill_id' => $bill]);
-            }
+        $employee_bill_id = Yii::$app->request->post('employee_bill_id', null);
 
-            $buy_bills_view = $this->buyBills($id);
-            $buy_bills_added_view = $this->buyBillsAdded($id);
-            $total_view = $this->buyBillsTotals($id);
-
-            return [
-                'status' => 'success',
-                'buy_bills' => $buy_bills_view,
-                'buy_bills_added' => $buy_bills_added_view,
-                'total' => $total_view
-            ];
-        } else {
+        if (empty($provider_bill_id) && empty($employee_bill_id)) {
             return [
                 'status' => 'fail'
             ];
         }
+
+        if ($provider_bill_id !== null) {
+            foreach ($provider_bill_id as $bill) {
+                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'provider_bill_id' => $bill]);
+            }
+        }
+
+        if ($employee_bill_id !== null) {
+            foreach ($employee_bill_id as $bill) {
+                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'employee_bill_id' => $bill]);
+            }
+        }
+
+        $buy_bills_view = $this->buyBills($id);
+        $total_view = $this->buyBillsTotals($id);
+        $buy_bills_added_view = $this->buyBillsAdded($id);
+        $buy_employee_bills_view = $this->buyEmployeeBills($id);
+
+        return [
+            'status' => 'success',
+            'buy_bills' => $buy_bills_view,
+            'buy_bills_added' => $buy_bills_added_view,
+            'buy_employee_bills' => $buy_employee_bills_view,
+            'total' => $total_view
+        ];
+
     }
 
     public function actionClose($id)
