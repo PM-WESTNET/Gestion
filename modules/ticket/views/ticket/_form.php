@@ -32,7 +32,16 @@ TicketBundle::register($this);
     <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form'=> $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
 
     <?php
-    $categories = Category::getForSelect();
+
+    $category_query = Category::find();
+
+    if (isset(Yii::$app->params['tickets_categories_showed']) && !empty(Yii::$app->params['tickets_categories_showed'])) {
+        $category_query->andWhere(['IN', 'category_id', Yii::$app->params['tickets_categories_showed']]);
+    }
+
+    $category_query->orderBy(['name' => SORT_ASC ]);
+
+    $categories = $category_query->all();
     $aCategories = [];
     $aOptions = [];
     foreach($categories as $category) {

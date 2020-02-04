@@ -154,6 +154,14 @@ class TicketSearch extends Ticket {
             $query->andFilterWhere(['in','category_id', $this->categories]);
         }
 
+        // Si no filtramos por ninguna categoria en especifico me fijo si hay categorias definidas para mostrar en el
+        // panel de tickets y filtro por ellas
+        if($this->scenario === self::SCENARIO_WIDE_SEARCH && empty($this->category) && empty($this->categories)){
+            if (isset(Yii::$app->params['tickets_categories_showed']) && !empty(Yii::$app->params['tickets_categories_showed'])) {
+                $query->andWhere(['IN', 'category_id', Yii::$app->params['tickets_categories_showed']]);
+            }
+        }
+
         $query->andFilterWhere(['like', 'title', $this->title]);
         $query->andFilterWhere(['like', 'number', $this->number]);
         $query->andFilterWhere(['like', 'customer.name', $this->customer]);
