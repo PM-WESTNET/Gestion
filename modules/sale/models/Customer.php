@@ -87,6 +87,20 @@ class Customer extends ActiveRecord {
     const EMAIL_STATUS_INACTIVE = 'inactive';
     const EMAIL_STATUS_INVALID = 'invalid';
 
+    //Publicity shape
+    const PUBLICITY_SHAPE_BANNER = 'banner';
+    const PUBLICITY_SHAPE_POSTER = 'poster';
+    const PUBLICITY_SHAPE_WEB = 'web';
+    const PUBLICITY_SHAPE_OTHER_CUSTOMER = 'other_customer';
+    const PUBLICITY_SHAPE_FACEBOOK = 'facebook';
+    const PUBLICITY_SHAPE_STREET_BANNER = 'street_banner';
+    const PUBLICITY_SHAPE_DOOR_TO_DOOR = 'door_to_door';
+    const PUBLICITY_SHAPE_COMPETITION = 'competition';
+    const PUBLICITY_SHAPE_INSTAGRAM = 'instagram';
+    const PUBLICITY_SHAPE_GIGANTOGRAFIA = 'gigantografía';
+    const PUBLICITY_SHAPE_PANTALLA_LED = 'pantalla-led';
+    const PUBLICITY_SHAPE_FOLLETO = 'folleto';
+
     protected static $companyRequired = false;
     
     private $_profiles = [];
@@ -2100,5 +2114,26 @@ class Customer extends ActiveRecord {
         if ($this->birthdate) {
             $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'dd-MM-yyyy');
         }
+    }
+
+    /**
+     * Devuelve un array con los canales de publicidad para ser listados en un selector
+     */
+    public static function getPublicityShapesForSelect()
+    {
+        return [
+            Customer::PUBLICITY_SHAPE_BANNER => Yii::t('app', 'banner'),
+            Customer::PUBLICITY_SHAPE_POSTER => Yii::t('app', 'poster'),
+            Customer::PUBLICITY_SHAPE_WEB => Yii::t('app', 'web'),
+            Customer::PUBLICITY_SHAPE_OTHER_CUSTOMER => Yii::t('app', 'other_customer'),
+            Customer::PUBLICITY_SHAPE_FACEBOOK => Yii::t('app', 'facebook'),
+            Customer::PUBLICITY_SHAPE_STREET_BANNER => Yii::t('app', 'street_banner'),
+            Customer::PUBLICITY_SHAPE_DOOR_TO_DOOR => Yii::t('app', 'door_to_door'),
+            Customer::PUBLICITY_SHAPE_COMPETITION => Yii::t('app', 'competition'),
+            Customer::PUBLICITY_SHAPE_INSTAGRAM => Yii::t('app', 'instagram'),
+            Customer::PUBLICITY_SHAPE_GIGANTOGRAFIA => Yii::t('app', 'gigantografía'),
+            Customer::PUBLICITY_SHAPE_PANTALLA_LED => Yii::t('app', 'pantalla-led'),
+            Customer::PUBLICITY_SHAPE_FOLLETO => Yii::t('app', 'Folleto'),
+        ];
     }
 }

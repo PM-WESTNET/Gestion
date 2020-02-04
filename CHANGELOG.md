@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  - Celular 2 no requerido [GES-788]
+ - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  
  ## [2020.02.03.0]
  ### Modificado

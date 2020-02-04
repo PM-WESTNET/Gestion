@@ -250,21 +250,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     </div>
     <div class="row">
         <div class="col-sm-12 col-xs-12">
-            <?php
-            echo $form->field($model, 'publicity_shape')->dropDownList([
-                    'banner'=> Yii::t('app', 'banner'), 
-                    'poster' => Yii::t('app', 'poster'), 
-                    'web' => Yii::t('app', 'web'), 
-                    'other_customer' => Yii::t('app', 'other_customer'), 
-                    'facebook' => Yii::t('app', 'facebook'), 
-                    'street_banner' => Yii::t('app', 'street_banner'),
-                    'door_to_door' => Yii::t('app', 'door_to_door'), 
-                    'competition' => Yii::t('app', 'competition'),
-                    'instagram' => Yii::t('app', 'Instagram'),
-                    'gigantografía' => Yii::t('app', 'Gigantografía'),
-                    'pantalla-led' => Yii::t('app', 'Pantalla led')
-                ], ['prompt' => Yii::t('app', 'Select an option...')]);
-            ?>
+            <?= $form->field($model, 'publicity_shape')->dropDownList(Customer::getPublicityShapesForSelect(), ['prompt' => Yii::t('app', 'Select an option...')]); ?>
         </div>
     </div> 
     <?php
