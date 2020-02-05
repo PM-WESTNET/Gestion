@@ -136,7 +136,7 @@ class Customer extends ActiveRecord {
     public function beforeValidate()
     {
         // La mascara del input rellena los digitos faltantes con _, antes de validar los eliminamos
-        $this->document_number= rtrim($this->document_number, '_');
+        $this->document_number= trim($this->document_number, '_');
 
         return parent::beforeValidate();
     }

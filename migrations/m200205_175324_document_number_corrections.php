@@ -28,7 +28,7 @@ class m200205_175324_document_number_corrections extends Migration
         foreach ($customers as $customer) {
             if (substr($customer->document_number, -1) === '_') {
                 $log = "Customer ID: ". $customer->customer_id . "\t". "Old document: ". $customer->document_number. "\t";
-                $customer->updateAttributes(['document_number' => rtrim($customer->document_number, '_')]);
+                $customer->updateAttributes(['document_number' => trim($customer->document_number, '_')]);
                 $log .= "New document: " . $customer->document_number;
                 fwrite($file, $log. PHP_EOL);
             }
