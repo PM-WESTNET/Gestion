@@ -68,7 +68,7 @@ class m200122_111818_add_employee_table extends Migration
         ]);
 
         $this->addForeignKey('fk_employee_bill_item_employee_bill_id', 'employee_bill_item', 'employee_bill_id', 'employee_bill', 'employee_bill_id');
-        $this->addForeignKey('fk_employee_bill_item_account_id', 'employee_bill_item', 'account', 'account_id');
+        $this->addForeignKey('fk_employee_bill_item_account_id', 'employee_bill_item', 'account_id', 'account', 'account_id');
 
         $this->createTable('employee_bill_has_tax_rate', [
             'employee_bill_has_tax_rate_id' => $this->primaryKey(),
