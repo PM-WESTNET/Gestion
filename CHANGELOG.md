@@ -20,6 +20,10 @@ All notable changes to this project will be documented in this file.
  - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  
+ ## [2020.02.05.0]
+ ### Agregado 
+ - Se agrega reporte de Clientes por Nodo
+ 
  ## [2020.02.04.0]
  ### Agregado
  - Se ocultan categorías de tickets para optimizar los tiempos de creación de tickets. [GES-485] Solicitado y aprobado por Camila.
