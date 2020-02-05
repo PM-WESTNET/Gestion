@@ -10,10 +10,13 @@ namespace app\modules\westnet\reports\search;
 
 
 use app\components\helpers\DbHelper;
+use app\modules\westnet\models\Node;
 use app\modules\sale\models\Customer;
 use app\modules\westnet\reports\ReportsModule;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -135,6 +138,122 @@ GROUP BY periodo
         return $query->all();
     }
 
+    public function findByNode($params) {
+        $cS= new \app\modules\sale\models\search\CustomerSearch();
+
+        $subquery = $cS->buildSearchQuery($params);
+
+        $subquery->select(['customer.*','n.name as node', 'n.node_id as node_id']);
+        $subquery->innerJoin('node n', 'n.node_id=connection.node_id');
+
+        Yii::info($subquery->createCommand()->getRawSql());
+
+        $query= (new Query())
+            ->select(['c100.node_id', 'c100.node', 'COUNT(c100.customer_id) as total'])
+            ->from(['c100' => $subquery])
+            ->groupBy(['c100.node_id']);
+
+        $data = $query->all();
+
+        $result= [];
+
+        $nodesQuery = Node::find();
+
+        if (isset($params['CustomerSearch']['node_id']) && !empty($params['CustomerSearch']['node_id'])){
+            $nodesQuery->andFilterWhere(['node_id' => $params['CustomerSearch']['node_id']]);
+        }
+
+        $nodes = $nodesQuery->all();
+
+        Yii::info($data);
+        Yii::info($nodes);
+
+        foreach ($nodes as $node) {
+            $result[$node->node_id]= [
+                'node' => $node->name,
+                'total' => 0
+            ] ;
+        }
+
+        foreach ($data as $node) {
+
+            $result[$node['node_id']] = [
+                'node' => $node['node'],
+                'total' => $node['total']
+            ];
+        }
+
+        Yii::info($result);
+
+        $dataProvider = new ArrayDataProvider(['allModels' => $result]);
+
+        return $dataProvider;
+
+    }
+
+    private function filterByNode($query){
+        if (!empty($this->node_id)) {
+            $query->andWhere(['connection.node_id' => $this->node_id]);
+        }
+    }
+
+    private function filterByNodes($query){
+        if (!empty($this->nodes)) {
+            $query->andWhere(['connection.node_id' => $this->nodes]);
+        }
+    }
+
+    private function filterByPlan($query){
+        if (!empty($this->plan_id)) {
+            $query->andWhere(['contract_detail.product_id' => $this->plan_id]);
+        }
+    }
+
+    private function filterByStatusAccount($query){
+        if (!empty($this->connection_status)) {
+            $query->andWhere(['connection.status_account' => $this->connection_status]);
+        }
+    }
+
+    private function filterByContractStatus($query){
+
+        if (!empty($this->contract_status)) {
+            $query->andWhere(['contract.status' => $this->contract_status]);
+        }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
+        }
+    }
+
+    private function filterByZone($query){
+        if (!empty($this->zone_id)) {
+            $query->andWhere(['add.zone_id' => $this->zone_id]);
+        }
+    }
+
+    private function filterByCompany($query, $parent = false){
+        if (!empty($this->company_id)) {
+            if($parent) {
+                $query->andWhere(['customer.parent_company_id' => $this->company_id]);
+            } else {
+                $query->andWhere(['customer.company_id' => $this->company_id]);
+            }
+        }
+    }
+
+    private function filterByClass($query){
+        if (!empty($this->customer_class_id)) {
+            $query->andWhere(['cchc.customer_class_id' => $this->customer_class_id]);
+        }
+    }
+
+    private function filterByCategory($query){
+        if (!empty($this->customer_category_id)) {
+            $query->andWhere(['ccathc.customer_category_id' => $this->customer_category_id]);
+        }
+    }
+
 
     /**
      * Datos para reporte de Clientes Actualizdos
@@ -212,9 +331,6 @@ GROUP BY periodo
                 $from_date = (new \DateTime())->modify('-7 days');
                 $to_date = (new \DateTime());
 
-//                var_dump($from_date->format('d-m-Y'));
-//                die();
-
                 for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day=86400 + $day) {
                     //var_dump($day);
 
@@ -228,7 +344,6 @@ GROUP BY periodo
 
                 break;
         }
-        //die();
         return [
             'labels' => $labels,
             'points' => $points,
@@ -236,6 +351,4 @@ GROUP BY periodo
 
 
     }
-
-
 }
