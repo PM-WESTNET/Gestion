@@ -275,13 +275,14 @@ GROUP BY periodo
             case self::LAST_WEEK_RANGE:
                 $from_date = (new \DateTime())->modify('-7 days');
                 $to_date = (new \DateTime());
-
+                $counter = 0;
                 for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day = $day + 86400) {
                     $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
                     $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $counter += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
-                        'y' => $qty
+                        'y' => $counter
                     ];
                 }
 
@@ -290,15 +291,17 @@ GROUP BY periodo
                 $from_date = (new \DateTime())->modify('-30 days');
                 $to_date = (new \DateTime());
                 $before = null;
+                $counter = 0;
                 for ($month= $from_date->getTimestamp(); $month <= $to_date->getTimestamp(); $month = $month + (86400 * 5)) {
                     $labels[] = Yii::$app->formatter->asDate($month, 'dd/MM');
                     $qty = Customer::find()
                         ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
                         ->andFilterWhere(['>=', 'last_update', $before])
                         ->count();
+                    $counter += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($month, 'dd/MM'),
-                        'y' => $qty
+                        'y' => $counter
                     ];
 
                     $before = Yii::$app->formatter->asDate($month, 'yyyy-MM-dd');
@@ -310,7 +313,7 @@ GROUP BY periodo
                 $to_date = (new \DateTime());
 
                 $before = null;
-
+                $counter = 0;
                 for ($year= $from_date->getTimestamp(); $year <= $to_date->getTimestamp(); $year=$year + (86400 * 30)) {
                     $labels[] = Yii::$app->formatter->asDate($year, 'MM/yyyy');
 
@@ -318,10 +321,10 @@ GROUP BY periodo
                         ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
                         ->andFilterWhere(['>=', 'last_update', $before])
                         ->count();
-
+                    $counter  += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
-                        'y' => $qty
+                        'y' => $counter
                     ];
 
                     $before = Yii::$app->formatter->asDate($year, 'yyyy-MM-dd');
@@ -331,14 +334,17 @@ GROUP BY periodo
                 $from_date = (new \DateTime())->modify('-7 days');
                 $to_date = (new \DateTime());
 
+                $counter = 0;
+
                 for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day=86400 + $day) {
                     //var_dump($day);
 
                     $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
                     $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $counter += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
-                        'y' => $qty
+                        'y' => $counter
                     ];
                 }
 

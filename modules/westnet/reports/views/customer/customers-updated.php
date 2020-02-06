@@ -71,7 +71,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => Yii::t('app', 'Updated Customers'),
                         'data' => $data['points'],
-                        'backgroundColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'fill' => false,
+                        'lineTension' => 0.1,
+                        'borderColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'borderCapStyle' => 'round',
+                        'borderDash' => [],
+                        'curveType' => 'none',
+                        //'backgroundColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'backgroundColor' => 'white',
+
                     ]
                 ]
             ]
