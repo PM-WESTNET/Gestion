@@ -11,8 +11,6 @@ All notable changes to this project will be documented in this file.
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
  - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
- - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
- uno de los clientes. [Ticket GES-568]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
@@ -26,10 +24,22 @@ All notable changes to this project will be documented in this file.
  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
- - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
- - Reporte de clientes actualizados [GES-764]
+ - Celular 2 no requerido [GES-788]
+ - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos
  
- 
+  ## [2020.01.22.1]
+  ### Agregado
+  - Reporte de clientes actualizados [GES-764]
+  - Alta de cliente: Agregado campo observaciones [GES-626]
+  
+  ### Modificado
+  - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
+  
+  ## [2020.01.22.0]
+  ### Agregado 
+   - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+   uno de los clientes. [Ticket GES-568] Solicitado y aprobado por Joaquin
+     
  ## [2020.01.16.0]
  ### Modificado
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian

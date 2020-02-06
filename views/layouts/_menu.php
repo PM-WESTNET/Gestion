@@ -213,6 +213,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
+        ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
     ]];
 
     //Reportes por empresa

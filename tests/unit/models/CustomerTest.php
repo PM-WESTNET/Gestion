@@ -845,5 +845,68 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Not validated', $customer->validate(['phone', 'phone2', 'phone3', 'phone4']))->false();
     }
 
+    public function testValidatePhone2RequiredSuccessOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+        $customer->phone2 = '2616260580';
+
+        expect('Not validate', $customer->validate(['phone2']))->true();
+    }
+
+    public function testValidatePhone2RequiredFailOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+
+        expect('Validate', $customer->validate(['phone2']))->false();
+    }
+
+    public function testValidatePhone2NotRequiredWhenNullOnUpdate()
+    {
+        $customer = Customer::findOne(45904);
+
+        expect('Not validate', $customer->validate(['phone2']))->true();
+    }
+
+    public function testValidatePhone2RequiredWhenNotNullOnUpdate()
+    {
+        $customer = Customer::findOne(45903);
+        $customer->phone2 = null;
+
+        expect('Not validate', $customer->validate(['phone2']))->false();
+    }
+
+    public function testValidatePhone3RequiredSuccessOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+        $customer->phone3 = '2616260580';
+
+        expect('Not validate', $customer->validate(['phone3']))->true();
+    }
+
+    public function testValidatePhone3RequiredFailOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+
+        expect('Validate', $customer->validate(['phone3']))->false();
+    }
+
+    public function testValidatePhone3NotRequiredWhenNullOnUpdate()
+    {
+        $customer = Customer::findOne(45904);
+
+        expect('Not validate', $customer->validate(['phone3']))->true();
+    }
+
+    public function testValidatePhone3RequiredWhenNotNullOnUpdate()
+    {
+        $customer = Customer::findOne(45903);
+        $customer->phone3 = null;
+
+        expect('Not validate', $customer->validate(['phone3']))->false();
+    }
     //TODO resto de la clase
 }

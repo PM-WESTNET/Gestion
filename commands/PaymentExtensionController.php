@@ -32,13 +32,20 @@ class PaymentExtensionController extends Controller
 
         $contracts = Contract::find()
             ->innerJoin('connection conn', 'conn.contract_id=contract.contract_id')
-            ->andWhere([
-                'contract.status' => Contract::STATUS_ACTIVE,
-                'conn.status_account' => Connection::STATUS_ACCOUNT_FORCED
+            ->innerJoin('contract_detail cd', 'cd.contract_id=contract.contract_id')
+            ->andWhere(['OR',
+                [
+                    'contract.status' => Contract::STATUS_ACTIVE,
+                    'conn.status_account' => Connection::STATUS_ACCOUNT_FORCED
+                ],
+                [
+                    'contract.status' => Contract::STATUS_ACTIVE,
+                    'conn.status_account' => Connection::STATUS_ENABLED
+                ]
             ])
-            ->orWhere([
-                'contract.status' => Contract::STATUS_ACTIVE,
-                'conn.status_account' => Connection::STATUS_ENABLED
+            ->andWhere([
+                'cd.status' => ContractDetail::STATUS_DRAFT,
+                'cd.product_id' => $product_id
             ])
             ->all();
 

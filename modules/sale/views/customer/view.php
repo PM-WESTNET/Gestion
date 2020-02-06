@@ -218,6 +218,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => Yii::t('app', $model->publicity_shape)
         ],
      ];
+
+    $attributes[] = [
+        'attribute' => 'observations',
+    ];
    
     $attributes[] = [
         'label'=>Yii::t('app', 'Address'),
