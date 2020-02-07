@@ -19,6 +19,11 @@ All notable changes to this project will be documented in this file.
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
+ - Se corrige dni con _ al final, en clientes con dni de 7 digitos
+ 
+ ## [2020.02.05.0]
+ ### Agregado 
+ - Se agrega reporte de Clientes por Nodo
  
  ## [2020.02.04.0]
  ### Agregado
