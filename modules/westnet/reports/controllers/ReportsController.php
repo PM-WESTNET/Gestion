@@ -809,54 +809,41 @@ class ReportsController extends Controller
         $data_app = [];
         $data_ivr = [];
 
-        $counter_app = 0;
-        $counter_ivr = 0;
-        //Completo los array con las fechas que comprenden el período
-        $before_app = 0;
+        $before_app= 0;
         $before_ivr = 0;
-        $before_item = null;
-        $before_item_app = null;
-        $before_item_ivr = null;
-        $before_qty_app = 0;
-        $before_qty_ivr = 0;
-        foreach ($colslineal as $key => $item) {
+
+        //Completo los array con las fechas que comprenden el período
+        foreach ($colslineal as $item) {
             $from_app = false;
             $from_ivr = false;
+
             foreach ($dataLineal as $datal) {
                 if($datal['from'] == NotifyPayment::FROM_APP) {
                     if($datal['date'] == $item) {
-                        $counter_app += (int) $datal['qty'];
-                        if ($counter_app === (int)$before_app) {
-                            array_push($data_app, ['x' => $item, 'y' => (int)$before_app]);
-                        }
-                        $before_app = $counter_app;
-                        array_push($data_app, ['x' => $item, 'y' => (int)$counter_app]);
+                        $before_app += (int)$datal['qty'];
+                        array_push($data_app, $before_app);
                         $from_app = true;
                     }
                 }
 
                 if($datal['from'] == NotifyPayment::FROM_IVR) {
                     if($datal['date'] == $item) {
-                        $counter_ivr += (int)$datal['qty'];
-                        if ($counter_ivr === $before_ivr) {
-                            array_push($data_ivr, ['x' => $item, 'y' => (int)$before_ivr]);
-                        }
-                        array_push($data_ivr, ['x' => $item, 'y' => (int)$counter_ivr]);
-                        $before_ivr = $counter_ivr;
+                        $before_ivr += (int)$datal['qty'];
+                        array_push($data_ivr, $before_ivr);
                         $from_ivr = true;
                     }
                 }
             }
 
             //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
-            if($key === (count($colslineal) - 1) && count($data_app) === 1) {
-                array_push($data_app, ['x' => $item, 'y' => (int)$counter_app]);
+            if(!$from_app ) {
+                array_push($data_app, $before_app);
                 $from_app = false;
             }
 
-            if($key === (count($colslineal) - 1) && count($data_ivr) === 1) {
-                array_push($data_ivr, ['x' => $item, 'y' => (int)$counter_ivr]);
-                $from_app = false;
+            if(!$from_ivr ) {
+                array_push($data_ivr, $before_ivr);
+                $from_ivr = false;
             }
 
 //            if(!$from_ivr ) {
@@ -920,51 +907,32 @@ class ReportsController extends Controller
         $counter_app = 0;
         $counter_ivr = 0;
         $before_app = 0;
-        $before_ivr =0;
-        $before_item = null;
-        $before_item_app = null;
-        $before_item_ivr = null;
-        $before_qty_app = 0;
-        $before_qty_ivr = 0;
+        $before_ivr = 0;
 
+//        var_dump($colslineal);
+//        die();
         //Completo los array con las fechas que comprenden el período
-        foreach ($colslineal as $key => $item) {
+        foreach ($colslineal as $item) {
             $from_app = false;
             $from_ivr = false;
 
+
             foreach ($datas as $data) {
                 if ($data['from'] == PaymentExtensionHistory::FROM_APP) {
+//                    var_dump($data['date']);
+//                    var_dump($item);
                     if ($data['date'] == $item) {
-                        if($before_item_app && $before_qty_app == 0 && (int)$data['qty'] !== 0){
-                            array_push($data_app, ['x' => $before_item_app, 'y' => $before_app]);
-                        }
-                        $before_qty_app = (int)$data['qty'];
-                        $counter_app += (int)$data['qty'];
-                        array_push($data_app, ['x' => $item, 'y' => $counter_app]);
-                        $before_app = $counter_app;
-                        $before_item_app = $item;
-                    }else {
-                        $before_item_app = $item;
-                        $before_qty_app = 0;
+                        $before_app += (int)$data['qty'];
+                        array_push($data_app, $before_app);
+                        $from_app = true;
                     }
                 }
 
                 if ($data['from'] == PaymentExtensionHistory::FROM_IVR) {
                     if ($data['date'] == $item) {
-                        if($before_item_ivr && $before_qty_ivr == 0 && (int)$data['qty'] !== 0){
-                            array_push($data_ivr, ['x' => $before_item_ivr, 'y' => $before_ivr]);
-                        }
-                        $before_qty_ivr = (int)$data['qty'];
-                        $counter_ivr += (int)$data['qty'];
-                        if ((($counter_ivr > $before_ivr && $before_qty_ivr === 0) || $before_ivr === 0 ) && $before_item ) {
-                            array_push($data_ivr, ['x' => $before_item, 'y' => $before_ivr]);
-                        }
-                        array_push($data_ivr, ['x' => $item, 'y' => $counter_ivr]);
-                        $before_ivr = $counter_ivr;
-                        $before_item_ivr = $item;
-                    }else {
-                        $before_item_ivr = $item;
-                        $before_qty_ivr = 0;
+                        $before_ivr += (int)$data['qty'];
+                        array_push($data_ivr, (int)$data['qty']);
+                        $from_ivr = true;
                     }
                 }
             }
@@ -972,16 +940,15 @@ class ReportsController extends Controller
 
 
             //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
-            if($key === (count($colslineal) - 1) && count($data_app) === 1 ) {
-                array_push($data_app, ['x' => $item, 'y' => (int)$counter_app]);
+            if (!$from_app) {
+                array_push($data_app, $before_app);
                 $from_app = false;
             }
 
-            if($key === (count($colslineal) - 1) && count($data_ivr) === 1 ) {
-                array_push($data_ivr, ['x' => $item, 'y' => (int)$counter_ivr]);
-                $from_app = false;
+            if (!$from_ivr) {
+                array_push($data_ivr, $before_ivr);
+                $from_ivr = false;
             }
-            $before_item = $item;
         }
 
         return $this->render('payment-extension-graphic', [

@@ -50,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo \dosamigos\chartjs\ChartJs::widget([
             'type' => 'line',
             'options' => [
-                'height' => '100%',
+                'height' => '50px',
                 'width' => '100%',
             ],
             'clientOptions' => [
