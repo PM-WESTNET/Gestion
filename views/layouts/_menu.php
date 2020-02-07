@@ -147,6 +147,7 @@ if (Yii::$app->getModule('afip')) {
         ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
+        ['label'=>Yii::t('app','Publicity Shapes'), 'url'=>['/sale/publicity-shape/index']],
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Billed and Cashed'), 'url'=>['/sale/customer/billed-and-cashed']],
         '<li class="divider"></li>',
@@ -219,11 +220,13 @@ if (Yii::$app->getModule('reports')) {
         ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports/in-out']],
         ['label' => ReportsModule::t('app', 'Payment Methods'), 'url' => ['/reports/reports/payment-methods']],
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
+        ['label' => Yii::t('app', 'Customers By Node'), 'url' => ['/reports/reports/customers-by-node']],
         ['label' => Yii::t('app', 'Customers by publicity shape'), 'url' => ['/reports/reports/customer-by-publicity-shape']],
         ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
         ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
+        ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
     ]];
 }
 

@@ -10,9 +10,6 @@ All notable changes to this project will be documented in this file.
  - Correcion error duplicado de tickets en panel de cobranza
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] [actualizaContratoManualISP]
- - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
- uno de los clientes. [Ticket GES-568]
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
@@ -20,16 +17,51 @@ All notable changes to this project will be documented in this file.
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
  - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710]
+ - Celular 2 no requerido [GES-788]
+ - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
+ - Se corrige dni con _ al final, en clientes con dni de 7 digitos
+ - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
+ 
+ ## [2020.02.05.0]
+ ### Agregado 
+ - Se agrega reporte de Clientes por Nodo
+ 
+ ## [2020.02.04.0]
+ ### Agregado
+ - Se ocultan categorías de tickets para optimizar los tiempos de creación de tickets. [GES-485] Solicitado y aprobado por Camila.
+ 
+ ## [2020.02.03.0]
+ ### Modificado
+ - Contrato: Boton "Actualizar en ISP" agregado a la vista para impactar el contrato en wispro [GES-543] Solicitado y aprobado por Joaquin
+ - Implementacion de mutex para evitar que el proceso de actualización de conexiones [GES-710] Aprobado por Camila
  - Exportacion de notificaciones: Se modifica la exportación y envio de notificaciones por SMS para qwe no tenga en 
- cuenta los teléfonos fijos. [GES-726]
- - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746]
- - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688]
- - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775]
- - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
- - Reporte de clientes actualizados [GES-764]
+  cuenta los teléfonos fijos. [GES-726] Solicitado y aprobado por Camila
+ - Cron Activacion Adicional de Extension de pago: Se corrige bug al buscar contratos [GES-654] Solicitado y aprobado por Camila
+ - Liquidación de vendedor: se optimiza búsqueda items de contrato asociados al vendedor [GES-786] Solicitado por Camila y aprobado por Maria Laura
  
- 
+ ## [2020.01.29.0]
+ ### Modificado
+  - Mobile App: Corrección de orden de comprobantes, del más nuevo al más viejo [GES-746] Solicitado y aprobado por Camila
+  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian
+  - Api de clientes morosos y cortados: Solo devuelve clientes en estado activo, con contrato activo y conexion habilitada [GES-775] Solicitado y aprobado por Joaquin
+   
+  ## [2020.01.28.0]
+  ### Agregado
+  - Libro Mayor [GES-783]
+  
+  ## [2020.01.22.1]
+  ### Agregado
+  - Reporte de clientes actualizados [GES-764]
+  - Alta de cliente: Agregado campo observaciones [GES-626]
+  
+  ### Modificado
+  - Campos celular 1 y 2 obligatorios para nuevos clientes [GES-764]
+  
+  ## [2020.01.22.0]
+  ### Agregado 
+   - API para portal captivo: Se agrega el reemplazo del contenido de las notificaciones activas de explorador para cada
+   uno de los clientes. [Ticket GES-568] Solicitado y aprobado por Joaquin
+     
  ## [2020.01.16.0]
  ### Modificado
  - Vista de cuenta monetaria: Debe, haber y saldo afectado por los filtros. [GES-688] Solicitado y aprobado por Marian

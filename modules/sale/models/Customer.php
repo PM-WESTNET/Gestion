@@ -61,6 +61,7 @@ use app\modules\ticket\models\Ticket;
  * @property integer $parent_company_id
  * @property integer $needs_bill
  * @property string $birthdate
+ * @property string $observations
  *
  *
  * @property Bill[] $bills
@@ -116,12 +117,22 @@ class Customer extends ActiveRecord {
         return 'customer';
     }
 
+
+
+    public function beforeValidate()
+    {
+        // La mascara del input rellena los digitos faltantes con _, antes de validar los eliminamos
+        $this->document_number= trim($this->document_number, '_');
+
+        return parent::beforeValidate();
+    }
+
     /**
      * @inheritdoc
      */
     public function rules() {
         $rules = [
-            [['name', 'lastname'],'required', 'on' => 'insert'],
+            [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
             [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
@@ -135,7 +146,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -433,6 +444,8 @@ class Customer extends ActiveRecord {
                 if (count($phone_characters) == 1) {
                     $this->addError('phone2', Yii::t('app','Invalid Phone'));
                 }
+            } elseif (isset($this->oldAttributes['phone2']) && !empty($this->oldAttributes['phone2'])) {
+                $this->addError('phone2', Yii::t('app', 'Cell Phone 1 can`t be empty'));
             }
 
             if ($this->phone3) {
@@ -445,6 +458,7 @@ class Customer extends ActiveRecord {
                     $this->addError('phone3', Yii::t('app','Invalid Phone'));
                 }
             }
+
 
             if ($this->phone4) {
                 $phone_array = str_split($this->phone4);
@@ -523,7 +537,8 @@ class Customer extends ActiveRecord {
             'hourRanges' => Yii::t('app', 'Customer Hour range'),
             'document_image' => Yii::t('app', 'Document image'),
             'tax_image' => Yii::t('app', 'Tax image'),
-            'birthdate' => Yii::t('app','Birthdate')
+            'birthdate' => Yii::t('app','Birthdate'),
+            'observations' => Yii::t('app', 'Observations')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -632,9 +647,9 @@ class Customer extends ActiveRecord {
             } else {
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
+//                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
                             $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
-                        }
+//                        }
 
                         if ($attr === 'email') {
                             $this->updateAttributes(['email_status' => 'invalid']);
@@ -1486,6 +1501,12 @@ class Customer extends ActiveRecord {
         $date_now = new \DateTime('now');
         $month_difference = $date_last_update->diff($date_now)->m + ($date_last_update->diff($date_now)->y*12);
 
+        Yii::trace($this->last_update);
+        Yii::trace($maximun_months_update);
+        Yii::trace($date_last_update->diff($date_now)->m);
+        Yii::trace(($date_last_update->diff($date_now)->y*1));
+        Yii::trace('diferencia '. $month_difference );
+
         if($month_difference >= $maximun_months_update) {
             return true;
         }
@@ -2089,5 +2110,13 @@ class Customer extends ActiveRecord {
         if ($this->birthdate) {
             $this->birthdate = Yii::$app->formatter->asDate($this->birthdate, 'dd-MM-yyyy');
         }
+    }
+
+    /**
+     * Devuelve un array con los canales de publicidad para ser listados en un selector
+     */
+    public static function getPublicityShapesForSelect()
+    {
+        return PublicityShape::getPublicityShapeForSelect();
     }
 }

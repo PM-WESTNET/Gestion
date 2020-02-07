@@ -429,14 +429,39 @@ class ContractDetail extends ActiveRecord
         //No modificar esta linea, es correcto de esta forma:
         return $this->hasOne(Vendor::className(), ['vendor_id' => 'vendor_id']);
     }
-    
-    public static function getForLiquidationSelect()
+
+    /**
+     * Devuelve los contractDeatils asociados al vendedor, que aun no estan asociados una liquidación
+     * @param int $vendor_id
+     * @return array
+     */
+    public static function getForLiquidationSelect($vendor_id)
     {
         Yii::setLogger(new EmptyLogger());
         
 //        $items = ContractDetail::find()->with('contract', 'product')->join('natural left join', 'vendor_liquidation_item')->joinWith('contract')->where('vendor_liquidation_item.vendor_liquidation_id IS NULL')->andWhere('contract.customer_id>22000')->all();
-        $items = ContractDetail::find()->with('contract', 'product')->join('natural left join', 'vendor_liquidation_item')->where('vendor_liquidation_item.vendor_liquidation_id IS NULL')->all();
-        $items = ArrayHelper::map($items, 'contract_detail_id', function($item){ return $item->contract->customer->fullName. ' | $'.$item->product->name. ' | '.Yii::$app->formatter->asCurrency($item->product->finalPrice); });
+        //$items = ContractDetail::find()->with('contract', 'product')->join('natural left join', 'vendor_liquidation_item')->where('vendor_liquidation_item.vendor_liquidation_id IS NULL')->all();
+        //$items = ArrayHelper::map($items, 'contract_detail_id', function($item){ return $item->contract->customer->fullName. ' | $'.$item->product->name. ' | '.Yii::$app->formatter->asCurrency($item->product->finalPrice); });
+
+        $query = (new Query())
+            ->select(['cd.contract_detail_id', 'CONCAT(cus.lastname,", ",cus.name," | ", p.name, " | ") as description'])
+            ->from('contract_detail cd')
+            ->innerJoin('contract c', 'c.contract_id=cd.contract_id')
+            ->innerJoin('customer cus', 'cus.customer_id=c.customer_id')
+            ->innerJoin('product p', 'p.product_id=cd.product_id')
+            ->leftJoin('vendor_liquidation_item vli', 'vli.contract_detail_id=cd.contract_detail_id')
+            ->andWhere(['IS', 'vli.vendor_liquidation_item_id', NULL])
+            ->andWhere(['cd.vendor_id' => $vendor_id]);
+
+        $result = $query->all();
+
+        //El precio final se calcula por programación para no complicar demasiado la query y ademas se aplican las reglas de negocios ya definidas
+        $items = ArrayHelper::map($result, 'contract_detail_id',function($item){
+           $detail = ContractDetail::findOne($item['contract_detail_id']);
+           return $item['description']. Yii::$app->formatter->asCurrency($detail->product->finalPrice);
+        });
+
+
         
         return $items;
     }

@@ -523,4 +523,58 @@ class AccountMovementSearch extends AccountMovement {
         return $movements;
     }
 
+    public function searchMayorBook($params)
+    {
+        $this->load($params);
+
+        $initBalance = 0;
+        //Si viene el filtro de fechas calculamos el saldo inicial
+        if ($this->fromDate) {
+            Yii::$app->db->createCommand('set @init_balance := 0')->execute();
+            $initBalanceQuery = (new Query())
+                ->select(['@init_balance := @init_balance + (coalesce(ami.debit,0) - coalesce(ami.credit,0)) as init_balance'])
+                ->from('account_movement_item ami')
+                ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id')
+                ->andWhere(['ami.account_id' => $this->account_id])
+                ->andWhere(['<', 'am.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')])
+                ->orderBy(['am.date' => SORT_ASC, 'am.time' => SORT_ASC]);
+
+            $initBalanceResult = $initBalanceQuery->all();
+            if (!empty($initBalanceResult)) {
+                $initBalance = end($initBalanceResult)['init_balance'];
+            }
+        }
+
+        Yii::$app->db->createCommand('set @balance := '.$initBalance)->execute();
+
+        $query = (new Query())
+            ->select(['ami.account_movement_id', 'ami.debit', 'ami.credit', 'ami.status', 'am.description',
+                '@balance := @balance + (coalesce(ami.debit,0) - coalesce(ami.credit, 0)) as balance',
+                'am.date'
+            ])
+            ->from('account_movement_item ami')
+            ->innerJoin('account_movement am', 'am.account_movement_id=ami.account_movement_id');
+
+        if ($this->fromDate) {
+            $query->andWhere(['>=', 'am.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
+        }
+
+        if ($this->toDate) {
+            $query->andWhere(['<=', 'am.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
+        }
+
+        $query->andWhere(['ami.account_id' => $this->account_id]);
+
+        $query->orderBy(['am.date' => SORT_ASC, 'am.time' => SORT_ASC]);
+
+        $totalQuery = clone $query;
+        $totalQuery->select(['SUM(ami.debit) as debit', 'SUM(ami.credit) as credit']);
+
+        return [
+            'query' => $query,
+            'totalQuery' => $totalQuery
+        ];
+
+    }
+
 }

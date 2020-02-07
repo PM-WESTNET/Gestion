@@ -49,4 +49,15 @@ class CustomerController extends Controller
             'categories'    => $categories
         ]);
     }
+
+    public function actionCustomersUpdated()
+    {
+        $search = new CustomerSearch();
+        $data = $search->findByCustomersUpdated(Yii::$app->request->post());
+
+        return $this->render('customers-updated', [
+            'search' => $search,
+            'data' => $data
+        ]);
+    }
 }

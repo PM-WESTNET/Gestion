@@ -10,16 +10,28 @@ namespace app\modules\westnet\reports\search;
 
 
 use app\components\helpers\DbHelper;
+use app\modules\westnet\models\Node;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\reports\ReportsModule;
 use Yii;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 
 class CustomerSearch extends Model
 {
+
+    const LAST_WEEK_RANGE= 'last_week';
+    const LAST_MONTH_RANGE = 'last_month';
+    const LAST_YEAR_RANGE = 'last_year';
+
     public $date_from;
     public $date_to;
+
+    // Rango de tiempo para el reporte de clientes actualizados
+    public $range;
 
     public function init()
     {
@@ -34,7 +46,7 @@ class CustomerSearch extends Model
     public function rules() {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to'], 'safe']
+            [['date_from', 'date_to', 'range'], 'safe']
         ];
     }
 
@@ -43,6 +55,7 @@ class CustomerSearch extends Model
         return [
             'date_from' => ReportsModule::t('app', 'Date From'),
             'date_to' => ReportsModule::t('app', 'Date To'),
+            'range' => Yii::t('app', 'Time Range')
         ];
     }
 
@@ -123,5 +136,219 @@ GROUP BY periodo
         }
 
         return $query->all();
+    }
+
+    public function findByNode($params) {
+        $cS= new \app\modules\sale\models\search\CustomerSearch();
+
+        $subquery = $cS->buildSearchQuery($params);
+
+        $subquery->select(['customer.*','n.name as node', 'n.node_id as node_id']);
+        $subquery->innerJoin('node n', 'n.node_id=connection.node_id');
+
+        Yii::info($subquery->createCommand()->getRawSql());
+
+        $query= (new Query())
+            ->select(['c100.node_id', 'c100.node', 'COUNT(c100.customer_id) as total'])
+            ->from(['c100' => $subquery])
+            ->groupBy(['c100.node_id']);
+
+        $data = $query->all();
+
+        $result= [];
+
+        $nodesQuery = Node::find();
+
+        if (isset($params['CustomerSearch']['node_id']) && !empty($params['CustomerSearch']['node_id'])){
+            $nodesQuery->andFilterWhere(['node_id' => $params['CustomerSearch']['node_id']]);
+        }
+
+        $nodes = $nodesQuery->all();
+
+        Yii::info($data);
+        Yii::info($nodes);
+
+        foreach ($nodes as $node) {
+            $result[$node->node_id]= [
+                'node' => $node->name,
+                'total' => 0
+            ] ;
+        }
+
+        foreach ($data as $node) {
+
+            $result[$node['node_id']] = [
+                'node' => $node['node'],
+                'total' => $node['total']
+            ];
+        }
+
+        Yii::info($result);
+
+        $dataProvider = new ArrayDataProvider(['allModels' => $result]);
+
+        return $dataProvider;
+
+    }
+
+    private function filterByNode($query){
+        if (!empty($this->node_id)) {
+            $query->andWhere(['connection.node_id' => $this->node_id]);
+        }
+    }
+
+    private function filterByNodes($query){
+        if (!empty($this->nodes)) {
+            $query->andWhere(['connection.node_id' => $this->nodes]);
+        }
+    }
+
+    private function filterByPlan($query){
+        if (!empty($this->plan_id)) {
+            $query->andWhere(['contract_detail.product_id' => $this->plan_id]);
+        }
+    }
+
+    private function filterByStatusAccount($query){
+        if (!empty($this->connection_status)) {
+            $query->andWhere(['connection.status_account' => $this->connection_status]);
+        }
+    }
+
+    private function filterByContractStatus($query){
+
+        if (!empty($this->contract_status)) {
+            $query->andWhere(['contract.status' => $this->contract_status]);
+        }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
+        }
+    }
+
+    private function filterByZone($query){
+        if (!empty($this->zone_id)) {
+            $query->andWhere(['add.zone_id' => $this->zone_id]);
+        }
+    }
+
+    private function filterByCompany($query, $parent = false){
+        if (!empty($this->company_id)) {
+            if($parent) {
+                $query->andWhere(['customer.parent_company_id' => $this->company_id]);
+            } else {
+                $query->andWhere(['customer.company_id' => $this->company_id]);
+            }
+        }
+    }
+
+    private function filterByClass($query){
+        if (!empty($this->customer_class_id)) {
+            $query->andWhere(['cchc.customer_class_id' => $this->customer_class_id]);
+        }
+    }
+
+    private function filterByCategory($query){
+        if (!empty($this->customer_category_id)) {
+            $query->andWhere(['ccathc.customer_category_id' => $this->customer_category_id]);
+        }
+    }
+
+
+    /**
+     * Datos para reporte de Clientes Actualizdos
+     */
+    public function findByCustomersUpdated($params)
+    {
+        $this->load($params);
+
+        $from_date = null;
+        $to_date = null;
+        $labels = [];
+        $points = [];
+
+        /**
+         * Según el rango calculo la fecha mínima y máxima
+         * Por cada fecha que se muestra en el gráfico cuento los clientes actualizados entre el punto anterior y el actual
+         */
+        switch($this->range) {
+            case self::LAST_WEEK_RANGE:
+                $from_date = (new \DateTime())->modify('-7 days');
+                $to_date = (new \DateTime());
+
+                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day = $day + 86400) {
+                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
+                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
+                        'y' => $qty
+                    ];
+                }
+
+                break;
+            case self::LAST_MONTH_RANGE:
+                $from_date = (new \DateTime())->modify('-30 days');
+                $to_date = (new \DateTime());
+                $before = null;
+                for ($month= $from_date->getTimestamp(); $month <= $to_date->getTimestamp(); $month = $month + (86400 * 5)) {
+                    $labels[] = Yii::$app->formatter->asDate($month, 'dd/MM');
+                    $qty = Customer::find()
+                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
+                        ->andFilterWhere(['>=', 'last_update', $before])
+                        ->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($month, 'dd/MM'),
+                        'y' => $qty
+                    ];
+
+                    $before = Yii::$app->formatter->asDate($month, 'yyyy-MM-dd');
+                }
+
+                break;
+            case self::LAST_YEAR_RANGE:
+                $from_date = (new \DateTime())->modify('-1 year');
+                $to_date = (new \DateTime());
+
+                $before = null;
+
+                for ($year= $from_date->getTimestamp(); $year <= $to_date->getTimestamp(); $year=$year + (86400 * 30)) {
+                    $labels[] = Yii::$app->formatter->asDate($year, 'MM/yyyy');
+
+                    $qty = Customer::find()
+                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                        ->andFilterWhere(['>=', 'last_update', $before])
+                        ->count();
+
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
+                        'y' => $qty
+                    ];
+
+                    $before = Yii::$app->formatter->asDate($year, 'yyyy-MM-dd');
+                }
+                break;
+            default :
+                $from_date = (new \DateTime())->modify('-7 days');
+                $to_date = (new \DateTime());
+
+                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day=86400 + $day) {
+                    //var_dump($day);
+
+                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
+                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
+                    $points[] = [
+                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
+                        'y' => $qty
+                    ];
+                }
+
+                break;
+        }
+        return [
+            'labels' => $labels,
+            'points' => $points,
+        ];
+
+
     }
 }

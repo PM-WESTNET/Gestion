@@ -36,6 +36,20 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'format' => 'currency'
 
+        ],
+        [
+            'class' => \app\components\grid\ActionColumn::class,
+            'buttons' => [
+                'mayor_book' => function ($url, $model) {
+                    return \app\components\helpers\UserA::a(Yii::t('app', 'Mayor Book'),
+                        \yii\helpers\Url::to(['account-movement/mayor-book', 'account_id' => $model['account_id']]),
+                        [
+                            'class' => 'btn btn-info'
+                        ]
+                    );
+                }
+            ],
+            'template' => '{mayor_book}'
         ]
     ];
     // Renders a export dropdown menu

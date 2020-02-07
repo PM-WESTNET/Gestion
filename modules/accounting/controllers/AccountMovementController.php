@@ -3,6 +3,7 @@
 namespace app\modules\accounting\controllers;
 
 use app\components\web\Controller;
+use app\modules\accounting\models\Account;
 use app\modules\accounting\models\AccountMovementItem;
 use app\modules\accounting\models\search\AccountMovementItemSearch;
 use app\modules\accounting\models\search\AccountMovementSearch;
@@ -10,6 +11,7 @@ use app\modules\accounting\models\search\AccountSearch;
 use Yii;
 use app\modules\accounting\models\AccountMovement;
 use yii\data\ActiveDataProvider;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\accounting\models\MoneyBoxAccount;
@@ -509,4 +511,31 @@ class AccountMovementController extends Controller
 
         return $json;
     }
+
+    public function actionMayorBook($account_id) {
+
+        $account = Account::findOne($account_id);
+
+        if (empty($account)) {
+            throw new BadRequestHttpException('Account not found');
+        }
+
+        $search = new AccountMovementSearch();
+        $search->account_id = $account->account_id;
+
+        $result = $search->searchMayorBook(Yii::$app->request->getQueryParams());
+
+        $dataProvider = new ActiveDataProvider(['query' => $result['query'], 'pagination' => false]);
+
+
+        return $this->render('mayor_book', [
+            'dataProvider' => $dataProvider,
+            'account' => $account,
+            'search' => $search,
+            'totalQuery' => $result['totalQuery']
+        ]);
+
+    }
+
+
 }

@@ -40,7 +40,7 @@ $customer = [
     ['customer_id' => 45904,'name' => 'Maria','lastname' => 'GOMEZ','document_number' => '35875229',
         'sex' => NULL,'email' => 'jperez7@quoma.com.ar','phone' => '2612575620','status' => 'enabled',
         'document_type_id' => 2,'tax_condition_id' => 3,'account_id' => NULL,'company_id' => NULL,
-        'address_id' => 1,'email2' => 'jperez8@quoma.com.ar','phone2' => '2612575620','phone3' => '2612575620',
+        'address_id' => 1,'email2' => 'jperez8@quoma.com.ar','phone2' => null,'phone3' => null,
         'customer_reference_id' => NULL,'code' => '59813','payment_code' => NULL,'publicity_shape' => 'poster',
         'screen_notification' => '1','sms_notification' => '1','email_notification' => '1',
         'sms_fields_notifications' => 'phone,phone2,phone3','email_fields_notifications' => 'email,email2',

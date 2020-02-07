@@ -22,7 +22,7 @@ use kartik\widgets\Select2;
     <?= $form->field($model, 'description')->textInput(['maxlength' => 255]) ?>
     
     <?= $form->field($model, 'contract_detail_id')->widget(Select2::className(),[
-        'data' => app\modules\sale\modules\contract\models\ContractDetail::getForLiquidationSelect(),
+        'data' => app\modules\sale\modules\contract\models\ContractDetail::getForLiquidationSelect($liquidation->vendor_id),
         'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
         'pluginOptions' => [
             'allowClear' => true
