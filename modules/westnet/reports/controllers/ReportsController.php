@@ -726,7 +726,7 @@ class ReportsController extends Controller
             'brochure' => 'rgba(211, 192, 255)',
             'gigantografía' => 'rgba(232, 195, 255)',
             'pantalla-led' => 'rgba(255, 194, 222)',
-            'instagram' => 'rgba(255, 193, 221)'
+            'instagram' => 'rgba(255, 193, 221)',
         ];
 
         $border_asigned_color = [
@@ -749,8 +749,8 @@ class ReportsController extends Controller
             $date = new \DateTime($item['period'] . '-01');
             $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
             $datas[] = $item['customer_qty'];
-            array_push($colors, $asigned_color[$item['publicity_shape']]);
-            array_push($border_colors, $border_asigned_color[$item['publicity_shape']]);
+            array_push($colors, (array_key_exists($item['publicity_shape'], $asigned_color) ? $asigned_color[$item['publicity_shape']] : $asigned_color[array_rand($asigned_color)]));
+            array_push($border_colors, (array_key_exists($item['publicity_shape'], $border_asigned_color) ? $border_asigned_color[$item['publicity_shape']] : $border_asigned_color[array_rand($border_asigned_color)]));
         }
 
 
