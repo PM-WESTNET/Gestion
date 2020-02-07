@@ -145,6 +145,7 @@ if (Yii::$app->getModule('afip')) {
         ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
+        ['label'=>Yii::t('app','Publicity Shapes'), 'url'=>['/sale/publicity-shape/index']],
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Billed and Cashed'), 'url'=>['/sale/customer/billed-and-cashed']],
         '<li class="divider"></li>',

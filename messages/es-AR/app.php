@@ -1312,4 +1312,8 @@
     'Last Week' => 'Última Semana',
     'Time Range' => 'Rango de Tiempo',
     'Mayor Book' => 'Libro Mayor',
+    'Publicity Shapes' => 'Canales de publicidad',
+    'Create Publicity Shape' => 'Crear canal de publicidad',
+    'enabled' => 'Habilidado',
+    'disabled' => 'Deshabilitado',
  );
