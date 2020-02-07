@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
  - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  - Se corrige dni con _ al final, en clientes con dni de 7 digitos
+ - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
  
  ## [2020.02.05.0]
  ### Agregado 
