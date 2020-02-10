@@ -245,7 +245,7 @@ class ReportCompanySearch extends Model
 
         $queryPaymentCobrado = new Query();
         $queryPaymentCobrado
-            ->select([new Expression('date_format(p.date, \'%Y-%m\') as period'), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'), new Expression('0 as pagos_account'), 'p.company_id'])
+            ->select([new Expression('date_format(p.date, \'%Y-%m\') as period'), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'), new Expression('0 as pagos_employee'), new Expression('0 as pagos_account'), 'p.company_id'])
             ->from(['payment p'])
             ->leftJoin('payment_item pi', 'p.payment_id = pi.payment_id')
             ->leftJoin('payment_method m', 'pi.payment_method_id = m.payment_method_id')
@@ -255,8 +255,16 @@ class ReportCompanySearch extends Model
 
         $queryPayment = new Query();
         $queryPayment
-            ->select([new Expression('date_format(pp.date, \'%Y-%m\') as period'), new Expression('0 AS facturado'), 'sum(pp.amount) AS pagos', new Expression('0 as pagos_account'), 'pp.company_id'])
+            ->select([new Expression('date_format(pp.date, \'%Y-%m\') as period'), new Expression('0 AS facturado'), 'sum(pp.amount) AS pagos', new Expression('0 as pagos_employee'), new Expression('0 as pagos_account'), 'pp.company_id'])
             ->from(['provider_payment pp'])
+            ->where(['pp.status' => 'closed'])
+            ->groupBy(['period', 'company_id'])
+        ;
+
+        $queryEmployeePayment = new Query();
+        $queryEmployeePayment
+            ->select([new Expression('date_format(pp.date, \'%Y-%m\') as period'), new Expression('0 AS facturado'),  new Expression('0 as pagos'), 'sum(pp.amount) AS pagos_employee', new Expression('0 as pagos_account'), 'pp.company_id'])
+            ->from(['employee_payment pp'])
             ->where(['pp.status' => 'closed'])
             ->groupBy(['period', 'company_id'])
         ;
@@ -264,26 +272,31 @@ class ReportCompanySearch extends Model
         if ($this->date_from) {
             $queryPaymentCobrado->andWhere(['>=', 'p.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryPayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
         }
 
         if ($this->date_to) {
             $queryPaymentCobrado->andWhere(['<=', 'p.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryPayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
         }
 
         if($this->company_id) {
             $queryPaymentCobrado->andWhere(['p.company_id' => $this->company_id]);
             $queryPayment->andWhere(['pp.company_id' => $this->company_id]);
+            $queryEmployeePayment->andWhere(['pp.company_id' => $this->company_id]);
         }
 
         $queryPaymentCobrado->union($queryPayment, true);
+        $queryPaymentCobrado->union($queryEmployeePayment, true);
         $query = new Query();
         $query
             ->select([
                 'period', new Expression('round(sum(facturado)) as facturado'),
                 new Expression('round(sum(pagos)) as pagos'),
+                new Expression('round(sum(pagos)) as pagos_employee'),
                 new Expression('round(sum(pagos_account)) as pagos_account'),
-                new Expression('round(sum(facturado) - sum(pagos) - sum(pagos_account)) as diferencia'),
+                new Expression('round(sum(facturado) - sum(pagos_employee) - sum(pagos) - sum(pagos_account)) as diferencia'),
                 'company_id'
             ])
             ->from(['a' => $queryPaymentCobrado])
@@ -376,22 +389,38 @@ class ReportCompanySearch extends Model
             ->groupBy(['m.payment_method_id', 'date_format(pp.date, \'%Y-%m\'), pp.company_id'])
         ;
 
+        $queryEmployeePayment = new Query();
+        $queryEmployeePayment
+            ->select([new Expression("'Egreso Sueldos Empleados' as tipo"), 'm.name as descripcion', "date_format(pp.date, '%Y-%m') as fecha",
+                new Expression('0 as cobrado'), new Expression('sum(i.amount) as pagado')])
+            ->from(['employee_payment pp'])
+            ->leftJoin('employee_payment_item i', 'pp.employee_payment_id = i.employee_payment_id')
+            ->leftJoin('payment_method m', 'i.payment_method_id = m.payment_method_id')
+            ->where('m.payment_method_id is not null')
+            ->groupBy(['m.payment_method_id', 'date_format(pp.date, \'%Y-%m\'), pp.company_id'])
+        ;
+
         if ($this->date_from) {
             $queryProviderPayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryPayment->andWhere(['>=', 'p.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
         }
 
         if ($this->date_to) {
             $queryProviderPayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryPayment->andWhere(['<=', 'p.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
         }
 
         if($this->company_id) {
             $queryProviderPayment->andWhere(['pp.company_id' => $this->company_id]);
+            $queryEmployeePayment->andWhere(['pp.company_id' => $this->company_id]);
             $queryPayment->andWhere(['p.company_id' => $this->company_id]);
         }
 
         $queryPayment->union($queryProviderPayment, true);
+        $queryPayment->union($queryEmployeePayment, true);
+
 
         if(Config::getValue('add_retenciones_into_in_out_report')){
             $queryRetenciones = $this->findRetenciones($params);

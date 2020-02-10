@@ -300,11 +300,13 @@ class ReportsController extends Controller
         $datasets = [];
         $earn = 0;
         $outgo = 0;
+        $outgoEmployee = 0;
         $account_movements = 0;
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . "-01");
             $earn += $item['facturado'];
             $outgo += $item['pagos'];
+            $outgoEmployee += $item['pagos_employee'];
             $account_movements += $item['pagos_account'];
             if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $labels[] = $date->format('m-Y');
@@ -325,6 +327,7 @@ class ReportsController extends Controller
             'datasets' => $datasets,
             'earn' => $earn,
             'outgo' => $outgo,
+            'outgoEmployee' => $outgoEmployee,
             'account_movements' => $account_movements
         ]);
     }

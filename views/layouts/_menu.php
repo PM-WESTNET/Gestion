@@ -1,5 +1,7 @@
 <?php
 
+use app\components\widgets\agenda\notification\Notification;
+use app\components\widgets\agenda\task\Task;
 use yii\helpers\Html;
 use yii\bootstrap\NavBar;
 use \webvimark\modules\UserManagement\components\GhostNav;
@@ -198,6 +200,15 @@ if (Yii::$app->getModule('checkout')) {
 //Reportes
 if (Yii::$app->getModule('reports')) {
     $items[] = ['label' => ReportsModule::t('app', 'Reports'), 'items' => [
+        ['label' => ReportsModule::t('app', 'Company Reports'), 'items' => [
+            ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports-company/customers-per-month']],
+            ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports-company/custumer-variation-per-month']],
+            ['label' => ReportsModule::t('app', 'Debt Bills'), 'url' => ['/reports/reports-company/debt-bills']],
+            ['label' => ReportsModule::t('app', 'Low By Month'), 'url' => ['/reports/reports-company/low-by-month']],
+            ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
+            ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
+            ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
+        ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],
         ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports/costumer-variation-per-month']],
         ['label' => ReportsModule::t('app', 'Company Passive'), 'url' => ['/reports/reports/company-passive']],
@@ -217,17 +228,6 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
         ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
     ]];
-
-    //Reportes por empresa
-    $items[] = ['label' => ReportsModule::t('app', 'Company Reports'), 'items' => [
-        ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports-company/customers-per-month']],
-        ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports-company/custumer-variation-per-month']],
-        ['label' => ReportsModule::t('app', 'Debt Bills'), 'url' => ['/reports/reports-company/debt-bills']],
-        ['label' => ReportsModule::t('app', 'Low By Month'), 'url' => ['/reports/reports-company/low-by-month']],
-        ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
-        ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
-        ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
-    ]];
 }
 
 //Proveedores
@@ -243,7 +243,18 @@ if (Yii::$app->getModule('provider')) {
     ]];
 }
 
-
+//Empleados
+if (Yii::$app->getModule('employee')) {
+    $items[] = ['label' => Yii::t('app', 'Employees'), 'items' => [
+        ['label' => Yii::t('app', 'Employees'), 'url' => ['/employee/employee/index']],
+        ['label' => Yii::t('app', 'Employee Debts'), 'url' => ['/employee/employee/debts']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Employee Bills'), 'url' => ['/employee/employee-bill/index']],
+        ['label' => Yii::t('app', 'Employee Payments'), 'url' => ['/employee/employee-payment/index']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Employee Bills And Payments'), 'url' => ['/employee/employee/bills-and-payments']],
+    ]];
+}
 
 //Accounting
 if (Yii::$app->getModule('accounting')) {
@@ -313,6 +324,13 @@ if (Yii::$app->getModule('westnet')) {
     $items[] = [
         'label' => 'Westnet',
         'items' => [
+            ['label'=>Yii::t('partner','Partner'), 'items' => [
+                ['label' => Yii::t('partner', 'Partner'), 'url' => ['/partner/partner']],
+                ['label' => Yii::t('partner', 'Partner Distribution Models'), 'url' => ['/partner/partner-distribution-model']],
+                '<li class="divider"></li>',
+                ['label' => Yii::t('partner', 'Liquidation'), 'url' => ['/partner/liquidation']],
+                ['label' => Yii::t('partner', 'Liquidations'), 'url' => ['/partner/liquidation/list-liquidation']],
+            ]],
             ['label'=>Yii::t('westnet','Servers'), 'url'=>['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
             ['label'=>Yii::t('westnet','Nodes'), 'url'=>['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
             ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
@@ -391,17 +409,6 @@ if (Yii::$app->getModule('westnet')) {
 }
 
 $items[] = [
-    'label' => Yii::t('partner', 'Partner'),
-    'items' => [
-        ['label' => Yii::t('partner', 'Partner'), 'url' => ['/partner/partner']],
-        ['label' => Yii::t('partner', 'Partner Distribution Models'), 'url' => ['/partner/partner-distribution-model']],
-        '<li class="divider"></li>',
-        ['label' => Yii::t('partner', 'Liquidation'), 'url' => ['/partner/liquidation']],
-        ['label' => Yii::t('partner', 'Liquidations'), 'url' => ['/partner/liquidation/list-liquidation']],
-    ]
-];
-
-$items[] = [
     'label' => Yii::t('app','Help'),
     'items' => [
         ['label' => Yii::t('app','Instructive'), 'url' => ['/instructive/instructive/index']],
@@ -437,7 +444,7 @@ if (Yii::$app->params['ticket_enabled']) {
 //Agenda
 if (Yii::$app->params['agenda_enabled']) {
 
-    echo \app\components\widgets\agenda\task\Task::widget();
+    echo Task::widget();
     $array_items = [
         ['label' => Yii::t('app', 'My agenda'), 'url' => ['/agenda']],
         ['label' => Yii::t('app', 'Tasks'), 'url' => ['/agenda/task']],
@@ -460,7 +467,7 @@ if (Yii::$app->params['agenda_enabled']) {
 
     if (User::canRoute('/agenda')) {
 
-        echo \app\components\widgets\agenda\notification\Notification::widget();
+        echo Notification::widget();
 
         $items[] = [
             'linkOptions' => [

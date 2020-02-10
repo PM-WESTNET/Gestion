@@ -6,7 +6,6 @@ All notable changes to this project will be documented in this file.
  
  - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
  - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
- - Reporte de Tickets Cerrados por usuario [reporteCierreTickets]
  - Correcion error duplicado de tickets en panel de cobranza
  - Correción filtros asignación masiva de planes
  - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
@@ -19,8 +18,15 @@ All notable changes to this project will be documented in this file.
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
  - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
- - Se corrige dni con _ al final, en clientes con dni de 7 digitos
  - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
+ 
+ ## [2020.02.07.0]
+ ### Agregado
+ - Agregado Modulo de Empleados [CON-1]
+ - Reporte de Tickets Cerrados por usuario [GES-92] 
+ 
+ ### Modificado
+ - Se corrige dni con _ al final, en clientes con dni de 7 digitos [GES-789]
  
  ## [2020.02.05.0]
  ### Agregado 

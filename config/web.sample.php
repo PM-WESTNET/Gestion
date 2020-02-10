@@ -321,7 +321,10 @@ $config = [
                     'class' => 'app\modules\ivr\v1\V1Module'
                 ]
             ]
-        ]
+        ],
+        'employee' => [
+            'class' => 'app\modules\employee\EmployeeModule',
+        ],
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
