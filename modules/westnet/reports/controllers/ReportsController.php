@@ -7,6 +7,7 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\PublicityShape;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
@@ -716,6 +717,9 @@ class ReportsController extends Controller
         $colors = [];
         $border_colors = [];
 
+        //Grafico comparativo;
+        $cols_comparative = [];
+
         $asigned_color = [
             'banner' => 'rgba(249, 192, 191)',
             'poster' => 'rgba(254, 229, 206)',
@@ -748,19 +752,62 @@ class ReportsController extends Controller
             'instagram' => 'rgba(241, 132, 182)'
         ];
 
+        $comparative_datasets_by_publicity_shape = [];
+        $previous_qty_by_publicity_shape = [];
+
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
             $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
             $datas[] = $item['customer_qty'];
             array_push($colors, (array_key_exists($item['publicity_shape'], $asigned_color) ? $asigned_color[$item['publicity_shape']] : $asigned_color[array_rand($asigned_color)]));
             array_push($border_colors, (array_key_exists($item['publicity_shape'], $border_asigned_color) ? $border_asigned_color[$item['publicity_shape']] : $border_asigned_color[array_rand($border_asigned_color)]));
+
+            //Completo las columnas del grafico comparativo con las fechas en las cuales tengo datos.
+            if(!in_array($item['period'], $cols_comparative)){
+                array_push($cols_comparative, $item['period']);
+            }
+
+            //Completo el array de datos con la cantidad de dataset que deberia renderizar
+            if(!array_key_exists($item['publicity_shape'], $comparative_datasets_by_publicity_shape)) {
+                $comparative_datasets_by_publicity_shape[$item['publicity_shape']] = [];
+                $previous_qty_by_publicity_shape[$item['publicity_shape']] = 0;
+            }
         }
 
+        foreach ($data as $item) {
+            foreach ($cols_comparative as $col_comparative) {
+                if($col_comparative == $item['period']) {
+                    $previous_qty_by_publicity_shape[$item['publicity_shape']] += (int)$item['customer_qty'];
+                    array_push($comparative_datasets_by_publicity_shape[$item['publicity_shape']], $previous_qty_by_publicity_shape[$item['publicity_shape']]);
 
-        return $this->render('customer-by-publicity-shape',[
+                } else {
+                    array_push($comparative_datasets_by_publicity_shape[$item['publicity_shape']], $previous_qty_by_publicity_shape[$item['publicity_shape']]);
+                }
+            }
+        }
+
+        $datasets = [];
+        //Formar datasets para grafico
+        foreach ($comparative_datasets_by_publicity_shape as $key => $comparative_dataset){
+            $color = ReportsController::BORDER_COLORS[array_rand(ReportsController::BORDER_COLORS)];
+            $publicity_shape = PublicityShape::findOne(['slug' => $key]);
+            $datasets[] = [
+                'label' => $publicity_shape ? $publicity_shape->name : $key,
+                'fill' => false,
+                'lineTension' => 0,
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'borderCapStyle' => 'round',
+                'data' => $comparative_dataset,
+            ];
+        }
+
+        return $this->render('customer-by-publicity-shape', [
             'model' => $search,
             'cols' => $cols,
             'data' => $datas,
+            'cols_comparative' => $cols_comparative,
+            'datasets' => $datasets,
             'colors' => $colors,
             'border_colors' => $border_colors
         ]);

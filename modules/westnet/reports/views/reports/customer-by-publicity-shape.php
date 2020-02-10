@@ -32,7 +32,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         'data' => PublicityShape::getPublicityShapeForSelect(),
                         'pluginOptions' => [
                             'placeholder' => Yii::t('app', 'Select ...'),
-                            'allowClear' => true
+                            'allowClear' => true,
+                            'multiple' => true
                         ]
                     ])?>
                 </div>
@@ -85,6 +86,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => [
                         'width' => 800,
                         'height' => 400,
+                        'responsive' => true,
+                        'scales' => [
+                            'yAxes' => [[
+                                'ticks' => [
+                                    'min' => 0,
+                                    'beginAtZero' => true,
+                                    'scaleBeginAtZero' => true,
+                                ]]
+                            ],
+                        ]
                     ],
                     'data' => [
                         'labels' => $cols,
@@ -105,6 +116,36 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'beginAtZero' => true
                                     ]
                                 ]
+                            ]
+                        ]
+                    ]
+
+                ]);
+                ?>
+            </div>
+        </div>
+
+        <div class="row" style="padding-top: 100px">
+            <div class="col-md-12 text-center">
+                <?= ChartJs::widget([
+                    'type' => 'line',
+                    'options' => [
+                        'width' => 800,
+                        'height' => 400,
+                    ],
+                    'data' => [
+                        'labels' => $cols_comparative,
+                        'datasets' => $datasets
+                    ],
+                    'clientOptions' => [
+                        'scales' => [
+                            'yAxes' => [
+                                'ticks' => [
+                                    'min' => 0
+                                ]
+                            ],
+                            'xAxes' => [
+                                'ticks' => ['min' => 0]
                             ]
                         ]
                     ]
