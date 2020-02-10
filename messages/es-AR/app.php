@@ -1326,5 +1326,6 @@
     'Employee Account' => 'Cuenta de Empleado',
     'Employee Bill' => 'Comprobante de Empleado',
     'Employee Payment' => 'Pago de Empleado',
-    'Employee payments' => 'Pagos de Empleados'
+    'Employee payments' => 'Pagos de Empleados',
+    'All nodes' => 'Todos los Nodos'
  );

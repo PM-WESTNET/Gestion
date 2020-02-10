@@ -47,14 +47,23 @@ $model->load(Yii::$app->request->getQueryParams())
         </div>
 
         <div class="col-sm-4">
-            <?= $form->field($model, 'node_id')->dropDownList(ArrayHelper::map(Node::find()->orderBy('name')->all(), 'node_id', 'name'), [
-                    'prompt' => 'Todos los Nodos', 'id' => 'node_id'
+            <?= $form->field($model, 'node_id')->widget(Select2::class, [
+                'data' =>  ArrayHelper::map(Node::find()->orderBy('name')->all(), 'node_id', 'name'),
+                'options' => ['placeholder' => Yii::t('app','All nodes'), 'multiple' => true],
+                'pluginOptions' => [
+                    'allowClear' => true,
+                ]
             ])?>
         </div>
 
         <div class="col-sm-4">
-            <?= $form->field($model, 'plan_id')->dropdownList(ArrayHelper::map(Product::find()->where(['type'=>'plan', 'status' => 'enabled' ])->orderBy('name')->all(),
-                'product_id', 'name'), ['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'plan_id'])
+            <?= $form->field($model, 'plan_id')->widget(Select2::class, [
+               'data' => ArrayHelper::map(Product::find()->where(['type'=>'plan', 'status' => 'enabled' ])->orderBy('name')->all(),'product_id', 'name'),
+               'options' => ['placeholder' => Yii::t('app','Select an option...'), 'multiple' => true, 'id' => 'plan_id'],
+               'pluginOptions' => [
+                    'allowClear' => true
+               ]
+            ])
             ?>
         </div>
 
@@ -217,4 +226,4 @@ $model->load(Yii::$app->request->getQueryParams())
 
 
 </script>
-<?= $this->registerJs('CustomerSearch.init()')?>
+<?php //$this->registerJs('CustomerSearch.init()')?>
