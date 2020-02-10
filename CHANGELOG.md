@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
  - Notificación por email: Se agrega referencia a código de cliente - [GES-772]
+ - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
  
  ## [2020.02.07.0]
  ### Agregado
