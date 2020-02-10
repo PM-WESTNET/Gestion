@@ -717,7 +717,7 @@ class ReportsController extends Controller
         $colors = [];
         $border_colors = [];
 
-        //Grafico comparativo;
+        //Columnas para grafico comparativo;
         $cols_comparative = [];
 
         $asigned_color = [
@@ -755,6 +755,8 @@ class ReportsController extends Controller
         $comparative_datasets_by_publicity_shape = [];
         $previous_qty_by_publicity_shape = [];
 
+        //USADO POR AMBOS GRAFICOS
+        //Completo el array de los datos con el siguiente formato: ['period' => , 'publicity_shape' => '', 'customer_qty'];
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
             $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
@@ -774,23 +776,44 @@ class ReportsController extends Controller
             }
         }
 
-        foreach ($data as $item) {
-            foreach ($cols_comparative as $col_comparative) {
-                if($col_comparative == $item['period']) {
-                    $previous_qty_by_publicity_shape[$item['publicity_shape']] += (int)$item['customer_qty'];
-                    array_push($comparative_datasets_by_publicity_shape[$item['publicity_shape']], $previous_qty_by_publicity_shape[$item['publicity_shape']]);
+        //PARA GRAFICO COMPARATIVO
+        //Defino los puntos de x e y de cada uno de los tipos por fecha
+        //Recorro cada una de las columnas del eje x
+        foreach($cols_comparative as $date) {
+            //Recorro cada uno de los canales de publicidad.
+            foreach ($comparative_datasets_by_publicity_shape as $type => $value) {
+                $date_and_type_is_in_array = false;
+                $qty = 0;
 
+                //Reviso si en el array de items tengo uno que sea del tipo y la fecha que estoy recorriendo
+                foreach ($data as $item) {
+                    if($date == $item['period'] && $type == $item['publicity_shape']) {
+                        $date_and_type_is_in_array = true;
+                        $qty = (int)$item['customer_qty'];
+                    }
+                }
+
+                //Si en el array de item existia uno, agrego el punto de 'x' e 'y' la cantidad de clientes, sino,
+                // agrego el valor que el punto de 'x' e 'y' previo.
+                if($date_and_type_is_in_array) {
+                    $previous_qty_by_publicity_shape[$type] = $previous_qty_by_publicity_shape[$type] + (int)$qty;
+                    array_push($comparative_datasets_by_publicity_shape[$type], ['x' => $date, 'y' => $previous_qty_by_publicity_shape[$type]]);
+                    $qty = 0;
+                    $date_and_type_is_in_array = false;
                 } else {
-                    array_push($comparative_datasets_by_publicity_shape[$item['publicity_shape']], $previous_qty_by_publicity_shape[$item['publicity_shape']]);
+                    array_push($comparative_datasets_by_publicity_shape[$type], ['x' => $date, 'y' => $previous_qty_by_publicity_shape[$type]]);
+
                 }
             }
         }
 
+        //PARA GRAFICO COMPARATIVO
+        //Formo datasets por cada uno de los medios de publicidad para el gráfico comparativo.
         $datasets = [];
-        //Formar datasets para grafico
         foreach ($comparative_datasets_by_publicity_shape as $key => $comparative_dataset){
             $color = ReportsController::BORDER_COLORS[array_rand(ReportsController::BORDER_COLORS)];
             $publicity_shape = PublicityShape::findOne(['slug' => $key]);
+
             $datasets[] = [
                 'label' => $publicity_shape ? $publicity_shape->name : $key,
                 'fill' => false,
