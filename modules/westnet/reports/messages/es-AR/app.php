@@ -43,5 +43,6 @@ return array(
     'Mobile app report' => 'Reporte de aplicación móvil',
     'Active customers' => 'Clientes activos',
     'Customers percentage with the app installed' => 'Porcentaje de clientes con la app instalada',
-    'Customers percentage using the app' => 'Porcentaje de clientes que usan la app'
+    'Customers percentage using the app' => 'Porcentaje de clientes que usan la app',
+    'Publicity Shape' => 'Canal de publicidad',
 );

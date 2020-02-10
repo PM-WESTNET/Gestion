@@ -93,6 +93,6 @@ class PublicityShape extends \yii\db\ActiveRecord
      */
     public static function  getPublicityShapeForSelect()
     {
-        return ArrayHelper::map(PublicityShape::find()->where(['status' => self::STATUS_ENABLED])->all(), 'publicity_shape_id', 'name');
+        return ArrayHelper::map(PublicityShape::find()->where(['status' => self::STATUS_ENABLED])->all(), 'slug', 'name');
     }
 }

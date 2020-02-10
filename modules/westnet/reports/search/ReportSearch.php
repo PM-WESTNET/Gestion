@@ -24,6 +24,7 @@ class ReportSearch extends Model
     public $date_to;
     public $company_id;
     public $from;
+    public $publicity_shape;
 
     public function init()
     {
@@ -39,7 +40,7 @@ class ReportSearch extends Model
     {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'company_id', 'from'], 'safe']
+            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe']
         ];
     }
 
@@ -48,6 +49,7 @@ class ReportSearch extends Model
         return [
             'date_from' => ReportsModule::t('app', 'Date From'),
             'date_to' => ReportsModule::t('app', 'Date To'),
+            'publicity_shape' => ReportsModule::t('app', 'Publicity Shape')
         ];
     }
 
@@ -590,8 +592,11 @@ class ReportSearch extends Model
                 new Expression('date_format(c.date_new, \'%Y-%m\') AS period'),
                 new Expression('count(c.customer_id) as customer_qty'),
                 'c.publicity_shape'
-            ])->from('customer c')
-            ->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
+            ])->from('customer c');
+
+        if($this->publicity_shape) {
+            $query->andWhere(['c.publicity_shape' => $this->publicity_shape]);
+        }
 
         if($this->date_from) {
             $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
@@ -600,6 +605,8 @@ class ReportSearch extends Model
         if($this->date_to) {
             $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
         }
+
+        $query->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
 
         return $query->all();
     }
