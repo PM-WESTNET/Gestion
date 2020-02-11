@@ -19,7 +19,11 @@ use yii\db\ActiveRecord;
  * @property string $document_number
  * @property integer $customer_code
  * @property string $email
+ * @property string $email2
  * @property string $phone
+ * @property string $phone2
+ * @property string $phone3
+ * @property string $phone4
  * @property string $status
  * @property integer $created_at
  */
@@ -77,8 +81,8 @@ class AppFailedRegister extends ActiveRecord
             [['name', 'phone', 'type'], 'required'],
             [['status', 'text'], 'string'],
             [['customer_code'], 'integer'],
-            [['name', 'document_type', 'document_number', 'phone'], 'string', 'max' => 45],
-            [['email'], 'string', 'max' => 255]
+            [['name', 'document_type', 'document_number', 'phone', 'phone2', 'phone3', 'phone4'], 'string', 'max' => 45],
+            [['email', 'email2'], 'string', 'max' => 255]
         ];
     }
 
