@@ -78,6 +78,38 @@ use app\modules\employee\models\Employee;
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-lg-12">
+            <?php echo $form->field($model, 'employee_category_id')->widget(Select2::class, [
+                'data' => $categories,
+                'options' => ['placeholder' => Yii::t('app','Select an option...')],
+                'pluginOptions' => [
+                    'allowClear' => true
+                ]
+            ])?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <?php echo $form->field($model, 'init_date')->widget(\kartik\date\DatePicker::class, [
+                'pluginOptions' => [
+                    'autoclose'=>true,
+                    'format' => 'dd-mm-yyyy'
+                ]
+            ])?>
+        </div>
+        <div class="col-lg-6">
+            <?php echo $form->field($model, 'finish_date')->widget(\kartik\date\DatePicker::class, [
+                'pluginOptions' => [
+                    'autoclose'=>true,
+                    'format' => 'dd-mm-yyyy'
+                ]
+            ])?>
+        </div>
+    </div>
+
+
 
     <div class="row">
         <div class="col-sm-6 col-xs-12">
@@ -96,11 +128,16 @@ use app\modules\employee\models\Employee;
                     ?>
                 </div>
             <?php } ?>
-            
+
         </div>
 
         <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'phone')->textInput(['maxlength' => 45]) ?>            
+            <?= $form->field($model, 'phone')->textInput(['maxlength' => 45]) ?>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <?php echo $form->field($model, 'observations')->textarea(['rows' => 5, 'cols' => 10])?>
         </div>
     </div>
 

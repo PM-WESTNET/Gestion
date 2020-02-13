@@ -45,6 +45,17 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'documentType.name',
         ],
         'document_number',
+        'birthday',
+        [
+            'attribute' => 'employee_category_id',
+            'value' => function ($model) {
+                if ($model->employeeCategory) {
+                    return $model->employeeCategory->name;
+                }
+            }
+        ],
+        'init_date',
+        'finish_date',
         [
             'attribute' => 'address_id',
             'value' => function ($model) {

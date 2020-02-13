@@ -1332,5 +1332,8 @@
     'Employee Categories' =>  'Categorias de Empleado',
     'Create Employee Category' => 'Crear Categoria de Empleado',
     'Update Employee Category: {nameAttribute}' => 'Actualizar Categoria de Empleado: {nameAttribute}',
+    'Start Work Date' => 'Fecha de Alta',
+    'Finish Work Date' => 'Fecha de Baja',
+
 
  );

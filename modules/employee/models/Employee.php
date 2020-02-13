@@ -26,6 +26,10 @@ use Yii;
  * @property integer $tax_condition_id
  * @property integer $company_id
  * @property string $birthday
+ * @property integer $employee_category_id
+ * @property integer $init_date
+ * @property integer $finish_date
+ * @property string $observations
  *
  * @property TaxCondition $taxCondition
  * @property DocumentType $documentType
@@ -33,6 +37,7 @@ use Yii;
  * @property Account $account
  * @property EmployeeBill[] $employeeBills
  * @property EmployeePayment[] $employeePayments
+ * @property EmployeeCategory $employeeCategory
  */
 class Employee extends \app\components\db\ActiveRecord
 {
@@ -50,13 +55,14 @@ class Employee extends \app\components\db\ActiveRecord
     public function rules()
     {
         $rules = [
-            [['name','lastname', 'tax_condition_id', 'document_type_id', 'document_number', 'address_id', 'company_id'], 'required'],
-            [['account_id'], 'safe'],
-            [['birthday'], 'string'],
+            [['name','lastname', 'tax_condition_id', 'document_type_id', 'document_number', 'address_id', 'company_id', 'employee_category_id'], 'required'],
+            [['account_id', 'init_date', 'finish_date', 'observations'], 'safe'],
+            [['birthday', 'observations'], 'string'],
             [['name', 'lastname'], 'string', 'max' => 255],
             [['phone'], 'string', 'max' => 45],
             [['account_id', 'address_id', 'company_id'], 'number'],
             ['document_number', 'compareDocument']
+
         ];
 
         if (Yii::$app->getModule('accounting')) {
@@ -81,7 +87,12 @@ class Employee extends \app\components\db\ActiveRecord
             'account_id' => Yii::t('accounting', 'Account'),
             'tax_condition_id' => Yii::t('app', 'Tax Condition'),
             'birthday' => Yii::t('app', 'Birthdate'),
-            'fullName' => Yii::t('app', 'Name')
+            'fullName' => Yii::t('app', 'Name'),
+            'employee_category_id' => Yii::t('app', 'Employee Category'),
+            'init_date' => Yii::t('app', 'Start Work Date'),
+            'finish_date' => Yii::t('app', 'Finish Work Date'),
+            'observations' => Yii::t('app', 'Observations'),
+            'document_type_id' => Yii::t('app', 'Document Type')
 
         ];
     }
@@ -204,11 +215,27 @@ class Employee extends \app\components\db\ActiveRecord
         if ($this->birthday) {
             $this->birthday = Yii::$app->formatter->asDate($this->birthday, 'yyyy-MM-dd');
         }
+
+        if($this->init_date) {
+            $this->init_date = strtotime(Yii::$app->formatter->asDate($this->init_date, 'yyyy-MM-dd'));
+        }
+
+        if($this->finish_date) {
+            $this->finish_date = strtotime(Yii::$app->formatter->asDate($this->finish_date, 'yyyy-MM-dd'));
+        }
     }
 
     private function formatDateAfterFind() {
         if ($this->birthday) {
             $this->birthday = Yii::$app->formatter->asDate($this->birthday, 'dd-MM-yyyy');
+        }
+
+        if($this->init_date) {
+            $this->init_date = Yii::$app->formatter->asDate($this->init_date, 'dd-MM-yyyy');
+        }
+
+        if($this->finish_date) {
+            $this->finish_date = Yii::$app->formatter->asDate($this->finish_date, 'dd-MM-yyyy');
         }
     }
 
@@ -245,4 +272,10 @@ class Employee extends \app\components\db\ActiveRecord
 
         return $billType;
     }
+
+    public function getEmployeeCategory() {
+        return $this->hasOne(EmployeeCategory::class, ['employee_category_id' => 'employee_category_id']);
+    }
+
+
 }

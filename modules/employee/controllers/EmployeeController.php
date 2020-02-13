@@ -2,6 +2,7 @@
 
 namespace app\modules\employee\controllers;
 
+use app\modules\employee\models\EmployeeCategory;
 use app\modules\sale\models\Address;
 use Yii;
 use app\modules\employee\models\Employee;
@@ -10,6 +11,7 @@ use app\modules\employee\models\search\EmployeeBillSearch;
 use app\modules\employee\models\search\EmployeePaymentSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -76,9 +78,13 @@ class EmployeeController extends Controller
             }
         }
         Yii::trace($model->getErrors());
+
+        $categories = ArrayHelper::map(EmployeeCategory::find()->andWhere(['status' => 'enabled'])->all(), 'employee_category_id', 'name');
+
         return $this->render('create', [
             'model' => $model,
-            'address' => $address
+            'address' => $address,
+            'categories' => $categories
         ]);
 
     }
