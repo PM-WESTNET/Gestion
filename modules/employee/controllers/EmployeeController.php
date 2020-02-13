@@ -105,10 +105,13 @@ class EmployeeController extends Controller
             return $this->redirect(['view', 'id' => $model->employee_id]);
         }
 
+        $categories = ArrayHelper::map(EmployeeCategory::find()->andWhere(['status' => 'enabled'])->all(), 'employee_category_id', 'name');
+
 
         return $this->render('update', [
             'model' => $model,
-            'address' => $address
+            'address' => $address,
+            'categories' => $categories
         ]);
 
     }
