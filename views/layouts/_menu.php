@@ -253,6 +253,8 @@ if (Yii::$app->getModule('employee')) {
         ['label' => Yii::t('app', 'Employee Payments'), 'url' => ['/employee/employee-payment/index']],
         '<li class="divider"></li>',
         ['label' => Yii::t('app', 'Employee Bills And Payments'), 'url' => ['/employee/employee/bills-and-payments']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Employee Categories'), 'url' => ['/employee/employee-category/index']],
     ]];
 }
 

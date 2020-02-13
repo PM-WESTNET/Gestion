@@ -1327,5 +1327,10 @@
     'Employee Bill' => 'Comprobante de Empleado',
     'Employee Payment' => 'Pago de Empleado',
     'Employee payments' => 'Pagos de Empleados',
-    'All nodes' => 'Todos los Nodos'
+    'All nodes' => 'Todos los Nodos',
+    'Employee Category' =>  'Categoria de Empleado',
+    'Employee Categories' =>  'Categorias de Empleado',
+    'Create Employee Category' => 'Crear Categoria de Empleado',
+    'Update Employee Category: {nameAttribute}' => 'Actualizar Categoria de Empleado: {nameAttribute}',
+
  );
