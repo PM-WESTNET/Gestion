@@ -290,14 +290,23 @@ GROUP BY periodo
             case self::LAST_MONTH_RANGE:
                 $from_date = (new \DateTime())->modify('-30 days');
                 $to_date = (new \DateTime());
-                $before = null;
+                $before = 0;
                 $counter = 0;
                 for ($month= $from_date->getTimestamp(); $month <= $to_date->getTimestamp(); $month = $month + (86400 * 5)) {
                     $labels[] = Yii::$app->formatter->asDate($month, 'dd/MM');
-                    $qty = Customer::find()
-                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
-                        ->andFilterWhere(['>=', 'last_update', $before])
-                        ->count();
+
+                    if($before === 0) {
+                        $qty = Customer::find()
+                            ->andWhere(['=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
+                            ->count();
+                        $counter += $qty;
+                    }else {
+                        $qty = Customer::find()
+                            ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
+                            ->andFilterWhere(['>=', 'last_update', $before])
+                            ->count();
+                    }
+
                     $counter += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($month, 'dd/MM'),
@@ -312,15 +321,22 @@ GROUP BY periodo
                 $from_date = (new \DateTime())->modify('-1 year');
                 $to_date = (new \DateTime());
 
-                $before = null;
+                $before = 0;
                 $counter = 0;
                 for ($year= $from_date->getTimestamp(); $year <= $to_date->getTimestamp(); $year=$year + (86400 * 30)) {
                     $labels[] = Yii::$app->formatter->asDate($year, 'MM/yyyy');
 
-                    $qty = Customer::find()
-                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
-                        ->andFilterWhere(['>=', 'last_update', $before])
-                        ->count();
+                    if($before === 0) {
+                        $qty = Customer::find()
+                            ->andWhere(['=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                            ->count();
+                        $counter += $qty;
+                    }else {
+                        $qty = Customer::find()
+                            ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                            ->andFilterWhere(['>=', 'last_update', $before])
+                            ->count();
+                    }
                     $counter  += $qty;
                     $points[] = [
                         'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
