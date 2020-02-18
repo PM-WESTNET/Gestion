@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
  - Categorias de Empleado [CON-14]
  - Agregado categoria, fecah de alta, fecha de baja y observaciones a Empleado [CON-14]
+ - Vista de tareas: Se agrega link a la vista del cliente de la tarea [GES-345]
  
  ## [2020.02.07.0]
  ### Agregado

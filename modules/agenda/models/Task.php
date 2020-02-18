@@ -2,6 +2,7 @@
 
 namespace app\modules\agenda\models;
 
+use app\modules\sale\models\Customer;
 use app\modules\ticket\models\Ticket;
 use Yii;
 use app\modules\config\models\Config;
@@ -208,6 +209,14 @@ class Task extends ActiveRecord {
     public function getTickets() {
 
         return $this->hasMany(Ticket::class, ['task_id' => 'task_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAsociatedCustomers()
+    {
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->via('tickets')->distinct();
     }
 
     /**
