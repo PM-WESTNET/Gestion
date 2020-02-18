@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 in_array() {
     local haystack=${1}[@]
@@ -16,8 +16,8 @@ in_array() {
 USER='root'
 PASSWORD='secret'
 HOST='rex-data'
-EXCLUDE= [ "information_schema" "mysql" "performance_schema" "test" ]
-BACKUPDIR=$(/home/backup/)
+declare -a EXCLUDE=("information_schema" "mysql" "performance_schema" "test" )
+BACKUPDIR="/home/backup/"
 
 # Find all databases
 #DATABASES=`mysql -u$USER -p$PASSWORD -h$HOST -e "SHOW DATABASES" | tr -d "| " | grep -v Database`
@@ -27,25 +27,30 @@ TODAY=$(date +%F)
 for db in $DATABASES
 do
     if in_array EXCLUDE $db; then
-        INFO="Dump: $db - "`date '+%d/%m/%Y %H:%M:%S'`
-        INIT = `date '+%d-%m-%Y %H:%M:%S'`
-            if [ ! -d "$BACKUPDIR$db/" ]; then
-                mkdir $BACKUPDIR$db/
-            fi
-        LOG = /var/log/$db"_log.log"
-        INITLINE= wc -l $LOG
-        echo $db
-        $(/var/www/html/yii backup/init-backup INIT)
-        #mysqldump -u$USER -p$PASSWORD -h $HOST --force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db |gzip -9 -c > $BACKUPD$
-        mysqldump -u$USER -p$PASSWORD -h $HOST -force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db |gzip -9 -c > $($BACKUPDIR$db/$db"_"`$db"_"`date +%Y%m%d_%H%M`.sql.gz)
+        DATE=`date '+%d%m%Y_%H%M%S'`
+        INFO="Dump: $db - "$DATE
+        INIT=`date '+%d-%m-%Y %H:%M:%S'`
 
-        LASTLINE = wc -l $LOG
+        if [! -d "$BACKUPDIR$db"]; then
+            mkdir -p $BACKUPDIR$db
+        fi
 
-        if [$? -eq 0] then
+        LOG=/var/log/$db"_log.txt"
 
-         $(/var/www/html/yii backup/init-finish-success-backup $INIT)
+        if [ -f "$LOG" ]; then
+            INITLINE= wc -l $LOG
         else
-         $(/var/www/html/yii backup/init-finish-error-backup $INIT $LOG $INITLINE $LASTLINE)
+            INITLINE= 0
+        fi
+        DUMP=$BACKUPDIR$db/$db"_"$DATE.sql
+        /var/www/html/yii backup-mysql/init-backup $INIT
+        #mysqldump -u$USER -p$PASSWORD -h $HOST --force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db |gzip -9 -c > $BACKUPD$
+        mysqldump -u$USER -p$PASSWORD -h $HOST --force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db  >  $DUMP 2> $LOG
+
+        if [ -f "$DUMP" ]; then
+         /var/www/html/yii backup-mysql/finish-success-backup $INIT
+        else
+         /var/www/html/yii backup-mysql/finish-error-backup $INIT $LOG $INITLINE
         fi
 
         echo $INFO
@@ -62,4 +67,3 @@ done
 #find /home/backup/arya_ticket/* -mtime +7 -exec rm {} \;
 #find /home/backup/config/* -mtime +7 -exec rm {} \;
 #find /home/backup/media/* -mtime +7 -exec rm {} \;
-
