@@ -60,12 +60,20 @@ class BackupSearch extends Backup
         // grid filtering conditions
         $query->andFilterWhere([
             'backup_id' => $this->backup_id,
-            'init_timestamp' => $this->init_timestamp,
-            'finish_timestamp' => $this->finish_timestamp,
+            'status' => $this->status
         ]);
 
-        $query->andFilterWhere(['like', 'status', $this->status])
-            ->andFilterWhere(['like', 'description', $this->description]);
+        if ($this->init_timestamp) {
+            $query->andWhere(['>=', 'init_timestamp', strtotime(Yii::$app->formatter($this->init_timestamp, 'yyyy-MM-dd'))]);
+            $query->andWhere(['<', 'init_timestamp', (strtotime(Yii::$app->formatter($this->init_timestamp, 'yyyy-MM-dd')) + 86400)]);
+        }
+
+        if ($this->finish_timestamp) {
+            $query->andWhere(['>=', 'finish_timestamp', strtotime(Yii::$app->formatter($this->finish_timestamp, 'yyyy-MM-dd'))]);
+            $query->andWhere(['<', 'finish_timestamp', (strtotime(Yii::$app->formatter($this->finish_timestamp, 'yyyy-MM-dd')) + 86400)]);
+        }
+
+        $query->andFilterWhere(['like', 'description', $this->description]);
 
         return $dataProvider;
     }

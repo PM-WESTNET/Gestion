@@ -29,7 +29,7 @@ class Backup extends \yii\db\ActiveRecord {
         return [
             [['init_timestamp'], 'required'],
             [['status'], 'string'],
-            [['description', 'database', 'init_timestamp', 'finish_timestamp'], 'safe']
+            [['description', 'database', 'finish_timestamp'], 'safe']
         ];
     }
 

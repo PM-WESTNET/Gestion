@@ -25,12 +25,34 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'backup_id',
-            'init_timestamp:datetime',
+            [
+                'attribute' => 'init_timestamp',
+                'filter' => \kartik\widgets\DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'init_timestamp',
+                    'value' => $searchModel->init_timestamp,
+                    'pluginOptions' => [
+                        'autoclose'=>true,
+                        'format' => 'dd-mm-yyyy'
+                    ]
+                ])
+            ],
+            [
+                'attribute' => 'finish_timestamp',
+                'filter' => \kartik\widgets\DatePicker::widget([
+                    'model' => $searchModel,
+                    'attribute' => 'finish_timestamp',
+                    'value' => $searchModel->finish_timestamp,
+                    'pluginOptions' => [
+                        'autoclose'=>true,
+                        'format' => 'dd-mm-yyyy'
+                    ]
+                ])
+            ],
             'finish_timestamp:datetime',
             'status',
-            'description:ntext',
+            'database',
 
-            ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

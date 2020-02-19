@@ -16,7 +16,7 @@ in_array() {
 USER='root'
 PASSWORD='secret'
 HOST='rex-data'
-declare -a EXCLUDE=("information_schema" "mysql" "performance_schema" "test" )
+declare -a EXCLUDE=("information_schema" "mysql" "performance_schema" "test" "backups" "rex-backups")
 BACKUPDIR="/home/backup/"
 
 # Find all databases
@@ -31,9 +31,7 @@ do
         INFO="Dump: $db - "$DATE
         INIT=`date '+%d-%m-%Y %H:%M:%S'`
 
-        if [! -d "$BACKUPDIR$db"]; then
-            mkdir -p $BACKUPDIR$db
-        fi
+        mkdir -p $BACKUPDIR$db
 
         LOG=/var/log/$db"_log.txt"
 
@@ -43,15 +41,12 @@ do
             INITLINE= 0
         fi
         DUMP=$BACKUPDIR$db/$db"_"$DATE.sql
-        /var/www/html/yii backup-mysql/init-backup $INIT
+        /var/www/html/yii backup-mysql/init-backup $db
         #mysqldump -u$USER -p$PASSWORD -h $HOST --force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db |gzip -9 -c > $BACKUPD$
         mysqldump -u$USER -p$PASSWORD -h $HOST --force --opt --routines --add-drop-database --add-drop-table -c --create-options -e --max_allowed_packet=20M --skip-lock-tables $db  >  $DUMP 2> $LOG
 
-        if [ -f "$DUMP" ]; then
-         /var/www/html/yii backup-mysql/finish-success-backup $INIT
-        else
-         /var/www/html/yii backup-mysql/finish-error-backup $INIT $LOG $INITLINE
-        fi
+        /var/www/html/yii backup-mysql/finish-backup $db $DUMP
+
 
         echo $INFO
     fi
