@@ -279,6 +279,7 @@ GROUP BY periodo
         }
 
         $label_format = 'dd/MM/yyyy';
+        $step = 86400;
 
         if (($to_date - $from_date) < (86400 * 30)){
             $step = 86400;
