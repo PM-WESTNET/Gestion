@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
  - Categorias de Empleado [CON-14]
  - Agregado categoria, fecah de alta, fecha de baja y observaciones a Empleado [CON-14]
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [GES-345]
+ - Tickets de instalaciones: Se agrega funcionalidad para cerrar tickets por período [AD-3]
  
  ## [2020.02.07.0]
  ### Agregado
