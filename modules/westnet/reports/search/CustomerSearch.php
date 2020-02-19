@@ -278,6 +278,8 @@ GROUP BY periodo
             $to_date = (new \DateTime())->getTimestamp();
         }
 
+        $label_format = 'dd/MM/yyyy';
+
         if (($to_date - $from_date) < (86400 * 30)){
             $step = 86400;
             $label_format = 'dd/MM/yyyy';
