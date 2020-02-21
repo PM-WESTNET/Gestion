@@ -1283,6 +1283,7 @@
     'gigantografía' => 'Gigantografía',
     'instagram' => 'Instagram',
     'pantalla-led' => 'Pantalla led',
+    'Progress' => 'Proceso',
     'File Type' => 'Tipo de Archivo',
     'Phones cant be repeated' => 'Los teléfonos no pueden repetirse',
     'Notify payments graphics' => 'Gráficos de informes de pago',
@@ -1341,3 +1342,4 @@
     'End' => 'Finalizado',
     'Progress' => 'Proceso',
 );
+
