@@ -1,8 +1,10 @@
 <?php
 
+use app\modules\sale\models\PublicityShape;
 use app\modules\westnet\models\search\NodeSearch;
 use app\modules\westnet\reports\ReportsModule;
 use dosamigos\chartjs\ChartJs;
+use kartik\select2\Select2;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
@@ -25,6 +27,16 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
 
             <div class="row">
+                <div class="col-sm-12">
+                    <?= $form->field($model, 'publicity_shape')->widget(Select2::class, [
+                        'data' => PublicityShape::getPublicityShapeForSelect(),
+                        'pluginOptions' => [
+                            'placeholder' => Yii::t('app', 'Select ...'),
+                            'allowClear' => true,
+                            'multiple' => true
+                        ]
+                    ])?>
+                </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <?= Html::activeLabel($model, 'date_from'); ?>
@@ -74,6 +86,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     'options' => [
                         'width' => 800,
                         'height' => 400,
+                        'responsive' => true,
+                        'scales' => [
+                            'yAxes' => [[
+                                'ticks' => [
+                                    'min' => 0,
+                                    'beginAtZero' => true,
+                                    'scaleBeginAtZero' => true,
+                                ]]
+                            ],
+                        ]
                     ],
                     'data' => [
                         'labels' => $cols,
@@ -94,6 +116,36 @@ $this->params['breadcrumbs'][] = $this->title;
                                         'beginAtZero' => true
                                     ]
                                 ]
+                            ]
+                        ]
+                    ]
+
+                ]);
+                ?>
+            </div>
+        </div>
+
+        <div class="row" style="padding-top: 100px">
+            <div class="col-md-12 text-center">
+                <?= ChartJs::widget([
+                    'type' => 'line',
+                    'options' => [
+                        'width' => 800,
+                        'height' => 400,
+                    ],
+                    'data' => [
+                        'labels' => $cols_comparative,
+                        'datasets' => $datasets
+                    ],
+                    'clientOptions' => [
+                        'scales' => [
+                            'yAxes' => [
+                                'ticks' => [
+                                    'min' => 0
+                                ]
+                            ],
+                            'xAxes' => [
+                                'ticks' => ['min' => 0]
                             ]
                         ]
                     ]

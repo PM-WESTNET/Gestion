@@ -618,4 +618,34 @@ class TicketController extends Controller
 
         return ['status' => 'error', 'msj' => Yii::t('app','Ticket not found')];
     }
+
+
+    /**
+     * Cierra tickets de instalacion por el período indicado
+     */
+    public function actionCloseInstallationTicketsByPeriod(){
+
+        $data = Yii::$app->request->get();
+
+        $search = new TicketSearch();
+        $search->categories = [Config::getValue('installations_category_id'), Config::getValue('ticket_category_gestion_ads')];
+
+        $query = $search->searchClosedByPeriodAndStatus($data);
+
+
+        if ($query->exists()) {
+            $count = $query->count();
+            $status = Status::findOne(['name' => 'Cerrado (Por Jefe de Cobranza)']);
+
+            foreach ($query->all() as $ticket) {
+                $ticket->updateAttributes(['status_id' => $status->status_id]);
+            }
+
+            Yii::$app->session->addFlash('success', Yii::t('app','{count} tickets has been closed', ['count' => $count]));
+            return $this->redirect(['installations-tickets']);
+        }
+
+        Yii::$app->session->addFlash('warning', Yii::t('app','Can`t found tickets to close'));
+
+        return $this->redirect(['installations-tickets']);    }
 }

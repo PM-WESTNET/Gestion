@@ -7,6 +7,7 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\PublicityShape;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
@@ -300,11 +301,13 @@ class ReportsController extends Controller
         $datasets = [];
         $earn = 0;
         $outgo = 0;
+        $outgoEmployee = 0;
         $account_movements = 0;
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . "-01");
             $earn += $item['facturado'];
             $outgo += $item['pagos'];
+            $outgoEmployee += $item['pagos_employee'];
             $account_movements += $item['pagos_account'];
             if ($date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
                 $labels[] = $date->format('m-Y');
@@ -325,6 +328,7 @@ class ReportsController extends Controller
             'datasets' => $datasets,
             'earn' => $earn,
             'outgo' => $outgo,
+            'outgoEmployee' => $outgoEmployee,
             'account_movements' => $account_movements
         ]);
     }
@@ -713,6 +717,9 @@ class ReportsController extends Controller
         $colors = [];
         $border_colors = [];
 
+        //Columnas para grafico comparativo;
+        $cols_comparative = [];
+
         $asigned_color = [
             'banner' => 'rgba(249, 192, 191)',
             'poster' => 'rgba(254, 229, 206)',
@@ -726,7 +733,7 @@ class ReportsController extends Controller
             'brochure' => 'rgba(211, 192, 255)',
             'gigantografía' => 'rgba(232, 195, 255)',
             'pantalla-led' => 'rgba(255, 194, 222)',
-            'instagram' => 'rgba(255, 193, 221)'
+            'instagram' => 'rgba(255, 193, 221)',
         ];
 
         $border_asigned_color = [
@@ -745,19 +752,85 @@ class ReportsController extends Controller
             'instagram' => 'rgba(241, 132, 182)'
         ];
 
+        $comparative_datasets_by_publicity_shape = [];
+        $previous_qty_by_publicity_shape = [];
+
+        //USADO POR AMBOS GRAFICOS
+        //Completo el array de los datos con el siguiente formato: ['period' => , 'publicity_shape' => '', 'customer_qty'];
         foreach ($data as $item) {
             $date = new \DateTime($item['period'] . '-01');
             $cols[] = $date->format('m-Y') . ' - '. Yii::t('app', $item['publicity_shape']);
             $datas[] = $item['customer_qty'];
-            array_push($colors, $asigned_color[$item['publicity_shape']]);
-            array_push($border_colors, $border_asigned_color[$item['publicity_shape']]);
+            array_push($colors, (array_key_exists($item['publicity_shape'], $asigned_color) ? $asigned_color[$item['publicity_shape']] : $asigned_color[array_rand($asigned_color)]));
+            array_push($border_colors, (array_key_exists($item['publicity_shape'], $border_asigned_color) ? $border_asigned_color[$item['publicity_shape']] : $border_asigned_color[array_rand($border_asigned_color)]));
+
+            //Completo las columnas del grafico comparativo con las fechas en las cuales tengo datos.
+            if(!in_array($item['period'], $cols_comparative)){
+                array_push($cols_comparative, $item['period']);
+            }
+
+            //Completo el array de datos con la cantidad de dataset que deberia renderizar
+            if(!array_key_exists($item['publicity_shape'], $comparative_datasets_by_publicity_shape)) {
+                $comparative_datasets_by_publicity_shape[$item['publicity_shape']] = [];
+                $previous_qty_by_publicity_shape[$item['publicity_shape']] = 0;
+            }
         }
 
+        //PARA GRAFICO COMPARATIVO
+        //Defino los puntos de x e y de cada uno de los tipos por fecha
+        //Recorro cada una de las columnas del eje x
+        foreach($cols_comparative as $date) {
+            //Recorro cada uno de los canales de publicidad.
+            foreach ($comparative_datasets_by_publicity_shape as $type => $value) {
+                $date_and_type_is_in_array = false;
+                $qty = 0;
 
-        return $this->render('customer-by-publicity-shape',[
+                //Reviso si en el array de items tengo uno que sea del tipo y la fecha que estoy recorriendo
+                foreach ($data as $item) {
+                    if($date == $item['period'] && $type == $item['publicity_shape']) {
+                        $date_and_type_is_in_array = true;
+                        $qty = (int)$item['customer_qty'];
+                    }
+                }
+
+                //Si en el array de item existia uno, agrego el punto de 'x' e 'y' la cantidad de clientes, sino,
+                // agrego el valor que el punto de 'x' e 'y' previo.
+                if($date_and_type_is_in_array) {
+                    $previous_qty_by_publicity_shape[$type] = $previous_qty_by_publicity_shape[$type] + (int)$qty;
+                    array_push($comparative_datasets_by_publicity_shape[$type], ['x' => $date, 'y' => $previous_qty_by_publicity_shape[$type]]);
+                    $qty = 0;
+                    $date_and_type_is_in_array = false;
+                } else {
+                    array_push($comparative_datasets_by_publicity_shape[$type], ['x' => $date, 'y' => $previous_qty_by_publicity_shape[$type]]);
+
+                }
+            }
+        }
+
+        //PARA GRAFICO COMPARATIVO
+        //Formo datasets por cada uno de los medios de publicidad para el gráfico comparativo.
+        $datasets = [];
+        foreach ($comparative_datasets_by_publicity_shape as $key => $comparative_dataset){
+            $color = ReportsController::BORDER_COLORS[array_rand(ReportsController::BORDER_COLORS)];
+            $publicity_shape = PublicityShape::findOne(['slug' => $key]);
+
+            $datasets[] = [
+                'label' => $publicity_shape ? $publicity_shape->name : $key,
+                'fill' => false,
+                'lineTension' => 0,
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'borderCapStyle' => 'round',
+                'data' => $comparative_dataset,
+            ];
+        }
+
+        return $this->render('customer-by-publicity-shape', [
             'model' => $search,
             'cols' => $cols,
             'data' => $datas,
+            'cols_comparative' => $cols_comparative,
+            'datasets' => $datasets,
             'colors' => $colors,
             'border_colors' => $border_colors
         ]);

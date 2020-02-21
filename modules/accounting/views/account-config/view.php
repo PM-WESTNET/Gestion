@@ -53,7 +53,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     ['class' => 'yii\grid\SerialColumn'],
                     'account.name',
                     'is_debit:boolean',
-                    'attrib'
+                    [
+                        'attribute' => 'attrib',
+                        'value' => function ($model) {
+                            $pm = \app\modules\ivr\v1\models\PaymentMethod::findOne($model->attrib);
+                            if ($pm) {
+                                return $pm->name;
+                            }
+
+                            return $model->attrib;
+
+                        }
+                    ]
                 ],
                 
                 'options'=>[

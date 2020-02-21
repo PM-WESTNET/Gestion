@@ -24,7 +24,7 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
         <span class="reference label label-default" data-ref="@Nombre" id="lbl-nombre">@Nombre</span>
         <span class="reference label label-primary" data-ref="@Telefono1" id="lbl-telefono1">@Telefono1</span>
         <span class="reference label label-success" data-ref="@Telefono2" id="lbl-telefono2">@Telefono2</span>
-        <span class="reference label label-info" data-ref="@Code" id="lbl-codigo"></span>
+        <span class="reference label label-info" data-ref="@CodigoDeCliente" id="lbl-codigo">@CodigoDeCliente</span>
         <span class="reference label label-warning" data-ref="@PaymentCode" id="lbl-codigo-de-pago">@CodigoDePago</span>
         <span class="reference label label-danger" data-ref="@CompanyCode" id="lbl-codigo-empresa">@CodigoEmpresa</span>
         <span class="reference label label-default" data-ref="@FacturasAdeudadas" id="lbl-facturas-adeudadas">@FacturasAdeudadas</span>
