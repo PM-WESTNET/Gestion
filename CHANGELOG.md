@@ -26,6 +26,11 @@ All notable changes to this project will be documented in this file.
  - Tickets de instalaciones: Se agrega funcionalidad para cerrar tickets por período [AD-3]
  - Backups: Alerta a email si falla un backup [GES-810]
  
+ 
+ ## [2020.02.21.0]
+ ### Modificación
+  - Corrección de visualización de reportes de Extensiones de pago, informe de pago y Actualización de cliente [AD-2]. Solicitado y Aprobado por Ma 
+ 
  ## [2020.02.19.0]
  ### Agregado
   - Notificación por email: Se agrega referencia a código de cliente - [GES-772] Solicitado y aprobado por Camila.
