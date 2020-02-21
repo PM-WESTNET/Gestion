@@ -26,12 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
-            <?=
-            Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
+            <?php if (User::hasRole('collection_manager')){
+                echo Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', Yii::t('app','Close Tickets by Period')),
+                    '#', ['class' => 'btn btn-warning', 'id' => 'close-all-btn']);
+             } ?>
+
+            <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
                         'modelClass' => 'Ticket',
                     ]), ['create'], ['class' => 'btn btn-success'])
-            ;
-            ?>
+            ;?>
         </p>
     </div>
 
@@ -348,3 +351,74 @@ $this->params['breadcrumbs'][] = $this->title;
 </script>
 
 <?php $this->registerJs('Tickets.init()')?>
+
+<?php if (User::hasRole('collection_manager')):?>
+    <script>
+
+        var CollectionManager = new function() {
+            this.init = function () {
+                $(document).on('click', '#close-all-btn', function(e){
+                    e.preventDefault();
+                    bootbox.dialog({
+                        title: "<h4><?php echo Yii::t('app','Close Tickets by Period')?></h4>",
+                        className: 'close-modal',
+                        message:
+                        '<form id="close-form" action="<?= Url::to(['/ticket/ticket/close-installation-tickets-by-period'])?>" method="get">'+
+                        '<input type="hidden" name="r" value="/ticket/ticket/close-installation-tickets-by-period"' +
+                        '<div class="row">'+
+                        '<div class="col-lg-12">' +
+                        '<div="form-group">' +
+                        '<label>'+ "<?= Yii::t('app','From Date')?>" +'</label>'+
+                        '<?= DatePicker::widget([
+                            'name' => 'TicketSearch[close_to_date]',
+                            'id' => 'close_from_date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format' => 'dd-mm-yyyy'
+                            ],
+                            'options' => ['class' => 'datepicker']
+                        ])?>'+
+                        '</div>'+
+                        '</div>'+
+                        '</div>'+
+                        '<div class="row">'+
+                        '<div class="col-lg-12">' +
+                        '<div="form-group">' +
+                        '<label>'+ "<?= Yii::t('app','To Date')?>" +'</label>'+
+                        '<?= DatePicker::widget([
+                            'name' => 'TicketSearch[close_to_date]',
+                            'id' => 'close_to_date',
+                            'pluginOptions' => [
+                                'autoclose' => true,
+                                'format' => 'dd-M-yyyy'
+                            ],
+                            'options' => ['class' => 'datepicker']
+                        ])?>'+
+                        '</div>'+
+                        '</div>'+
+                        '</div>'+
+                        '</form>',
+                        buttons: {
+                            close: {
+                                label: "<?= Yii::t('app','Close Tickets')?>",
+                                className: 'btn btn-primary',
+                                callback: function() {
+                                    $('#close-form').trigger('submit');
+                                }
+                            }
+                        }
+                    }).on('shown.bs.modal', function () {
+                        $(".datepicker").kvDatepicker({
+                            format: 'dd-mm-yyyy',
+                            language: 'es'
+                        });
+                        $('.close-modal').removeAttr('tabindex');
+                    });
+                })
+            }
+        }
+
+    </script>
+
+    <?php $this->registerJs('CollectionManager.init()')?>
+<?php endif;?>

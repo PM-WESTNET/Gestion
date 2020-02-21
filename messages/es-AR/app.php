@@ -1193,7 +1193,7 @@
     'This customer has draft payments' => 'El cliente posee pagos en estado borrador',
     'This customer has draft bills' => 'El cliente posee comprobantes en estado borrador',
     '{count} tickets has been closed' => '{count} tickets han sido cerrados',
-    'Can`t found tickets to close' => 'No se pudo encontrar tickets para cerrar',
+    'Can`t found tickets to close' => 'No se pudieron encontrar tickets para cerrar',
     'Close Tickets by Period' => 'Cerrar Tickets por periodo',
     'Close Tickets' => 'Cerrar Tickets',
     'Show in app' => 'Mostar en aplicación',

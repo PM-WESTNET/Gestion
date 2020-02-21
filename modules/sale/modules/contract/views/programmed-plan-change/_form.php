@@ -18,7 +18,7 @@ use kartik\depdrop\DepDrop;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= Html::hiddenInput('contract_id', $contract_id, ['id' => 'pre-selected-contract_id']); ?>
+    <?= Html::hiddenInput('contract_id', (isset($contract_id) ? $contract_id : $model->contract_id ), ['id' => 'pre-selected-contract_id']); ?>
 
 
     <div class="row">
@@ -70,16 +70,10 @@ use kartik\depdrop\DepDrop;
         this.init = function(){
             if($('#programmedplanchange-customer_id').val() !== ''){
                 $('#programmedplanchange-customer_id').trigger({type: 'select2:select'});
-                $('#select-contract-id').val("<?= $contract_id ?>");
-
-                $('#programmedplanchange-customer_id').on('change', function () {
-                    console.log('change');
-                });
-
-
-
+                <?php if(isset($contract_id)) { ?>
+                    $('#select-contract-id').val("<?= $contract_id ?>");
+                <?php }?> 
             }
-
 
             $(document).off("click", "#plan-show_in_ads").on("click", "#plan-show_in_ads", function(evt){
                 self.nameAds($(this).is(':checked'));

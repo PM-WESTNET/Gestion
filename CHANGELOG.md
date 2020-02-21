@@ -19,10 +19,15 @@ All notable changes to this project will be documented in this file.
  - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
- - Notificación por email: Se agrega referencia a código de cliente - [GES-772]
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
- - Categorias de Empleado [CON-14]
- - Agregado categoria, fecah de alta, fecha de baja y observaciones a Empleado [CON-14]
+ - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
+ - Tickets de instalaciones: Se agrega funcionalidad para cerrar tickets por período [AD-3]
+ 
+ ## [2020.02.19.0]
+ ### Agregado
+  - Notificación por email: Se agrega referencia a código de cliente - [GES-772] Solicitado y aprobado por Camila.
+  - Categorias de Empleado [CON-14] Solicitado y aprobado por Marian.
+  - Agregado categoria, fecah de alta, fecha de baja y observaciones a Empleado [CON-14]  Solicitado y aprobado por Marian.
  
  ## [2020.02.07.0]
  ### Agregado

@@ -251,11 +251,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-12 col-xs-12">
             <?= $form->field($model, 'publicity_shape')->widget(Select2::class, [
-                        'data' => Customer::getPublicityShapesForSelect(),
-                        'value' => $model->publicity_shape
-                    ],
-                    ['prompt' => Yii::t('app', 'Select an option...')]
-            ); ?>
+                    'data' => Customer::getPublicityShapesForSelect(),
+                    'value' => $model->publicity_shape,
+                    'pluginOptions' => [
+                        'placeholder' => Yii::t('app', 'Select ...')
+                    ]
+                ])
+            ?>
         </div>
     </div> 
     <?php

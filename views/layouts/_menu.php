@@ -74,7 +74,7 @@ $billIndexItems = [
             ['label' => Yii::t('app', 'Tax Rates'), 'url' => ['/sale/tax-rate/index'], 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index'], 'visible' => Yii::$app->user->isSuperadmin],
             //'<li class="divider"></li>',
-            ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => Yii::$app->user->isSuperadmin],
+
             ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
             ['label' => Yii::t('app', 'Invoice Classes'), 'url' => ['/sale/invoice-class/index'], 'visible' => Yii::$app->user->isSuperadmin]
     ], 'visible' => Yii::$app->user->isSuperadmin],
@@ -148,6 +148,7 @@ if (Yii::$app->getModule('afip')) {
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
         ['label'=>Yii::t('app','Publicity Shapes'), 'url'=>['/sale/publicity-shape/index']],
+        ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => User::canRoute('/checkout/payment-method/index')],
         '<li class="divider"></li>',
         ['label'=>Yii::t('app','Billed and Cashed'), 'url'=>['/sale/customer/billed-and-cashed']],
         '<li class="divider"></li>',
