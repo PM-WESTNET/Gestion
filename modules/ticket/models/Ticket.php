@@ -528,9 +528,11 @@ class Ticket extends \app\components\db\ActiveRecord {
                 //Color assignation
                 $this->assignColor();
 
+                $status = Status::findOne($this->status_id);
                 //Creates and sets a task for this ticket, only if it is not a closing ticket
-                if (Status::findOne($this->status_id)->is_open)
+                if ($status && $status->is_open) {
                     $this->buildTask();
+                }
             }
 
 
