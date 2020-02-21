@@ -58,7 +58,19 @@ class Backup extends \yii\db\ActiveRecord {
         $this->formatDatesAfterFind();
     }
 
-    private function formatDatesBeforeSave() {
+    public function getStatusLabel()
+    {
+        $statuses = [
+            'in_process' => Yii::t('app','In Process'),
+            'success' => Yii::t('app', 'Success'),
+            'error' => Yii::t('app', 'Fail'),
+        ];
+
+        return $statuses[$this->status];
+    }
+
+    private function formatDatesBeforeSave()
+    {
         if ($this->init_timestamp) {
             $this->init_timestamp = strtotime(Yii::$app->formatter->asDatetime($this->init_timestamp, 'yyyy-MM-dd HH:mm:ss'));
         }
@@ -68,7 +80,8 @@ class Backup extends \yii\db\ActiveRecord {
         }
     }
 
-    private function formatDatesAfterFind() {
+    private function formatDatesAfterFind()
+    {
         if ($this->init_timestamp) {
             $this->init_timestamp = Yii::$app->formatter->asDatetime($this->init_timestamp, 'dd-MM-yyyy HH:mm:ss');
         }

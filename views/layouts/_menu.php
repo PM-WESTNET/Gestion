@@ -298,9 +298,7 @@ if (User::canRoute('/log/index')) {
     ];
 }
 if (User::canRoute('/backup/backup/index')) {
-    $appMenu = [
-        ['label' => Yii::t('app', 'Backups'), 'url' => ['/backup/backup/index']]
-    ];
+    $appMenu[] = ['label' => Yii::t('app', 'Backups'), 'url' => ['/backup/backup/index']];
 }
 $appMenu[] = ['label' => Yii::t('app', 'Companies'), 'url' => ['/sale/company']];
 $appMenu[] = ['label' => Yii::t('app', 'Points of Sale'), 'url' => ['/sale/point-of-sale']];

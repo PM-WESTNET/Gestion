@@ -75,6 +75,8 @@ class BackupSearch extends Backup
 
         $query->andFilterWhere(['like', 'description', $this->description]);
 
+        $query->orderBy(['init_timestamp' => SORT_DESC]);
+
         return $dataProvider;
     }
 }

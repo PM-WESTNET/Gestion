@@ -49,8 +49,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]
                 ])
             ],
-            'finish_timestamp:datetime',
-            'status',
+            [
+                'attribute' => 'status',
+                'value' => function ($model) {
+                    return $model->getStatusLabel();
+                },
+                'filter' => [
+                    'in_process' => Yii::t('app','In Process'),
+                    'success' => Yii::t('app', 'Success'),
+                    'error' => Yii::t('app', 'Fail'),
+                ]
+            ],
             'database',
 
         ],
