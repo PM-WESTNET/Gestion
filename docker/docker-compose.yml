@@ -36,12 +36,12 @@ services:
         networks:
             - docker-net
 
-    pdf-service:
-        container_name: pdf-service
-        build: pdf-service
-        ports:
-            - "5001:5001"
-        restart: always
+#    pdf-service:
+#        container_name: pdf-service
+#        build: pdf-service
+#        ports:
+#            - "5001:5001"
+#        restart: always
 
 networks:
     docker-net:

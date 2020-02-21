@@ -2,6 +2,7 @@
 
 namespace app\modules\westnet\notifications\components\transports;
 
+use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\westnet\notifications\models\Notification;
 use Yii;
@@ -90,13 +91,15 @@ class EmailTransport implements TransportInterface {
             $emails = array_merge($emails, $destinataries->getEmails());
         }
 
-        Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 3600);
-        Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 3600);
+        Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
+        Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
-        $chunks = array_chunk($emails, 50, true);
+        $max_rate = (int)Config::getValue('aws_max_send_rate');
+
+        //Le restamos 2 al maximo de cuota por segundo para asegurarnos nunca alcanzarla
+        $chunks = array_chunk($emails, ($max_rate - 2), true);
         
         $ok = 0;
-        $fail= 0;
         $error = 'Error: ';
 
         try {
@@ -131,14 +134,18 @@ class EmailTransport implements TransportInterface {
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;
-                $fail += (count($chunk) - $ok);
-                Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 3600);
-                Yii::$app->cache->set('error_'.$notification->notification_id, $fail, 3600);
+                Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
+                Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
+                Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
+
+                //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
+                sleep(3);
             }
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
+            Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
             $error = $ex->getMessage();
             $ok = false;
         }
@@ -166,7 +173,7 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Nombre', trim(substr($customer['name'], 0, $replace_max_string['@Nombre'])), $replaced_text);
         $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
         $replaced_text = str_replace('@Telefono2', substr($customer['phone2'], 0, $replace_max_string['@Telefono2']), $replaced_text);
-        $replaced_text = str_replace('@Code', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
+        $replaced_text = str_replace('@CodigoDeCliente', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
         $replaced_text = str_replace('@PaymentCode', substr($customer['payment_code'], 0, $replace_max_string['@CodigoDePago']), $replaced_text);
         $replaced_text = str_replace('@Nodo', substr($customer['node'], 0, $replace_max_string['@Nodo']), $replaced_text);
         $replaced_text = str_replace('@Saldo', substr($customer['saldo'], 0, $replace_max_string['@Saldo']), $replaced_text);

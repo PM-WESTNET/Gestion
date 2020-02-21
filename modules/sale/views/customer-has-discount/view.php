@@ -38,6 +38,8 @@ $this->params['breadcrumbs'][] = $this->title ;
                 'label' => Yii::t('app', 'Status'),
                 'value' => Yii::t('app', ucfirst($model->status))
             ],
+            'created_at:datetime',
+            'updated_at:datetime',
 
         ],
     ]) ?>

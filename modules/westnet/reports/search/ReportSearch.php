@@ -17,12 +17,15 @@ use app\modules\westnet\reports\ReportsModule;
 use yii\base\Model;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\web\JsExpression;
 
 class ReportSearch extends Model
 {
     public $date_from;
     public $date_to;
     public $company_id;
+    public $from;
+    public $publicity_shape;
 
     public function init()
     {
@@ -38,7 +41,7 @@ class ReportSearch extends Model
     {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'company_id'], 'safe']
+            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe']
         ];
     }
 
@@ -47,6 +50,7 @@ class ReportSearch extends Model
         return [
             'date_from' => ReportsModule::t('app', 'Date From'),
             'date_to' => ReportsModule::t('app', 'Date To'),
+            'publicity_shape' => ReportsModule::t('app', 'Publicity Shape')
         ];
     }
 
@@ -264,7 +268,7 @@ class ReportSearch extends Model
 
         $queryPaymentCobrado = new Query();
         $queryPaymentCobrado
-            ->select([new Expression("p.date as fecha"), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'), new Expression('0 as pagos_account')])
+            ->select([new Expression("p.date as fecha"), new Expression('sum(pi.amount) as facturado'),new Expression('0 as pagos'),new Expression('0 AS pagos_employee'), new Expression('0 as pagos_account')])
             ->from(['payment p'])
             ->leftJoin('payment_item pi', 'p.payment_id = pi.payment_id')
             ->leftJoin('payment_method m', 'pi.payment_method_id = m.payment_method_id')
@@ -274,15 +278,20 @@ class ReportSearch extends Model
 
         $queryPayment = new Query();
         $queryPayment
-            ->select(['pp.date as fecha', new Expression('0 AS facturado'), 'pp.amount AS pagos', new Expression('0 as pagos_account')])
+            ->select(['pp.date as fecha', new Expression('0 AS facturado'), 'pp.amount AS pagos', new Expression('0 AS pagos_employee'), new Expression('0 as pagos_account')])
             ->from(['provider_payment pp']);
+
+        $queryEmployeePayment = new Query();
+        $queryEmployeePayment
+            ->select(['pp.date as fecha', new Expression('0 AS facturado'), new Expression('0 as pagos'), 'pp.amount AS pagos_employee', new Expression('0 as pagos_account')])
+            ->from(['employee_payment pp']);
 
 
         $account = Account::findOne(['name'=>'GASTOS BANCARIOS']);
 
         $queryMovements = new Query();
         $queryMovements
-            ->select(["am.date as fecha", new Expression('0 as facturado'),new Expression('0 as pagos'),  new Expression('coalesce(credit, debit) as pagos_account')])
+            ->select(["am.date as fecha", new Expression('0 as facturado'),new Expression('0 as pagos'), new Expression('0 AS pagos_employee'), new Expression('coalesce(credit, debit) as pagos_account')])
             ->from(['account_movement am'])
             ->leftJoin('account_movement_item a', 'am.account_movement_id = a.account_movement_id')
             ->leftJoin('account_movement_relation a2', 'am.account_movement_id = a2.account_movement_id')
@@ -293,27 +302,32 @@ class ReportSearch extends Model
         if ($this->date_from) {
             $queryPaymentCobrado->andWhere(['>=', 'p.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryPayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryMovements->andWhere(['>=', 'am.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
         }
 
         if ($this->date_to) {
             $queryPaymentCobrado->andWhere(['<=', 'p.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryPayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryMovements->andWhere(['<=', 'am.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
         }
 
         $queryPaymentCobrado->union($queryMovements, true);
         $queryPaymentCobrado->union($queryPayment, true);
+        $queryPaymentCobrado->union($queryEmployeePayment, true);
+
         $query = new Query();
         $query
             ->select([
                 new Expression('date_format(fecha, \'%Y-%m\') AS period'), new Expression('round(sum(facturado)) as facturado'),
                 new Expression('round(sum(pagos)) as pagos'),
+                new Expression('round(sum(pagos_employee)) as pagos_employee'),
                 new Expression('round(sum(pagos_account)) as pagos_account'),
-                new Expression('round(sum(facturado) - sum(pagos) - sum(pagos_account)) as diferencia')
+                new Expression('round(sum(facturado) - sum(pagos) - sum(pagos_employee) - sum(pagos_account)) as diferencia')
             ])
             ->from(['a' => $queryPaymentCobrado])
-            ->groupBy([new Expression('date_format(fecha, \'%m/%Y\')')])
+            ->groupBy([new Expression('date_format(fecha, \'%m/%Y\')'),])
             ->orderBy(['date_format(fecha, \'%Y%m\')' => SORT_ASC]);
 
         return $query->all();
@@ -430,6 +444,17 @@ class ReportSearch extends Model
             ->groupBy(['m.payment_method_id', 'date_format(pp.date, \'%Y-%m\')'])
         ;
 
+        $queryEmployeePayment = new Query();
+        $queryEmployeePayment
+            ->select([new Expression("'Egreso Sueldos Empleados' as tipo"), 'm.name as descripcion', "date_format(pp.date, '%Y-%m') as fecha",
+                new Expression('0 as cobrado'), new Expression('sum(i.amount) as pagado')])
+            ->from(['employee_payment pp'])
+            ->leftJoin('employee_payment_item i', 'pp.employee_payment_id = i.employee_payment_id')
+            ->leftJoin('payment_method m', 'i.payment_method_id = m.payment_method_id')
+            ->where('m.payment_method_id is not null')
+            ->groupBy(['m.payment_method_id', 'date_format(pp.date, \'%Y-%m\')'])
+        ;
+
         $account = Account::findOne(['name'=>'EGRESOS']);
 
         $queryMovements = new Query();
@@ -446,18 +471,22 @@ class ReportSearch extends Model
 
         if ($this->date_from) {
             $queryProviderPayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['>=', 'pp.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryPayment->andWhere(['>=', 'p.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
             $queryMovements->andWhere(['>=', 'am.date', (new \DateTime($this->date_from))->format('Y-m-d')]);
         }
 
         if ($this->date_to) {
             $queryProviderPayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
+            $queryEmployeePayment->andWhere(['<=', 'pp.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryPayment->andWhere(['<=', 'p.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
             $queryMovements->andWhere(['<=', 'am.date', (new \DateTime($this->date_to))->format('Y-m-d')]);
         }
 
         $queryPayment->union($queryMovements, true);
         $queryPayment->union($queryProviderPayment, true);
+        $queryPayment->union($queryEmployeePayment, true);
+
 
         if(Config::getValue('add_retenciones_into_in_out_report')){
             $queryRetenciones = $this->findRetenciones($params);
@@ -589,8 +618,11 @@ class ReportSearch extends Model
                 new Expression('date_format(c.date_new, \'%Y-%m\') AS period'),
                 new Expression('count(c.customer_id) as customer_qty'),
                 'c.publicity_shape'
-            ])->from('customer c')
-            ->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
+            ])->from('customer c');
+
+        if($this->publicity_shape) {
+            $query->andWhere(['c.publicity_shape' => $this->publicity_shape]);
+        }
 
         if($this->date_from) {
             $query->andWhere(['>=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_from))->format('Y-m')]);
@@ -599,6 +631,128 @@ class ReportSearch extends Model
         if($this->date_to) {
             $query->andWhere(['<=', new Expression('date_format(c.date_new, \'%Y-%m\')'), (new \DateTime($this->date_to))->format('Y-m')]);
         }
+
+        $query->groupBy([new Expression('date_format(c.date_new, \'%Y-%m\')'), 'c.publicity_shape']);
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de informes de pago diferenciados por medio de pago
+     */
+    public function searchNotifyPayments($params)
+    {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression("CONCAT(`from`, ' - ', payment_method.name) as name"),
+                new Expression('payment_method.payment_method_id'),
+                new Expression('`from`')
+            ])->from('notify_payment')
+        ->leftJoin('payment_method', 'payment_method.payment_method_id = notify_payment.payment_method_id')
+        ->groupBy(['notify_payment.payment_method_id', 'from'])
+        ;
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de informes de pago diferenciados por medio de pago
+     */
+    public function searchNotifyPaymentsByDate($params)
+    {
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('date_format(date, \'%Y-%m-%d\') as date'),
+                new Expression('`from`')
+            ])->from('notify_payment')
+            ->groupBy(['from', 'date'])
+            ->orderBy('date')
+        ;
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=', new Expression('date_format(notify_payment.date, \'%Y-%m-%d\')'), $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de extensiones de pago por períodos
+     */
+    public function searchPaymentExtensionQty($params) {
+
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('date_format(date, \'%Y-%m-%d\') as date'),
+                new Expression('`from`')
+            ])->from(['payment_extension_history'])
+            ->groupBy(['date', 'from'])
+            ->orderBy('date');
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', 'date', $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=','date', $date_to]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve la cantidad de extensiones de pago por origen
+     */
+    public function searchPaymentExtensionQtyFrom($params) {
+
+        $this->load($params);
+
+        $query = (new Query())
+            ->select([
+                new Expression('COUNT(*) as qty'),
+                new Expression('`from`')
+            ])->from(['payment_extension_history'])
+            ->groupBy(['date'])
+            ->orderBy('date');
+
+        if($this->date_from) {
+            $date_from = (new \DateTime($this->date_from))->format('Y-m-d');
+            $query->andWhere(['>=', 'date', $date_from]);
+        }
+
+        if($this->date_to) {
+            $date_to = (new \DateTime($this->date_to))->format('Y-m-d');
+            $query->andWhere(['<=','date', $date_to]);
+        }
+
+        $query->groupBy(['from']);
 
         return $query->all();
     }

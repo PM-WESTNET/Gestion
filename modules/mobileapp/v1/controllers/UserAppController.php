@@ -1095,7 +1095,7 @@ class UserAppController extends Controller
             return [
                 'status' => false,
                 'notify_payment_id' => null,
-                'message' => Yii::t('app','Customer not found')
+                'message' => Yii::t('app','Can`t request a notify payment')
             ];
         }
 

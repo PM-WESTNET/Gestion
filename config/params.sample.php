@@ -341,5 +341,7 @@ return [
     
     /** Behaviors de contrato para el cambio de estado */
     'contract_behaviors_status_change' => 'app\modules\westnet\components\SecureConnectionBehavior',
-    'curl_verbose' =>false
+    'curl_verbose' =>false,
+
+    'tickets_categories_showed' => []
 ];

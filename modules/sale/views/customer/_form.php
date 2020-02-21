@@ -83,6 +83,24 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         </div>
 
     </div>
+
+    <div class="row">
+        <div class="col-sm-6 col-xs-12">
+
+            <?= $form->field($model, 'birthdate')->widget(\yii\jui\DatePicker::class, [
+                'clientOptions' => [
+                    'format' =>  'dd-mm-yyyy',
+                    'autoclose' => true,
+                    'maxDate' => Yii::$app->formatter->asDate((time() - ((86400 * 365)* 18)),'dd-MM-yyyy')
+                ],
+                'options'=>[
+                    'class'=>'form-control dates',
+                ]
+            ]) ?>
+
+        </div>
+    </div>
+
     <div class="row">
 
         <div class="col-sm-3 col-xs-12">
@@ -118,6 +136,8 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
     </div>
 
+
+
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
@@ -135,12 +155,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
+            <?= $form->field($model, 'phone')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2614XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone2')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone2')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45),'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
 
@@ -149,11 +169,11 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
         <div class="col-sm-6 col-xs-12">
 
-            <?= $form->field($model, 'phone3')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone3')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
-            <?= $form->field($model, 'phone4')->textInput(['maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
+            <?= $form->field($model, 'phone4')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
         <div class="col-sm-6 col-xs-12">
@@ -230,20 +250,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     </div>
     <div class="row">
         <div class="col-sm-12 col-xs-12">
-            <?php
-            echo $form->field($model, 'publicity_shape')->dropDownList([
-                    'banner'=> Yii::t('app', 'banner'), 
-                    'poster' => Yii::t('app', 'poster'), 
-                    'web' => Yii::t('app', 'web'), 
-                    'other_customer' => Yii::t('app', 'other_customer'), 
-                    'facebook' => Yii::t('app', 'facebook'), 
-                    'street_banner' => Yii::t('app', 'street_banner'),
-                    'door_to_door' => Yii::t('app', 'door_to_door'), 
-                    'competition' => Yii::t('app', 'competition'),
-                    'instagram' => Yii::t('app', 'Instagram'),
-                    'gigantografía' => Yii::t('app', 'Gigantografía'),
-                    'pantalla-led' => Yii::t('app', 'Pantalla led')
-                ], ['prompt' => Yii::t('app', 'Select an option...')]);
+            <?= $form->field($model, 'publicity_shape')->widget(Select2::class, [
+                    'data' => Customer::getPublicityShapesForSelect(),
+                    'value' => $model->publicity_shape,
+                    'pluginOptions' => [
+                        'placeholder' => Yii::t('app', 'Select ...')
+                    ]
+                ])
             ?>
         </div>
     </div> 
@@ -298,6 +311,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                         'overwriteInitial' => true,
                         'initialPreview'=>($model->tax_image ? [Html::img(Yii::$app->request->baseUrl .'/'. $model->getTaxImageWebPath(), ['class'=>'file-preview-image', 'style' =>'height:100%; width: 100%','alt'=>'', 'title'=>''])] : false ),
                     ]]); ?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 col-md-12">
+            <?php echo $form->field($model, 'observations')->textarea(['rows' => 3, 'cols' => 10])?>
         </div>
     </div>
 
@@ -445,23 +464,24 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             });
 
             self.changeDocumentType();
+            self.phonesMask();
         }
 
         this.changeDocumentType = function(){
             var options;
-            $("#customer-document_number").inputmask("remove");
+            $("#document_number_input").inputmask("remove");
             // Si es CUIT
             if($("#document_type").val()==1) {
                 options = 'cuit';
                 $('#div-validation').removeClass('hidden');
             } else {
                 options = {
-                    'mask': '99999999'
+                    'mask': '99999999',
                 };
                 $('#div-validation').addClass('hidden')
             }
 
-            $("#customer-document_number").inputmask(options);
+            $("#document_number_input").inputmask(options);
         }
 
 
@@ -520,7 +540,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
         this.validateCustomer = function () {
             $.ajax({
                 url: "<?php echo Url::to(['validate-customer'])?>",
-                data: {Customer:{document_number: $('#document_number_input').val()}},
+                data: {Customer:{document_number: $('#document_number_input').val(), document_type_id:$('#document_type').val() }},
                 method: 'POST',
                 dataType: 'json'
             }).done(function (response) {
@@ -555,6 +575,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                         break;
                 }
             });
+        }
+
+        this.phonesMask = function () {
+            $('.phone').inputmask({
+                mask: '9999999999'
+            })
         }
     };
 </script>

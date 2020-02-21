@@ -119,3 +119,7 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
 </div>
+
+<?php if ($model->status === 'in_process' || $model->status === 'pending'):?>
+    <?php $this->registerJs('EmailStatus.init()')?>
+<?php endif;?>

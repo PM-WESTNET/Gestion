@@ -67,10 +67,22 @@ class Customer extends \app\modules\sale\models\Customer
                 'services_address' => function($model) {
                     $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->one();
                     if($contract){
-                        return ($contract->address ? $contract->address->fullAddress : $model->address);
+                        return ($contract->address ? $contract->address->shortAddress : $model->address);
                     }
 
                     return '';
+                },
+                'fibra' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->orWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract) {
+                        if($contract->hasFibraPlan()) {
+                            return "true";
+                        }
+
+                        return "false";
+                    }
+
+                    return "false";
                 },
                 'balance' => function($model){
                     return $model->current_account_balance;
@@ -89,6 +101,13 @@ class Customer extends \app\modules\sale\models\Customer
                     }
 
                     return 'enabled';
+                },
+                'low_process' => function($model) {
+                    $contract = $model->getContracts()->andWhere(['status' => Contract::STATUS_LOW_PROCESS])->one();
+                    if($contract){
+                        return "true";
+                    }
+                    return "false";
                 }
             ];
         }else {
@@ -177,5 +196,16 @@ class Customer extends \app\modules\sale\models\Customer
     public function hasContractAndConnectionActive()
     {
         return $this->getContracts()->andWhere(['status' => Contract::STATUS_ACTIVE])->exists();
+    }
+
+    /**
+     * Indica si posee un contrato activo o en proceso de baja
+     */
+    public function hasActiveOrLowProcessContract()
+    {
+        return $this->getContracts()
+            ->andWhere(['status' => Contract::STATUS_ACTIVE])
+            ->orWhere(['status' => Contract::STATUS_LOW_PROCESS])
+            ->exists();
     }
 }

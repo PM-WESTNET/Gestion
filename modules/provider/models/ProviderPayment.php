@@ -484,8 +484,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     {
         if (count($provider_bill_ids) > 0) {
             ProviderBillHasProviderPayment::deleteAll(['provider_payment_id' => $this->provider_payment_id, 'provider_bill_id' => $provider_bill_ids]);
-            //Para disparar la actualización del campo balance en el beforesave
-            $this->save();
+            //Actualizamos el balance
+            $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
             return true;
         }
     }

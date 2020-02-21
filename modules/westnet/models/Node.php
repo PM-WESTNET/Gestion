@@ -41,6 +41,7 @@ class Node extends \app\components\db\ActiveRecord
     public $company_id;
     public $count;
     private $_old_server_id;
+    public $total;
 
     /**
      * @inheritdoc

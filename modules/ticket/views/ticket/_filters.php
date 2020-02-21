@@ -12,6 +12,15 @@ use yii\widgets\ActiveForm;
 use \kartik\daterange\DateRangePicker;
 use yii\helpers\Url;
 
+$category_query = Category::find();
+
+if (isset(Yii::$app->params['tickets_categories_showed']) && !empty(Yii::$app->params['tickets_categories_showed'])) {
+    $category_query->andWhere(['IN', 'category_id', Yii::$app->params['tickets_categories_showed']]);
+}
+
+$category_query->orderBy(['name' => SORT_ASC ]);
+
+
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
 
@@ -38,7 +47,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-lg-4">
-            <?=$form->field($model, 'category_id')->dropDownList(ArrayHelper::map(Category::find()->orderBy('name')->all(), 'category_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
+            <?=$form->field($model, 'category_id')->dropDownList(ArrayHelper::map($category_query->all(), 'category_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
 
         <div class="col-lg-4">

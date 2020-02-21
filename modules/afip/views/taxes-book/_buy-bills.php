@@ -17,7 +17,7 @@ use yii\widgets\ActiveForm;
     <div class="panel panel-primary">
         <div class="panel-heading">
             <strong>
-                <?=Yii::t('app', ($bills ? 'Bills': 'Bills Added' ))?>
+                <?=Yii::t('app', ($bills ? 'Provider Bills': 'Bills Added' ))?>
             </strong>
         </div>
         <div class="panel-body">
@@ -66,7 +66,9 @@ use yii\widgets\ActiveForm;
                     $columns[] = [
                         'class' => 'yii\grid\CheckboxColumn',
                         'checkboxOptions' => function($model, $key, $index, $column) {
-                            return ['value' => $model['provider_bill_id'], 'checked'=>($model['taxes_book_item_id']===null?0:1)];
+                            return ['value' => ($model['provider_bill_id']),
+                                'checked'=>($model['taxes_book_item_id']===null?0:1),
+                                'data-type' => ($model['type'] !== 'employee' ? 'provider' : 'employee')];
                         },
                     ];
                 }

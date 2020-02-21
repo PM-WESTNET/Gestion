@@ -171,7 +171,7 @@ class CustomerController extends Controller
             }
 
             if($model->needsUpdate) {
-                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data'));
+                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data. Last update: {date}', ['date' => ( new \DateTime($model->last_update))->format('d-m-Y')]));
             }
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
@@ -205,28 +205,6 @@ class CustomerController extends Controller
      */
     public function actionCreate()
     {
-
-        /*
-         $model = new Company();
-
-        if ($model->load(Yii::$app->request->post())&&$model->validate()) {
-            $this->upload($model, 'certificate');
-            $this->upload($model, 'key');
-            $this->upload($model, 'logo');
-
-            if($model->save()){
-                return $this->redirect(['point-of-sale/create', 'company' => $model->company_id]);
-            }
-        } else {
-            foreach( $model->getErrors() as $error) {
-                Yii::$app->session->setFlash("error", Yii::t('app', $error[0]));
-            }
-        }
-
-        return $this->render('create', [
-            'model' => $model,
-        ]);
-         */
         $model = new Customer;
         $address= new Address;
         $address->scenario = 'insert';
@@ -834,7 +812,7 @@ class CustomerController extends Controller
                     return $this->render('verify-emails', ['results' => $results]);
                 }
 
-                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'), Yii::$app->request->post('type'));
 
                 foreach ($partial_result as $key => $r) {
                     if (isset($results[$key])) {

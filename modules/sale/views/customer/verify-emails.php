@@ -34,6 +34,15 @@ $this->title = Yii::t('app','Verify Emails');
                     </div>
                 </div>
                 <div class="row">
+                    <div class="col-lg-6">
+                        <label for="type"><?php echo Yii::t('app','File Type')?></label>
+                        <?php echo \yii\helpers\Html::dropDownList('type', null, [
+                            'elastic' =>  'Elastic Email',
+                            'invalid' => 'Archivo de emails inválidos'
+                        ], ['class' => 'form-control'])?>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-lg-12">
                         <?php echo \yii\helpers\Html::submitButton(Yii::t('app','Verify'), ['class' => 'btn btn-success pull-right'])?>
                     </div>
