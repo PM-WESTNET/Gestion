@@ -21,6 +21,11 @@ All notable changes to this project will be documented in this file.
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
  - Backups: Alerta a email si falla un backup [GES-810]
  
+ 
+ ## [2020.02.26.1]
+ ### Modificado
+ - En direccion del cliente, la calle no es requerida
+ 
  ## [2020.02.26.0]
  ### Modificado
   - Descuentos por recomendado: Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673] Solicitado y aprobado por Camila
