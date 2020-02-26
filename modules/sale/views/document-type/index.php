@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'regex',
 
             [
-                'class' => 'app\components\grid\ActionColumn', 
+                'class' => 'app\components\grid\ActionColumn',
             ],
         ],
     ]); ?>

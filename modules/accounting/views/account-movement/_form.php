@@ -14,36 +14,40 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?php
-        echo Html::activeHiddenInput($model, 'account_movement_id', ['value'=>$model->account_movement_id]);
-        echo Html::activeHiddenInput($model, 'accounting_period_id', ['value'=>\app\modules\accounting\models\AccountingPeriod::getActivePeriod()->accounting_period_id]);
-        echo Html::activeHiddenInput($model, 'status', ['value'=>\app\modules\accounting\models\AccountMovement::STATE_DRAFT]);
-    ?>
+    <?php if ($model->isManualMovement()):?>
+        <?php
+            echo Html::activeHiddenInput($model, 'account_movement_id', ['value'=>$model->account_movement_id]);
+            echo Html::activeHiddenInput($model, 'accounting_period_id', ['value'=>\app\modules\accounting\models\AccountingPeriod::getActivePeriod()->accounting_period_id]);
+            echo Html::activeHiddenInput($model, 'status', ['value'=>\app\modules\accounting\models\AccountMovement::STATE_DRAFT]);
+        ?>
 
-    <?php echo app\components\companies\CompanySelector::widget(['model'=>$model]); ?>
-    
-    <?php
-        echo $this->render('@app/modules/partner/views/partner-distribution-model/_selector', ['model' => $model, 'form'=>$form]);
-    ?>
+        <?php echo app\components\companies\CompanySelector::widget(['model'=>$model]); ?>
 
-    <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
+        <?php
+            echo $this->render('@app/modules/partner/views/partner-distribution-model/_selector', ['model' => $model, 'form'=>$form]);
+        ?>
 
-    <?= $form->field($model, 'description')->textInput(['maxlength' => 150]) ?>
+        <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
 
-    <?php if ($itemsDataProvider!==null): ?>
+        <?= $form->field($model, 'description')->textInput(['maxlength' => 150]) ?>
 
-    <div class="panel panel-primary">
-        <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-items" aria-expanded="true" aria-controls="panel-body-items">
-            <h3 class="panel-title"><?= Yii::t('app', 'Items') ?></h3>
-        </div>
-        <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
-            <div class="row" id="form-items">
+        <?php if ($itemsDataProvider!==null): ?>
+
+        <div class="panel panel-primary">
+            <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-items" aria-expanded="true" aria-controls="panel-body-items">
+                <h3 class="panel-title"><?= Yii::t('app', 'Items') ?></h3>
             </div>
-            <div class="row" id="form-list-items">
+            <div class="panel-body collapse in" id="panel-body-items" aria-expanded="true">
+                <div class="row" id="form-items">
+                </div>
+                <div class="row" id="form-list-items">
+                </div>
             </div>
         </div>
-    </div>
-    
+
+        <?php endif; ?>
+    <?php elseif($model->getUpdatable() && \webvimark\modules\UserManagement\models\User::hasRole('modify-account-movement')) :?>
+        <?= $form->field($model, 'date')->widget(\yii\jui\DatePicker::classname(), ['language' => 'es-AR','dateFormat' => 'dd-MM-yyyy','options' => ['class' => 'form-control',],]) ?>
     <?php endif; ?>
 
     <div class="form-group">

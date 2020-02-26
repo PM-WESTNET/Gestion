@@ -55,10 +55,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 $bill_cat_id= Config::getValue('bill-category-id');
 
                 if($model->category_id === (int)$credit_bill_cat_id || $model->category_id === (int)$bill_cat_id){
+                    $billTypesCustomer = $model->customer->taxCondition->billTypes;
                     $billTypes2Create = $model->customer->company->billTypes;
+
+                    $bill_types = [];
+
+                    foreach ($billTypesCustomer as $bill_type_customer) {
+
+                        foreach ($billTypes2Create as $bill_type_company) {
+                            if($bill_type_customer->bill_type_id == $bill_type_company->bill_type_id) {
+                                array_push($bill_types, $bill_type_customer);
+                            }
+                        }
+                    }
+
                     $billItems = [];
 
-                    foreach ($billTypes2Create as $item) {
+                    foreach ($bill_types as $item) {
 
                         $billItems[] = ['label' => $item->name, 'url' => ['/sale/bill/create', 'type' => $item->bill_type_id, 'customer_id'=> $model->customer_id, 'company_id' => $model->customer->company_id ]];
                     }
@@ -147,6 +160,86 @@ $this->params['breadcrumbs'][] = $this->title;
                         'label' =>  Yii::t('app', 'User'),
                         'attribute' => 'user.username'
                     ]
+                ]
+            ]) ?>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row">
+                <h3 class="panel-title">
+                    <?= Yii::t('app', 'Ticket Managements') ?>
+                </h3>
+            </div>
+
+        </div>
+        <div class="panel-body">
+            <?= GridView::widget([
+                'dataProvider' => new ActiveDataProvider(['query' => $model->getTicketManagements()]),
+                'columns' => [
+                    [
+                        'attribute' => 'timestamp',
+                        'value' => function($model) {
+                            return $model->timestamp ? (new \DateTime('now'))->setTimestamp($model->timestamp)->format('d-m-Y') : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'ticket_id',
+                        'value' => function($model) {
+                            return $model->ticket ? $model->ticket->title : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'user_id',
+                        'value' => function($model) {
+                            return $model->user ? $model->user->username : '';
+                        }
+                    ],
+                    [
+                        'attribute' => 'by_wp',
+                        'value' => function($model) {
+                            if($model->by_wp) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_call',
+                        'value' => function($model) {
+                            if($model->by_call) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_email',
+                        'value' => function($model) {
+                            if($model->by_email) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
+                    [
+                        'attribute' => 'by_sms',
+                        'value' => function($model) {
+                            if($model->by_sms) {
+                                return "<span class='glyphicon glyphicon-ok' style='color: #2b542c'></span>";
+                            }
+                            return "<span class='glyphicon glyphicon-remove' style='color:#9e0505'></span>";
+
+                        },
+                        'format' => 'raw'
+                    ],
                 ]
             ]) ?>
         </div>

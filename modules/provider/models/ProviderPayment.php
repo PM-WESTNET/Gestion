@@ -64,7 +64,13 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
         return [
             'account' => [
                 'class'=> 'app\modules\accounting\behaviors\AccountMovementBehavior'
-            ]
+            ],
+            'unix_timestamp' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                ],
+            ],
         ];
     }
 
@@ -217,6 +223,30 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
      */
     public function getDeletable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse.
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+        if($this->status == ProviderPayment::STATUS_CLOSED) {
+            return false;
+        }
+
         return true;
     }
     
@@ -447,8 +477,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
                 }
             }
         }
-        //Para disparar la actualizacion del balance en el beforesave
-        $this->save();
+        //Actualizamos el balance
+        $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
 
         return $return;
     }
@@ -460,8 +490,8 @@ class ProviderPayment extends \app\components\companies\ActiveRecord implements 
     {
         if (count($provider_bill_ids) > 0) {
             ProviderBillHasProviderPayment::deleteAll(['provider_payment_id' => $this->provider_payment_id, 'provider_bill_id' => $provider_bill_ids]);
-            //Para disparar la actualización del campo balance en el beforesave
-            $this->save();
+            //Actualizamos el balance
+            $this->updateAttributes(['balance' => $this->amount - $this->calculateTotalPayed()]);
             return true;
         }
     }

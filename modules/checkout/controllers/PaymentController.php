@@ -18,6 +18,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 use app\modules\checkout\models\PagoFacilTransmitionFile;
 use \app\modules\accounting\models\search\AccountMovementSearch;
+use app\modules\sale\models\Product;
+use app\modules\westnet\models\Vendor;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -210,16 +212,14 @@ class PaymentController extends Controller {
         }
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $customer->customer_id;
+        $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+        $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+            ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+            ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+            ->all(), 'vendor_id', 'fullName');
 
         $dataProvider = $searchModel->searchAccount($customer->customer_id, Yii::$app->request->queryParams);
-
-        $retVals = [
-            'searchModel' => $searchModel,
-            'customer' => $customer,
-            'dataProvider' => $dataProvider
-        ];
-        $retVals['dataModelAccount'] = $dataModelAccount;
-        $retVals['searchModelAccount'] = $searchModelAccount;
 
         if($customer->hasDraftBills()) {
             Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft bills'));
@@ -229,7 +229,15 @@ class PaymentController extends Controller {
             Yii::$app->session->addFlash('info', Yii::t('app', 'This customer has draft payments'));
         }
 
-        return $this->render('account', $retVals);
+        return $this->render('account', [
+            'searchModel' => $searchModel,
+            'customer' => $customer,
+            'dataProvider' => $dataProvider,
+            'dataModelAccount' => $dataModelAccount,
+            'searchModelAccount' => $searchModelAccount,
+            'products' => $products,
+            'vendors' => $vendors
+        ]);
     }
 
     /**
@@ -542,7 +550,7 @@ class PaymentController extends Controller {
     }
     
     public function actionPagofacilPaymentsIndex(){
-        
+
         $pagofacilFiles= PagoFacilTransmitionFile::find()->orderBy(['pago_facil_transmition_file_id' => SORT_DESC]);
         
         $dataProvider = new ActiveDataProvider(['query' => $pagofacilFiles]);
@@ -554,13 +562,16 @@ class PaymentController extends Controller {
         $model= \app\modules\checkout\models\PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
        
         $payments= new ActiveDataProvider(['query' => $model->payments()]);
-        
+
         return $this->render('pagofacil-payment-view', [
             'model' => $model,
             'payments' => $payments,
         ]);
     }
-    
+
+    /**
+     * Cierra el archivo de pago fácil y los pagos que corresponden al mismo
+     */
     public function actionConfirmFile($idFile){
         set_time_limit(0);
         $model = PagoFacilTransmitionFile::findOne(['pago_facil_transmition_file_id' => $idFile]);
@@ -588,7 +599,7 @@ class PaymentController extends Controller {
         
         $payment->customer_id= $new_customer_id;
         
-        if ($payment->save()) {
+        if ($payment->updateAttributes(['customer_id'])) {
             \Yii::$app->session->setFlash('success', \Yii::t('app', 'Customer changed successfull'));
             $this->redirect(['view', 'id' => $payment->payment_id]);
         }else{
@@ -645,5 +656,38 @@ class PaymentController extends Controller {
         }
 
         return $this->redirect(['pagofacil-payments-index']);
+    }
+
+    /**
+     * Envía el recibo de pago por email al cliente.
+     */
+    public function actionEmail($id, $from = 'index')
+    {
+        $model = $this->findModel($id);
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+        if (trim($model->customer->email) == "") {
+            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
+        }
+
+        if ($model->sendEmail($fileName)) {
+            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+        } else {
+            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
+        };
+
+        if ($from === 'index') {
+            return $this->redirect(['index']);
+        } elseif ($from == 'current-account') {
+            return $this->redirect(['current-account', 'customer' => $model->customer_id]);
+        } else {
+            return $this->redirect(['view', 'customer' => $model->customer_id]);
+        }
     }
 }

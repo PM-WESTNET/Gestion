@@ -49,6 +49,15 @@ class CountableMovement
         return $this->errors;
     }
 
+    public function setErrors($error)
+    {
+        if (is_array($error)) {
+            $this->errors = $error;
+        }else{
+            array_push($this->getErrors(), $error);
+        }
+    }
+
     /**
      * Guarda el movmiento contable con los parametros enviados.
      *
@@ -63,6 +72,7 @@ class CountableMovement
     {
         Debug::debug('Llego a createMovement');
         $this->errors = [];
+        $this->setErrors([]);
         $movement = new AccountMovement();
         try{
             $movement->date = (new \DateTime($date))->format('d-m-Y');
@@ -87,10 +97,10 @@ class CountableMovement
                     $movement->updateAttributes(['status'=>AccountMovement::STATE_BROKEN]);
                 }
             } else {
-                $this->errors[] = Yii::t('accounting', 'The movement is invalid.');
+                $this->setErrors(Yii::t('accounting', 'The movement is invalid.'));
                 foreach($movement->getErrors() as $key => $errors) {
                     foreach($errors as $error) {
-                        $this->errors[] = $error;
+                        $this->setErrors($error);
                     }
                 }
             }
@@ -99,8 +109,9 @@ class CountableMovement
             if(!$movement->account_movement_id) {
                 throw new \Exception(Yii::t('accounting', 'The movement could not be created.')  . $ex->getMessage());
             } else {
-                $this->errors[] = Yii::t('accounting', 'The debit and credit is not equal.');
+                $this->setErrors(Yii::t('accounting', 'The debit and credit is not equal.'));
             }
+            \Yii::info('---------------- FALLA AL CREAR MOVIMIENTO: ' . $description .' --- '.$ex->getMessage() . ' - '. $ex->getTraceAsString(), 'account-movement');
         }
         return $movement->account_movement_id;
     }

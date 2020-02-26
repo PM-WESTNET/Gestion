@@ -60,11 +60,11 @@ class MesaTicketContractBehavior extends Behavior
             /**
              * Si tiene un plan que sea de fibra, la categoria del ticket a crear no es la misma que la de las instalaciones comunes
              */
-//            if($contract->hasFibraPlan()){
-//                $instalation_category_id = Config::getValue('fibra_instalation_category_id');
-//            } else {
+            if($contract->hasFibraPlan()){
+                $instalation_category_id = Config::getValue('fibra_instalation_category_id');
+            } else {
                 $instalation_category_id = Config::getValue('instalation_category_id');
-//            }
+            }
 
             if (!$instalation_category_id) {
                 throw new Exception(Yii::t('app', 'Parameter not found: {parameter}', ['parameter' => 'instalation_category_id']));

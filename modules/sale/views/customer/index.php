@@ -64,6 +64,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'CustomerSearch[customer_status]' => $searchModel->customer_status,
                 'CustomerSearch[connection_status]' => $searchModel->connection_status,
                 'CustomerSearch[contract_status]' => $searchModel->contract_status,                   
+                'CustomerSearch[email_status]' => $searchModel->email_status,
+                'CustomerSearch[email2_status]' => $searchModel->email2_status,
+                'CustomerSearch[mobile_app_status]' => $searchModel->mobile_app_status,
                 ];
             }
         echo Html::a('<span class="glyphicon glyphicon-export"></span> '.Yii::t('app', 'Export'), Url::to($params), ['class'=> 'btn btn-warning', 'target' => '_blank']);
@@ -88,6 +91,30 @@ $this->params['breadcrumbs'][] = $this->title;
             }
         ],
         'document_number',
+        [
+            'label' => 'Foto doc.',
+            'value' => function($model) {
+                $html_view = Html::a('<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>', ['view', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+                $html_update = Html::a('<span class="glyphicon glyphicon-remove" style="color: darkred"></span>', ['update', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+
+                return $model->document_image ? $html_view : $html_update;
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
+        [
+            'label' => 'Foto imp.',
+            'value' => function($model) {
+                $html_view = Html::a('<span class="glyphicon glyphicon-ok" style="color: darkgreen;"></span>', ['view', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+                $html_update = Html::a('<span class="glyphicon glyphicon-remove" style="color: darkred"></span>', ['update', 'id' => $model->customer_id], ['target' => '_blank', 'data-pjax' => '0']);
+
+                return $model->tax_image ? $html_view : $html_update;
+            },
+            'format' => 'raw',
+            'headerOptions' => ['max-width' => '70px'],
+            'contentOptions' => ['style'=>'text-align: center; max-width:70px'],
+        ],
         'phone',
     ];
 

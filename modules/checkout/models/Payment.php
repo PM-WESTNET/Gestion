@@ -17,6 +17,8 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\HttpException;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\sale\models\Company;
 
 /**
  * This is the model class for table "payment".
@@ -140,6 +142,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
             ],
             'discount' => [
                 'class'=> 'app\modules\westnet\components\ReferencedDiscountBehavior'
+            ],
+            'ticket' => [
+                'class'=> 'app\modules\ticket\behaviors\TicketBehavior'
             ],
         ];
     }
@@ -346,9 +351,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @param type $method
      * @return type
      */
-    public function accountTotal($fromDate = null, $toDate = null){
+    public function accountTotal($fromDate = null, $toDate = null, $only_closed = true){
 
-        return $this->accountPayed($fromDate, $toDate, true) - $this->accountTotalCredit($fromDate, $toDate);
+        return $this->accountPayed($fromDate, $toDate, $only_closed) - $this->accountTotalCredit($fromDate, $toDate, $only_closed);
 
     }
 
@@ -395,16 +400,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
      *
      * @return float|mixed
      */
-    public function accountTotalCredit($fromDate = null, $toDate = null)
+    public function accountTotalCredit($fromDate = null, $toDate = null, $only_closed = true)
     {
 
         $query = Bill::find();
         $query->leftJoin("bill_type", 'bill.bill_type_id = bill_type.bill_type_id' );
         $query->where([
             'bill.customer_id' => $this->customer_id,
-            'bill.status' => Bill::STATUS_CLOSED
+
         ]);
-        
+
+
+        if ($only_closed) {
+            $query->andWhere([
+                'bill.status' => Bill::STATUS_CLOSED
+            ]);
+        }
+
         if($fromDate !== null){
             $query->andWhere("date>='$fromDate'");
         }
@@ -424,9 +436,29 @@ class Payment extends  ActiveRecord  implements CountableInterface
      */
     public function getDeletable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
 
-        return true;//($this->status=='draft');
+        return true;
+    }
 
+    /**
+     * Modificar en caso de que el modelo no pueda ser actualizado
+     * Si el modelo se encuentra en la relacion de una cuenta monetaria no puede ser elimminado.
+     * @return boolean
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if ($this->status != self::PAYMENT_DRAFT) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getConfig()
@@ -569,5 +601,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
     public static function getLastNumber($company_id){
         $number = Payment::find()->where(['company_id' => $company_id])->max('number');
         return $number;
+    }
+
+    /**
+     * @return bool
+     * Envia el comprobante por email al cliente correspondiente.
+     */
+    public function sendEmail($pdfFileName)
+    {
+        $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
+
+        if ($sender->send( $this->customer->email, "Envio de comprobante", [
+            'params'=>[
+                'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
+                'comprobante'   => sprintf("%08d", $this->number )
+            ]],[], [],[$pdfFileName]) ) {
+            return true;
+        }
+        return false;
     }
 }

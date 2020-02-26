@@ -12,6 +12,7 @@ use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use webvimark\modules\UserManagement\models\User;
+
  /**
  * @var View $this
  * @var Customer $model
@@ -47,7 +48,15 @@ $this->params['breadcrumbs'][] = $this->title;
            h1 {background-color: <?= $bgColor ?>}
     </style>
     <?php endif; ?>
-        
+
+    <?php
+        if ($model->hasPendingPlanChange()):
+    ?>
+        <?php $change = $model->getPendingPlanChange()?>
+        <div class="alert alert-warning">
+            <h4><?php echo Yii::t('app','The customer has pending programmed plan change for {date}', ['date' => $change->date])?></h4>
+        </div>
+    <?php endif; ?>
     <div class="title">
         <h1><?php echo Html::encode($this->title) ?></h1>
     </div>
@@ -79,10 +88,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php
                 //Está habilitado manejo de planes?
                 if(Yii::$app->params['plan_product']): ?>
-                <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?>
+                <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?> <br>
+                <?= UserA::a('<span class="glyphicon glyphicon-time"></span> '.Yii::t('app', 'Create programmed plan change'), ['/sale/contract/programmed-plan-change/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning pull-right']) ?>
                 <?php endif; ?>
                 <?= UserA::a(Yii::t('app', 'Customer Log'), ['/sale/customer-log/index', 'customer_id' => $model->customer_id], ['class' => 'btn btn-info']) ?>
-
             </p>
         </div>
     </div>
@@ -97,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'class' => 'btn btn-warning',
                         'id'=>'customer-tickets',
                     ])?>
-            
+
             <?php if(User::canRoute('/sale/customer/change-company')): ?>
             <?= Html::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('westnet', 'Change Company'), null, [
                         'class' => 'btn btn-warning',
@@ -109,9 +118,11 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Discounts'), ['/sale/customer-has-discount/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Products to Invoice'), ['/sale/product-to-invoice/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
             <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Payment Plan'), ['/checkout/payment-plan/index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
-            
+            <?= UserA::a('<span class="glyphicon glyphicon-chevron-right"></span> '.Yii::t('app', 'Ticket Managements'), ['/ticket/ticket-management/customer-index',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning']) ?>
+
             <?php if(User::canRoute('/sale/bill/index')): ?>
             <div class="pull-right" style="margin-right: -10px;">
+
                 <?= $this->render('_bills-dropdown', ['model' => $model, 'class' => 'btn btn-primary']); //Lista de comprobantes de cliente ?>
                 <?= $this->render('_pending-bills', ['model' => $model]) ?>
             </div>
@@ -139,16 +150,18 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
     <!--Contratos-->
-
+    <hr>
     <?php if($contracts->getTotalCount() >= 1) {
         echo $this->render('_customer-contracts', [
             'model' => $model,
-            'contracts' => $contracts
+            'contracts' => $contracts,
+            'products' => $products,
+            'vendors' => $vendors
         ]);
     } else { ?>
         <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
     <?php } ?>
-    
+    <hr>
     <!--Fin Contratos-->
 
     <h2> <?= Yii::t('app', 'Customer data')?>  </h2>
@@ -168,6 +181,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'value'=>$model->documentType ? $model->documentType->name : null,
         ],
         'document_number',
+        'birthdate',
         [
             'label'=>$model->getAttributeLabel('sex'),
             'value'=>Yii::t('app', ucfirst($model->sex))
@@ -197,13 +211,20 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => $model->getAttributeLabel('customer_reference_id'),
-            'value' => ($model->customerReference ? ($model->customerReference->name . ( $model->customerReference->lastname!='' ? ', ' . $model->customerReference->lastname : '' )) : '' )
+            'value' => function ($model) {
+                return ($model->customerReference ? Html::a($model->customerReference->fullName, ['customer/view', 'id' => $model->customer_reference_id]) : '');
+            },
+            'format' => 'raw'
         ],
         [
             'label' => Yii::t('app','Publicity Shape'),
             'value' => Yii::t('app', $model->publicity_shape)
         ],
      ];
+
+    $attributes[] = [
+        'attribute' => 'observations',
+    ];
    
     $attributes[] = [
         'label'=>Yii::t('app', 'Address'),
@@ -234,7 +255,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ];
     }
     
-    $profileClasses = \app\modules\sale\models\Customer::getEnabledProfileClasses();
+    $profileClasses = Customer::getEnabledProfileClasses();
     
     foreach($profileClasses as $class){
         $attributes[] = $class->attr;
@@ -294,6 +315,22 @@ $this->params['breadcrumbs'][] = $this->title;
             },
         ];
     }
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Document image') ,
+        'value' => function ($model) {
+            return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
+
+    $attributes[] = [
+        'label' => Yii::t('app', 'Tax image') ,
+        'value' => function ($model) {
+            return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+        },
+        'format' => 'raw'
+    ];
 
     echo DetailView::widget([
         'model' => $model,
@@ -374,6 +411,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
 <script>
     var CustomerView= new function(){
         

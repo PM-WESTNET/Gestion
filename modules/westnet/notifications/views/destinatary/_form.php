@@ -186,6 +186,14 @@ use yii\widgets\ActiveForm;
                 </div>
 
             </div>
+
+            <?php if ($notification->transport->slug !== 'mobile-push'):?>
+                <div class="row toClear">
+                    <div class="col-lg-6 no-padding-left">
+                        <?php echo $form->field($model, 'has_app')->radioList(['installed' => NotificationsModule::t('westnetDestinatary','Installed'), 'not_installed' => NotificationsModule::t('app','Not Installed')])?>
+                    </div>
+                </div>
+            <?php endif;?>
         </div>
 
         <div id="by_customers" style="display: none;">

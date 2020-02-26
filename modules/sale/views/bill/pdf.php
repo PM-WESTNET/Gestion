@@ -357,12 +357,23 @@ $companyData = $model->company;
     ?>
     <tr style="margin-left:425px; width:435px; display: block;">
         <!-- Item -->
+        <?php $discount = $model->totalDiscountWithTaxes();
+        if($discount > 0) { ?>
+            <td style="width: 300px;float:left;">
+                <h5 style="text-align: right;margin-top: 6px; margin-bottom: 6px; font-size: 18px;">Descuento aplicado:</h5>
+            </td>
+            <!-- Precio -->
+            <td style="width: 130px; float:left;">
+                <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($discount,2)?></h5>
+            </td>
+        <?php } ?>
+        <!-- Item -->
         <td style="width: 300px;float:left;">
             <h5 style="text-align: right;margin-top: 6px; margin-bottom: 6px; font-size: 18px;">TOTAL:</h5>
         </td>
         <!-- Precio -->
         <td style="width: 130px; float:left;">
-            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?=round($model->calculateTotal(),2)?></h5>
+            <h5 style="text-align: right;font-size: 18px;margin-top: 6px; margin-bottom: 6px; padding-right: 25%;"><span>$</span> <?= round($model->calculateTotal(),2)?></h5>
         </td>
     </tr>
     <tr style="padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 0.3cm">

@@ -101,6 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <label><?= Yii::t('app', 'Earn').' : '.Yii::$app->formatter->asCurrency($earn) ?></label> <br>
         <label><?= Yii::t('app', 'Provider payments').' : '.Yii::$app->formatter->asCurrency($outgo) ?></label> <br>
+        <label><?= Yii::t('app', 'Employee payments').' : '.Yii::$app->formatter->asCurrency($outgoEmployee) ?></label> <br>
         <label><?= ReportsModule::t('app', 'Cost effectiveness').' : '.Yii::$app->formatter->asCurrency($earn - $outgo - $account_movements) ?></label>
     </div>
     <div style="padding-top: 20px">
@@ -108,7 +109,8 @@ $this->params['breadcrumbs'][] = $this->title;
         <p>
             1 - <?= Yii::t('app', 'Earn')?>: Se calcula el total cobrado por el período. (Pagos de clientes) <br>
             2 - <?= Yii::t('app', 'Provider payments')?> : Se calcula el total pagado por el período a partir de los pagos realizados a proveedores. <br>
-            3 - <?= ReportsModule::t('app', 'Cost effectiveness')?> : <?= Yii::t('app', 'Earn')?> - <?= Yii::t('app', 'Provider payments')?> - Gastos bancarios. <br>
+            3 - <?= Yii::t('app', 'Employee payments')?> : Se calcula el total pagado por el período a partir de los pagos realizados a empleados. <br>
+            4 - <?= ReportsModule::t('app', 'Cost effectiveness')?> : <?= Yii::t('app', 'Earn')?> - <?= Yii::t('app', 'Provider payments')?> - <?= Yii::t('app', 'Employee payments')?> - Gastos bancarios. <br>
                 Importante: <br>
             Sólo se incluyen retenciones o cualquier otro item pagado, si el mismo  ha sido incluído en un comprobante de pago. <br>
             Los gastos bancarios no están incluidos en el gráfico, ya que no es posible diferenciarlos por empresas

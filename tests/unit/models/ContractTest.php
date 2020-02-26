@@ -27,6 +27,12 @@ class ContractTest extends \Codeception\Test\Unit
     public function _fixtures()
     {
         return [
+            'contracts' => [
+                'class' => \app\tests\fixtures\ContractFixture::class
+            ],
+            'connections' => [
+                'class' => \app\tests\fixtures\ConnectionFixture::class
+            ],
             'customer' => [
                 'class' => CustomerFixture::class
             ],
@@ -44,7 +50,10 @@ class ContractTest extends \Codeception\Test\Unit
             ],
             'details' => [
                 'class' => \app\tests\fixtures\ContractDetailFixture::class
-            ]
+            ],
+            'users' => [
+                'class' => \app\tests\fixtures\UserFixture::class
+            ],
         ];
     }
 
@@ -279,6 +288,52 @@ class ContractTest extends \Codeception\Test\Unit
         expect('Contract dont have any payment extension', $model->getActivePaymentExtensionQtyPerPeriod())->equals(1);
 
 
+    }
+
+    public function testActiveItemContractAfterForceConnection()
+    {
+        Config::setValue('extend_payment_product_id', 3);
+        $contract = Contract::findOne(2);
+        $connection = $contract->connection;
+
+        $product_id = Config::getValue('extend_payment_product_id');
+
+        if (!$connection->force('31-12-2019', $product_id, $contract->vendor_id, true)){
+            expect('No forzo 1', false)->true();
+        }
+
+        $connection->ip4_public = '0';
+
+        $not_active_items = $contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->count();
+
+        expect('No active item 1', $not_active_items)->equals(0);
+
+        $contract = Contract::findOne(2);
+        $connection = $contract->connection;
+
+        if (!$connection->force('31-12-2019', $product_id, $contract->vendor_id, true)){
+            expect('No forzo 2', false)->true();
+        }
+
+        $connection->ip4_public = '0';
+
+        \Codeception\Util\Debug::debug($contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->asArray()->all());
+
+        $not_active_items = $contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->count();
+
+        expect('No active item 2', $not_active_items)->equals(0);
+
+        $contract = Contract::findOne(2);
+        $connection = $contract->connection;
+
+        if (!$connection->force('31-12-2019', $product_id, $contract->vendor_id, true)){
+            expect('No forzo 3', false)->true();
+        }
+
+        $connection->ip4_public = '0';
+        $not_active_items = $contract->getContractDetails()->andWhere(['status' => Contract::STATUS_DRAFT])->count();
+
+        expect('No active item 3', $not_active_items)->equals(0);
     }
 
 }

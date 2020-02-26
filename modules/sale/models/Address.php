@@ -82,7 +82,7 @@ class Address extends \app\components\db\ActiveRecord {
         ];
 
         if(Config::getConfig('customer_address_required')->value) {
-            $rules[] = [['zone_id', 'street'], 'required', 'on' => 'insert'];            
+            $rules[] = [['zone_id'], 'required', 'on' => 'insert'];
         }
         
         return $rules;

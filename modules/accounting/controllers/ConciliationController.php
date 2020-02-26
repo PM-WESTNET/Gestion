@@ -6,13 +6,18 @@ use app\modules\accounting\components\CountableMovement;
 use app\modules\accounting\models\AccountMovementItem;
 use app\modules\accounting\models\ConciliationItem;
 use app\modules\accounting\models\ConciliationItemHasResumeItem;
+use app\modules\accounting\models\OperationType;
 use app\modules\accounting\models\Resume;
 use app\modules\accounting\models\ResumeItem;
 use app\modules\accounting\models\search\AccountMovementSearch;
+use app\modules\accounting\models\search\ResumeSearch;
+use app\modules\config\models\Config;
+use app\modules\partner\models\PartnerDistributionModel;
 use Yii;
 use app\modules\accounting\models\Conciliation;
 use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -137,57 +142,73 @@ class ConciliationController extends Controller
         $searchModel->account_id_to = $model->moneyBoxAccount->account->rgt;
         $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
         $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
-        $searchModel->balance = 'credit';
 
-        $creditDataProvider = $searchModel->searchForConciliation([]);
+        $movementsDataProvider = $searchModel->searchForConciliation([]);
 
         $totalAccountCredit = $searchModel->totalCredit;
-
-        $searchModel->balance = 'debit';
-        $debitDataProvider = $searchModel->searchForConciliation([]);
         $totalAccountDebit = $searchModel->totalDebit;
+        $resumeTotal = $model->resume->getTotal();
+        $totalResumeCredit = $resumeTotal['credit'];
+        $totalResumeDebit = $resumeTotal['debit'];
 
         $conciliatedDataProvider = new ActiveDataProvider([
             'query' => $model->getConciliationItems(),
         ]);
 
-        $totales = $model->getTotals();
+        $partner_distibution_model = ArrayHelper::map(PartnerDistributionModel::find()->andWhere(['company_id' => $model->company_id])->all(),'partner_distribution_model_id', 'name');
+        $operationTypes = ArrayHelper::map(OperationType::find()->all(), 'operation_type_id', 'name');
 
         $this->layout = '/fluid';
         return $this->render( 'conciliate',[
             'model' => $model,
             'conciliatedDataProvider' => $conciliatedDataProvider,
-            'creditDataProvider' => $creditDataProvider,
-            'debitDataProvider' => $debitDataProvider,
+            'movementsDataProvider' => $movementsDataProvider,
             'totalAccountDebit' => $totalAccountDebit,
             'totalAccountCredit' => $totalAccountCredit,
-            'totalConciliationDebit' => $totales['debit'],
-            'totalConciliationCredit' => $totales['credit'],
-            'readOnly' =>$readOnly
+            'totalResumeCredit' => $totalResumeCredit,
+            'totalResumeDebit' => $totalResumeDebit,
+            'readOnly' =>$readOnly,
+            'operationTypes' => $operationTypes,
+            'partner_distribution_model' => $partner_distibution_model
         ]);
     }
 
-    public function actionGetResumeItems($resume_id = 0, $readOnly=false)
+    public function actionGetAccountMovements($id, $readOnly=false)
     {
-        $resumeItemsDebitDataProvider = null;
-        if ($resume_id != 0){
-            $resumeItemsDebitDataProvider = new ActiveDataProvider([
-                'query' => Resume::getResumeItemsEnabled($resume_id, true)
-            ]);
+        $model = $this->findModel($id);
+        $params = Yii::$app->request->post();
+        // Busco los movimientos de cuenta en el rango de fechas de la conciliacion.
+        // y teniendo en cuenta que no sean movimientos cerrados
+        $searchModel = new AccountMovementSearch();
+        $searchModel->account_id_from = $model->moneyBoxAccount->account->lft;
+        $searchModel->account_id_to = $model->moneyBoxAccount->account->rgt;
+        if (empty($params['AccountMovementSearch']['date'])){
+            $searchModel->fromDate = Yii::$app->formatter->asDate($model->date_from, 'yyyy-MM-dd');
+            $searchModel->toDate = Yii::$app->formatter->asDate($model->date_to, 'yyyy-MM-dd');
         }
 
-        $resumeItemsCreditDataProvider = null;
-        if ($resume_id != 0){
-            $resumeItemsCreditDataProvider = new ActiveDataProvider([
-                'query' => Resume::getResumeItemsEnabled($resume_id, false)
-            ]);
-        }
 
-        $model = Resume::findOne(["resume_id"=>$resume_id]);
+        $movementsDataProvider = $searchModel->searchForConciliation($params);
 
+        return $this->renderAjax('_movements', ['readOnly' => $readOnly, 'movementsDataProvider' => $movementsDataProvider]);
+    }
+
+    public function actionGetResumeItems($readOnly=false)
+    {
+        $resumeItemsDataProvider = null;
+        $resumeSearch = new ResumeSearch();
+        $params = Yii::$app->request->post();
+
+        $resumeItemsDataProvider = new ActiveDataProvider([
+            'query' => $resumeSearch->searchForConciliation($params)
+        ]);
+
+
+
+        $model = Resume::findOne(['resume_id' => $params['ResumeSearch']['resume_id']]);
+        $resumeItemsDataProvider->setPagination(false);
         return $this->renderAjax('_resume_items', [
-            'resumeItemsDebitDataProvider' => $resumeItemsDebitDataProvider,
-            'resumeItemsCreditDataProvider' => $resumeItemsCreditDataProvider,
+            'resumeItemsDataProvider' => $resumeItemsDataProvider,
             'model' => $model,
             'readOnly' => $readOnly
         ]);
@@ -215,35 +236,43 @@ class ConciliationController extends Controller
         $sumMovements = AccountMovementItem::find()
             ->andWhere(['account_movement_item_id' => $movements_ids])
             ->andWhere(['status' => 'draft'])
-            ->sum('COALESCE(debit,0)+COALESCE(credit,0)');
+            ->sum('COALESCE(ABS(debit),0)-COALESCE(ABS(credit),0)');
 
         $sumResume = ResumeItem::find()
             ->andWhere(['resume_item_id' => $resume_items_ids])
             ->andWhere(['status' => 'draft'])
-            ->sum('COALESCE(debit,0)+COALESCE(credit,0)');
+            ->sum('COALESCE(ABS(debit),0)-COALESCE(ABS(credit),0)');
 
 
         // En el caso de que no exista movimiento pero si item en el resumen,
         // Genero Items de la conciliacion
         if (count($movements_ids)==0 && count($resume_items_ids) > 0) {
             // Para cada item del resumen creo un item de la conciliacion
+            $item = new ConciliationItem();
+            $item->conciliation_id = $conciliation_id;
+            $item->date = date('d-m-Y');
+            $item->save();
+            $operation= null;
+            $partnerDistribution= Yii::$app->request->post('partner_distribution_model_id');
             foreach($resume_items_ids as $key => $value) {
-                if(($resModel=ResumeItem::findOne($value))!==null) {
-                    $item = new ConciliationItem();
-                    $item->conciliation_id = $conciliation_id;
-                    $item->date = date('d-m-Y');
-                    $item->amount = $resModel->debit + $resModel->credit;
-                    $item->description = $resModel->moneyBoxHasOperationType->operationType->name;
-                    $item->save();
-                    $item->addResumeItem($resModel->resume_item_id);
-                    $item->save();
+                $resModel=ResumeItem::findOne($value);
+                if($resModel) {
+                    $operation = $resModel->operationType;
+                    $item->addResumeItem($resModel, true, $partnerDistribution);
+                    $resModel->updateAttributes(['ready' => true]);
+                    $item->amount += ($resModel->debit - $resModel->credit);
                     $status = "success";
                 }
             }
+            Yii::info($operation);
+            $item->description = $operation->name;
+            $item->updateAttributes(['description', 'amount']);
+            Yii::info(print_r($item->getErrors(),1));
         } else {
 
+            $diference = ($sumResume - $sumMovements);
             // Si son iguales marco todo
-            if ($sumMovements == $sumResume) {
+            if ($sumMovements == $sumResume || abs($diference) <= (double)Config::getValue('movements_items_range')) {
                 $bOk = true;
 
                 $mMovements = AccountMovementItem::findAll(['account_movement_item_id'=>$movements_ids]);
@@ -254,16 +283,19 @@ class ConciliationController extends Controller
                 $item->amount = $sumResume;
                 $item->description = Yii::t('accounting', 'Conciliation of {movement} and {resume}.', ['movement'=>implode(",", $movements_ids), 'resume'=>implode(",", $resume_items_ids)] );
                 $item->date = date('d-m-Y');
+                $item->variation_balance = $diference;
                 $item->save();
 
                 // Asocio los movmientos
                 foreach($mMovements as $mov) {
                     $item->addAccountItem($mov->account_movement_item_id);
+                    $mov->updateAttributes(['ready' => true]);
                 }
 
                 // Asocio los items del resumen
                 foreach($mResumeItems as $res) {
-                    $item->addResumeItem($res->resume_item_id);
+                    $item->addResumeItem($res);
+                    $res->updateAttributes(['ready' => true]);
                 }
 
                 $item->save();
@@ -293,6 +325,16 @@ class ConciliationController extends Controller
         if (count($keys)>0) {
             foreach ($keys as $key=>$value ) {
                 $model = ConciliationItem::findOne($value);
+
+                foreach ($model->resumeItems as $item){
+                    $item->updateAttributes(['ready' => false]);
+                }
+
+                foreach ($model->accountMovementItems as $item) {
+                    $item->updateAttributes(['ready' => false]);
+                }
+
+
                 $model->delete();
             }
             $status = 'success';
@@ -319,11 +361,16 @@ class ConciliationController extends Controller
 
         $model = $this->findModel($conciliation_id);
         try {
-            $model->close();
-            $model->resume->changeState('conciled');
-            $status = 'success';
-            Yii::$app->session->addFlash('success', Yii::t('accounting', 'Conciliation closed.'));
+            if ($model->validateBalance()) {
+                $model->close();
+                $model->resume->changeState('conciled');
+                $status = 'success';
+                Yii::$app->session->addFlash('success', Yii::t('accounting', 'Conciliation closed.'));
+            }else {
+                Yii::$app->session->addFlash('error', Yii::t('accounting', 'The balance of account is not equals to balance of resume'));
+            }
         } catch(\Exception $ex) {
+            Yii::debug($ex->getTraceAsString());
             $message = Yii::t('accounting', $ex->getMessage());
         }
 

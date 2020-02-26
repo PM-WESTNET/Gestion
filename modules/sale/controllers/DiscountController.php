@@ -78,6 +78,10 @@ class DiscountController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $enabled_referenced_discount = Discount::find()->where(['status' => Discount::STATUS_ENABLED, 'referenced' => 1])->all();
+            if(count($enabled_referenced_discount) > 1) {
+                Yii::$app->session->addFlash('error', Yii::t('app', 'More than one referenced discount are enabled'));
+            }
             return $this->redirect(['view', 'id' => $model->discount_id]);
         } else {
             return $this->render('update', [

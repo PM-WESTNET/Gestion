@@ -441,5 +441,4 @@ class Ecopago extends \app\components\db\ActiveRecord {
         return false;
 
     }
-
 }

@@ -2,6 +2,7 @@
 
 namespace app\modules\ticket\models;
 
+use app\modules\config\models\Config;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\ticket\behaviors\GenerateActionBehavior;
 use app\modules\ticket\components\MesaTicket;
@@ -13,6 +14,7 @@ use yii\httpclient\Client;
 use app\modules\ticket\TicketModule;
 use app\modules\ticket\models\query\TicketQuery;
 use app\modules\agenda\models\Task;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "ticket".
@@ -46,6 +48,7 @@ use app\modules\agenda\models\Task;
  * @property History[] $completeHistory
  * @property User $user
  * @property Contract $contract
+ * @property boolean $discounted
  */
 class Ticket extends \app\components\db\ActiveRecord {
 
@@ -64,7 +67,6 @@ class Ticket extends \app\components\db\ActiveRecord {
 
     //Fecha que debe ser seteada si el estado del ticket genera una tarea.
     public $task_date;
-
     /**
      * @inheritdoc
      */
@@ -124,6 +126,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             [['status_id', 'customer_id', 'task_id', 'color_id', 'category_id', 'number', 'start_datetime', 'user_id', 'contract_id', 'external_tag_id'], 'integer'],
             [['start_date', 'finish_date'], 'date'],
             [['content'], 'string'],
+            [['discounted'], 'boolean'],
             [['title'], 'string', 'max' => 255],
             [['user_id', 'start_date', 'start_datetime', 'update_datetime', 'finish_date', 'status', 'users', 'observations', 'category', 'task', 'task_id', 'category_id', 'user', 'contract', 'task_date'], 'safe'],
         ];
@@ -153,6 +156,8 @@ class Ticket extends \app\components\db\ActiveRecord {
             'contract_id' => TicketModule::t('app', 'Contract'),
             'user_id' => TicketModule::t('app', 'User'),
             'external_tag_id' => TicketModule::t('app', 'Tag'),
+            'task_date' => TicketModule::t('app', 'Task date'),
+            'discounted' => TicketModule::t('app', 'Discounted'),
         ];
     }
 
@@ -270,7 +275,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             $allUsers = $userClass::findAll([
                         'status' => $userClass::STATUS_ACTIVE
             ]);
-            $users = \yii\helpers\ArrayHelper::map($allUsers, 'id', 'id');
+            $users = ArrayHelper::map($allUsers, 'id', 'id');
         }
 
         //Si vienen grupos de usuarios, buscamos sus integrantes
@@ -683,6 +688,7 @@ class Ticket extends \app\components\db\ActiveRecord {
         $this->unlinkAll('assignations', true);
         $this->unlinkAll('observations', true);
         $this->unlinkAll('completeHistory', true);
+        $this->unlinkAll('ticketManagements', true);
     }
 
     /**
@@ -837,4 +843,19 @@ class Ticket extends \app\components\db\ActiveRecord {
         return $this->getTicketManagements()->count();
     }
 
+    /**
+     * Crea un ticket de la categoría de Gestion de ADS.
+     */
+    public static function createGestionADSTicket($customer_id)
+    {
+        $ticket = new Ticket([
+            'customer_id' => $customer_id,
+            'task_id' => null,
+            'category_id' => Config::getValue('ticket_category_gestion_ads'),
+            'title' => 'Gestionar ADS',
+            'content' => 'Instalación realizada. Se asignó la IP al cliente.'
+        ]);
+
+        return $ticket->save();
+    }
 }

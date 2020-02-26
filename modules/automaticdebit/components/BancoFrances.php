@@ -73,7 +73,7 @@ class BancoFrances implements BankInterface
         $totalOperations = 0;
         $totalAmount = 0;
         foreach ($debits as $debit) {
-            $bills = $this->getCustomerBills($debit->customer_id, $this->periodFrom, $this->periodTo);
+            $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
 
             foreach ($bills as $bill) {
                 $resource = $this->addFirstLine($resource, $debit, $bill, $export->concept);
@@ -208,6 +208,7 @@ class BancoFrances implements BankInterface
                 if ($p->save()) {
                     $this->createItemAndRelation($payment['amount'], 'Debito Directo cta ' . $payment['cbu'], $payment_method->payment_method_id, $import->money_box_account_id, $p, $import);
                     $payments_created ++;
+                    $transaction->commit();
                 } else {
                     $transaction->rollBack();
                     array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'], 'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Cant create payment. Customer code: ').$payment['customer_code']]);
@@ -217,7 +218,6 @@ class BancoFrances implements BankInterface
                 array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'] ,'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Customer not found'). ': '.$payment['customer_code']]);
             }
 
-            $transaction->commit();
         }
 
         //Creamos registros de todos los pagos que no se pudieron procesar
@@ -437,7 +437,7 @@ class BancoFrances implements BankInterface
      * @throws InvalidConfigException
      * Obtiene los comprobantes de un cliente pendientes de pago.
      */
-    private function getCustomerBills($customer_id, $fromDate = null, $toDate = null)
+    private function getCustomerBills($customer_id, $company_id, $fromDate = null, $toDate = null)
     {
         $bills = Bill::find()
             ->leftJoin('bill_has_export_to_debit bhtd', 'bhtd.bill_id=bill.bill_id')
@@ -449,6 +449,7 @@ class BancoFrances implements BankInterface
             ->andWhere(['bill.status' => 'closed'])
             ->andWhere(['bt.multiplier' => 1])
             ->andWhere(['LIKE', 'bt.class', 'app\modules\sale\models\bills\Bill'])
+            ->andWhere(['bill.company_id' => $company_id])
             ->all();
 
         return $bills;

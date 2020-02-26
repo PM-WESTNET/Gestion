@@ -134,5 +134,4 @@ class TaskType extends \app\components\db\ActiveRecord {
     {
         return ArrayHelper::map(self::find()->all(), 'task_type_id', 'name');
     }
-
 }

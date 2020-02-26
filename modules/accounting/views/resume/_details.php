@@ -1,6 +1,8 @@
 <?php
 
+use app\modules\accounting\models\Account;
 use app\modules\accounting\models\ResumeItem;
+use kartik\select2\Select2;
 use kartik\widgets\FileInput;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -16,34 +18,46 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('accounting', 'Resumes'), 'u
 $this->params['breadcrumbs'][] = ['label' => $name, 'url' => ['view', 'id' => $model->resume_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 ?>
-    <style>
+    <!--<style>
         .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 0px;
         }
-    </style>
+    </style> -->
+
+    <?php if ($model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+        <div class="alert alert-warning">
+            <?php echo Yii::t('accounting','Money Box has undefined code operations')?>
+        </div>
+    <?php endif;?>
     <div class="resume-update">
         <input type="hidden" value="<?= $model->resume_id ?>" name="resume_id" id="resume_id"/>
-        <!-- <h1><?= Html::encode($this->title) ?></h1>-->
+        <h1><?= Html::encode($this->title) ?></h1>
+        <?php if ($model->can('closed')): ?>
+
+            <p>
+
+                <?= Html::a('<span class="glyphicon glyphicon-ok"></span> ' . Yii::t('app', 'Ready'), ['change-state', 'id' => $model->resume_id, 'newState' => 'closed'], [
+                    'class' => 'btn btn-success',
+                    //'style' => 'position:relative; top: -7px;',
+                    'data' => [
+                        'confirm' => Yii::t('accounting', 'Are you sure you want to close this resume ?'),
+                        'method' => 'post',
+                    ],]);
+                ?>
+            </p>
+
+        <?php endif; ?>
 
         <?php \yii\widgets\Pjax::begin(['id' => 'w_header_resume', 'timeout' => 5000]); ?>
         <div class="row">
+            <div class="col-sm-12">
+
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <strong>
+                    <h3 class="panel-title">
                         <?= Html::encode($this->title) ?>
-                    </strong>
-                    <?php if ($model->can('closed')) { ?>
-                        <div class="pull-right" role="group">
 
-                            <?= Html::a('<span class="glyphicon glyphicon-ok"></span> ' . Yii::t('app', 'Ready'), ['change-state', 'id' => $model->resume_id, 'newState' => 'closed'], [
-                                'class' => 'btn btn-success',
-                                'data' => [
-                                    'confirm' => Yii::t('accounting', 'Are you sure you want to close this resume ?'),
-                                    'method' => 'post',
-                                ],]);
-                            ?>
-                        </div>
-                    <?php } ?>
+                    </h3>
                 </div>
                 <div class="panel-body">
 
@@ -102,12 +116,58 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
                     </div>
                 </div>
             </div>
+            </div>
         </div>
         <?php \yii\widgets\Pjax::end(); ?>
         <div class="row">
             <div class="col-sm-12">
                 <?php $form = ActiveForm::begin(['action' => ['import-resume', 'id' => $model->resume_id], 'options' => ['id'=>'resume_form','enctype' => 'multipart/form-data']]); ?>
                 <input type="hidden" value="3" name="Resume[resume_id]" class="form-control" id="resume-resume_id">
+                <div class="col-sm-12">
+                    <?php echo $form->field($model, 'columns', [
+                            'template' =>
+                                '<div class="form-group">
+                                       {label}
+                                       {input}
+                                       {error}
+                                       <span class="help-block" id="helpBlock">'.Yii::t('accounting','Input the name of columns separated with comma').'</span>
+                                 </div>'
+
+                    ])->widget(\kartik\select2\Select2::class, [
+                        'data' => ['Fecha' => 'Fecha', 'Descripcion' => 'Descripcion', 'Código' => 'Código', 'Debe' => 'Debe', 'Haber' => 'Haber'],
+                        'value' => ['Fecha', 'Descripcion', 'Código', 'Debe', 'Haber'],
+                        'maintainOrder' => true,
+                        'options' => [
+                            'placeholder' => Yii::t('accounting','Columns of File'),
+                            'multiple' => true,
+                            'aria-describedby'=> 'helpBlock'
+                        ],
+                        'pluginOptions' => [
+                            'tags' => true,
+                            'tokenSeparators' => [','],
+                            'maximumInputLength' => 10
+                        ],
+                    ])?>
+
+                </div>
+                <div class="col-sm-12">
+                    <?= $form->field($model, 'account_id')->widget(Select2::className(),[
+                        'data' => yii\helpers\ArrayHelper::map(Account::getForSelect(), 'account_id', 'name' ),
+                        'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+                        'pluginOptions' => [
+                            'allowClear' => true
+                        ]
+                    ]);
+                    ?>
+                </div>
+                <div class="col-sm-12">
+                    <?= $form->field($model, 'separator')->dropDownList([
+                        "," => '"," Coma',
+                        ";" => '";" punto y coma',
+                         "\t"=> 'Tabulación'
+                    ]);
+                    ?>
+                </div>
                 <div class="col-sm-6">
                     <?= $form->field($model, 'file_import')->widget(FileInput::classname(), [
                         'pluginOptions' => [
@@ -147,54 +207,53 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
         <div class="clearfix margin-top-full"></div>
         
         <?php $canClose = $model->can('closed'); ?>
-        <div class="row">
-            <?php if ($canClose) { ?>
-                <div class="col-sm-12">
-                    <!-- <div class="panel panel-default">
-                        <div class="panel-body"> -->
-                            <?= $this->render('_form_item', ['model' => new ResumeItem(), 'resume' => $model]); ?>
-                        <!-- </div>
-                    </div> -->
-                </div>
-        </div>
 
         <div class="clearfix margin-top-full"></div>
 
         <div class="row">
-            <!-- <div class="clearfix margin-top-full"></div> -->
-            <?php } ?>
             <div class="col-sm-12">
+
+
                 <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <strong>
+                            <?= Yii::t('accounting', 'Resume Detail') ?>
+                        </strong>
+                    </div>
                     <div class="panel-body">
                         <?php \yii\widgets\Pjax::begin(['id' => 'w_item_form', 'timeout' => 5000]); ?>
                         <?= GridView::widget([
-                            'layout' => '{items}',
+                            //'layout' => '{items}',
                             'id' => 'wSummary',
                             'dataProvider' => $resumeItems,
                             'columns' => [
                                 [
-                                    'header' => Yii::t('app', 'Date'),
+                                    'label' => Yii::t('app', 'Date'),
                                     'attribute' => 'date',
                                     'format' => ['date']
                                 ],
                                 [
-                                    'header' => Yii::t('accounting', 'Operation Type'),
+                                    'label' => Yii::t('accounting', 'Operation Type'),
                                     'value' => function ($model){
-                                        return $model->moneyBoxHasOperationType->operationType->name;
+                                        if ($model->moneyBoxHasOperationType->operationType){
+                                            return $model->moneyBoxHasOperationType->operationType->name;
+                                        }
+
+                                        return $model->moneyBoxHasOperationType->code;
                                     },
                                 ],
                                 [
-                                    'header' => Yii::t('app', 'Description'),
+                                    'label' => Yii::t('app', 'Description'),
                                     'attribute' => 'description',
                                 ],
                                 [
-                                    'header' => Yii::t('accounting', 'Debit'),
+                                    'label' => Yii::t('accounting', 'Debit'),
                                     'value' => function ($model) {
                                         return Yii::$app->formatter->asCurrency($model->debit);
                                     }
                                 ],
                                 [
-                                    'header' => Yii::t('accounting', 'Credit'),
+                                    'label' => Yii::t('accounting', 'Credit'),
                                     'value' => function ($model) {
                                         return Yii::$app->formatter->asCurrency($model->credit);
                                     }
@@ -205,27 +264,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
                                         return Yii::t('accounting', ucfirst($model->status));
                                     }
                                 ],
-                                [
-                                    'class' => 'app\components\grid\ActionColumn',
-                                    'template' => '{delete}',
-                                    'contentOptions' => ['class' => 'text-center'],
-                                    'buttons' => [
-                                        'delete' => function ($url, $model, $key) use ($canClose) {
-                                            if ($model->getDeletable() && $canClose) {
-                                                return Html::a('<span class="glyphicon glyphicon-trash"></span>',
-                                                    "#",
-                                                    [
-                                                        'data-url' => yii\helpers\Url::toRoute(['resume/delete-item', 'resume_item_id' => $key]),
-                                                        'title' => Yii::t('yii', 'Delete'),
-                                                        'data-confirms' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                                                        'class' => 'resume-item-delete btn btn-danger' 
-                                                    ]);
-                                            }
-                                        },
-                                    ]
-                                ]
                             ],
                         ]); ?>
+            </div>
+        </div>
                         <div class="row">
                             <div class="col-sm-3 text-center">
                                 <strong><?= Yii::t('accounting', 'Total Debit'); ?></strong>
@@ -251,8 +293,6 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
                         </div>
                         <?php \yii\widgets\Pjax::end(); ?>
                     </div>
-                </div>
-            </div>
         </div>
 
     </div>

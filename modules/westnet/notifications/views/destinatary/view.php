@@ -299,6 +299,39 @@ $this->params['breadcrumbs'][] = $this->title;
         </div>
         <!-- end Debth info -->
 
+        <!-- Debth info -->
+        <div class="row valign-wrapper padding-top-quarter padding-bottom-quarter">
+
+            <div class="col-lg-3 text-center">
+
+                <span class="font-bold"><?= NotificationsModule::t('app', 'App'); ?></span>
+
+            </div>
+
+            <div class="col-lg-9">
+                <?php if (empty($model->has_app)):?>
+                    <label class="badge">
+                        <?php echo NotificationsModule::t('app', 'Without criteria')?>
+                    </label>
+                <?php endif;?>
+
+                <?php if (!empty($model->has_app) && $model->has_app === 'installed'):?>
+                    <label class="badge">
+                        <?php echo NotificationsModule::t('app', 'Installed')?>
+                    </label>
+                <?php endif;?>
+
+                <?php if (!empty($model->has_app) && $model->has_app === 'not_installed'):?>
+                    <label class="badge">
+                        <?php echo NotificationsModule::t('app', 'Not Installed')?>
+                    </label>
+                <?php endif;?>
+
+            </div>
+
+        </div>
+        <!-- end Debth info -->
+
     </div>
     <!-- end Search information -->
 
@@ -316,6 +349,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app', 'Email'),
                 'attribute'=>'email',
+            ],
+            [
+                'label' => Yii::t('app', 'Email Status'),
+                'attribute'=>'email_status',
             ],
             [
                 'label' => Yii::t('app', 'Phone'),

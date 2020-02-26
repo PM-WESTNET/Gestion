@@ -22,6 +22,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\components\helpers\EmptyLogger;
 
 /**
  * TaxesBookController implements the CRUD actions for TaxesBook model.
@@ -276,6 +277,51 @@ class TaxesBookController extends \app\components\web\Controller
         ]);
     }
 
+    public function buyEmployeeBills($id)
+    {
+        $model = $this->findModel($id);
+
+        $searchModel  = new TaxesBookSearch();
+        $searchModel->taxes_book_id = $id;
+        $searchModel->company_id = $model->company_id;
+        $searchModel->toDate = (new \DateTime($model->period))->format('Y-m-t');
+        $searchModel->employee_id = Yii::$app->request->post('employee_id', Yii::$app->request->get('employee_id', null));
+        $searchModel->bill_types =  Yii::$app->request->post('bill_types', Yii::$app->request->get('bill_types', null));
+
+        if(!$searchModel->bill_types) {
+            foreach($model->company->taxCondition->getBillTypesBuy()->select(['bill_type_id'])->asArray()->all() as $bt) {
+                $searchModel->bill_types[] = $bt['bill_type_id'];
+            }
+        } else {
+            if(strpos($searchModel->bill_types[0], ',')!==false) {
+                $searchModel->bill_types = explode(',', $searchModel->bill_types[0]);
+            }
+        }
+
+        $dataProvider = $searchModel->findBuyEmployeeBills(Yii::$app->request->getQueryParams());
+
+        $paginator = $dataProvider->getPagination();
+        $paginator->params = [
+            'id'=>$searchModel->taxes_book_id,
+            'per-page' => 10,
+        ];
+
+        if($searchModel->employee_id){
+            $paginator->params['employee_id'] = $searchModel->employee_id;
+        }
+
+        $paginator->page = Yii::$app->request->get('page-bills', Yii::$app->request->post('page',1))-1;
+        $dataProvider->setPagination($paginator);
+
+        $this->layout = '//embed';
+        return $this->renderAjax('_buy-employee-bills', [
+            'model' => $model,
+            'dataProvider'  => $dataProvider,
+            'searchModel'   => $searchModel,
+            'bills' => true
+        ]);
+    }
+
     public function buyBillsAdded($id)
     {
         $model = $this->findModel($id);
@@ -286,6 +332,11 @@ class TaxesBookController extends \app\components\web\Controller
         $searchModel->company_id = $model->company_id;
         $searchModel->bill_types =  ArrayHelper::getColumn( $model->company->taxCondition->billTypesBuy, 'bill_type_id');
         $dataProvider = $searchModel->findBuyBills(Yii::$app->request->getQueryParams());
+
+        $dataProvider2 = $searchModel->findBuyEmployeeBills(Yii::$app->request->getQueryParams());
+        $dataProvider->query->union($dataProvider2->query);
+
+        Yii::trace($dataProvider->query->createCommand()->getRawSql());
 
         $paginator = $dataProvider->getPagination();
         $paginator->params = [
@@ -327,6 +378,8 @@ class TaxesBookController extends \app\components\web\Controller
         Yii::$app->response->format = 'json';
 
         $provider_bill_id = Yii::$app->request->post('provider_bill_id', null);
+        $employee_bill_id = Yii::$app->request->post('employee_bill_id', null);
+
         if ($provider_bill_id !== null) {
             foreach ($provider_bill_id as $bill) {
                 if (empty(TaxesBookItem::find()->where(['taxes_book_id' => $id, 'provider_bill_id' => $bill])->one())) {
@@ -340,20 +393,50 @@ class TaxesBookController extends \app\components\web\Controller
             }
 
             $buy_bills_view = $this->buyBills($id);
+            $buy_employee_bills_view = $this->buyEmployeeBills($id);
             $buy_bills_added_view = $this->buyBillsAdded($id);
             $total_view = $this->buyBillsTotals($id);
 
             return [
                 'status' => 'success',
                 'buy_bills' => $buy_bills_view,
+                'buy__employee_bills' => $buy_employee_bills_view,
                 'buy_bills_added' => $buy_bills_added_view,
                 'total' => $total_view
             ];
-        } else {
+        }
+
+        if ($employee_bill_id !== null) {
+            foreach ($employee_bill_id as $bill) {
+                if (empty(TaxesBookItem::find()->where(['taxes_book_id' => $id, 'employee_bill_id' => $bill])->one())) {
+                    $item = new TaxesBookItem();
+                    $item->taxes_book_id = $id;
+                    $item->page = 0;
+                    $item->employee_bill_id = $bill;
+                    $item->taxes_book_id = $id;
+                    $item->save();
+                }
+            }
+
+            $buy_bills_view = $this->buyBills($id);
+            $buy_employee_bills_view = $this->buyEmployeeBills($id);
+            $buy_bills_added_view = $this->buyBillsAdded($id);
+            $total_view = $this->buyBillsTotals($id);
+
             return [
-                'status' => 'fail'
+                'status' => 'success',
+                'buy_bills' => $buy_bills_view,
+                'buy__employee_bills' => $buy_employee_bills_view,
+                'buy_bills_added' => $buy_bills_added_view,
+                'total' => $total_view
             ];
         }
+
+
+        return [
+            'status' => 'fail'
+        ];
+
     }
 
     public function actionRemoveBill($id)
@@ -362,26 +445,39 @@ class TaxesBookController extends \app\components\web\Controller
         Yii::$app->response->format = 'json';
 
         $provider_bill_id = Yii::$app->request->post('provider_bill_id', null);
-        if ($provider_bill_id !== null) {
-            foreach ($provider_bill_id as $bill) {
-                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'provider_bill_id' => $bill]);
-            }
+        $employee_bill_id = Yii::$app->request->post('employee_bill_id', null);
 
-            $buy_bills_view = $this->buyBills($id);
-            $buy_bills_added_view = $this->buyBillsAdded($id);
-            $total_view = $this->buyBillsTotals($id);
-
-            return [
-                'status' => 'success',
-                'buy_bills' => $buy_bills_view,
-                'buy_bills_added' => $buy_bills_added_view,
-                'total' => $total_view
-            ];
-        } else {
+        if (empty($provider_bill_id) && empty($employee_bill_id)) {
             return [
                 'status' => 'fail'
             ];
         }
+
+        if ($provider_bill_id !== null) {
+            foreach ($provider_bill_id as $bill) {
+                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'provider_bill_id' => $bill]);
+            }
+        }
+
+        if ($employee_bill_id !== null) {
+            foreach ($employee_bill_id as $bill) {
+                TaxesBookItem::deleteAll(['taxes_book_id' => $id, 'employee_bill_id' => $bill]);
+            }
+        }
+
+        $buy_bills_view = $this->buyBills($id);
+        $total_view = $this->buyBillsTotals($id);
+        $buy_bills_added_view = $this->buyBillsAdded($id);
+        $buy_employee_bills_view = $this->buyEmployeeBills($id);
+
+        return [
+            'status' => 'success',
+            'buy_bills' => $buy_bills_view,
+            'buy_bills_added' => $buy_bills_added_view,
+            'buy_employee_bills' => $buy_employee_bills_view,
+            'total' => $total_view
+        ];
+
     }
 
     public function actionClose($id)
@@ -426,6 +522,9 @@ class TaxesBookController extends \app\components\web\Controller
 
     public function actionPrint($id)
     {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
         Yii::$app->response->format = 'pdf';
         $this->layout = '//pdf';
@@ -436,7 +535,7 @@ class TaxesBookController extends \app\components\web\Controller
         $searchModel->company_id = $model->company_id;
 
         if ($model->type == 'buy') {
-            $dataProvider = $searchModel->findBuyBills(Yii::$app->request->getQueryParams());
+            $dataProvider = $searchModel->findBuyTxt(Yii::$app->request->getQueryParams());
         } else {
             $dataProvider = $searchModel->findSale(Yii::$app->request->getQueryParams());
         }
@@ -451,6 +550,9 @@ class TaxesBookController extends \app\components\web\Controller
 
     public function actionExportExcel($id)
     {
+        set_time_limit(0);
+        //Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
         Yii::$app->htmlToPdf->options['orientation'] = 'landscape';
         $searchModel  = new TaxesBookSearch();
@@ -477,6 +579,9 @@ class TaxesBookController extends \app\components\web\Controller
      */
     public function actionIibbProducts()
     {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $isSearch = Yii::$app->request->post('search', true);
         if($isSearch) {
             $iibb = new IibbSearch();
@@ -497,6 +602,9 @@ class TaxesBookController extends \app\components\web\Controller
 
     public function actionExportExcelIIBB()
     {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $iibb = new IibbSearch();
         $iibb->load(Yii::$app->request->bodyParams);
 
@@ -530,6 +638,9 @@ class TaxesBookController extends \app\components\web\Controller
 
     public function actionExportTxt($id, $type)
     {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
         $model = $this->findModel($id);
 
         $searchModel  = new TaxesBookSearch();
@@ -569,12 +680,14 @@ class TaxesBookController extends \app\components\web\Controller
     {
         Yii::$app->response->format = 'json';
         $buy_bills_view = $this->buyBills($id);
+        $buy_employee_bills_view = $this->buyEmployeeBills($id);
         $buy_bills_added_view = $this->buyBillsAdded($id);
         $total_view = $this->buyBillsTotals($id);
 
         return [
             'status' => 'success',
             'buy_bills' => $buy_bills_view,
+            'buy_employee_bills' => $buy_employee_bills_view,
             'buy_bills_added' => $buy_bills_added_view,
             'total' => $total_view
         ];

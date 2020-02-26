@@ -38,7 +38,6 @@ class ContractSearch extends Contract {
     public $max_debt;
     public $from_date;
     public $to_date;
-
     public $invoice_date;
     public $date_new_from;
     public $date_new_to;

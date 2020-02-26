@@ -11,6 +11,8 @@ use app\modules\sale\models\Product;
 use app\modules\sale\models\ProductToInvoice;
 use app\modules\sale\modules\contract\components\CompanyByNode;
 use app\modules\ticket\models\Category;
+use app\modules\westnet\components\SecureConnectionUpdate;
+use app\modules\westnet\isp\IspFactory;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\Vendor;
@@ -83,14 +85,13 @@ class Contract extends ActiveRecord {
                     ],
                 ];
             }
-
             $is_developer_mode = Config::getValue('is_developer_mode');
             if(!$is_developer_mode) {
                 //  Se sobreescribe la propiedad events del behavior para evitar que se distare cuando el contrato se
                 //inserta y que aun no tenga contract details que analizar.
                 $behaviors[] = [
                     'class' => 'app\modules\westnet\components\MesaTicketContractBehavior',
-//                    'events' => []
+                    'events' => []
                 ];
                 $behaviors[] = 'app\modules\westnet\components\RouterContractBehavior';
             }
@@ -169,7 +170,7 @@ class Contract extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getContractDetails() {
-        return $this->hasMany(ContractDetail::className(), ['contract_id' => 'contract_id']);
+        return $this->hasMany(ContractDetail::className(), ['contract_id' => 'contract_id'])->cache(-1);
     }
 
     /**
@@ -319,7 +320,7 @@ class Contract extends ActiveRecord {
                         case 'address_id':
                             $oldAddress= Address::findOne(['address_id' => $oldValue]);
                             $log = new CustomerLog();
-                            $log->createUpdateLog($this->contract->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fulAddress, 'Contract', $this->contract_id);
+                            $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Address'], ($oldAddress == null ? '-' : $oldAddress->fullAddress), $this->address->fullAddress, 'Contract', $this->contract_id);
                             break;
                         case 'status':
                             if ($this->status === self::STATUS_CANCELED) {
@@ -598,5 +599,33 @@ class Contract extends ActiveRecord {
         $product = Product::findOne(Config::getValue('extend_payment_product_id'));
 
         return round($product->finalPrice,2);
+    }
+
+    public function hasPendingPlanChange()
+    {
+        return ProgrammedPlanChange::find()->andWhere(['contract_id' => $this->contract_id, 'applied' => 0])->exists();
+    }
+
+    public function getPendingPlanChange()
+    {
+        return ProgrammedPlanChange::find()
+            ->andWhere(['contract_id' => $this->contract_id, 'applied' => 0])
+            ->orderBy(['date' => SORT_DESC])
+            ->one();
+    }
+
+    /**
+     * ¡¡¡¡DANGER!!!!. Actualiza el contrato directamente contra el ISP
+     * Usar con responsabilidad.
+     * TODO: Ver la posibilidad de crear tests para probar esta función.
+     * @return bool
+     */
+    public function updateOnISP()
+    {
+        if ($this->status === self::STATUS_ACTIVE) {
+            return SecureConnectionUpdate::update($this->connection, $this, true);
+        }
+
+        return false;
     }
 }

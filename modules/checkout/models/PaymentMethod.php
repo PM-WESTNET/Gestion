@@ -123,9 +123,29 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     /**
      * Devuelve un listado de medios de pago que están disponibles para ser mostrados en la app
      */
-    public static function getPaymentMethodsAvailableForApp()
+    public static function getPaymentMethodsAvailableForApp($only_enabled = true)
     {
-        return PaymentMethod::find()->where(['show_in_app' => true, 'status' => PaymentMethod::STATUS_ENABLED])->all();
+        $query = PaymentMethod::find()->where(['show_in_app' => true]);
+
+        if($only_enabled) {
+            $query->andWhere(['status' => PaymentMethod::STATUS_ENABLED]);
+        }
+
+        return $query->all();
+    }
+
+    /**
+     * Devuelve un listado de medios de pago que están disponibles para ser mostrados en la app
+     */
+    public static function getPaymentMethodsAvailableForIvr($only_enabled = true)
+    {
+        $query = PaymentMethod::find()->where(['send_ivr' => true]);
+
+        if($only_enabled) {
+            $query->andWhere(['status' => PaymentMethod::STATUS_ENABLED]);
+        }
+
+        return $query->all();
     }
 
     /**
@@ -134,5 +154,19 @@ class PaymentMethod extends \app\components\db\ActiveRecord
     public static function getPaymentMethodForSelect()
     {
         return ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name');
+    }
+
+    /**
+     * Obtiene el medio de pago Transferencia.
+     */
+    public static function getTransferencia()
+    {
+        $payment_method = PaymentMethod::findOne(['name' => 'Transferencia']);
+
+        if(!$payment_method) {
+            return false;
+        }
+
+        return $payment_method;
     }
 }

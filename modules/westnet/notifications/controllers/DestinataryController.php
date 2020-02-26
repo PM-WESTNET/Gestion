@@ -56,10 +56,16 @@ class DestinataryController extends Controller {
     public function actionView($id) {
         $destinatary = $this->findModel($id);
 
+        $customerQuery = $destinatary->getCustomersQuery( $destinatary->notification->transport->slug != 'sms');
+
+        if ($destinatary->notification->transport->slug === 'email') {
+            $customerQuery->andWhere(['email_status' => 'active']);
+        }
+
         $dataProvider = new ActiveDataProvider([
-            'query' => $destinatary->getCustomersQuery( $destinatary->notification->transport->slug != 'sms')->andWhere(['email_status' => 'active'])
+            'query' => $customerQuery
         ]);
-        
+
         return $this->render('view', [
             'dataProvider' => $dataProvider,
             'model' => $destinatary,
@@ -111,8 +117,12 @@ class DestinataryController extends Controller {
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             $this->redirect(['view', 'id' => $model->destinatary_id]);
         } else {
+
+            $notification = Notification::findOne($model->notification_id);
+
             return $this->render('update', [
-                        'model' => $model,
+                'model' => $model,
+                'notification' => $notification
             ]);
         }
     }

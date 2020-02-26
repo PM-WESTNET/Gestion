@@ -169,6 +169,30 @@ class CustomerCest
         ]);
     }
 
+    public function canForceConnectionFailToDebtManyBills(IvrapiTester $I)
+    {
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/can-force', ['code' => 59812]);
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseContainsJson([
+            'error' => Yii::t('ivrapi','The customer debts more than one bill')
+        ]);
+    }
+
+    public function canForceConnectionFailToNewCustomerClipped(IvrapiTester $I)
+    {
+        $I->haveHttpHeader('Authorization', 'Bearer QENUrXDpxJcSXTyC0gWeEyBMe9nPWFVxthEp8kpc');
+        $I->haveHttpHeader('client_id', 'ivr_user');
+        $I->haveHttpHeader('client_secret', '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe');
+        $I->sendPOST('/customer/can-force', ['code' => 59810]);
+        $I->seeResponseCodeIs(400);
+        $I->seeResponseContainsJson([
+            'error' => Yii::t('ivrapi','The customer exceeded the payment extension limit')
+        ]);
+    }
+
     public function forceConnection(IvrapiTester $I)
     {
 

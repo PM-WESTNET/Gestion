@@ -34,6 +34,7 @@ class TaxesBookSearch extends ProviderBill
     public $company_id;
 
     public $provider_id;
+    public $employee_id;
 
     public $taxes_book_item_id;
 
@@ -45,7 +46,7 @@ class TaxesBookSearch extends ProviderBill
     public function rules()
     {
         return [
-            [['provider_id', 'company_id', 'taxes_book_item_id'], 'integer'],
+            [['provider_id', 'employee_id', 'company_id', 'taxes_book_item_id'], 'integer'],
             [['toDate', 'fromDate', 'for_print', 'bill_types', 'period', 'status', 'number'], 'safe'],
             [['fromDate'], 'default', 'value'=> date('Y-m-01')],
             [['toDate'], 'default', 'value'=> date('Y-m-t')]
@@ -126,12 +127,7 @@ class TaxesBookSearch extends ProviderBill
 
         $subQuery = 'SELECT distinct concat(c.lastname, \' \', c.name) AS business_name, c.document_number as tax_identification, b.date, bt.name AS bill_type, ' .
                     'b.number, b.amount,'.
-                    '(CASE '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.21 THEN 0.21 '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.105 THEN 0.105 '.
-                        'WHEN (round(if(b.total=b.amount, 0.21, (b.total/b.amount) - 1 ),2)) = 0.27 THEN 0.27 '.
-                        'ElSE 0.21 '.
-                    'END) as pct, '.
+                    '0.21 as pct, '.
                     'tbi.page, '.
                     '(if((b.amount = b.total), (b.amount / 1.21), b.amount)* bt.multiplier) AS net, ' .
                     '(b.total * bt.multiplier) AS total, ' .
@@ -203,7 +199,8 @@ class TaxesBookSearch extends ProviderBill
         $subQuery
             ->select(['pb.provider_bill_id', 'tbi.taxes_book_item_id', 'p.name as business_name', 'p.tax_identification', 'pb.date',
                             'bt.name AS bill_type', 'pb.number', 'tbi.page', new Expression('(pb.net * bt.multiplier) as net'),
-                            new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount')])
+                            new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount'),
+                            new Expression('"provider" as type')])
             ->from('provider_bill pb')
             ->leftJoin('provider p', 'pb.provider_id = p.provider_id ' )
             ->leftJoin('bill_type AS bt', 'pb.bill_type_id = bt.bill_type_id ' )
@@ -243,7 +240,7 @@ class TaxesBookSearch extends ProviderBill
         $mainQuery = new Query();
         $mainQuery
             ->select(['provider_bill_id', 'taxes_book_item_id', 'business_name',
-            'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+            'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total', 'type'])
             ->from(['c'=>$subQuery])
             ->groupBy(['business_name', 'tax_identification', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
             ->orderBy(['page'=>SORT_ASC, 'date'=>SORT_ASC])
@@ -273,6 +270,84 @@ class TaxesBookSearch extends ProviderBill
         }
     }
 
+    private function getBaseQueryEmployeeBuy($total=false)
+    {
+
+        $subQuery = new Query();
+        $subQuery
+            ->select(['pb.employee_bill_id', 'tbi.taxes_book_item_id', 'CONCAT(p.name, " ", p.lastname) as fullName', 'p.document_number', 'pb.date',
+                'bt.name AS bill_type', 'pb.number', 'tbi.page', new Expression('(pb.net * bt.multiplier) as net'),
+                new Expression('(pb.total * bt.multiplier) as total'), 'tr.tax_rate_id', new Expression('(pbhtr.amount*bt.multiplier) as amount'),
+                new Expression('"employee" as type')])
+            ->from('employee_bill pb')
+            ->leftJoin('employee p', 'pb.employee_id = p.employee_id ' )
+            ->leftJoin('bill_type AS bt', 'pb.bill_type_id = bt.bill_type_id ' )
+            ->leftJoin('employee_bill_has_tax_rate pbhtr', 'pb.employee_bill_id = pbhtr.employee_bill_id ' )
+            ->leftJoin('tax_rate AS tr', 'pbhtr.tax_rate_id = tr.tax_rate_id ' )
+            ->leftJoin('taxes_book_item tbi', 'pb.employee_bill_id = tbi.employee_bill_id ' )
+            ->where('pb.status = \'closed\' ')
+            ->andWhere(['pb.company_id' => $this->company_id])
+            ->andWhere(['bt.applies_to_buy_book' => 1])
+
+        ;
+        if(!empty($this->bill_types)){
+            $subQuery->andWhere(['in', 'pb.bill_type_id', $this->bill_types]);
+        }
+
+        if(!empty($this->fromDate)){
+            $subQuery->andWhere(['>=', 'pb.date', Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd')]);
+        }
+
+        if(!empty($this->toDate)){
+            $subQuery->andWhere(['<=', 'pb.date', Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd')]);
+        }
+
+        if (!empty($this->employee_id)) {
+            $subQuery->andWhere(['=', 'pb.employee_id', $this->employee_id]);
+        }
+
+        if (!empty($this->taxes_book_id) &&  !$this->for_print && !$total) {
+            $subQuery->andWhere(['or', 'tbi.taxes_book_id is null', 'tbi.taxes_book_id = :taxes_book_id']);
+        } else if ($total || (!empty($this->taxes_book_id) &&  $this->for_print )) {
+            $subQuery->andWhere('tbi.taxes_book_id= :taxes_book_id');
+        }
+
+        $subQuery->addParams([':taxes_book_id' => $this->taxes_book_id]);
+
+
+        $mainQuery = new Query();
+        $mainQuery
+            ->select(['employee_bill_id', 'taxes_book_item_id', 'fullName',
+                'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total', 'type'])
+            ->from(['c'=>$subQuery])
+            ->groupBy(['fullName', 'document_number', 'date', 'page', 'bill_type', 'number', 'net', 'total'])
+            ->orderBy(['page'=>SORT_ASC, 'date'=>SORT_ASC])
+        ;
+
+        // Recorro los impuestos para cargar las columnas de cada uno
+        foreach(TaxRate::find()->all() as $tax) {
+            $mainQuery->addSelect(new Expression('sum(CASE WHEN tax_rate_id = ' . $tax->tax_rate_id . ' THEN amount ELSE 0 END) as \'' . $tax->tax->name . ' ' . ($tax->pct*100) . '%\''));
+        }
+
+
+        // Armo la consulta general
+        if ($total) {
+            $query = new Query();
+            $query
+                ->select(new Expression('round(sum(net),2) as Subtotal'))
+                ->from(['b'=> $mainQuery]);
+
+            foreach(TaxRate::find()->all() as $tax) {
+                $query->addSelect(new Expression('sum(`'. $tax->tax->name . ' ' . ($tax->pct*100) . '%`) as `'.$tax->tax->name . ' ' . ($tax->pct*100) .'%`'));
+            }
+            $query->addSelect(new Expression('round(sum(total),2) as Total'));
+
+            return $query;
+        } else {
+            return $mainQuery;
+        }
+    }
+
 
     /**
      * Retorna todos los comprobantes pagados dentro de los parametros seteados.
@@ -284,6 +359,22 @@ class TaxesBookSearch extends ProviderBill
     {
         $this->load($params);
         $sql = $this->getBaseQueryBuy();
+
+        return new ActiveDataProvider([
+            'query' => $sql,
+        ]);
+    }
+
+    /**
+     * Retorna todos los comprobantes de empleados pagados dentro de los parametros seteados.
+     *
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function findBuyEmployeeBills($params)
+    {
+        $this->load($params);
+        $sql = $this->getBaseQueryEmployeeBuy();
 
         return new ActiveDataProvider([
             'query' => $sql,
@@ -302,8 +393,23 @@ class TaxesBookSearch extends ProviderBill
         $this->load($params);
 
         $query = $this->getBaseQueryBuy(true);
+        $query2 = $this->getBaseQueryEmployeeBuy(true);
 
-        $this->totals = $query->one();
+        $query->union($query2);
+
+        $masterQuery = new Query();
+        $masterQuery
+            ->select(new Expression('round(sum(Subtotal),2) as Subtotal'))
+            ->from(['b'=> $query]);
+
+        foreach(TaxRate::find()->all() as $tax) {
+            $masterQuery->addSelect(new Expression('sum(`'. $tax->tax->name . ' ' . ($tax->pct*100) . '%`) as `'.$tax->tax->name . ' ' . ($tax->pct*100) .'%`'));
+        }
+        $masterQuery->addSelect(new Expression('round(sum(Total),2) as Total'));
+
+
+
+        $this->totals = $masterQuery->one();
         return $this->totals;
     }
 
@@ -345,14 +451,6 @@ class TaxesBookSearch extends ProviderBill
                     LEFT JOIN taxes_book_item tbi ON b.bill_id = tbi.bill_id
                     LEFT JOIN customer AS c ON b.customer_id = c.customer_id
                     LEFT JOIN bill_type AS bt ON b.bill_type_id = bt.bill_type_id
-                    LEFT JOIN (
-                                SELECT bill_id,
-                                  round((line_total / line_subtotal) - 1, 3) AS pct,
-                                  sum(line_subtotal)                         AS line_subtotal,
-                                  sum(line_total)                            AS line_total
-                                FROM bill_detail
-                                GROUP BY bill_id, round((line_total / line_subtotal) - 1, 3)
-                              ) AS bd ON b.bill_id = bd.bill_id
                     LEFT JOIN tax_rate tr on round(tr.pct,2) = round(if(b.total = b.amount, 0.21, (b.total / b.amount) - 1), 2)
                     LEFT JOIN document_type dt on c.document_type_id = dt.document_type_id
                     LEFT JOIN point_of_sale pos on b.company_id = pos.company_id
@@ -360,8 +458,7 @@ class TaxesBookSearch extends ProviderBill
                   (b.ein IS NOT NULL AND b.ein <> '' OR ((b.ein IS NULL OR b.ein = '') AND bt.invoice_class_id IS NULL)) AND 1 = 1
                 AND b.company_id = :company_id AND tbi.taxes_book_id = :taxes_book_id
                 AND bt.applies_to_sale_book = 1
-                  GROUP BY c.name, c.document_number, b.date, concat(bt.name, ' - ', b.number), b.amount,
-                    if(bd.pct = 0 OR bd.pct IS NULL, 0.21, bd.pct), tbi.page, tr.code
+                  GROUP BY c.name, c.document_number, b.date, concat(bt.name, ' - ', b.number), b.amount, tbi.page, tr.code
                   ORDER BY tbi.page, b.date DESC, b.number";
 
         $queryParams[':company_id'] = $this->company_id;
@@ -506,6 +603,214 @@ class TaxesBookSearch extends ProviderBill
         $queryParams[':company_id'] = $this->company_id;
         $queryParams[':taxes_book_id'] = $this->taxes_book_id;
 
+        //Me traigo la consulta de los comprobantes de empleados. La query debe tener las mismas columnas que la de proveedores, para poder
+        // hacer el UNION
+        $employee_bills = $this->findEmployeeBuyTxt($params, true);
+
+        // Hago la union entre las 2 query
+        $sql = '('.$sql.') UNION ('. $employee_bills.')';
+
+
+        // Por último hago una query general seleccionando los mismos campos (sin hacer cálculos solo selecciono los resultados)
+        //Para poder ordenar por page y date el data set resultante
+        $masterSql = "SELECT
+                    date,
+                    tipo_comprobante,
+                    nombre_tipo_comprobante,
+                    numero_comprobante,
+                    numero_importacion,
+                    tipo_documento,
+                    numero_documento,
+                    empresa,
+                    codigo_operacion,
+                    total,  
+                    conceptos_no_incluido_neto, 
+                    exento,
+                    percepciones_a_cuenta_iva, 
+                    percepciones_a_cuenta_otros,
+                    iibb,
+                    municipales,
+                    internos,
+                    codigo_moneda,
+                    tipo_de_cambio,
+                    cantidad_iva,
+                    credito_fiscal,
+                    otros_tributos,
+                    cuit_emisor,
+                    emisor,
+                    iva_comision,
+                    neto,
+                    tipo_de_iva,
+                    impuesto_liquidado,
+                    code_iva_105,
+                    code_iva_21,
+                    code_iva_27,
+                    code_iva_06,
+                    code_iva_05,
+                    code_iva_025,
+                    iva_105,
+                    iva_21,
+                    iva_27,
+                    iva_06,
+                    iva_05,
+                    iva_025,
+                    net_iva_105,
+                    net_iva_21,
+                    net_iva_27,
+                    net_iva_06,
+                    net_iva_05,
+                    net_iva_025,
+                    page,
+                    retencion_iva,
+                    retencion_ingresos_brutos
+                    FROM ($sql) master
+                    ORDER BY page, date";
+
+        return new SqlDataProvider([
+            'sql' => $masterSql,
+            'params' => $queryParams,
+            'pagination' => [
+                'pageSize' => 0,
+            ],
+        ]);
+    }
+
+
+    /**
+     * @param $params
+     * Devuelve los comprabantes de empleados para exportar el libro IVA compra. DEBE MANTENER LA MISMA ESTRUCTURA Y COLUMNAS QUE LA
+     * BUSQUEDA DE COMPROBANTES DE PROVEEDOR
+     * @return SqlDataProvider || string
+     * Primer bloque de CASE WHEN : Es necesario que se tenga en cuenta los importes de los impuestos que no son iva en los campos que están destinado a ello
+     * Segundo bloque de CASE WHEN : Se determina el importe del impuesto por cada tipo de iva
+     * Tercer bloque de CASE WHEN : Se suma 1 por cada tipo de iva que está presente en el comprobante, ya que de esa manera se puede determinar la cantidad de alicuotas. (tener presente que por cada tipo de iva, se debe enviar una alicuota)
+     * Cuarto bloque de CASE WHEN : Código de cada tipo de iva, en caso de que se incluya en el comprobante
+     */
+    public function findEmployeeBuyTxt($params, $query = false)
+    {
+        $this->load($params);
+
+        $sql = "SELECT
+                    date,
+                    bill_type                                                                   as tipo_comprobante,
+                    bill_type_name                                                              as nombre_tipo_comprobante,
+                    number                                                                      as numero_comprobante,
+                    0                                                                           as numero_importacion,
+                    tipo_documento                                                              as tipo_documento,
+                    tax_identification                                                          as numero_documento,
+                    business_name                                                               as empresa,
+                    ' '                                                                         as codigo_operacion,
+                    total,  
+                    SUM(conceptos_no_gravados)                                                  as conceptos_no_incluido_neto, 
+                    0                                                                           as exento,
+                    SUM(percepcion_iva)                                                         as percepciones_a_cuenta_iva, 
+                    SUM(retencion_ganancias)                                                    as percepciones_a_cuenta_otros,
+                    (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos))  as iibb,
+                    0                                                                           as municipales,
+                    0                                                                           as internos,
+                    'PES'                                                                       as codigo_moneda,
+                    1                                                                           as tipo_de_cambio,
+                    (SUM(cant_iva_105) + SUM(cant_iva_21) + SUM(cant_iva_27) + SUM(cant_iva_06) + SUM(cant_iva_05) + SUM(cant_iva_025)) as cantidad_iva,
+                    (total - net - (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos)) - SUM(retencion_ganancias) - SUM(conceptos_no_gravados) - SUM(percepcion_iva)) as credito_fiscal,
+                    0                                                                           as otros_tributos,
+                    0                                                                           as cuit_emisor,
+                    ''                                                                          as emisor,
+                    0                                                                           as iva_comision,
+                    net                                                                         as neto,
+                    code                                                                        as tipo_de_iva,
+                    (total - net - (SUM(ingresos_brutos) + SUM(percepcion_ingresos_brutos) + SUM(retencion_ingresos_brutos)) - SUM(retencion_ganancias) - SUM(conceptos_no_gravados) - SUM(percepcion_iva)) as impuesto_liquidado,
+                    SUM(code_iva_105)                                                           as code_iva_105,
+                    SUM(code_iva_21)                                                            as code_iva_21,
+                    SUM(code_iva_27)                                                            as code_iva_27,
+                    SUM(code_iva_06)                                                            as code_iva_06,
+                    SUM(code_iva_05)                                                            as code_iva_05,
+                    SUM(code_iva_025)                                                           as code_iva_025,
+                    SUM(iva_105)                                                                as iva_105,
+                    SUM(iva_21)                                                                 as iva_21,
+                    SUM(iva_27)                                                                 as iva_27,
+                    SUM(iva_06)                                                                 as iva_06,
+                    SUM(iva_05)                                                                 as iva_05,
+                    SUM(iva_025)                                                                as iva_025,
+                    SUM(net_iva_105)                                                            as net_iva_105,
+                    SUM(net_iva_21)                                                             as net_iva_21,
+                    SUM(net_iva_27)                                                             as net_iva_27,
+                    SUM(net_iva_06)                                                             as net_iva_06,
+                    SUM(net_iva_05)                                                             as net_iva_05,
+                    SUM(net_iva_025)                                                            as net_iva_025,
+                    page                                                                        AS page,
+                    retencion_iva                                                               AS retencion_iva,
+                    retencion_ingresos_brutos                                                   AS retencion_ingresos_brutos
+                FROM (SELECT
+                        eb.employee_bill_id,
+                        etbi.taxes_book_item_id,
+                        CONCAT(e.name, ' ', e.lastname)                    AS business_name,
+                        e.document_number AS tax_identification,
+                        CASE WHEN e.tax_condition_id = 3 THEN 96 ELSE 80 END as tipo_documento,
+                        eb.date,
+                        ebt.code                    AS bill_type,
+                        ebt.name                    AS bill_type_name,
+                        eb.number,
+                        etbi.page,
+                        (eb.net * ebt.multiplier)       AS net,
+                        (eb.total * ebt.multiplier)     AS total,
+                        etr.pct,
+                        coalesce(etr.code, 5) as code,
+                        (ebhtr.amount * ebt.multiplier) AS amount,
+                        
+                        CASE WHEN etx.slug = 'ingresos-brutos' THEN ebhtr.amount ELSE 0 END as ingresos_brutos,
+                        CASE WHEN etx.slug = 'cptos-no-grav' THEN ebhtr.amount ELSE 0 END as conceptos_no_gravados,
+                        CASE WHEN etx.slug = 'percep-iva' THEN ebhtr.amount ELSE 0 END as percepcion_iva,
+                        CASE WHEN etx.slug = 'percep-ing-b' THEN ebhtr.amount ELSE 0 END as percepcion_ingresos_brutos,
+                        CASE WHEN etx.slug = 'retenc-iva' THEN ebhtr.amount ELSE 0 END as retencion_iva,
+                        CASE WHEN etx.slug = 'retenc-ing-b' THEN ebhtr.amount ELSE 0 END as retencion_ingresos_brutos,
+                        CASE WHEN etx.slug = 'retenc-gan' THEN ebhtr.amount ELSE 0 END as retencion_ganancias,
+                        CASE WHEN etx.slug = 'iva-otros' THEN ebhtr.amount ELSE 0 END as iva_otros,
+                        
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.105' THEN ebhtr.amount ELSE 0 END as iva_105,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.21' THEN ebhtr.amount ELSE 0 END as iva_21,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.27' THEN ebhtr.amount ELSE 0 END as iva_27,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.06' THEN ebhtr.amount ELSE 0 END as iva_06,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.05' THEN ebhtr.amount ELSE 0 END as iva_05,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.025' THEN ebhtr.amount ELSE 0 END as iva_025,
+                        
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.105' THEN ebhtr.net ELSE 0 END as net_iva_105,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.21' THEN ebhtr.net ELSE 0 END as net_iva_21,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.27' THEN ebhtr.net ELSE 0 END as net_iva_27,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.06' THEN ebhtr.net ELSE 0 END as net_iva_06,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.05' THEN ebhtr.net ELSE 0 END as net_iva_05,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.025' THEN ebhtr.net ELSE 0 END as net_iva_025,
+                        
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.105' THEN 1 ELSE 0 END as cant_iva_105,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.21' THEN 1 ELSE 0 END as cant_iva_21,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.27' THEN 1 ELSE 0 END as cant_iva_27,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.06' THEN 1 ELSE 0 END as cant_iva_06,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.05' THEN 1 ELSE 0 END as cant_iva_05,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.025' THEN 1 ELSE 0 END as cant_iva_025,
+                        
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.105' THEN etr.code ELSE 0 END as code_iva_105,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.21' THEN etr.code ELSE 0 END as code_iva_21,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.27' THEN etr.code ELSE 0 END as code_iva_27,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.06' THEN etr.code ELSE 0 END as code_iva_06,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.05' THEN etr.code ELSE 0 END as code_iva_05,
+                        CASE WHEN etx.slug =  'iva' AND etr.pct = '0.025' THEN etr.code ELSE 0 END as code_iva_025
+                                                
+                      FROM employee_bill eb LEFT JOIN employee e ON eb.employee_id = e.employee_id
+                        LEFT JOIN bill_type ebt ON eb.bill_type_id = ebt.bill_type_id
+                        LEFT JOIN employee_bill_has_tax_rate ebhtr ON eb.employee_bill_id = ebhtr.employee_bill_id
+                        LEFT JOIN tax_rate etr ON ebhtr.tax_rate_id = etr.tax_rate_id
+                        LEFT JOIN tax etx ON etx.tax_id = etr.tax_id
+                        LEFT JOIN taxes_book_item etbi ON eb.employee_bill_id = etbi.employee_bill_id
+                      WHERE
+                      ((eb.status = 'closed') AND (eb.company_id = :company_id)) AND (etbi.taxes_book_id = :taxes_book_id) AND ebt.applies_to_buy_book = 1) e
+                GROUP BY business_name, tax_identification, tipo_documento, date, page, bill_type, number, net, total
+                ORDER BY page, date";
+
+        $queryParams[':company_id'] = $this->company_id;
+        $queryParams[':taxes_book_id'] = $this->taxes_book_id;
+
+        if ($query) {
+            return $sql;
+        }
         return new SqlDataProvider([
             'sql' => $sql,
             'params' => $queryParams,

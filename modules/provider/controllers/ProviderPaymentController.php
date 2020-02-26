@@ -14,6 +14,9 @@ use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
+use yii\helpers\ArrayHelper;
+use app\modules\accounting\models\MoneyBox;
+use app\modules\config\models\Config;
 
 /**
  * ProviderPaymentController implements the CRUD actions for ProviderPayment model.
@@ -434,5 +437,25 @@ class ProviderPaymentController extends Controller {
             'status' => $status,
             'message' => $message
         ];
+    }
+
+    /**
+     * Devuelve un listado de bancos o cajas para ser desplegados en un selector.
+     */
+    public function actionGetDataForSelector($type) {
+        Yii::$app->response->format = 'json';
+        $data = [];
+
+        if($type == 'bank'){
+            foreach (MoneyBox::findByMoneyBoxType(Config::getValue('money_box_bank'))->all() as $bank) {
+                array_push($data, ['val' => $bank->money_box_id, 'text' => $bank->name]);
+            }
+        } else {
+            foreach (MoneyBox::findByMoneyBoxType(Config::getValue('money_box_smallbox'))->all() as $box) {
+                array_push($data, ['val' => $box->money_box_id, 'text' => $box->name]);
+            }
+        }
+
+        return $data;
     }
 }

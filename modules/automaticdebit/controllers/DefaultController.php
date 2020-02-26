@@ -1,6 +1,6 @@
 <?php
 
-namespace app\module\automaticdebit\controllers;
+namespace app\modules\automaticdebit\controllers;
 
 use yii\web\Controller;
 

@@ -47,6 +47,8 @@ class CustomerSearch extends Customer {
     public $customers_id;
     public $customer_id;
 
+    public $not_contract_status;
+
     //TODO: dejar solo nodes
     public $node_id;
     public $nodes = [];
@@ -74,7 +76,7 @@ class CustomerSearch extends Customer {
         return [
             [['customer_id', 'document_type_id', 'debt_bills', 'plan_id'], 'integer'],
             [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to'], 'safe'],
-            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status'],'safe'],
+            [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
             [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
@@ -184,6 +186,8 @@ class CustomerSearch extends Customer {
         $this->filterByNodes($query);
         $this->filterByZone($query);
         $this->filterByPlan($query);
+        $this->filterEmailStatus($query);
+        $this->filterMobileAppStatus($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -229,7 +233,6 @@ class CustomerSearch extends Customer {
             ;
 
         $this->load($params);
-
         if($normal){
             $this->filterByCategory($query);
             $this->filterByClass($query);
@@ -498,7 +501,7 @@ class CustomerSearch extends Customer {
             $subQueryPayments->andWhere(['>=', 'p.date', Yii::$app->getFormatter()->asDate($this->fromDate, 'yyyy-MM-dd') ]);
         }
 
-        $masterSubQuery = (new Query())->select(['customer.customer_id', 'concat(customer.lastname, \' \', customer.name) as name', 'customer.phone', 'customer.code',
+        $masterSubQuery = (new Query())->select(['customer.customer_id', 'concat(customer.lastname, \' \', customer.name) as name', 'customer.phone','customer.phone2','customer.phone3','customer.phone4', 'customer.document_number', 'customer.code',
                 'round(coalesce(('.$subQueryBills->createCommand()->getRawSql().'), 0) - coalesce(('.$subQueryPayments->createCommand()->getRawSql().'), 0)) as saldo', 'bills.debt_bills', 'bills.payed_bills',
                 new Expression('( bills.debt_bills +  bills.payed_bills) as total_bills'),
             'contract_detail.product_id as plan',
@@ -701,6 +704,10 @@ class CustomerSearch extends Customer {
         if (!empty($this->contract_status)) {
             $query->andWhere(['contract.status' => $this->contract_status]);
         }
+
+        if (!empty($this->not_contract_status)) {
+            $query->andWhere(['not',['contract.status' => $this->not_contract_status]]);
+        }
     }
 
     private function filterByContractAge($query) {
@@ -762,11 +769,13 @@ class CustomerSearch extends Customer {
 
     private function filterEmailStatus($query){
         if ($this->email_status) {
-            $query->andWhere(['customer.email_status' => $this->email_status]);
+            $query->andFilterWhere(['customer.email_status' => $this->email_status]);
+            $query->andWhere(['<>','customer.email', '']);
         }
 
         if ($this->email2_status) {
-            $query->andWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andFilterWhere(['customer.email2_status' => $this->email2_status]);
+            $query->andWhere(['<>','customer.email2', '']);
         }
     }
 
@@ -792,6 +801,8 @@ class CustomerSearch extends Customer {
                     $query->andFilterWhere(['not',['uahc.customer_id' => null]])
                         ->andFilterWhere(['not',['uaa.user_app_id' => null]])
                         ->andFilterWhere(['<=','uaa.last_activity_datetime', $date_min_last_activity]);
+
+                    $query->orWhere(['uahc.customer_id' => null]);
                 }
 
                 if($this->mobile_app_status[0] == 'installed') {
@@ -868,13 +879,8 @@ class CustomerSearch extends Customer {
             new Expression('@customer_ant:=customer_id'),
             new Expression('if(i>0,1,0) AS qty'),])
             ->from(['a'=> $queryBill->union($queryPayment,true) ])
-            ->orderBy(['customer_id'=>SORT_ASC, 'i'=>SORT_ASC, 'date'=>SORT_ASC])
-            
-        ;
-        
-        
+            ->orderBy(['customer_id'=>SORT_ASC, 'i'=>SORT_ASC, 'date'=>SORT_ASC]);
 
-              
         $mainQuery = (new Query());
         $mainQuery
             ->select(["customer_id",  "sum(if(qty>0, 1, 0)) as bills"])

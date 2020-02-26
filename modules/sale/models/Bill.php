@@ -16,6 +16,8 @@ use \app\modules\sale\modules\invoice\components\Invoice;
 use yii\helpers\ArrayHelper;
 use yii\web\Application;
 use app\modules\mailing\components\sender\MailSender;
+use app\modules\accounting\components\AccountMovementRelationManager;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * This is the model class for table "bill".
@@ -404,7 +406,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateAmount()
     {
-        $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
+        $discountFixedDetail = $this->getFixedDiscountPerDetail(true, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(true);
 
         $amount = 0.0;
@@ -470,6 +472,17 @@ class Bill extends ActiveRecord implements CountableInterface
 
     }
 
+    public function totalDiscountWithTaxes()
+    {
+        $total = 0.0;
+
+        foreach ($this->billDetails as $detail) {
+            $total += (float)$detail->getTotalDiscount(true);
+        }
+
+        return round($total,2);
+    }
+
 
     /**
      * Permite agregar un detalle a una factura. El detalle solo puede
@@ -515,7 +528,11 @@ class Bill extends ActiveRecord implements CountableInterface
 
             //Generamos el detalle
             $billDetail = new BillDetail();
+            Yii::info($detail, 'Deuda');
+
             $billDetail->setAttributes($detail);
+            Yii::info($billDetail, 'Deuda');
+
 
             $this->link('billDetails',$billDetail);
 
@@ -623,6 +640,8 @@ class Bill extends ActiveRecord implements CountableInterface
                 }
             }
         }  catch (\Exception $e){
+            echo 'ERROR______________ '.$e->getTraceAsString()."\n";
+            \Yii::info('ERROR ________________ ' .$e->getTraceAsString(), 'facturacion-cerrado');
             $transaction->rollback();
         }
 
@@ -661,12 +680,17 @@ class Bill extends ActiveRecord implements CountableInterface
                             $msg = Yii::t('app', 'Invoice successfully created.');
                             $this->status = 'closed';
                             $backToDraft = false;
-                            Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                            if(!Yii::$app instanceof Yii\console\Application) {
+                                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                            }
                             $retValue = true;
                         } else {
                             $retValue = false;
+                            $this->addErrorToCacheOrSession(['An error occurred while the Invoice is processed.'. ' - Bill_id: '. $this->bill_id, ]);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
-                            Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
+                            if(!Yii::$app instanceof Yii\console\Application) {
+                                Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
+                            }
                         }
                     } else {
                         $backToDraft = true;
@@ -696,24 +720,26 @@ class Bill extends ActiveRecord implements CountableInterface
                     }
 
                     foreach ($result['errors'] as $msg) {
+                        $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'error');
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
-                        Yii::$app->session->addFlash('error', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
                     foreach ($result['observations'] as $msg) {
+                        $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
-                        Yii::$app->session->addFlash('info', 'Codigo: ' . $msg['code'] . ' - ' . $msg['message']);
                     }
 
                     return ($retValue || empty($result['errors']));
                 } catch (\Exception $ex) {
                     \Yii::info($ex, 'facturacion');
-                    Yii::$app->session->setFlash("error", Yii::t('app', $ex->getMessage()));
+                    $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                     return false;
                 }
             } else {
                 //Si un tipo no tiene asociado factura electronica, la actualizacion de estado se debe realizar de todas formas
                 $msg = Yii::t('app', 'Invoice successfully created.');
-                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                }
                 $this->updateAttributes(['status' => 'closed']);
                 //Agrega el numero de comprobante
                 if ($this->fillNumber) {
@@ -726,12 +752,26 @@ class Bill extends ActiveRecord implements CountableInterface
             if($this->isNewRecord){
                 $this->number = $this->fillNumber(true);
             } else {
-                Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
+                }
                 $this->updateAttributes(['status' => 'closed']);
             }
         }
 
         return true;
+    }
+
+    /**
+     * Examina si es una instacia de consola o no, y agrega los mensajes de error a cache o a session según corresponda.
+     */
+    public function addErrorToCacheOrSession($error, $key = null){
+        if(Yii::$app instanceof Yii\console\Application) {
+            $old_errors = Yii::$app->cache->get('_invoice_close_errors');
+            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]));
+        } else {
+            Yii::$app->session->addFlash($key, $error);
+        }
     }
 
     /**
@@ -863,6 +903,10 @@ class Bill extends ActiveRecord implements CountableInterface
             return false;
         }
 
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -870,6 +914,7 @@ class Bill extends ActiveRecord implements CountableInterface
     public function beforeDelete() {
         $this->unLinkAll('billDetails', true);
         BillHasPayment::deleteAll(['bill_id' => $this->bill_id]);
+        AccountMovementRelationManager::delete($this);
         parent::beforeDelete();
         return true;
     }
@@ -920,8 +965,9 @@ class Bill extends ActiveRecord implements CountableInterface
 
             } else {
                 if($detail->unit_net_discount != 0 ) {
-
-                    $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    if(!$fixedDiscount) {
+                        $this->getDiscountTaxes($taxesApplied, $detail, $fixedDiscount);
+                    }
 
                 } elseif($detail->unit_net_price != 0) {
 
@@ -1157,7 +1203,7 @@ class Bill extends ActiveRecord implements CountableInterface
         if ($this->billType && !$this->billType->invoiceClass) {
             if ($this->number) {
                 $bill = Bill::find()->where(['number' => $this->number])->exists();
-                if($bill){
+                if($bill && !Yii::$app instanceof Yii\console\Application){
                     Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
                 }
             } else {
@@ -1261,13 +1307,15 @@ class Bill extends ActiveRecord implements CountableInterface
 
     public function getIsEditable()
     {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
 
-        if($this->status == 'draft' || $this->status == 'pending' && \webvimark\modules\UserManagement\models\User::hasPermission('user-can-update-pending-order',true)){
+        if ($this->status == 'draft' || $this->status == 'pending' && User::hasPermission('user-can-update-pending-order', true)) {
             return true;
         }
 
         return false;
-
     }
 
     /**

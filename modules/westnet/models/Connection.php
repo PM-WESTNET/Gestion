@@ -360,18 +360,23 @@ class Connection extends ActiveRecord {
      * @return boolean
      */
     public function canForce(){
+
+        //TODO: Remover esta condicion cuando se haya finalizado el desarrollo de IVR
+        if ($this->contract->customer->code === 27237){
+            return true;
+        }
+
         $forcedHistoralSearch = new ConnectionForcedHistorialSearch();
         $forced_param = Config::getValue('times_forced_conn_month');
         $times = $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);
         
                 
-        if ((int)$times < (int)$forced_param) {
+        if ((int)$times < (int)$forced_param && $this->status === self::STATUS_ENABLED && $this->contract->status === Contract::STATUS_ACTIVE) {
             return true;
         }else{
             return false;
         }
     }
-
 
     /**
      * Fuerza la conexion. Crea el contractDetail con el recargo y crea el producto a facturar
@@ -388,10 +393,14 @@ class Connection extends ActiveRecord {
             $this->createForcedHistorial();
             if ($create_product){
 
-                if ($this->createExtendPaymentCD($product_id, $vendor_id)){
+                if (!$this->createExtendPaymentCD($product_id, $vendor_id)){
+                    Debug::debug('O no crea CD o lo crea y sale por falso');
                     $trasanction->rollBack();
                     return false;
                 }
+
+                Debug::debug('----- antes'.count($this->contract->contractDetails));
+
 
                 $cti = new ContractToInvoice();
                 if (!$cti->updateContract($this->contract)) {
@@ -399,6 +408,7 @@ class Connection extends ActiveRecord {
                     $trasanction->rollBack();
                     return false;
                 }
+                Debug::debug('En teoria activa contrato');
             }
 
             $trasanction->commit();
@@ -410,6 +420,7 @@ class Connection extends ActiveRecord {
 
         $trasanction->rollBack();
         return false;
+
     }
 
     /**
@@ -427,8 +438,9 @@ class Connection extends ActiveRecord {
         $contract_detail->from_date = (new \DateTime())->modify('first day of next month')->format('d-m-Y');
         $contract_detail->to_date = (new \DateTime())->modify('last day of next month')->format('d-m-Y');
         $contract_detail->vendor_id = $vendor_id;
+        $contract_detail->status = Contract::STATUS_DRAFT;
 
-        return !$contract_detail->save(false);
+        return $contract_detail->save(false);
     }
 
     private function createForcedHistorial() {
@@ -447,5 +459,4 @@ class Connection extends ActiveRecord {
 
         $forcedHistory->save(false);
     }
-
 }

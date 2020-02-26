@@ -27,6 +27,9 @@ class Resume extends \app\components\companies\ActiveRecord
 
     public $money_box_id;
     public $file_import;
+    public $columns;
+    public $account_id;
+    public $separator;
 
     const STATE_DRAFT       = 'draft';
     const STATE_CANCELED    = 'canceled';
@@ -81,7 +84,7 @@ class Resume extends \app\components\companies\ActiveRecord
         $rules = [
             [['money_box_account_id', 'name'], 'required'],
             [['money_box_account_id'], 'integer'],
-            [['date', 'date_from', 'date_to', 'moneyBoxAccount', 'company_id'], 'safe'],
+            [['date', 'date_from', 'date_to', 'moneyBoxAccount', 'company_id', 'columns', 'account_id', 'separator'], 'safe'],
             [['date', 'date_from', 'date_to'], 'date'],
             [['status'], 'in', 'range' => ['draft', 'closed', 'canceled']],
             [['status'], 'default', 'value'=>'draft'],
@@ -114,6 +117,9 @@ class Resume extends \app\components\companies\ActiveRecord
             'balance_initial' => Yii::t('accounting', 'Initial Balance'),
             'balance_final' => Yii::t('accounting', 'Final Balance'),
             'file_import' => Yii::t('accounting', 'File To Import'),
+            'account_id' => Yii::t('accounting','Account'),
+            'columns' => Yii::t('accounting','Columns'),
+            'separator' => Yii::t('accounting','Separator'),
         ];
     }    
 
@@ -232,17 +238,13 @@ class Resume extends \app\components\companies\ActiveRecord
      *
      * @param $resume_id
      */
-    public function getResumeItemsEnabled($resume_id, $is_debit)
+    public function getResumeItemsEnabled($resume_id)
     {
         $query = ResumeItem::find()
             ->leftJoin('conciliation_item_has_resume_item ciri', 'ciri.resume_item_id =  resume_item.resume_item_id ')
             ->andWhere(['resume_item.resume_id'=>$resume_id])
             ->andWhere('ciri.conciliation_item_id IS NULL');
-        if($is_debit) {
-            $query->andFilterWhere(['>', 'resume_item.debit', 0]);
-        } else {
-            $query->andFilterWhere(['>', 'resume_item.credit', 0]);
-        }
+
         return $query;
     }
 
@@ -289,8 +291,8 @@ class Resume extends \app\components\companies\ActiveRecord
         $total = ['debit' => 0, 'credit'=> 0];
 
         foreach($this->getResumeItems()->all()  as $item) {
-            $total['debit'] +=  ($item->debit > 0 ?  $item->debit : 0 );
-            $total['credit'] +=  ($item->credit > 0 ?  $item->credit : 0 );
+            $total['debit'] +=  (abs($item->debit) > 0 ?  abs($item->debit) : 0 );
+            $total['credit'] +=  (abs($item->credit) > 0 ?  abs($item->credit) : 0 );
         }
         return $total;
     }

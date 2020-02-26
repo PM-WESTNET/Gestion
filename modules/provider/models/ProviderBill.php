@@ -5,6 +5,7 @@ namespace app\modules\provider\models;
 use app\modules\accounting\components\AccountMovementRelationManager;
 use app\modules\accounting\components\CountableInterface;
 use app\modules\accounting\components\CountableMovement;
+use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\TaxRate;
@@ -86,9 +87,10 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             [['payed'],'boolean'],
             [['status'], 'default', 'value' => ProviderBill::STATUS_DRAFT],
             [['company_id', 'number1', 'number2'], 'safe'],
-            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id']],
+            ['number', 'unique', 'targetAttribute' => ['number', 'provider_id', 'bill_type_id']],
             ['number1', 'default' , 'value' => '0000'],
             ['number2', 'default', 'value' => '00000000'],
+            ['date', 'validateMinimunDate']
         ];
     }
 
@@ -108,7 +110,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
             'provider_id' => Yii::t('app', 'Provider'),
             'description' => Yii::t('app', 'Observations'),
             'payed' => Yii::t('app', 'Bill payed'),
-
+            'timestamp' => Yii::t('app', 'Created at'),
             'bill_type_id' => Yii::t('app', 'Bill Type'),
             'billType' => Yii::t('app', 'Bill Type'),
             'provider' => Yii::t('app', 'Provider'),
@@ -202,6 +204,18 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
     public function getPartnerDistributionModel()
     {
         return $this->hasOne(PartnerDistributionModel::class, ['partner_distribution_model_id' => 'partner_distribution_model_id']);
+    }
+
+    /**
+     * Valida la fecha minima de creación del comprobante.
+     */
+    public function validateMinimunDate($attribute, $params) {
+        $days = Config::getValue('limit_days_to_create_provider_bill') ;
+        $min_date = (new \DateTime('now'))->modify("-$days days");
+
+        if((new \DateTime($this->date ))->getTimestamp() < $min_date->getTimestamp()) {
+            $this->addError($attribute, Yii::t('app', 'Date must be greater than {date}' , ['date' => $min_date->format('d-m-Y')]));
+        }
     }
 
     /**
@@ -306,12 +320,45 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
      */
     private function formatDatesBeforeSave()
     {
+        if ($this->date instanceof \DateTime) {
+            $this->date = $this->date->format('d-m-Y');
+        }
+
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
     }
-    
-    public function getDeletable(){
-        return count($this->providerBillHasProviderPayments) == 0;
 
+    /**
+     * @return bool
+     * Indica si el modelo puede eliminarse
+     */
+    public function getDeletable()
+    {
+        if (count($this->providerBillHasProviderPayments) != 0) {
+            return false;
+        };
+
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if($this->status == ProviderBill::STATUS_CLOSED) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * Indica si el modelo puede actualizarse
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -322,6 +369,7 @@ class ProviderBill extends \app\components\companies\ActiveRecord implements Cou
         $this->unlinkAll('providerPayments', true);
         $this->unlinkAll('providerBillHasTaxRates', true);
         $this->unlinkAll('providerBillItems', true);
+        AccountMovementRelationManager::delete($this);
     }
 
     /**

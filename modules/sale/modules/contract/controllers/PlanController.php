@@ -2,15 +2,20 @@
 
 namespace app\modules\sale\modules\contract\controllers;
 
+use app\modules\sale\models\Category;
+use app\modules\sale\models\Customer;
 use Yii;
 use app\modules\sale\modules\contract\models\Plan;
 use app\modules\sale\modules\contract\models\search\PlanSearch;
 use app\modules\sale\models\search\ProductSearch;
 use app\components\web\Controller;
+use yii\db\Query;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\sale\models\ProductPrice;
 use app\modules\sale\models\search\ProductPriceSearch;
+use yii\web\Response;
 
 /**
  * PlanController implements the CRUD actions for Plan model.
@@ -258,6 +263,69 @@ class PlanController extends Controller
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
+        }
+    }
+
+    /**
+     * Devuelve un array con planes para ser listados en un select2
+     */
+    public function actionGetPlansByCustomer()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+
+        $out = [];
+        if (isset($_POST['depdrop_parents'])) {
+            $parents = $_POST['depdrop_parents'];
+
+            if ($parents != null) {
+                $customer_id = $parents[0];
+                $customer = Customer::findOne($customer_id);
+
+                if(!$customer) {
+                    throw new BadRequestHttpException('Customer not found');
+                }
+
+                $fibra_category = Category::findOne(['system' => 'plan-fibra']);
+                $wifi_category = Category::findOne(['system' => 'plan-wifi']);
+                $fibra_products = (new Query())->select('product.product_id')
+                    ->from('product')
+                    ->leftJoin('product_has_category phc', 'phc.product_id = product.product_id')
+                    ->where(['type' => Plan::TYPE])
+                    ->andWhere(['phc.category_id' => $fibra_category->category_id]);
+                $wifi_products = (new Query())->select('product.product_id')
+                    ->from('product')
+                    ->leftJoin('product_has_category phc', 'phc.product_id = product.product_id')
+                    ->where(['type' => Plan::TYPE])
+                    ->andWhere(['phc.category_id' => $wifi_category->category_id]);
+
+                if($customer->hasFibraPlan()) {
+
+                    $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
+                    $queryPlans->joinWith('categories')
+                        ->where(['in','product.product_id', $fibra_products]);
+                } else {
+
+                    $queryPlans = Plan::find()->andWhere(['product.status' => 'enabled']);
+                    $queryPlans->joinWith('categories')
+                        ->where(['in','product.product_id', $wifi_products]);
+                }
+
+                $customer_category = $customer->customerCategory;
+
+                if ($customer_category->name == 'Familia') {
+                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-residencial'])
+                    ->andWhere(['product.type' => Plan::TYPE]);
+                }elseif  ($customer_category->name == 'Empresa') {
+                    $queryPlans->andWhere(['category.system' => 'planes-de-internet-empresa'])
+                        ->andWhere(['product.type' => Plan::TYPE]);
+                }
+
+                foreach ($queryPlans->all() as $plan) {
+                    $out[] = ['id' => $plan->product_id, 'name' => $plan->name];
+                }
+
+                return ['output'=>$out, 'selected'=>''];
+            }
         }
     }
 }

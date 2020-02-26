@@ -119,5 +119,4 @@ use app\modules\sale\models\Company;
     </div>
     
     <?php ActiveForm::end(); ?>
-
 </div>

@@ -12,7 +12,7 @@ use yii\jui\Dialog;
 /* @var $this yii\web\View */
 /* @var $model app\modules\accounting\models\Conciliation */
 
-$this->title = (!$readOnly ? Yii::t('app', 'Update {modelClass}: ', ['modelClass' => Yii::t('accounting', 'Conciliation'),]) : "" ) . ' ' . $model->name;
+$this->title = $model->moneyBoxAccount->moneyBox->name . " - " . $model->moneyBoxAccount->number;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('accounting', 'Conciliations'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['view', 'id' => $model->conciliation_id]];
 $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
@@ -27,242 +27,220 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
 </style>
 <div class="conciliation-create">
     <input type="hidden" value="<?=$model->conciliation_id?>" name="conciliation_id" id="conciliation_id"/>
+
+    <?php if ($model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+        <div class="alert alert-warning">
+            <?php echo Yii::t('accounting','Money Box has undefined code operations')?>
+        </div>
+    <?php endif;?>
+
     <div class="row">
         <div class="col-sm-10">
             <h1><?= Html::encode($this->title) ?></h1>
         </div>
     </div>
 
+    <?php if (!$readOnly) { ?>
+        <!-- <div class="pull-right" role="group"> -->
+        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+            <button type="button" data-type="btnConciliate" class="btn btn-success btnConciliate">
+                 <?=Yii::t('accounting', 'Conciliate');?> <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+
+            <span style="display: none" class="conciliate_gif">
+                <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+                <?php echo Yii::t('app','Conciliating')?>...
+            </span>
+        <?php endif;?>
+        <!-- </div> -->
+    <?php } ?>
+
+
+    <div class="row">
+
+        <div class="col-sm-6" style="padding: 0px;">
+            <div class="panel panel-primary" style="padding: 0px;">
+                <div class="panel-heading text-center">
+                    <strong>
+                        <?=Yii::t('accounting', 'Account Movements')?>
+                    </strong>
+
+                </div>
+                <div class="panel-body" style="overflow-y: scroll; height: 500px">
+                    <?php echo $this->render('movements_search')?>
+                    <div id="movements_grid">
+                        <?php echo $this->render('_movements', ['readOnly' => $readOnly, 'movementsDataProvider' => $movementsDataProvider])?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6" style="padding: 0px;">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <strong>
+                        <?= Yii::t('accounting', 'Summary'); ?>
+                    </strong>
+
+                </div>
+                <div class="panel-body" style="overflow-y: scroll;  height: 500px"">
+
+                    <?php echo $this->render('_resume_items_search', ['operationTypes' => $operationTypes, 'resume_id' => $model->resume_id])?>
+
+                    <div id="w_resume_items" style="text-align: center">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <h3><?php echo Yii::t('accounting', 'Conciliated')?></h3>
+
+    <button type="button" data-type="btnDeconciliate" class="btn btn-warning btnDeconciliate">
+        <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-chevron-up"></span>
+    </button>
+
+    <span  style="display: none" id="desconciliate_gif">
+                <img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="">
+        <?php echo Yii::t('app','Desconciliating')?>...
+    </span>
+
+    <?php
+    $cols = [];
+    if(!$readOnly) {
+        $cols[] = [
+            'class' => 'yii\grid\CheckboxColumn',
+            'checkboxOptions' => function($model, $key, $index, $column) {
+                return ['value' => $model->conciliation_item_id];
+            }
+        ];
+    }
+    $cols = array_merge($cols, [[
+        'header'=>Yii::t('app', 'Date'),
+        'value' => function ($model) {
+            return ($model->date ? Yii::$app->formatter->asDate($model->date, 'dd-MM-yyyy')  : '' );
+        }
+    ],[
+        'header'=>Yii::t('app', 'Description'),
+        'attribute'=>'description',
+    ],[
+        'header'=>Yii::t('app', 'Amount'),
+        'value' => function ($model) {
+            return Yii::$app->formatter->asCurrency($model->amount);
+        }
+    ]]);
+
+    echo GridView::widget([
+        //'layout'=> '{items}',
+        'id'=> 'wConciliated',
+        'dataProvider' => $conciliatedDataProvider,
+        'columns' => $cols,
+        'summary' => ''
+    ]);?>
+
     <div class="row">
         <div class="col-sm-8 col-sm-offset-2">
-            <?php \yii\widgets\Pjax::begin(['id'=>'w_header']);?>
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <strong>
                         <?=$model->moneyBoxAccount->moneyBox->name . " - " . $model->moneyBoxAccount->number?>
                     </strong>
                     <?php if (!$readOnly) { ?>
-                    <!-- <div class="pull-right" role="group"> -->
-                        <button type="button" id="btnClose" class="btn btn-success pull-right">
-                            <span class="glyphicon glyphicon-ok"></span> <?= Yii::t('app', 'Ready');?>
-                        </button>
-                    <!-- </div> -->
-                    <?php } ?>
-                </div>
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-sm-1 text-center">
-                            <strong><?= Yii::t('app', 'Date'); ?></strong>
-                            <br/>
-                            <?= $model->date ?>
-                        </div>
-                        <div class="col-sm-2 text-center">
-                            <strong><?= Yii::t('accounting', 'Date From'); ?></strong>
-                            <br/>
-                            <?= $model->date_from ?>
-                        </div>
-                        <div class="col-sm-2 text-center">
-                            <strong><?= Yii::t('accounting', 'Date To'); ?></strong>
-                            <br/>
-                            <?= $model->date_to ?>
-                        </div>
-                        <div class="col-sm-1 text-center">
-                            <strong><?= Yii::t('app', 'Status'); ?></strong>
-                            <br/>
-                            <?= Yii::t('accounting', ucfirst($model->status)) ?>
-                        </div>
-                        <div class="col-sm-3 text-center">
-                            <strong><?= Yii::t('accounting', 'Account Debit Balance'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalAccountDebit) ?>
-                        </div>
-                        <div class="col-sm-3 text-center">
-                            <strong><?= Yii::t('accounting', 'Account Credit Balance'); ?></strong>
-                            <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalAccountCredit) ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php \yii\widgets\Pjax::end();?>
-        </div>
-    </div>
-
-    <div class="row">
-
-        <div class="col-sm-6">
-            <?php \yii\widgets\Pjax::begin(['id'=>'w_movements']);?>
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <strong>
-                        <?=Yii::t('accounting', 'Account Movements')?>
-                    </strong>
-                    <?php if (!$readOnly) { ?>
                         <!-- <div class="pull-right" role="group"> -->
-                            <button type="button" data-type="btnDeconciliate" class="btn btn-warning btnDeconciliate pull-right">
-                                <?=Yii::t('accounting', 'Deconciliate');?> <span class="glyphicon glyphicon-triangle-right"></span>
+                        <?php if (!$model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+                            <button type="button" id="btnClose" class="btn btn-success pull-right">
+                                <span class="glyphicon glyphicon-ok"></span> <?= Yii::t('app', 'Close');?>
                             </button>
+                        <?php endif;?>
                         <!-- </div> -->
                     <?php } ?>
                 </div>
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-sm-6 text-center">
-                            <strong><?= Yii::t('accounting', 'Debit to Conciliate'); ?></strong>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Debit Balance'); ?></strong>
                             <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalConciliationDebit) ?>
+                            <?= Yii::$app->formatter->asCurrency($totalAccountDebit) ?>
                         </div>
-                        <div class="col-sm-6 text-center">
-                            <strong><?= Yii::t('accounting', 'Credit to Conciliate'); ?></strong>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Credit Balance'); ?></strong>
                             <br/>
-                            <?= Yii::$app->formatter->asCurrency($totalConciliationCredit) ?>
+                            <?= Yii::$app->formatter->asCurrency($totalAccountCredit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Account Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency(-$totalAccountDebit + $totalAccountCredit) ?>
+                        </div>
+
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Debit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalResumeDebit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Credit Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totalResumeCredit) ?>
+                        </div>
+                        <div class="col-sm-2 text-center">
+                            <strong><?= Yii::t('accounting', 'Resume Balance'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency(-$totalResumeDebit - $totalResumeCredit) ?>
                         </div>
                     </div>
+                    <?php $totals = $model->getTotals()?>
                     <div class="row">
-                        <div class="col-sm-12">&nbsp;</div>
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Debit'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['debit']) ?>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Credit'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['credit']) ?>
+                        </div>
+                        <div class="col-sm-4 text-center">
+                            <strong><?= Yii::t('accounting', 'Concilated Total'); ?></strong>
+                            <br/>
+                            <?= Yii::$app->formatter->asCurrency($totals['total']) ?>
+                        </div>
                     </div>
-                    <?php
-                        $cols = [];
-                        if(!$readOnly) {
-                            $cols[] = [
-                                'class' => 'yii\grid\CheckboxColumn',
-                                'checkboxOptions' => function($model, $key, $index, $column) {
-                                    return ['value' => $model->conciliation_item_id];
-                                }
-                            ];
-                        }
-                        $cols = array_merge($cols, [[
-                            'header'=>Yii::t('app', 'Date'),
-                            'attribute'=>'date',
-                            'format'=>['date']
-                        ],[
-                            'header'=>Yii::t('app', 'Description'),
-                            'attribute'=>'description',
-                        ],[
-                            'header'=>Yii::t('app', 'Amount'),
-                            'value' => function ($model) {
-                                return Yii::$app->formatter->asCurrency($model->amount);
-                            }
-                        ]]);
-
-                    echo GridView::widget([
-                        'layout'=> '{items}',
-                        'id'=> 'wConciliated',
-                        'caption' => Yii::t('accounting', 'Conciliated'),
-                        'dataProvider' => $conciliatedDataProvider,
-                        'columns' => $cols,
-                    ]);?>
-
-
-                    <?php
-
-                    $cols = [];
-                    if (!$readOnly) {
-                        $cols[] = [
-                            'class' => 'yii\grid\CheckboxColumn',
-                            'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->account_movement_item_id];
-                            }
-                        ];
-                    }
-                    $cols = array_merge($cols, [
-                            [
-                                'header'=>Yii::t('app', 'Date'),
-                                'value' => function ($model) {
-                                    return ($model->date ? Yii::$app->formatter->asDate($model->date, 'd-m-Y')  : '' );
-                                }
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Description'),
-                                'attribute'=>'status',
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Debit'),
-                                'value' => function ($model) {
-                                    return Yii::$app->formatter->asCurrency($model->debit);
-                                }
-                            ],
-                            [
-                                'header'=>Yii::t('app', 'Status'),
-                                'value' => function ($model) {
-                                    return Yii::t('app', ucfirst($model->status));
-                                }
-                            ]]);
-
-                    echo GridView::widget([
-                        'layout'=> '{items}',
-                        'id'=>'wDebit',
-                        'caption' => Yii::t('accounting', 'Debits with out conciliation.'),
-                        'dataProvider' => $debitDataProvider,
-                        'columns' => $cols
-                    ]);?>
-
-                    <?php
-                    $cols = [];
-
-                    if (!$readOnly) {
-                        $cols[] = [
-                            'class' => 'yii\grid\CheckboxColumn',
-                            'checkboxOptions' => function($model, $key, $index, $column) {
-                                return ['value' => $model->account_movement_item_id];
-                            }
-                        ];
-                    }
-                    $cols = array_merge($cols, [
-                        [
-                            'header'=>Yii::t('app', 'Date'),
-                            'attribute'=>'date',
-                            'format'=>['date']
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Description'),
-                            'attribute'=>'status',
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Credit'),
-                            'value' => function ($model) {
-                                return Yii::$app->formatter->asCurrency($model->credit);
-                            }
-                        ],
-                        [
-                            'header'=>Yii::t('app', 'Status'),
-                            'value' => function ($model) {
-                                return Yii::t('app', ucfirst($model->status));
-                            }
-                        ]]);
-
-                    echo GridView::widget([
-                        'layout'=> '{items}',
-                        'id'=> 'wCredit',
-                        'caption' => Yii::t('accounting', 'Credits with out conciliation.'),
-                        'dataProvider' => $creditDataProvider,
-                        'columns' => $cols
-                    ]);?>
-
-                </div>
-            </div>
-            <?php \yii\widgets\Pjax::end();?>
-        </div>
-
-        <div class="col-sm-6">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <strong>
-                        <?= Yii::t('accounting', 'Summary'); ?>
-                    </strong>
-                    <?php if (!$readOnly) { ?>
-                    <!-- <div class="pull-right" role="group"> -->
-                        <button type="button" data-type="btnConciliate" class="btn btn-success btnConciliate pull-right">
-                            <span class="glyphicon glyphicon-triangle-left"></span> <?=Yii::t('accounting', 'Conciliate');?>
-                        </button>
-                    <!-- </div> -->
-                    <?php } ?>
-                </div>
-                <div class="panel-body" id="w_resume_items">
                 </div>
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" role="dialog" id="partner_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title"><?php echo Yii::t('app','Select a Partner Distribution Model')?></h4>
+                </div>
+                <div class="modal-body">
+                    <?php echo \kartik\select2\Select2::widget([
+                        'data' => $partner_distribution_model,
+                        'name' => 'partnerDistribution',
+                        'options' => [
+                            'id' => 'partner_distribution_model'
+                        ]
+                    ])?>
+                </div>
+                <div class="modal-footer">
+                    <span style="display: none" class="conciliate_gif">
+                        <img src="<?php echo Url::to('@web').'/images/ajax-loader.gif'?>" alt="">
+                                <?php echo Yii::t('app','Conciliating')?>...
+                    </span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success btnModalConciliate" data-type="btnConciliate"><?php echo Yii::t('accounting','Conciliate')?></button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 </div>
 <script>
     var Conciliate = new function() {
@@ -271,8 +249,12 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 Conciliate.deconciliate($(this).data('type'));
             });
             $(document).off('click', '.btnConciliate').on('click', '.btnConciliate', function(){
+                Conciliate.validateConciliate($(this).data('type'));
+            });
+            $(document).on('click', '.btnModalConciliate', function(){
                 Conciliate.conciliate($(this).data('type'));
             });
+
             $(document).off('change', '#resume_id').on('change', '#resume_id', function(){
                 Conciliate.findResumeItems($(this).val());
             });
@@ -280,62 +262,121 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                 Conciliate.close();
             });
 
+            $(document).on('click', '#btn-resume-search', function (e) {
+               e.preventDefault();
+               Conciliate.findResumeItems(true);
+            });
+
+            $(document).on('click', '#btn-movement-search', function (e) {
+                e.preventDefault();
+                Conciliate.findMovements();
+            });
+
             Conciliate.findResumeItems();
         }
 
-        this.findResumeItems = function() {
+        this.findResumeItems = function(search = false) {
+            var data= {};
+            if (!search){
+                data = {
+                    ResumeSearch: {
+                        resume_id: "<?php echo $model->resume_id?>"
+                    }
+                };
+            }else {
+                data= $('#resume_search_form').serializeArray();
+            }
+
             $.ajax({
-                url: "<?=Url::toRoute(['/accounting/conciliation/get-resume-items', 'resume_id'=> $model->resume_id, 'readOnly'=> $readOnly ])?>",
+                url: "<?=Url::toRoute(['/accounting/conciliation/get-resume-items', 'readOnly'=> $readOnly ])?>",
+                data: data,
                 method: 'POST',
                 dataType: 'html',
+                beforeSend: function() {
+                    $('#w_resume_items').html('<img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                },
                 success: function(data){
                     $("#w_resume_items").html(data);
                 }
             });
         }
 
+        this.findMovements = function() {
+            var data= {};
+
+            data= $('#movements_search_form').serializeArray();
+
+
+            $.ajax({
+                url: "<?=Url::toRoute(['/accounting/conciliation/get-account-movements', 'id' => $model->conciliation_id,'readOnly'=> $readOnly ])?>",
+                data: data,
+                method: 'POST',
+                dataType: 'html',
+                beforeSend: function() {
+                    $('#movements_grid').html('<img src="<?php echo Url::base().'/images/ajax-loader.gif'?>" alt="" width="5%" height="5%">')
+                },
+                success: function(data){
+                    $("#movements_grid").html(data);
+                }
+            });
+        }
+
+        this.validateConciliate = function(type) {
+            var resume = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
+            var movement = $('#wDebit').yiiGridView('getSelectedRows');
+
+            if ( movement.length == 0 && resume.length > 0) {
+                if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
+                    $('#partner_model').modal();
+                }
+                return
+            }
+
+            Conciliate.conciliate(type);
+        };
 
         this.conciliate = function(type) {
             // Busco lo seleccionado de movimientos y de resumen
-            var resumeDebit = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
-            var resumeCredit = $('#w_resume_items_credit').yiiGridView('getSelectedRows');
-            var movementDebit = $('#wDebit').yiiGridView('getSelectedRows');
-            var movementCredit = $('#wCredit').yiiGridView('getSelectedRows');
+            var resume = $('#w_resume_items_debit').yiiGridView('getSelectedRows');
+            var movement = $('#wDebit').yiiGridView('getSelectedRows');
 
             var data = {};
 
-            if ( ( movementDebit.length > 0 && resumeCredit.length > 0 ) ||
-                 ( movementCredit.length > 0 && resumeDebit.length > 0 )) {
-                alert("<?=Yii::t('accounting', 'You can not mark resume items and movements with the different balance.')?>");
+
+            // Si tengo quiero conciliar movimientos del resumen para los que no tengo
+            // movimientos contables, consulto si los quiero crear.
+            if ( movement.length == 0 && resume.length > 0) {
+                data.resumeItems = resume;
+                data.partner_distribution_model_id =$('#partner_distribution_model').val();
             } else {
-                // Si tengo quiero conciliar movimientos del resumen para los que no tengo
-                // movimientos contables, consulto si los quiero crear.
-                if ( (movementDebit.length + movementCredit.length) == 0 && (resumeDebit.length + resumeCredit.length) > 0) {
-                    if( confirm("<?=Yii::t('accounting', 'The items marked generate summary accounting transactions, are you sure?')?>") ) {
-                        data.resumeItems = resumeDebit.concat(resumeCredit);
-                    }
-                } else {
-                    data.resumeItems = resumeDebit.concat(resumeCredit);
-                    data.movementItems = movementCredit.concat(movementDebit);
-                }
-
-                var conciliation_id = $('#conciliation_id').val();
-                $.ajax({
-                    url: '<?=Url::toRoute(['/accounting/conciliation/conciliar', 'conciliation_id'=>$model->conciliation_id ])?>',
-                    method: 'POST',
-                    dataType: 'json',
-                    data: data,
-                    success: function(data){
-                        if (data.status!="success") {
-                            alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
-
-                        } else {
-                            $.pjax.reload({container: '#w0'});
-                        }
-                    }
-                });
-
+                data.resumeItems = resume;
+                data.movementItems = movement;
             }
+
+            var conciliation_id = $('#conciliation_id').val();
+            $.ajax({
+                url: '<?= Url::toRoute(['/accounting/conciliation/conciliar', 'conciliation_id'=>$model->conciliation_id ])?>',
+                method: 'POST',
+                dataType: 'json',
+                data: data,
+                beforeSend: function(){
+                    $('.conciliate_gif').show()
+                    $('.btnConciliate').attr('disabled', 'disabled');
+                    $('.btnModalConciliate').attr('disabled', 'disabled');
+                },
+                success: function(data){
+                    $('.conciliate_gif').hide();
+                    $('.btnConciliate').removeAttr('disabled');
+                    $('.btnModalConciliate').removeAttr('disabled');
+                    if (data.status!="success") {
+                        alert("<?=Yii::t('app', 'This resource could not be conciliated.')?>");
+
+                    } else {
+                        location.reload()
+                    }
+                }
+            });
+
 
 
         }
@@ -353,14 +394,20 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                     method: 'POST',
                     dataType: 'json',
                     data: data,
+                    beforeSend: function(){
+                        $('#desconciliate_gif').show()
+                        $('.btnDeconciliate').attr('disabled', 'disabled');
+                    },
                     success: function(data){
+                        $('#desconciliate_gif').hide();
+                        $('.btnDeconciliate').removeAttr('disabled');
                         if (data.status!="success") {
                             if (data.message!="") {
                                 alert("<?=Yii::t('app', 'This resource could not be deleted.')?>");
                             }
 
                         } else {
-                            $.pjax.reload({container: '#w0'});
+                            location.reload()
                         }
                     }
                 });
@@ -377,7 +424,7 @@ $this->params['breadcrumbs'][] =  (!$readOnly ? Yii::t('app', 'Update') : "");
                         if (data.status=="success") {
                             window.location = '<?= \yii\helpers\Url::toRoute(['/accounting/conciliation/index']) ?>';
                         } else {
-                            alert(data.message);
+                            location.reload()
                         }
                     }
                 });

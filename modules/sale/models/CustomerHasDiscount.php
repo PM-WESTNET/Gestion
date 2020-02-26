@@ -2,7 +2,9 @@
 
 namespace app\modules\sale\models;
 
+use app\modules\log\db\ActiveRecord;
 use Yii;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "customer_has_discount".
@@ -14,6 +16,8 @@ use Yii;
  * @property string $to_date
  * @property string $status
  * @property string $description
+ * @property integer $created_at
+ * @property integer $updated_at
  *
  * @property Customer $customer
  * @property Discount $discount
@@ -31,34 +35,24 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
     
     /**
      * @inheritdoc
+     *
      */
-    /*
     public function behaviors()
     {
         return [
             'timestamp' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
+                'class' => TimestampBehavior::class,
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    ActiveRecord::EVENT_BEFORE_UPDATE => ['updated_at']
                 ],
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at'
             ],
-            'date' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-                ],
-                'value' => function(){return date('Y-m-d');},
-            ],
-            'time' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
-                ],
-                'value' => function(){return date('h:i');},
-            ],
+
         ];
     }
-    */
+
 
     /**
      * @inheritdoc
@@ -67,7 +61,7 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
     {
         return [
             [['customer_id', 'discount_id', 'status'], 'required'],
-            [['customer_id', 'discount_id'], 'integer'],
+            [['customer_id', 'discount_id', 'created_at', 'updated_at'], 'integer'],
             [['from_date', 'to_date', 'customer', 'discount'], 'safe'],
             [['from_date', 'to_date'], 'date'],
             [['status', 'description'], 'string']
@@ -89,6 +83,8 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
             'customer' => Yii::t('app', 'Customer'),
             'discount' => Yii::t('app', 'Discount'),
             'description' => \Yii::t('app', 'Description for Invoice'),
+            'created_at' => \Yii::t('app', 'Created At'),
+            'updated_at' => \Yii::t('app', 'Updated At'),
         ];
     }    
 
@@ -122,10 +118,12 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
         if (parent::beforeSave($insert)) {
             $this->formatDatesBeforeSave();
             if($insert) {
-                $this->to_date = (new \DateTime(Yii::$app->formatter->asDate($this->from_date)));
-                $this->to_date->add(new \DateInterval("P".$this->discount->periods."M"));
-                $this->to_date->modify('-1 day');
-                $this->to_date = $this->to_date->format('Y-m-d');
+                if(!$this->discount->persistent) {
+                    $this->to_date = (new \DateTime(Yii::$app->formatter->asDate($this->from_date)));
+                    $this->to_date->add(new \DateInterval("P".$this->discount->periods."M"));
+                    $this->to_date->modify('-1 day');
+                    $this->to_date = $this->to_date->format('Y-m-d');
+                }
             }
             return true;
         } else {
@@ -157,7 +155,7 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
     private function formatDatesBeforeSave()
     {
             $this->from_date = Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd');
-            $this->to_date = Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd');
+            $this->to_date = $this->to_date ? Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd') : null;
         }
     
              

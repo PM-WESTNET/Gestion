@@ -2,6 +2,7 @@
 
 namespace app\modules\westnet\notifications\components\transports;
 
+use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\westnet\notifications\models\Notification;
 use Yii;
@@ -9,7 +10,8 @@ use yii\base\Component;
 use app\components\helpers\EmptyLogger;
 use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 use yii\validators\EmailValidator;
-
+use PHPExcel;
+use PHPExcel_IOFactory;
 /**
  * Description of EmailTransport
  *
@@ -24,30 +26,58 @@ class EmailTransport implements TransportInterface {
             'programmable'
         ];
     }
-    
-    public function export($notification){
-        
+
+    public function export($notification)
+    {
         //Para evitar que la memoria alcance el limite
         Yii::setLogger(new EmptyLogger());
-        
+        set_time_limit(0);
+
         //Nombre de archivo
-        $fileName = 'emails.csv';
-        
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="'.$fileName.'"');
-        
-        $output = fopen('php://output', 'w');
-        
-        //Encabezado:
-        fputcsv($output, [ Yii::t('app', 'Name'), Yii::t('app', 'Lastname'), Yii::t('app', 'Email') ] );
-        
-        foreach($notification->destinataries as $destinataries){
-            $query = $destinataries->getCustomersQuery();
-            foreach($query->each() as $customer) {
-                fputcsv($output, [ $customer['name'], $customer['lastname'], $customer['email'] ]);
+        $fileName = 'mail-notification.xls';
+
+        ob_start();
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header('Cache-Control: cache, must-revalidate');
+        header('Pragma: public');
+
+        $excel = new PHPExcel();
+
+        $excel->getProperties()
+            ->setCreator("Arya By Quoma S.A.")
+            ->setTitle("SMS Contacts");
+
+        $excel->setActiveSheetIndex(0)
+            ->setCellValue('A1', Yii::t('app', 'Name'))
+            ->setCellValue('B1', Yii::t('app', 'Lastname'))
+            ->setCellValue('C1', Yii::t('app', 'Email'));
+
+        $i = 2;
+
+        foreach ($notification->destinataries as $destinataries) {
+            /** @var Query $query */
+            $query = $destinataries->getCustomersQuery(false)->andWhere(['email_status' => 'active']);
+
+            foreach ($query->batch(1000) as $customers) {
+                foreach ($customers as $customer) {
+
+                    $excel->setActiveSheetIndex(0)
+                        ->setCellValue('A' . $i, $customer['name'])
+                        ->setCellValue('B' . $i, $customer['lastname'])
+                        ->setCellValue('C' . $i, $customer['email']);
+                    $i++;
+                }
+                $excel->getActiveSheet()->getStyle('A1:A' . $i)
+                    ->getNumberFormat()
+                    ->setFormatCode();
             }
         }
-        
+
+        $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+        $objWriter->save('php://output');
     }
 
     /**
@@ -60,7 +90,14 @@ class EmailTransport implements TransportInterface {
         foreach($notification->destinataries as $destinataries){
             $emails = array_merge($emails, $destinataries->getEmails());
         }
-        $chunks = array_chunk($emails, 50, true);
+
+        Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
+        Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
+
+        $max_rate = (int)Config::getValue('aws_max_send_rate');
+
+        //Le restamos 2 al maximo de cuota por segundo para asegurarnos nunca alcanzarla
+        $chunks = array_chunk($emails, ($max_rate - 2), true);
         
         $ok = 0;
         $error = 'Error: ';
@@ -97,12 +134,24 @@ class EmailTransport implements TransportInterface {
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;
+                Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
+                Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
+                Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
+
+                //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
+                sleep(3);
             }
         } catch(\Exception $ex) {
+            Yii::$app->cache->delete('status_'.$notification->notification_id);
+            Yii::$app->cache->delete('success_'.$notification->notification_id);
+            Yii::$app->cache->delete('error_'.$notification->notification_id);
+            Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
             $error = $ex->getMessage();
             $ok = false;
         }
 
+
+        Yii::$app->cache->delete('status_'.$notification->notification_id);
         if($ok){
             return [
                 'status' => 'success',
@@ -124,7 +173,7 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Nombre', trim(substr($customer['name'], 0, $replace_max_string['@Nombre'])), $replaced_text);
         $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
         $replaced_text = str_replace('@Telefono2', substr($customer['phone2'], 0, $replace_max_string['@Telefono2']), $replaced_text);
-        $replaced_text = str_replace('@Code', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
+        $replaced_text = str_replace('@CodigoDeCliente', substr($customer['code'], 0, $replace_max_string['@Codigo']), $replaced_text);
         $replaced_text = str_replace('@PaymentCode', substr($customer['payment_code'], 0, $replace_max_string['@CodigoDePago']), $replaced_text);
         $replaced_text = str_replace('@Nodo', substr($customer['node'], 0, $replace_max_string['@Nodo']), $replaced_text);
         $replaced_text = str_replace('@Saldo', substr($customer['saldo'], 0, $replace_max_string['@Saldo']), $replaced_text);

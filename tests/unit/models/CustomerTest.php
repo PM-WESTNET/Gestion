@@ -8,6 +8,8 @@
 
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerHasCustomerMessage;
+use app\modules\sale\models\ProductHasCategory;
+use app\modules\sale\modules\contract\models\Plan;
 use app\tests\fixtures\CustomerCategoryFixture;
 use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\CustomerClassFixture;
@@ -25,6 +27,11 @@ use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\tests\fixtures\CustomerMessageFixture;
 use app\modules\sale\models\Bill;
 use app\modules\checkout\models\Payment;
+use app\modules\sale\models\CustomerHasDiscount;
+use app\modules\sale\models\Discount;
+use app\modules\sale\modules\contract\models\Contract;
+use app\tests\fixtures\ProductFixture;
+use app\tests\fixtures\VendorFixture;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -65,6 +72,12 @@ class CustomerTest extends \Codeception\Test\Unit
             ],
             'customer_message' => [
                 'class' => CustomerMessageFixture::class
+            ],
+            'product' => [
+                'class' => ProductFixture::class
+            ],
+            'vendor' => [
+                'class' => VendorFixture::class
             ]
         ];
     }
@@ -80,14 +93,12 @@ class CustomerTest extends \Codeception\Test\Unit
     {
         $model = new Customer([
             'tax_condition_id' => 1,
+            'name' => 'Pepe',
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1
         ]);
-
-        $model->validate();
-        \Codeception\Util\Debug::debug($model->getErrors());
 
         expect('Valid when full and new', $model->validate())->true();
     }
@@ -105,6 +116,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
+            'name' => 'Pepe',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -133,6 +145,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Pepe',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -355,6 +368,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
@@ -380,6 +394,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
@@ -409,6 +424,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
+            'name' => 'Cliente1',
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
             'email' => 'customer@gmail.com',
@@ -438,6 +454,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -469,6 +486,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'tax_condition_id' => 1,
             'publicity_shape' => 'web',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -501,6 +519,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
             'customerClass' => 1,
+            'name' => 'Cliente1',
             '_notifications_way' => [Customer::getNotificationWays()],
             'code' => 11111,
             'email' => 'customer@gmail.com',
@@ -532,6 +551,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'publicity_shape' => 'web',
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
+            'name' => 'Cliente1',
             'document_type_id' => 1,
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
@@ -556,6 +576,7 @@ class CustomerTest extends \Codeception\Test\Unit
             'document_number' => '12456789',
             'document_number' => '23-29834800-4',
             'document_type_id' => 1,
+            'name' => 'Cliente1',
             'customerClass' => 1,
             '_notifications_way' => [Customer::getNotificationWays()],
         ]);
@@ -571,5 +592,321 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Customer has one draft payment', $model->hasDraftPayments())->true();
     }
 
+    public function testGetActiveCustomerHasDiscounts()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456789',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $discount = new Discount([
+            'name' => 'Descuento1',
+            'status' => Discount::STATUS_ENABLED,
+            'type' => Discount::TYPE_FIXED,
+            'value' => 50,
+            'value_from' => 'plan',
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
+            'periods' => 1,
+            'apply_to' => Discount::APPLY_TO_PRODUCT,
+            'referenced' => 1,
+        ]);
+        $discount->save();
+
+        $chd = new CustomerHasDiscount([
+            'customer_id' => $model->customer_id,
+            'discount_id' => $discount->discount_id,
+            'from_date' => (new \DateTime('now'))->modify('-1 month')->format('d-m-Y'),
+            'to_date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
+            'status' => CustomerHasDiscount::STATUS_ENABLED
+        ]);
+        $chd->save();
+
+        expect('Get one discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(1);
+
+        $chd->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+
+        $chd->updateAttributes(['status' => CustomerHasDiscount::STATUS_ENABLED]);
+        $discount->updateAttributes(['status' => Discount::STATUS_DISABLED]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+
+        $discount->updateAttributes(['status' =>  Discount::STATUS_ENABLED]);
+        $chd->updateAttributes(['from_date' => (new \DateTime('now'))->modify('+1 days')->format('Y-m-d')]);
+
+        expect('Get any discount', count($model->getActiveCustomerHasDiscounts()->all()))->equals(0);
+    }
+
+    public function testIsNewCustomer()
+    {
+        $days_qty = Config::getValue('new_contracts_days');
+
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456799',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $old_date = $days_qty + 1;
+        $new_date = $days_qty - 1;
+
+        $contract = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => $model->customer_id,
+            'from_date' => (new \DateTime('now'))->modify("-$old_date days")->format('d-m-Y')
+        ]);
+        $contract->save();
+
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is not new', $model->isNewCustomer())->false();
+
+        $contract->from_date = (new \DateTime('now'))->modify("-$new_date days")->format('d-m-Y');
+        $contract->to_date = (new \DateTime('now'))->modify("+1 month")->format('d-m-Y');
+        $contract->save();
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is new', $model->isNewCustomer())->true();
+
+        $contract->from_date = (new \DateTime('now'))->modify("-$days_qty days")->format('d-m-Y');
+        $contract->to_date = (new \DateTime('now'))->modify("+1 month")->format('d-m-Y');
+        $contract->save();
+        $model->refresh();
+        $contract->refresh();
+
+        expect('Customer is not new 2', $model->isNewCustomer())->false();
+    }
+
+    public function testHasfibraPlan()
+    {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '12456799',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'name' => 'Cliente1',
+            'customerClass' => 1,
+            '_notifications_way' => [Customer::getNotificationWays()],
+        ]);
+        $model->save();
+
+        $contract = new Contract([
+            'date' => (new \DateTime('now'))->format('d-m-Y'),
+            'customer_id' => $model->customer_id,
+            'from_date' => (new \DateTime('now'))->format('d-m-Y')
+        ]);
+        $contract->save();
+
+        $model->refresh();
+        $contract->refresh();
+
+        $contract->addContractDetail([
+            'contract_id' => $contract->contract_id,
+            'product_id' => 1,
+            'count' => 1,
+            'vendor_id' => 1
+        ]);
+
+        expect('Has fibra plan return false', $model->hasFibraPlan())->false();
+
+        $category_fibra = \app\modules\sale\models\Category::findOne(['system' => 'plan-fibra']);
+        $product_has_category = new ProductHasCategory([
+            'product_id' => 1,
+            'category_id' => $category_fibra->category_id,
+        ]);
+        $product_has_category->save();
+
+        expect("Has fibra plan return true", $model->hasFibraPlan())->true();
+    }
+
+
+    public function testValidateDniSuccess8Characters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "35875225";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+
+    public function testValidateDniSuccess7Characters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "5875225";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+    public function testValidateCuitSuccess()
+    {
+        $document_type = DocumentType::findOne(['name' => 'CUIT']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "20358752250";
+
+        expect('Not validated', $customer->validate(['document_number']))->true();
+
+    }
+
+    public function testValidateDniFailLessCharacters()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "20358752250";
+
+        expect('Not validated', $customer->validate(['document_number']))->false();
+
+    }
+
+    public function testValidateDniFailSameCharacter()
+    {
+        $document_type = DocumentType::findOne(['name' => 'DNI']);
+
+        if (empty($document_type)) {
+            expect('Document Type not found', false)->true();
+        }
+
+        $customer = new Customer();
+        $customer->document_type_id = $document_type->document_type_id;
+        $customer->document_number = "99999";
+
+        expect('Not validated', $customer->validate(['document_number']))->false();
+
+    }
+
+    public function testValidatePhonesOnlyNumbers()
+    {
+        $customer = new Customer();
+        $customer->phone = '2616260580';
+        $customer->phone2 = '2616260581';
+        $customer->phone3 = '2616260582';
+        $customer->phone4 = '2616260583';
+
+        $validate = $customer->validate(['phone', 'phone2', 'phone3', 'phone4']);
+
+        \Codeception\Util\Debug::debug($customer->getErrors());
+
+        expect('Not validated', $validate)->true();
+    }
+
+    public function testValidatePhonesFail()
+    {
+        $customer = new Customer();
+        $customer->phone = '2616260580 :)';
+        $customer->phone2 = '2616260581 (El de mi mujer)';
+        $customer->phone3 = '2616260582';
+        $customer->phone4 = '2616260583';
+
+        expect('Not validated', $customer->validate(['phone', 'phone2', 'phone3', 'phone4']))->false();
+    }
+
+    public function testValidatePhone2RequiredSuccessOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+        $customer->phone2 = '2616260580';
+
+        expect('Not validate', $customer->validate(['phone2']))->true();
+    }
+
+    public function testValidatePhone2RequiredFailOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+
+        expect('Validate', $customer->validate(['phone2']))->false();
+    }
+
+    public function testValidatePhone2NotRequiredWhenNullOnUpdate()
+    {
+        $customer = Customer::findOne(45904);
+
+        expect('Not validate', $customer->validate(['phone2']))->true();
+    }
+
+    public function testValidatePhone2RequiredWhenNotNullOnUpdate()
+    {
+        $customer = Customer::findOne(45903);
+        $customer->phone2 = null;
+
+        expect('Not validate', $customer->validate(['phone2']))->false();
+    }
+
+    public function testValidatePhone3RequiredSuccessOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+        $customer->phone3 = '2616260580';
+
+        expect('Not validate', $customer->validate(['phone3']))->true();
+    }
+
+    public function testValidatePhone3RequiredFailOnInsert()
+    {
+        $customer = new Customer();
+        $customer->scenario = 'insert';
+
+        expect('Validate', $customer->validate(['phone3']))->false();
+    }
+
+    public function testValidatePhone3NotRequiredWhenNullOnUpdate()
+    {
+        $customer = Customer::findOne(45904);
+
+        expect('Not validate', $customer->validate(['phone3']))->true();
+    }
+
+    public function testValidatePhone3RequiredWhenNotNullOnUpdate()
+    {
+        $customer = Customer::findOne(45903);
+        $customer->phone3 = null;
+
+        expect('Not validate', $customer->validate(['phone3']))->false();
+    }
     //TODO resto de la clase
 }

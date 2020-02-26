@@ -6,6 +6,7 @@ use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use app\modules\westnet\models\NotifyPayment;
+use yii\db\Query;
 
 /**
  * NotifyPaymentSearch represents the model behind the search form of `app\modules\westnet\models\NotifyPayment`.
@@ -22,7 +23,7 @@ class NotifyPaymentSearch extends NotifyPayment
     {
         return [
             [['notify_payment_id', 'payment_method_id', 'created_at'], 'integer'],
-            [['date', 'image_receipt', 'from_date', 'to_date', 'customer_id'], 'safe'],
+            [['date', 'image_receipt', 'from_date', 'to_date', 'customer_id', 'from'], 'safe'],
             [['amount'], 'number'],
         ];
     }
@@ -75,6 +76,7 @@ class NotifyPaymentSearch extends NotifyPayment
             'date' => $this->date,
             'amount' => $this->amount,
             'payment_method_id' => $this->payment_method_id,
+            'from' => $this->from,
             'created_at' => $this->created_at,
             'customer_id' => $this->customer_id,
         ]);
@@ -89,6 +91,20 @@ class NotifyPaymentSearch extends NotifyPayment
 
         $query->andFilterWhere(['like', 'image_receipt', $this->image_receipt]);
 
+        $query->orderBy(['created_at' => SORT_DESC]);
+
         return $dataProvider;
+    }
+
+    public function report()
+    {
+        $query = (new Query())->select('COUNT(*) as qty, pm.name as payment_method_name')
+                ->from('notify_payment np')
+                ->leftJoin('payment_method pm', 'pm.payment_method_id = np.payment_method_id')
+                ->where(['from' => NotifyPayment::FROM_APP])
+                ->groupBy(['pm.name'])
+                ->all();
+
+        return $query;
     }
 }

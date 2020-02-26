@@ -2,6 +2,8 @@
 
 namespace app\controllers;
 
+use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\westnet\models\NotifyPayment;
 use Yii;
 use yii\filters\AccessControl;
 use app\components\web\Controller;
@@ -36,6 +38,11 @@ class SiteController extends Controller
         if(!Yii::$app->user->isGuest){
             if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
                 return $this->redirect(['/agenda/default/index']);
+            }
+
+
+            if(Yii::$app->user->identity->hasRole('User-alert-new-no-verified-tranferences', false) && NotifyPayment::transferenceNotifyPaymentsNotVerifiedExists()) {
+                Yii::$app->session->addFlash('info', Yii::t('app', 'Theres one or more notify payments by transference not verified'));
             }
         }
         return $this->render('index');
@@ -80,6 +87,14 @@ class SiteController extends Controller
 
     public function actionAbout()
     {
+        $paymentSearch = new PaymentSearch();
+        $paymentSearch->customer_id = 6;
+
+        $debt = round((float)$paymentSearch->accountTotal(), 2);
+
+        var_dump($debt);
+        Yii::trace($debt);
+        die();
         return $this->render('about');
     }
 }

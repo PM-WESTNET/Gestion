@@ -77,7 +77,6 @@ class AutomaticDebitController extends Controller
         return $this->render('create', [
             'model' => $model,
             'banks' => $banks
-
         ]);
     }
 
@@ -95,7 +94,6 @@ class AutomaticDebitController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->automatic_debit_id]);
         }
-
 
         $banks = ArrayHelper::map(Bank::find()->andWhere(['status' => Bank::STATUS_ENABLED])->all(), 'bank_id', 'name');
 

@@ -9,6 +9,8 @@ use yii\data\ActiveDataProvider;
 use app\modules\ticket\models\Ticket;
 use app\components\helpers\DbHelper;
 use app\modules\sale\models\Customer;
+use yii\db\Query;
+use yii\db\Expression;
 
 /**
  * TicketSearch represents the model behind the search form about `app\modules\agenda\models\Ticket`.
@@ -22,13 +24,19 @@ class TicketSearch extends Ticket {
     public $user_id;
     public $customer;
     public $customer_number;
+    public $customer_id;
     public $document;
     public $assignations;
     public $start_date_label;
     public $ticket_management_qty;
-
+    public $created_by;
     public $close_from_date;
     public $close_to_date;
+
+    public $categories;
+    public $start_date_from;
+    public $start_date_to;
+    public $show_all;
 
     public function init() {
         parent::init();
@@ -37,9 +45,10 @@ class TicketSearch extends Ticket {
     public function rules() {
         return [
             [['ticket_id'], 'integer'],
+            [['show_all'], 'boolean'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
             [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
-            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id'], 'safe'],
+            [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations', 'show_all'], 'safe'],
         ];
     }
     
@@ -49,6 +58,10 @@ class TicketSearch extends Ticket {
             'customer' => Yii::t('app', 'Customer'),
             'customer_number' => Yii:: t('app', 'Customer Number'),
             'ticket_management_qty' => Yii::t('app', 'Ticket management quantity'),
+            'created_by' => Yii::t('app', 'Created by'),
+            'start_date_from' => Yii::t('app', 'Start date from'),
+            'start_date_to' => Yii::t('app', 'Start date to'),
+            'show_all' => Yii::t('app','Show All')
         ]);
     }
 
@@ -106,6 +119,7 @@ class TicketSearch extends Ticket {
             $query->andFilterWhere(['between', 'start_date', $start_date, $end_date]);
             $this->start_date = $this->start_date;
         }
+
         if (!is_null($this->finish_date) && strpos($this->finish_date, ' al ') !== false) {
             list($start_date, $end_date) = explode(' al ', $this->finish_date);
             
@@ -116,12 +130,37 @@ class TicketSearch extends Ticket {
             $this->finish_date = $this->finish_date;
         }
 
+        //Rango de fecha start date
+        if($this->start_date_from) {
+            $query->andFilterWhere(['>=', 'start_date', $this->start_date_from]);
+        }
+
+        if($this->start_date_to) {
+            $query->andFilterWhere(['<=', 'start_date', $this->start_date_to]);
+        }
+
         $query->andFilterWhere([
             'ticket_id' => $this->ticket_id,
             'status_id' => $this->status_id,
             'color_id' => $this->color_id,
-            'category_id' => $this->category_id,
+            'ticket.customer_id' => $this->customer_id,
         ]);
+
+        if($this->category) {
+            $query->andFilterWhere(['category_id' => $this->category_id]);
+        }
+
+        if($this->categories) {
+            $query->andFilterWhere(['in','category_id', $this->categories]);
+        }
+
+        // Si no filtramos por ninguna categoria en especifico me fijo si hay categorias definidas para mostrar en el
+        // panel de tickets y filtro por ellas
+        if($this->scenario === self::SCENARIO_WIDE_SEARCH && empty($this->category) && empty($this->categories)){
+            if (isset(Yii::$app->params['tickets_categories_showed']) && !empty(Yii::$app->params['tickets_categories_showed'])) {
+                $query->andWhere(['IN', 'category_id', Yii::$app->params['tickets_categories_showed']]);
+            }
+        }
 
         $query->andFilterWhere(['like', 'title', $this->title]);
         $query->andFilterWhere(['like', 'number', $this->number]);
@@ -134,11 +173,13 @@ class TicketSearch extends Ticket {
                 ->andFilterWhere(['assig.user_id' => $this->assignations]);
         }
 
-        if($this->user_id) {
-            $query->andFilterWhere(['like', 'user.id', $this->user_id]);
+        if($this->created_by) {
+            $query->andFilterWhere(['ticket.user_id' => $this->created_by]);
         }
 
-
+        if($this->user_id && !(boolean)$this->show_all) {
+            $query->andFilterWhere(['like', 'user.id', $this->user_id]);
+        }
         
         if (empty($params['sort'])) {
             $query->orderBy([
@@ -155,9 +196,7 @@ class TicketSearch extends Ticket {
             $query->andWhere(['<>','status_id', $err_status->status_id]);
         }
 
-
-        $query->orderBy('ticket.status_id');
-
+        $query->distinct();
         $dataProvider->query = $query;
 
         return $dataProvider;
@@ -256,7 +295,7 @@ class TicketSearch extends Ticket {
         $query->joinWith('customerProfiles', false);
 
         //Profiles habilitados para busqueda
-        $profileClasses = \app\modules\agenda\models\Ticket::getSearchableProfileClasses();
+        $profileClasses = Ticket::getSearchableProfileClasses();
         foreach ($profileClasses as $class) {
 
             /* El query debe ser armado asi para que funcione coorectamente. Pasando profile_class_id como parametro :profile_class_id no funciona.
@@ -289,7 +328,12 @@ class TicketSearch extends Ticket {
         $query->innerJoin('status st', 'st.status_id=ticket.status_id');
 
         $query->andWhere(['st.is_open' => 1]);
-        $query->andWhere(['category_id' => $this->category_id]);
+
+        if($this->categories) {
+            $query->andWhere(['in', 'category_id', $this->categories]);
+        } else {
+            $query->andWhere(['category_id' => $this->category_id]);
+        }
 
         if (!empty($this->close_from_date)) {
             $query->andFilterWhere(['>=', 'start_datetime', strtotime(Yii::$app->formatter->asDate($this->close_from_date, 'yyyy-MM-dd'))]);
@@ -300,5 +344,60 @@ class TicketSearch extends Ticket {
         }
 
         return $query;
+    }
+
+    /**
+     * Devuelve registros para el reporte.
+     */
+    public function searchReport($params)
+    {
+        $this->load($params);
+
+        $query = new Query();
+        $query->select([new Expression('date_format(start_date, \'%Y-%m\') AS periodo'),new Expression('count(*) as qty')])
+            ->from('ticket');
+
+        if($this->assignations) {
+            $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
+                ->andFilterWhere(['assig.user_id' => $this->assignations]);
+        }
+
+        if($this->ticket_management_qty) {
+            $ticket_managements_ids = (new Query)
+                ->select('tm.ticket_id')
+                ->from('ticket_management tm')
+                ->groupBy('tm.ticket_id')
+                ->having("count(tm.ticket_id) = $this->ticket_management_qty");
+
+            $query->andFilterWhere(['in', 'ticket.ticket_id', $ticket_managements_ids]);
+        }
+
+        if($this->start_date_from){
+            $query->andWhere(['>=','start_date', $this->start_date_from]);
+        }
+
+        if($this->start_date_to) {
+            $query->andWhere(['<=', 'start_date', $this->start_date_to]);
+        }
+
+        if($this->status_id) {
+            $query->andWhere(['status_id' => $this->status_id]);
+        }
+
+        if($this->created_by) {
+            $query->andFilterWhere(['ticket.user_id' => $this->created_by]);
+        }
+
+        if($this->user_id) {
+            $query->andFilterWhere(['like', 'user.id', $this->user_id]);
+        }
+
+        if($this->category_id) {
+            $query->andFilterWhere(['category_id' => $this->category_id]);
+        }
+
+        $query->groupBy(new Expression('date_format(start_date, \'%Y-%m\')'));
+
+        return $query->all(Yii::$app->dbticket);
     }
 }

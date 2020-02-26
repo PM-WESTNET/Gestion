@@ -4,7 +4,6 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use \app\modules\ticket\TicketModule;
 
-
 /* @var $this yii\web\View */
 /* @var $model app\modules\ticket\models\Ticket */
 

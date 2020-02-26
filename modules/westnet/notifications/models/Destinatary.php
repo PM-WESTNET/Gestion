@@ -5,6 +5,7 @@ namespace app\modules\westnet\notifications\models;
 use app\components\db\ActiveRecord;
 use app\components\helpers\DbHelper;
 use app\components\helpers\EmptyLogger;
+use app\modules\config\models\Config;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerCategory;
@@ -37,6 +38,7 @@ use yii\db\Query;
  * @property integer $customer_class_id
  * @property integer $debt_from
  * @property integer $debt_to
+ * @property string $has_app
  *
  * @property Customer[] $customers
  * @property Notification $notification
@@ -92,7 +94,7 @@ class Destinatary extends ActiveRecord {
             [['notification_id', 'all_subscribed', 'all_unsubscribed', 'overdue_bills_from', 'overdue_bills_to', 'contract_min_age', 'contract_max_age'], 'integer'],
             [['debt_from', 'debt_to'], 'double'],
             [['name'], 'string'],
-            [['notification', '_nodes', '_companies', '_customer_categories', '_customer_class', '_plans', '_contract_statuses', '_customer_statuses', 'customers'], 'safe'],
+            [['notification', '_nodes', '_companies', '_customer_categories', '_customer_class', '_plans', '_contract_statuses', '_customer_statuses', 'customers', 'has_app'], 'safe'],
             [['code'], 'string', 'max' => 255],
         ];
     }
@@ -124,6 +126,7 @@ class Destinatary extends ActiveRecord {
             'contract_max_age' => Yii::t('app', 'Contract maximum age in months'),
             'debt_from' => NotificationsModule::t('app', 'Debt From'),
             'debt_to' => NotificationsModule::t('app', 'Debt To'),
+            'has_app' => NotificationsModule::t('app', 'Has App'),
         ];
     }
 
@@ -586,17 +589,21 @@ class Destinatary extends ActiveRecord {
 
         $query = $search->buildDebtorsQuery($params);
 
+        // Filtro de instalacion de app
+        $this->filterMobileAppStatus($query);
+
         $subquery = new Query();
         $subquery->select("im.customer_id as customer_integratech, im.status as status_integratech, im.integratech_message_id")
                 ->from(DbHelper::getDbName(Yii::$app->dbnotifications).".integratech_message im")
                 ->leftJoin(DbHelper::getDbName(Yii::$app->dbnotifications).".notification n", "im.notification_id = n.notification_id")
                 ->where("n.status = 'enabled' AND im.status = 'pending' ");
 
-        $query->from['b']->addSelect(['connection.ip4_1 as ipv4', 'customer.email', 'customer.email_status', 'customer.phone2',
+        $query->from['b']->addSelect(['connection.ip4_1 as ipv4', 'customer.email', 'customer.email2', 'customer.email_status', 'customer.phone2',
             'customer.phone3', 'customer.phone4', 'n.name as node', 'customer.payment_code', 'company.code as company_code',
             'connection.status_account as status', 'cc.name as category', 'customer.lastname']);
 
         $query->leftJoin(['n' => $subquery], 'b.customer_id = n.customer_integratech');
+
 
         return $query;
     }
@@ -636,7 +643,7 @@ class Destinatary extends ActiveRecord {
 
         //Obtenemos la query de deudores y le agregamos una condicion
         $query = $this->getCustomersQuery();
-        $query->andWhere('email IS NOT NULL');
+        $query->andWhere(['IS NOT','b.email',  NULL]);
         if ($this->notification->transport->class === EmailTransport::class) {
             $query->andWhere(['email_status' => 'active']);
         }
@@ -673,6 +680,49 @@ class Destinatary extends ActiveRecord {
 
     public function getCustomers()
     {
-        return $this->hasMany(Customer::className(), ['customer_id' => 'customer_id'])->viaTable('destinatary_has_customer', ['destinatary_id' => 'destinatary_id']);
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->viaTable('destinatary_has_customer', ['destinatary_id' => 'destinatary_id']);
+    }
+
+    /**
+     * @param $query
+     * @throws \Exception
+     * Filtra por el estado de la aplicación móvil
+     */
+    private function filterMobileAppStatus($query){
+        $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled');
+        $date_min_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period month")->getTimestamp();
+
+        //Si la notificacon es mobile push si o si necesitamos clientes que posean la app instalada
+        if ($this->notification->transport->slug === 'mobile-push'){
+            $query->leftJoin('user_app_has_customer uahc', 'uahc.customer_id = b.customer_id')
+                ->leftJoin('user_app ua', 'ua.user_app_id = uahc.user_app_id')
+                ->leftJoin('user_app_activity uaa', 'uaa.user_app_id = ua.user_app_id');
+
+            $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                ->andFilterWhere(['>=','uaa.last_activity_datetime', $date_min_last_activity]);
+        }else {
+            if(!empty($this->has_app)) {
+                $query->leftJoin('user_app_has_customer uahc', 'uahc.customer_id = b.customer_id')
+                    ->leftJoin('user_app ua', 'ua.user_app_id = uahc.user_app_id')
+                    ->leftJoin('user_app_activity uaa', 'uaa.user_app_id = ua.user_app_id');
+
+                if($this->has_app == 'not_installed') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['<=','uaa.last_activity_datetime', $date_min_last_activity]);
+
+                    $query->orWhere(['uahc.customer_id' => null]);
+                }
+
+                if($this->has_app == 'installed') {
+                    $query->andFilterWhere(['not',['uahc.customer_id' => null]])
+                        ->andFilterWhere(['not',['uaa.user_app_id' => null]])
+                        ->andFilterWhere(['>=','uaa.last_activity_datetime', $date_min_last_activity]);
+                }
+            }
+        }
+
+
     }
 }

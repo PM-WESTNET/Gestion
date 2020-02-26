@@ -29,6 +29,8 @@ use yii\web\Response;
 use SoapClient;
 use yii\web\UploadedFile;
 use yii2fullcalendar\yii2fullcalendar;
+use app\modules\sale\models\Product;
+use app\modules\westnet\models\Vendor;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -102,7 +104,6 @@ class CustomerController extends Controller
             'J' => ['class', Yii::t('app', 'Customer Class'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'K' => ['category', Yii::t('app', 'Customer Category'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'L' => ['company', Yii::t('app', 'Company'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            
         ])->createHeader();       
         
         foreach ($customers as $c) {
@@ -170,16 +171,26 @@ class CustomerController extends Controller
             }
 
             if($model->needsUpdate) {
-                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data'));
+                Yii::$app->session->setFlash('warning', Yii::t('app','This customer needs to confirm data. Last update: {date}', ['date' => ( new \DateTime($model->last_update))->format('d-m-Y')]));
             }
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
+
+            $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+
+            $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
+                ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
+                ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
+                ->all(), 'vendor_id', 'fullName');
+
 
             return $this->render('view', [
                 'model' => $model,
                 'address'=> $address,
                 'contracts' => $contracts,
-                'messages' => $messages
+                'messages' => $messages,
+                'products' => $products,
+                'vendors' => $vendors
             ]);
         }else{
            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
@@ -202,6 +213,8 @@ class CustomerController extends Controller
         if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
             if($address->save()){
                 $model->setAddress($address);
+                $this->upload($model, 'document_image');
+                $this->upload($model, 'tax_image');
 
                 if($model->save()){
                     if(Yii::$app->params['plan_product']){
@@ -261,8 +274,25 @@ class CustomerController extends Controller
     {
         $model = $this->findModel($id);
         $address=  $model->address ? $model->address : new Address;
+        $document_image = $model->document_image;
+        $tax_image = $model->tax_image;
+        $docImageUpdate = Yii::$app->request->post('document_image_update', 0);
+        $taxImageUpdate =  Yii::$app->request->post('tax_image_update', 0);
+
         if($model->canUpdate()){
             if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
+
+                if ($docImageUpdate) {
+                    $this->upload($model, 'document_image');
+                } else {
+                    $model->document_image = $document_image;
+                }
+
+                if ($taxImageUpdate) {
+                    $this->upload($model, 'tax_image');
+                } else {
+                    $model->tax_image = $tax_image;
+                }
 
                 if ($address->save()) {
 
@@ -372,8 +402,11 @@ class CustomerController extends Controller
             'A' => ['code', Yii::t('app', 'Customer Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'D' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
-            'E' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'D' => ['phone2', Yii::t('app', 'Phone 2'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'E' => ['phone3', Yii::t('app', 'Phone 3'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'F' => ['phone4', Yii::t('app', 'Phone 4'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'G' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
+            'H' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();
         
@@ -620,12 +653,9 @@ class CustomerController extends Controller
         $billsQuery= $customer_search->searchAllBills();
         $ticketQuery =$customer_search->getTicketsCount();
         $installations= $contract_search->getInstallations($params, $billsQuery, $ticketQuery);
-        
-        
-        
+
         $dataProvider= new ActiveDataProvider(['query' => $installations]);
         $users = ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username');
-
 
         $this->layout= '//fluid';
         return $this->render('installations', ['data' => $dataProvider, 'contract_search' => $contract_search, 'users' => $users]);
@@ -713,9 +743,10 @@ class CustomerController extends Controller
     {
         $searchModel = new CustomerSearch;
         $searchModel->exclude_customers_with_one_bill = true;
+        $searchModel->not_contract_status = 'low';
         $dataProvider = $searchModel->searchDebtors(Yii::$app->request->getQueryParams(), 100);
 
-        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill are excluded'));
+        Yii::$app->session->setFlash('info', Yii::t('app', 'Remember: Customers whose debt is on the first bill and their contract is in low status are excluded'));
 
         return $this->render('cashing-panel', [
             'dataProvider' => $dataProvider,
@@ -781,7 +812,7 @@ class CustomerController extends Controller
                     return $this->render('verify-emails', ['results' => $results]);
                 }
 
-                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'));
+                $partial_result = Customer::verifyEmails($resource, Yii::$app->request->post('field'), Yii::$app->request->post('type'));
 
                 foreach ($partial_result as $key => $r) {
                     if (isset($results[$key])) {
@@ -794,8 +825,29 @@ class CustomerController extends Controller
         }
 
         return $this->render('verify-emails', ['results' => $results]);
-
-
     }
 
+    private function upload($model, $attr){
+
+        $file = UploadedFile::getInstance($model, $attr);
+
+        $folder = \yii\helpers\Inflector::pluralize($attr);
+
+        if ($file && $model->validate()) {
+            $filePath = Yii::$app->params['upload_directory'] . "$folder/". uniqid($attr) . '.' . $file->extension;
+
+            if (!file_exists(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/")) {
+                mkdir(Yii::getAlias('@webroot') . '/' . Yii::$app->params['upload_directory'] . "$folder/", 0775, true);
+            }
+
+            $file->saveAs(Yii::getAlias('@webroot') . '/' . $filePath);
+
+            $model->$attr = $filePath;
+
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 }

@@ -10,6 +10,7 @@ use app\modules\checkout\models\PaymentItem;
 use app\modules\provider\models\ProviderPayment;
 use app\modules\provider\models\ProviderPaymentItem;
 use Yii;
+use app\modules\accounting\components\AccountMovementRelationManager;
 
 /**
  * This is the model class for table "paycheck".
@@ -318,18 +319,40 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
             $this->timestamp = (new \DateTime("now"))->getTimestamp();
         }
     }
-    
-                         
+
+
     /**
      * @inheritdoc
      * Strong relations: None.
      */
     public function getDeletable()
     {
-        return (
-            ($this->getProviderPaymentsItems()->count()===0) &&
-            ($this->getPaymentItems()->count()===0)
-        );
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if (($this->getProviderPaymentsItems()->count() === 0) && ($this->getPaymentItems()->count() === 0)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     * Verifica si el cheque se puede actualizar.
+     */
+    public function getUpdatable()
+    {
+        if(!AccountMovementRelationManager::isDeletable($this)) {
+            return false;
+        }
+
+        if ($this->status != Paycheck::STATE_CREATED && $this->status != Paycheck::STATE_RECEIVED) {
+            return false;
+        }
+
+        return true;
     }
     
     /**
@@ -337,6 +360,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
      * Weak relations: Checkbook, MoneyBox, PaycheckLogs, Payments, ProviderPayments.
      */
     protected function unlinkWeakRelations(){
+        AccountMovementRelationManager::delete($this);
     }
     
     /**

@@ -14,10 +14,16 @@ use app\modules\ivr\v1\components\Controller;
 use app\modules\ivr\v1\models\Customer;
 use app\modules\ivr\v1\models\search\CustomerSearch;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\Product;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\westnet\models\NotifyPayment;
+use app\modules\westnet\models\PaymentExtensionHistory;
 use Yii;
+use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\filters\VerbFilter;
+use yii\web\BadRequestHttpException;
 
 class CustomerController extends Controller
 {
@@ -233,35 +239,56 @@ class CustomerController extends Controller
     public function actionCanForce()
     {
         $data = \Yii::$app->request->post();
+        $default_message = \Yii::t('ivrapi','The customer exceeded the payment extension limit');
 
         if (!isset($data['code']) || empty($data['code'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
-                'error' => \Yii::t('ivrapi','"code" param is required')
+                'error' => "true",
+                'deudor' => "false",
+                'nuevo' => 'false',
+                'msg' => \Yii::t('ivrapi','"code" param is required')
             ];
         }
 
-        $customer = Customer::findOne(['code' => $data['code']]);
+        $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => \Yii::t('ivrapi','Customer not found')
             ];
         }
 
-        if (!$customer->canRequestPaymentExtension()) {
+        if (!$customer->hasContractAndConnectionActive()) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        //TODO: Eliminar segunda condicion al finalizar el desarrollo de IVR
+        if (!$customer->canRequestPaymentExtension() && $customer->code !== 27237) {
             \Yii::$app->response->setStatusCode(400);
 
             return [
                 'error' => 'true',
-                'msg' => \Yii::t('ivrapi','The customer exceeded the payment extension limit')
+                'deudor' => $customer->debtor ? 'true' : 'false',
+                'nuevo' => $customer->isNew ? 'true' : 'false',
+                'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
             ];
         }
 
         return [
             'error' => 'false',
+            'deudor' => 'false',
+            'nuevo' => 'false',
             'data' => $customer->extendConnetionInfo()
         ];
     }
@@ -306,22 +333,38 @@ class CustomerController extends Controller
     public function actionForceConnection()
     {
         $data = Yii::$app->request->post();
+        $default_message = \Yii::t('ivrapi','The customer exceeded the payment extension limit');
 
-        if (!isset($data['contract_id'])){
+        if (!isset($data['code'])){
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => Yii::t('ivrapi','Connection to payment extension not found')
+                'deudor' => 'false',
+                'nuevo' => 'false',
+                'msg' => Yii::t('ivrapi','Customer not found')
             ];
         }
 
+        $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
 
-        $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
+        if (empty($customer)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
+                'msg' => \Yii::t('ivrapi','Customer not found')
+            ];
+        }
+
+        $contract = Contract::find()->andWhere(['customer_id' => $customer->customer_id, 'status' => Contract::STATUS_ACTIVE])->one();
 
         if (empty($contract)) {
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
@@ -332,29 +375,54 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
+                'deudor' => 'false',
+                'nuevo' => 'false',
                 'msg' => Yii::t('ivrapi','Connection to payment extension not found')
             ];
         }
 
-        if ($contract->customer->canRequestPaymentExtension() && $connection->canForce()) {
-            $payment_extension_product = Config::getValue('extend_payment_product_id');
-            $payment_extension_duration_days = Config::getValue('payment_extension_duration_days');
-            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
-            $create_pti = true;
+        if (!$contract->customer->canRequestPaymentExtension() && $customer->code !== 27237) {
+            \Yii::$app->response->setStatusCode(400);
 
-            if($contract->customer->getPaymentExtensionQtyRequest() > 0) {
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days;
-                $due_date = date('d-m-Y', $due_timestamp);
-            }else{
-                $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
-                $due_date = date('d-m-Y', $due_timestamp);
-                $create_pti = false;
+            return [
+                'error' => 'true',
+                'deudor' => $contract->customer->debtor ? 'true' : 'false',
+                'nuevo' => $contract->customer->isNew ? 'true' : 'false',
+                'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
+            ];
+        }
+
+        if ($connection->canForce()){
+
+            $payment_extension_product = Product::findOne(Config::getValue('extend_payment_product_id'));
+
+            if (empty($payment_extension_product)) {
+                Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'deudor' => 'false',
+                    'nuevo' => 'false',
+                    'msg' => Yii::t('ivrapi','Can`t create payment extension')
+                ];
             }
 
-            if($connection->force($due_date, $payment_extension_product, null, $create_pti)){
+            $create_pti = true;
+
+            $due_date =(new \DateTime('now'))
+                ->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())
+                ->format('d-m-Y');
+
+            $real_date = (new \DateTime('now'))
+                ->setTimestamp(\app\modules\sale\models\Customer::getMaxDateRealPaymentExtension())
+                ->format('d-m-Y');
+
+
+            if($connection->force($real_date, $payment_extension_product->product_id, null, $create_pti)){
+                PaymentExtensionHistory::createPaymentExtensionHistory($contract->customer_id, PaymentExtensionHistory::FROM_IVR);
                 return [
                     'error' => 'false',
                     'to_date' => $due_date,
+                    'price' => round($payment_extension_product->finalPrice, 2),
                     'msg' => Yii::t('ivrapi','Payment Extension created successfull')
                 ];
             }
@@ -363,6 +431,8 @@ class CustomerController extends Controller
         Yii::$app->response->setStatusCode(400);
         return [
             'error' => 'true',
+            'deudor' => 'false',
+            'nuevo' => 'false',
             'msg' => Yii::t('ivrapi','Can`t create payment extension')
         ];
     }
@@ -523,13 +593,23 @@ class CustomerController extends Controller
             ];
         }
 
+
         $model = \app\modules\sale\models\bills\Bill::find()->andWhere(['customer_id' => $customer->customer_id])->orderBy(['bill_id' => SORT_DESC])->one();
 
         if(empty($model)) {
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => 'The customer haven`t any bill'
+                'msg' => Yii::t('ivrapi','The customer haven`t any bill')
+            ];
+        }
+
+        // La de cupon
+        if ($model->bill_type_id == Config::getValue('cupon_bill_types')) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => Yii::t('ivrapi','The customer haven`t any bill')
             ];
         }
 
@@ -658,13 +738,234 @@ class CustomerController extends Controller
      */
     public function actionGetCustomer()
     {
+        try {
+
+            $data = Yii::$app->request->post();
+
+            if (!isset($data['code']) || empty($data['code'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"code" param is required')
+                ];
+            }
+
+            $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
+
+            if (empty($customer)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            if (!$customer->hasActiveOrLowProcessContract()) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            $customer->scenario= 'full';
+
+            return [
+                'error' => 'false',
+                'data' => $customer,
+            ];
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @SWG\Post(path="/customer/get-customer-by-document-number",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Número de documento del cliente"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'error': 'false',
+     *               'data': {
+     *                   'customer_id': 39932,
+     *                   'fullName': 'LEZCANO, NADIA ETHEL ',
+     *                   'documentType': {
+     *                   'document_type_id': 2,
+     *                   'name': 'DNI',
+     *                   'code': 96,
+     *                   'regex': ''
+     *                  },
+     *                   'document_number': '39382763',
+     *                   'code': 47745,
+     *                   'balance': -1035.03,
+     *                   'last_payment': {
+     *                   'amount': 1110,
+     *                   'date': '17-07-2019'
+     *                   },
+     *                   'clipped': 'enabled'
+     *               }
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomerByDocumentNumber()
+    {
+        try {
+
+            $data = Yii::$app->request->post();
+            $customer_qty = 0;
+            $active_customers = [];
+
+            if (!isset($data['document_number']) || empty($data['document_number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','"document_number" param is required')
+                ];
+            }
+
+            $customers = Customer::find()->where(['document_number' => $data['document_number'], 'status' => Customer::STATUS_ENABLED])->all();
+
+            if (empty($customers)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            foreach ($customers as $customer) {
+                if ($customer->hasActiveOrLowProcessContract()) {
+                    $customer->scenario = 'full';
+                    array_push($active_customers, $customer);
+                    $customer_qty ++;
+                }
+            }
+
+            //Si no hay ningun cliente activo
+            if($customer_qty <= 0) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'customer_qty' => 0,
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
+            }
+
+            //Se pide específicamente que si el resultado es uno solo NO se devuelva dentro de un array
+            if(count($active_customers) == 1) {
+                return [
+                    'error' => 'false',
+                    'data' => $active_customers[0],
+                    'customer_qty' => 1
+                ];
+            }
+
+            return [
+                'error' => 'false',
+                'customer_qty' => $customer_qty,
+                'data' => $active_customers,
+            ];
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'customer_qty' => 0,
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * @SWG\Post(path="/customer/create-notify-payment",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Informa un pago",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *          @SWG\Property(property="date", type="string", description="Formato dd-mm-yyyy"),
+     *          @SWG\Property(property="amount", type="number", description="Monto del pago"),
+     *          @SWG\Property(property="payment_method_id", type="integer", description="ID del método de pago"),
+     *          @SWG\Property(property="contract_id", type="integer", description="ID del contrato"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'error': 'false',
+     *               'msg': 'Su informe de pago se creó exitosamente'
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *              Usted no puede notificar un pago este mes
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionCreateNotifyPayment()
+    {
         $data = Yii::$app->request->post();
 
-        if (!isset($data['code']) || empty($data['code'])) {
+        if (!isset($data['code']) || empty($data['code']) ||
+            !isset($data['amount']) || empty($data['amount']) || !isset($data['payment_method_id']) || empty($data['payment_method_id'])
+            || !isset($data['contract_id']) || empty($data['contract_id'])) {
             \Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => \Yii::t('ivrapi','"code" param is required')
+                'msg' => \Yii::t('ivrapi','code, date, amount, payment_method_id, contract_id are required')
             ];
         }
 
@@ -678,11 +979,106 @@ class CustomerController extends Controller
             ];
         }
 
-        $customer->scenario= 'full';
+        $date = (new \DateTime(date('Y-m-d')))->modify('first day of this month')->format('Y-m-d');
+        $date_to = (new \DateTime(date('Y-m-d')))->modify('last day of this month')->format('Y-m-d');
+
+        if (!$customer->getContracts()->andWhere(['contract_id' => $data['contract_id']])->exists()){
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','Invalid Contract')
+
+            ];
+        }
+
+        if (!$customer->canNotifyPayment($date, $date_to)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => \Yii::t('ivrapi','You can`t notify a payment this month')
+
+            ];
+        }
+
+
+
+        $notify_payment = new NotifyPayment([
+            'customer_id' => $customer->customer_id,
+            'date' => date('Y-m-d'),
+            'amount' => $data['amount'],
+            'payment_method_id' => $data['payment_method_id'],
+            'contract_id' => $data['contract_id'],
+            'from' => NotifyPayment::FROM_IVR
+        ]);
+
+        $trasanction = Yii::$app->db->beginTransaction();
+
+        $result = $this->createPaymentExtensionAndForce($data['contract_id']);
+        if($notify_payment->save() && $result['status']) {
+            $trasanction->commit();
+            return [
+                'error' => 'false',
+                'msg' => Yii::t('app', 'Your notify payment was created successfully')
+            ];
+        }
+
+        $trasanction->rollBack();
 
         return [
-            'error' => 'false',
-            'data' => $customer,
+            'error' => 'true',
+            'msg' => array_key_exists('message', $result) ? $result['message'] : Yii::t('app', 'Your notify payment can`t be created')
         ];
+    }
+
+    /**
+     * Crea una extensión de pago (gratuita o paga) y fuerza la conexion
+     */
+    private function createPaymentExtensionAndForce($contract_id)
+    {
+        $contract = Contract::find()->andWhere(['contract_id' => $contract_id])->one();
+
+        if (empty($contract)) {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Contract not found'),
+            ];
+        }
+
+        $connection = $contract->connection;
+
+        if (empty($connection)) {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Connection not found'),
+            ];
+        }
+
+        if($connection->canForce()) {
+            $payment_extension_product = Config::getValue('extend_payment_product_id');
+            $payment_extension_duration_days_for_free = Config::getValue('payment_extension_duration_days_free');
+
+            $due_timestamp = strtotime(date('Y-m-d')) + 86400 * (int)$payment_extension_duration_days_for_free;
+            $due_date = date('d-m-Y', $due_timestamp);
+
+            if($connection->force($due_date, $payment_extension_product, null, false)){
+                //Activo los items del contrato
+                $cti = new ContractToInvoice();
+                $cti->updateContract($contract);
+                return [
+                    'status' => true,
+                ];
+            } else {
+                return [
+                    'status' => false,
+                    'message' => Yii::t('app', 'An error occurred. Your connection can`t be restored.')
+                ];
+            }
+        } else {
+            return [
+                'status' => false,
+                'message' => Yii::t('app', 'Your connection can`t be restored.')
+            ];
+        }
+            //Si no es gratuito, se está solicitando una extension de pago
     }
 }

@@ -42,19 +42,19 @@ $this->params['breadcrumbs'][] = $this->title;
             <h6>Referencias</h6>
         </div>
         <div class="col-sm-5">
-                <h6><?= AgendaModule::t('app', 'Task statuses'); ?> : </h6>
-            <span class="label label-default"><?= AgendaModule::t('app', 'Created task'); ?></span>
-            <span class="label label-info"><?= AgendaModule::t('app', 'In progress task'); ?></span>
-            <span class="label label-warning"><?= AgendaModule::t('app', 'Pending task'); ?></span>
-            <span class="label label-danger"><?= AgendaModule::t('app', 'Stopped task'); ?></span>
-            <span class="label label-success"><?= AgendaModule::t('app', 'Completed task'); ?></span>
+                <h6><?= Yii::t('app', 'Task statuses'); ?> : </h6>
+            <span class="label label-default"><?= Yii::t('app', 'Created task'); ?></span>
+            <span class="label label-info"><?= Yii::t('app', 'In progress task'); ?></span>
+            <span class="label label-warning"><?= Yii::t('app', 'Pending task'); ?></span>
+            <span class="label label-danger"><?= Yii::t('app', 'Stopped task'); ?></span>
+            <span class="label label-success"><?= Yii::t('app', 'Completed task'); ?></span>
             </div>
         <div class="col-sm-5">
-               <h6><?= AgendaModule::t('app', 'Task priorities'); ?> : </h6>
-               <span class="label label-default"> * <?= AgendaModule::t('app', 'Low priority'); ?></span>
-               <span class="label label-default"> ** <?= AgendaModule::t('app', 'Medium priority'); ?></span>
-               <span class="label label-default"> *** <?= AgendaModule::t('app', 'High priority'); ?></span>
-               <span class="label label-default"> **** <?= AgendaModule::t('app', 'Highest priority'); ?></span>
+               <h6><?= Yii::t('app', 'Task priorities'); ?> : </h6>
+               <span class="label label-default"> * <?= Yii::t('app', 'Low priority'); ?></span>
+               <span class="label label-default"> ** <?= Yii::t('app', 'Medium priority'); ?></span>
+               <span class="label label-default"> *** <?= Yii::t('app', 'High priority'); ?></span>
+               <span class="label label-default"> **** <?= Yii::t('app', 'Highest priority'); ?></span>
         </div>
     </div>
 

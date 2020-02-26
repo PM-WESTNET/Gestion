@@ -58,6 +58,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label'=>$model->getAttributeLabel('priority'),
                 'value'=> $model->getPriorities()[$model->priority]
             ],
+            [
+                'label' => Yii::t('app', 'Customer'),
+                'value' => function($model) {
+                    $html = '';
+                    foreach ($model->asociatedCustomers as $customer) {
+                        $html .= Html::a($customer->fullName, ['/sale/customer/view', 'id' => $customer->customer_id]) . '  ';
+                    }
+                    return $html;
+                },
+                'format' => 'raw'
+            ]
         ],
     ]) ?>    
     

@@ -80,7 +80,7 @@ class ProviderBillController extends Controller
         }
 
         if ($model->load(Yii::$app->request->post())) {
-            $existing_provider_bill = ProviderBill::find()->where(['number' => $model->number1.'-'.$model->number2])->andWhere(['provider_id' => $model->provider_id])->one();
+            $existing_provider_bill = ProviderBill::find()->where(['number' => $model->number1.'-'.$model->number2])->andWhere(['provider_id' => $model->provider_id])->andWhere(['bill_type_id' => $model->bill_type_id])->one();
             if ($existing_provider_bill) {
                 \Yii::$app->session->setFlash('error', 'Ya existe una factura con el mismo número para ese provedor');
                 return $this->render('create', [
@@ -89,10 +89,10 @@ class ProviderBillController extends Controller
                             'itemsDataProvider' => null,
                             'from' => $from
                 ]);
-            } elseif ($model->save()) {
+            } elseif ($model->save() && $model->validate()) {
                 return $this->redirect(['provider-bill/update', 'id' => $model->provider_bill_id, 'from' => $from]);
             }
-        } else {
+        }
             \app\components\helpers\FlashHelper::flashErrors($model);
 
             return $this->render('create', [
@@ -101,7 +101,7 @@ class ProviderBillController extends Controller
                         'itemsDataProvider' => null,
                         'from' => $from
             ]);
-        }
+
     }
 
     /**

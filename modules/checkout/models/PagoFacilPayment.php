@@ -101,10 +101,6 @@ class PagoFacilPayment extends \app\components\db\ActiveRecord
         return $this->hasOne(Payment::class, ['payment_id' => 'payment_payment_id']);
     }
     
-        
-        
-        
-                 
     /**
      * @inheritdoc
      * Strong relations: None.

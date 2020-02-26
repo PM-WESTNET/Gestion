@@ -8,7 +8,6 @@
 
 namespace app\modules\mobileapp\v1\models;
 
-
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\config\models\Config;
@@ -59,7 +58,7 @@ class Customer extends \app\modules\sale\models\Customer
     public function getBillsToShow()
     {
         $excluded_bill_type = BillType::findOne(['name' => 'Cupón de Pago']);
-        $all_bills = $this->getBills()->where(['status' => Bill::STATUS_CLOSED])->andWhere(['not',['bill_type_id' => $excluded_bill_type->bill_type_id]])->orderBy('timestamp', SORT_DESC)->limit(10)->all();
+        $all_bills = $this->getBills()->where(['status' => Bill::STATUS_CLOSED])->andWhere(['not',['bill_type_id' => $excluded_bill_type->bill_type_id]])->orderBy(['timestamp' => SORT_DESC])->limit(10)->all();
         $bills = [];
 
         foreach ($all_bills as $bill) {

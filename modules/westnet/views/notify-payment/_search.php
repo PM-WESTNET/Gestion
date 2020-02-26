@@ -1,5 +1,6 @@
 <?php
 
+use app\modules\westnet\models\NotifyPayment;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\jui\DatePicker;
@@ -19,12 +20,22 @@ use app\modules\checkout\models\PaymentMethod;
     ]); ?>
 
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <?= $form->field($model,'payment_method_id')->widget(Select2::class, [
-                'data' => PaymentMethod::getPaymentMethodForSelect()
+                'data' => PaymentMethod::getPaymentMethodForSelect(),
+                'pluginOptions' => [
+                    'allowClear' => true,
+                    'placeholder' => Yii::t('app', 'Select ...')
+                ]
+            ]);?>
+        </div>
+        <div class="col-sm-4">
+            <?= $form->field($model,'from')->widget(Select2::class, [
+                'data' => NotifyPayment::getFormForSelect(),
+                'options' => ['placeholder' => Yii::t('app','Select an option')]
             ]);?>
         </div>
     </div>

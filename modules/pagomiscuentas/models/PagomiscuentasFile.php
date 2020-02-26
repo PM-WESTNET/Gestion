@@ -252,6 +252,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
                     $this->createRelationWithPayment($payment->payment_id);
                     $payment->close();
                 }
+
                 $this->updateAttributes(['status' => self::STATUS_CLOSED, 'total' => $total]);
                 $trans->commit();
                 return true;

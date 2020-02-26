@@ -13,6 +13,12 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="resume-view">
 
+    <?php if ($model->moneyBoxAccount->moneyBox->hasUndefinedOperationType()):?>
+        <div class="alert alert-warning">
+            <?php echo Yii::t('accounting','Money Box has undefined code operation')?>
+        </div>
+    <?php endif;?>
+
    <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
@@ -111,7 +117,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'header' => Yii::t('accounting', 'Operation Type'),
                             'value' => function ($model){
-                                return $model->moneyBoxHasOperationType->operationType->name;
+                                if ($model->moneyBoxHasOperationType->operationType){
+                                    return $model->moneyBoxHasOperationType->operationType->name;
+                                }
+
+                                return $model->moneyBoxHasOperationType->code;
                             },
                         ],
                         [

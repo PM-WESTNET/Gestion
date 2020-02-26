@@ -151,9 +151,15 @@ class BillDetail extends \app\components\db\ActiveRecord
     //Calcula el subtotal del detalle
     public function getSubtotal()
     {
+        $subtotal = 0.0;
 
-        return round(($this->type == 'discount' || !is_null($this->discount_id) ? ($this->qty * $this->unit_net_discount) : ($this->qty * ($this->unit_net_price - $this->unit_net_discount ) ) ), 2) ;
+        if($this->type == 'discount') {
+            $subtotal = $this->qty * $this->unit_net_discount;
+        } else {
+            $subtotal = $this->qty * ($this->unit_net_price - $this->unit_net_discount);
+        }
 
+        return round($subtotal, 2);
     }
 
     //Calcula el total del detalle
@@ -162,8 +168,18 @@ class BillDetail extends \app\components\db\ActiveRecord
         return round($this->qty * $this->unit_final_price, 2) ;
     }
 
-    public function getTotalDiscount()
+    public function getTotalDiscount($withTaxes = false)
     {
+        if($withTaxes) {
+            //Si el descuento es fijo, se saltean los impuestos.
+            if($this->discount) {
+                if($this->discount->type == Discount::TYPE_FIXED) {
+                    return round($this->qty * $this->unit_net_discount, 2);
+                }
+            }
+            return round($this->qty * ($this->unit_net_discount * 1.21), 2);
+        }
+
         return round($this->qty * $this->unit_net_discount, 2) ;
     }
 

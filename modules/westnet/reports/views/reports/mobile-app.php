@@ -48,4 +48,48 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= round($statistics[0]['used_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['used_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
         </div>
     </div>
+
+    <hr>
+
+    <div class="col-sm-12 list-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?= Yii::t('app', 'Notify payments qty per payment method') ?></h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <?php
+                    $last_period = '';
+                    foreach ($paymentsStatistics as $paymentStatistic) {
+
+                        $date = DateTime::createFromFormat('Ymd', $paymentStatistic['period'].'01');
+                        if($last_period != $paymentStatistic['period']) {
+                            echo "<li class='list-group-item disabled'>". $date->format('Y-m')."</li>";
+                            $last_period = $paymentStatistic['period'];
+                        }
+                        echo "<li class='list-group-item' style='padding-left:5em'>". $paymentStatistic['payment_method_name']." <span class='badge'>".$paymentStatistic['qty']."</span></li>";
+                    }?>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="col-sm-12 list-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?= Yii::t('app', 'Payment extension qty per period') ?></h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <?php foreach ($paymentExtensionStatistics as $paymentExtensionStatistic) {
+                        $date = DateTime::createFromFormat('Ymd', $paymentExtensionStatistic['period'].'01');
+                        $qty = ($paymentExtensionStatistic['payment_extension_qty'] - $paymentExtensionStatistic['notify_payment_qty']) <= 0 ? 0 : ($paymentExtensionStatistic['payment_extension_qty'] - $paymentExtensionStatistic['notify_payment_qty']);
+                        echo "<li class='list-group-item'>". $date->format('Y-m')." <span class='badge badge-lg'>".$qty."</span></li>";
+                    }?>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>

@@ -66,14 +66,16 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'class' => 'btn btn-warning',
                             ]);
 
-                        $html .= Html::a('<span class="glyphicon glyphicon-trash"></span>',
-                                Url::toRoute(['account-movement/delete', 'id'=>$model['account_movement_id']]), [
-                                    'title' => Yii::t('yii', 'Delete'),
-                                    'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                                    'data-method' => 'post',
-                                    'data-pjax' => '1',
-                                    'class' => 'btn btn-danger',
-                                ]) . '</div>';
+                        if ($model->getDeletable()) {
+                            $html .= Html::a('<span class="glyphicon glyphicon-trash"></span>',
+                                    Url::toRoute(['account-movement/delete', 'id'=>$model['account_movement_id']]), [
+                                        'title' => Yii::t('yii', 'Delete'),
+                                        'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                        'data-method' => 'post',
+                                        'data-pjax' => '1',
+                                        'class' => 'btn btn-danger',
+                                    ]) . '</div>';
+                        }
                     }
 
                     return $html."</div>";
@@ -128,6 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             [
                 'value' => function($model){
+                    $movement = AccountMovement::findOne($model['account_movement_id']);
                     $html = '<div class="row"><div class="col-md-8">'. Yii::t('accounting', 'Entry') . " - " .
                         $model['account_movement_id']. " - " . $model['description'] .
                         '</div>';
@@ -136,8 +139,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
                     if($model['status'] != 'closed') {
-                        $html .= '<div class="col-md-2 text-right">'. Html::a('<span class="glyphicon glyphicon-pencil"></span>',
+                        $html .= '<div class="col-md-2 text-right">';
+                        if ($movement->isManualMovement() || ($movement->getUpdatable() && \webvimark\modules\UserManagement\models\User::hasRole('modify-account-movement'))) {
+                            $html .= Html::a('<span class="glyphicon glyphicon-pencil"></span>',
                                 Url::toRoute(['account-movement/update', 'id'=>$model['account_movement_id']]), ['class' => 'btn btn-primary']) ;
+                        }
 
                         $html .= Html::a('<span class="glyphicon glyphicon-repeat"></span>',
                             Url::toRoute(['account-movement/close', 'id'=>$model['account_movement_id'], 'from'=>'index']), [
@@ -148,14 +154,18 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'class' => 'btn btn-warning',
                             ]);
 
-                        $html .= Html::a('<span class="glyphicon glyphicon-trash"></span>',
-                                Url::toRoute(['account-movement/delete', 'id'=>$model['account_movement_id']]), [
-                            'title' => Yii::t('yii', 'Delete'),
-                            'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
-                            'data-method' => 'post',
-                            'data-pjax' => '1',
-                            'class' => 'btn btn-danger',
-                        ]) . '</div>';
+                        if ($movement->getDeletable() && \webvimark\modules\UserManagement\models\User::hasRole('modify-account-movement')) {
+                            $html .= Html::a('<span class="glyphicon glyphicon-trash"></span>',
+                                    Url::toRoute(['account-movement/delete', 'id'=>$model['account_movement_id']]), [
+                                'title' => Yii::t('yii', 'Delete'),
+                                'data-confirm' => Yii::t('yii', 'Are you sure you want to delete this item?'),
+                                'data-method' => 'post',
+                                'data-pjax' => '1',
+                                'class' => 'btn btn-danger',
+                            ]) ;
+                        }
+
+                        $html .= '</div>';
                     }
 
                     return $html."</div>";
