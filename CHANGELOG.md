@@ -12,16 +12,27 @@ All notable changes to this project will be documented in this file.
  - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
- las opciones de gigantografia, pantalla led e instagram [GES-644]
+ las opciones de gigantografia, pantalla led e instagram [AD-9]
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
- - Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Celular 2 no requerido [GES-788]
  - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
  - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
- - Tickets de instalaciones: Se agrega funcionalidad para cerrar tickets por período [AD-3]
+ - Backups: Alerta a email si falla un backup [GES-810]
+ 
+ ## [2020.02.26.0]
+ ### Modificado
+  - Descuentos por recomendado: Modifcación de función que calcula si el cliente tiene la primera factura pagada [GES-632/GES-673] Solicitado y aprobado por Camila
+  - Alta de cliente: Celular 2 no requerido [GES-788] Solicitado y aprobado por Camila.
+ - Se corrige dni con _ al final, en clientes con dni de 7 digitos [GES-789] Solicitado y aprobado por Camila.
+ - Correccion de Reportes de clientes actualizados, extensiones de pago, e informe de pago [AD-2] Solicitado y aprobado por Maria Laura.
+ ### Agregado
+   - Tickets de instalaciones: Se agrega funcionalidad para cerrar tickets por período [AD-3] Solicitado y aprobado por Camila.
+ 
+ ## [2020.02.21.0]
+ ### Modificación
+  - Corrección de visualización de reportes de Extensiones de pago, informe de pago y Actualización de cliente [AD-2]. Solicitado y Aprobado por Ma 
  
  ## [2020.02.19.0]
  ### Agregado

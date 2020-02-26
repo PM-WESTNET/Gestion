@@ -64,4 +64,11 @@ return [
         'password' => '*********',
         'charset' => 'utf8',
     ],
+    'dbbackups' => [
+        'class' => 'yii\db\Connection',
+        'dsn' => 'mysql:host=localhost;dbname=rex-backups',
+        'username' => 'root',
+        'password' => '*********',
+        'charset' => 'utf8',
+    ],
 ];

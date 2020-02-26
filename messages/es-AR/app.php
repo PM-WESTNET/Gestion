@@ -1334,6 +1334,11 @@
     'Update Employee Category: {nameAttribute}' => 'Actualizar Categoria de Empleado: {nameAttribute}',
     'Start Work Date' => 'Fecha de Alta',
     'Finish Work Date' => 'Fecha de Baja',
+    'In Process' => 'En Proceso',
+    'Success' => 'Correcto',
+    'Fail' => 'Falló',
+    'Begin' => 'Inicio',
+    'End' => 'Finalizado'
 
 
  );

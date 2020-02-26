@@ -211,7 +211,10 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'label' => $model->getAttributeLabel('customer_reference_id'),
-            'value' => ($model->customerReference ? ($model->customerReference->name . ( $model->customerReference->lastname!='' ? ', ' . $model->customerReference->lastname : '' )) : '' )
+            'value' => function ($model) {
+                return ($model->customerReference ? Html::a($model->customerReference->fullName, ['customer/view', 'id' => $model->customer_reference_id]) : '');
+            },
+            'format' => 'raw'
         ],
         [
             'label' => Yii::t('app','Publicity Shape'),

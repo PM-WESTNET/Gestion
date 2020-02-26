@@ -262,88 +262,65 @@ GROUP BY periodo
     {
         $this->load($params);
 
-        $from_date = null;
-        $to_date = null;
         $labels = [];
         $points = [];
 
-        /**
-         * Según el rango calculo la fecha mínima y máxima
-         * Por cada fecha que se muestra en el gráfico cuento los clientes actualizados entre el punto anterior y el actual
-         */
-        switch($this->range) {
-            case self::LAST_WEEK_RANGE:
-                $from_date = (new \DateTime())->modify('-7 days');
-                $to_date = (new \DateTime());
 
-                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day = $day + 86400) {
-                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
-                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
-                    $points[] = [
-                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
-                        'y' => $qty
-                    ];
-                }
-
-                break;
-            case self::LAST_MONTH_RANGE:
-                $from_date = (new \DateTime())->modify('-30 days');
-                $to_date = (new \DateTime());
-                $before = null;
-                for ($month= $from_date->getTimestamp(); $month <= $to_date->getTimestamp(); $month = $month + (86400 * 5)) {
-                    $labels[] = Yii::$app->formatter->asDate($month, 'dd/MM');
-                    $qty = Customer::find()
-                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($month, 'yyyy-MM-dd')])
-                        ->andFilterWhere(['>=', 'last_update', $before])
-                        ->count();
-                    $points[] = [
-                        'x' => Yii::$app->formatter->asDate($month, 'dd/MM'),
-                        'y' => $qty
-                    ];
-
-                    $before = Yii::$app->formatter->asDate($month, 'yyyy-MM-dd');
-                }
-
-                break;
-            case self::LAST_YEAR_RANGE:
-                $from_date = (new \DateTime())->modify('-1 year');
-                $to_date = (new \DateTime());
-
-                $before = null;
-
-                for ($year= $from_date->getTimestamp(); $year <= $to_date->getTimestamp(); $year=$year + (86400 * 30)) {
-                    $labels[] = Yii::$app->formatter->asDate($year, 'MM/yyyy');
-
-                    $qty = Customer::find()
-                        ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
-                        ->andFilterWhere(['>=', 'last_update', $before])
-                        ->count();
-
-                    $points[] = [
-                        'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
-                        'y' => $qty
-                    ];
-
-                    $before = Yii::$app->formatter->asDate($year, 'yyyy-MM-dd');
-                }
-                break;
-            default :
-                $from_date = (new \DateTime())->modify('-7 days');
-                $to_date = (new \DateTime());
-
-                for ($day= $from_date->getTimestamp(); $day <= $to_date->getTimestamp(); $day=86400 + $day) {
-                    //var_dump($day);
-
-                    $labels[] = Yii::$app->formatter->asDate($day, 'dd/MM');
-                    $qty = Customer::find()->andWhere(['last_update' => Yii::$app->formatter->asDate($day, 'yyyy-MM-dd')])->count();
-                    $points[] = [
-                        'x' => Yii::$app->formatter->asDate($day, 'dd/MM'),
-                        'y' => $qty
-                    ];
-                }
-
-                break;
+        if (!empty($this->date_from)) {
+            $from_date = strtotime(Yii::$app->formatter->asDate($this->date_from, 'yyyy-MM-dd'));
+        }else {
+            $from_date = (new \DateTime())->modify('first day of month')->getTimestamp();
         }
+
+        if (!empty($this->date_from)) {
+            $to_date = strtotime(Yii::$app->formatter->asDate($this->date_to, 'yyyy-MM-dd'));
+        }else {
+            $to_date = (new \DateTime())->getTimestamp();
+        }
+
+        $label_format = 'dd/MM/yyyy';
+        $step = 86400;
+
+        if (($to_date - $from_date) < (86400 * 30)){
+            $step = 86400;
+            $label_format = 'dd/MM/yyyy';
+        }
+
+        if (($to_date - $from_date) < (86400 * 180) && ($to_date - $from_date) > (86400 * 30)){
+            $step = 86400 * 15;
+            $label_format = 'dd/MM/yyyy';
+        }
+
+        if (($to_date - $from_date) > (86400 * 180)) {
+            $step = 86400 * 31;
+            $label_format = 'MM/yyyy';
+        }
+
+        $before = 0;
+        $counter = 0;
+        for ($year= $from_date; $year <= $to_date; $year=$year + $step) {
+            $labels[] = Yii::$app->formatter->asDate($year, $label_format);
+
+            if($before === 0) {
+                $qty = Customer::find()
+                    ->andWhere(['=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                    ->count();
+                $counter += $qty;
+            }else {
+                $qty = Customer::find()
+                    ->andWhere(['<=', 'last_update', Yii::$app->formatter->asDate($year, 'yyyy-MM-dd')])
+                    ->andFilterWhere(['>=', 'last_update', $before])
+                    ->count();
+            }
+            $counter  += $qty;
+            $points[] = [
+                'x' => Yii::$app->formatter->asDate($year, 'dd/MM'),
+                'y' => $counter
+            ];
+
+            $before = Yii::$app->formatter->asDate($year, 'yyyy-MM-dd');
+        }
+
         return [
             'labels' => $labels,
             'points' => $points,

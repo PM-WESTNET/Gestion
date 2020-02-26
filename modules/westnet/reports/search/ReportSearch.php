@@ -708,7 +708,7 @@ class ReportSearch extends Model
         $query = (new Query())
             ->select([
                 new Expression('COUNT(*) as qty'),
-                new Expression('date'),
+                new Expression('date_format(date, \'%Y-%m-%d\') as date'),
                 new Expression('`from`')
             ])->from(['payment_extension_history'])
             ->groupBy(['date', 'from'])

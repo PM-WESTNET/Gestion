@@ -1,5 +1,8 @@
 <?php
 use app\modules\westnet\reports\search\CustomerSearch;
+use yii\helpers\Html;
+use yii\jui\DatePicker;
+use yii\widgets\ActiveForm;
 
 $this->title = Yii::t('app', 'Updated Customers Report');
 $this->params['breadcrumbs'][] = $this->title;
@@ -10,17 +13,44 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?php echo $this->title?></h1>
     <hr>
 
-    <?php $form = \yii\bootstrap\ActiveForm::begin(['id' => 'range-form'])?>
+    <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
+
     <div class="row">
-        <div class="col-lg-12">
-            <?php echo $form->field($search, 'range')->dropDownList([
-                CustomerSearch::LAST_WEEK_RANGE => Yii::t('app', 'Last Week'),
-                CustomerSearch::LAST_MONTH_RANGE => Yii::t('app', 'Last Month'),
-                CustomerSearch::LAST_YEAR_RANGE => Yii::t('app', 'Last Year'),
-            ], ['id' => 'range-drop'])?>
+        <div class="col-md-6">
+            <div class="form-group">
+                <?= $form->field($search, 'date_from')->widget(DatePicker::class, [
+                    'language' => Yii::$app->language,
+                    'model' => $search,
+                    'attribute' => 'date_from',
+                    'dateFormat' => 'dd-MM-yyyy',
+                    'options'=>[
+                        'class'=>'form-control filter dates',
+                        'placeholder'=>Yii::t('app','Date')
+                    ]
+                ])?>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <?= $form->field($search, 'date_to')->widget(DatePicker::class, [
+                    'language' => Yii::$app->language,
+                    'model' => $search,
+                    'attribute' => 'date_to',
+                    'dateFormat' => 'dd-MM-yyyy',
+                    'options'=>[
+                        'class'=>'form-control filter dates',
+                        'placeholder'=>Yii::t('app','Date')
+                    ]
+                ])?>
+            </div>
         </div>
     </div>
-    <?php \yii\bootstrap\ActiveForm::end()?>
+    <div class="row">
+        <div class="col-md-12">
+            <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
+        </div>
+    </div>
+    <?php ActiveForm::end(); ?>
 
     <?php
 
@@ -50,7 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo \dosamigos\chartjs\ChartJs::widget([
             'type' => 'line',
             'options' => [
-                'height' => '100%',
+                'height' => '50px',
                 'width' => '100%',
             ],
             'clientOptions' => [
@@ -71,7 +101,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => Yii::t('app', 'Updated Customers'),
                         'data' => $data['points'],
-                        'backgroundColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'fill' => false,
+                        'lineTension' => 0.1,
+                        'borderColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'borderCapStyle' => 'round',
+                        'borderDash' => [],
+                        'curveType' => 'none',
+                        //'backgroundColor' => sprintf('rgba(%s,%s,%s,0.6)', 255, 80, 80),
+                        'backgroundColor' => 'white',
+
                     ]
                 ]
             ]

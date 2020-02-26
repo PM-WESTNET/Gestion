@@ -872,6 +872,7 @@ class ReportsController extends Controller
 
         $colslineal = $graph->getSteps();
 
+
         //Columnas del grafico de torta
         foreach ($data as $item) {
             $cols[] = $item['name'];
@@ -881,6 +882,9 @@ class ReportsController extends Controller
         $data_app = [];
         $data_ivr = [];
 
+        $before_app= 0;
+        $before_ivr = 0;
+
         //Completo los array con las fechas que comprenden el período
         foreach ($colslineal as $item) {
             $from_app = false;
@@ -889,14 +893,16 @@ class ReportsController extends Controller
             foreach ($dataLineal as $datal) {
                 if($datal['from'] == NotifyPayment::FROM_APP) {
                     if($datal['date'] == $item) {
-                        array_push($data_app, (int)$datal['qty']);
+                        $before_app += (int)$datal['qty'];
+                        array_push($data_app, $before_app);
                         $from_app = true;
                     }
                 }
 
                 if($datal['from'] == NotifyPayment::FROM_IVR) {
                     if($datal['date'] == $item) {
-                        array_push($data_ivr, (int)$datal['qty']);
+                        $before_ivr += (int)$datal['qty'];
+                        array_push($data_ivr, $before_ivr);
                         $from_ivr = true;
                     }
                 }
@@ -904,14 +910,19 @@ class ReportsController extends Controller
 
             //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
             if(!$from_app ) {
-                array_push($data_app, 0);
+                array_push($data_app, $before_app);
                 $from_app = false;
             }
 
             if(!$from_ivr ) {
-                array_push($data_ivr, 0);
+                array_push($data_ivr, $before_ivr);
                 $from_ivr = false;
             }
+
+//            if(!$from_ivr ) {
+//                array_push($data_ivr, $counter_ivr);
+//                $from_ivr = false;
+//            }
         }
 
 
@@ -966,35 +977,49 @@ class ReportsController extends Controller
             $data_tart[] = $item['qty'];
         }
 
+        $counter_app = 0;
+        $counter_ivr = 0;
+        $before_app = 0;
+        $before_ivr = 0;
+
+//        var_dump($colslineal);
+//        die();
         //Completo los array con las fechas que comprenden el período
         foreach ($colslineal as $item) {
             $from_app = false;
             $from_ivr = false;
 
+
             foreach ($datas as $data) {
                 if ($data['from'] == PaymentExtensionHistory::FROM_APP) {
+//                    var_dump($data['date']);
+//                    var_dump($item);
                     if ($data['date'] == $item) {
-                        array_push($data_app, (int)$data['qty']);
+                        $before_app += (int)$data['qty'];
+                        array_push($data_app, $before_app);
                         $from_app = true;
                     }
                 }
 
                 if ($data['from'] == PaymentExtensionHistory::FROM_IVR) {
                     if ($data['date'] == $item) {
+                        $before_ivr += (int)$data['qty'];
                         array_push($data_ivr, (int)$data['qty']);
                         $from_ivr = true;
                     }
                 }
             }
 
+
+
             //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
             if (!$from_app) {
-                array_push($data_app, 0);
+                array_push($data_app, $before_app);
                 $from_app = false;
             }
 
             if (!$from_ivr) {
-                array_push($data_ivr, 0);
+                array_push($data_ivr, $before_ivr);
                 $from_ivr = false;
             }
         }
