@@ -74,7 +74,7 @@ class AppFailedRegister extends ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'phone', 'type'], 'required'],
+            [['name', 'type'], 'required'],
             [['status', 'text'], 'string'],
             [['customer_code'], 'integer'],
             [['name', 'document_type', 'document_number', 'phone'], 'string', 'max' => 45],
