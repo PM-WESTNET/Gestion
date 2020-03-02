@@ -220,6 +220,7 @@ class FixErrorsController extends \yii\console\Controller
     {
         $customers = Customer::find()
             ->andWhere(['status' => Customer::STATUS_ENABLED])
+            ->andWhere(['IS NOT', 'company_id', NULL])
             ->andWhere(['>=', 'code', $from])
             ->andFilterWhere(['<=', 'code', $to])
             ->all();
