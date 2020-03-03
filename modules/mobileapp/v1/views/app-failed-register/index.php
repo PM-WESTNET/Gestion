@@ -42,7 +42,49 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
 
             ],
-            'email:email',
+            [
+                'label' => Yii::t('app','Emails'),
+                'value' => function ($model) {
+                    $emails = '';
+                    if ($model->email) {
+                        $emails .= '<h5>'.Yii::t('app', 'Email').': '.$model->email.'</h5>';
+                    }
+
+                    if ($model->email2) {
+                        $emails .= '<h5>'.Yii::t('app', 'Secondary Email').': '.$model->email2.'</h5>';
+                    }
+
+                    return $emails;
+                },
+                'format' => 'raw'
+            ],
+            [
+                'label' => Yii::t('app','Phones'),
+                'value' => function ($model) {
+                    $phones = '';
+                    if ($model->phone) {
+                        $phones .= '<h5>'.Yii::t('app', 'Phone').': '.$model->phone.'</h5>';
+                    }
+
+                    if ($model->phone2) {
+                        $phones .= '<h5>'.Yii::t('app', 'Second Phone').': '.$model->phone2.'</h5>';
+                    }
+
+                    if ($model->phone3) {
+                        $phones .= '<h5>'.Yii::t('app', 'Third Phone').': '.$model->phone3.'</h5>';
+                    }
+
+
+                    if ($model->phone4) {
+                        $phones .= '<h5>'.Yii::t('app', 'Cellphone 4').': '.$model->phone4.'</h5>';
+                    }
+
+
+
+                    return $phones;
+                },
+                'format' => 'raw'
+            ],
             'phone',
             [
                 'attribute' => 'type',

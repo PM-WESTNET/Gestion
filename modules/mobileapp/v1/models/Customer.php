@@ -31,6 +31,7 @@ class Customer extends \app\modules\sale\models\Customer
             'phone',
             'phone2',
             'phone3',
+            'phone4',
             'email2',
             'payment_code'
         ];
