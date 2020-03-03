@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
  - Backups: Alerta a email si falla un backup [GES-810]
  - Al borrar un adicional en estado borrador, se eliminan los log asociados al adicional [GES-744] Solicitado por Camila.
  - Formulario de cliente: Al actualizar se agrega checkbox para marcar como verificados los datos del clientes [GES-793]
+ - Se hacen cambios en el alta de cliente para evitar que se creen tickets duplicados al hacer mas de un click [GES-656]
  
  ## [2020.03.03.0]
  ### Modificado
