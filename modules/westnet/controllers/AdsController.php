@@ -100,7 +100,15 @@ class AdsController extends Controller {
             $codes = [];
 
             for ($i = 0; $i < $qty; $i++) {
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
+                /**
+                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+                 */
+                $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                }
+
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .
                     str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
 
                 $payment_code= $generator->generate($code);

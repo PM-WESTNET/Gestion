@@ -1426,7 +1426,7 @@ class Customer extends ActiveRecord {
         return $this->parent_company_id;
     }
 
-    public function updatePaymentCode()
+    public function updatePaymentCode($force = false)
     {
         if($this->company_id) {
             $company = Company::findOne($this->company_id);
@@ -1441,10 +1441,19 @@ class Customer extends ActiveRecord {
             if (($this->isNewRecord || $this->payment_code == '' || $this->payment_code == '0') ||
                 (((int)$this->company_id) != ((int)$this->old_company_id) ||
                     (strlen($this->payment_code) != 11 && strlen($this->payment_code) != 14 )) ||
-                $this->payment_code < 0
+                $this->payment_code < 0 || $force
             ) {
                 $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
+
+                /**
+                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+                 */
+                $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($this->code)), '0', STR_PAD_LEFT);
+                }
+
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
                     str_pad($this->code, 5, "0", STR_PAD_LEFT) ;
                 $this->payment_code = $generator->generate($code);
             }

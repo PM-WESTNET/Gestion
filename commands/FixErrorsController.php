@@ -215,4 +215,18 @@ class FixErrorsController extends \yii\console\Controller
     {
         \Yii::$app->mutex->release($process);
     }
+
+    public function actionFixPaymentCodes($from, $to = null)
+    {
+        $customers = Customer::find()
+            ->andWhere(['status' => Customer::STATUS_ENABLED])
+            ->andWhere(['IS NOT', 'company_id', NULL])
+            ->andWhere(['>=', 'code', $from])
+            ->andFilterWhere(['<=', 'code', $to])
+            ->all();
+
+        foreach ($customers as $customer) {
+            $customer->updatePaymentCode(true);
+        }
+    }
 }

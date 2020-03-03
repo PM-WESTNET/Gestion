@@ -10,6 +10,7 @@ use app\modules\automaticdebit\models\BillHasExportToDebit;
 use app\modules\checkout\models\BillHasPayment;
 use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
+use app\modules\ticket\behaviors\TicketBehavior;
 use Yii;
 use \app\modules\checkout\models\Payment;
 use \app\modules\sale\modules\invoice\components\Invoice;
@@ -169,6 +170,9 @@ class Bill extends ActiveRecord implements CountableInterface
             ],
             'modifier' => [
                 'class'=> 'app\components\db\ModifierBehavior'
+            ],
+            'ticket' => [
+                'class'=> 'app\modules\ticket\behaviors\TicketBehavior'
             ],
         ];
     }
@@ -741,6 +745,10 @@ class Bill extends ActiveRecord implements CountableInterface
                     Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
                 }
                 $this->updateAttributes(['status' => 'closed']);
+
+                //Se llama al behavior para cerrar los tickets que tenga el cliente de cobranza
+                $this->trigger('EVENT_CLOSE_TICKETS');
+
                 //Agrega el numero de comprobante
                 if ($this->fillNumber) {
                     $this->fillNumber();
@@ -756,6 +764,9 @@ class Bill extends ActiveRecord implements CountableInterface
                     Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
                 }
                 $this->updateAttributes(['status' => 'closed']);
+
+                //Se llama al behavior para cerrar los tickets que tenga el cliente de cobranza
+                $this->trigger('EVENT_CLOSE_TICKETS');
             }
         }
 
