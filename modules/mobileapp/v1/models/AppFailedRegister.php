@@ -183,8 +183,16 @@ class AppFailedRegister extends ActiveRecord
 
                     $ticket= new Ticket();
                     $ticket->title = 'Solicitud de Edición de Datos';
-                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos:' . ($this->text ? $this->text : '');
-                    $ticket->customer_id = $customer->customer_id;
+                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos: ' .
+                        'Nombre: ' . $this->name . "\n".
+                        'Nro de Documento: ' . $this->document_number . "\n" .
+                        'Email: ' . $this->email . "\n" .
+                        'Email Secundario: ' . $this->email2. "\n".
+                        'Teléfono Fijo: ' . $this->phone. "\n" .
+                        'Celular 1: '. $this->phone2 . "\n".
+                        'Celular 2: '. $this->phone3 . "\n".
+                        'Celular 3: '. $this->phone4 . "\n";
+                        $ticket->customer_id = $customer->customer_id;
                     $ticket->category_id = $category->category_id;
                     $ticket->status_id = $status_id;
                     $ticket->user_id = 1;
