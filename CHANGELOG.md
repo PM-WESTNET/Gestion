@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
  - Backups: Alerta a email si falla un backup [GES-810]
  -  Cierre de tickets de cobranza al cerrar un comprobante y dejar la deuda en cero [GES-773] Solicitado por Camila.
+ - Formulario de cliente: Al actualizar se agrega checkbox para marcar como verificados los datos del clientes [GES-793]
  
  
  ## [2020.02.26.1]
