@@ -23,7 +23,7 @@ TicketBundle::register($this);
 
 <div class="ticket-form">
 
-    <?php $form = ActiveForm::begin(); ?>
+    <?php $form = ActiveForm::begin(['id' => 'ticket-form']); ?>
 
     <?= $form->field($model, 'title')->textInput(['maxlength' => 255]) ?>
 
