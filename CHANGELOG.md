@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
  - Backups: Alerta a email si falla un backup [GES-810]
  -  Cierre de tickets de cobranza al cerrar un comprobante y dejar la deuda en cero [GES-773] Solicitado por Camila.
  - Al borrar un adicional en estado borrador, se eliminan los log asociados al adicional [GES-744] Solicitado por Camila.
+ - Formulario de cliente: Al actualizar se agrega checkbox para marcar como verificados los datos del clientes [GES-793]
  
  ## [2020.02.26.1]
  ### Modificado

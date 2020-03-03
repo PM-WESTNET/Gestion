@@ -1338,7 +1338,7 @@
     'Success' => 'Correcto',
     'Fail' => 'Falló',
     'Begin' => 'Inicio',
-    'End' => 'Finalizado'
-
+    'End' => 'Finalizado',
+    'Data Verified' => 'Datos Verificados'
 
  );
