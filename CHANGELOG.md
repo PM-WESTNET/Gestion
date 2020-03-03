@@ -20,9 +20,12 @@ All notable changes to this project will be documented in this file.
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
  - Backups: Alerta a email si falla un backup [GES-810]
- -  Cierre de tickets de cobranza al cerrar un comprobante y dejar la deuda en cero [GES-773] Solicitado por Camila.
  - Al borrar un adicional en estado borrador, se eliminan los log asociados al adicional [GES-744] Solicitado por Camila.
  - Formulario de cliente: Al actualizar se agrega checkbox para marcar como verificados los datos del clientes [GES-793]
+ 
+ ## [2020.03.03.0]
+ ### Modificado
+  -  Cierre de tickets de cobranza al cerrar un comprobante y dejar la deuda en cero [GES-773] Solicitado y aprobado por Camila.
  
  ## [2020.02.26.1]
  ### Modificado
