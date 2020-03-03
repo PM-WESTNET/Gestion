@@ -1941,7 +1941,17 @@ class Customer extends ActiveRecord {
             ->where(['customer_id' => $customer_id, 'status' => 'closed'])
             ->one();
 
-        if($total_payed['total'] >= $bill->total) {
+        $credit_bills = (new Query())
+            ->select('SUM(total) as total')
+            ->from('bill')
+            ->innerJoin('bill_type bt', 'bt.bill_type_id=bill.bill_type_id')
+            ->andWhere(['customer_id' => $customer_id, 'status' => 'closed'])
+            ->andWhere(['bt.multiplier' => -1])
+            ->one();
+
+        $total = (double)$total_payed['total'] + (double)$credit_bills['total'];
+
+        if($total >= $bill->total) {
             return true;
         }
 
