@@ -26,7 +26,7 @@ class BackupMysqlController extends \yii\console\Controller
         ]);
 
         if ($backup) {
-            if (is_file($log)){
+            if (file_exists($log)){
                 $backup->status = 'success';
             }else {
                 $backup->status = 'error';
