@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
  - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
  - Backups: Alerta a email si falla un backup [GES-810]
+ - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
 
  ##[2020.03.06.0]
  ### Modificado
