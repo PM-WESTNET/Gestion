@@ -2,6 +2,8 @@
 
 namespace app\commands;
 
+use app\modules\backup\models\Backup;
+
 class BackupMysqlController extends \yii\console\Controller
 {
 
@@ -51,6 +53,114 @@ class BackupMysqlController extends \yii\console\Controller
         return '';
     }
 
+    public function actionPerconaFullBack()
+    {
+        
+        $date = (new DateTime('now'));
+        
+        $backup = new Backup();
+        $backup->init_timestamp = $date->format('d-m-Y H:i:s');
+        $backup->status = 'in_process';
+        $backup->save();
+        
+        if(!isset(Yii::$app->params['backups']) || (isset(Yii::$app->params['backups']) && empty(Yii::$app->params['backups']))) {
+            
+        }
+
+        if (!$this->verifySpace()) {
+            $backup->status = 'error';
+            $backup->description ='Falta Espacio en disco';
+            $backup->save();
+            return; 
+        }
+
+        $params = Yii::$app->params['backups'];
+        $dir = $params['dirbase'];
+        $fileOut = $dir. $date->format('Y-m-d_H-i'). '.tar';
+        $host = $params['host'];
+        $user = $params['user'];
+        $pass = $params['pass'];
+
+        $command = "innobackupex --host=$host --user=$user --password=$pass --stream=tar $dir > $fileOut";
+
+        $result = shell_exec($command);
+
+        if ($result ==  '' && file_exists($fileOut)) {
+            $backup->status = 'success';
+            $backup->save();
+            return;
+        }
+
+        $backup->status = 'error';
+        $backup->description ='Error desconocido';
+        $backup->save();
+        return;
+
+    }
+
+    public function actionPerconaIncrementalBack()
+    {
+        $date = (new DateTime('now'));
+        
+        $backup = new Backup();
+        $backup->init_timestamp = $date->format('d-m-Y H:i:s');
+        $backup->status = 'in_process';
+        $backup->save();
+        
+        if(!isset(Yii::$app->params['backups']) || (isset(Yii::$app->params['backups']) && empty(Yii::$app->params['backups']))) {
+            
+        }
+
+        if (!$this->verifySpace()) {
+            $backup->status = 'error';
+            $backup->description ='Falta Espacio en disco';
+            $backup->save();
+            return; 
+        }
+
+        $params = Yii::$app->params['backups'];
+        $dir = $params['dirbase'];
+        $dirInc = $params['dirincrmental'];
+        $fileOut = $dir. $date->format('Y-m-d_H-i'). '.tar';
+        $host = $params['host'];
+        $user = $params['user'];
+        $pass = $params['pass'];
+
+        $command = "innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirInc > $fileOut";
+
+        $result = shell_exec($command);
+
+        if ($result ==  '' && file_exists($fileOut)) {
+            $backup->status = 'success';
+            $backup->save();
+            return;
+        }
+
+        $backup->status = 'error';
+        $backup->description ='Error desconocido';
+        $backup->save();
+        return;
+    }
+
+    public function actionMysqlBackup()
+    {
+
+    }
+
+    /**
+     * Verifica el espacio disponible en el disco y devuelve verdadero si el espacio es mayor al mínimo establecido en params
+     */
+    private function verifySpace() {
+        $limit = Yii::$app->params['backups']['min_disk_space'];
+
+        $space = ((disk_free_space('/')/1024)/1024);
+
+        if ($space !== false && $space > $limit) {
+            return true;
+        }
+
+        return false;
+    }
 
 
 }
