@@ -2,6 +2,7 @@
 
 namespace app\commands;
 
+use DateTime;
 use app\modules\backup\models\Backup;
 
 class BackupMysqlController extends \yii\console\Controller
