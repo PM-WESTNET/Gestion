@@ -3,6 +3,7 @@
 namespace app\commands;
 
 use DateTime;
+use \Yii;
 use app\modules\backup\models\Backup;
 
 class BackupMysqlController extends \yii\console\Controller
@@ -157,10 +158,10 @@ class BackupMysqlController extends \yii\console\Controller
                 $backup = new Backup();
                 $backup->init_timestamp = $date->format('d-m-Y H:i:s');
                 $backup->status = 'in_process';
-                $backup->db = $db;
+                $backup->database = $db;
                 $backup->save();
 
-                $fileOutput = $params['backupMysqlDir'] .'/'. $db.'_'. $date->format('d-m-Y H:i:s').'.sql';
+                $fileOutput = $params['backupMysqlDir'] .'/'. $db.'_'. $date->format('dmY_His').'.sql';
                 $command = "mysqldump -h $host -u $user -p $pass $db > $fileOutput";
                 $result = shell_exec($command);
 
