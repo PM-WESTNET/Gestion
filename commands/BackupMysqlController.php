@@ -120,13 +120,14 @@ class BackupMysqlController extends \yii\console\Controller
 
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
-        $dirInc = $params['dirincrmental'];
-        $fileOut = $dir. $date->format('Y-m-d_H-i'). '.tar';
+        $dirInc = $params['dirincremental']. '/'.$date->format('Y-m-d'). '/';
+        $dirIncBefore = $params['dirincremental']. '/'.$date->modify('-1 day')->format('Y-m-d');
+        $fileOut = $dirInc. $date->format('Y-m-d_H-i'). '.tar';
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command = "innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirInc > $fileOut";
+        $command = "innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirIncBefore > $fileOut";
 
         $result = shell_exec($command);
 
@@ -144,7 +145,34 @@ class BackupMysqlController extends \yii\console\Controller
 
     public function actionMysqlBackup()
     {
+        $params = Yii::$app->params['backups'];
+        $date = (new DateTime('now'));
+        $host = $params['host'];
+        $user = $params['user'];
+        $pass = $params['pass'];
 
+        if (isset($params['databases'])) {
+            foreach ($params['databases'] as $db) {
+                $backup = new Backup();
+                $backup->init_timestamp = $date->format('d-m-Y H:i:s');
+                $backup->status = 'in_process';
+                $backup->db = $db;
+                $backup->save();
+
+                $fileOutput = $params['backupMysqlDir'] .'/'. $db.'_'. $date->format('d-m-Y H:i:s').'.sql';
+                $command = "mysqldump -h $host -u $user -p $pass $db > $fileOutput";
+                $result = shell_exec($command);
+
+                if ($result ==  '' && file_exists($fileOutput)) {
+                    $backup->status = 'success';
+                    $backup->save();
+                }else {
+                    $backup->status = 'error';
+                    $backup->description ='Error desconocido';
+                    $backup->save();
+                }
+            }
+        }
     }
 
     /**

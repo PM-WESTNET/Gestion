@@ -107,9 +107,9 @@ class Backup extends \yii\db\ActiveRecord {
         <h1>Ocurrió un error al realizar un backup</h1>
         <hr>
         
-        <h4>Fecha de Inicio: <?php echo $this->init_timestamp; ?></h4>
-        <h4>Base de datos: <?php echo $this->database; ?></h4>
-        <h4>Descripción: <?php echo $this->description; ?></h4>
+        <h4>Fecha de Inicio:  $this->init_timestamp </h4>
+        <h4>Base de datos:  $this->database</h4>
+        <h4>Descripción: $this->description</h4>
         
 </div>   
 BODY;
