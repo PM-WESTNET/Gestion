@@ -83,7 +83,7 @@ class BackupMysqlController extends \yii\console\Controller
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command = "innobackupex --host=$host --user=$user --password=$pass --stream=tar $dir > $fileOut";
+        $command = "sudo innobackupex --host=$host --user=$user --password=$pass --stream=tar $dir > $fileOut";
 
         $result = shell_exec($command);
 
@@ -123,13 +123,17 @@ class BackupMysqlController extends \yii\console\Controller
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
         $dirInc = $params['dirincremental']. '/'.$date->format('Y-m-d'). '/';
-        $dirIncBefore = $params['dirincremental']. '/'.$date->modify('-1 day')->format('Y-m-d');
         $fileOut = $dirInc. $date->format('Y-m-d_H-i'). '.tar';
+        $dirIncBefore = $params['dirincremental']. '/'.$date->modify('-1 day')->format('Y-m-d');
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command = "innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirIncBefore > $fileOut";
+        $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirIncBefore > $fileOut";
+
+        if (!file_exist($dirInc)) {
+            mkdir($dirInc, 0777);
+        }
 
         $result = shell_exec($command);
 
