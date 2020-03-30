@@ -63,6 +63,7 @@ class InvoiceProcessController extends Controller
         echo 'bill_type_id '.$invoice_process->bill_type_id . "\n";
         echo 'period ' . $invoice_process->period . "\n";
         echo 'bill_observation '.$invoice_process->observation ."\n";
+        echo 'InvoiceAll() antes de query ' . microtime(true);
         $cti->invoiceAll(
             [
                 'ContractSearch' => [
