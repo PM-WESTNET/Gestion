@@ -509,9 +509,15 @@ class ContractToInvoice
                         $start = microtime(true);
 
                         if($contractDetail->product->type == 'plan' && $includePlan) {
+                            //4.1.1.5.1.1.1
+                            echo "invoice() - iteracion de contract detail 4.1.1.5.1.1.1 " . (microtime(true) - $start)."\n";
                             if (!$contractDetail->isAddedForInvoice($periods)){
+                                //4.1.1.5.1.1.2
+                                echo "invoice() - iteracion de contract detail 4.1.1.5.1.1.2 " . (microtime(true) - $start)."\n";
                                 $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
 
+                                //4.1.1.5.1.1.3
+                                echo "invoice() - iteracion de contract detail 4.1.1.5.1.1.3 " . (microtime(true) - $start)."\n";
                                 //Solicito el precio activo en funcion del contrato de cliente (aplica reglas de negocio)
                                 $activePrice = $contractDetail->product->getActivePrice($contractDetail)->one();
 
