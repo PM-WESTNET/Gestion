@@ -442,8 +442,7 @@ class ContractToInvoice
                 $bill->automatically_generated = $automatically_generated ? true : null;
                 $bill->save(false);
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - Creacion de bill ". $time_start."\n";
+                echo "invoice() - Creacion de bill ". microtime(true)."\n";
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
                 $contractSearch = new ContractSearch();
@@ -454,8 +453,7 @@ class ContractToInvoice
                 $contractSearch->period = $period;
                 $contracts = $contractSearch->searchForInvoice([], true, $includePlan)->all();
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - SearchforInvoice()" . $time_start."\n";
+                echo "invoice() - SearchforInvoice()" . microtime(true)."\n";
 
 
                 // Busco el customer que estoy procesando
@@ -464,22 +462,19 @@ class ContractToInvoice
                 // Se tienen en cuenta por la fecha, mas alla de los periodos aplicados.
                 $customerActiveDiscount = $customer->getActiveCustomerHasDiscounts($period)->all();
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - Busqueda de descuentos " . $time_start."\n";
+                echo "invoice() - Busqueda de descuentos " . microtime(true)."\n";
 
 
                 $next = false;
                 $default_unit_id = Config::getValue('default_unit_id');
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - Inicio de iteracion de contratos " . $time_start."\n";
+                echo "invoice() - Inicio de iteracion de contratos " . microtime(true)."\n";
 
                 foreach ($contracts as $contract_value) {
                     $contract = Contract::findOne(['contract_id' => $contract_value['contract_id']]);
                     $contractStart = new DateTime( Yii::$app->formatter->asDate($contract->from_date)) ;
 
-                    $time_start = (microtime(true) - $time_start);
-                    echo "invoice() - Iteracion de contratos  ". $time_start."\n";
+                    echo "invoice() - Iteracion de contratos  ". microtime(true)."\n";
 
                     $periods[] = $period;
 
@@ -496,8 +491,7 @@ class ContractToInvoice
                     // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
                     foreach($contract->contractDetails as $contractDetail) {
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - iteracion de contract detail " . $time_start."\n";
+                        echo "invoice() - iteracion de contract detail " . microtime(true)."\n";
 
                         if($contractDetail->product->type == 'plan' && $includePlan) {
                             if (!$contractDetail->isAddedForInvoice($periods)){
@@ -521,26 +515,22 @@ class ContractToInvoice
                             }
                         }
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Fin iteracion de contract detail " . $time_start."\n";
+                        echo "invoice() - Fin iteracion de contract detail " . microtime(true)."\n";
 
                     }
 
-                    $time_start = (microtime(true) - $time_start);
-                    echo "invoice() - Inicio de busqueda de product to invoice " . $time_start."\n";
+                    echo "invoice() - Inicio de busqueda de product to invoice " . microtime(true)."\n";
 
                     // Itero en los items a facturar y voy agregandolo a la factura
                     $search = new ProductToInvoiceSearch();
                     $products_to_invoice = $search->search($periods, $contract->contract_id, $contract->customer_id)->all();
 
-                    $time_start = (microtime(true) - $time_start);
-                    echo "invoice() - Fin de busqueda de product to invoice" . (microtime(true) - $time_start)."\n";
+                    echo "invoice() - Fin de busqueda de product to invoice" . (microtime(true))."\n";
 
                     /** @var ProductToInvoice $pti */
                     foreach($products_to_invoice as $pti) {
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Inicio de iteracion  de product to invoice " . $time_start."\n";
+                        echo "invoice() - Inicio de iteracion  de product to invoice " . microtime(true)."\n";
 
                         // Veo si tiene una categoria que me cambie el importe de facturacion
                         // Y el factor es que voy a multiplicar por el neto a facturar
@@ -568,8 +558,7 @@ class ContractToInvoice
                             }
                         }
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Antes de buscar descuento a item " . $time_start."\n";
+                        echo "invoice() - Antes de buscar descuento a item " . microtime(true)."\n";
 
                         // Si el item tiene descuento lo busco y aplico
                         $discount = null;
@@ -585,8 +574,7 @@ class ContractToInvoice
                             }
                         }
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Despues de buscar descuento a item " . $time_start."\n";
+                        echo "invoice() - Despues de buscar descuento a item " . microtime(true)."\n";
 
                         if($discount) {
                             if($discount->type == Discount::TYPE_PERCENTAGE ) {
@@ -604,8 +592,7 @@ class ContractToInvoice
                             }
                         }
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Despues de aplicar descuento a item ". $time_start."\n";
+                        echo "invoice() - Despues de aplicar descuento a item ". microtime(true)."\n";
 
                         $unit_net_price_with_discount = $unit_net_price - $unit_net_discount;
                         // Calculo el total unitario en base al importe con descuento
@@ -619,6 +606,9 @@ class ContractToInvoice
                                 $unit_final_price = $unit_net_price_with_discount;
                             }
                         }
+
+                        //POSIBLE OPTIMIZACION
+                        // $contractDetail = $pti->contractDetail;
                         $bill->addDetail([
                             'product_id' => ($pti->contractDetail ? $pti->contractDetail->product_id : null ),
                             'unit_id' => ($pti->contractDetail ? $pti->contractDetail->product->unit_id : $default_unit_id ),
@@ -633,22 +623,19 @@ class ContractToInvoice
                         ]);
                         $pti->status = 'consumed';
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Despuues de agregar el detalle a la factura " . $time_start."\n";
+                        echo "invoice() - Despuues de agregar el detalle a la factura " . microtime(true)."\n";
 
 
                         if (!$pti->save(false)) {
                             FlashHelper::flashErrors($pti);
                         }
 
-                        $time_start = (microtime(true) - $time_start);
-                        echo "invoice() - Fin de iteracion  de product to invoice " . $time_start."\n";
+                        echo "invoice() - Fin de iteracion  de product to invoice " . microtime(true)."\n";
 
                     }
 
                     // Itero en los descuentos aplicados al cliente.
-                    $time_start = (microtime(true) - $time_start);
-                    echo "invoice() - Antes de agregar descuento " . $time_start."\n";
+                    echo "invoice() - Antes de agregar descuento " . microtime(true)."\n";
 
                     foreach($customerActiveDiscount as $key => $customerDiscount) {
                         if($customerDiscount->discount->value_from == Discount::VALUE_FROM_TOTAL) {
@@ -678,13 +665,11 @@ class ContractToInvoice
                         unset($customerActiveDiscount[$key]);
                     }
 
-                    $time_start = (microtime(true) - $time_start);
-                    echo "invoice() - Despues de agregar descuento " . $time_start."\n";
+                    echo "invoice() - Despues de agregar descuento " . microtime(true)."\n";
 
                 }
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - Antes de Verificacion de items en factura " . $time_start."\n";
+                echo "invoice() - Antes de Verificacion de items en factura " . microtime(true)."\n";
 
                 if($bill->getBillDetails()->exists()) {
                     $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
@@ -697,8 +682,7 @@ class ContractToInvoice
                     }
                 }
 
-                $time_start = (microtime(true) - $time_start);
-                echo "invoice() - Despues de Verificacion de items en factura " . $time_start."\n";
+                echo "invoice() - Despues de Verificacion de items en factura " . microtime(true)."\n";
 
 
 
