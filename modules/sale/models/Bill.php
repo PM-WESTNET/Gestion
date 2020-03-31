@@ -410,8 +410,16 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateAmount()
     {
+        $start = microtime(true);
         $discountFixedDetail = $this->getFixedDiscountPerDetail(true, false);
+        //1.2.1
+        echo "Bill->calculateAmount() - getFixedDiscountPerDetail() 1.2.1 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(true);
+        //1.2.2
+        echo "Bill->calculateAmount() - getPercentageDiscountPerDetail() 1.2.2 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
 
         $amount = 0.0;
 
@@ -433,8 +441,19 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateTotal()
     {
+        $start = microtime(true);
+
         $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
+        //1.2.2.1
+        echo "Bill->calculateTotal() - getFixedDiscountPerDetail() 1.2.2.1 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
+
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(false);
+        //1.2.2.2
+        echo "Bill->calculateTotal() - getPercentageDiscountPerDetail() 1.2.2.2 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
         $total = 0.0;
         foreach ($this->billDetails as $detail){
             //La segunda parte de esta condicion es para resolver un problema con los detalles migrados del sistema anterior
@@ -459,8 +478,14 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function calculateTaxes()
     {
+        $start = microtime(true);
+        //1.2.3.1
+        $taxes = abs(round( $this->calculateTotal() - $this->calculateAmount(), 2));
 
-        return abs(round( $this->calculateTotal() - $this->calculateAmount(), 2));
+        echo "Bill->calculateTaxes()  1.2.3.1 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
+        return $start;
 
     }
 
@@ -570,14 +595,29 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function complete()
     {
+        $start = microtime(true);
+
         if($this->status != 'draft') return false;
 
         if($this->status == 'completed') return true;
 
         //Calculos:
+        //1.2.1
         $this->amount = $this->calculateAmount();
+        echo "Bill->complete() - calculateAmount() 1.2.1 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
+        //1.2.2
         $this->total = $this->calculateTotal();
+        echo "Bill->complete() - calculateTotal() 1.2.2 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
+
+        //POSIBLE OPTIMIZACION
+        //AL llamar a calculateTaxes(), llama internamente a las mismas funciones, calculateAmount() y calculateTotal()
+        //1.2.3
         $this->taxes = $this->calculateTaxes();
+        echo "Bill->complete() - calculateTaxes()1.2.3 ". (microtime(true) - $start)."\n";
+        $start = microtime(true);
 
         $this->status = 'completed';
 
@@ -594,7 +634,10 @@ class Bill extends ActiveRecord implements CountableInterface
             $this->time = $date->format('H:i');
         }
 
+        //1.2.4
         if($this->save()){
+            echo "Bill->complete() - save() 1.2.4 ". (microtime(true) - $start)."\n";
+            $start = microtime(true);
             return true;
         }else{
             return false;
@@ -612,15 +655,27 @@ class Bill extends ActiveRecord implements CountableInterface
     {
         $transaction = $this->db->beginTransaction();
 
+        $start = microtime(true);
         try{
+            //1.0
+            echo "Bill->close() 1.0 ". $start."\n";
+            $start = microtime(true);
+
             if($this->status == null){
                 $this->status = 'draft';
             }
+
+            //1.1
+            echo "Bill->close() 1.1 ". (microtime(true) - $start)."\n";
+            $start = microtime(true);
 
             if($this->number){
                 $this->updateAttributes(['number' => $this->number]);
             }
 
+            //1.2
+            echo "Bill->close() update number 1.2 ". (microtime(true) - $start)."\n";
+            $start = microtime(true);
             //Si el estado es 'draft' primero debemos completar la factura
             if($this->status == 'draft'){
                 if(!$this->complete()){
@@ -628,6 +683,9 @@ class Bill extends ActiveRecord implements CountableInterface
                 }
             }
 
+            //1.3
+            echo "Bill->close() - complete() 1.3 ". (microtime(true) - $start)."\n";
+            $start = microtime(true);
             if($this->status == 'completed'){
 
                 \app\modules\sale\components\BillExpert::manageStock($this);
@@ -643,6 +701,10 @@ class Bill extends ActiveRecord implements CountableInterface
                     return false;
                 }
             }
+            //1.4
+            echo "Bill->close() - invoice() AFIP 1.4 ". (microtime(true) - $start)."\n";
+            $start = microtime(true);
+
         }  catch (\Exception $e){
             echo 'ERROR______________ '.$e->getTraceAsString()."\n";
             \Yii::info('ERROR ________________ ' .$e->getTraceAsString(), 'facturacion-cerrado');
