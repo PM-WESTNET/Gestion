@@ -695,9 +695,15 @@ class Bill extends ActiveRecord implements CountableInterface
 
                 if($succeed){
                     $transaction->commit();
+                    //1.4
+                    echo "Bill->close() - invoice() AFIP 1.4 ". (microtime(true) - $start)."\n";
+                    $start = microtime(true);
                     return true;
                 }else {
                     $transaction->rollback();
+                    //1.4
+                    echo "Bill->close() - NO invoice() AFIP 1.4 ". (microtime(true) - $start)."\n";
+                    $start = microtime(true);
                     return false;
                 }
             }
