@@ -97,14 +97,17 @@ class InvoiceProcessController extends Controller
 
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
+                $start = microtime(true);
                 $bill->verifyNumberAndDate();
-
+                echo "VERIFY NUMBER AND DATE". (microtime(true) - $start ). "\n";
                 if($bill->close()){
                     $i++;
+
                     Yii::$app->cache->set('_invoice_close_process_', [
                         'total' => $total,
                         'qty' => $i
                     ]);
+                    echo "TIEMPO TOTAL ". (microtime(true) - $start ). "\n";
                 } else {
                     $bill->addErrorToCacheOrSession("El comprobante $bill->bill_id no pudo cerrarse \n");
                 }
