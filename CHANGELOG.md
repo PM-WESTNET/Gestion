@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file.
  - Backups: Alerta a email si falla un backup [GES-810]
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
  - Se cambia fecha en la que se genera el movimiento desde un pago a proveedor o una factura a proveedor. [CON-22]
+ - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado por Camila
 
  ##[2020.03.06.0]
  ### Modificado
