@@ -196,6 +196,57 @@ class BackupMysqlController extends \yii\console\Controller
         return false;
     }
 
+    private function connectToRemoterServer() {
+        params = Yii::$app->params['backups'];
+
+        $connection = ssh2_connect($params['remote_server_url'], 22);
+
+        if (ssh2_auth_password($connection, $params['remote_server_user'], $params['remote_server_password'])){
+            return $connection;
+        }
+
+        return false;
+    }
+
+    private function transferToRemoteServer($filename, $remoteFile) {
+        $params = Yii::$app->params['backups'];
+
+        $connection = $this->connectToRemoterServer();
+
+        if(ssh2_auth_password($connection, $params['remote_server_user'], $params['remote_server_password'])) {
+            if(ssh2_scp_send($connection, $filename, $remoteFile, 0777)){
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+    private function verifyRemoteSpace($connection){
+        $params = Yii::$app->params['backups'];
+        $command = "df -h --output=target,avail /home";
+        $stream = ssh2_exec($connection, $command);
+
+        if ($stream !== false) {
+            $i= 0;
+            while ($line = fgets(stream)) {
+                if ( $i === 1 ) {
+                    $lineArray = explode("\t", $line);
+
+                    if (isset($lineArray[1])){
+                       $size = substr($lineArray[1], 0 ,(count($lineArray[1]) -1));
+                       $unit = substr($lineArray[1], (count($lineArray[1]) -1));
+                       
+                       if ((float)$size > $params['remoteDiskSpace']) {
+
+                       }
+                    }
+                }
+            }
+        }
+    }
+
 
 }
 
