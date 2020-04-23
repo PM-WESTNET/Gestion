@@ -78,7 +78,8 @@ class BackupMysqlController extends \yii\console\Controller
 
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
-        $fileOut = $dir. $date->format('Y-m-d_H-i'). '.tar';
+        $name = $date->format('Y-m-d_H-i'). '.tar';
+        $fileOut = $dir. $name;
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
@@ -88,7 +89,13 @@ class BackupMysqlController extends \yii\console\Controller
         $result = shell_exec($command);
 
         if ($result ==  '' && file_exists($fileOut)) {
-            $backup->status = 'success';
+            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/full/'. $date->format('Y-m-d'). '/'. $name)) {
+                $backup->status = 'success';
+            }else {
+                $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                $backup->status = 'error';
+                
+            }
             $backup->save();
             return;
         }
@@ -123,7 +130,8 @@ class BackupMysqlController extends \yii\console\Controller
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
         $dirInc = $params['dirincremental']. '/'.$date->format('Y-m-d'). '/';
-        $fileOut = $dirInc. $date->format('Y-m-d_H-i'). '.tar';
+        $name = $date->format('Y-m-d_H-i'). '.tar';
+        $fileOut = $dirInc. $name;
         $dirIncBefore = $params['dirincremental']. '/'.$date->modify('-1 day')->format('Y-m-d');
         $host = $params['host'];
         $user = $params['user'];
@@ -138,7 +146,13 @@ class BackupMysqlController extends \yii\console\Controller
         $result = shell_exec($command);
 
         if ($result ==  '' && file_exists($fileOut)) {
-            $backup->status = 'success';
+            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/incremental/'. $date->format('Y-m-d'). '/' . $name)) {
+                $backup->status = 'success';
+            }else {
+                $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                $backup->status = 'error';
+                
+            }
             $backup->save();
             return;
         }
@@ -165,12 +179,19 @@ class BackupMysqlController extends \yii\console\Controller
                 $backup->database = $db;
                 $backup->save();
 
-                $fileOutput = $params['backupMysqlDir'] .'/'. $db.'_'. $date->format('dmY_His').'.sql';
+                $name = $db.'_'. $date->format('dmY_His').'.sql';
+                $fileOutput = $params['backupMysqlDir'] .'/'. $name;
                 $command = "mysqldump -h $host -u $user -p $pass $db > $fileOutput";
                 $result = shell_exec($command);
 
                 if ($result ==  '' && file_exists($fileOutput)) {
-                    $backup->status = 'success';
+                    if($this->transferToRemoteServer($name, '/home/gestion/backups/mysql/'. $name)) {
+                        $backup->status = 'success';
+                    }else {
+                        $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                        $backup->status = 'error';
+                        
+                    }
                     $backup->save();
                 }else {
                     $backup->status = 'error';
@@ -197,7 +218,7 @@ class BackupMysqlController extends \yii\console\Controller
     }
 
     private function connectToRemoterServer() {
-        params = Yii::$app->params['backups'];
+        $params = Yii::$app->params['backups'];
 
         $connection = ssh2_connect($params['remote_server_url'], 22);
 
@@ -225,26 +246,16 @@ class BackupMysqlController extends \yii\console\Controller
 
     private function verifyRemoteSpace($connection){
         $params = Yii::$app->params['backups'];
-        $command = "df -h --output=target,avail /home";
+        $command = "df -k /mnt/pruebaRaid | tr -s ' ' | cut -d' ' -f 4 | tr -dc '0-9'";
         $stream = ssh2_exec($connection, $command);
 
         if ($stream !== false) {
-            $i= 0;
-            while ($line = fgets(stream)) {
-                if ( $i === 1 ) {
-                    $lineArray = explode("\t", $line);
-
-                    if (isset($lineArray[1])){
-                       $size = substr($lineArray[1], 0 ,(count($lineArray[1]) -1));
-                       $unit = substr($lineArray[1], (count($lineArray[1]) -1));
-                       
-                       if ((float)$size > $params['remoteDiskSpace']) {
-
-                       }
-                    }
-                }
+            if ((float)$size > $params['remoteDiskSpace']) {
+                return true;
             }
         }
+
+        return false;
     }
 
 
