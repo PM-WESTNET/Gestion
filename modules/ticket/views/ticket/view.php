@@ -56,7 +56,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 if($model->category_id === (int)$credit_bill_cat_id || $model->category_id === (int)$bill_cat_id){
                     $billTypesCustomer = $model->customer->taxCondition->billTypes;
-                    $billTypes2Create = $model->customer->company->billTypes;
+
+                    if($model->customer && $model->customer->company) {
+                        $billTypes2Create = $model->customer->company->billTypes;
+                    }else {
+                        $billTypes2Create= [];
+                    }
 
                     $bill_types = [];
 
