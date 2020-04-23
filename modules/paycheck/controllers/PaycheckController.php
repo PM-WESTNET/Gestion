@@ -133,6 +133,8 @@ class PaycheckController extends Controller
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'embed' => false,
+                'from_thrid_party' => false
             ]);
         }
     }

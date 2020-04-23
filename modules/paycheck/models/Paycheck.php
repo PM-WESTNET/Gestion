@@ -325,15 +325,16 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
      */
     public function getDeletable()
     {
-        if(!AccountMovementRelationManager::isDeletable($this)) {
-            return false;
-        }
+        // if(AccountMovementRelationManager::isDeletable($this)) {
+        //     return true;
+        // }
 
-        if (($this->getProviderPaymentsItems()->count() === 0) && ($this->getPaymentItems()->count() === 0)) {
-            return false;
-        }
+        // if (($this->getProviderPaymentsItems()->count() === 0) && ($this->getPaymentItems()->count() === 0)) {
+        //     return true;
+        // }
 
-        return true;
+        // return false;
+        return false;
     }
 
     /**
@@ -359,6 +360,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
      */
     protected function unlinkWeakRelations(){
         AccountMovementRelationManager::delete($this);
+        $this->unlinkAll('paycheckLogs', true);
     }
     
     /**
@@ -371,9 +373,10 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
                 $this->unlinkWeakRelations();
                 return true;
             }
-        } else {
-            return false;
         }
+        
+        return false;
+        
     }
 
     public function afterSave($insert, $changedAttributes) {

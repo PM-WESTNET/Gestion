@@ -23,7 +23,9 @@ $this->params['breadcrumbs'][] = Yii::t('paycheck', 'Update');
 
             <?= $this->render('_form', [
                 'model' => $model,
-                'for_payment' => true
+                'for_payment' => true,
+                'embed' => $embed,
+                'from_thrid_party' => $from_thrid_party
             ]) ?>
 
         </div>
