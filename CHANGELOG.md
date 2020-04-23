@@ -13,16 +13,21 @@ All notable changes to this project will be documented in this file.
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [AD-9]
- - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
- - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
- - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
  - Backups: Alerta a email si falla un backup [GES-810]
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
- - Se cambia fecha en la que se genera el movimiento desde un pago a proveedor o una factura a proveedor. [CON-22]
+ - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado por Camila
 
+ ##[2020.04.20.0]
+ ### Agregado
+ - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645] Solicitado por Mariela y aprobado por Laura
+ - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801] Solicitado y aprobado por Mariela
+ - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4] Solicitado y aprobado por Camila
+ - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela y aprobado por Laura
+ ### Modificado
+ - Se cambia fecha en la que se genera el movimiento desde un pago a proveedor o una factura a proveedor. [CON-22] Solicitado y aprobado por Marian
+  
  ##[2020.03.06.0]
  ### Modificado
  - Al borrar un adicional en estado borrador, se eliminan los log asociados al adicional [GES-744] Solicitado y aprobado por Camila.

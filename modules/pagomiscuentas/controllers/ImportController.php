@@ -49,7 +49,7 @@ class ImportController extends Controller
     public function actionCreate()
     {
         $model = new PagomiscuentasFile();
-        if ($model->load(Yii::$app->request->post())&&$model->validate()) {
+        if ($model->load(Yii::$app->request->post())&& $model->validate()) {
             if($model->upload() && $model->save()){
                 return $this->redirect(['import/view', 'id'=>$model->pagomiscuentas_file_id]);
             }

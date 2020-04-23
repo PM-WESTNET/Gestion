@@ -233,6 +233,11 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
      */
     private function closeImport()
     {
+        //Si el archivo ya tiene pagos asociados, no se deben crear nuevos. Para evitar importaciones multiples
+        if($this->getPayments()->exists()){
+            return false;
+        }
+
         $cobranza = new CobranzaReader();
         $datas = $cobranza->parse($this);
         $payment_method_id = Config::getValue('pagomiscuentas-payment-method');
@@ -258,7 +263,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
                 return true;
             }catch(\Exception $ex) {
                 $trans->rollBack();
-                Yii::debug($ex->getFile() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
+                Yii::debug($ex->getFile(). " - " . $ex->getLine() . " - " .  $ex->getCode() . " - " . $ex->getTraceAsString() . " - " . $ex->getMessage());
                 error_log($ex->getMessage());
                 throw $ex;
             }

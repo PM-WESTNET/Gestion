@@ -650,6 +650,7 @@ class Bill extends ActiveRecord implements CountableInterface
         }
 
         //En caso de llegar a este punto, retornamos false
+        $transaction->rollback();
         return false;
 
     }
@@ -732,7 +733,7 @@ class Bill extends ActiveRecord implements CountableInterface
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                     }
 
-                    return ($retValue || empty($result['errors']));
+                    return ($retValue && empty($result['errors']));
                 } catch (\Exception $ex) {
                     \Yii::info($ex, 'facturacion');
                     $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
