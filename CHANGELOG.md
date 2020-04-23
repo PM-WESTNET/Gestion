@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
  - Backups: Alerta a email si falla un backup [GES-810]
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
  - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado por Camila
+ - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
 
  ##[2020.04.20.0]
  ### Agregado
