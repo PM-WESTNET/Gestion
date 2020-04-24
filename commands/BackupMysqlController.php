@@ -234,7 +234,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         $connection = $this->connectToRemoterServer();
 
-        if(ssh2_auth_password($connection, $params['remote_server_user'], $params['remote_server_password'])) {
+        if($connection !== false && $this->verifyRemoteSpace($connection)) {
             if(ssh2_scp_send($connection, $filename, $remoteFile, 0777)){
                 return true;
             }
@@ -250,7 +250,7 @@ class BackupMysqlController extends \yii\console\Controller
         $stream = ssh2_exec($connection, $command);
 
         if ($stream !== false) {
-            if ((float)$size > $params['remoteDiskSpace']) {
+            if ((float)$stream > $params['remoteDiskSpace']) {
                 return true;
             }
         }
