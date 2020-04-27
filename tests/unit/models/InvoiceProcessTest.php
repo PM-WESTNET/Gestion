@@ -6,6 +6,7 @@
  * Time: 11:04
  */
 
+use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use app\modules\sale\models\InvoiceProcess;
 use app\tests\fixtures\CompanyFixture;
 use app\tests\fixtures\BillTypeFixture;
@@ -82,4 +83,67 @@ class InvoiceProcessTest extends \Codeception\Test\Unit
         expect('Invoice process created', count(InvoiceProcess::find()->all()))->equals($invoice_process_qty + 1);
     }
 
+    public function testCreatePagomiscuentasFile()
+    {
+        $model = new InvoiceProcess([
+            'company_id' => 1,
+            'bill_type_id' => 1,
+            'status' => InvoiceProcess::STATUS_PENDING,
+            'period' => (new \DateTime('now'))->format('d-m-Y'),
+            'type' => InvoiceProcess::TYPE_CREATE_BILLS
+        ]);
+
+        $model->save();
+
+        expect('PagomiscuentasFile created', $model->createPagoMisCuentasFile())->true();
+
+        $pagomiscuentas_file = PagomiscuentasFile::find()->where(['created_by_invoice_process_id' => $model->invoice_process_id])->one();
+        expect('PagomiscuentasFile created with invoice process id', $pagomiscuentas_file)->notEmpty();
+        expect('PagomiscuentasFile created with invoice process id', $pagomiscuentas_file->created_by_invoice_process_id)->equals($model->invoice_process_id);
+    }
+
+    public function testClosePMCAssociatedFile()
+    {
+        $model = new InvoiceProcess([
+            'company_id' => 1,
+            'bill_type_id' => 1,
+            'status' => InvoiceProcess::STATUS_PENDING,
+            'period' => (new \DateTime('now'))->format('d-m-Y'),
+            'type' => InvoiceProcess::TYPE_CREATE_BILLS
+        ]);
+
+        $model->save();
+
+        expect('Invoice process doesnt have a PMC associated file', $model->closePMCAssociatedFile())->false();
+
+        $model->createPagoMisCuentasFile();
+
+        expect('Invoice process close PMC associated file', $model->closePMCAssociatedFile())->true();
+
+        $pagomiscuentas_file = PagomiscuentasFile::find()->where(['created_by_invoice_process_id' => $model->invoice_process_id])->one();
+
+        expect('PMC associated file is closed', $pagomiscuentas_file->status)->equals(PagomiscuentasFile::STATUS_CLOSED);
+    }
+
+    public function testGetDescriptiveName()
+    {
+        $model = new InvoiceProcess([
+            'company_id' => 1,
+            'bill_type_id' => 1,
+            'status' => InvoiceProcess::STATUS_PENDING,
+            'period' => (new \DateTime('now'))->format('d-m-Y'),
+            'type' => InvoiceProcess::TYPE_CREATE_BILLS
+        ]);
+
+        $model->save();
+
+        expect('getDescriptiveName return a string', $model->descriptiveName)->equals('Proceso de facturación Nº ' . $model->invoice_process_id .' del '.$model->period);
+    }
+
+    /**
+    public function getDescriptiveName()
+    {
+    return 'Proceso de facturación Nº ' . $this->invoice_process_id .' del '.$this->period;
+    }
+     */
 }

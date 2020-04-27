@@ -29,5 +29,6 @@ return [
     'Export of {name} to {date}' => 'Exportación de {name} hasta el {date}',
     'Export of {name} from {from} to {date}' => 'Exportación de {name} desde {from} hasta el {date}',
     'Import of {name} of {date}' => 'Importación de {name} del {date}',
-    'Download File' => 'Bajar Archivo'
+    'Download File' => 'Bajar Archivo',
+    'Created by invoice process' => 'Creado por el proceso de facturación',
 ];

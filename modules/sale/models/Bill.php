@@ -34,6 +34,7 @@ use webvimark\modules\UserManagement\models\User;
  * @property string $observation
  * @property string $user_id
  * @property integer $partner_distribution_model_id
+ * @property integer $invoice_process_id
  *
  * @property Customer $customer
  * @property BillDetail[] $billDetails
@@ -309,6 +310,14 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return $this->billType->invoiceClass;
 
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceProcess()
+    {
+        return $this->hasOne(InvoiceProcess::class, ['invoice_process_id' => 'invoice_process_id']);
     }
 
     /**

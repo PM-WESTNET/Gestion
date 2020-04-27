@@ -15,6 +15,7 @@ use app\modules\pagomiscuentas\components\Cobranza\CobranzaReader;
 use app\modules\pagomiscuentas\models\search\PagomiscuentasFileSearch;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\InvoiceProcess;
 use Yii;
 use yii\web\UploadedFile;
 use app\modules\sale\models\Bill;
@@ -30,6 +31,7 @@ use app\modules\sale\models\Bill;
  * @property string $status
  * @property integer $company_id
  * @property string $from_date
+ * @property integer $created_by_invoice_process_id
  *
  * @property PagomiscuentasHasBill[] $pagomiscuentasHasBills
  * @property PagomiscuentasHasPayment[] $pagomiscuentasHasPayments
@@ -56,11 +58,12 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
         return [
             [['company_id', 'date'],'required'],
             [['from_date'], 'required', 'when' => function ($model){ return $model->type === self::TYPE_BILL;}],
-            [['status'], 'in', 'range' => ['draft', 'closed']],
+            [['status'], 'in', 'range' => [ PagomiscuentasFile::STATUS_DRAFT, PagomiscuentasFile::STATUS_CLOSED]],
             [['status'], 'default', 'value'=>'draft'],
             [['type'], 'in', 'range' => ['payment', 'bill']],
             [['date', 'from_date'], 'date'],
             [['from_date', 'total'], 'safe'],
+            ['created_by_invoice_process_id', 'integer'],
             ['path', 'string'],
             ['file', 'unique'],
             [['file'],'file']
@@ -74,7 +77,8 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
             'file' => Yii::t('app','Company'),
             'date' => Yii::t('pagomiscuentas','Date'),
             'status' => Yii::t('pagomiscuentas', 'Status'),
-            'type' => Yii::t('pagomiscuentas', 'Type')
+            'type' => Yii::t('pagomiscuentas', 'Type'),
+            'created_by_invoice_process_id' => Yii::t('pagomiscuentas', 'Created by invoice process')
         ];
     }
 
@@ -119,6 +123,14 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     public function getPaymentCustomer()
     {
         return $this->getPayments()->joinWith(Customer::tableName());
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceProcess()
+    {
+        return $this->hasOne(InvoiceProcess::class, ['invoice_process_id' => 'created_by_invoice_process_id']);
     }
 
     /**
@@ -218,9 +230,9 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     {
         if($this->status == self::STATUS_DRAFT) {
             if($this->type == self::TYPE_PAYMENT) {
-                $this->closeImport();
+                return $this->closeImport();
             } else {
-                $this->closeExport();
+                return $this->closeExport();
             }
         }
         return false;
@@ -278,7 +290,13 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     private function closeExport()
     {
         try{
-            $query = (new PagomiscuentasFileSearch())->findBills($this->pagomiscuentas_file_id);
+            //Si el registro fue creado por un proceso de facturacion, los comprobantes están asociados al mismo proceso,
+            //lo cual significa que los comprobantes a tomar no necesariamente deben estar cerrados.
+            if($this->created_by_invoice_process_id){
+                $query = (new PagomiscuentasFileSearch())->findBillsFromInvoiceProcess($this->created_by_invoice_process_id);
+            } else {
+                $query = (new PagomiscuentasFileSearch())->findBills($this->pagomiscuentas_file_id);
+            }
 
             $transaction = Yii::$app->db->beginTransaction();
             $total = 0 ;
