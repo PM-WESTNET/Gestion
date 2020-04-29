@@ -2,6 +2,7 @@
 
 use app\modules\sale\modules\contract\models\Contract;
 use app\components\helpers\UserA;
+use webvimark\modules\UserManagement\models\User;
 
 ?>
 
@@ -42,7 +43,9 @@ use app\components\helpers\UserA;
 
 
     if ($model->status == Contract::STATUS_ACTIVE) {
-        echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id' => $model->contract_id]);
+        if(User::canRoute('/sale/contract/contract/cancel-contract')){
+            echo UserA::a(Yii::t('app', 'Begin Low Process'), null, ['class' => 'btn btn-danger', 'id' => 'btn-low-process', 'data-id' => $model->contract_id]);
+        }
         echo UserA::a(Yii::t('app', 'Create programmed plan change'), ['programmed-plan-change/create', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning']);
         echo UserA::a(Yii::t('app', 'Update on ISP'), ['update-on-isp', 'contract_id' => $model->contract_id], ['class' => 'btn btn-warning', 'data-confirm' => '¿Está seguro que desea actualizar este contrato en el ISP?']);
     }
