@@ -14,12 +14,15 @@ All notable changes to this project will be documented in this file.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [AD-9]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
- - Backups: Alerta a email si falla un backup [GES-810]
+  - Backups: Alerta a email si falla un backup [GES-810]
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
- - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado por Camila
  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
 
+ ##[2020.04.27.0]
+ ### Agregado
+ - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado y aprobado por Camila
+ - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela y aprobado por Laura
+ 
  ##[2020.04.20.0]
  ### Agregado
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645] Solicitado por Mariela y aprobado por Laura
