@@ -3,6 +3,8 @@
 use app\modules\config\models\Config;
 use app\modules\sale\models\Company;
 use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\models\search\ContractDetailSearch;
+use app\modules\ticket\models\Category;
 use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\Node;
 use kartik\widgets\DatePicker;
@@ -176,21 +178,21 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                 <p>
                     <?php
                     if ($model->status == Contract::STATUS_ACTIVE) {
-                        echo Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update-connection', 'id' => $model->contract_id], [
+                        echo UserA::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update-connection', 'id' => $model->contract_id], [
                             'class' => 'btn btn-primary',
                             'id' => 'update-connection',
                         ]);
                         
-                        echo Html::a(Yii::t('westnet', 'Connection Forced Historials'), ['/westnet/connection-forced-historial/index', 'connection_id'=>$connection->connection_id], [
+                        echo UserA::a(Yii::t('westnet', 'Connection Forced Historials'), ['/westnet/connection-forced-historial/index', 'connection_id'=>$connection->connection_id], [
                             'class' => 'btn btn-info',
                             
                         ]);
-                        echo Html::a(Yii::t('westnet', 'Change Node'), null, [
+                        echo UserA::a(Yii::t('westnet', 'Change Node'), null, [
                             'class' => 'btn btn-warning',
                             'id' => 'change-node',
                         ]);
 
-                        echo Html::a(Yii::t('westnet', 'Change IP'), null, [
+                        echo UserA::a(Yii::t('westnet', 'Change IP'), null, [
                             'class' => 'btn btn-warning',
                             'id' => 'change-ip',
                         ]);
@@ -204,7 +206,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         }
 
                         if ($connection->status == Connection::STATUS_DISABLED) {
-                            echo Html::a(Yii::t('westnet', 'Activate'), null, [
+                            echo UserA::a(Yii::t('westnet', 'Activate'), null, [
                                 'class' => 'btn btn-danger',
                                 'id' => 'enable-connection',
                                 'data-loading-text' => Yii::t('westnet', 'Enabling') . "..."
@@ -212,7 +214,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         }
 
 
-                        echo Html::a(Yii::t('westnet', 'Force Activation'), null, [
+                        echo UserA::a(Yii::t('westnet', 'Force Activation'), null, [
                             'class' => 'btn btn-danger',
                             'id' => 'force-connection',
                             'data-loading-text' => Yii::t('westnet', 'Enabling') . "..."
@@ -269,9 +271,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 
     <h2><?php echo Yii::t('app', 'Contract Details') ?></h2>
 
-    <?=
-    GridView::widget([
-        'dataProvider' => \app\modules\sale\modules\contract\models\search\ContractDetailSearch::getdataProviderDetail($model->contract_id),
+    <?= GridView::widget([
+        'dataProvider' => ContractDetailSearch::getdataProviderDetail($model->contract_id),
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
             [
@@ -561,8 +562,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                             <label><?= Yii::t('westnet', 'Reason of low') ?></label>
                         </div>
                         <div class="col-md-12">
-                            <?php
-                            $categories = \app\modules\ticket\models\Category::getForSelectChilds(Config::getValue('mesa_category_low_reason'));
+                            <?php $categories = Category::getForSelectChilds(Config::getValue('mesa_category_low_reason'));
                             echo Select2::widget([
                                 'name' => 'category_id',
                                 'data' => yii\helpers\ArrayHelper::map($categories, 'category_id', 'name'),
@@ -579,8 +579,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                             <label><?= Yii::t('westnet', 'Date of low') ?></label>
                         </div>
                         <div class="col-md-12">
-                            <?php
-                            echo DatePicker::widget([
+                            <?= DatePicker::widget([
                                 'type' => 1,
                                 'language' => Yii::$app->language,
                                 'name' => 'date_low',
@@ -601,14 +600,14 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                     <br>
                     <div class="row">
                         <div class="col-lg-12">
-                            <?php echo \yii\bootstrap\Html::checkbox('credit', false, ['id' => 'credit_note'])?>
-                            <label for=""><?php echo Yii::t('app','Create Credit Note')?></label>
+                            <?= \yii\bootstrap\Html::checkbox('credit', false, ['id' => 'credit_note'])?>
+                            <label for=""><?= Yii::t('app','Create Credit Note')?></label>
                         </div>
                     </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"><?php echo Yii::t('app', 'Cancel') ?></button>
-                <button type="button" class="btn btn-primary" id="start-low-button"><?php echo Yii::t('app', 'Low') ?></button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"><?= Yii::t('app', 'Cancel') ?></button>
+                <button type="button" class="btn btn-primary" id="start-low-button"><?= Yii::t('app', 'Low') ?></button>
             </div>
         </div>
     </div>
