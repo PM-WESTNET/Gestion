@@ -18,7 +18,8 @@ All notable changes to this project will be documented in this file.
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
  - Generación automática de archivo de pago mis cuentas desde facturación por lotes [GES-834] Solicitado y aprobado por Laura
-
+ - Vista de contrato: Cambio de los botes en la vista por componentes que verifican el permiso del usuario a la funcionalidad [GES-832] Solicitado por Laura
+ 
  ##[2020.04.27.0]
  ### Agregado
  - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado y aprobado por Camila
