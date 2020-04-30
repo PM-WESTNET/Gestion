@@ -113,7 +113,7 @@ class Backup extends \yii\db\ActiveRecord {
         
 </div>   
 BODY;
-        $email = Yii::$app->mailer->compose();
+        $email = Yii::$app->mail->compose();
         $email->setFrom(['noreply@westnet.com.ar' => 'Backups Automaticos de Gestión']);
         $email->setHtmlBody($msg);
         $email->setSubject('IMPORTANTE!!! - ERROR EN BACKUP DE GESTION');
