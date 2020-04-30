@@ -129,10 +129,10 @@ class BackupMysqlController extends \yii\console\Controller
 
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
-        $dirInc = $params['dirincremental']. '/'.$date->format('Y-m-d'). '/';
-        $name = $date->format('Y-m-d_H-i'). '.tar';
+        $dirInc = $params['dirincremental']. '/';
+        $name = 'incremental.tar';
         $fileOut = $dirInc. $name;
-        $dirIncBefore = $params['dirincremental']. '/'.$date->modify('-1 day')->format('Y-m-d');
+        $dirIncBefore = $params['dirincremental'];
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
@@ -146,7 +146,7 @@ class BackupMysqlController extends \yii\console\Controller
         $result = shell_exec($command);
 
         if ($result ==  '' && file_exists($fileOut)) {
-            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/incremental/'. $date->format('Y-m-d'). '/' . $name)) {
+            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/incremental/'. $date->format('Y-m-d'). '/' .$date->format('Y-m-d_H-i'). '.tar')) {
                 $backup->status = 'success';
             }else {
                 $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -179,13 +179,13 @@ class BackupMysqlController extends \yii\console\Controller
                 $backup->database = $db;
                 $backup->save();
 
-                $name = $db.'_'. $date->format('dmY_His').'.sql';
+                $name = $db.'.sql';
                 $fileOutput = $params['backupMysqlDir'] .'/'. $name;
                 $command = "mysqldump -h $host -u $user -p $pass $db > $fileOutput";
                 $result = shell_exec($command);
 
                 if ($result ==  '' && file_exists($fileOutput)) {
-                    if($this->transferToRemoteServer($name, '/home/gestion/backups/mysql/'. $name)) {
+                    if($this->transferToRemoteServer($name, '/home/gestion/backups/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
                         $backup->status = 'success';
                     }else {
                         $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -260,4 +260,3 @@ class BackupMysqlController extends \yii\console\Controller
 
 
 }
-
