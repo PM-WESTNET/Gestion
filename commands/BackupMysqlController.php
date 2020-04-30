@@ -89,15 +89,23 @@ class BackupMysqlController extends \yii\console\Controller
         $result = shell_exec($command);
 
         if ($result ==  '' && file_exists($fileOut)) {
-            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/full/'. $date->format('Y-m-d'). '/'. $name)) {
-                $backup->status = 'success';
-            }else {
-                $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+            try {
+
+                if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/full/'. $date->format('Y-m-d'). '/'. $name)) {
+                    $backup->status = 'success';
+                }else {
+                    $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                    $backup->status = 'error';
+                    
+                }
+                $backup->save();
+                return;
+            }catch(\Exception $e) {
                 $backup->status = 'error';
-                
+                $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups ' . $e->getMessage();
+                $backup->save();
+                return;
             }
-            $backup->save();
-            return;
         }
 
         $backup->status = 'error';
@@ -146,15 +154,22 @@ class BackupMysqlController extends \yii\console\Controller
         $result = shell_exec($command);
 
         if ($result ==  '' && file_exists($fileOut)) {
-            if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/incremental/'. $date->format('Y-m-d'). '/' .$date->format('Y-m-d_H-i'). '.tar')) {
-                $backup->status = 'success';
-            }else {
-                $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+            try {
+                if($this->transferToRemoteServer($name, '/home/gestion/backups/percona/incremental/'. $date->format('Y-m-d'). '/' .$date->format('Y-m-d_H-i'). '.tar')) {
+                    $backup->status = 'success';
+                }else {
+                    $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                    $backup->status = 'error';
+                    
+                }
+                $backup->save();
+                return;
+            }catch(\Exception $e) {
                 $backup->status = 'error';
-                
+                $backup->description =$e->getMessage();
+                $backup->save();
+                return;
             }
-            $backup->save();
-            return;
         }
 
         $backup->status = 'error';
@@ -185,14 +200,22 @@ class BackupMysqlController extends \yii\console\Controller
                 $result = shell_exec($command);
 
                 if ($result ==  '' && file_exists($fileOutput)) {
-                    if($this->transferToRemoteServer($name, '/home/gestion/backups/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
-                        $backup->status = 'success';
-                    }else {
-                        $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                    try {
+
+                        if($this->transferToRemoteServer($name, '/home/gestion/backups/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
+                            $backup->status = 'success';
+                        }else {
+                            $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
+                            $backup->status = 'error';
+                            
+                        }
+                        $backup->save();
+                    }catch(\Exception $e) {
                         $backup->status = 'error';
-                        
+                        $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups ' . $e->getMessage();
+                        $backup->save();
+                        return;
                     }
-                    $backup->save();
                 }else {
                     $backup->status = 'error';
                     $backup->description ='Error desconocido';
