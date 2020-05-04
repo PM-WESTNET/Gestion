@@ -147,7 +147,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass --stream=tar --incremental-basedir=$dir $dirIncBefore > $fileOut";
 
-        if (!file_exist($dirInc)) {
+        if (!file_exists($dirInc)) {
             mkdir($dirInc, 0777);
         }
 
