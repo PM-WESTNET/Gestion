@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
  - Generación automática de archivo de pago mis cuentas desde facturación por lotes [GES-834] Solicitado y aprobado por Laura
  - Vista de contrato: Cambio de los botes en la vista por componentes que verifican el permiso del usuario a la funcionalidad [GES-832] Solicitado por Laura
+ - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
+ aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
  
  ##[2020.04.27.0]
  ### Agregado
