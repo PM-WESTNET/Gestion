@@ -91,7 +91,7 @@ class BackupMysqlController extends \yii\console\Controller
         if ($result ==  '' && file_exists($fileOut)) {
             try {
 
-                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/full/'. $name)) {
+                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/full/'. $date->format('Y-m-d_H-i'). '.tar')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
