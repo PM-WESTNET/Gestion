@@ -78,7 +78,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
-        $name = $date->format('Y-m-d_H-i'). '.tar';
+        $name = 'full_backup.tar';
         $fileOut = $dir. $name;
         $host = $params['host'];
         $user = $params['user'];
@@ -91,7 +91,7 @@ class BackupMysqlController extends \yii\console\Controller
         if ($result ==  '' && file_exists($fileOut)) {
             try {
 
-                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/full/'. $name)) {
+                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/full/'. $name)) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -155,7 +155,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
-                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/incremental/'.$date->format('Y-m-d_H-i'). '.tar')) {
+                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.tar')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
