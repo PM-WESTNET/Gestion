@@ -91,7 +91,7 @@ class BackupMysqlController extends \yii\console\Controller
         if ($result ==  '' && file_exists($fileOut)) {
             try {
 
-                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/full/'. $date->format('Y-m-d_H-i'). '.tar')) {
+                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/full/'. $date->format('Y-m-d_H-i'). '.tar')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -155,7 +155,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
-                if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.tar')) {
+                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.tar')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -202,7 +202,7 @@ class BackupMysqlController extends \yii\console\Controller
                 if ($result ==  '' && file_exists($fileOutput)) {
                     try {
 
-                        if($this->transferToRemoteServer($name, '/mnt/pruebaRaid/backupGestion/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
+                        if($this->transferToRemoteServer($fileOutput, '/mnt/pruebaRaid/backupGestion/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
                             $backup->status = 'success';
                         }else {
                             $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
