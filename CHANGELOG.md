@@ -13,14 +13,43 @@ All notable changes to this project will be documented in this file.
  la condición del cliente.
  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
  las opciones de gigantografia, pantalla led e instagram [AD-9]
- - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645]
  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801]
- - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela
- - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
- - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4]
- - Backups: Alerta a email si falla un backup [GES-810]
+  - Backups: Alerta a email si falla un backup [GES-810]
+ - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
+ - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
+ aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
+ - Archivo de Pagomiscuentas: Se limita la eliminación de los archivos a aquellos que no fueron generados automáticamente [AD-40] Solicitado por Camila
  
+ ##[2020.05.05.0]
+ ### Agregado
+  - Generación automática de archivo de pago mis cuentas desde facturación por lotes [GES-834] Solicitado y aprobado por Laura
+ ### Modificado
+ - Vista de contrato: Cambio de los botes en la vista por componentes que verifican el permiso del usuario a la funcionalidad [GES-832] Solicitado y aprobado por Laura
+ - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7] Solicitado y aprobado por Camila
+ 
+ ##[2020.04.27.0]
+ ### Agregado
+ - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado y aprobado por Camila
+ - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela y aprobado por Laura
+ 
+ ##[2020.04.20.0]
+ ### Agregado
+ - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645] Solicitado por Mariela y aprobado por Laura
+ - Se agrega opcion "Folleto" en selector de canales de publicidad en el alta del cliente. [GES-801] Solicitado y aprobado por Mariela
+ - Vista de tareas: Se agrega link a la vista del cliente de la tarea [AD-4] Solicitado y aprobado por Camila
+ - Manejo de canales de publicidad: Alta, modificación, eliminación y deshabilitación [GES-645] Solicitado por Mariela y aprobado por Laura
+ ### Modificado
+ - Se cambia fecha en la que se genera el movimiento desde un pago a proveedor o una factura a proveedor. [CON-22] Solicitado y aprobado por Marian
+  
+ ##[2020.03.06.0]
+ ### Modificado
+ - Al borrar un adicional en estado borrador, se eliminan los log asociados al adicional [GES-744] Solicitado y aprobado por Camila.
+ - Se hacen cambios en el alta de cliente para evitar que se creen tickets duplicados al hacer mas de un click [GES-656] Solicitado y aprobado por Camila.
+ - Formulario de cliente: Al actualizar se agrega checkbox para marcar como verificados los datos del clientes [GES-793] Solicitado y aprobado por Camila.
+  
+ ## [2020.03.03.0]
+ ### Modificado
+  -  Cierre de tickets de cobranza al cerrar un comprobante y dejar la deuda en cero [GES-773] Solicitado y aprobado por Camila.
  
  ## [2020.02.26.1]
  ### Modificado

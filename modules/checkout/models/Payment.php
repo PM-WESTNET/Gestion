@@ -31,6 +31,7 @@ use app\modules\sale\models\Company;
  * @property string $number
  * @property string $concept
  * @property integer $customer_id
+ * @property integer $company_id
  * @property double $balance
  * @property string $status
  * @property integer $partner_distribution_model_id

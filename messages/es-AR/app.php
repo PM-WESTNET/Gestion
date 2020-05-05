@@ -1338,7 +1338,8 @@
     'Success' => 'Correcto',
     'Fail' => 'Falló',
     'Begin' => 'Inicio',
-    'End' => 'Finalizado'
-
-
+    'End' => 'Finalizado',
+    'Data Verified' => 'Datos Verificados',
+    'Accounting date' => 'Fecha contable',
+    'The accounting date cant be greater that today.' => 'La fecha contable no puede ser mayor a hoy.',
  );

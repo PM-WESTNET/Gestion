@@ -110,6 +110,8 @@ class Customer extends ActiveRecord {
     // Indica al IVR que el cliente es nuevo
     public $isNew= false;
 
+    //Indica si los datos que ya existen en la base de datos fueron verificados con el cliente
+    public $dataVerified;
     /**
      * @inheritdoc
      */
@@ -146,7 +148,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -538,7 +540,8 @@ class Customer extends ActiveRecord {
             'document_image' => Yii::t('app', 'Document image'),
             'tax_image' => Yii::t('app', 'Tax image'),
             'birthdate' => Yii::t('app','Birthdate'),
-            'observations' => Yii::t('app', 'Observations')
+            'observations' => Yii::t('app', 'Observations'),
+            'dataVerified' => Yii::t('app', 'Data Verified'),
         ];
 
         //Labels adicionales definidos para los profiles
@@ -645,6 +648,12 @@ class Customer extends ActiveRecord {
                 $log = new CustomerLog();
                 $log->createInsertLog($this->customer_id, 'Customer', $this->customer_id);
             } else {
+                if ($this->dataVerified) {
+                    $this->updateAttributes(['last_update' => (new DateTime('now'))->format('Y-m-d')]);
+                    $log = new CustomerLog();
+                    $log->createUpdateLog($this->customer_id, 'Verificación de Datos', '', '', 'Customer', $this->customer_id);
+                }
+
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
 //                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
@@ -1417,7 +1426,7 @@ class Customer extends ActiveRecord {
         return $this->parent_company_id;
     }
 
-    public function updatePaymentCode()
+    public function updatePaymentCode($force = false)
     {
         if($this->company_id) {
             $company = Company::findOne($this->company_id);
@@ -1432,10 +1441,19 @@ class Customer extends ActiveRecord {
             if (($this->isNewRecord || $this->payment_code == '' || $this->payment_code == '0') ||
                 (((int)$this->company_id) != ((int)$this->old_company_id) ||
                     (strlen($this->payment_code) != 11 && strlen($this->payment_code) != 14 )) ||
-                $this->payment_code < 0
+                $this->payment_code < 0 || $force
             ) {
                 $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . ($company->code == '9999' ? '' : '000' ) .
+
+                /**
+                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+                 */
+                $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($this->code)), '0', STR_PAD_LEFT);
+                }
+
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
                     str_pad($this->code, 5, "0", STR_PAD_LEFT) ;
                 $this->payment_code = $generator->generate($code);
             }

@@ -230,6 +230,10 @@ use webvimark\modules\UserManagement\models\User;
 
         this.old_address_id = 0;
         this.init = function () {
+
+            $('#continue').attr('disabled', false);
+            $('#finish').attr('disabled', false);
+
             $(document).off('change','#same_address').on('change','#same_address', function() {
                 ContractForm.sameAddress();
             });
@@ -250,6 +254,20 @@ use webvimark\modules\UserManagement\models\User;
             });
             $(document).off('change', '#product_id').on('change', '#product_id', function(){
                 ContractForm.changeProductoAdicional();
+            });
+
+            $(document).off('click', '#continue').on('click', '#continue', function(e){
+                e.preventDefault();
+                $('#mode').val(1);
+                $(this).attr('disabled', true);
+                $('#contractForm').submit();
+            });
+
+            $(document).off('click', '#finish').on('click', '#finish', function(e){
+                    e.preventDefault();
+                    $('#mode').val(0);
+                    $(this).attr('disabled', true);
+                    $('#contractForm').submit();
             });
 
 
@@ -278,20 +296,6 @@ use webvimark\modules\UserManagement\models\User;
                     $($('#tmp_discount_id').find('option[value=""]')[0]).html('<?php echo Yii::t('app', 'No discounts are available')?>')
                 }
             });
-            
-            $(document).on('click', '#continue', function(e){
-                e.preventDefault();
-                $('#mode').val(1);
-                $('#contractForm').submit();
-            });
-            
-            $(document).on('click', '#finish', function(e){
-                e.preventDefault();
-                $('#mode').val(0);
-                $('#contractForm').submit();
-            });
-            
-            
 
         }
         

@@ -301,9 +301,13 @@ class ContractToInvoice
         return false;
     }
 
-    public function invoiceAll($params)
+    /**
+     * Crea los comprobantes que se incluyan con los $params indicados
+     * Si se incluye un id de invoice process, los comprobantes generados tendrán este dato adicional
+     */
+    public function invoiceAll($params, $invoice_process_id = false)
     {
-//        Yii::setLogger(new EmptyLogger());
+        Yii::setLogger(new EmptyLogger());
 
         $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
@@ -346,7 +350,7 @@ class ContractToInvoice
             foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true, $invoice_process_id) ) {
                         $afip_error = true;
                     }
                     Yii::$app->cache->set('_invoice_all_', [
@@ -379,6 +383,10 @@ class ContractToInvoice
     }
 
     /**
+     * Genera un comprobante.
+     * Si la funcion en llamada desde el proceso por lotes, debe pasarse el parametro $automatically_generated en true
+     * y el id del invoice_process
+     *
      * @param $company
      * @param $bill_type_id
      * @param $customer_id
@@ -389,7 +397,7 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false)
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false, $invoice_process_id = false)
     {
 
         try{
@@ -405,6 +413,7 @@ class ContractToInvoice
                 $bill->status = 'draft';
                 $bill->observation = $bill_observation;
                 $bill->automatically_generated = $automatically_generated ? true : null;
+                $bill->invoice_process_id = $invoice_process_id ? $invoice_process_id : null;
                 $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer

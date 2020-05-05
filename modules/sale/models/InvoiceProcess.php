@@ -2,6 +2,7 @@
 
 namespace app\modules\sale\models;
 
+use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use app\modules\sale\modules\invoice\components\Invoice;
 use Yii;
 use app\modules\sale\models\BillType;
@@ -20,6 +21,7 @@ use app\modules\sale\models\Company;
  * @property string $to_date
  * @property string $status
  * @property string $observation
+ * @property string $type
  *
  * @property BillType $billType
  * @property Company $company
@@ -111,6 +113,14 @@ class InvoiceProcess extends \yii\db\ActiveRecord
         return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBills()
+    {
+        return $this->hasMany(Bill::class, ['invoice_process_id' => 'invoice_process_id']);
+    }
+
     public static function createInvoiceProcess($company_id, $bill_type_id, $period = null, $observation, $type, $from_date = null, $to_date = null)
     {
         if(!InvoiceProcess::getPendingInvoiceProcess($type)) {
@@ -152,4 +162,50 @@ class InvoiceProcess extends \yii\db\ActiveRecord
         return false;
     }
 
+    /**
+     * Crea un registro de de la tabla pagomiscuentas_file con la
+     */
+    public function createPagoMisCuentasFile()
+    {
+        //Verifico si el registro existe
+        $pmc_file_exists = PagomiscuentasFile::find()->where(['created_by_invoice_process_id' => $this->invoice_process_id])->exists();
+        if($pmc_file_exists) {
+            return true;
+        }
+
+        $model = new PagomiscuentasFile([
+            'from_date' => (new \DateTime())->setTimestamp($this->start_datetime)->format('d-m-Y'),
+            'date' => (new \DateTime())->setTimestamp($this->start_datetime)->format('d-m-Y'),
+            'company_id' => $this->company_id,
+            'type' => PagomiscuentasFile::TYPE_BILL,
+            'status' => PagomiscuentasFile::STATUS_DRAFT,
+            'created_by_invoice_process_id' => $this->invoice_process_id
+        ]);
+
+        return $model->save();
+    }
+
+    /**
+     * Cierra el registro de pagomiscuentas si es que tiene uno asociado.
+     */
+    public function closePMCAssociatedFile()
+    {
+        $pmc_file = PagomiscuentasFile::find()->where(['created_by_invoice_process_id' => $this->invoice_process_id])->one();
+
+        if($pmc_file) {
+            $pmc_file->updateAttributes(['date' => (new \DateTime('now'))->format('Y-m-d')]);
+            return $pmc_file->close();
+        }
+
+        return false;
+    }
+
+    /**
+     * Retorna un string con una descripción breve de los datos mas importantes del proceso de facturación para una
+     * identificación rápida del mismo
+     */
+    public function getDescriptiveName()
+    {
+        return 'Proceso de facturación Nº ' . $this->invoice_process_id .' del '.$this->period;
+    }
 }
