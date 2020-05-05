@@ -169,6 +169,10 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
         } else {
             return ($this->getPagomiscuentasBills()->count() == 0);;
         }
+
+        if($this->created_by_invoice_process_id) {
+            return false;
+        }
     }
 
     /**
