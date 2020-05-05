@@ -78,15 +78,17 @@ class BackupMysqlController extends \yii\console\Controller
 
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
-        $name = 'full_backup.tar';
-        $fileOut = $dir. $name;
+        $name = 'full_backup.zip';
+        $fileOut = '/home/backups/percona/'. $name;
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command = "sudo innobackupex --host=$host --user=$user --password=$pass --stream=tar $dir > $fileOut";
+        $command1 = "sudo innobackupex --host=$host --user=$user --password=$pass $dir";
+        $command2 = "zip -r $fileOut $dir";
 
-        $result = shell_exec($command);
+        $result = shell_exec($command1);
+        $result2 = shell_exec($command2);
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
