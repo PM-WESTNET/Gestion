@@ -85,7 +85,7 @@ class BackupMysqlController extends \yii\console\Controller
         $pass = $params['pass'];
 
         $command1 = "sudo innobackupex --host=$host --user=$user --password=$pass --no-timestamp $dir";
-        $command2 = "zip -r $fileOut $dir";
+        $command2 = "sudo zip -r $fileOut $dir";
 
         $result = shell_exec($command1);
         $result2 = shell_exec($command2);
@@ -141,19 +141,20 @@ class BackupMysqlController extends \yii\console\Controller
         $dir = $params['dirbase'];
         $dirInc = $params['dirincremental']. '/';
         $name = 'incremental.tar';
-        $fileOut = $dirInc. $name;
+        $fileOut = '/home/backups/percona/'.  $name;
         $dirIncBefore = $params['dirincremental'];
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
 
         $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass  --no-timestamp --incremental-basedir=$dir $dirIncBefore ";
-
+        $command2 = "sudo zip -r $fileOut $dirInc";
         if (!file_exists($dirInc)) {
             mkdir($dirInc, 0777);
         }
 
         $result = shell_exec($command);
+        $result2 = shell_exec($command2);
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
