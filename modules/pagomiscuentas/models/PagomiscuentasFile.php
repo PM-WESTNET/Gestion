@@ -74,7 +74,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     public function attributeLabels() {
         return [
             'pagomiscuentas_file_id' => Yii::t('pagomiscuentas','ID'),
-            'file' => Yii::t('app','Company'),
+            'file' => Yii::t('app','File'),
             'date' => Yii::t('pagomiscuentas','Date'),
             'status' => Yii::t('pagomiscuentas', 'Status'),
             'type' => Yii::t('pagomiscuentas', 'Type'),

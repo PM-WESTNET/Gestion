@@ -127,7 +127,7 @@ class ImportController extends Controller
                 $model->close();
                 return $this->actionIndex();
             } catch(\Exception $ex) {
-                Yii::$app->session->addFlash('error', $ex->getMessage());
+                Yii::$app->session->addFlash('error', $ex->getMessage() . ' ' .$ex->getFile() . ' ' . $ex->getLine() );
                 return $this->actionView($id);
             }
         }

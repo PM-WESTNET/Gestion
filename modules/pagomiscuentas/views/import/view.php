@@ -27,8 +27,8 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php if($model->status == PagomiscuentasFile::STATUS_DRAFT) {
                 echo Html::a(Yii::t('app', 'Close'), ['close', 'id' => $model->pagomiscuentas_file_id], [
                     'class' => 'btn btn-warning',
+                    'id' => 'close-pmc-btn',
                     'data' => [
-                        'confirm' => Yii::t('pagomiscuentas', 'Are you sure you want to close this item?'),
                         'method' => 'post',
                     ],
                 ]);
@@ -113,3 +113,15 @@ $this->params['breadcrumbs'][] = $this->title;
     }
     ?>
 </div>
+    <script>
+        var Pmc = new function(){
+            this.init = function() {
+                $('#close-pmc-btn').on('click', function(event) {
+                    if(confirm('<?=Yii::t('pagomiscuentas', 'Are you sure you want to close this item?')?>')){
+                        $('#close-pmc-btn').addClass('disabled');
+                    }
+                });
+            }
+        }
+    </script>
+<?php $this->registerJs('Pmc.init()') ?>
