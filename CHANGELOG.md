@@ -19,6 +19,7 @@ All notable changes to this project will be documented in this file.
  - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
  aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
  - Archivo de Pagomiscuentas: Se limita la eliminación de los archivos a aquellos que no fueron generados automáticamente [AD-40] Solicitado por Camila
+ - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
  
  ##[2020.05.05.0]
  ### Agregado
