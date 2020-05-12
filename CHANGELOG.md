@@ -4,23 +4,21 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ## [Pendiente de aprobación]
  
- - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
- - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
- - Correcion error duplicado de tickets en panel de cobranza
- - Correción filtros asignación masiva de planes
- - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
- la condición del cliente.
- - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
- las opciones de gigantografia, pantalla led e instagram [AD-9]
- - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
-  - Backups: Alerta a email si falla un backup [GES-810]
- - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
- - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
- aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
- - Archivo de Pagomiscuentas: Se limita la eliminación de los archivos a aquellos que no fueron generados automáticamente [AD-40] Solicitado por Camila
- - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
- 
+  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
+  las opciones de gigantografia, pantalla led e instagram [AD-9]
+  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
+   - Backups: Alerta a email si falla un backup [GES-810]
+  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
+  - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
+  aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
+  - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
+  
+  ##[2020.05.12.0]
+  ### Agregado
+  ### Modificado
+   - Archivo de Pagomiscuentas: Se limita la eliminación de los archivos a aquellos que no fueron generados automáticamente [AD-40] Solicitado y aprobado por Camila
+   - Cheques: Marcar como entregado al crear un pago a proveedor [GES-223] Solicitado y aprobado por Marian
+
  ##[2020.05.05.0]
  ### Agregado
   - Generación automática de archivo de pago mis cuentas desde facturación por lotes [GES-834] Solicitado y aprobado por Laura
