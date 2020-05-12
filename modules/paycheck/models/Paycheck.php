@@ -54,6 +54,8 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
 
     public $dateStamp;
 
+    public $outAccount;
+
     protected $all_statuses = [
         'created',
         'commited',
@@ -149,7 +151,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
     {
 
         return [
-            [['date', 'due_date', 'timestamp', 'checkbook', 'moneyBox', 'moneyBoxAccount', 'dateStamp'], 'safe'],
+            [['date', 'due_date', 'timestamp', 'checkbook', 'moneyBox', 'moneyBoxAccount', 'dateStamp', 'outAccount'], 'safe'],
             [['date', 'due_date', 'dateStamp'], 'date', 'min'=>'01-01-1980', 'format'=>'dd-MM-yyyy'],
             [['date'], 'default', 'value'=> null],
             [['amount'], 'number'],

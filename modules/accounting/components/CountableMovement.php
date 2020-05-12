@@ -11,6 +11,7 @@ namespace app\modules\accounting\components;
 use app\modules\accounting\models\AccountingPeriod;
 use app\modules\accounting\models\AccountMovement;
 use app\modules\accounting\models\AccountMovementItem;
+use Codeception\Util\Debug;
 use Yii;
 
 
@@ -69,6 +70,8 @@ class CountableMovement
     public function createMovement($description, $company_id, $items=array(), $status="draft",
                                           $partner_distribution_model_id = null, $date = "now")
     {
+        Debug::debug('Llego a createMovement');
+        $this->errors = [];
         $this->setErrors([]);
         $movement = new AccountMovement();
         try{
@@ -77,10 +80,14 @@ class CountableMovement
             $movement->description = $description;
             $movement->status = $status;
             $movement->company_id = $company_id;
+            Debug::debug('Antes del periodo');
             $movement->accounting_period_id = AccountingPeriod::getActivePeriod()->accounting_period_id;
+            Debug::debug('Despues del periodo');
             $movement->partner_distribution_model_id = $partner_distribution_model_id;
 
+            Debug::debug('Por validar');
             if ($movement->validate() && $movement->save()) {
+                Debug::debug('Mov validado y guardado');
                 foreach ($items as $item) {
                     $movement->link('accountMovementItems', $item);
                 }
