@@ -335,6 +335,7 @@ return [
      */
     //A partir de este punto, se eliminan los registros antiguos
     'garbageCollectorLimit' => 1000000,
+    'garbageCollectorQtyToDeleteOnLimit' => 500,
     /**
      * END LOG
      */
