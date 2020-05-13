@@ -1121,7 +1121,7 @@ class Bill extends ActiveRecord implements CountableInterface
             if ($this->status != null && $this->status != 'draft') {
                 //Validaciópn de numero de factura
                 if ($this->number) {
-                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id, 'status' => Bill::STATUS_CLOSED]);
+                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id, 'status' => Bill::STATUS_CLOSED, 'company_id' => $this->company_id]);
                     $existing_bill = $this->bill_id ? $query->andWhere(['<>', 'bill_id', $this->bill_id])->one() : $query->one();
                     if ($existing_bill) {
 //                        Yii::$app->session->setFlash('danger', Yii::t('app', 'The bill number already exists'));
