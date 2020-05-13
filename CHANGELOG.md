@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file.
   - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
   aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
   - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
+  - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
+  no está duplicado [AD-48]
   
   ##[2020.05.12.0]
   ### Agregado

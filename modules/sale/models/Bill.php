@@ -789,7 +789,7 @@ class Bill extends ActiveRecord implements CountableInterface
     public function addErrorToCacheOrSession($error, $key = null){
         if(Yii::$app instanceof Yii\console\Application) {
             $old_errors = Yii::$app->cache->get('_invoice_close_errors');
-            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]));
+            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300);
         } else {
             Yii::$app->session->addFlash($key, $error);
         }
@@ -1121,7 +1121,7 @@ class Bill extends ActiveRecord implements CountableInterface
             if ($this->status != null && $this->status != 'draft') {
                 //Validaciópn de numero de factura
                 if ($this->number) {
-                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id]);
+                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id, 'status' => Bill::STATUS_CLOSED]);
                     $existing_bill = $this->bill_id ? $query->andWhere(['<>', 'bill_id', $this->bill_id])->one() : $query->one();
                     if ($existing_bill) {
 //                        Yii::$app->session->setFlash('danger', Yii::t('app', 'The bill number already exists'));
