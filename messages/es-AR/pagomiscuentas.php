@@ -31,4 +31,6 @@ return [
     'Import of {name} of {date}' => 'Importación de {name} del {date}',
     'Download File' => 'Bajar Archivo',
     'Created by invoice process' => 'Creado por el proceso de facturación',
+    'pending' => 'Pendiente',
+    'Are you sure you want to create the payments?' => '¿Está seguro que desea crear los pagos?',
 ];

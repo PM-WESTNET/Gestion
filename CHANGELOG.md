@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
   - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
   - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
   no está duplicado [AD-48]
+  - PMC: Se modifica la carga del archivo para que se realice en dos pasos, el primero crea los pagos y el segundo cierra 
+  los pagos y el archivo. De modo que si se detecta alguna anomalía pueda ser eliminado antes del cierre del mismo [AD-50] Solicitado por Elizabeth
   
   ##[2020.05.12.0]
   ### Agregado

@@ -25,6 +25,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]) ?>
             <?php if($model->status == PagomiscuentasFile::STATUS_DRAFT) {
+                echo Html::a(Yii::t('app', 'Create payments'), ['create-payments', 'id' => $model->pagomiscuentas_file_id], [
+                    'class' => 'btn btn-success',
+                    'id' => 'create-payments-pmc-btn',
+                    'data' => [
+                        'method' => 'post',
+                    ],
+                ]);
+            }
+            ?>
+            <?php if($model->status == PagomiscuentasFile::STATUS_PENDING) {
                 echo Html::a(Yii::t('app', 'Close'), ['close', 'id' => $model->pagomiscuentas_file_id], [
                     'class' => 'btn btn-warning',
                     'id' => 'close-pmc-btn',
@@ -44,8 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
-    <?php
-    if ($model->status == PagomiscuentasFile::STATUS_CLOSED) {
+    <?php if ($model->status != PagomiscuentasFile::STATUS_DRAFT) {
         //Clientes con empres errónea
         if($dataProviderCustomers->count > 0){
             echo '<hr style="padding-top: 20px"><h3>'.Yii::t('app', 'Customers in wrong company').'</h3>';
@@ -117,8 +126,15 @@ $this->params['breadcrumbs'][] = $this->title;
         var Pmc = new function(){
             this.init = function() {
                 $('#close-pmc-btn').on('click', function(event) {
-                    if(confirm('<?=Yii::t('pagomiscuentas', 'Are you sure you want to close this item?')?>')){
+                    if(confirm('<?=Yii::t('pagomiscuentas', 'Are you sure you want to close this item?')?>') === true){
                         $('#close-pmc-btn').addClass('disabled');
+                        $('#close-pm-btn').text('Cerrando ...')
+                    }
+                });
+                $('#create-payments-pmc-btn').on('click', function(event) {
+                    if(confirm('<?=Yii::t('pagomiscuentas', 'Are you sure you want to create the payments?')?>') === true){
+                        $('#create-payments-pmc-btn').addClass('disabled');
+                        $('#create-payments-pmc-btn').text('Creando pagos ...')
                     }
                 });
             }
