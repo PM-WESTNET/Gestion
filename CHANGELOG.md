@@ -16,6 +16,9 @@ All notable changes to this project will be documented in this file.
   no está duplicado [AD-48]
   - PMC: Se modifica la carga del archivo para que se realice en dos pasos, el primero crea los pagos y el segundo cierra 
   los pagos y el archivo. De modo que si se detecta alguna anomalía pueda ser eliminado antes del cierre del mismo [AD-50] Solicitado por Elizabeth
+  - Baja de clientes: Las notas de crédito automáticas no se generan a menos que el importe adeudado sea mayor a $1 [CON-38]
+  - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
+  si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
   
   ##[2020.05.12.0]
   ### Agregado

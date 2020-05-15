@@ -2024,75 +2024,78 @@ class Customer extends ActiveRecord {
 
         if ($debt < 0) {
             $amount = abs($debt);
-            if ($this->taxCondition->name === 'IVA Inscripto') {
-                $lastBillType = $this->getLastBillType();
-                if ($lastBillType && $lastBillType->name === 'Factura A') {
-                    $billType = BillType::findOne(['name' => 'Nota Crédito A']);
-                }else {
-                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+            //Verifico que el monto de deuda sea mayor a un peso para no tener inconvenientes al momento de calcular el IVA y presentar el comprobante
+            if ($amount > 1) {
+                if ($this->taxCondition->name === 'IVA Inscripto') {
+                    $lastBillType = $this->getLastBillType();
+                    if ($lastBillType && $lastBillType->name === 'Factura A') {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito A']);
+                    } else {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    }
+                } else {
+                    if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')) {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    } else {
+                        $billType = BillType::findOne(['name' => 'Descuento']);
+                    }
                 }
-            }else {
-                if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
-                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
-                }else {
-                    $billType = BillType::findOne(['name' => 'Descuento']);
-                }
-            }
 
-            $unit_final_price = $amount;
-            $unit_net_price = (($amount * 100) / ((0.21 * 100) + 100));
+                $unit_final_price = $amount;
+                $unit_net_price = (($amount * 100) / ((0.21 * 100) + 100));
 
-            if (empty($billType)) {
-                return false;
-            }
-
-            if(!class_exists($billType->class)){
-                return false;
-            }
-
-            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
-
-            if (empty($point_of_sale)) {
-                $point_of_sale = $this->company->getPointsOfSale()->one();
-                if (empty($point_of_sale)) {
-                    Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                if (empty($billType)) {
                     return false;
                 }
+
+                if (!class_exists($billType->class)) {
+                    return false;
+                }
+
+                $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
+
+                if (empty($point_of_sale)) {
+                    $point_of_sale = $this->company->getPointsOfSale()->one();
+                    if (empty($point_of_sale)) {
+                        Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                        return false;
+                    }
+                }
+
+                $bill = Yii::createObject($billType->class);
+                $bill->bill_type_id = $billType->bill_type_id;
+                $bill->date = date('d-m-Y');
+                $bill->status = Bill::STATUS_DRAFT;
+                $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
+                $bill->class = $billType->class;
+                $bill->customer_id = $this->customer_id;
+                $bill->company_id = $this->company_id;
+                $bill->save();
+
+                Yii::info($bill->getErrors(), 'Nota');
+                Yii::info($debt, 'Deuda');
+
+                $detail = $bill->addDetail([
+                    'product_id' => Config::getValue('baja_product_id'),
+                    'qty' => 1,
+                    'unit_id' => Config::getValue('default_unit_id'),
+                    'unit_net_price' => $unit_net_price,
+                    'unit_final_price' => $unit_final_price,
+                    'line_subtotal' => $unit_net_price,
+                    'line_total' => $unit_final_price,
+                    'concept' => 'Cancelación por baja(Automático)'
+                ]);
+                Yii::info($detail, 'Deuda');
+
+
+                if ($detail == false) {
+                    return false;
+                }
+
+                $detail->save();
+
+                return $bill->close();
             }
-
-            $bill = Yii::createObject($billType->class);
-            $bill->bill_type_id = $billType->bill_type_id;
-            $bill->date = date('d-m-Y');
-            $bill->status = Bill::STATUS_DRAFT;
-            $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
-            $bill->class = $billType->class;
-            $bill->customer_id = $this->customer_id;
-            $bill->company_id = $this->company_id;
-            $bill->save();
-
-            Yii::info($bill->getErrors(), 'Nota');
-            Yii::info($debt, 'Deuda');
-
-            $detail = $bill->addDetail([
-                'product_id' => Config::getValue('baja_product_id'),
-                'qty' => 1,
-                'unit_id' =>  Config::getValue('default_unit_id'),
-                'unit_net_price' => $unit_net_price,
-                'unit_final_price' => $unit_final_price,
-                'line_subtotal' => $unit_net_price,
-                'line_total' => $unit_final_price,
-                'concept' => 'Cancelación por baja(Automático)'
-            ]);
-            Yii::info($detail, 'Deuda');
-
-
-            if ($detail == false) {
-                return false;
-            }
-
-            $detail->save();
-
-            return $bill->close();
         }
 
         return true;
