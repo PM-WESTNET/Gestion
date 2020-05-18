@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
   - Baja de clientes: Las notas de crédito automáticas no se generan a menos que el importe adeudado sea mayor a $1 [CON-38]
   - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
   si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
+  - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55]
   
   ##[2020.05.18.0]
   ## Modificado
