@@ -3,22 +3,24 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## [Pendiente de aprobación]
- 
-  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
-  las opciones de gigantografia, pantalla led e instagram [AD-9]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
-   - Backups: Alerta a email si falla un backup [GES-810]
+  - Backups: Alerta a email si falla un backup [GES-810]
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
-  - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
-  aquellas que están en estado cerrado [AD-13] Solicitado por Camila.
-  - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42]
   - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
   no está duplicado [AD-48]
-  - PMC: Se modifica la carga del archivo para que se realice en dos pasos, el primero crea los pagos y el segundo cierra 
-  los pagos y el archivo. De modo que si se detecta alguna anomalía pueda ser eliminado antes del cierre del mismo [AD-50] Solicitado por Elizabeth
   - Baja de clientes: Las notas de crédito automáticas no se generan a menos que el importe adeudado sea mayor a $1 [CON-38]
   - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
   si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
+  
+  ##[2020.05.18.0]
+  ## Modificado
+  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
+    las opciones de gigantografia, pantalla led e instagram [AD-9] Solicitado por Mariela, aprobado por Gabriel
+  - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
+    aquellas que están en estado cerrado [AD-13] Solicitado y aprobado por Camila.
+  - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42] Solicitado por Camila, aprobado por Elizabeth
+  - PMC: Se modifica la carga del archivo para que se realice en dos pasos, el primero crea los pagos y el segundo cierra 
+    los pagos y el archivo. De modo que si se detecta alguna anomalía pueda ser eliminado antes del cierre del mismo [AD-50] Solicitado y aprobado por Elizabeth
   
   ##[2020.05.12.0]
   ### Agregado
