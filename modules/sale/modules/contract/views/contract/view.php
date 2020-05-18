@@ -233,7 +233,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
 <?= $this->render('_modal-contract-connection', ['model' => $model, 'products' => $products, 'vendors' => $vendors])?>
 
 <!-- Modal de company -->
-<?= $this->render('_modal-contract-company', ['connection' => $connection])?>
+<?= $this->render('_modal-contract-company', ['connection' => $connection, 'model' => $model])?>
 
 <!-- Modal de Nodo -->
 <?= $this->render('_modal-contract-node', [ 'connection' => $connection ])?>
