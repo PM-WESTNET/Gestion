@@ -10,6 +10,7 @@ use app\modules\automaticdebit\models\BillHasExportToDebit;
 use app\modules\checkout\models\BillHasPayment;
 use app\modules\config\models\Config;
 use app\modules\partner\models\PartnerDistributionModel;
+use app\modules\ticket\behaviors\TicketBehavior;
 use Yii;
 use \app\modules\checkout\models\Payment;
 use \app\modules\sale\modules\invoice\components\Invoice;
@@ -33,6 +34,7 @@ use webvimark\modules\UserManagement\models\User;
  * @property string $observation
  * @property string $user_id
  * @property integer $partner_distribution_model_id
+ * @property integer $invoice_process_id
  *
  * @property Customer $customer
  * @property BillDetail[] $billDetails
@@ -170,6 +172,9 @@ class Bill extends ActiveRecord implements CountableInterface
             'modifier' => [
                 'class'=> 'app\components\db\ModifierBehavior'
             ],
+            'ticket' => [
+                'class'=> 'app\modules\ticket\behaviors\TicketBehavior'
+            ],
         ];
     }
 
@@ -305,6 +310,14 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return $this->billType->invoiceClass;
 
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceProcess()
+    {
+        return $this->hasOne(InvoiceProcess::class, ['invoice_process_id' => 'invoice_process_id']);
     }
 
     /**
@@ -646,6 +659,7 @@ class Bill extends ActiveRecord implements CountableInterface
         }
 
         //En caso de llegar a este punto, retornamos false
+        $transaction->rollback();
         return false;
 
     }
@@ -728,7 +742,7 @@ class Bill extends ActiveRecord implements CountableInterface
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                     }
 
-                    return ($retValue || empty($result['errors']));
+                    return ($retValue && empty($result['errors']));
                 } catch (\Exception $ex) {
                     \Yii::info($ex, 'facturacion');
                     $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
@@ -741,6 +755,10 @@ class Bill extends ActiveRecord implements CountableInterface
                     Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
                 }
                 $this->updateAttributes(['status' => 'closed']);
+
+                //Se llama al behavior para cerrar los tickets que tenga el cliente de cobranza
+                $this->trigger('EVENT_CLOSE_TICKETS');
+
                 //Agrega el numero de comprobante
                 if ($this->fillNumber) {
                     $this->fillNumber();
@@ -756,6 +774,9 @@ class Bill extends ActiveRecord implements CountableInterface
                     Yii::$app->session->addFlash('success', Yii::t('app', 'Invoice successfully created.'));
                 }
                 $this->updateAttributes(['status' => 'closed']);
+
+                //Se llama al behavior para cerrar los tickets que tenga el cliente de cobranza
+                $this->trigger('EVENT_CLOSE_TICKETS');
             }
         }
 
@@ -768,7 +789,7 @@ class Bill extends ActiveRecord implements CountableInterface
     public function addErrorToCacheOrSession($error, $key = null){
         if(Yii::$app instanceof Yii\console\Application) {
             $old_errors = Yii::$app->cache->get('_invoice_close_errors');
-            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]));
+            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300);
         } else {
             Yii::$app->session->addFlash($key, $error);
         }
@@ -1100,7 +1121,7 @@ class Bill extends ActiveRecord implements CountableInterface
             if ($this->status != null && $this->status != 'draft') {
                 //Validaciópn de numero de factura
                 if ($this->number) {
-                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id]);
+                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id, 'status' => Bill::STATUS_CLOSED, 'company_id' => $this->company_id]);
                     $existing_bill = $this->bill_id ? $query->andWhere(['<>', 'bill_id', $this->bill_id])->one() : $query->one();
                     if ($existing_bill) {
 //                        Yii::$app->session->setFlash('danger', Yii::t('app', 'The bill number already exists'));

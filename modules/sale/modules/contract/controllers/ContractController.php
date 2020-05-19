@@ -183,18 +183,6 @@ class ContractController extends Controller {
             $transaction = Yii::$app->db->beginTransaction();
             try {
 
-                /* Busco si el usuario logueado esta en Vendor; si es superadmin, veo si lo selecciono en el formulario
-                if ((User::hasPermission('user-can-select-vendor') || $contractDetail->vendor_id === null) 
-                        && !empty(Yii::$app->request->post('Contract')['vendor_id'])) {
-                    $model->vendor_id = Yii::$app->request->post('Contract')['vendor_id'];
-                    $contractDetailPlan->vendor_id = Yii::$app->request->post('Contract')['vendor_id'];
-                    $contractDetailIns->vendor_id = Yii::$app->request->post('Contract')['vendor_id'];
-                } else {
-                    //$contractDetail asigna vendedor en init()
-                    $vendor = Vendor::findByUserId(Yii::$app->user->id);
-                    $model->vendor_id = $vendor ? $vendor->vendor_id : NULL;
-                }**/
-
                 $model->date = (new \DateTime('now'))->format('d-m-Y');
                 
                 if ($model->validate()) {

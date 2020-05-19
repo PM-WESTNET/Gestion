@@ -7,7 +7,9 @@
  */
 namespace app\commands;
 
+use app\modules\accounting\models\AccountMovementRelation;
 use app\modules\config\models\Config;
+use app\modules\pagomiscuentas\models\PagomiscuentasFile;
 use app\modules\provider\models\ProviderBill;
 use app\modules\sale\components\BillExpert;
 use app\modules\sale\models\Bill;
@@ -214,5 +216,75 @@ class FixErrorsController extends \yii\console\Controller
     public function actionFreeProcess($process)
     {
         \Yii::$app->mutex->release($process);
+    }
+
+    public function actionFixPaymentCodes($from, $to = null)
+    {
+        $customers = Customer::find()
+            ->andWhere(['status' => Customer::STATUS_ENABLED])
+            ->andWhere(['IS NOT', 'company_id', NULL])
+            ->andWhere(['>=', 'code', $from])
+            ->andFilterWhere(['<=', 'code', $to])
+            ->all();
+
+        foreach ($customers as $customer) {
+            $customer->updatePaymentCode(true);
+        }
+    }
+
+
+    /**
+     * Elimina el archivo, los pagos asociados y los movimientos contables asociados a los pagos
+     */
+    public function actionDeletePagoMisCuentasFile($pagomiscuentas_file_id)
+    {
+        $pagomiscuentas_file = PagomiscuentasFile::findOne($pagomiscuentas_file_id);
+
+        if($pagomiscuentas_file) {
+
+            $transaction = \Yii::$app->db->beginTransaction();
+
+            foreach ($pagomiscuentas_file->payments as $payment) {
+
+                echo "Eliminando pago ". $payment->payment_id . "\n";
+
+                $account_movement_relation = AccountMovementRelation::find()->where(['model_id' => $payment->payment_id, 'class' => "app\modules\checkout\models\Payment"])->one();
+                
+                if($account_movement_relation) {
+                    $account_movement = $account_movement_relation->accountMovement;
+
+                    //Eliminamos los items del movimiento contable
+                    \Yii::$app->db->createCommand("DELETE FROM account_movement_item WHERE account_movement_id = :account_movement_id",['account_movement_id' => $account_movement->account_movement_id])->execute();
+
+                    //Eliminamos la relacion
+                    \Yii::$app->db->createCommand("DELETE FROM account_movement_relation WHERE account_movement_id  = :account_movement_id",['account_movement_id' => $account_movement->account_movement_id])->execute();
+
+                    //Eliminamos el movimiento
+                    \Yii::$app->db->createCommand("DELETE FROM account_movement WHERE account_movement_id = :account_movement_id", ['account_movement_id' => $account_movement->account_movement_id])->execute();
+                }
+
+                //Eliminamos los item del pago
+                \Yii::$app->db->createCommand("DELETE FROM payment_item WHERE payment_id = :payment_id", ['payment_id' => $payment->payment_id])->execute();
+
+                //Eliminamos la relacion del archivo con el pago
+                \Yii::$app->db->createCommand("DELETE FROM pagomiscuentas_file_has_payment WHERE payment_id = :payment_id", ['payment_id' => $payment->payment_id])->execute();
+
+                //Eliminamos la relacion del pago con un comprobante
+                \Yii::$app->db->createCommand("DELETE FROM bill_has_payment WHERE payment_id = :payment_id", ['payment_id' => $payment->payment_id])->execute();
+
+                //Eliminamos el pago
+                \Yii::$app->db->createCommand("DELETE FROM payment WHERE payment_id = :payment_id", ['payment_id' => $payment->payment_id])->execute();
+            }
+
+            //Eliminamos el archivo
+            \Yii::$app->db->createCommand("DELETE FROM pagomiscuentas_file WHERE pagomiscuentas_file_id = :file_id", ['file_id' => $pagomiscuentas_file_id])->execute();
+
+            $transaction->commit();
+
+            echo "Proceso completado\n";
+
+        } else {
+            echo "Archivo de pagomiscuentas no encontrado\n";
+        }
     }
 }

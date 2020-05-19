@@ -81,6 +81,25 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
         return $query;
     }
 
+    /**
+     * Query para obtener los comprobantes que se han creado desde un proceso de facturacion en particular
+     * @var ActiveQuery $query
+     * */
+    public function findBillsFromInvoiceProcess($invoice_process_id)
+    {
+        $query = (new Query());
+        $query
+            ->select("b.bill_id, b.total")
+            ->from('bill b')
+            ->leftJoin('pagomiscuentas_file_has_bill pfhb', 'b.bill_id = pfhb.bill_id')
+            ->where('pfhb.bill_id is null')
+            ->andWhere(['b.invoice_process_id' => $invoice_process_id])
+            ->orderBy(['b.bill_id'=>SORT_DESC])
+        ;
+
+        return $query;
+    }
+
     public function findBillsForExport($pagomiscuentas_file_id)
     {
         $pago_mis_cuentas_file = PagomiscuentasFile::findOne($pagomiscuentas_file_id);

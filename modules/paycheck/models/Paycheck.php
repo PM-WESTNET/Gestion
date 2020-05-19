@@ -54,6 +54,8 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
 
     public $dateStamp;
 
+    public $outAccount;
+
     protected $all_statuses = [
         'created',
         'commited',
@@ -149,7 +151,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
     {
 
         return [
-            [['date', 'due_date', 'timestamp', 'checkbook', 'moneyBox', 'moneyBoxAccount', 'dateStamp'], 'safe'],
+            [['date', 'due_date', 'timestamp', 'checkbook', 'moneyBox', 'moneyBoxAccount', 'dateStamp', 'outAccount'], 'safe'],
             [['date', 'due_date', 'dateStamp'], 'date', 'min'=>'01-01-1980', 'format'=>'dd-MM-yyyy'],
             [['date'], 'default', 'value'=> null],
             [['amount'], 'number'],
@@ -325,15 +327,16 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
      */
     public function getDeletable()
     {
-        if(!AccountMovementRelationManager::isDeletable($this)) {
-            return false;
-        }
+        // if(AccountMovementRelationManager::isDeletable($this)) {
+        //     return true;
+        // }
 
-        if (($this->getProviderPaymentsItems()->count() === 0) && ($this->getPaymentItems()->count() === 0)) {
-            return false;
-        }
+        // if (($this->getProviderPaymentsItems()->count() === 0) && ($this->getPaymentItems()->count() === 0)) {
+        //     return true;
+        // }
 
-        return true;
+        // return false;
+        return false;
     }
 
     /**
@@ -359,6 +362,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
      */
     protected function unlinkWeakRelations(){
         AccountMovementRelationManager::delete($this);
+        $this->unlinkAll('paycheckLogs', true);
     }
     
     /**
@@ -371,9 +375,10 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
                 $this->unlinkWeakRelations();
                 return true;
             }
-        } else {
-            return false;
         }
+        
+        return false;
+        
     }
 
     public function afterSave($insert, $changedAttributes) {

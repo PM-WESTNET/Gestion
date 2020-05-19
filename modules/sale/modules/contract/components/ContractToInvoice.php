@@ -301,9 +301,13 @@ class ContractToInvoice
         return false;
     }
 
-    public function invoiceAll($params)
+    /**
+     * Crea los comprobantes que se incluyan con los $params indicados
+     * Si se incluye un id de invoice process, los comprobantes generados tendrán este dato adicional
+     */
+    public function invoiceAll($params, $invoice_process_id = false)
     {
-//        Yii::setLogger(new EmptyLogger());
+        Yii::setLogger(new EmptyLogger());
 
         $bill_observation = array_key_exists('bill_observation', $params) ? $params['bill_observation'] : '';
         $contractSearch = new ContractSearch();
@@ -346,7 +350,7 @@ class ContractToInvoice
             foreach($contractList as $item) {
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true) ) {
+                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true, $invoice_process_id) ) {
                         $afip_error = true;
                     }
                     Yii::$app->cache->set('_invoice_all_', [
@@ -379,6 +383,10 @@ class ContractToInvoice
     }
 
     /**
+     * Genera un comprobante.
+     * Si la funcion en llamada desde el proceso por lotes, debe pasarse el parametro $automatically_generated en true
+     * y el id del invoice_process
+     *
      * @param $company
      * @param $bill_type_id
      * @param $customer_id
@@ -389,23 +397,13 @@ class ContractToInvoice
      * @throws \yii\web\ForbiddenHttpException
      * @throws \yii\web\HttpException
      */
-    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false)
+    public function invoice($company, $bill_type_id, $customer_id, $period, $includePlan=true, $bill_observation = '', $invoice_date = null, $close_bill = true, $automatically_generated = false, $invoice_process_id = false)
     {
 
         try{
 
             if ($company && $bill_type_id && $customer_id) {
                 $node = null;
-                /** @var Bill $bill */
-                $bill = BillExpert::createBill($bill_type_id);
-                $bill->company_id = $company->company_id;
-                $bill->point_of_sale_id = $company->getDefaultPointOfSale()->point_of_sale_id;
-                $bill->customer_id = $customer_id;
-                $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d') );
-                $bill->status = 'draft';
-                $bill->observation = $bill_observation;
-                $bill->automatically_generated = $automatically_generated ? true : null;
-                $bill->save(false);
 
                 // Como ya no tengo el contrato, busco todos los contratos para el customer
                 $contractSearch = new ContractSearch();
@@ -416,199 +414,207 @@ class ContractToInvoice
                 $contractSearch->period = $period;
                 $contracts = $contractSearch->searchForInvoice([], true, $includePlan)->all();
 
-                // Busco el customer que estoy procesando
-                $customer = Customer::findOne($customer_id);
-                // Traigo todos los descuentos aplicados al customer
-                // Se tienen en cuenta por la fecha, mas alla de los periodos aplicados.
-                $customerActiveDiscount = $customer->getActiveCustomerHasDiscounts($period)->all();
+                //Verifico que la consulta retorne algun contrato por si el cliente se dió de baja en el medio del proceso, antes de llamar a esta funcion invoice()
+                if($contracts) {
 
-                $next = false;
-                $default_unit_id = Config::getValue('default_unit_id');
-                foreach ($contracts as $contract_value) {
-                    $contract = Contract::findOne(['contract_id' => $contract_value['contract_id']]);
-                    $contractStart = new DateTime( Yii::$app->formatter->asDate($contract->from_date)) ;
-
-                    $periods[] = $period;
-
-                    // Si el mes y año de inicio es igual al actual y la fecha de inicio esta dentro de los dias libres
-                    // agrego el mes siguiente para facturar ya que seguramente los productos asignados van a estar ahi
-                    if ($this->invoice_day_for_next_month != 0 && ( (new DateTime('now'))->format('Ym') == $contractStart->format('Ym'))  &&
-                        $this->invoice_day_for_next_month <= $contractStart->format('d')
-                    ){
-                        $next = true;
-                        $nextPeriod = clone $period;
-                        $periods[] = $nextPeriod->modify('first day of next month');
-                    }
-
-                    // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
-                    foreach($contract->contractDetails as $contractDetail) {
-                        if($contractDetail->product->type == 'plan' && $includePlan) {
-                            if (!$contractDetail->isAddedForInvoice($periods)){
-                                $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
-
-                                //Solicito el precio activo en funcion del contrato de cliente (aplica reglas de negocio)
-                                $activePrice = $contractDetail->product->getActivePrice($contractDetail)->one();
-
-                                $pti = $this->createProductToInvoice([
-                                    'contract_detail_id' => $contractDetail->contract_detail_id,
-                                    'funding_plan_id' => null,
-                                    'date' => (new DateTime('now'))->format('d-m-Y'),
-                                    'amount' => $activePrice->net_price,
-                                    'status' => 'active',
-                                    'period' => ($next ? $nextPeriod->format('d-m-Y') : $period->format('d-m-Y')),
-                                    'discount_id' => ($discount ? $discount->discount_id : null ),
-                                    'customer_id' => $contract->customer_id,
-                                    'qty' => 1,
-                                ]);
-                                $pti->save(false);
-                            }
-                        }
-                    }
-
-                    // Itero en los items a facturar y voy agregandolo a la factura
-                    $search = new ProductToInvoiceSearch();
-                    $products_to_invoice = $search->search($periods, $contract->contract_id, $contract->customer_id)->all();
-                    /** @var ProductToInvoice $pti */
-                    foreach($products_to_invoice as $pti) {
-
-                        // Veo si tiene una categoria que me cambie el importe de facturacion
-                        // Y el factor es que voy a multiplicar por el neto a facturar
-                        $factor = 1;
-                        if ($contract->customer->getCustomerClass()) {
-                            $factor = ($contract->customer->customerClass->percentage_bill / 100);
-                        }
-
-                        // Aca tengo el neto, sin descuentos e impuestos
-                        $unit_net_price     = ($pti->amount  * $factor);
-
-
-                        // El proporcional se calcula si el mes de inicio del plan es igual al mes que se esta.
-                        if($pti->contract_detail_id) {
-                            if($pti->contractDetail->product->type == 'plan') {
-                                if($includePlan) {
-                                    $factorProporcional = 1;
-                                    if( $period->format('Ym') == $contractStart->format('Ym') && !$next) {
-                                        $factorProporcional = (30 - $contractStart->format('d'))/30;
-                                    }
-                                    $unit_net_price     = ($unit_net_price  * $factorProporcional);
-                                } else {
-                                    continue;
-                                }
-                            }
-                        }
-
-                        // Si el item tiene descuento lo busco y aplico
-                        $discount = null;
-                        $unit_net_discount = 0;
-                        if ($pti->discount) {
-                            $discount = $pti->discount;
-                        } else {
-                            // Verifico que el producto tenga un descuento aplicado
-                            if($pti->contract_detail_id && $pti->contractDetail->product_id) {
-                                // Busco los descuentos y solo paso el primero que encuentro
-                                $discounts = Discount::findActiveByProduct($pti->contractDetail->product_id);
-                                $discount = (count($discounts)>0 ?  $discounts[0]: null );
-                            }
-                        }
-
-                        if($discount) {
-                            if($discount->type == Discount::TYPE_PERCENTAGE ) {
-                                $unit_net_discount =  $unit_net_price * ($discount->value/100);
-                            } else {
-                                $unit_net_discount =  $discount->value;
-                            }
-
-                            //Si el descuento es de tipo persistente, se debe deshabilitar una vez que ha sido aplicado.
-                            if($discount->persistent) {
-                                $customer_discount = CustomerHasDiscount::find()->where(['discount_id' => $discount->discount_id, 'customer_id' => $bill->customer_id, 'status' => CustomerHasDiscount::STATUS_ENABLED])->one();
-                                if($customer_discount) {
-                                    $customer_discount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
-                                }
-                            }
-                        }
-
-                        $unit_net_price_with_discount = $unit_net_price - $unit_net_discount;
-                        // Calculo el total unitario en base al importe con descuento
-                        if($pti->contractDetail) {
-                            $unit_final_price = $unit_net_price_with_discount + $pti->contractDetail->product->calculateTaxes($unit_net_price_with_discount);
-                        } else {
-                            $taxRate = TaxRate::findOne(['code'=>Config::getValue('default_tax_rate_code')]);
-                            if($taxRate) {
-                                $unit_final_price = $unit_net_price_with_discount + $taxRate->calculate($unit_net_price_with_discount);
-                            } else {
-                                $unit_final_price = $unit_net_price_with_discount;
-                            }
-                        }
-                        $bill->addDetail([
-                            'product_id' => ($pti->contractDetail ? $pti->contractDetail->product_id : null ),
-                            'unit_id' => ($pti->contractDetail ? $pti->contractDetail->product->unit_id : $default_unit_id ),
-                            'qty' => $pti->qty,
-                            'type' => ($pti->contractDetail ? $pti->contractDetail->product->type : null ),
-                            'unit_net_price' => $unit_net_price,
-                            'unit_final_price' => $unit_final_price,
-                            'concept' => ($pti->contractDetail ? ($pti->contractDetail->product->description ?: $pti->contractDetail->product->name) . ($pti->contractDetail->product->type =='plan' ? ' - ' . Yii::$app->formatter->asDate($pti->period, 'MM/Y') : '' ) :
-                                $pti->description ) ,
-                            'discount_id' => ($discount ? $discount->discount_id : null ),
-                            'unit_net_discount' => $unit_net_discount
-                        ]);
-                        $pti->status = 'consumed';
-
-
-                        if (!$pti->save(false)) {
-                            FlashHelper::flashErrors($pti);
-                        }
-                    }
-
-                    // Itero en los descuentos aplicados al cliente.
-                    foreach($customerActiveDiscount as $key => $customerDiscount) {
-                        if($customerDiscount->discount->value_from == Discount::VALUE_FROM_TOTAL) {
-                            $unit_net_discount = ( $customerDiscount->discount->type == Discount::TYPE_FIXED ?
-                                $customerDiscount->discount->value
-                                :
-                                $bill->total * (((double)$customerDiscount->discount->value) / 100)
-                            );
-
-                            // Agrego un nuevo item por el total
-                            $billDetail = $bill->addDetail([
-                                'qty' => 1,
-                                'unit_id' => 1,
-                                'type' => 'discount',
-                                'unit_net_price' => 0,
-                                'unit_final_price' => 0,
-                                'unit_net_discount' => $unit_net_discount,
-                                'concept' => $customerDiscount,
-                                'discount_id' => $customerDiscount->discount->discount_id
-                            ]);
-
-                            //Si el descuento es de tipo persistent y ya se aplicó se debe actualizar el estado
-                            if($customerDiscount->discount->persistent) {
-                                $customerDiscount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
-                            }
-                        }
-                        unset($customerActiveDiscount[$key]);
-                    }
-                }
-
-                if($bill->getBillDetails()->exists()) {
-                    $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
+                    /** @var Bill $bill */
+                    $bill = BillExpert::createBill($bill_type_id);
+                    $bill->company_id = $company->company_id;
+                    $bill->point_of_sale_id = $company->getDefaultPointOfSale()->point_of_sale_id;
+                    $bill->customer_id = $customer_id;
+                    $bill->date = ($invoice_date ? $invoice_date->format('Y-m-d') : $period->format('Y-m-d'));
+                    $bill->status = 'draft';
+                    $bill->observation = $bill_observation;
+                    $bill->automatically_generated = $automatically_generated ? true : null;
+                    $bill->invoice_process_id = $invoice_process_id ? $invoice_process_id : null;
                     $bill->save(false);
-                    $bill->fillNumber = false;
-                    $bill->verifyAmounts(true);
-                    if($close_bill) {
-                        $bill->complete();
-                        $bill->close();
+
+                    // Busco el customer que estoy procesando
+                    $customer = Customer::findOne($customer_id);
+                    // Traigo todos los descuentos aplicados al customer
+                    // Se tienen en cuenta por la fecha, mas alla de los periodos aplicados.
+                    $customerActiveDiscount = $customer->getActiveCustomerHasDiscounts($period)->all();
+
+                    $next = false;
+                    $default_unit_id = Config::getValue('default_unit_id');
+                    foreach ($contracts as $contract_value) {
+                        $contract = Contract::findOne(['contract_id' => $contract_value['contract_id']]);
+                        $contractStart = new DateTime(Yii::$app->formatter->asDate($contract->from_date));
+
+                        $periods[] = $period;
+
+                        // Si el mes y año de inicio es igual al actual y la fecha de inicio esta dentro de los dias libres
+                        // agrego el mes siguiente para facturar ya que seguramente los productos asignados van a estar ahi
+                        if ($this->invoice_day_for_next_month != 0 && ((new DateTime('now'))->format('Ym') == $contractStart->format('Ym')) &&
+                            $this->invoice_day_for_next_month <= $contractStart->format('d')
+                        ) {
+                            $next = true;
+                            $nextPeriod = clone $period;
+                            $periods[] = $nextPeriod->modify('first day of next month');
+                        }
+
+                        // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
+                        foreach ($contract->contractDetails as $contractDetail) {
+                            if ($contractDetail->product->type == 'plan' && $includePlan) {
+                                if (!$contractDetail->isAddedForInvoice($periods)) {
+                                    $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
+
+                                    //Solicito el precio activo en funcion del contrato de cliente (aplica reglas de negocio)
+                                    $activePrice = $contractDetail->product->getActivePrice($contractDetail)->one();
+
+                                    $pti = $this->createProductToInvoice([
+                                        'contract_detail_id' => $contractDetail->contract_detail_id,
+                                        'funding_plan_id' => null,
+                                        'date' => (new DateTime('now'))->format('d-m-Y'),
+                                        'amount' => $activePrice->net_price,
+                                        'status' => 'active',
+                                        'period' => ($next ? $nextPeriod->format('d-m-Y') : $period->format('d-m-Y')),
+                                        'discount_id' => ($discount ? $discount->discount_id : null),
+                                        'customer_id' => $contract->customer_id,
+                                        'qty' => 1,
+                                    ]);
+                                    $pti->save(false);
+                                }
+                            }
+                        }
+
+                        // Itero en los items a facturar y voy agregandolo a la factura
+                        $search = new ProductToInvoiceSearch();
+                        $products_to_invoice = $search->search($periods, $contract->contract_id, $contract->customer_id)->all();
+                        /** @var ProductToInvoice $pti */
+                        foreach ($products_to_invoice as $pti) {
+
+                            // Veo si tiene una categoria que me cambie el importe de facturacion
+                            // Y el factor es que voy a multiplicar por el neto a facturar
+                            $factor = 1;
+                            if ($contract->customer->getCustomerClass()) {
+                                $factor = ($contract->customer->customerClass->percentage_bill / 100);
+                            }
+
+                            // Aca tengo el neto, sin descuentos e impuestos
+                            $unit_net_price = ($pti->amount * $factor);
+
+
+                            // El proporcional se calcula si el mes de inicio del plan es igual al mes que se esta.
+                            if ($pti->contract_detail_id) {
+                                if ($pti->contractDetail->product->type == 'plan') {
+                                    if ($includePlan) {
+                                        $factorProporcional = 1;
+                                        if ($period->format('Ym') == $contractStart->format('Ym') && !$next) {
+                                            $factorProporcional = (30 - $contractStart->format('d')) / 30;
+                                        }
+                                        $unit_net_price = ($unit_net_price * $factorProporcional);
+                                    } else {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            // Si el item tiene descuento lo busco y aplico
+                            $discount = null;
+                            $unit_net_discount = 0;
+                            if ($pti->discount) {
+                                $discount = $pti->discount;
+                            } else {
+                                // Verifico que el producto tenga un descuento aplicado
+                                if ($pti->contract_detail_id && $pti->contractDetail->product_id) {
+                                    // Busco los descuentos y solo paso el primero que encuentro
+                                    $discounts = Discount::findActiveByProduct($pti->contractDetail->product_id);
+                                    $discount = (count($discounts) > 0 ? $discounts[0] : null);
+                                }
+                            }
+
+                            if ($discount) {
+                                if ($discount->type == Discount::TYPE_PERCENTAGE) {
+                                    $unit_net_discount = $unit_net_price * ($discount->value / 100);
+                                } else {
+                                    $unit_net_discount = $discount->value;
+                                }
+
+                                //Si el descuento es de tipo persistente, se debe deshabilitar una vez que ha sido aplicado.
+                                if ($discount->persistent) {
+                                    $customer_discount = CustomerHasDiscount::find()->where(['discount_id' => $discount->discount_id, 'customer_id' => $bill->customer_id, 'status' => CustomerHasDiscount::STATUS_ENABLED])->one();
+                                    if ($customer_discount) {
+                                        $customer_discount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                                    }
+                                }
+                            }
+
+                            $unit_net_price_with_discount = $unit_net_price - $unit_net_discount;
+                            // Calculo el total unitario en base al importe con descuento
+                            if ($pti->contractDetail) {
+                                $unit_final_price = $unit_net_price_with_discount + $pti->contractDetail->product->calculateTaxes($unit_net_price_with_discount);
+                            } else {
+                                $taxRate = TaxRate::findOne(['code' => Config::getValue('default_tax_rate_code')]);
+                                if ($taxRate) {
+                                    $unit_final_price = $unit_net_price_with_discount + $taxRate->calculate($unit_net_price_with_discount);
+                                } else {
+                                    $unit_final_price = $unit_net_price_with_discount;
+                                }
+                            }
+                            $bill->addDetail([
+                                'product_id' => ($pti->contractDetail ? $pti->contractDetail->product_id : null),
+                                'unit_id' => ($pti->contractDetail ? $pti->contractDetail->product->unit_id : $default_unit_id),
+                                'qty' => $pti->qty,
+                                'type' => ($pti->contractDetail ? $pti->contractDetail->product->type : null),
+                                'unit_net_price' => $unit_net_price,
+                                'unit_final_price' => $unit_final_price,
+                                'concept' => ($pti->contractDetail ? ($pti->contractDetail->product->description ?: $pti->contractDetail->product->name) . ($pti->contractDetail->product->type == 'plan' ? ' - ' . Yii::$app->formatter->asDate($pti->period, 'MM/Y') : '') :
+                                    $pti->description),
+                                'discount_id' => ($discount ? $discount->discount_id : null),
+                                'unit_net_discount' => $unit_net_discount
+                            ]);
+                            $pti->status = 'consumed';
+
+
+                            if (!$pti->save(false)) {
+                                FlashHelper::flashErrors($pti);
+                            }
+                        }
+
+                        // Itero en los descuentos aplicados al cliente.
+                        foreach ($customerActiveDiscount as $key => $customerDiscount) {
+                            if ($customerDiscount->discount->value_from == Discount::VALUE_FROM_TOTAL) {
+                                $unit_net_discount = ($customerDiscount->discount->type == Discount::TYPE_FIXED ?
+                                    $customerDiscount->discount->value
+                                    :
+                                    $bill->total * (((double)$customerDiscount->discount->value) / 100)
+                                );
+
+                                // Agrego un nuevo item por el total
+                                $billDetail = $bill->addDetail([
+                                    'qty' => 1,
+                                    'unit_id' => 1,
+                                    'type' => 'discount',
+                                    'unit_net_price' => 0,
+                                    'unit_final_price' => 0,
+                                    'unit_net_discount' => $unit_net_discount,
+                                    'concept' => $customerDiscount,
+                                    'discount_id' => $customerDiscount->discount->discount_id
+                                ]);
+
+                                //Si el descuento es de tipo persistent y ya se aplicó se debe actualizar el estado
+                                if ($customerDiscount->discount->persistent) {
+                                    $customerDiscount->updateAttributes(['status' => CustomerHasDiscount::STATUS_DISABLED]);
+                                }
+                            }
+                            unset($customerActiveDiscount[$key]);
+                        }
                     }
+
+                    if ($bill->getBillDetails()->exists()) {
+                        $bill->number = $this->getBillNumber($bill_type_id, $bill->company_id);
+                        $bill->save(false);
+                        $bill->fillNumber = false;
+                        $bill->verifyAmounts(true);
+                        if ($close_bill) {
+                            $bill->complete();
+                            $bill->close();
+                        }
+                    }
+
+                    $this->addMessage($bill);
                 }
-
-
-                // Si es electronica y no se emitio es por error en AFIP y corto proceso.
-//                if($bill->getPointOfSale()->electronic_billing && $bill->status != 'closed') {
-//                    $this->messages['error'][] = Yii::t('app', 'The billing process is stopped by problems with AFIP.');
-//                    return false;
-//                }
-
-                $this->addMessage($bill);
-
             }
 
             return true;

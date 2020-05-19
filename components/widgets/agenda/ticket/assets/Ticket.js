@@ -45,7 +45,23 @@ var Ticket = new function () {
         this.bindGetCustomerInfo();
         this.bindGetCategoriesByType()
         this.bindCategoryChange();
-        $("#category_id").trigger('change');
+        $("#category_id").trigger('change')
+
+        //Se previene el submit mas de una vez del formulario
+        $('.btn-success').on('click', function (evt) {
+            evt.preventDefault();
+            $(this).attr('disabled', true);
+
+            $('#ticket-form').submit();
+        });
+
+        $('#ticket-form').on('afterValidate', function (evt, msj, attributes) {
+            if(attributes.length > 0) {
+                $('.btn-success').attr('disabled', false);
+            } else {
+                $('.btn-success').attr('disabled', true);
+            }
+        });
     }
 
     //addUser - Agrega un input hidden con su label para un usuario, verifica tambien que ya no se haya agregado anteriormente

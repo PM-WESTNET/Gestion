@@ -91,7 +91,8 @@ class ProviderPaymentMovement extends BaseMovement
                         $modelInstance->company_id,
                         $items,
                         null,
-                        $modelInstance->partner_distribution_model_id)) ) {
+                        $modelInstance->partner_distribution_model_id,
+                        $modelInstance->date)) ) {
                         $this->addMessage('error', Yii::t('accounting', 'The movement is created with errors.'));
                         foreach($countMov->getErrors() as $error) {
                             Yii::$app->session->addFlash('error', $error);

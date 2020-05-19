@@ -5,6 +5,8 @@ namespace app\modules\log\models;
 use Yii;
 use app\modules\log\LogModule;
 use webvimark\modules\UserManagement\models\User;
+use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * This is the model class for table "log".
@@ -221,10 +223,14 @@ class Log extends \app\components\db\ActiveRecord
     {
 
         $limit = Yii::$app->params['garbageCollectorLimit'];
-        $count = Log::find()->count();
-        if ($count > $limit) {
+        $qty = Yii::$app->params['garbageCollectorQtyToDeleteOnLimit'];
 
-            $qty = $count - $limit;
+        //Evitamos hacer el uso de un ->count() por el tiempo que toma la consula cuando hay gran cantidad de registros.
+        $min_log = Yii::$app->dblog->createCommand('SELECT min(log_id) FROM log')->queryScalar();
+        $max_log = Yii::$app->dblog->createCommand('SELECT max(log_id) FROM log')->queryScalar();
+        $count = $max_log - $min_log;
+
+        if($count > $limit) {
 
             Yii::$app->dblog->createCommand('DELETE FROM log ORDER BY log_id ASC LIMIT ' . $qty)
                     ->execute();

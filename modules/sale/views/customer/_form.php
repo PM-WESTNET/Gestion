@@ -349,7 +349,13 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
           </div>
         </div>
     </div>
-    
+
+    <?php
+        if (!$model->isNewRecord && $model->needsUpdate) {
+            echo $form->field($model, 'dataVerified')->checkbox();
+        }
+    ?>
+
     <div class="row">
         <div class="col-xs-12 no-padding">
             <div class="form-group">

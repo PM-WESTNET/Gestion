@@ -94,6 +94,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'date',
             ],
             [
+                'attribute' => 'created_by_invoice_process_id',
+                'value' => function($model) {
+                    return $model->created_by_invoice_process_id ? $model->invoiceProcess->descriptiveName : 'No';
+                }
+            ],
+            [
                 'label' => Yii::t('app', 'Status'),
                 'value' => function($model) {
                     return Yii::t('pagomiscuentas', $model->status);

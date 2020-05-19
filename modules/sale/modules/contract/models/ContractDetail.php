@@ -276,7 +276,11 @@ class ContractDetail extends ActiveRecord
      * @brief Deletes weak relations for this model on delete
      * Weak relations: Contract, Product.
      */
-    protected function unlinkWeakRelations(){
+    protected function unlinkWeakRelations()
+    {
+        if($this->status == self::STATUS_DRAFT) {
+            ContractDetailLog::deleteAll(['contract_detail_id' => $this->contract_detail_id]);
+        }
     }
     
     /**
