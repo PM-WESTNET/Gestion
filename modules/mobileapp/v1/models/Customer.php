@@ -184,4 +184,8 @@ class Customer extends \app\modules\sale\models\Customer
 
         return false;
     }
+
+    public function getFullName() {
+        return $this->lastname . ' '. $this->name;
+    }
 }
