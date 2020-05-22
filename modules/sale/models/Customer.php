@@ -1443,19 +1443,7 @@ class Customer extends ActiveRecord {
                     (strlen($this->payment_code) != 11 && strlen($this->payment_code) != 14 )) ||
                 $this->payment_code < 0 || $force
             ) {
-                $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-
-                /**
-                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
-                 */
-                $complete = '';
-                if ($company->code != '9999') {
-                    $complete = str_pad($complete, (8 - strlen($this->code)), '0', STR_PAD_LEFT);
-                }
-
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
-                    str_pad($this->code, 5, "0", STR_PAD_LEFT) ;
-                $this->payment_code = $generator->generate($code);
+               $this->payment_code = $this->generatePaymentCode($company);
             }
         } else {
             $this->payment_code = null;//-($this->code ? $this->code : rand());
@@ -1463,6 +1451,33 @@ class Customer extends ActiveRecord {
         $this->updateAttributes(['payment_code']);
         return $this->payment_code;
     }
+
+    /**
+     * Genera el codigo de pago en base a la empresa recibida y el codigo del cliente, si no recibe codigo de cliente, toma el propio del objeto,
+     * de lo contrario usa el codigo recibido (Esto facilita el testing)
+     */
+    public function generatePaymentCode($company, $code = null) {
+
+        if ($code == null) {
+            $code = $this->code;
+        }
+        
+        $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+
+        /**
+         * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+         */
+        $complete = '';
+        if ($company->code != '9999') {
+            $complete = str_pad($complete, (8 - strlen($code)), '0', STR_PAD_LEFT);
+        }
+
+        $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
+            $code ;
+
+        return $generator->generate($code);    
+    }
+
 
     /**
      * @return array

@@ -232,6 +232,14 @@ class FixErrorsController extends \yii\console\Controller
         }
     }
 
+    public function actionFixCustomerPaymentCode($customer_id) {
+        $customer = Customer::findOne($customer_id);
+
+        if ($customer) {
+            $customer->updatePaymentCode(true);
+        }
+    }
+
 
     /**
      * Elimina el archivo, los pagos asociados y los movimientos contables asociados a los pagos
