@@ -232,8 +232,8 @@ class FixErrorsController extends \yii\console\Controller
         }
     }
 
-    public function actionFixCustomerPaymentCode($customer_id) {
-        $customer = Customer::findOne($customer_id);
+    public function actionFixCustomerPaymentCode($code) {
+        $customer = Customer::findOne(['code' => $code]);
 
         if ($customer) {
             $customer->updatePaymentCode(true);
