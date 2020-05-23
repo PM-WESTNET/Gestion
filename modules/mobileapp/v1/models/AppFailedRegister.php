@@ -187,16 +187,17 @@ class AppFailedRegister extends ActiveRecord
 
                     $ticket= new Ticket();
                     $ticket->title = 'Solicitud de Edición de Datos';
-                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos: ' .
-                        'Nombre: ' . $this->name . "\n".
-                        'Nro de Documento: ' . $this->document_number . "\n" .
-                        'Email: ' . $this->email . "\n" .
-                        'Email Secundario: ' . $this->email2. "\n".
-                        'Teléfono Fijo: ' . $this->phone. "\n" .
-                        'Celular 1: '. $this->phone2 . "\n".
-                        'Celular 2: '. $this->phone3 . "\n".
-                        'Celular 3: '. $this->phone4 . "\n";
-                        $ticket->customer_id = $customer->customer_id;
+
+                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos: <br>' .
+                        (($this->name !== $customer->lastname. ' '. $customer->name) ? 'Nombre: ' . $this->name . "<br>" : '').
+                        (($this->document_number !== $customer->document_number) ? 'Nro de Documento: ' . $this->document_number . "<br>" : '').
+                        (($this->email !== $customer->email) ?'Email: ' . $this->email . "\n" : '').
+                        (($this->email2 !== $customer->email2) ? 'Email Secundario: ' . $this->email2. "\n": '').
+                        (($this->phone !== $customer->phone) ? 'Teléfono Fijo: ' . (!empty($this->phone) ? $this->phone : 'No definido'). "<br>" : '').
+                        (($this->phone2 !== $customer->phone2) ? 'Celular 1: '. (!empty($this->phone2) ? $this->phone2 : 'No definido'). "<br>" : '').
+                        (($this->phone3 !== $customer->phone3) ? 'Celular 2: '. (!empty($this->phone3) ? $this->phone3: 'No definido') . "<br>" : '').
+                        (($this->phone4 !== $customer->phone4) ? 'Celular 3: '. (!empty($this->phone4) ? $this->phone4 : 'No definido') . "<br>" : '');
+                    $ticket->customer_id = $customer->customer_id;
                     $ticket->category_id = $category->category_id;
                     $ticket->status_id = $status_id;
                     $ticket->user_id = 1;
