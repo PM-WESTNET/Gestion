@@ -19,7 +19,11 @@ use yii\db\ActiveRecord;
  * @property string $document_number
  * @property integer $customer_code
  * @property string $email
+ * @property string $email2
  * @property string $phone
+ * @property string $phone2
+ * @property string $phone3
+ * @property string $phone4
  * @property string $status
  * @property integer $created_at
  */
@@ -77,8 +81,8 @@ class AppFailedRegister extends ActiveRecord
             [['name', 'type'], 'required'],
             [['status', 'text'], 'string'],
             [['customer_code'], 'integer'],
-            [['name', 'document_type', 'document_number', 'phone'], 'string', 'max' => 45],
-            [['email'], 'string', 'max' => 255]
+            [['name', 'document_type', 'document_number', 'phone', 'phone2', 'phone3', 'phone4'], 'string', 'max' => 45],
+            [['email', 'email2'], 'string', 'max' => 255]
         ];
     }
 
@@ -183,7 +187,16 @@ class AppFailedRegister extends ActiveRecord
 
                     $ticket= new Ticket();
                     $ticket->title = 'Solicitud de Edición de Datos';
-                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos:' . ($this->text ? $this->text : '');
+
+                    $ticket->content = 'El cliente '. $customer->getFullName(). ' solicitó contacto para edición de Datos: <br>' .
+                        (($this->name !== $customer->lastname. ' '. $customer->name) ? 'Nombre: ' . $this->name . "<br>" : '').
+                        (($this->document_number !== $customer->document_number) ? 'Nro de Documento: ' . $this->document_number . "<br>" : '').
+                        (($this->email !== $customer->email) ?'Email: ' . $this->email . "\n" : '').
+                        (($this->email2 !== $customer->email2) ? 'Email Secundario: ' . $this->email2. "\n": '').
+                        (($this->phone !== $customer->phone) ? 'Teléfono Fijo: ' . (!empty($this->phone) ? $this->phone : 'No definido'). "<br>" : '').
+                        (($this->phone2 !== $customer->phone2) ? 'Celular 1: '. (!empty($this->phone2) ? $this->phone2 : 'No definido'). "<br>" : '').
+                        (($this->phone3 !== $customer->phone3) ? 'Celular 2: '. (!empty($this->phone3) ? $this->phone3: 'No definido') . "<br>" : '').
+                        (($this->phone4 !== $customer->phone4) ? 'Celular 3: '. (!empty($this->phone4) ? $this->phone4 : 'No definido') . "<br>" : '');
                     $ticket->customer_id = $customer->customer_id;
                     $ticket->category_id = $category->category_id;
                     $ticket->status_id = $status_id;

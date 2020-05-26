@@ -112,6 +112,7 @@ class UserApp extends ActiveRecord
                 'customer_name' => $customer->fullName,
                 'contracts' => $contracts,
                 'can_request_payment_extension' => $customer->canRequestPaymentExtension(),
+                'error_extension' => $customer->detailed_error,
                 'price' => $price,
                 'duration_days' => 0,
                 'date_available_to' => (new \DateTime('now'))->setTimestamp(\app\modules\sale\models\Customer::getMaxDateNoticePaymentExtension())->format('d-m-Y'),

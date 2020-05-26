@@ -366,6 +366,13 @@ class Connection extends ActiveRecord {
             return true;
         }
 
+        $lastForced = $this->contract->customer->getLastForced();
+        $timeBetween = (int)Config::getValue('time_between_payment_extension');
+
+        if ($lastForced && ($lastForced->create_timestamp > (time() - ($timeBetween * 60)))) {
+            return false;
+        }
+
         $forcedHistoralSearch = new ConnectionForcedHistorialSearch();
         $forced_param = Config::getValue('times_forced_conn_month');
         $times = $forcedHistoralSearch->countForcedTimesForConnection($this->connection_id);

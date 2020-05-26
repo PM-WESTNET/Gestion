@@ -6,32 +6,33 @@
  * Time: 12:15
  */
 
-use app\modules\sale\models\Customer;
-use app\modules\sale\models\CustomerHasCustomerMessage;
-use app\modules\sale\models\ProductHasCategory;
-use app\modules\sale\modules\contract\models\Plan;
-use app\tests\fixtures\CustomerCategoryFixture;
-use app\tests\fixtures\TaxConditionFixture;
-use app\tests\fixtures\CustomerClassFixture;
-use app\tests\fixtures\DocumentTypeFixture;
-use app\modules\sale\models\DocumentType;
-use app\modules\config\models\Config;
-use app\tests\fixtures\CustomerFixture;
+use app\modules\sale\models\Bill;
 use app\tests\fixtures\BillFixture;
-use app\tests\fixtures\PaymentFixture;
-use app\modules\config\models\Category;
+use app\modules\sale\models\Company;
+use app\modules\config\models\Config;
+use app\modules\sale\models\Customer;
+use app\modules\sale\models\Discount;
 use app\modules\ticket\models\Ticket;
+use app\tests\fixtures\VendorFixture;
+use app\tests\fixtures\PaymentFixture;
+use app\tests\fixtures\ProductFixture;
+use app\modules\config\models\Category;
+use app\tests\fixtures\CustomerFixture;
+use app\modules\checkout\models\Payment;
+use app\modules\sale\models\DocumentType;
+use app\tests\fixtures\DocumentTypeFixture;
+use app\tests\fixtures\TaxConditionFixture;
 use app\tests\fixtures\TicketStatusFixture;
 use app\modules\mobileapp\v1\models\UserApp;
-use app\modules\mobileapp\v1\models\UserAppActivity;
+use app\tests\fixtures\CustomerClassFixture;
 use app\tests\fixtures\CustomerMessageFixture;
-use app\modules\sale\models\Bill;
-use app\modules\checkout\models\Payment;
+use app\modules\sale\models\ProductHasCategory;
+use app\tests\fixtures\CustomerCategoryFixture;
 use app\modules\sale\models\CustomerHasDiscount;
-use app\modules\sale\models\Discount;
+use app\modules\sale\modules\contract\models\Plan;
+use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\sale\modules\contract\models\Contract;
-use app\tests\fixtures\ProductFixture;
-use app\tests\fixtures\VendorFixture;
+use app\modules\sale\models\CustomerHasCustomerMessage;
 
 class CustomerTest extends \Codeception\Test\Unit
 {
@@ -908,5 +909,43 @@ class CustomerTest extends \Codeception\Test\Unit
 
         expect('Not validate', $customer->validate(['phone3']))->false();
     }
+
+    public function testGeneratePaymentCode3Digits() {
+        $customer = new Customer();
+        $company = Company::findOne(7);
+
+        $paymentCode = $customer->generatePaymentCode($company, 518);
+
+        expect('Error al generar código de pago', strlen((string)$paymentCode))->equals(14);
+    }
+
+    public function testGeneratePaymentCode4Digits() {
+        $customer = new Customer();
+        $company = Company::findOne(7);
+
+        $paymentCode = $customer->generatePaymentCode($company, 4518);
+
+        expect('Error al generar código de pago', strlen((string)$paymentCode))->equals(14);
+    }
+
+    public function testGeneratePaymentCode5Digits() {
+        $customer = new Customer();
+        $company = Company::findOne(7);
+
+        $paymentCode = $customer->generatePaymentCode($company, 14518);
+
+        expect('Error al generar código de pago', strlen((string)$paymentCode))->equals(14);
+    }
+
+    public function testGeneratePaymentCode6Digits() {
+        $customer = new Customer();
+        $company = Company::findOne(7);
+
+        $paymentCode = $customer->generatePaymentCode($company, 114518);
+
+        expect('Error al generar código de pago', strlen((string)$paymentCode))->equals(14);
+    }
+
+
     //TODO resto de la clase
 }

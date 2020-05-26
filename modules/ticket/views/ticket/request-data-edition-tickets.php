@@ -98,12 +98,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'raw'
         ],
         'title',
-        'content',
+        'content:raw',
         [
             'label' => Yii::t('app', 'Ticket management quantity'),
             'value' => function($model) {
                 return $model->getTicketManagementQuantity();
-            }
+            },
         ],
         [
             'label' => Yii::t('app', 'Assignated users'),
