@@ -39,6 +39,12 @@ $this->params['breadcrumbs'][] = $this->title ;
                 }
             ],
             [
+                'label' => Yii::t('app', 'Created at'),
+                'value' => function($model) {
+                    return ($model->timestamp ? (new \DateTime())->setTimestamp($model->timestamp)->format('d/m/Y H:m') : '');
+                }
+            ],
+            [
                 'attribute'=>'status',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->status));

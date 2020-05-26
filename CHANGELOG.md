@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
   - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
   si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
   - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55]
+  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
   
   ##[2020.05.18.0]
   ## Modificado
@@ -37,7 +38,7 @@ All notable changes to this project will be documented in this file.
  - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7] Solicitado y aprobado por Camila
  
  ##[2020.04.27.0]
- ### Agregado
+ ### AgregadoActivación Forzosa
  - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado y aprobado por Camila
  - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela y aprobado por Laura
  
