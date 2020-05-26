@@ -3,16 +3,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## [Pendiente de aprobación]
-  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
+  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
   - Backups: Alerta a email si falla un backup [GES-810]
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
-  - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
-  no está duplicado [AD-48]
+  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
+  
+  ##[2020.05.26.0]
+  ### Modificado
+  - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55] Solicitado y aprobado por Camila
   - Baja de clientes: Las notas de crédito automáticas no se generan a menos que el importe adeudado sea mayor a $1 [CON-38]
   - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
-  si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
-  - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55]
-  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
+si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38] Solicitado por Camila y aprobado por Marian
+  - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
+  no está duplicado [AD-48] Solicitado y aprobado por Camila
   
   ##[2020.05.18.0]
   ## Modificado
