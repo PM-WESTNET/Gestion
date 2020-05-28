@@ -12,6 +12,7 @@ namespace app\modules\westnet\notifications\components\transports;
 use app\components\companies\User;
 use app\modules\mobileapp\v1\models\MobilePush;
 use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\westnet\notifications\models\Notification;
 use app\modules\westnet\notifications\models\Transport;
 
 class MobilePushTransport extends Transport implements TransportInterface
@@ -27,20 +28,17 @@ class MobilePushTransport extends Transport implements TransportInterface
 
     public function send($notification, $force_send = false)
     {
-        $mobile_push= new MobilePush();
-        $mobile_push->title= $notification->name;
+        $mobile_push = new MobilePush();
+        $mobile_push->title = $notification->name;
         $mobile_push->content = $notification->content;
 
         if (!$mobile_push->save()){
-            return [
-                'status' => 'error'
-            ];
+            return ['status' => 'error'];
         }
 
-        $destinataries= $notification->destinataries;
-
-        foreach ($destinataries as $destinatary){
-            $customers= $destinatary->getCustomersQuery()->all();
+        //Registramos todas las notificaciones que serán enviadas
+        foreach ($notification->destinataries as $destinatary){
+            $customers = $destinatary->getCustomersQuery()->all();
             if (count($customers) === 0) {
                 return [
                     'status' => 'error'
@@ -48,16 +46,18 @@ class MobilePushTransport extends Transport implements TransportInterface
             }
 
             foreach ($customers as $customer){
-                $mobile_push->addUserApp($customer['customer_id']);
+                $mobile_push->addUserApp($customer['customer_id'], $customer);
             }
         }
 
-        $notification->updateAttributes(['status' => 'sent']);
-        $mobile_push->send();
+        if($mobile_push->send()){
+            $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+        } else {
+            $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+            return ['status' => 'error'];
+        }
 
-        return [
-            'status' => 'success'
-        ];
+        return ['status' => 'success'];
     }
 
     public function export($notification)

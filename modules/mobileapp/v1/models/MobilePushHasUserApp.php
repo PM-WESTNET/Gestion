@@ -10,6 +10,10 @@ use Yii;
  * @property integer $mobile_push_has_user_app_id
  * @property integer $mobile_push_id
  * @property integer $user_app_id
+ * @property integer $customer_id
+ * @property string $notification_title
+ * @property string $notification_content
+ * @property string $notification_read
  *
  * @property MobilePush $mobilePush
  * @property UserApp $userApp
@@ -64,7 +68,8 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
     {
         return [
             [['mobile_push_id', 'user_app_id'], 'required'],
-            [['mobile_push_id', 'user_app_id'], 'integer']
+            [['mobile_push_id', 'user_app_id', 'customer_id'], 'integer'],
+            [['notification_read', 'notification_content', 'notification_title'], 'string']
         ];
     }
 
@@ -76,6 +81,10 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         return [
             'mobile_push_id' => Yii::t('app', 'Mobile Push ID'),
             'user_app_id' => Yii::t('app', 'User App ID'),
+            'customer_id' => Yii::t('app', 'Customer'),
+            'notification_title' => Yii::t('app', 'Notification title'),
+            'notification_content' => Yii::t('app', 'Notification content'),
+            'notification_read' => Yii::t('app', 'Notification read'),
         ];
     }    
 
