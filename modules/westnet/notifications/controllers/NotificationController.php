@@ -42,6 +42,18 @@ class NotificationController extends Controller {
         ]);
     }
 
+    public function actionIndexProgrammed(){
+        $searchModel = new NotificationSearch();
+        $searchModel->enabled_transports_only = true;
+        $searchModel->programmed = true;
+        $dataProvider = $searchModel->search(Yii::$app->request->getQueryParams());
+
+        return $this->render('index', [
+                    'dataProvider' => $dataProvider,
+                    'searchModel' => $searchModel
+        ]);
+    }
+
     /**
      * Displays a single Notification model.
      * @param integer $id

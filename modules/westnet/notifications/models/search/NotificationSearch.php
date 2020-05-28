@@ -14,6 +14,7 @@ class NotificationSearch extends Notification {
 
     public $search_text;
     public $enabled_transports_only;
+    public $programmed = false;
 
     /**
      * @inheritdoc
@@ -61,6 +62,12 @@ class NotificationSearch extends Notification {
 
         $query->leftJoin('transport', 'transport.transport_id = notification.transport_id')
             ->andWhere(['transport.status' => 'enabled']);
+        }
+
+        if ($this->programmed) {
+            $query->andWhere(['IS NOT', 'scheduler', null]);
+        }else {
+            $query->andWhere(['IS', 'scheduler', null]);
         }
 
         if (!($this->load($params) && $this->validate())) {

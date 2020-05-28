@@ -10,6 +10,11 @@ use app\modules\westnet\notifications\models\Transport;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
 $this->title = NotificationsModule::t('app', 'Notifications');
+
+if ($searchModel->programmed) {
+    $this->title = NotificationsModule::t('app', 'Programmed Notifications');
+}
+
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notification-index">
@@ -17,9 +22,11 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
 
         <p>
-            <?=
-            Html::a("<span class='glyphicon glyphicon-plus'></span> " . NotificationsModule::t('app', 'Create Notification'), ['create'], ['class' => 'btn btn-success'])
-            ;
+            <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . NotificationsModule::t('app', 'Create Notification'), ['create'], ['class' => 'btn btn-success']);?>
+            <?php 
+                if (!$searchModel->programmed) {
+                    Html::a("<span class='glyphicon glyphicon-clock'></span> " . NotificationsModule::t('app', 'Programmed Notifications'), ['index-programmed'], ['class' => 'btn btn-warning']);
+                }
             ?>
         </p>
     </div>

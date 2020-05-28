@@ -55,6 +55,7 @@ return array(
     'Process'  => 'Proceso',
     'Processing...'  => 'Procesando...',
     'Finished'  => 'Finalizado',
+    'Programmed Notifications' => 'Notificaciones Programadas',
 
     //Notification status
     'Created' => 'Creada',
