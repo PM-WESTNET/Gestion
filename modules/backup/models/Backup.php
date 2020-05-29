@@ -105,19 +105,8 @@ class Backup extends \yii\db\ActiveRecord {
 
     private function notifyError()
     {
-        $msg = <<<BODY
-        <div class="backup-message">
-        <h1>Ocurrió un error al realizar un backup</h1>
-        <hr>
         
-        <h4>Fecha de Inicio:  $this->init_timestamp </h4>
-        <h4>Base de datos:  $this->database</h4>
-        <h4>Descripción: $this->description</h4>
-        
-</div>   
-BODY;
-        $layout = LayoutHelper::getLayoutAlias('Info');
-        Yii::$app->mail->htmlLayout = $layout;
+        $layout = '@app/modules/backup/views/mail';
         $emailTransport = EmailTransport::findOne(Config::getValue('defaultEmailTransport'));
         
         $mailSender = MailSender::getInstance(null, null, null, $emailTransport);
@@ -128,7 +117,11 @@ BODY;
             $messages[] = $mailSender->prepareMessage(
                 ['email'=>$destinatary, 'name' => $destinatary],
                 'IMPORTANTE!!! - ERROR EN BACKUP DE GESTION',
-                [ 'view'=> $msg ,'params' => []]
+                [ 'view'=> $layout ,'params' => [
+                    'init_timestamp' => $this->init_timestamp,
+                    'database' => $this->database,
+                    'description' => $this->description
+                ]]
             );
         }
 
