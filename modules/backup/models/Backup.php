@@ -106,7 +106,7 @@ class Backup extends \yii\db\ActiveRecord {
     private function notifyError()
     {
         
-        $layout = '@app/modules/backup/views/mail';
+        $layout = '@app/modules/backup/views/backup/mail';
         $emailTransport = EmailTransport::findOne(Config::getValue('defaultEmailTransport'));
         
         $mailSender = MailSender::getInstance(null, null, null, $emailTransport);
