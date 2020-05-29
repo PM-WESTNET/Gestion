@@ -1,7 +1,8 @@
 <?php
 namespace app\modules\backup\models;
-use app\modules\config\models\Config;
 use Yii;
+use app\modules\config\models\Config;
+use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 
 /**
  * @property integer $backup_id
@@ -113,6 +114,8 @@ class Backup extends \yii\db\ActiveRecord {
         
 </div>   
 BODY;
+        $layout = LayoutHelper::getLayoutAlias('Info');
+        Yii::$app->mail->htmlLayout = $layout;
         $email = Yii::$app->mail->compose();
         $email->setFrom(['noreply@westnet.com.ar' => 'Backups Automaticos de Gestión']);
         $email->setHtmlBody($msg);
