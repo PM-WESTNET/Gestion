@@ -34,6 +34,7 @@ use webvimark\modules\UserManagement\models\User;
  * @property string $observation
  * @property string $user_id
  * @property integer $partner_distribution_model_id
+ * @property integer $invoice_process_id
  *
  * @property Customer $customer
  * @property BillDetail[] $billDetails
@@ -309,6 +310,14 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return $this->billType->invoiceClass;
 
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getInvoiceProcess()
+    {
+        return $this->hasOne(InvoiceProcess::class, ['invoice_process_id' => 'invoice_process_id']);
     }
 
     /**
@@ -780,7 +789,7 @@ class Bill extends ActiveRecord implements CountableInterface
     public function addErrorToCacheOrSession($error, $key = null){
         if(Yii::$app instanceof Yii\console\Application) {
             $old_errors = Yii::$app->cache->get('_invoice_close_errors');
-            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]));
+            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300);
         } else {
             Yii::$app->session->addFlash($key, $error);
         }
@@ -1112,7 +1121,7 @@ class Bill extends ActiveRecord implements CountableInterface
             if ($this->status != null && $this->status != 'draft') {
                 //Validaciópn de numero de factura
                 if ($this->number) {
-                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id]);
+                    $query = Bill::find()->where(['number' => $this->number, 'point_of_sale_id' => $this->pointOfSale, 'bill_type_id' => $this->bill_type_id, 'status' => Bill::STATUS_CLOSED, 'company_id' => $this->company_id]);
                     $existing_bill = $this->bill_id ? $query->andWhere(['<>', 'bill_id', $this->bill_id])->one() : $query->one();
                     if ($existing_bill) {
 //                        Yii::$app->session->setFlash('danger', Yii::t('app', 'The bill number already exists'));

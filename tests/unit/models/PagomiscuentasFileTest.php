@@ -154,4 +154,26 @@ class PagomiscuentasFileTest extends \Codeception\Test\Unit
         expect('Relation was build', count($relation) > 0)->true();
         expect('Relation bill is correct', $relation->bill_id)->equals($bill->bill_id);
     }
+
+    private function testBatchPagomiscuentasFileHasPaymentInsert()
+    {
+        $model = new PagomiscuentasFile([
+            'company_id' => 1,
+            'from_date' => (new \DateTime('now'))->format('d-m-Y'),
+            'date' => (new \DateTime('now'))->modify('+1 month')->format('d-m-Y'),
+            'type' => PagomiscuentasFile::TYPE_PAYMENT
+        ]);
+        $model->save();
+
+        $payments = [];
+
+        $payment = $model->createPayment(45900, (new \DateTime('now'))->format('Y-m-d'), 123, 'description', 1);
+        array_push($payments, $payment->payment_id);
+        $payment = $model->createPayment(45901, (new \DateTime('now'))->format('Y-m-d'), 120, 'description', 1);
+        array_push($payments, $payment->payment_id);
+
+        $model->batchPagomiscuentasFileHasPaymentInsert($payments);
+
+        expect('File has two payments associated', count($model->payments))->equals(2);
+    }
 }

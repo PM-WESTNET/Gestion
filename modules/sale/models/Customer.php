@@ -1443,19 +1443,7 @@ class Customer extends ActiveRecord {
                     (strlen($this->payment_code) != 11 && strlen($this->payment_code) != 14 )) ||
                 $this->payment_code < 0 || $force
             ) {
-                $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-
-                /**
-                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
-                 */
-                $complete = '';
-                if ($company->code != '9999') {
-                    $complete = str_pad($complete, (8 - strlen($this->code)), '0', STR_PAD_LEFT);
-                }
-
-                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
-                    str_pad($this->code, 5, "0", STR_PAD_LEFT) ;
-                $this->payment_code = $generator->generate($code);
+               $this->payment_code = $this->generatePaymentCode($company);
             }
         } else {
             $this->payment_code = null;//-($this->code ? $this->code : rand());
@@ -1463,6 +1451,33 @@ class Customer extends ActiveRecord {
         $this->updateAttributes(['payment_code']);
         return $this->payment_code;
     }
+
+    /**
+     * Genera el codigo de pago en base a la empresa recibida y el codigo del cliente, si no recibe codigo de cliente, toma el propio del objeto,
+     * de lo contrario usa el codigo recibido (Esto facilita el testing)
+     */
+    public function generatePaymentCode($company, $code = null) {
+
+        if ($code == null) {
+            $code = $this->code;
+        }
+        
+        $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+
+        /**
+         * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+         */
+        $complete = '';
+        if ($company->code != '9999') {
+            $complete = str_pad($complete, (8 - strlen($code)), '0', STR_PAD_LEFT);
+        }
+
+        $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete.
+            $code ;
+
+        return $generator->generate($code);    
+    }
+
 
     /**
      * @return array
@@ -1779,7 +1794,9 @@ class Customer extends ActiveRecord {
      * @return bool
      * @throws \Exception
      * Indica si el cliente puede pedir una extension de pago.
-     * Logica de negocio: Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
+     * Logica de negocio:
+     *
+     * Si el item de config. de vencimiento de los comprobantes + item de config. de extension de pago informada
      * es mayor al dia corriente, el cliente no puede solicitar una extensión de pago. Ej: 15 + 5 = 20
      * Si hoy es 16, puedo solicitar una extension de pago
      * Si hoy es 21 ya no puedo solicitarla.
@@ -1787,6 +1804,15 @@ class Customer extends ActiveRecord {
      */
     public function canRequestPaymentExtension()
     {
+
+        $lastForced = $this->getLastForced();
+        $timeBetween = (int)Config::getValue('time_between_payment_extension');
+
+        if ($lastForced && ($lastForced->create_timestamp > (time() - ($timeBetween * 60)))) {
+            return false;
+        }
+
+
         $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
         $today = (new \DateTime('now'))->getTimestamp();
 
@@ -2024,75 +2050,78 @@ class Customer extends ActiveRecord {
 
         if ($debt < 0) {
             $amount = abs($debt);
-            if ($this->taxCondition->name === 'IVA Inscripto') {
-                $lastBillType = $this->getLastBillType();
-                if ($lastBillType && $lastBillType->name === 'Factura A') {
-                    $billType = BillType::findOne(['name' => 'Nota Crédito A']);
-                }else {
-                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+            //Verifico que el monto de deuda sea mayor a un peso para no tener inconvenientes al momento de calcular el IVA y presentar el comprobante
+            if ($amount > 1) {
+                if ($this->taxCondition->name === 'IVA Inscripto') {
+                    $lastBillType = $this->getLastBillType();
+                    if ($lastBillType && $lastBillType->name === 'Factura A') {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito A']);
+                    } else {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    }
+                } else {
+                    if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')) {
+                        $billType = BillType::findOne(['name' => 'Nota Crédito B']);
+                    } else {
+                        $billType = BillType::findOne(['name' => 'Descuento']);
+                    }
                 }
-            }else {
-                if ($this->company_id != Config::getValue('ecopago_batch_closure_company_id')){
-                    $billType = BillType::findOne(['name' => 'Nota Crédito B']);
-                }else {
-                    $billType = BillType::findOne(['name' => 'Descuento']);
-                }
-            }
 
-            $unit_final_price = $amount;
-            $unit_net_price = (($amount * 100) / ((0.21 * 100) + 100));
+                $unit_final_price = $amount;
+                $unit_net_price = (($amount * 100) / ((0.21 * 100) + 100));
 
-            if (empty($billType)) {
-                return false;
-            }
-
-            if(!class_exists($billType->class)){
-                return false;
-            }
-
-            $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
-
-            if (empty($point_of_sale)) {
-                $point_of_sale = $this->company->getPointsOfSale()->one();
-                if (empty($point_of_sale)) {
-                    Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                if (empty($billType)) {
                     return false;
                 }
+
+                if (!class_exists($billType->class)) {
+                    return false;
+                }
+
+                $point_of_sale = $this->company->getPointsOfSale()->andWhere(['default' => 1])->one();
+
+                if (empty($point_of_sale)) {
+                    $point_of_sale = $this->company->getPointsOfSale()->one();
+                    if (empty($point_of_sale)) {
+                        Yii::$app->session->addFlash('error', 'Can`t found a point of sale for customer company');
+                        return false;
+                    }
+                }
+
+                $bill = Yii::createObject($billType->class);
+                $bill->bill_type_id = $billType->bill_type_id;
+                $bill->date = date('d-m-Y');
+                $bill->status = Bill::STATUS_DRAFT;
+                $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
+                $bill->class = $billType->class;
+                $bill->customer_id = $this->customer_id;
+                $bill->company_id = $this->company_id;
+                $bill->save();
+
+                Yii::info($bill->getErrors(), 'Nota');
+                Yii::info($debt, 'Deuda');
+
+                $detail = $bill->addDetail([
+                    'product_id' => Config::getValue('baja_product_id'),
+                    'qty' => 1,
+                    'unit_id' => Config::getValue('default_unit_id'),
+                    'unit_net_price' => $unit_net_price,
+                    'unit_final_price' => $unit_final_price,
+                    'line_subtotal' => $unit_net_price,
+                    'line_total' => $unit_final_price,
+                    'concept' => 'Cancelación por baja(Automático)'
+                ]);
+                Yii::info($detail, 'Deuda');
+
+
+                if ($detail == false) {
+                    return false;
+                }
+
+                $detail->save();
+
+                return $bill->close();
             }
-
-            $bill = Yii::createObject($billType->class);
-            $bill->bill_type_id = $billType->bill_type_id;
-            $bill->date = date('d-m-Y');
-            $bill->status = Bill::STATUS_DRAFT;
-            $bill->point_of_sale_id = $point_of_sale->point_of_sale_id;
-            $bill->class = $billType->class;
-            $bill->customer_id = $this->customer_id;
-            $bill->company_id = $this->company_id;
-            $bill->save();
-
-            Yii::info($bill->getErrors(), 'Nota');
-            Yii::info($debt, 'Deuda');
-
-            $detail = $bill->addDetail([
-                'product_id' => Config::getValue('baja_product_id'),
-                'qty' => 1,
-                'unit_id' =>  Config::getValue('default_unit_id'),
-                'unit_net_price' => $unit_net_price,
-                'unit_final_price' => $unit_final_price,
-                'line_subtotal' => $unit_net_price,
-                'line_total' => $unit_final_price,
-                'concept' => 'Cancelación por baja(Automático)'
-            ]);
-            Yii::info($detail, 'Deuda');
-
-
-            if ($detail == false) {
-                return false;
-            }
-
-            $detail->save();
-
-            return $bill->close();
         }
 
         return true;
@@ -2136,5 +2165,20 @@ class Customer extends ActiveRecord {
     public static function getPublicityShapesForSelect()
     {
         return PublicityShape::getPublicityShapeForSelect();
+    }
+
+    /**
+     * Devuelve el ultimo forzado de conexión del cliente
+     */
+    public function getLastForced()
+    {
+        $lastForced = ConnectionForcedHistorial::find()
+            ->innerJoin('connection c', 'c.connection_id=connection_forced_historial.connection_id')
+            ->innerJoin('contract con', 'con.contract_id=c.contract_id')
+            ->andWhere(['con.customer_id' => $this->customer_id])
+            ->orderBy(['connection_forced_historial.create_timestamp' => SORT_DESC])
+            ->one();
+
+        return $lastForced;
     }
 }

@@ -3,22 +3,44 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## [Pendiente de aprobación]
- 
- - Cheques: Marcar como entregado al crear un pago a proveedor [entregaCheque]
- - Activación de Extensiones de pago: Tarea cron para asegurarse de que no queden extensiones en borrador [activacionExtensiones]
- - Correcion error duplicado de tickets en panel de cobranza
- - Correción filtros asignación masiva de planes
- - Asignacion de planes a clientes: Correción filtros asignación masiva de planes
- - Vista de ticket: Se modifica botón "Crear factura" para que solo muestre los tipos de comprobantes habilitados para
- la condición del cliente.
- - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
- las opciones de gigantografia, pantalla led e instagram [AD-9]
- - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
- - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela
- - Backups: Alerta a email si falla un backup [GES-810]
- - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7]
- - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado por Camila
+  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682]
+  - Backups: Alerta a email si falla un backup [GES-810]
+  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
+  - Validación de comprobantes: Se tienen en cuenta solo los comprobantes cerrados al comprobar si el numero de comprobante
+  no está duplicado [AD-48]
+  - Baja de clientes: Las notas de crédito automáticas no se generan a menos que el importe adeudado sea mayor a $1 [CON-38]
+  - Facturación por lotes: Al momento de facturar a un cliente en específico se hace una verificación adicional para saber
+  si el contrato luego de haber comenzado el proceso de facturación sigue estando activo [CON-38]
+  - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55]
+  
+  ##[2020.05.18.0]
+  ## Modificado
+  - Alta de cliente: En desplegable "Cómo conoció a westnet?" se quitan las opciones de pasacalle y revista. Se agregan 
+    las opciones de gigantografia, pantalla led e instagram [AD-9] Solicitado por Mariela, aprobado por Gabriel
+  - Cron de actualizacion de conexiones: Se modifica consulta que obtiene la última factura, para que solo tenga en cuenta
+    aquellas que están en estado cerrado [AD-13] Solicitado y aprobado por Camila.
+  - Importación de pagomiscuentas: Se deshabilita el boton de cerrado una vez confirmado el proceso [AD-42] Solicitado por Camila, aprobado por Elizabeth
+  - PMC: Se modifica la carga del archivo para que se realice en dos pasos, el primero crea los pagos y el segundo cierra 
+    los pagos y el archivo. De modo que si se detecta alguna anomalía pueda ser eliminado antes del cierre del mismo [AD-50] Solicitado y aprobado por Elizabeth
+  
+  ##[2020.05.12.0]
+  ### Agregado
+  ### Modificado
+   - Archivo de Pagomiscuentas: Se limita la eliminación de los archivos a aquellos que no fueron generados automáticamente [AD-40] Solicitado y aprobado por Camila
+   - Cheques: Marcar como entregado al crear un pago a proveedor [GES-223] Solicitado y aprobado por Marian
 
+ ##[2020.05.05.0]
+ ### Agregado
+  - Generación automática de archivo de pago mis cuentas desde facturación por lotes [GES-834] Solicitado y aprobado por Laura
+ ### Modificado
+ - Vista de contrato: Cambio de los botes en la vista por componentes que verifican el permiso del usuario a la funcionalidad [GES-832] Solicitado y aprobado por Laura
+ - Al verificar si la primer factura esta paga, se tienen en cuenta las notas de credito [AD-7] Solicitado y aprobado por Camila
+ 
+ ##[2020.04.27.0]
+ ### Agregado
+ - Comando para eliminar pagos, movimientos y archivo de pagomiscuentas [AD-31] Soliciado y aprobado por Camila
+ - Reporte de clientes por canal de publicidad: Se agrega un gráfico comparativo y acumulativo de los canales de publicidad [GES-645] Solicitado por Mariela y aprobado por Laura
+ 
  ##[2020.04.20.0]
  ### Agregado
  - Reporte: Se agrega reporte de cantidad de clientes por medio de publicidad. [GES-645] Solicitado por Mariela y aprobado por Laura

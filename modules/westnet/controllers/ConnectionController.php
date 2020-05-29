@@ -84,7 +84,7 @@ class ConnectionController extends Controller
             }else{
                 return [
                     'status' =>'error',
-                    'message' =>  Yii::t('westnet', 'Can`t force this connection becouse this connection has exceeded the limit forced in the month')
+                    'message' =>  Yii::t('westnet', 'Can`t force this connection becouse this connection has exceeded the limit forced in the month ')
                 ];
             }
 

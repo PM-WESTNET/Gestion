@@ -579,6 +579,32 @@ class BillTest extends \Codeception\Test\Unit
         expect('Taxes is 1167.32', $generated_bill->taxes)->equals(1167.32);
     }
 
+    public function testVerifyNumberAndDate()
+    {
+        $model = BillExpert::createBill(1);
+        $model->company_id = 1;
+        $model->bill_type_id = 1;
+        $model->status = 'draft';
+        $model->partner_distribution_model_id = 1;
+        $model->save();
+        $model->updateAttributes(['status' => 'closed', 'number' => 100]);
+
+        $model = BillExpert::createBill(1);
+        $model->company_id = 1;
+        $model->bill_type_id = 1;
+        $model->status = 'draft';
+        $model->partner_distribution_model_id = 1;
+        $model->save();
+
+        $old_date = (new \DateTime('now'))->modify('-3 days');
+
+        $model->updateAttributes(['date' => $old_date->format('Y-m-d')]);
+        $model->verifyNumberAndDate();
+        $model->refresh();
+
+        expect('Date has changed', $model->date)->equals((new \DateTime('now'))->format('Y-m-d'));
+    }
+
     /**
      * TODO PRUEBAS DE CASOS DE DESCUENTOS
      * * Por porcentaje

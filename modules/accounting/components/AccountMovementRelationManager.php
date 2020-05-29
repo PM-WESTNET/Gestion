@@ -32,7 +32,7 @@ class AccountMovementRelationManager
         try{
             $amr = AccountMovementRelationManager::find($obj);
 
-            if ( $amr->accountMovement->status == AccountMovement::STATE_DRAFT ) {
+            if ( $amr && $amr->accountMovement->status == AccountMovement::STATE_DRAFT ) {
                 $amr->delete();
 
                 return $amr->accountMovement->delete();

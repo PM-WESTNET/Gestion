@@ -117,6 +117,9 @@ class ImportController extends Controller
         }
     }
 
+    /**
+     * Cierra el archivo de pmc y los pagos correspondientes
+     */
     public function actionClose($id)
     {
         //Yii::setLogger(new EmptyLogger());
@@ -127,9 +130,32 @@ class ImportController extends Controller
                 $model->close();
                 return $this->actionIndex();
             } catch(\Exception $ex) {
-                Yii::$app->session->addFlash('error', $ex->getMessage());
+                Yii::$app->session->addFlash('error', $ex->getMessage() . ' ' .$ex->getFile() . ' ' . $ex->getLine() );
                 return $this->actionView($id);
             }
         }
+    }
+
+    /**
+     * Crea los pagos desde el archivo en estado borrador
+     */
+    public function actionCreatePayments($id)
+    {
+        $model = $this->findModel($id);
+        $result = $model->createPayments();
+
+        if($result && (array_key_exists('errors', $result))) {
+            if(!empty($result['errors'])) {
+                $string_error = '';
+                foreach ($result['errors'] as $error) {
+                    $string_error .= $error . "<br>";
+                }
+                Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while importing file: ')."<br>".$string_error);
+            }
+        } else {
+            Yii::$app->session->addFlash('success', 'Pagos creados con éxito');
+        }
+
+        return $this->actionView($id);
     }
 }

@@ -292,6 +292,7 @@ class ConnectionStatusController extends Controller
             ->leftJoin('bill_type bt', 'bill.bill_type_id = bt.bill_type_id')
             ->andWhere(['customer_id'=> $customer_id])
             ->andWhere(new Expression('bt.multiplier > 0'))
+            ->andWhere(['bill.status' => Bill::STATUS_CLOSED])
             ->orderBy(['bill.date'=>SORT_DESC])
         ;
         return $query->scalar();

@@ -22,6 +22,9 @@ class InvoiceProcessController extends Controller
         parent::init();
     }
 
+    /**
+     * Inicia y controla el proceso de creacion de los comprobantes
+     */
     public function actionControlCreationInvoiceProcess()
     {
         $pending_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
@@ -33,12 +36,15 @@ class InvoiceProcessController extends Controller
                     $this->invoiceAll($pending_invoice_process);
                 }
             } catch (\Exception $ex) {
-                echo "ERROR__________". $ex->getMessage() ."\n" .$ex->getTraceAsString();
+                echo "ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";
                 \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
             }
         }
     }
 
+    /**
+     * Inicia y controla el proceso de cierre de los comprobantes
+     */
     public function actionControlCloseInvoiceProcess()
     {
         $pending_close_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
@@ -56,13 +62,22 @@ class InvoiceProcessController extends Controller
         }
     }
 
+    /**
+     * Crea todos los comprobantes que se deben incluir en el proceso de facturacion indicado
+     */
     public function invoiceAll(InvoiceProcess $invoice_process)
     {
         $cti = new ContractToInvoice();
-        echo 'company_id ' .$invoice_process->company_id ."\n";
-        echo 'bill_type_id '.$invoice_process->bill_type_id . "\n";
-        echo 'period ' . $invoice_process->period . "\n";
-        echo 'bill_observation '.$invoice_process->observation ."\n";
+
+        echo 'company_id ' .$invoice_process->company_id ."\n" .'bill_type_id '.$invoice_process->bill_type_id . "\n".'period ' . $invoice_process->period . "\n" .'bill_observation '.$invoice_process->observation ."\n";
+
+        //Verifico si la configuracion me indica que genere un archivo de pmc
+        $generate_pmc_file = in_array($invoice_process->company_id, Yii::$app->params['companies_ids_to_generate_pmc_files_in_invoice_process']);
+
+        if($generate_pmc_file){
+            $invoice_process->createPagoMisCuentasFile();
+        }
+
         $cti->invoiceAll(
             [
                 'ContractSearch' => [
@@ -71,10 +86,18 @@ class InvoiceProcessController extends Controller
                     'period' => $invoice_process->period,
                 ],
                 'bill_observation' => $invoice_process->observation
-            ]
+            ],
+            ($generate_pmc_file ? $invoice_process->invoice_process_id : null)
         );
+
+        if($generate_pmc_file){
+            $invoice_process->closePMCAssociatedFile();
+        }
     }
 
+    /**
+     * Cierra todos los comprobantes que se deben incluir en el proceso de facturacion indicado
+     */
     public function closePendingBills($invoice_process)
     {
         $i = 0;
