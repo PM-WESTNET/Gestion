@@ -38,18 +38,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 ])
             ],
             [
-                'attribute' => 'finish_timestamp',
-                'filter' => \kartik\widgets\DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'finish_timestamp',
-                    'value' => $searchModel->finish_timestamp,
-                    'pluginOptions' => [
-                        'autoclose'=>true,
-                        'format' => 'dd-mm-yyyy'
-                    ]
-                ])
-            ],
-            [
                 'attribute' => 'status',
                 'value' => function ($model) {
                     return $model->getStatusLabel();
@@ -61,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ],
             'database',
-
+            'description',
         ],
     ]); ?>
 </div>
