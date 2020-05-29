@@ -107,6 +107,7 @@ class Backup extends \yii\db\ActiveRecord {
     {
         
         $layout = '@app/modules/backup/views/backup/mail';
+        Yii::$app->mail->htmlLayout = $layout;
         $emailTransport = EmailTransport::findOne(Config::getValue('defaultEmailTransport'));
         
         $mailSender = MailSender::getInstance(null, null, null, $emailTransport);
