@@ -4,10 +4,14 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ## [Pendiente de aprobación]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
-  - Backups: Alerta a email si falla un backup [GES-810]
+  
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
   - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
   
+  ##[2020.05.28.0]
+  ###Agregado
+  - Backups: Alerta a email si falla un backup [GES-810][GES-823]
+
   ##[2020.05.26.0]
   ### Modificado
   - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55] Solicitado y aprobado por Camila
