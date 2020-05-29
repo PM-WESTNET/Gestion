@@ -84,7 +84,7 @@ class BackupMysqlController extends \yii\console\Controller
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command1 = "sudo innobackupex --host=$host --user=$user --password=$pass --no-timestamp $dir";
+        $command1 = "sudo innobackupex --host=$host --user=$user --password=$pass --no-timestamp  --no-lock $dir";
         $command2 = "sudo zip -r $fileOut $dir";
 
         $result = shell_exec($command1);
@@ -147,7 +147,7 @@ class BackupMysqlController extends \yii\console\Controller
         $user = $params['user'];
         $pass = $params['pass'];
 
-        $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass  --no-timestamp --incremental-basedir=$dir $dirIncBefore ";
+        $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass  --no-timestamp  --no-lock --incremental-basedir=$dir $dirIncBefore ";
         $command2 = "sudo zip -r $fileOut $dirInc";
         if (!file_exists($dirInc)) {
             mkdir($dirInc, 0777);
