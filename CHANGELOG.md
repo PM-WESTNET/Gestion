@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
   - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
   - Notificaciones push: Se agregan referncias en el contenido de la notificacion [AD-57]
   - Notificaciones push: Se cambia el envío de notificaciones para que sean personalizadas para cada cliente [AD-57]
+  - Notificaciones push: Se agrega referencia a valor de extension de pago, email1, email2 y celular3 [AD-57]
   
   ##[2020.05.26.0]
   ### Modificado

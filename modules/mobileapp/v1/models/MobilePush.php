@@ -322,14 +322,20 @@ class MobilePush extends ActiveRecord
         $replaced_text = $text;
 
         $replaced_text = array_key_exists('name', $customer_data) ? str_replace('@Nombre', $customer_data['name'], $replaced_text) : $replaced_text;
-        $replaced_text = array_key_exists('phone', $customer_data) ? str_replace('@Telefono1', $customer_data['phone'], $replaced_text) : $replaced_text;
-        $replaced_text = array_key_exists('phone2', $customer_data) ? str_replace('@Telefono2', $customer_data['phone2'], $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('phone', $customer_data) ? str_replace('@TelefonoFijo', $customer_data['phone'], $replaced_text) : $replaced_text;
+        $replaced_text = array_key_exists('phone2', $customer_data) ? str_replace('@Celular1', $customer_data['phone2'], $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('phone3', $customer_data) ? str_replace('@Celular2', $customer_data['phone3'], $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('phone4', $customer_data) ? str_replace('@Celular3', $customer_data['phone4'], $replaced_text): $replaced_text;
         $replaced_text = array_key_exists('code', $customer_data) ? str_replace('@CodigoDeCliente', $customer_data['code'], $replaced_text): $replaced_text;
         $replaced_text = array_key_exists('payment_code', $customer_data) ? str_replace('@PaymentCode', $customer_data['payment_code'], $replaced_text): $replaced_text;
         $replaced_text = array_key_exists('node', $customer_data) ? str_replace('@Nodo', $customer_data['node'], $replaced_text): $replaced_text;
-        $replaced_text = array_key_exists('saldo', $customer_data) ? str_replace('@Saldo', $customer_data['saldo'], $replaced_text): $replaced_text;
+        //Si el saldo es mayor negativo (es decir que tiene dinero a favor), se le muestra 0
+        $replaced_text = array_key_exists('saldo', $customer_data) ? str_replace('@Saldo', ($customer_data['saldo'] <= 0 ? '$0' : '$' .$customer_data['saldo']), $replaced_text): $replaced_text;
         $replaced_text = array_key_exists('company_code', $customer_data) ? str_replace('@CompanyCode', $customer_data['company_code'], $replaced_text): $replaced_text;
         $replaced_text = array_key_exists('debt_bills', $customer_data) ? str_replace('@FacturasAdeudadas', $customer_data['debt_bills'], $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('product_extension_value', $customer_data) ? str_replace('@ValorDeExtensionDePago', ('$ '.round($customer_data['product_extension_value'])), $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('email', $customer_data) ? str_replace('@EmailPrincipal', $customer_data['email'], $replaced_text): $replaced_text;
+        $replaced_text = array_key_exists('email2', $customer_data) ? str_replace('@EmailSecundario', $customer_data['email2'], $replaced_text): $replaced_text;
 
         return $replaced_text;
     }

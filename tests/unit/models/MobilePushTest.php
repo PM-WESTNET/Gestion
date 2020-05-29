@@ -99,10 +99,26 @@ class MobilePushTest extends \Codeception\Test\Unit
 
     public function testReplaceText()
     {
-        $text = 'Texto con Alias @Nombre @Telefono1 y algo mas';
+        $text = 'Texto con Alias @Nombre @PaymentCode @FacturasAdeudadas @ValorDeExtensionDePago @Saldo @CodigoDeCliente @TelefonoFijo @Celular1 @Celular2 @Celular3 y algo mas @EmailPrincipal @EmailSecundario';
+        $data = [
+            'name' => 'Nombre',
+            'phone' => 'teléfono fijo',
+            'phone2' => 'celular 1',
+            'phone3' => 'celular 2',
+            'phone4' => 'celular 3',
+            'code' => 'codigo de cliente',
+            'payment_code' => 'codigo de pago de cliente',
+            'node' => 'nodo',
+            'saldo' => '$saldo',
+            'company_code' => 'codigo de empresa',
+            'debt_bills' => 'facturas adeudadas',
+            'product_extension_value' => 'valor de extension de pago',
+            'email' => 'email primero',
+            'email2' => 'email secundario',
+        ];
+        $string_expected = 'Texto con Alias Nombre codigo de pago de cliente facturas adeudadas valor de extension de pago $saldo codigo de cliente teléfono fijo celular 1 celular 2 celular 3 y algo mas email primero email secundario';
 
-        expect('Returned text was replaced', MobilePush::replaceText($text, ['name' => 'Alias_de_nombre', 'phone' => '123456']))->equals('Texto con Alias Alias_de_nombre 123456 y algo mas');
-
+        expect('Returned text was replaced', MobilePush::replaceText($text, $data))->equals($string_expected);
     }
 
     public function testGetDataOneSignalFormatWithUserApps()

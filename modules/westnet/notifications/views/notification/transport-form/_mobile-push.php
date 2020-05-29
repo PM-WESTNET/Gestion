@@ -25,18 +25,18 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
             <?= Yii::t('app', 'References') ?>:
         </div>
         <div class="col-sm-9">
-            //TODO sin limites de caracteres
             <span class="reference label label-default" data-ref="@Nombre" id="lbl-nombre">@Nombre</span>
             <span class="reference label label-warning" data-ref="@PaymentCode" id="lbl-codigo-de-pago">@CodigoDePago</span>
-            //TODO costo de extension de pago
-            <span class="reference label label-default" data-ref="@FacturasAdeudadas" id="lbl-facturas-adeudadas">@FacturasAdeudadas</span>
-            //TODO si es positivo, poner $0
-            <span class="reference label label-primary" data-ref="@Saldo" id="lbl-saldo">@Saldo</span>
-            <span class="reference label label-info" data-ref="@CodigoDeCliente" id="lbl-codigo">@CodigoDeCliente</span>
-            //TODO numeros de telefono disponibles del cliente
-            <span class="reference label label-primary" data-ref="@Telefono1" id="lbl-telefono1">@Telefono1</span>
-            <span class="reference label label-success" data-ref="@Telefono2" id="lbl-telefono2">@Telefono2</span>
-            //TODO emails
+            <span class="reference label label-danger" data-ref="@FacturasAdeudadas" id="lbl-facturas-adeudadas">@FacturasAdeudadas</span>
+            <span class="reference label label-warning" data-ref="@ValorDeExtensionDePago" id="lbl-valor-extension-de-pago">@ValorDeExtensionDePago</span>
+            <span class="reference label label-danger" data-ref="@Saldo" id="lbl-saldo">@Saldo</span>
+            <span class="reference label label-success" data-ref="@CodigoDeCliente" id="lbl-codigo">@CodigoDeCliente</span>
+            <span class="reference label label-default" data-ref="@TelefonoFijo" id="lbl-telefono-fijo">@TelefonoFijo</span>
+            <span class="reference label label-default" data-ref="@Celular1" id="lbl-celular1">@Celular1</span>
+            <span class="reference label label-default" data-ref="@Celular2" id="lbl-celular2">@Celular2</span>
+            <span class="reference label label-default" data-ref="@Celular3" id="lbl-celular3">@Celular3</span>
+            <span class="reference label label-info" data-ref="@EmailPrincipal" id="lbl-email-principal">@EmailPrincipal</span>
+            <span class="reference label label-info" data-ref="@EmailSecundario" id="lbl-email-secundario">@EmailSecundario</span>
         </div>
     </div>
     <hr/>
