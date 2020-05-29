@@ -2,8 +2,9 @@
 namespace app\modules\backup\models;
 use Yii;
 use app\modules\config\models\Config;
-use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 use app\modules\mailing\models\EmailTransport;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 
 /**
  * @property integer $backup_id
