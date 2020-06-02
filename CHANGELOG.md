@@ -2,15 +2,26 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## [push-notification]
+### Configuraciones a verificar
+    ver db.php.sample , el cambio de charset en bd de notificaciones
+    ver en params.php.sample key words-to-ignore-in-log
+    
+### Agregado
+  - Notificaciones push: Se agregan referncias en el contenido de la notificacion [AD-57]
+  - Notificaciones push: Se cambia el envío de notificaciones para que sean personalizadas para cada cliente [AD-57]
+  - Notificaciones push: Se agrega referencia a valor de extension de pago, email1, email2 y celular3 [AD-57]
+  - Notificaciones push: Se agrega referencia se inserta donde está el cursor del mouse [AD-57]
+  - Notificaciones push: Se agrega el título en la vista de la notificacion [AD-57]
+  - Notificaciones push: Se agrega la posibilidad de agregar emojis en el título de la notificacion [AD-57]
+  - Notificaciones push: Se agrega la posibilidad de agregar emojis en el contenido de la notificacion [AD-57]
+
 ## [Pendiente de aprobación]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
   - Backups: Alerta a email si falla un backup [GES-810]
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
   - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
-  - Notificaciones push: Se agregan referncias en el contenido de la notificacion [AD-57]
-  - Notificaciones push: Se cambia el envío de notificaciones para que sean personalizadas para cada cliente [AD-57]
-  - Notificaciones push: Se agrega referencia a valor de extension de pago, email1, email2 y celular3 [AD-57]
-  - Notificaciones push: Se agrega referencia se inserta donde está el cursor del mouse [AD-57]
+
   
   ##[2020.05.26.0]
   ### Modificado

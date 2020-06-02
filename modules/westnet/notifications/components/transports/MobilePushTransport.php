@@ -31,8 +31,8 @@ class MobilePushTransport extends Transport implements TransportInterface
     public function send($notification, $force_send = false)
     {
         $mobile_push = new MobilePush();
-        $mobile_push->title = $notification->name;
-        $mobile_push->content = $notification->content;
+        $mobile_push->title = strip_tags($notification->subject ? $notification->subject : $notification->name);
+        $mobile_push->content = strip_tags($notification->content);
 
         $id_product_payment_extension = Config::getValue('id-product_id-extension-de-pago');
         $product_payment_extension = Product::findOne($id_product_payment_extension);

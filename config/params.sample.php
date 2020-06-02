@@ -344,5 +344,7 @@ return [
     'contract_behaviors_status_change' => 'app\modules\westnet\components\SecureConnectionBehavior',
     'curl_verbose' =>false,
 
-    'tickets_categories_showed' => []
+    'tickets_categories_showed' => [],
+
+    'words-to-ignore-in-log' => ['content', 'subject', 'title'],
 ];

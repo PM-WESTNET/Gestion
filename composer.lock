@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5edc9ced9bbf90be513b2b4eda9bcfc1",
+    "content-hash": "f92e564fe3161d8ecdd29d98aaab226f",
     "packages": [
         {
             "name": "2amigos/yii2-chartjs-widget",
@@ -66,24 +66,26 @@
         },
         {
             "name": "2amigos/yii2-ckeditor-widget",
-            "version": "2.1.1",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/2amigos/yii2-ckeditor-widget.git",
-                "reference": "248e671faf7ec1e6affbcc6554d991095139d379"
+                "reference": "77812cafc6f1d3dd43ee0f581f8a431d0d4f8227"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/2amigos/yii2-ckeditor-widget/zipball/248e671faf7ec1e6affbcc6554d991095139d379",
-                "reference": "248e671faf7ec1e6affbcc6554d991095139d379",
+                "url": "https://api.github.com/repos/2amigos/yii2-ckeditor-widget/zipball/77812cafc6f1d3dd43ee0f581f8a431d0d4f8227",
+                "reference": "77812cafc6f1d3dd43ee0f581f8a431d0d4f8227",
                 "shasum": ""
             },
             "require": {
-                "ckeditor/ckeditor": "dev-full/4.7.x",
+                "ckeditor/ckeditor": "^4.7",
+                "sunhater/kcfinder": "*",
                 "yiisoft/yii2": "^2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "4.*"
+                "phpunit/phpunit": "4.*",
+                "roave/security-advisories": "dev-master"
             },
             "type": "yii2-extension",
             "extra": {
@@ -119,7 +121,7 @@
                 "yii 2",
                 "yii2"
             ],
-            "time": "2017-07-22T15:38:16+00:00"
+            "time": "2019-04-06T16:44:11+00:00"
         },
         {
             "name": "2amigos/yii2-tinymce-widget",
@@ -313,7 +315,7 @@
             "version": "v3.9.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:fullcalendar/fullcalendar.git",
+                "url": "https://github.com/fullcalendar/fullcalendar.git",
                 "reference": "3ddb3c8d1461c6b841aed3487ba07d8ba338adb6"
             },
             "dist": {
@@ -358,7 +360,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/RobinHerbots/Inputmask.git",
+                "url": "git@github.com:RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -463,7 +465,7 @@
             "version": "2.22.2",
             "source": {
                 "type": "git",
-                "url": "git@github.com:moment/moment.git",
+                "url": "https://github.com/moment/moment.git",
                 "reference": "2e2a5b35439665d4b0200143d808a7c26d6cd30f"
             },
             "dist": {
@@ -625,16 +627,16 @@
         },
         {
             "name": "ckeditor/ckeditor",
-            "version": "dev-full/4.7.x",
+            "version": "4.14.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ckeditor/ckeditor-releases.git",
-                "reference": "5f1564a3d64cd06d8a4f3f21150f57e892a40939"
+                "url": "https://github.com/ckeditor/ckeditor4-releases.git",
+                "reference": "998e43cd6305bca24304b9538a682da123ac5b73"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ckeditor/ckeditor-releases/zipball/5f1564a3d64cd06d8a4f3f21150f57e892a40939",
-                "reference": "5f1564a3d64cd06d8a4f3f21150f57e892a40939",
+                "url": "https://api.github.com/repos/ckeditor/ckeditor4-releases/zipball/998e43cd6305bca24304b9538a682da123ac5b73",
+                "reference": "998e43cd6305bca24304b9538a682da123ac5b73",
                 "shasum": ""
             },
             "type": "library",
@@ -647,13 +649,14 @@
             "authors": [
                 {
                     "name": "CKSource",
-                    "homepage": "http://cksource.com"
+                    "homepage": "https://cksource.com"
                 }
             ],
             "description": "JavaScript WYSIWYG web text editor.",
-            "homepage": "http://ckeditor.com",
+            "homepage": "https://ckeditor.com/ckeditor-4/",
             "keywords": [
                 "CKEditor",
+                "ckeditor4",
                 "editor",
                 "fckeditor",
                 "html",
@@ -662,7 +665,7 @@
                 "text",
                 "wysiwyg"
             ],
-            "time": "2017-09-13T13:08:14+00:00"
+            "time": "2020-03-04T13:19:40+00:00"
         },
         {
             "name": "conquer/oauth2",
@@ -3773,6 +3776,61 @@
             "time": "2017-05-11T14:25:49+00:00"
         },
         {
+            "name": "sunhater/kcfinder",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sunhater/kcfinder.git",
+                "reference": "b645d2a81e647d63780c238b130593e32b4d95a9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sunhater/kcfinder/zipball/b645d2a81e647d63780c238b130593e32b4d95a9",
+                "reference": "b645d2a81e647d63780c238b130593e32b4d95a9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=5.3.0"
+            },
+            "suggest": {
+                "ext-curl": "*",
+                "ext-exif": "*",
+                "ext-fileinfo": "*",
+                "ext-gmagick": "*",
+                "ext-http": "*",
+                "ext-imagick": "*",
+                "ext-sockets": "*",
+                "ext-zip": "*"
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0+",
+                "LGPL-3.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Pavel Tzonkov",
+                    "email": "sunhater@sunhater.com",
+                    "homepage": "http://sunhater.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "KCFinder web file manager",
+            "homepage": "http://kcfinder.sunhater.com",
+            "keywords": [
+                "explorer",
+                "file",
+                "file explorer",
+                "file manager",
+                "finder",
+                "kcfinder",
+                "manager"
+            ],
+            "time": "2014-09-27T18:47:34+00:00"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "v5.4.12",
             "source": {
@@ -5116,12 +5174,12 @@
             "version": "1.6.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/facebook/php-webdriver.git",
+                "url": "https://github.com/php-webdriver/php-webdriver-archive.git",
                 "reference": "bd8c740097eb9f2fc3735250fc1912bc811a954e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facebook/php-webdriver/zipball/bd8c740097eb9f2fc3735250fc1912bc811a954e",
+                "url": "https://api.github.com/repos/php-webdriver/php-webdriver-archive/zipball/bd8c740097eb9f2fc3735250fc1912bc811a954e",
                 "reference": "bd8c740097eb9f2fc3735250fc1912bc811a954e",
                 "shasum": ""
             },
@@ -5169,6 +5227,7 @@
                 "selenium",
                 "webdriver"
             ],
+            "abandoned": "php-webdriver/webdriver",
             "time": "2018-05-16T17:37:13+00:00"
         },
         {

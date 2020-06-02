@@ -140,7 +140,7 @@ class Log extends \app\components\db\ActiveRecord
         $log = new Log();
         $log->route = Yii::$app->requestedRoute ? Yii::$app->requestedRoute : 'site/index';
 
-        if ($log->route != 'mobileapp/v1/user-app/create-notify-payment') {
+        if ($log->route != 'mobileapp/v1/user-app/create-notify-payment' && $log->route != 'westnet/notifications/notification/send') {
 
             if (Yii::$app instanceof \yii\console\Application) {
                 $log->user_id = User::findOne(['username' => 'superadmin'])->id;

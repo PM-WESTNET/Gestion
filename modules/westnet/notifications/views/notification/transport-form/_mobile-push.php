@@ -9,14 +9,31 @@ use dosamigos\ckeditor\CKEditor;
 use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 ?>
 
+<?php
+$this->registerJs("CKEDITOR.plugins.addExternal('xml', '".Yii::getAlias('@web')."/plugins/xml/plugin.js', '');");
+$this->registerJs("CKEDITOR.plugins.addExternal('textwatcher', '".Yii::getAlias('@web')."/plugins/textwatcher/plugin.js', '');");
+$this->registerJs("CKEDITOR.plugins.addExternal('ajax', '".Yii::getAlias('@web')."/plugins/ajax/plugin.js', '');");
+$this->registerJs("CKEDITOR.plugins.addExternal('textmatch', '".Yii::getAlias('@web')."/plugins/textmatch/plugin.js', '');");
+$this->registerJs("CKEDITOR.plugins.addExternal('autocomplete', '".Yii::getAlias('@web')."/plugins/autocomplete/plugin.js', '');");
+$this->registerJs("CKEDITOR.plugins.addExternal('emoji', '".Yii::getAlias('@web')."/plugins/emoji/plugin.js', '');");
+$this->registerJs("CKEDITOR.config.emoji_emojiListUrl = '".Yii::getAlias('@web')."/plugins/emoji/emoji.json'");
+?>
 <div class="mobile-push">
 
-    <?= $form->field($model, 'subject')->textInput(['maxlength' => 255]) ?>
+    <?= $form->field($model, 'subject')->widget(CKEditor::class, [
+        'options' => ['id' => 'subject', 'rows' => 1],
+        'preset' => 'basic',
+        'clientOptions' => [
+            'extraPlugins' => 'emoji',
+        ]
+    ]); ?>
 
     <?= $form->field($model, 'content')->widget(CKEditor::class, [
         'options' => ['rows' => 6, 'id' => 'content'],
+        'preset' => 'basic',
         'clientOptions' => [
-            'toolbar' => "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+            'extraPlugins' => 'emoji',
+            'toolbar' => "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | emoji"
         ]
     ]); ?>
 

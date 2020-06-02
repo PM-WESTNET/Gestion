@@ -62,9 +62,8 @@ class MobilePush extends ActiveRecord
     {
         return [
             [['title', 'content',], 'required'],
-            [['status', 'content', 'type'], 'string'],
+            [['status', 'content', 'type', 'title'], 'string'],
             [['send_timestamp', 'created_at'], 'integer'],
-            [['title'], 'string', 'max' => 45]
         ];
     }
 
@@ -189,7 +188,7 @@ class MobilePush extends ActiveRecord
                             'es' => $content
                         ],
                         'data' => $this->extra_data,
-                        'include_player_ids' => $mphua->userApp->player_id
+                        'include_player_ids' => [$mphua->userApp->player_id]
                 ]);
             }
         // Si la notificacion es de facturacion, y no hay ningun usuario especifico para enviarla, no lo incluimos
