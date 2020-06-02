@@ -82,7 +82,7 @@ class SMSInfobipTransport implements TransportInterface
      */
     public function export($notification)
     {
-        //Yii::setLogger(new EmptyLogger());
+        Yii::setLogger(new EmptyLogger());
         set_time_limit(0);
 
         //Nombre de archivo
@@ -128,9 +128,7 @@ class SMSInfobipTransport implements TransportInterface
                 /** @var Query $query */
                 $query = $destinataries->getCustomersQuery(false);
 
-
                 foreach($query->batch(1000) as $customers) {
-                    Yii::trace($customers);
                     foreach ($customers as $customer) {
                         $plan = Plan::findOne($customer['plan']);
                         $future_price = $plan ? $plan->futureFinalPrice : '';
@@ -175,15 +173,12 @@ class SMSInfobipTransport implements TransportInterface
                                 ->setCellValue('P' .$i, $email)
                                 ->setCellValue('Q' .$i, $email2);
                             $i++;
-
                         }
                     }
                     $excel->getActiveSheet()->getStyle('A1:A'.$i)
                         ->getNumberFormat()
                         ->setFormatCode();
-
                 }
-
             }
 
             $objWriter = PHPExcel_IOFactory::createWriter($excel, 'Excel5');
@@ -192,7 +187,6 @@ class SMSInfobipTransport implements TransportInterface
         }catch (\Exception $ex){
             Yii::trace($ex->getTraceAsString());
             throw $ex;
-            //error_log($ex->getMessage());
         }
 
 
