@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Pendiente de aprobación]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
+  - Mensajes predefinidos a clientes: Se tienen en cuenta los estados de los mensajes predefinidos a la hora de hacer 
+  el envio de los mismos [AD-77] Solicitado por Camila
   
   ##[2020.06.01.0]
   ###Agregado
