@@ -7,6 +7,7 @@
  */
 
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\CustomerMessage;
 use app\tests\fixtures\BillFixture;
 use app\modules\sale\models\Company;
 use app\modules\config\models\Config;
@@ -532,6 +533,30 @@ class CustomerTest extends \Codeception\Test\Unit
         Config::setValue('link-to-app-customer-message-id', 1);
 
         expect('Can send SMS message to customer', $model->sendMobileAppLinkSMSMessage())->true();
+    }
+
+    public function testDontSendMobileAppLinkSMSMessageWhenIsDisabled() {
+        $model = new Customer([
+            'tax_condition_id' => 1,
+            'publicity_shape' => 'web',
+            'document_number' => '23-29834800-4',
+            'document_type_id' => 1,
+            'customerClass' => 1,
+            'name' => 'Cliente1',
+            '_notifications_way' => [Customer::getNotificationWays()],
+            'code' => 11111,
+            'email' => 'customer@gmail.com',
+            'phone' => '2612575620',
+            'status' => 'enabled'
+        ]);
+        $model->save();
+
+        Config::setValue('link-to-app-customer-message-id', 1);
+
+        $customer_message = CustomerMessage::findOne(1);
+        $customer_message->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+
+        expect('Cant send SMS message to customer', $model->sendMobileAppLinkSMSMessage())->false();
     }
 
     public function testGetStatusEmailForSelect()

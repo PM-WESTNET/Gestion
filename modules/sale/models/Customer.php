@@ -1699,7 +1699,7 @@ class Customer extends ActiveRecord {
     public function sendMobileAppLinkSMSMessage()
     {
         $id_customer_message = Config::getValue('link-to-app-customer-message-id');
-        $customer_message = CustomerMessage::findOne($id_customer_message);
+        $customer_message = CustomerMessage::find()->where(['customer_message_id' => $id_customer_message, 'status' => CustomerMessage::STATUS_ENABLED])->one();
         $is_developer_mode = Config::getValue('is_developer_mode');
 
         if($this->canSendSMSMessage() && $customer_message) {
