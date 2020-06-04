@@ -10,8 +10,11 @@ namespace app\modules\westnet\notifications\components\transports;
 
 
 use app\components\companies\User;
+use app\modules\config\models\Config;
 use app\modules\mobileapp\v1\models\MobilePush;
 use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\sale\models\Product;
+use app\modules\westnet\notifications\models\Notification;
 use app\modules\westnet\notifications\models\Transport;
 
 class MobilePushTransport extends Transport implements TransportInterface
@@ -27,37 +30,42 @@ class MobilePushTransport extends Transport implements TransportInterface
 
     public function send($notification, $force_send = false)
     {
-        $mobile_push= new MobilePush();
-        $mobile_push->title= $notification->name;
-        $mobile_push->content = $notification->content;
+        $mobile_push = new MobilePush();
+        $mobile_push->title = strip_tags($notification->subject ? $notification->subject : $notification->name);
+        $mobile_push->content = strip_tags($notification->content);
 
-        if (!$mobile_push->save()){
-            return [
-                'status' => 'error'
-            ];
+        $id_product_payment_extension = Config::getValue('id-product_id-extension-de-pago');
+        $product_payment_extension = Product::findOne($id_product_payment_extension);
+        $product_payment_extension_value = 0;
+        if($product_payment_extension){
+            $product_payment_extension_value = $product_payment_extension->getFinalPrice();
         }
 
-        $destinataries= $notification->destinataries;
+        if (!$mobile_push->save()){
+            return ['status' => 'error', 'error' => 'Failed to save MobilePush'];
+        }
 
-        foreach ($destinataries as $destinatary){
-            $customers= $destinatary->getCustomersQuery()->all();
+        //Registramos todas las notificaciones que serán enviadas
+        foreach ($notification->destinataries as $destinatary){
+            $customers = $destinatary->getCustomersQuery()->all();
             if (count($customers) === 0) {
-                return [
-                    'status' => 'error'
-                ];
+                return [ 'status' => 'error', 'error' => 'No customers to send'];
             }
 
             foreach ($customers as $customer){
-                $mobile_push->addUserApp($customer['customer_id']);
+                $customer['product_extension_value'] = $product_payment_extension_value;
+                $mobile_push->addUserApp($customer['customer_id'], $customer);
             }
         }
 
-        $notification->updateAttributes(['status' => 'sent']);
-        $mobile_push->send();
+        if($mobile_push->send()){
+            $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+        } else {
+            $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+            return ['status' => 'error', 'error' => 'Failed to send '];
+        }
 
-        return [
-            'status' => 'success'
-        ];
+        return ['status' => 'success'];
     }
 
     public function export($notification)

@@ -309,14 +309,10 @@ class NotificationController extends Controller {
      * Envio manual de notificacion
      * @param type $notification_id
      */
-    public function actionSend($id, $force_send = false) {
-
-
+    public function actionSend($id, $force_send = false)
+    {
         $notification = $this->findModel($id);
-
         $transport = $notification->transport;
-
-
 
         try {
             $status = $transport->send($notification, $force_send);

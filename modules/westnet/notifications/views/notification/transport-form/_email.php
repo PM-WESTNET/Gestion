@@ -42,7 +42,7 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
         this.init = function(){
             $(document).on('click', '.reference', function(){
                 var new_value = CKEDITOR.instances.content.getData() + $(this).data('ref');
-                CKEDITOR.instances['content'].setData(new_value);
+                CKEDITOR.instances.content.insertText($(this).data('ref'))
                 CKEDITOR.instances['content'].focus();
             });
         }

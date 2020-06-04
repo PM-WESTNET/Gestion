@@ -502,6 +502,7 @@ class CustomerSearch extends Customer {
         }
 
         $masterSubQuery = (new Query())->select(['customer.customer_id', 'concat(customer.lastname, \' \', customer.name) as name', 'customer.phone','customer.phone2','customer.phone3','customer.phone4', 'customer.document_number', 'customer.code',
+                'customer.email', 'customer.email2',
                 'round(coalesce(('.$subQueryBills->createCommand()->getRawSql().'), 0) - coalesce(('.$subQueryPayments->createCommand()->getRawSql().'), 0)) as saldo', 'bills.debt_bills', 'bills.payed_bills',
                 new Expression('( bills.debt_bills +  bills.payed_bills) as total_bills'),
             'contract_detail.product_id as plan',

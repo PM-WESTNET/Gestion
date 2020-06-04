@@ -74,6 +74,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'name',
             [
+                'attribute' => 'subject',
+                'value' => $model->layout ? $this->render(LayoutHelper::getLayoutAlias($model->layout), ['subject' => $this->render('@app/modules/westnet/notifications/body/content/content', ['notification' => $model])]) : $model->subject,
+                'format' => 'html'
+            ],
+            [
                 'attribute' => 'content',
                 'value' => $model->layout ? $this->render(LayoutHelper::getLayoutAlias($model->layout), ['content' => $this->render('@app/modules/westnet/notifications/body/content/content', ['notification' => $model])]) : $model->content,
                 'format' => 'html'
