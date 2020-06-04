@@ -25,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . NotificationsModule::t('app', 'Create Notification'), ['create'], ['class' => 'btn btn-success']);?>
             <?php 
                 if (!$searchModel->programmed) {
-                    Html::a("<span class='glyphicon glyphicon-clock'></span> " . NotificationsModule::t('app', 'Programmed Notifications'), ['index-programmed'], ['class' => 'btn btn-warning']);
+                    echo Html::a("<span class='glyphicon glyphicon-clock'></span> " . NotificationsModule::t('app', 'Programmed Notifications'), ['index-programmed'], ['class' => 'btn btn-warning']);
                 }
             ?>
         </p>
