@@ -106,24 +106,7 @@ use yii\widgets\ActiveForm;
                 ],
             ])->label(NotificationsModule::t('app', 'Customer Category'));
             ?> 
-            <?php
-            $customer_statuses=[];
-            foreach (Customer::getStatusRange() as $sta => $label) {
-                $customer_statuses[]= ['status' => $sta, 'label'=> $label];
-            }
-            echo $form->field($model, '_customer_statuses')->widget(Select2::classname(), [
-                'language' => 'es',
-                'data' => ArrayHelper::map($customer_statuses, 'status', 'label'),
-                'options' => [
-                    'multiple' => true,
-                    'placeholder' => NotificationsModule::t('app', 'Select an option...')
-                ],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ])->label(NotificationsModule::t('app', 'Customer status'));
-            ?>
-
+            
             <?= $form->field($model, '_plans')->widget(Select2::classname(), [
                 'language' => 'es',
                 'data' => ArrayHelper::map(Product::find()->orderBy('name')->where(['type' => 'plan', 'status' => 'enabled'])->all(), 'product_id', 'name'),
