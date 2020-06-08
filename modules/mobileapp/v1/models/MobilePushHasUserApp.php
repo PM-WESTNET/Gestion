@@ -136,4 +136,12 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         }
     }
 
+    /**
+     * Devuelve un array con los botones seleccionados para la notificación
+     */
+    public function getButtoms()
+    {
+        return explode(',', $this->mobilePush->buttoms);
+    }
+
 }

@@ -1,6 +1,8 @@
 <?php
 
+use app\modules\mobileapp\v1\models\MobilePush;
 use app\modules\mobileapp\v1\models\MobilePushHasUserApp;
+use app\modules\westnet\notifications\models\Notification;
 use app\tests\fixtures\MobilePushFixture;
 use app\tests\fixtures\UserAppFixture;
 
@@ -60,5 +62,21 @@ class MobilePushHasUserAppTest extends \Codeception\Test\Unit
         ]);
 
         expect('Save when new and full', $model->save())->true();
+    }
+
+    public function testGetButtoms()
+    {
+        $model = new MobilePushHasUserApp([
+            'mobile_push_id' => 1,
+            'user_app_id' => 1
+        ]);
+        $model->save();
+
+        $mobile_push = MobilePush::findOne(1);
+        $mobile_push->buttoms = Notification::BUTTOM_PAYMENT_EXTENSION .','. Notification::BUTTOM_PAYMENT_NOTIFY .',';
+        $mobile_push->save();
+
+        expect('Buttoms is an array', is_array($model->getButtoms()))->true();
+        expect('Buttoms is an array', $model->getButtoms())->equals([Notification::BUTTOM_PAYMENT_EXTENSION, Notification::BUTTOM_PAYMENT_NOTIFY, '']);
     }
 }

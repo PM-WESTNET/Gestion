@@ -16,7 +16,9 @@ use yii\db\ActiveRecord;
  * @property string $status
  * @property integer $send_timestamp
  * @property integer $created_at
+ * @property integer $notification_id
  * @property string $type
+ * @property string $buttoms
  *
  * @property MobilePushHasUserApp[] $mobilePushHasUserApps
  * @property UserApp[] $userApps
@@ -62,8 +64,8 @@ class MobilePush extends ActiveRecord
     {
         return [
             [['title', 'content',], 'required'],
-            [['status', 'content', 'type', 'title'], 'string'],
-            [['send_timestamp', 'created_at'], 'integer'],
+            [['status', 'content', 'type', 'title', 'buttoms'], 'string'],
+            [['send_timestamp', 'created_at', 'notification_id'], 'integer'],
         ];
     }
 
@@ -79,6 +81,8 @@ class MobilePush extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'send_timestamp' => Yii::t('app', 'Send Timestamp'),
             'created_at' => Yii::t('app', 'Created At'),
+            'notification_id' => Yii::t('app', 'Notification'),
+            'buttoms' => Yii::t('app', 'Buttoms'),
         ];
     }
 
@@ -284,7 +288,7 @@ class MobilePush extends ActiveRecord
                'mobile_push_id' => $this->mobile_push_id,
                'customer_id' => $customer_id,
                'notification_title' => MobilePush::replaceText($this->title, $customer_data),
-               'notification_content' => MobilePush::replaceText($this->content, $customer_data)
+               'notification_content' => MobilePush::replaceText($this->content, $customer_data),
            ]);
 
            if(!$mphua->save()){

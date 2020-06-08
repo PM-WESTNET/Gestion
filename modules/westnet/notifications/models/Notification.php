@@ -28,6 +28,7 @@ use app\modules\westnet\notifications\NotificationsModule;
  * @property string $status
  * @property integer $email_transport_id
  * @property string $test_phone
+ * @property string $buttoms
  * @property integer $test_phone_frecuency
  *
  * @property Destinatary[] $destinataries
@@ -40,6 +41,12 @@ class Notification extends ActiveRecord {
 
     public $_isExternal = false;
 
+    //Buttoms
+    public $buttom_payment_extension;
+    public $buttom_payment_notify;
+    public $buttom_edit_data;
+    public $buttom_send_bill;
+
     //Statuses
     const STATUS_CREATED = 'created';
     const STATUS_ENABLED = 'enabled';
@@ -50,6 +57,11 @@ class Notification extends ActiveRecord {
     const STATUS_PENDING = 'pending';
     const STATUS_IN_PROCESS = 'in_process';
 
+    //Buttoms
+    const BUTTOM_PAYMENT_EXTENSION = 'payment_extension';
+    const BUTTOM_PAYMENT_NOTIFY = 'payment_notify';
+    const BUTTOM_EDIT_DATA = 'edit_data';
+    const BUTTOM_SEND_BILL = 'send_bill';
 
     public function init() {
         parent::init();
@@ -95,9 +107,10 @@ class Notification extends ActiveRecord {
      */
     public function rules() {
         return [
+            [['buttom_payment_extension', 'buttom_payment_notify', 'buttom_edit_data', 'buttom_send_bill'], 'boolean'],
             [['transport_id', 'name'], 'required', 'on' => 'create'],
             [['transport_id', 'email_transport_id', 'company_id', 'test_phone_frecuency'], 'integer'],
-            [['content', 'layout', 'test_phone'], 'string'],
+            [['content', 'layout', 'test_phone', 'buttoms'], 'string'],
             [['status'], 'in', 'range' => ['created', 'enabled', 'disabled', 'error', 'sent', 'cancelled'], 'on' => 'update-status'],
             [['status'], 'safe'],
             [['test_phone_frecuency'], 'default' , 'value' => 1000],
@@ -143,7 +156,12 @@ class Notification extends ActiveRecord {
             'update_timestamp' => Yii::t('app', 'Updated'),
             'email_transport_id' => MailingModule::t('Email transport'),
             'test_phone' => Yii::t('app', 'Test phone'),
-            'test_phone_frecuency' => Yii::t('app', 'Test phone frecuency')
+            'test_phone_frecuency' => Yii::t('app', 'Test phone frecuency'),
+            'buttoms' => Yii::t('app', 'Buttoms'),
+            'buttom_payment_extension' => NotificationsModule::t('app', 'Buttom payment extension'),
+            'buttom_payment_notify' => NotificationsModule::t('app', 'Buttom payment notify'),
+            'buttom_edit_data' => NotificationsModule::t('app', 'Buttom edit data'),
+            'buttom_send_bill' => NotificationsModule::t('app', 'Buttom send bill'),
         ];
     }
 
@@ -255,6 +273,8 @@ class Notification extends ActiveRecord {
                 
             }
 
+            $this->formatButtomsBeforeSave();
+
             $this->formatDatesBeforeSave();
             
             return true;
@@ -281,6 +301,10 @@ class Notification extends ActiveRecord {
             $this->from_date = null;
             $this->to_date = null;
         }
+
+        if(!empty($this->buttoms)){
+            $this->formatButtomsAfterFind();
+        }
         
         parent::afterFind();
     }
@@ -297,6 +321,53 @@ class Notification extends ActiveRecord {
         }
         $this->from_date = Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd');
         $this->to_date = Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd');
+    }
+
+    /**
+     * Format buttom string
+     */
+    private function formatButtomsBeforeSave() {
+        $buttom_string = '';
+        if($this->buttom_payment_extension){
+            $buttom_string = $buttom_string . self::BUTTOM_PAYMENT_EXTENSION . ',';
+        }
+
+        if($this->buttom_payment_notify){
+            $buttom_string = $buttom_string . self::BUTTOM_PAYMENT_NOTIFY . ',';
+        }
+
+        if($this->buttom_edit_data){
+            $buttom_string = $buttom_string . self::BUTTOM_EDIT_DATA . ',';
+        }
+
+        if($this->buttom_send_bill){
+            $buttom_string = $buttom_string . self::BUTTOM_SEND_BILL . ',';
+        }
+
+        $this->buttoms = $buttom_string;
+    }
+
+    /**
+     * Format buttom string
+     */
+    private function formatButtomsAfterFind() {
+        $buttoms = explode(',', $this->buttoms);
+
+        if(in_array(self::BUTTOM_PAYMENT_EXTENSION, $buttoms)){
+            $this->buttom_payment_extension = 1;
+        }
+
+        if(in_array(self::BUTTOM_PAYMENT_NOTIFY, $buttoms)){
+            $this->buttom_payment_notify = 1;
+        }
+
+        if(in_array(self::BUTTOM_EDIT_DATA, $buttoms)){
+            $this->buttom_edit_data = 1;
+        }
+
+        if(in_array(self::BUTTOM_SEND_BILL, $buttoms)){
+            $this->buttom_send_bill= 1;
+        }
     }
 
     /**
