@@ -2,6 +2,7 @@
 
 namespace app\modules\mobileapp\v1\models;
 
+use Codeception\Util\Debug;
 use Yii;
 
 /**
@@ -69,7 +70,8 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         return [
             [['mobile_push_id', 'user_app_id'], 'required'],
             [['mobile_push_id', 'user_app_id', 'customer_id'], 'integer'],
-            [['notification_read', 'notification_content', 'notification_title'], 'string']
+            [['notification_content', 'notification_title'], 'string'],
+            [['notification_read'], 'boolean']
         ];
     }
 
@@ -86,7 +88,20 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
             'notification_content' => Yii::t('app', 'Notification content'),
             'notification_read' => Yii::t('app', 'Notification read'),
         ];
-    }    
+    }
+
+    public function fields()
+    {
+        return [
+            'mobile_push_has_user_app_id',
+            'user_app_id',
+            'customer_id',
+            'notification_title',
+            'notification_content',
+            'notification_read',
+            'buttoms'
+        ];
+    }
 
 
     /**
@@ -144,4 +159,18 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         return explode(',', $this->mobilePush->buttoms);
     }
 
+    /**
+     * Marca una notificación como leída
+     */
+    public static function markAsRead($mobile_push_has_user_app_id)
+    {
+        $mobile_push_has_user_app = MobilePushHasUserApp::findOne($mobile_push_has_user_app_id);
+
+        if($mobile_push_has_user_app){
+            $mobile_push_has_user_app->notification_read = true;
+            return $mobile_push_has_user_app->save();
+        }
+
+        return false;
+    }
 }

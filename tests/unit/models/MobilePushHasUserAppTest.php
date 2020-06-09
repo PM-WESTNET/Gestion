@@ -79,4 +79,17 @@ class MobilePushHasUserAppTest extends \Codeception\Test\Unit
         expect('Buttoms is an array', is_array($model->getButtoms()))->true();
         expect('Buttoms is an array', $model->getButtoms())->equals([Notification::BUTTOM_PAYMENT_EXTENSION, Notification::BUTTOM_PAYMENT_NOTIFY, '']);
     }
+
+    public function testMarkAsRead()
+    {
+        $model = new MobilePushHasUserApp([
+            'mobile_push_id' => 1,
+            'user_app_id' => 1
+        ]);
+        $model->save();
+
+        expect('Notification marked as read', MobilePushHasUserApp::markAsRead($model->mobile_push_has_user_app_id))->true();
+        $model->refresh();
+        expect('Field notification_read equals 1', $model->notification_read)->equals(1);
+    }
 }

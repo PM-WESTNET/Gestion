@@ -216,6 +216,14 @@ class UserApp extends ActiveRecord
     {
         return $this->hasOne(UserAppActivity::class, ['user_app_id' => 'user_app_id']);
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNotifications()
+    {
+        return $this->hasMany(MobilePushHasUserApp::class, ['user_app_id' => 'user_app_id']);
+    }
              
     /**
      * @inheritdoc
