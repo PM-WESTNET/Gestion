@@ -192,7 +192,8 @@ class MobilePush extends ActiveRecord
                             'es' => $content
                         ],
                         'data' => $this->extra_data,
-                        'include_player_ids' => [$mphua->userApp->player_id]
+                        'include_player_ids' => [$mphua->userApp->player_id],
+                        'mobile_push_has_user_app_id' => $mphua
                 ]);
             }
         // Si la notificacion es de facturacion, y no hay ningun usuario especifico para enviarla, no lo incluimos
@@ -228,8 +229,16 @@ class MobilePush extends ActiveRecord
         $total_sended = 0;
         $total_not_sended = 0;
 
+        $mobile_push_has_user_app_ids_sent = [];
+
         if(!YII_ENV_TEST) {
             foreach ($one_signal_data as $data) {
+                $mphua = false;
+                if(array_key_exists('mobile_push_has_user_app_id', $data)) {
+                    $mphua = $data['mobile_push_has_user_app_id'];
+                    unset($data['mobile_push_has_user_app_id']);
+                }
+
                 $ch = curl_init($this->api_url);
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -256,10 +265,17 @@ class MobilePush extends ActiveRecord
                         $total_sended = $total_sended + $decoded_response->recipients;
                     }
 
+                    //Agregamos el id del MobilePushHasUserApp para que se marquen como enviados
+                    if($mphua) {
+                        array_push($mobile_push_has_user_app_ids_sent, $mphua);
+                    }
+
                 } else {
                     $total_not_sended ++;
                 }
             }
+
+            MobilePushHasUserApp::setTimeSentAt($mobile_push_has_user_app_ids_sent);
         }
 
         return [

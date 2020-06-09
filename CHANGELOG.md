@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
   - Notificaciones push: Se agrega el título en la vista de la notificacion [AD-57]
   - Notificaciones push: Se agrega la posibilidad de agregar emojis en el título de la notificacion [AD-57]
   - Notificaciones push: Se agrega la posibilidad de agregar emojis en el contenido de la notificacion [AD-57]
+  - Notificaciones push: Se crea APi para notificaciones de aplicación móbil [AD-57]
+  - Notificaciones push: Se guarda la fecha y hora del envío de la notificación push [AD-57]
 
 ## [Pendiente de aprobación]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila

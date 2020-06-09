@@ -12,6 +12,8 @@ use Yii;
  * @property integer $mobile_push_id
  * @property integer $user_app_id
  * @property integer $customer_id
+ * @property integer $created_at
+ * @property integer $sent_at
  * @property string $notification_title
  * @property string $notification_content
  * @property string $notification_read
@@ -34,33 +36,33 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
     /**
      * @inheritdoc
      */
-    /*
+
     public function behaviors()
     {
         return [
             'timestamp' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
                 'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['timestamp'],
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
                 ],
             ],
-            'date' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-                ],
-                'value' => function(){return date('Y-m-d');},
-            ],
-            'time' => [
-                'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
-                ],
-                'value' => function(){return date('h:i');},
-            ],
+//            'date' => [
+//                'class' => 'yii\behaviors\TimestampBehavior',
+//                'attributes' => [
+//                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
+//                ],
+//                'value' => function(){return date('Y-m-d');},
+//            ],
+//            'time' => [
+//                'class' => 'yii\behaviors\TimestampBehavior',
+//                'attributes' => [
+//                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['time'],
+//                ],
+//                'value' => function(){return date('h:i');},
+//            ],
         ];
     }
-    */
+
 
     /**
      * @inheritdoc
@@ -69,7 +71,7 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
     {
         return [
             [['mobile_push_id', 'user_app_id'], 'required'],
-            [['mobile_push_id', 'user_app_id', 'customer_id'], 'integer'],
+            [['mobile_push_id', 'user_app_id', 'customer_id', 'created_at', 'sent_at'], 'integer'],
             [['notification_content', 'notification_title'], 'string'],
             [['notification_read'], 'boolean']
         ];
@@ -87,6 +89,8 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
             'notification_title' => Yii::t('app', 'Notification title'),
             'notification_content' => Yii::t('app', 'Notification content'),
             'notification_read' => Yii::t('app', 'Notification read'),
+            'created_at' => Yii::t('app', 'Created at'),
+            'sent_at' => Yii::t('app', 'Sent at'),
         ];
     }
 
@@ -172,5 +176,18 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         }
 
         return false;
+    }
+
+    /**
+     * Le determina un timestamp en el campo sent_at para los ids indicados
+     */
+    public static function setTimeSentAt($mobile_push_has_user_app_ids_sent, $timestamp = null)
+    {
+        $timestamp_value = (new \DateTime('now'))->getTimestamp();
+        if($timestamp) {
+            $timestamp_value = $timestamp;
+        }
+
+        Yii::$app->db->createCommand()->update(self::tableName(), ['sent_at' => $timestamp_value], ['in', 'mobile_push_has_user_app_id', $mobile_push_has_user_app_ids_sent])->execute();
     }
 }
