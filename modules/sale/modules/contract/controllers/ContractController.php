@@ -1061,17 +1061,17 @@ class ContractController extends Controller {
                     return $this->redirect(['view', 'id' => $contract_id]);
                 }else{
                     $transaction->rollBack();
-                    Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t active  this contract again.'));
+                    Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. Cant't update connection status"));
                     return $this->redirect(['view', 'id' => $contract_id]);
                 }
                 
             }else{                
                 $transaction->rollBack();
-                Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t active  this contract again.'));
+                Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. Can't update contract status"));
                 return $this->redirect(['view', 'id' => $contract_id]);
             }
         }else{
-           Yii::$app->session->setFlash('error', Yii::t('app', 'Can\'t active  this contract again.'));
+           Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. The contract status must be ".Contract::STATUS_LOW_PROCESS));
            return $this->redirect(['view', 'id' => $contract_id]);
         }   
     }
