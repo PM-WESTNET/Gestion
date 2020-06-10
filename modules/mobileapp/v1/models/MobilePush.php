@@ -261,11 +261,11 @@ class MobilePush extends ActiveRecord
                 } else {
                     $total_not_sended ++;
                 }
+                Yii::$app->cache->set('notification_'.$notification_id.'_total', count($one_signal_data));
+                Yii::$app->cache->set('notification_'.$notification_id.'_sended', $total_sended);
+                Yii::$app->cache->set('notification_'.$notification_id.'_with_errors', $total_with_errors);
+                Yii::$app->cache->set('notification_'.$notification_id.'_not_sended', $total_not_sended);
             }
-            Yii::$app->cache->set('notification_'.$notification_id.'_total', count($one_signal_data));
-            Yii::$app->cache->set('notification_'.$notification_id.'_sended', $total_sended);
-            Yii::$app->cache->set('notification_'.$notification_id.'_with_errors', $total_with_errors);
-            Yii::$app->cache->set('notification_'.$notification_id.'_not_sended', $total_not_sended);
 
         }
 

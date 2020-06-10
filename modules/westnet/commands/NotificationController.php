@@ -117,6 +117,9 @@ class NotificationController extends Controller
         }
     }
 
+    /*
+     Comando para enviar las notificaciones push. Implementa mutex
+    */
     public function actionSendMobilePush() {
 
         $notifications = Notification::find()
