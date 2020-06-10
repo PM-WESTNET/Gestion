@@ -1048,28 +1048,12 @@ class ContractController extends Controller {
         
         if ($contract->status === Contract::STATUS_LOW_PROCESS){
             $transaction= Yii::$app->db->beginTransaction();
-            
-            $contract->status = Contract:: STATUS_ACTIVE;
-            if ($contract->updateAttributes(['status'])) {
-                $connection= Connection::findOne(['contract_id' => $contract->contract_id]);
-                
-                $connection->status_account= Connection::STATUS_ACCOUNT_ENABLED;
-                
-                if ($connection->updateAttributes(['status_account'])) {
-                    $transaction->commit();
-                    $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
-                    return $this->redirect(['view', 'id' => $contract_id]);
-                }else{
-                    $transaction->rollBack();
-                    Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. Cant't update connection status"));
-                    return $this->redirect(['view', 'id' => $contract_id]);
-                }
-                
-            }else{                
-                $transaction->rollBack();
-                Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. Can't update contract status"));
-                return $this->redirect(['view', 'id' => $contract_id]);
-            }
+            $contract->updateAttributes(['status' => Contract::STATUS_ACTIVE]);
+            $connection= Connection::findOne(['contract_id' => $contract->contract_id]);
+            $connection->updateAttributes(['status' => Connection::STATUS_ENABLED]);
+            $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
+            $transaction->commit();
+            return $this->redirect(['view', 'id' => $contract_id]);
         }else{
            Yii::$app->session->setFlash('error', Yii::t('app', "Can't active  this contract again. The contract status must be ".Contract::STATUS_LOW_PROCESS));
            return $this->redirect(['view', 'id' => $contract_id]);
