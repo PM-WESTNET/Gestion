@@ -3,6 +3,7 @@
 namespace app\modules\mobileapp\v1\models;
 
 
+use app\modules\agenda\models\Notification;
 use app\modules\config\models\Config;
 use Yii;
 use yii\db\ActiveRecord;
@@ -101,6 +102,14 @@ class MobilePush extends ActiveRecord
     public function getUserApps()
     {
         return $this->hasMany(UserApp::className(), ['user_app_id' => 'user_app_id'])->viaTable('mobile_push_has_user_app', ['mobile_push_id' => 'mobile_push_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNotification()
+    {
+        return $this->hasOne(\app\modules\westnet\notifications\models\Notification::class, ['notification_id' => 'notification_id']);
     }
              
     /**

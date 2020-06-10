@@ -918,11 +918,6 @@ class ReportsController extends Controller
                 array_push($data_ivr, $before_ivr);
                 $from_ivr = false;
             }
-
-//            if(!$from_ivr ) {
-//                array_push($data_ivr, $counter_ivr);
-//                $from_ivr = false;
-//            }
         }
 
 
@@ -982,8 +977,6 @@ class ReportsController extends Controller
         $before_app = 0;
         $before_ivr = 0;
 
-//        var_dump($colslineal);
-//        die();
         //Completo los array con las fechas que comprenden el período
         foreach ($colslineal as $item) {
             $from_app = false;
@@ -992,8 +985,6 @@ class ReportsController extends Controller
 
             foreach ($datas as $data) {
                 if ($data['from'] == PaymentExtensionHistory::FROM_APP) {
-//                    var_dump($data['date']);
-//                    var_dump($item);
                     if ($data['date'] == $item) {
                         $before_app += (int)$data['qty'];
                         array_push($data_app, $before_app);
@@ -1033,6 +1024,22 @@ class ReportsController extends Controller
             'data_tart' => $data_tart,
             'colors' => self::COLORS,
             'border_colors' => self::BORDER_COLORS
+        ]);
+    }
+
+    /**
+     * Reporte de notificaciones push
+     */
+    public function actionPushNotificationsReport()
+    {
+        $search = new ReportSearch();
+        $dataProvider = $search->findPushNotifications((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+       //TODO fechas por defecto
+
+        return $this->render('/reports/push-notifications', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $search
         ]);
     }
 }

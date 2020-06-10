@@ -15,8 +15,10 @@ use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\ReportsModule;
 use yii\base\Model;
+use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
+use yii\debug\models\timeline\DataProvider;
 use yii\web\JsExpression;
 
 class ReportSearch extends Model
@@ -755,5 +757,36 @@ class ReportSearch extends Model
         $query->groupBy(['from']);
 
         return $query->all();
+    }
+
+    /**
+     * Busca las notificaciones con los parámetros indicados
+     * @param $params
+     * @return ReportData[]|array|\yii\db\ActiveRecord[]
+     */
+    public function findPushNotifications($params)
+    {
+        $this->load($params);
+        $this->load($params);
+
+        $query = (new Query())
+            ->select(['n.notification_id as notification_id',
+                'n.name as notification_name',
+                'mp.send_timestamp',
+                (new Expression("COUNT(CASE WHEN `mphua`.sent_at IS NOT NULL THEN 1 END) as count_sent")),
+                (new Expression("COUNT(CASE WHEN `mphua`.notification_read = 1 THEN 1 END) as count_read")),
+                'mphua.mobile_push_id'
+            ])
+            ->from(DbHelper::getDbName(\Yii::$app->db) .'.mobile_push_has_user_app mphua' )
+            ->leftJoin(DbHelper::getDbName(\Yii::$app->db).'.mobile_push mp', 'mp.mobile_push_id= mphua.mobile_push_id')
+            ->leftJoin(DbHelper::getDbName(\Yii::$app->dbnotifications) .'.notification n', 'mp.notification_id = n.notification_id')
+            ->groupBy('mp.mobile_push_id')
+            ->orderBy(['mp.send_timestamp' => SORT_DESC])
+        ;
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query
+        ]);
+        return $dataProvider;
     }
 }

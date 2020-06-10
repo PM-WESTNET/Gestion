@@ -113,7 +113,7 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
      */
     public function getMobilePush()
     {
-        return $this->hasOne(MobilePush::className(), ['mobile_push_id' => 'mobile_push_id']);
+        return $this->hasOne(MobilePush::class, ['mobile_push_id' => 'mobile_push_id']);
     }
 
     /**
@@ -121,7 +121,15 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
      */
     public function getUserApp()
     {
-        return $this->hasOne(UserApp::className(), ['user_app_id' => 'user_app_id']);
+        return $this->hasOne(UserApp::class, ['user_app_id' => 'user_app_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCustomer()
+    {
+        return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
              
     /**
