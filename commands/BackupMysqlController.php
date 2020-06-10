@@ -140,7 +140,7 @@ class BackupMysqlController extends \yii\console\Controller
         $params = Yii::$app->params['backups'];
         $dir = $params['dirbase'];
         $dirInc = $params['dirincremental']. '/';
-        $name = 'incremental.tar';
+        $name = 'incremental.zip';
         $fileOut = '/home/backups/percona/'.  $name;
         $dirIncBefore = $params['dirincremental'];
         $host = $params['host'];
@@ -158,7 +158,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
-                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.tar')) {
+                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.zip')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
