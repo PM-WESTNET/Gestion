@@ -45,4 +45,7 @@ return array(
     'Customers percentage with the app installed' => 'Porcentaje de clientes con la app instalada',
     'Customers percentage using the app' => 'Porcentaje de clientes que usan la app',
     'Publicity Shape' => 'Canal de publicidad',
+    'Push notifications report' => 'Reporte de notificaciones push',
+    'sent' => 'Enviada',
+    'no sent' => 'No enviada',
 );
