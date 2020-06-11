@@ -1035,8 +1035,6 @@ class ReportsController extends Controller
         $search = new ReportSearch();
         $dataProvider = $search->findPushNotifications((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
 
-       //TODO fechas por defecto
-
         return $this->render('/reports/push-notifications', [
             'dataProvider' => $dataProvider,
             'searchModel' => $search

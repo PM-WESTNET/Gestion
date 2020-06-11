@@ -19,19 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
     </div>
-    <?= Collapse::widget([
-            'items' => [
-                [
-                    'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
-                    'content' => $this->render('_search/push-notifications-filters', ['model' => $searchModel]),
-                    'encode' => false,
-                ],
-            ],
-            'options' => [
-                'class' => 'hidden-print'
-            ]
-        ]);
-    ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

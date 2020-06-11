@@ -3,6 +3,7 @@
 use app\modules\westnet\reports\ReportsModule;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\bootstrap\Collapse;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\mobileapp\v1\models\AppFailedRegisterSearch */
@@ -14,7 +15,20 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="mobile-push-has-user-app-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?= Collapse::widget([
+        'items' => [
+            [
+                'label' => '<span class="glyphicon glyphicon-chevron-down"></span> '.Yii::t('app','Filters'),
+                'content' => $this->render('_search', ['model' => $searchModel]),
+                'encode' => false,
+            ],
+        ],
+        'options' => [
+            'class' => 'hidden-print'
+        ]
+    ]);
+    ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,

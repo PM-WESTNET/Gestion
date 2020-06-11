@@ -18,20 +18,21 @@ use yii\db\Query;
  */
 class MobilePushSearch extends MobilePush
 {
+    public $customer_id;
+    public $customer_code;
 
     public function rules()
     {
         return [
-            //[['user_app_activity_id', 'user_app_id', 'installation_datetime', 'company_id'], 'integer'],
-            //[['last_activity_from', 'last_activity_to'], 'safe'],
+            [['customer_id', 'customer_code'], 'safe'],
         ];
     }
 
     public function attributeLabels()
     {
         return array_merge(parent::attributeLabels(), [
-            'last_activity_from' => Yii::t('app', 'Last activity from'),
-            'last_activity_to' => Yii::t('app', 'Last activity to'),
+            'customer_id' => Yii::t('app', 'Customer'),
+            'customer_code' => Yii::t('app', 'Customer code'),
         ]);
     }
 
@@ -58,9 +59,17 @@ class MobilePushSearch extends MobilePush
             ->leftJoin('customer c', 'c.customer_id = mphua.customer_id')
             ;
 
-        /*if($this->mobile_push_id){
+        if($this->mobile_push_id){
             $query->andFilterWhere(['mphua.mobile_push_id' => $this->mobile_push_id]);
-        }*/
+        }
+
+        if($this->customer_id){
+            $query->andFilterWhere(['c.customer_id' => $this->customer_id]);
+        }
+
+        if($this->customer_code){
+            $query->andFilterWhere(['c.code' => $this->customer_code]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query

@@ -767,7 +767,6 @@ class ReportSearch extends Model
     public function findPushNotifications($params)
     {
         $this->load($params);
-        $this->load($params);
 
         $query = (new Query())
             ->select(['n.notification_id as notification_id',
@@ -781,7 +780,7 @@ class ReportSearch extends Model
             ->leftJoin(DbHelper::getDbName(\Yii::$app->db).'.mobile_push mp', 'mp.mobile_push_id= mphua.mobile_push_id')
             ->leftJoin(DbHelper::getDbName(\Yii::$app->dbnotifications) .'.notification n', 'mp.notification_id = n.notification_id')
             ->groupBy('mp.mobile_push_id')
-            ->orderBy(['mp.send_timestamp' => SORT_DESC])
+            ->orderBy(['mp.created_at' => SORT_DESC])
         ;
 
         $dataProvider = new ActiveDataProvider([

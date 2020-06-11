@@ -9,13 +9,12 @@ use yii\widgets\DetailView;
 /* @var $searchModel app\modules\mobileapp\v1\models\AppFailedRegisterSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app', 'Notificaciones push');
+$this->title = Yii::t('app', 'Notificacion push');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="mobile-push-has-user-app-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
-    <?= $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= DetailView::widget([
         'model' => $model,

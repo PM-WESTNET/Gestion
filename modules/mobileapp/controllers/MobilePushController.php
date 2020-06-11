@@ -23,7 +23,8 @@ class MobilePushController extends Controller
     public function actionView($mobile_push_id)
     {
         $searchModel = new MobilePushSearch();
-        $dataProvider = $searchModel->searchMobilePushHasUserApp([]/*(!Yii::$app->request->isPost) ? null : Yii::$app->request->post()*/);
+        $searchModel->mobile_push_id = $mobile_push_id;
+        $dataProvider = $searchModel->searchMobilePushHasUserApp((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
 
         return $this->render('view', [
             'searchModel' => $searchModel,
