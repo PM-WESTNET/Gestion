@@ -44,8 +44,7 @@ class NotificationController extends Controller
      * @return array
      */
     public function actionNotifications(){
-//        $userApp = $this->getUserApp();
-        $userApp = UserApp::findOne(18);
+        $userApp = $this->getUserApp();
 
         if($userApp){
             \Yii::$app->response->setStatusCode(200);
@@ -72,5 +71,25 @@ class NotificationController extends Controller
 
         \Yii::$app->response->setStatusCode(400);
         return false;
+    }
+
+    /*
+        Devuelve la cantidad de notificaciones sin leer que posee el userApp    
+    */ 
+    public function actionGetNotificationsCount() 
+    {
+        $userApp= $this->getUserApp();
+
+        if (empty($userApp)) {
+            return [
+                'count' => 0,
+            ];
+        }
+
+        $count = $userApp->getNotifications()->andWhere(['notification_read' => 0])->count();
+
+        return [
+            'count' => $count
+        ];
     }
 }
