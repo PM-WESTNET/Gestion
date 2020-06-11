@@ -60,17 +60,32 @@ class NotificationController extends Controller
     /**
      * Marca una notificación como leída
      */
-    public function actionSetAsRead($mobile_push_has_user_app_id){
-//        $userApp = $this->getUserApp();
-        $userApp = UserApp::findOne(18);
+    public function actionSetAsRead(){
+        $userApp = $this->getUserApp();
+        $mphua = \Yii::$app->request->post('mphua_id');
+
+        if (empty($mphua)) {
+            \Yii::$app->response->setStatusCode(400);
+            return [
+                'msg' => 'No encuentro parámetro'
+            ];
+        }
 
         if($userApp){
             \Yii::$app->response->setStatusCode(200);
-            return  MobilePushHasUserApp::markAsRead($mobile_push_has_user_app_id);
+            $result = MobilePushHasUserApp::markAsRead($mphua);
+
+            if ($result) {
+                return [
+                    'msg' => 'Marcado con éxito'
+                ];
+            }
         }
 
         \Yii::$app->response->setStatusCode(400);
-        return false;
+        return [
+            'msg' => 'No encuentro UserApp. Raro!!!'
+        ];
     }
 
     /*

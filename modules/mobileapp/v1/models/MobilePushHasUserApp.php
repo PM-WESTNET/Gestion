@@ -103,7 +103,9 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
             'notification_title',
             'notification_content',
             'notification_read',
-            'buttoms'
+            'buttoms' => function($model) {
+                return $model->getButtoms();
+            }
         ];
     }
 
