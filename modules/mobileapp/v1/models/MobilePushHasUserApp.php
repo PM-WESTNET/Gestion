@@ -170,7 +170,39 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
      */
     public function getButtoms()
     {
-        return explode(',', $this->mobilePush->buttoms);
+        $buttons = [];
+        $slugs = explode(',', $this->mobilePush->buttoms);
+
+        foreach($slugs as $slug) {
+            switch ($slug) {
+                case "payment_extension":
+                    $buttons[] = [
+                        'label' => Yii::t('app','Extend Payment'),
+                        'slug' => $slug
+                    ];
+                    break;
+                case "payment_notify" :
+                    $buttons[] = [
+                        'label' => Yii::t('app','Notify Payment'),
+                        'slug' => $slug
+                    ];
+                    break;
+                case "edit_data" :
+                    $buttons[] = [
+                        'label' => Yii::t('app','Edit Data'),
+                        'slug' => $slug
+                    ];
+                    break;
+                case "send_bill" :
+                    $buttons[] = [
+                        'label' => Yii::t('app','Send Bill to Email'),
+                        'slug' => $slug
+                    ];
+                    break;    
+            }
+        }
+
+        return $buttons; 
     }
 
     /**
