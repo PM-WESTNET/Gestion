@@ -560,7 +560,8 @@ class Destinatary extends ActiveRecord {
             'contract_status' => $this->getContractStatusesLabels(),
             'contract_min_age' => $this->contract_min_age,
             'contract_max_age' => $this->contract_max_age,
-            'plan_id' => $this->getPlansIds()
+            'plan_id' => $this->getPlansIds(),
+            'status' => 'enabled'
         ];
 
 
