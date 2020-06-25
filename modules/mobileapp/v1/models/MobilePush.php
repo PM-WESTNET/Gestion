@@ -162,10 +162,10 @@ class MobilePush extends ActiveRecord
      * https://documentation.onesignal.com/reference
      * @return bool
      */
-    public function send()
+    public function send($notification_id)
     {
         $data_formated = $this->getDataOneSignalFormat();
-        $result = $this->sendThroughOneSignal($data_formated);
+        $result = $this->sendThroughOneSignal($data_formated, $notification_id);
 
         if($result['total_sended'] > 0 || YII_ENV_TEST) {
             $this->updateAttributes(['status' => MobilePush::STATUS_SENDED]);
@@ -230,7 +230,7 @@ class MobilePush extends ActiveRecord
      * Hace el envio de los datos a OneSignal
      * @return Array
      */
-    public function sendThroughOneSignal($one_signal_data)
+    public function sendThroughOneSignal($one_signal_data, $notification_id)
     {
         $one_signal_rest_key = Config::getValue('one_signal_rest_key');
         $errors = '';
@@ -239,6 +239,10 @@ class MobilePush extends ActiveRecord
         $total_not_sended = 0;
 
         $mobile_push_has_user_app_ids_sent = [];
+        Yii::$app->cache->set('notification_'.$notification_id.'_total', count($one_signal_data));
+        Yii::$app->cache->set('notification_'.$notification_id.'_sended', 0);
+        Yii::$app->cache->set('notification_'.$notification_id.'_with_errors', 0);
+        Yii::$app->cache->set('notification_'.$notification_id.'_not_sended', 0);
 
         if(!YII_ENV_TEST) {
             foreach ($one_signal_data as $data) {
@@ -272,6 +276,7 @@ class MobilePush extends ActiveRecord
                     //One signal devuelve los usuarios alcanzados con la notificacion
                     if(isset($decoded_response->recipients)){
                         $total_sended = $total_sended + $decoded_response->recipients;
+
                     }
 
                     //Agregamos el id del MobilePushHasUserApp para que se marquen como enviados
@@ -282,6 +287,10 @@ class MobilePush extends ActiveRecord
                 } else {
                     $total_not_sended ++;
                 }
+                Yii::$app->cache->set('notification_'.$notification_id.'_total', count($one_signal_data));
+                Yii::$app->cache->set('notification_'.$notification_id.'_sended', $total_sended);
+                Yii::$app->cache->set('notification_'.$notification_id.'_with_errors', $total_with_errors);
+                Yii::$app->cache->set('notification_'.$notification_id.'_not_sended', $total_not_sended);
             }
 
             MobilePushHasUserApp::setTimeSentAt($mobile_push_has_user_app_ids_sent);

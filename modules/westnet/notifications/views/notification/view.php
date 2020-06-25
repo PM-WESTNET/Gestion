@@ -60,7 +60,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?php
         if ($model->status === 'in_process' || $model->status === 'pending') {
-            echo $this->render('_email_status', ['model' => $model]);
+            if ($model->transport->slug === 'email'){
+                echo $this->render('_email_status', ['model' => $model]);
+            }elseif($model->transport->slug === 'mobile-push') {
+                echo $this->render('_mobile_push_status', ['model' => $model]);
+            }
         }
     ?>
 
@@ -126,5 +130,15 @@ $this->params['breadcrumbs'][] = $this->title;
 </div>
 
 <?php if ($model->status === 'in_process' || $model->status === 'pending'):?>
-    <?php $this->registerJs('EmailStatus.init()')?>
+
+    <?php 
+        if ($model->transport->name === 'Email') {
+            $this->registerJs('EmailStatus.init()');
+        }
+        
+        if ($model->transport->name === 'Mobile Push') {
+            $this->registerJs('NotificationStatus.init()');
+        }
+        
+    ?>
 <?php endif;?>
