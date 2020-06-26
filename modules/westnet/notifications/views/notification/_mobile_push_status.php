@@ -66,7 +66,7 @@ if ($total) {
                 if (status === 'success') {
                     if (response.status === 'pending' || response.status === 'in_process') {
 
-                        var process = ((parseInt(response.success)) * 100) / parseInt(response.total);
+                        var process = ((parseInt(response.success) + parseInt(response.success_errors)) * 100) / parseInt(response.total);
                         $("#bar").css('width', process + '%');
                         $('#total').html(response.total);
                         $('#sended').html(response.success);
@@ -86,6 +86,18 @@ if ($total) {
                         $("#bar").css('width', '100%');
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Error')?>")
 
+                    } else if (response.status === 'sent') {
+                        var process = ((parseInt(response.success) + parseInt(response.success_errors)) * 100) / parseInt(response.total);
+                        $("#bar").css('width', process + '%');
+                        $('#total').html(response.total);
+                        $('#sended').html(response.success);
+                        $('#sended_errors').html(response.success_errors);
+                        $('#not_sended').html(response.notSended);
+                        $('#error').html(response.error);
+
+                        clearInterval(NotificationStatus.interval);
+                        $("#bar").css('background-color', 'green');
+                        $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
                     }
                 }
             })

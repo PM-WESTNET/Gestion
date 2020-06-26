@@ -475,6 +475,14 @@ class NotificationController extends Controller {
                 
                 Yii::$app->response->format= Response::FORMAT_JSON;
                 
+                if ($model->status === 'sent') {
+                    Yii::$app->cache->set('notification_'.$id.'_total', 0);
+                    Yii::$app->cache->set('notification_'.$id.'_sended', 0);
+                    Yii::$app->cache->set('notification_'.$id.'_with_errors', 0);
+                    Yii::$app->cache->set('notification_'.$id.'_not_sended', 0 );
+                    Yii::$app->cache->set('error_message_'.$id, 0);
+                }
+
                 return [
                     'status' => $status,
                     'total' => $total,
