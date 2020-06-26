@@ -195,8 +195,8 @@ return array(
     'Installed' => 'Instalada',
     'Not Installed' => 'No Instalada',
 
-    'Buttom payment extension' => 'Botón extensión de pago',
-    'Buttom payment notify' => 'Botón informe de pago',
-    'Buttom edit data' => 'Botón edición de datos',
-    'Buttom send bill' => 'Botón enviar comprobante',
+    'Button payment extension' => 'Botón extensión de pago',
+    'Button payment notify' => 'Botón informe de pago',
+    'Button edit data' => 'Botón edición de datos',
+    'Button send bill' => 'Botón enviar comprobante',
 );

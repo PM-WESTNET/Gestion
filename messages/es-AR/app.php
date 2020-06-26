@@ -1343,4 +1343,8 @@
     'Accounting date' => 'Fecha contable',
     'The accounting date cant be greater that today.' => 'La fecha contable no puede ser mayor a hoy.',
     'Create payments' => 'Crear Pagos',
+    'payment_extension' => 'Solicitar extensión de pago',
+    'payment_notify' => 'Notificar pago',
+    'edit_data' => 'Editar datos',
+    'send_bill' => 'Enviar comprobante'
  );

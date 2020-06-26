@@ -100,15 +100,45 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
             'mobile_push_has_user_app_id',
             'user_app_id',
             'customer_id',
+            'title',
+            'content',
             'notification_title',
             'notification_content',
             'notification_read',
-            'buttoms' => function($model) {
-                return $model->getButtoms();
+            'date',
+            'buttons' => function($model) {
+                return $model->getButtons();
             }
         ];
     }
 
+    /**
+     * Devuelve la fecha de envío con formato d/m/Y
+     */
+    public function getDate()
+    {
+        if($this->created_at) {
+            return (new \DateTime())->setTimestamp($this->created_at)->format('d/m/Y');
+        }
+
+        return '';
+    }
+
+    /**
+     * Elimina caracteres del titulo que la app no interpreta
+     */
+    public function getTitle()
+    {
+        return strip_tags(str_replace('&nbsp;',' ', $this->notification_title));
+    }
+
+    /**
+     * Elimina caracteres del contenido que la app no interpreta
+     */
+    public function getContent()
+    {
+        return strip_tags(str_replace('&nbsp;',' ', $this->notification_content));
+    }
 
     /**
      * @return \yii\db\ActiveQuery
@@ -168,9 +198,17 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
     /**
      * Devuelve un array con los botones seleccionados para la notificación
      */
-    public function getButtoms()
+    public function getButtons()
     {
-        return explode(',', $this->mobilePush->buttoms);
+        $buttons = [];
+
+        foreach (explode(',', $this->mobilePush->buttons) as $button) {
+            if(!empty($button)){
+                array_push($buttons, ['name' => $button, 'label' => Yii::t('app', $button)]);
+            }
+        }
+
+        return $buttons;
     }
 
     /**

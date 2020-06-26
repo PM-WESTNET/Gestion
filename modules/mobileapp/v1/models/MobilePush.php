@@ -19,7 +19,7 @@ use yii\db\ActiveRecord;
  * @property integer $created_at
  * @property integer $notification_id
  * @property string $type
- * @property string $buttoms
+ * @property string $buttons
  *
  * @property MobilePushHasUserApp[] $mobilePushHasUserApps
  * @property UserApp[] $userApps
@@ -65,7 +65,7 @@ class MobilePush extends ActiveRecord
     {
         return [
             [['title', 'content',], 'required'],
-            [['status', 'content', 'type', 'title', 'buttoms'], 'string'],
+            [['status', 'content', 'type', 'title', 'buttons'], 'string'],
             [['send_timestamp', 'created_at', 'notification_id'], 'integer'],
         ];
     }
@@ -83,7 +83,7 @@ class MobilePush extends ActiveRecord
             'send_timestamp' => Yii::t('app', 'Send Timestamp'),
             'created_at' => Yii::t('app', 'Created At'),
             'notification_id' => Yii::t('app', 'Notification'),
-            'buttoms' => Yii::t('app', 'Buttoms'),
+            'buttons' => Yii::t('app', 'Buttons'),
         ];
     }
 
@@ -182,14 +182,14 @@ class MobilePush extends ActiveRecord
     {
         $app_id = Config::getValue('one_signal_app_id');
         $data = [];
-        $title = $this->title;
-        $content = $this->content;
+        $title = $this->cleanTitle;
+        $content = $this->cleanContent;
 
         if($this->getUserApps()->exists()) {
             foreach ($this->mobilePushHasUserApps as $mphua) {
 
-                $title = $mphua->notification_title ? $mphua->notification_title : $this->title;
-                $content = $mphua->notification_content ? $mphua->notification_content : $this->content;
+                $title = $mphua->title ? $mphua->title : $this->title;
+                $content = $mphua->content ? $mphua->content : $this->content;
                 array_push($data, [
                         'app_id' => $app_id,
                         'headings' => [
@@ -366,5 +366,21 @@ class MobilePush extends ActiveRecord
         $replaced_text = array_key_exists('email2', $customer_data) ? str_replace('@EmailSecundario', $customer_data['email2'], $replaced_text): $replaced_text;
 
         return $replaced_text;
+    }
+
+    /**
+     * Elimina caracteres del titulo que la app no interpreta
+     */
+    public function getCleanTitle()
+    {
+        return strip_tags(str_replace('&nbsp;',' ', $this->title));
+    }
+
+    /**
+     * Elimina caracteres del contenido que la app no interpreta
+     */
+    public function getCleanContent()
+    {
+        return strip_tags(str_replace('&nbsp;',' ', $this->content));
     }
 }

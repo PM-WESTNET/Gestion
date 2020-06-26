@@ -13,6 +13,7 @@ $this->title = NotificationsModule::t('app', 'Notifications');
 
 if ($searchModel->programmed) {
     $this->title = NotificationsModule::t('app', 'Programmed Notifications');
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Notifications'), 'url' => ['index']];
 }
 
 $this->params['breadcrumbs'][] = $this->title;

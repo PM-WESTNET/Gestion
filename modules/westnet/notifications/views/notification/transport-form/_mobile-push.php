@@ -58,10 +58,10 @@ $this->registerJs("CKEDITOR.config.emoji_emojiListUrl = '".Yii::getAlias('@web')
     </div>
     <hr/>
 
-    <?= $form->field($model, 'buttom_payment_extension')->checkbox()?>
-    <?= $form->field($model, 'buttom_payment_notify')->checkbox()?>
-    <?= $form->field($model, 'buttom_edit_data')->checkbox()?>
-    <?= $form->field($model, 'buttom_send_bill')->checkbox()?>
+    <?= $form->field($model, 'button_payment_extension')->checkbox()?>
+    <?= $form->field($model, 'button_payment_notify')->checkbox()?>
+    <?= $form->field($model, 'button_edit_data')->checkbox()?>
+    <?= $form->field($model, 'button_send_bill')->checkbox()?>
 </div>
 
 <script>

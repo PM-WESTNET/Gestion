@@ -17,8 +17,8 @@ class m200608_113535_add_field_buttons_into_notification_table_and_MobilePush_ta
 
         $this->addForeignKey('fk_mobile_push_notification_id', 'mobile_push', 'notification_id', $db_notifications.".notification", 'notification_id');
 
-        $this->addColumn($db_notifications.'.notification', 'buttoms', $this->string());
-        $this->addColumn('mobile_push', 'buttoms', $this->string());
+        $this->addColumn($db_notifications.'.notification', 'buttons', $this->string());
+        $this->addColumn('mobile_push', 'buttons', $this->string());
     }
 
     /**

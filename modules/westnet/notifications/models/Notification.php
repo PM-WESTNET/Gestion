@@ -28,7 +28,7 @@ use app\modules\westnet\notifications\NotificationsModule;
  * @property string $status
  * @property integer $email_transport_id
  * @property string $test_phone
- * @property string $buttoms
+ * @property string $buttons
  * @property integer $test_phone_frecuency
  *
  * @property Destinatary[] $destinataries
@@ -41,11 +41,11 @@ class Notification extends ActiveRecord {
 
     public $_isExternal = false;
 
-    //Buttoms
-    public $buttom_payment_extension;
-    public $buttom_payment_notify;
-    public $buttom_edit_data;
-    public $buttom_send_bill;
+    //Buttons
+    public $button_payment_extension;
+    public $button_payment_notify;
+    public $button_edit_data;
+    public $button_send_bill;
 
     //Statuses
     const STATUS_CREATED = 'created';
@@ -57,11 +57,11 @@ class Notification extends ActiveRecord {
     const STATUS_PENDING = 'pending';
     const STATUS_IN_PROCESS = 'in_process';
 
-    //Buttoms
-    const BUTTOM_PAYMENT_EXTENSION = 'payment_extension';
-    const BUTTOM_PAYMENT_NOTIFY = 'payment_notify';
-    const BUTTOM_EDIT_DATA = 'edit_data';
-    const BUTTOM_SEND_BILL = 'send_bill';
+    //Buttons
+    const BUTTON_PAYMENT_EXTENSION = 'payment_extension';
+    const BUTTON_PAYMENT_NOTIFY = 'payment_notify';
+    const BUTTON_EDIT_DATA = 'edit_data';
+    const BUTTON_SEND_BILL = 'send_bill';
 
     public function init() {
         parent::init();
@@ -107,10 +107,10 @@ class Notification extends ActiveRecord {
      */
     public function rules() {
         return [
-            [['buttom_payment_extension', 'buttom_payment_notify', 'buttom_edit_data', 'buttom_send_bill'], 'boolean'],
+            [['button_payment_extension', 'button_payment_notify', 'button_edit_data', 'button_send_bill'], 'boolean'],
             [['transport_id', 'name'], 'required', 'on' => 'create'],
             [['transport_id', 'email_transport_id', 'company_id', 'test_phone_frecuency'], 'integer'],
-            [['content', 'layout', 'test_phone', 'buttoms'], 'string'],
+            [['content', 'layout', 'test_phone', 'buttons'], 'string'],
             [['status'], 'in', 'range' => ['created', 'enabled', 'disabled', 'error', 'sent', 'cancelled'], 'on' => 'update-status'],
             [['status'], 'safe'],
             [['test_phone_frecuency'], 'default' , 'value' => 1000],
@@ -157,11 +157,11 @@ class Notification extends ActiveRecord {
             'email_transport_id' => MailingModule::t('Email transport'),
             'test_phone' => Yii::t('app', 'Test phone'),
             'test_phone_frecuency' => Yii::t('app', 'Test phone frecuency'),
-            'buttoms' => Yii::t('app', 'Buttoms'),
-            'buttom_payment_extension' => NotificationsModule::t('app', 'Buttom payment extension'),
-            'buttom_payment_notify' => NotificationsModule::t('app', 'Buttom payment notify'),
-            'buttom_edit_data' => NotificationsModule::t('app', 'Buttom edit data'),
-            'buttom_send_bill' => NotificationsModule::t('app', 'Buttom send bill'),
+            'buttons' => Yii::t('app', 'Buttons'),
+            'button_payment_extension' => NotificationsModule::t('app', 'Button payment extension'),
+            'button_payment_notify' => NotificationsModule::t('app', 'Button payment notify'),
+            'button_edit_data' => NotificationsModule::t('app', 'Button edit data'),
+            'button_send_bill' => NotificationsModule::t('app', 'Button send bill'),
         ];
     }
 
@@ -273,7 +273,7 @@ class Notification extends ActiveRecord {
                 
             }
 
-            $this->formatButtomsBeforeSave();
+            $this->formatButtonsBeforeSave();
 
             $this->formatDatesBeforeSave();
             
@@ -302,8 +302,8 @@ class Notification extends ActiveRecord {
             $this->to_date = null;
         }
 
-        if(!empty($this->buttoms)){
-            $this->formatButtomsAfterFind();
+        if(!empty($this->buttons)){
+            $this->formatButtonsAfterFind();
         }
         
         parent::afterFind();
@@ -324,49 +324,49 @@ class Notification extends ActiveRecord {
     }
 
     /**
-     * Format buttom string
+     * Format button string
      */
-    private function formatButtomsBeforeSave() {
-        $buttom_string = '';
-        if($this->buttom_payment_extension){
-            $buttom_string = $buttom_string . self::BUTTOM_PAYMENT_EXTENSION . ',';
+    private function formatButtonsBeforeSave() {
+        $button_string = '';
+        if($this->button_payment_extension){
+            $button_string = $button_string . self::BUTTON_PAYMENT_EXTENSION . ',';
         }
 
-        if($this->buttom_payment_notify){
-            $buttom_string = $buttom_string . self::BUTTOM_PAYMENT_NOTIFY . ',';
+        if($this->button_payment_notify){
+            $button_string = $button_string . self::BUTTON_PAYMENT_NOTIFY . ',';
         }
 
-        if($this->buttom_edit_data){
-            $buttom_string = $buttom_string . self::BUTTOM_EDIT_DATA . ',';
+        if($this->button_edit_data){
+            $buttom_string = $button_string . self::BUTTON_EDIT_DATA . ',';
         }
 
-        if($this->buttom_send_bill){
-            $buttom_string = $buttom_string . self::BUTTOM_SEND_BILL . ',';
+        if($this->button_send_bill){
+            $button_string = $button_string . self::BUTTON_SEND_BILL . ',';
         }
 
-        $this->buttoms = $buttom_string;
+        $this->buttons = $button_string;
     }
 
     /**
-     * Format buttom string
+     * Format button string
      */
-    private function formatButtomsAfterFind() {
-        $buttoms = explode(',', $this->buttoms);
+    private function formatButtonsAfterFind() {
+        $buttons = explode(',', $this->buttons);
 
-        if(in_array(self::BUTTOM_PAYMENT_EXTENSION, $buttoms)){
-            $this->buttom_payment_extension = 1;
+        if(in_array(self::BUTTON_PAYMENT_EXTENSION, $buttons)){
+            $this->button_payment_extension = 1;
         }
 
-        if(in_array(self::BUTTOM_PAYMENT_NOTIFY, $buttoms)){
-            $this->buttom_payment_notify = 1;
+        if(in_array(self::BUTTON_PAYMENT_NOTIFY, $buttons)){
+            $this->button_payment_notify = 1;
         }
 
-        if(in_array(self::BUTTOM_EDIT_DATA, $buttoms)){
-            $this->buttom_edit_data = 1;
+        if(in_array(self::BUTTON_EDIT_DATA, $buttons)){
+            $this->button_edit_data = 1;
         }
 
-        if(in_array(self::BUTTOM_SEND_BILL, $buttoms)){
-            $this->buttom_send_bill= 1;
+        if(in_array(self::BUTTON_SEND_BILL, $buttons)){
+            $this->button_send_bill= 1;
         }
     }
 
