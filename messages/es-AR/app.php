@@ -1346,5 +1346,9 @@
     'payment_extension' => 'Solicitar extensión de pago',
     'payment_notify' => 'Notificar pago',
     'edit_data' => 'Editar datos',
-    'send_bill' => 'Enviar comprobante'
+    'send_bill' => 'Enviar comprobante',
+    'Extend Payment' => 'Solicitar Extensión de Pago',
+    'Notify Payment' => 'Notificar Pago',
+    'Edit Data' => 'Editar Datos',
+    'Send Bill to Email' => 'Enviar Comprobante por Email'
  );

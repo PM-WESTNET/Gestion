@@ -116,4 +116,27 @@ class NotificationController extends Controller
 
         }
     }
+
+    /*
+     Comando para enviar las notificaciones push. Implementa mutex
+    */
+    public function actionSendMobilePush() {
+
+        $notifications = Notification::find()
+            ->innerJoin('transport t', 't.transport_id=notification.transport_id')
+            ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
+            ->all();
+
+        foreach ($notifications as $notification) {
+            if (\Yii::$app->mutex->acquire('send_mobile_push_'.$notification->notification_id)){
+                $notification->updateAttributes(['status' => 'in_process']);
+                $transport = $notification->transport;
+                $transport->send($notification);
+
+                $notification->updateAttributes(['status' => 'sent']);
+                \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+            }
+
+        }
+    }
 }

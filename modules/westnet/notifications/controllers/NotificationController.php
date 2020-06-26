@@ -144,7 +144,7 @@ class NotificationController extends Controller {
              * Si le transport es Email, la marcamos como pendiente solamente
              * Luego el comando en segundo plano se encargara de realizar el envio
              */
-            if ($transport->name === 'Email') {
+            if ($transport->name === 'Email'|| $transport->name === 'Mobile Push') {
                 $model->updateAttributes(['status' => 'pending']);
                 Yii::$app->session->setFlash('success', NotificationsModule::t('app', 'The notifications has been sent.'));
                 return $this->redirect(['view', 'id' => $id]);
@@ -448,21 +448,42 @@ class NotificationController extends Controller {
         if (Yii::$app->request->isAjax) {
             $model= $this->findModel($id);
 
-            $total = Yii::$app->cache->get('total_'.$id);
-            $status = $model->status;
-            $ok = (int)Yii::$app->cache->get('success_'.$id);
-            $error = (int)Yii::$app->cache->get('error_'.$id);
-            $message = Yii::$app->cache->get('error_message_'.$id);
+            if ($model->transport->name === 'Email') {
 
-            Yii::$app->response->format= Response::FORMAT_JSON;
-
-            return [
-                'status' => $status,
-                'total' => $total,
-                'success' => $ok,
-                'error' => $error,
-                'message' => $message
-            ];
-        }
+                $total = Yii::$app->cache->get('total_'.$id);
+                $status = $model->status;
+                $ok = (int)Yii::$app->cache->get('success_'.$id);
+                $error = (int)Yii::$app->cache->get('error_'.$id);
+                $message = Yii::$app->cache->get('error_message_'.$id);
+                
+                Yii::$app->response->format= Response::FORMAT_JSON;
+                
+                return [
+                    'status' => $status,
+                    'total' => $total,
+                    'success' => $ok,
+                    'error' => $error,
+                    'message' => $message
+                ];
+            }elseif($model->transport->name === 'Mobile Push')  {
+                $total = Yii::$app->cache->get('notification_'.$id.'_total');
+                $status = $model->status;
+                $ok = (int)Yii::$app->cache->get('notification_'.$id.'_sended');
+                $ok_with_errors= (int)Yii::$app->cache->get('notification_'.$id.'_with_errors');
+                $error = (int)Yii::$app->cache->get('notification_'.$id.'_not_sended');
+                $message = Yii::$app->cache->get('error_message_'.$id);
+                
+                Yii::$app->response->format= Response::FORMAT_JSON;
+                
+                return [
+                    'status' => $status,
+                    'total' => $total,
+                    'success' => $ok,
+                    'success_errors' => $ok_with_errors,
+                    'notSended' => $error,
+                    'message' => $message
+                ];
+            }
+        } 
     }
 }

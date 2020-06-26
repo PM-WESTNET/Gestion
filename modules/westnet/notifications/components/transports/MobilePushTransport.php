@@ -60,7 +60,7 @@ class MobilePushTransport extends Transport implements TransportInterface
             }
         }
 
-        if($mobile_push->send()){
+        if($mobile_push->send($notification->notification_id)){
             $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
         } else {
             $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
