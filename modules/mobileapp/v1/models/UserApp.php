@@ -222,7 +222,7 @@ class UserApp extends ActiveRecord
      */
     public function getNotifications()
     {
-        return $this->hasMany(MobilePushHasUserApp::class, ['user_app_id' => 'user_app_id'])->orderBy(['created_at' => SORT_DESC]);
+        return $this->hasMany(MobilePushHasUserApp::class, ['user_app_id' => 'user_app_id'])->orderBy([ 'notification_read' => SORT_ASC, 'created_at' => SORT_DESC]);
     }
              
     /**

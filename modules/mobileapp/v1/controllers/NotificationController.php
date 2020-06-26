@@ -45,11 +45,12 @@ class NotificationController extends Controller
      */
     public function actionNotifications(){
         $userApp = $this->getUserApp();
+        $from_date = (new \DateTime('now'))->modify('-6 months')->getTimestamp();
 
         if($userApp){
             \Yii::$app->response->setStatusCode(200);
             return [
-                'notifications' => $userApp->notifications
+                'notifications' => $userApp->getNotifications()->where(['>=','created_at', $from_date])->all()
             ];
         }
 
