@@ -199,7 +199,7 @@ class BackupMysqlController extends \yii\console\Controller
 
                 $name = $db.'.sql';
                 $fileOutput = $params['backupMysqlDir'] .'/'. $name;
-                $command = "mysqldump -h $host -u $user -p $pass $db > $fileOutput";
+                $command = "mysqldump -h$host -u$user -p$pass $db > $fileOutput";
                 $result = shell_exec($command);
 
                 if ($result ==  '' && file_exists($fileOutput)) {
