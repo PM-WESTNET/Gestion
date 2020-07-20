@@ -12,4 +12,6 @@ interface SchedulerInterface {
     public static function description();
     
     public function mergeQuery(&$query);
+
+    public function getNextSend($notification);
 }

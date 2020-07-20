@@ -16,6 +16,7 @@ use Yii;
  * @property integer $sent_at
  * @property string $notification_title
  * @property string $notification_content
+ * @property string $notification_resume
  * @property string $notification_read
  *
  * @property MobilePush $mobilePush
@@ -72,7 +73,7 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
         return [
             [['mobile_push_id', 'user_app_id'], 'required'],
             [['mobile_push_id', 'user_app_id', 'customer_id', 'created_at', 'sent_at'], 'integer'],
-            [['notification_content', 'notification_title'], 'string'],
+            [['notification_content', 'notification_title', 'notification_resume'], 'string'],
             [['notification_read'], 'boolean']
         ];
     }
@@ -88,6 +89,7 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
             'customer_id' => Yii::t('app', 'Customer'),
             'notification_title' => Yii::t('app', 'Notification title'),
             'notification_content' => Yii::t('app', 'Notification content'),
+            'notification_resume' => Yii::t('app', 'Notification resume'),
             'notification_read' => Yii::t('app', 'Notification read'),
             'created_at' => Yii::t('app', 'Created at'),
             'sent_at' => Yii::t('app', 'Sent at'),

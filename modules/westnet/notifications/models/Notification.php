@@ -6,6 +6,8 @@ use app\components\companies\ActiveRecord;
 use app\modules\mailing\MailingModule;
 use app\modules\mailing\models\EmailTransport;
 use app\modules\sale\models\Customer;
+use app\modules\westnet\notifications\components\scheduler\Scheduler;
+use app\modules\westnet\notifications\components\scheduler\types\EachDayOfWeekScheduler;
 use Yii;
 use app\modules\westnet\notifications\models\Image;
 use app\modules\westnet\notifications\NotificationsModule;
@@ -132,6 +134,7 @@ class Notification extends ActiveRecord {
             'notification_id' => NotificationsModule::t('app', 'Notification'),
             'transport_id' => NotificationsModule::t('app', 'Transport'),
             'subject' => NotificationsModule::t('app', 'Subject'),
+            'resume' => NotificationsModule::t('app', 'Resume'),
             'name' => NotificationsModule::t('app', 'Name'),
             'content' => NotificationsModule::t('app', 'Content'),
             'from_date' => NotificationsModule::t('app', 'From Date'),
@@ -426,6 +429,19 @@ class Notification extends ActiveRecord {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Devuelve la fecha en la que una notificacion programada va a ser enviada
+     */
+    public function getNextProgrammedSend()
+    {
+        if(!empty($this->scheduler)){
+            $scheduler = Scheduler::getSchedulerObject($this->scheduler);
+            return $scheduler->getNextSend($this);
+        }
+
+        return '';
     }
 
 

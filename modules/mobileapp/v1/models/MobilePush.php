@@ -14,6 +14,7 @@ use yii\db\ActiveRecord;
  * @property integer $mobile_push_id
  * @property string $title
  * @property string $content
+ * @property string $resume
  * @property string $status
  * @property integer $send_timestamp
  * @property integer $created_at
@@ -65,7 +66,7 @@ class MobilePush extends ActiveRecord
     {
         return [
             [['title', 'content',], 'required'],
-            [['status', 'content', 'type', 'title', 'buttons'], 'string'],
+            [['status', 'content', 'type', 'title', 'buttons', 'resume'], 'string'],
             [['send_timestamp', 'created_at', 'notification_id'], 'integer'],
         ];
     }
@@ -78,6 +79,7 @@ class MobilePush extends ActiveRecord
         return [
             'mobile_push_id' => Yii::t('app', 'Mobile Push ID'),
             'title' => Yii::t('app', 'Title'),
+            'resume' => Yii::t('app', 'Resume'),
             'content' => Yii::t('app', 'Content'),
             'status' => Yii::t('app', 'Status'),
             'send_timestamp' => Yii::t('app', 'Send Timestamp'),
@@ -323,6 +325,7 @@ class MobilePush extends ActiveRecord
                'customer_id' => $customer_id,
                'notification_title' => MobilePush::replaceText($this->title, $customer_data),
                'notification_content' => MobilePush::replaceText($this->content, $customer_data),
+               'notification_resume' => MobilePush::replaceText($this->resume, $customer_data),
            ]);
 
            if(!$mphua->save()){
@@ -391,5 +394,13 @@ class MobilePush extends ActiveRecord
     public function getCleanContent()
     {
         return strip_tags(str_replace('&nbsp;',' ', $this->content));
+    }
+
+    /**
+     * Elimina caracteres del resumen que la app no interpreta
+     */
+    public function getCleanResume()
+    {
+        return strip_tags(str_replace('&nbsp;',' ', $this->resume));
     }
 }

@@ -32,6 +32,7 @@ class MobilePushTransport extends Transport implements TransportInterface
     {
         $mobile_push = new MobilePush();
         $mobile_push->title = $notification->subject ? $notification->subject : $notification->name;
+        $mobile_push->resume = $notification->resume;
         $mobile_push->content = $notification->content;
         $mobile_push->buttons = $notification->buttons;
         $mobile_push->notification_id = $notification->notification_id;

@@ -1350,5 +1350,8 @@
     'Extend Payment' => 'Solicitar Extensión de Pago',
     'Notify Payment' => 'Notificar Pago',
     'Edit Data' => 'Editar Datos',
-    'Send Bill to Email' => 'Enviar Comprobante por Email'
+    'Send Bill to Email' => 'Enviar Comprobante por Email',
+    'Resume' => 'Resumen',
+    'From Date Created' => 'Fecha de creación desde',
+    'To Date Created' => 'Fecha de creación hasta',
  );

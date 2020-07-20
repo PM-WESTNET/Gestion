@@ -26,6 +26,14 @@ $this->registerJs("CKEDITOR.config.emoji_emojiListUrl = '".Yii::getAlias('@web')
         'clientOptions' => [
             'extraPlugins' => 'emoji',
         ]
+    ])->label(Yii::t('app', 'Title')); ?>
+
+    <?= $form->field($model, 'resume')->widget(CKEditor::class, [
+        'options' => ['id' => 'resume', 'rows' => 1],
+        'preset' => 'basic',
+        'clientOptions' => [
+            'extraPlugins' => 'emoji',
+        ]
     ]); ?>
 
     <?= $form->field($model, 'content')->widget(CKEditor::class, [

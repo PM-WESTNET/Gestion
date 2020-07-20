@@ -35,5 +35,26 @@ class PeriodScheduler extends Component implements SchedulerInterface{
         $query->andWhere('from_time<="'.date('H:i:s').'"');
         $query->andWhere('to_time>="'.date('H:i:s').'"');
     }
-    
+
+    /**
+     * Devuelve la próxima fecha de envio de una notificacion
+     */
+    public function getNextSend($notification)
+    {
+
+        $date = (new \DateTime($notification->from_date));
+        $today = (new \DateTime('now'));
+        $from_date = (new \DateTime($notification->from_date));
+        $to_date = (new \DateTime($notification->to_date));
+
+        if($today <= $to_date) {
+            if($today > $from_date){
+                $date = $today;
+            }
+
+            return $date->modify('+1 days')->format('d-m-Y');
+        }
+
+        return '';
+    }
 }

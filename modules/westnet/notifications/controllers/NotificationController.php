@@ -48,7 +48,7 @@ class NotificationController extends Controller {
         $searchModel->programmed = true;
         $dataProvider = $searchModel->search(Yii::$app->request->getQueryParams());
 
-        return $this->render('index', [
+        return $this->render('index_programmed', [
                     'dataProvider' => $dataProvider,
                     'searchModel' => $searchModel
         ]);

@@ -52,6 +52,7 @@ return array(
     'The notification has been deactivated.' => 'La notificación ha sido desactivada.',
     'The notification has been activated.' => 'La notificación ha sido activada.',
     'Subject' => 'Asunto',
+    'Resume' => 'Resumen',
     'Process'  => 'Proceso',
     'Processing...'  => 'Procesando...',
     'Finished'  => 'Finalizado',
@@ -199,4 +200,6 @@ return array(
     'Button payment notify' => 'Botón informe de pago',
     'Button edit data' => 'Botón edición de datos',
     'Button send bill' => 'Botón enviar comprobante',
+
+    'Resume' => 'Resumen',
 );
