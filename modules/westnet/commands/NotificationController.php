@@ -51,12 +51,14 @@ class NotificationController extends Controller
         $this->stdout("\n********************\n".$scheduler->name().":\n", Console::BOLD);
         
         $query = Notification::find();
-        $query->where(['status' => 'enabled']);
-        $query->andWhere('scheduler IS NOT NULL');
-        $query->andWhere(['OR', ['<','last_sent', date('Y-m-d')], ['IS','last_sent', null]]);
+        $query->where(['status' => Notification::STATUS_ENABLED]);
+        $query->andWhere(['not',['scheduler' => NULL]]);
+        $query->andWhere(['OR', ['<','last_sent', date('Y-m-d')], ['last_sent' => null]]);
 
         $scheduler->mergeQuery($query);
         $notifications = $query->all();
+
+        var_dump($query->createCommand()->getRawSql());
 
         foreach($notifications as $notification){
             $this->stdout('Notification: ');
@@ -68,9 +70,26 @@ class NotificationController extends Controller
             $this->stderr($transport->name."\n", Console::BOLD);
             
             $this->stderr("Sending...\n\n");
-            
-            $status = $transport->send($notification);
-            
+
+            //Si es desde email o mobilepush, lo corremos con el mutex correspondiente
+            if($transport->name == 'Email') {
+                if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
+                    $notification->updateAttributes(['status' => 'in_process']);
+                    $status = $transport->send($notification);
+                    $notification->updateAttributes(['status' => 'enabled']);
+                    \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+                }
+            } elseif ($transport->name == 'Mobile Push'){
+                if (\Yii::$app->mutex->acquire('send_mobile_push_'.$notification->notification_id)){
+                    $notification->updateAttributes(['status' => 'in_process']);
+                    $status = $transport->send($notification);
+                    $notification->updateAttributes(['status' => 'enabled']);
+                    \Yii::$app->mutex->release('send_mobile_push_'. $notification->notification_id);
+                }
+            } else {
+                $status = $this->sendNotification($notification);
+            }
+
             if($status['status'] == 'success'){
                 $this->stdout("\nSUCCESS!\n\n\n", Console::BOLD);
             }else{
@@ -97,11 +116,15 @@ class NotificationController extends Controller
         echo "\n";
     }
 
+    /**
+     * Comando para enviar las campañas de email no calendarizadas. Implementa mutex
+     */
     public function actionSendEmails() {
 
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
             ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
+            ->andWhere(['notification.schedule' => null])
             ->all();
 
         foreach ($notifications as $notification) {
@@ -117,14 +140,16 @@ class NotificationController extends Controller
         }
     }
 
-    /*
-     Comando para enviar las notificaciones push. Implementa mutex
-    */
-    public function actionSendMobilePush() {
+    /**
+     * Comando para enviar las notificaciones push no calendarizadas. Implementa mutex
+     */
+    public function actionSendMobilePush()
+    {
 
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
             ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
+            ->andWhere(['notification.schedule' => null])
             ->all();
 
         foreach ($notifications as $notification) {
@@ -134,9 +159,8 @@ class NotificationController extends Controller
                 $transport->send($notification);
 
                 $notification->updateAttributes(['status' => 'sent']);
-                \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+                \Yii::$app->mutex->release('send_mobile_push_'. $notification->notification_id);
             }
-
         }
     }
 }

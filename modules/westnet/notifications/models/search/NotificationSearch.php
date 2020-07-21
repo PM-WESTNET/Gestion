@@ -69,8 +69,6 @@ class NotificationSearch extends Notification {
 
         if ($this->programmed) {
             $query->andWhere(['IS NOT', 'scheduler', null]);
-        }else {
-            $query->andWhere(['OR',['IS', 'scheduler', null], ['scheduler' => '']]);
         }
 
         if (!($this->load($params) && $this->validate())) {

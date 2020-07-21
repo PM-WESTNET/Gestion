@@ -32,8 +32,6 @@ class PeriodScheduler extends Component implements SchedulerInterface{
         
         $query->andWhere('from_date<="'.date('Y-m-d').'"');
         $query->andWhere('to_date>="'.date('Y-m-d').'"');
-        $query->andWhere('from_time<="'.date('H:i:s').'"');
-        $query->andWhere('to_time>="'.date('H:i:s').'"');
     }
 
     /**

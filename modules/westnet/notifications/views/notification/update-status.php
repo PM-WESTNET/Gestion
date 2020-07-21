@@ -1,5 +1,6 @@
 <?php
 
+use app\modules\westnet\notifications\models\Notification;
 use yii\helpers\Html;
 use app\modules\westnet\notifications\NotificationsModule;
 
@@ -21,10 +22,11 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
         <div class="panel-body" style="text-align: center; padding: 60px;">
             <p class="lead">
                 <?php
-                if($model->status != 'enabled'){
-                    echo NotificationsModule::t('app', 'Do you want to activate this notification?');
-                }else{
+
+                if($model->status == Notification::STATUS_ENABLED || $model->status == Notification::STATUS_PENDING){
                     echo NotificationsModule::t('app', 'Do you want to deactivate this notification?');
+                }else{
+                    echo NotificationsModule::t('app', 'Do you want to activate this notification?');
                 }
                 ?>
             </p>

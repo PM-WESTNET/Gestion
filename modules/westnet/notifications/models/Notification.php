@@ -22,6 +22,7 @@ use app\modules\westnet\notifications\NotificationsModule;
  * @property string $subject
  * @property string $name
  * @property string $content
+ * @property string $resume
  * @property string $from_date
  * @property string $from_time
  * @property string $to_date
@@ -112,8 +113,9 @@ class Notification extends ActiveRecord {
             [['button_payment_extension', 'button_payment_notify', 'button_edit_data', 'button_send_bill'], 'boolean'],
             [['transport_id', 'name'], 'required', 'on' => 'create'],
             [['transport_id', 'email_transport_id', 'company_id', 'test_phone_frecuency'], 'integer'],
-            [['content', 'layout', 'test_phone', 'buttons'], 'string'],
-            [['status'], 'in', 'range' => ['created', 'enabled', 'disabled', 'error', 'sent', 'cancelled'], 'on' => 'update-status'],
+            [['content', 'layout', 'test_phone', 'buttons', 'resume'], 'string'],
+            [['status'], 'in', 'range' => [self::STATUS_CREATED, self::STATUS_ENABLED, self::STATUS_DISABLED,
+                self::STATUS_ERROR, self::STATUS_SENT, self::STATUS_CANCELLED, self::STATUS_PENDING], 'on' => 'update-status'],
             [['status'], 'safe'],
             [['test_phone_frecuency'], 'default' , 'value' => 1000],
             [['from_date', 'from_time', 'to_date', 'to_time', 'times_per_day', 'transport'], 'safe', 'on' => 'update'],

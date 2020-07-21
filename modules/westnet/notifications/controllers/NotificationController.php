@@ -139,15 +139,9 @@ class NotificationController extends Controller {
         }
         
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-            $transport = $model->transport;
-            /**
-             * Si le transport es Email, la marcamos como pendiente solamente
-             * Luego el comando en segundo plano se encargara de realizar el envio
-             */
-            if ($transport->name === 'Email'|| $transport->name === 'Mobile Push') {
-                $model->updateAttributes(['status' => 'pending']);
-                Yii::$app->session->setFlash('success', NotificationsModule::t('app', 'The notifications has been sent.'));
-                return $this->redirect(['view', 'id' => $id]);
+            // Si la notificacion no está calendarizada, el cron de envio inmediato debe hacerse cargo, por lo que la pasamos a pending
+            if($model->scheduler == null && $model->status == Notification::STATUS_ENABLED){
+                $model->status = Notification::STATUS_PENDING;
             }
 
             if ($model->save()) {
@@ -160,7 +154,7 @@ class NotificationController extends Controller {
                     ];
                 }
                 
-                if($model->status == 'enabled'){
+                if($model->status == Notification::STATUS_ENABLED || $model->status == Notification::STATUS_PENDING){
                     Yii::$app->session->setFlash('success', NotificationsModule::t('app', 'The notification has been activated.'));
                 }else{
                     Yii::$app->session->setFlash('success', NotificationsModule::t('app', 'The notification has been deactivated.'));

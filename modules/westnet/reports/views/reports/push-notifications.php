@@ -11,7 +11,7 @@ use app\modules\westnet\reports\ReportsModule;
 /* @var $searchModel app\modules\provider\models\search\ProviderBillSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = ReportsModule::t('app', 'Mobile app report')  ;
+$this->title = ReportsModule::t('app', 'Push notifications report')  ;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="provider-bill-index">

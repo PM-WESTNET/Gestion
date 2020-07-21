@@ -325,7 +325,7 @@ class MobilePush extends ActiveRecord
                'customer_id' => $customer_id,
                'notification_title' => MobilePush::replaceText($this->title, $customer_data),
                'notification_content' => MobilePush::replaceText($this->content, $customer_data),
-               'notification_resume' => MobilePush::replaceText($this->resume, $customer_data),
+               'resume' => MobilePush::replaceText($this->resume, $customer_data)
            ]);
 
            if(!$mphua->save()){

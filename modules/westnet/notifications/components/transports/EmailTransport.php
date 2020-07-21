@@ -22,7 +22,6 @@ class EmailTransport implements TransportInterface {
     public function features()
     {
         return [
-            'manualSent',
             'programmable'
         ];
     }

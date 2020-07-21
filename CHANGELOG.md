@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [push-notification]
 ### Configuraciones a verificar
     ver db.php.sample , el cambio de charset en bd de notificaciones
-    ver en params.php.sample key words-to-ignore-in-log
+    ver en params.php.sample key words-to-ignore-in-log 'words-to-ignore-in-log' => ['content', 'subject', 'title', 'resume'],
     
 ### Agregado
   - Notificaciones push: Se agregan referncias en el contenido de la notificacion [AD-57]
