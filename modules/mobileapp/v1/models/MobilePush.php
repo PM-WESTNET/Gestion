@@ -185,13 +185,13 @@ class MobilePush extends ActiveRecord
         $app_id = Config::getValue('one_signal_app_id');
         $data = [];
         $title = $this->cleanTitle;
-        $content = $this->cleanContent;
+        $content = $this->cleanResume;
 
         if($this->getUserApps()->exists()) {
             foreach ($this->mobilePushHasUserApps as $mphua) {
 
                 $title = $mphua->title ? $mphua->title : $this->title;
-                $content = $mphua->content ? $mphua->content : $this->content;
+                $content = $mphua->resume ? $mphua->notificationResume : $this->cleanResume;
                 array_push($data, [
                         'app_id' => $app_id,
                         'headings' => [
