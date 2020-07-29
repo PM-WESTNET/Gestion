@@ -124,7 +124,7 @@ class NotificationController extends Controller
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
             ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
-            ->andWhere(['notification.schedule' => null])
+            ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
             ->all();
 
         foreach ($notifications as $notification) {
@@ -149,7 +149,7 @@ class NotificationController extends Controller
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
             ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
-            ->andWhere(['notification.schedule' => null])
+            ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
             ->all();
 
         foreach ($notifications as $notification) {

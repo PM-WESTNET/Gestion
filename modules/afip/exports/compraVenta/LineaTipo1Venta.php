@@ -39,6 +39,7 @@ class LineaTipo1Venta extends AbstractLine
      *  Cantidad de alícuotas de IVA	242	242	1
      *  Código de operación	243	243	1
      *  Otros Tributos	244	258	15
+     *  Vecha de vencimiento o pago 259 266 8
      */
     public function parse($values)
     {
