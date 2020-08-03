@@ -3,9 +3,10 @@ FROM debian:jessie-slim
 MAINTAINER Marcelo Briones <ing@marcelobriones.com.ar>
 
 RUN apt-get update && apt-get -y install \
-    curl mysql-client git \
+    wget gnupg2 lsb-release curl mysql-client git \
     php5 php5-mysql php5-intl php5-gd php5-curl php5-xdebug\
 	barcode make gcc xvfb xfonts-75dpi fontconfig libxrender1 libjpeg62-turbo
+
 	
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -17,6 +18,12 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 COPY composer.json /root/.composer
 COPY auth.json /root/.composer/auth.json
 RUN composer global update
+
+RUN wget https://repo.percona.com/apt/percona-release_latest.jessie_all.deb
+RUN dpkg -i percona-release_latest.jessie_all.deb
+RUN apt-get update
+RUN apt-get install -y percona-xtrabackup-24
+
 
 RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jessie_amd64.deb -o wkhtmltox_0.12.5-1.xenial_amd64.deb
 RUN dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb

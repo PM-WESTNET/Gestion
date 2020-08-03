@@ -2,13 +2,16 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
-## [push-notification]
-### Configuraciones a verificar
-    ver db.php.sample , el cambio de charset en bd de notificaciones
-    ver en params.php.sample key words-to-ignore-in-log 'words-to-ignore-in-log' => ['content', 'subject', 'title', 'resume'],
-    
-### Agregado
-  - Notificaciones push: Se agregan referncias en el contenido de la notificacion [AD-57]
+
+## [Pendiente de aprobación]
+  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
+  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
+  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
+ 
+  ##[2020.07.03.0]
+  ###Agregado
+  Solicitado y aprobado por Camila
+  - Notificaciones push: Se agregan referencias en el contenido de la notificacion [AD-57]
   - Notificaciones push: Se cambia el envío de notificaciones para que sean personalizadas para cada cliente [AD-57]
   - Notificaciones push: Se agrega referencia a valor de extension de pago, email1, email2 y celular3 [AD-57]
   - Notificaciones push: Se agrega referencia se inserta donde está el cursor del mouse [AD-57]
@@ -19,13 +22,22 @@ All notable changes to this project will be documented in this file.
   - Notificaciones push: Se guarda la fecha y hora del envío de la notificación push [AD-57]
   - Notificaciones push: Se agrega reporte de notificaciones [AD-57]
 
-## [Pendiente de aprobación]
-  - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
-  - Backups: Alerta a email si falla un backup [GES-810]
-  - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
-  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
-
   
+  ##[2020.06.08.0]
+  ### Modificado
+  - Exportación de destinatarios de notificaciones de Infobip: Se quita el límite de ejecución para la exportación. A
+  fin de que se puedan manejar grandes volúmenes de clientes exportados [AD-76] Solicitado por Camila y aprobado por Camila.
+  - Mensajes predefinidos a clientes: Se tienen en cuenta los estados de los mensajes predefinidos a la hora de hacer 
+  el envio de los mismos [AD-77] Solicitado y aprobado por Camila.
+  
+  ##[2020.06.01.0]
+  ###Agregado
+  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] [AD-5]Solicitado Camila y aprobado por Camila  
+  
+  ##[2020.05.28.0]
+  ###Agregado
+  - Backups: Alerta a email si falla un backup [GES-810][GES-823]
+
   ##[2020.05.26.0]
   ### Modificado
   - Edición de contrato: Se corrige el error al actualizar el contrato de un cliente nuevo [AD-55] Solicitado y aprobado por Camila

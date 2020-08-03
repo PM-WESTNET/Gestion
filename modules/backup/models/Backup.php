@@ -1,7 +1,10 @@
 <?php
 namespace app\modules\backup\models;
-use app\modules\config\models\Config;
 use Yii;
+use app\modules\config\models\Config;
+use app\modules\mailing\models\EmailTransport;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 
 /**
  * @property integer $backup_id
@@ -102,25 +105,28 @@ class Backup extends \yii\db\ActiveRecord {
 
     private function notifyError()
     {
-        $msg = <<<BODY
-        <div class="backup-message">
-        <h1>Ocurrió un error al realizar un backup</h1>
-        <hr>
         
-        <h4>Fecha de Inicio: <?php echo $this->init_timestamp; ?></h4>
-        <h4>Base de datos: <?php echo $this->database; ?></h4>
-        <h4>Descripción: <?php echo $this->description; ?></h4>
+        $layout = '@app/modules/backup/views/backup/mail';
+        Yii::$app->mail->htmlLayout = $layout;
+        $emailTransport = EmailTransport::findOne(Config::getValue('defaultEmailTransport'));
         
-</div>   
-BODY;
-        $email = Yii::$app->mailer->compose();
-        $email->setFrom('Backups Automaticos de Gestión');
-        $email->setHtmlBody($msg);
-        $email->setSubject('IMPORTANTE!!! - ERROR EN BACKUP DE GESTION');
-        $email->setTo(explode(',', Config::getValue('backup_emails_notify')));
+        $mailSender = MailSender::getInstance(null, null, null, $emailTransport);
+        $destinataries = explode(',', Config::getValue('backup_emails_notify'));
 
-        $email->send();
+        $messages = [];
+        foreach($destinataries as $destinatary) {
+            $messages[] = $mailSender->prepareMessage(
+                ['email'=>$destinatary, 'name' => $destinatary],
+                'IMPORTANTE!!! - ERROR EN BACKUP DE GESTION',
+                [ 'view'=> $layout ,'params' => [
+                    'init_timestamp' => $this->init_timestamp,
+                    'database' => $this->database,
+                    'description' => $this->description
+                ]]
+            );
+        }
 
+        $result = $mailSender->sendMultiple($messages);
     }
 
 
