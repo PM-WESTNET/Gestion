@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
   - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
  
-  ##[2020.07.03.0]
+  ##[2020.08.03.0]
   ###Agregado
   Solicitado y aprobado por Camila
   - Notificaciones push: Se agregan referencias en el contenido de la notificacion [AD-57]
