@@ -1536,21 +1536,32 @@ class Bill extends ActiveRecord implements CountableInterface
     /**
      * @return bool
      * Envia el comprobante por email al cliente correspondiente.
+     * Se envía un mail por cada correo verificado que tenga
      */
     public function sendEmail($pdfFileName)
     {
         $pointOfSale = $this->getPointOfSale()->number;
 
         $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
-
-        if ($sender->send( $this->customer->email, "Envio de factura de: " . $this->customer->parentCompany->name, [
+        $send_email1 = true;
+        $send_email2 = true;
+        $message_subject = "Envio de factura de: " . $this->customer->parentCompany->name;
+        $message = [
             'params'=>[
                 'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
                 'comprobante'   => $this->billType->name . " " . sprintf("%08d", $this->number )
-            ]],[], [],[$pdfFileName]) ) {
-            return true;
+            ]
+        ];
+
+        if($this->customer->email_status == Customer::EMAIL_STATUS_ACTIVE) {
+            $send_email1 = $sender->send( $this->customer->email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
         }
-        return false;
+
+        if($this->customer->email2_status == Customer::EMAIL_STATUS_ACTIVE) {
+            $send_email2 = $sender->send( $this->customer->email2, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;;
+        }
+
+        return $send_email1 && $send_email2;
     }
 
     /**
