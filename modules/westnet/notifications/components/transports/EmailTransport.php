@@ -4,6 +4,7 @@ namespace app\modules\westnet\notifications\components\transports;
 
 use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\notifications\models\Notification;
 use Yii;
 use yii\base\Component;
@@ -52,7 +53,8 @@ class EmailTransport implements TransportInterface {
         $excel->setActiveSheetIndex(0)
             ->setCellValue('A1', Yii::t('app', 'Name'))
             ->setCellValue('B1', Yii::t('app', 'Lastname'))
-            ->setCellValue('C1', Yii::t('app', 'Email'));
+            ->setCellValue('C1', Yii::t('app', 'Email'))
+            ->setCellValue('D1', Yii::t('app', 'Email 2'));
 
         $i = 2;
 
@@ -62,11 +64,13 @@ class EmailTransport implements TransportInterface {
 
             foreach ($query->batch(1000) as $customers) {
                 foreach ($customers as $customer) {
+                    $email2_active = $customer['email2_status'] == Customer::EMAIL_STATUS_ACTIVE ? true : false;
 
                     $excel->setActiveSheetIndex(0)
                         ->setCellValue('A' . $i, $customer['name'])
                         ->setCellValue('B' . $i, $customer['lastname'])
-                        ->setCellValue('C' . $i, $customer['email']);
+                        ->setCellValue('C' . $i, $customer['email'])
+                        ->setCellValue('D' . $i, $email2_active ? $customer['email2'] : '');
                     $i++;
                 }
                 $excel->getActiveSheet()->getStyle('A1:A' . $i)
