@@ -6,9 +6,13 @@ All notable changes to this project will be documented in this file.
 ## [Pendiente de aprobación]
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
-  - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38] Solicitado Camila
-  - Se agrega el email2 del cliente al envio de notificaciones. [AD-110] Solicitado por Camila.
-  - Se agrega el email2 del cliente al envio de comprobante [AD-110] Solicitado por Camila.
+ 
+  ##[2020.08.11.0]
+  ###Agregado
+  Solicitados y aprobados por Camila
+   - Listado de productos a facturar: Se agrega columna de fecha de creación de los productos a facturar [AD-38]
+   - Se agrega el email2 del cliente al envio de notificaciones. [AD-110]
+   - Se agrega el email2 del cliente al envio de comprobante [AD-110]
  
   ##[2020.08.03.0]
   ###Agregado
