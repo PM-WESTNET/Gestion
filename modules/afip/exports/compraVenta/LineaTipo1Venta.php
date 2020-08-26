@@ -64,7 +64,7 @@ class LineaTipo1Venta extends AbstractLine
         $this->line .= sprintf("%'.015d", (round(abs($values['percepciones_iibb'])*100,2)));
         $this->line .= sprintf("%'.015d", (round(abs($values['percepciones_municipales'])*100,2)));
         $this->line .= sprintf("%'.015d", (round(abs($values['impuestos_internos'])*100,2)));
-        $this->line .= sprintf("%'.03d", $values['codigo_moneda']);
+        $this->line .= $values['codigo_moneda'];
         $this->line .= sprintf("%'.010d", (round($values['tipo_de_cambio']*1000000,2)));
         $this->line .= sprintf("%'.01d", $values['cantidad_iva']);
         $this->line .= sprintf("%'.01d", $values['codigo_operacion']);
