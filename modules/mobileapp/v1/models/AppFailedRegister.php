@@ -81,6 +81,9 @@ class AppFailedRegister extends ActiveRecord
             [['name', 'type'], 'required'],
             [['status', 'text'], 'string'],
             [['customer_code'], 'integer'],
+            [['document_type'], 'default', 'value' => null],
+            [['document_number'], 'default', 'value' => null],
+            [['email'], 'default', 'value' => null],
             [['name', 'document_type', 'document_number', 'phone', 'phone2', 'phone3', 'phone4'], 'string', 'max' => 45],
             [['email', 'email2'], 'string', 'max' => 255]
         ];
