@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
   - Agregado filtro de clientes con app instalada o no en Notificaciones [GES-682] Solicitado por Camila
   - Se deshabilita el boton para alta de contrato una vez clickeado, para evitar duplicidad de contratos - [GES-831] Solicitado por Laura
   - Se cambia el formato en el campo código de moneda en exportacion de Libro de iva ventas []
+  - Se cambia calculo de credito fiscal e impuestos liquidados en libro de iva compras []
   - Se agregan valores por defecto en tabla app_failed_register [AD-113] Solicitado por Camila
  
   ##[2020.08.11.0]
