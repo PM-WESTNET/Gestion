@@ -971,6 +971,37 @@ class CustomerTest extends \Codeception\Test\Unit
         expect('Error al generar código de pago', strlen((string)$paymentCode))->equals(14);
     }
 
+    public function testGetLastClosedBill()
+    {
+        $customer = Customer::findOne(45904);
+        $bill1 = Bill::findOne(10);
+        $bill1->updateAttributes(['status' => Bill::STATUS_DRAFT]);
+        $bill2 = Bill::findOne(11);
+        $bill2->updateAttributes(['status' => Bill::STATUS_DRAFT]);
+
+        expect('Get last closed bill returns false', $customer->getLastClosedBill())->false();
+
+        $bill1->updateAttributes(['status' => Bill::STATUS_CLOSED]);
+
+        $lastClosedBill = $customer->getLastClosedBill();
+        expect('Get last closed bill returns instance of bill_1', $lastClosedBill)->isInstanceOf(Bill::class);
+        expect('Get last closed bill returns bill_1', $lastClosedBill->bill_id)->equals(10);
+
+        $bill1->updateAttributes(['status' => Bill::STATUS_DRAFT]);
+        $bill2->updateAttributes(['status' => Bill::STATUS_CLOSED]);
+
+        $lastClosedBill = $customer->getLastClosedBill();
+        expect('Get last closed bill returns instance of bill_2', $lastClosedBill)->isInstanceOf(Bill::class);
+        expect('Get last closed bill returns bill_2', $lastClosedBill->bill_id)->equals(11);
+
+        $bill1->updateAttributes(['status' => Bill::STATUS_CLOSED]);
+        $bill2->updateAttributes(['status' => Bill::STATUS_CLOSED]);
+
+        $lastClosedBill = $customer->getLastClosedBill();
+        expect('Get last closed bill returns instance of bill_2', $lastClosedBill)->isInstanceOf(Bill::class);
+        expect('Get last closed bill returns bill_2', $lastClosedBill->bill_id)->equals(11);
+    }
+
 
     //TODO resto de la clase
 }

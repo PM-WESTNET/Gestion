@@ -20,5 +20,6 @@ class BillFixture extends ActiveFixture
         CustomerFixture::class,
         UserFixture::class,
         CurrencyFixture::class,
+        BillTypeFixture::class
     ];
 }

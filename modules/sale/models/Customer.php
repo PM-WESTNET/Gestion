@@ -25,6 +25,7 @@ use DateTime;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\db\ActiveQuery;
+use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\validators\RegularExpressionValidator;
@@ -2180,5 +2181,20 @@ class Customer extends ActiveRecord {
             ->one();
 
         return $lastForced;
+    }
+
+    /**
+     * Devuelve el ultimo comprobante cerrado, o false en caso de no encontrar ninguno.
+     */
+    public function getLastClosedBill()
+    {
+        $bill = $this->getBills()
+            ->leftJoin('bill_type bt', 'bill.bill_type_id = bt.bill_type_id')
+            ->andWhere(new Expression('bt.multiplier > 0'))
+            ->andWhere(['status' => Bill::STATUS_CLOSED])
+            ->orderBy(['date' => SORT_DESC])
+            ->one();
+
+        return $bill ? $bill : false;
     }
 }

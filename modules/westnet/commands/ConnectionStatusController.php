@@ -591,7 +591,11 @@ class ConnectionStatusController extends Controller
                             $es_nueva_instalacion = ($date->diff($from_date)->days<=$newContractsDays);
                             $avisa = ($date >= $aviso_date && $date < $cortado_date);
                             $corta = ($date >= $cortado_date);
-                            $es_nuevo = ( $from_date >= $last_bill_date && $from_date <= $bill_date  );
+                            $es_nuevo = ( $from_date >= $last_bill_date && $from_date <= $bill_date );
+                            //Verificamos que la ultima factura cerrada sea del mes corriente.
+                            $last_closed_bill = $customer->getLastClosedBill();
+                            $last_closed_bill_date = $last_closed_bill ? (new \DateTime($last_closed_bill->date)) : false;
+                            $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
 
                             if($debug) {
                                 error_log('tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's': 'n' ) . " - " . ' tiene_deuda: ' . ($tiene_deuda ? 's': 'n' )
@@ -614,18 +618,17 @@ class ConnectionStatusController extends Controller
                                 //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
 
                             } else if( $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED ) {
-                                $dateLastBill = new \DateTime( $this->getLastBill($customer->customer_id) );
                                 /**
                                  * Habilito si:
                                  *  - solo debe la factura del mes actual y la fecha es menor a la de corte
                                  */
-                                if( !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) || ( $debtLastBill <= 1 && $date->format('Y-m') == $dateLastBill->format('Y-m') && $date < $cortado_date ) ) {
+                                if( !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) || ( $debtLastBill <= 1 && $lastBillItsFromActualMonth && $date < $cortado_date ) ) {
                                     $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                                 }
                             } else if(
-                            (!$tiene_deuda ||
+                                (!$tiene_deuda ||
                                 ($tiene_deuda && !$tiene_deuda_sobre_tolerante ) ||
-                                ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && !$corta && !$avisa )
+                                ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && $lastBillItsFromActualMonth && !$corta && !$avisa )
                             )
                             ) {
                                 $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
