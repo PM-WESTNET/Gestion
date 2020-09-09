@@ -79,6 +79,10 @@ if ($total) {
                         $("#bar").css('width', '100%');
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Error')?>")
 
+                    }else if (response.status === 'sent') {
+                        clearInterval(EmailStatus.interval);
+                        $("#bar").css('background-color', 'green');
+                        $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
                     }
                 }
             })
