@@ -52,6 +52,7 @@ class MobilePushTransport extends Transport implements TransportInterface
         foreach ($notification->destinataries as $destinatary){
             $customers = $destinatary->getCustomersQuery()->all();
             if (count($customers) === 0) {
+                $notification->updateAttributes(['error_msg' => 'No customers to send']);
                 return [ 'status' => 'error', 'error' => 'No customers to send'];
             }
 
@@ -65,6 +66,7 @@ class MobilePushTransport extends Transport implements TransportInterface
             $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
         } else {
             $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+            $notification->updateAttributes(['error_msg' => 'Failed to send ']);
             return ['status' => 'error', 'error' => 'Failed to send '];
         }
 

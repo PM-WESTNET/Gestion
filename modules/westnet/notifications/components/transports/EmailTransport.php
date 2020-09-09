@@ -150,6 +150,7 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('error_'.$notification->notification_id);
             Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
             $error = $ex->getMessage();
+            $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
         }
 
