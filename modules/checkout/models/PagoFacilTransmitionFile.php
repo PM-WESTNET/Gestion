@@ -268,8 +268,10 @@ class PagoFacilTransmitionFile extends ActiveRecord {
                         $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower($array_data['payment_method'])."'")->one();
                     }
 
-                    $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
-                    $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
+                    if (!empty($payment_id)) {
+                        $paymentItem[] = [$payment_id, $data['amount'], "PAGO FACIL", $paymentMethod->payment_method_id, $moneyBoxAccount ? $moneyBoxAccount->money_box_account_id : '' ];
+                        $pagofacilPayment[] = [$this->pago_facil_transmition_file_id, $payment_id];
+                    }
                     $total += $data['amount'];
                 }
             }
