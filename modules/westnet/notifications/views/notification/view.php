@@ -17,7 +17,11 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="notification-view">
     <div class="messages">
-        
+        <?php if($model->status === Notification::STATUS_ERROR && $model->error_msg):?>
+            <div class="alert alert-danger">
+                <?= $model->error_msg?>
+            </div>
+        <?php endif;?>
     </div>
     <div class="name title">
         <h1><?= Html::encode($this->title) ?></h1>

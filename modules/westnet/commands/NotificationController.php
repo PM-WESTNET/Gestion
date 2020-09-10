@@ -131,9 +131,14 @@ class NotificationController extends Controller
             if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
                 $notification->updateAttributes(['status' => 'in_process']);
                 $transport = $notification->transport;
-                $transport->send($notification);
+                $result = $transport->send($notification);
 
-                $notification->updateAttributes(['status' => 'sent']);
+                if ($result['status'] === 'success') {
+                    $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+                }else {
+                    $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+                }
+
                 \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
             }
 
