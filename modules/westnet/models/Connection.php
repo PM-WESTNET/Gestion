@@ -466,4 +466,42 @@ class Connection extends ActiveRecord {
 
         $forcedHistory->save(false);
     }
+
+    public static function changeNode(Connection $connection, $destination_node_id)
+    {
+        if ($connection->node_id != $destination_node_id) {
+            $node = Node::findOne(['node_id'=> $destination_node_id]);
+            $connection->old_server_id = $connection->server_id;
+            $connection->server_id = $node->server_id;
+            $connection->node_id = $node->node_id;
+
+            ///?
+            try {
+                Yii::$app->formatter->asDate($connection->due_date, 'yyyy-MM-dd');
+            } catch (\Exception $ex) {
+                $connection->due_date = null;
+            }
+            $connection->updateIp();
+
+            return $connection->save();
+//            if ($connection->save()) {
+//                $response = [
+//                    'status' => 'success'
+//                ];
+//            } else {
+//                $response = [
+//                    'status' => 'error',
+//                    'message' => Yii::t('westnet', 'Can\'t change the Node.')
+//                ];
+//            }
+        }
+
+        return false;
+//        else {
+//            $response = [
+//                'status' => 'error',
+//                'message' => Yii::t('westnet', 'The Node is already assigned.')
+//            ];
+//        }
+    }
 }

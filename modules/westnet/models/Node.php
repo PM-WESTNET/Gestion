@@ -8,6 +8,7 @@ use app\modules\sale\models\Company;
 use Yii;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "node".
@@ -296,5 +297,13 @@ class Node extends \app\components\db\ActiveRecord
         }
 
         return $companies;
+    }
+
+    /**
+     * Devuelve un array con todos los nodos
+     */
+    public function getForSelect()
+    {
+        return ArrayHelper::map(Node::find()->all(), 'node_id', 'name');
     }
 }

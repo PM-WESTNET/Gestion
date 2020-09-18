@@ -76,12 +76,12 @@ class SecureConnectionUpdate
                 if( $isDeleted === false){
                     $connection->revertChangeNode();
                     if(isset(Yii::$app->session)) {
-                        Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo']));
+                        Yii::$app->session->addFlash('error', Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo. Connection_id: ' . $connection->connection_id]));
                     }
                     $has_errors= true;
 
                     if (Yii::$app->request->isConsoleRequest) {
-                        echo Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo']);
+                        echo Yii::t('westnet', 'The connection cant\'t be deleted in Server. {error}', ['error' => 'Nodo. Connection_id: ' . $connection->connection_id]);
                         echo "\n";
                     }
                 } else {

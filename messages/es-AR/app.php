@@ -1354,4 +1354,12 @@
     'Resume' => 'Resumen',
     'From Date Created' => 'Fecha de creación desde',
     'To Date Created' => 'Fecha de creación hasta',
+    'Init massive node change process' => 'Iniciar proceso masivo de cambio nodos',
+    'Ended At' => 'Finalizado en',
+    'Node Change Process' => 'Proceso de cambio de nodo',
+    'Creator User' => 'Creado por',
+    'Process file' => 'Procesar archivo',
+    'Are you sure you want to process the file? This will change all the customers in the file to the selected node.' => '¿Está seguro que quiere procesar el archivo? Esto cambiará todos los clientes del archivo al nodo seleccionado.',
+    'finished' => 'Finalizado',
+    'Connection' => 'Conexión',
  );

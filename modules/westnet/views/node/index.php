@@ -22,6 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
         <p>
+            <?= \app\components\helpers\UserA::a(Yii::t('app', 'Init massive node change process'),  ['node-change-process/create'], ['class' => 'btn btn-warning'])?>
             <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " .  Yii::t('app','Create {modelClass}', ['modelClass'=>Yii::t('westnet', 'Node')]),
             ['create'], 
             ['class' => 'btn btn-success']) 
