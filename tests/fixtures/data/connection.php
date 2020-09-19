@@ -5,7 +5,7 @@ return [
     [
         'connection_id' => 1,
         'contract_id' => 1,
-        'node_id' => 1,
+        'node_id' => 2,
         'server_id' => 1,
         'ip4_1' => 178035818,
         'ip4_2' => 0,
@@ -16,7 +16,7 @@ return [
         'payment_code' => null,
         'status_account' => 'enabled',
         'clean' => 0,
-        'old_server_id' => null,
+        'old_server_id' => 1,
     ],
     [
         'connection_id' => 2,

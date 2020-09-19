@@ -57,7 +57,7 @@ class SecureConnectionBehavior extends Behavior
         }
 
         // Solo actualizo si el contrato no es borrador y estoy deshabilitando la conexion
-        if($contract->status != Contract::STATUS_DRAFT &&
+        if(!YII_ENV_TEST && $contract->status != Contract::STATUS_DRAFT &&
             ( $connection->status_account == Connection::STATUS_ACCOUNT_DISABLED ||
               $connection->status_account == Connection::STATUS_ACCOUNT_ENABLED   ) || 
             $connection->isNodeChanged() || $connection->clean

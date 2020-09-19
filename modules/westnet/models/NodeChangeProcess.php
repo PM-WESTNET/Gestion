@@ -283,4 +283,18 @@ class NodeChangeProcess extends ActiveRecord
             'created_at' => (new \DateTime())->format('Y-m-d H:i:s')
         ]);
     }
+
+    public function  rollback() {
+        
+        $errors= [];
+        foreach($this->nodeChangeHistories as $history) {
+            $r = $history->rollback();
+
+            if($r['status'] === 'error') {
+                $errors= array_merge($errors, $r['errors']);
+            }
+
+        }
+
+    }
 }
