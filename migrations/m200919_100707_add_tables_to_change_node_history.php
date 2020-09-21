@@ -35,7 +35,6 @@ class m200919_100707_add_tables_to_change_node_history extends Migration
             'old_ip' => $this->integer(),
             'new_ip' => $this->integer(),
             'created_at' => $this->dateTime(),
-            'status' => "ENUM('error', 'applied')"
         ]);
 
         $this->addForeignKey('fk_node_change_history_process_id', 'node_change_history', 'node_change_process_id', 'node_change_process', 'node_change_process_id');
@@ -48,7 +47,7 @@ class m200919_100707_add_tables_to_change_node_history extends Migration
      */
     public function safeDown()
     {
-//        $this->dropForeignKey('fk_node_change_history_connection_id', 'node_change_history');
+        $this->dropForeignKey('fk_node_change_history_connection_id', 'node_change_history');
         $this->dropForeignKey('fk_node_change_history_old_node_id', 'node_change_history');
         $this->dropForeignKey('fk_node_change_history_process_id', 'node_change_history');
 

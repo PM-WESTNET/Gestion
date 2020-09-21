@@ -10,7 +10,7 @@ use app\modules\westnet\models\NodeChangeProcess;
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\NodeChangeProcess */
 
-$this->title = $model->node_change_process_id;
+$this->title = 'Cambio de nodo '.$model->node_change_process_id;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Node Change Processes'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -20,13 +20,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
 
-        <?= UserA::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->node_change_process_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
-                'method' => 'post',
-            ],
-        ]); ?>
+        <?php if($model->getDeletable()){
+            echo UserA::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->node_change_process_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    'method' => 'post',
+                ],
+            ]);
+        } ?>
         <?php if($model->status != NodeChangeProcess::STATUS_FINISHED){
             echo UserA::a(Yii::t('app', 'Process file'), ['node-change-process/process-file', 'id' => $model->node_change_process_id], [
                 'class' => 'btn btn-warning pull-right',
@@ -34,6 +36,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'confirm' => Yii::t('app', 'Are you sure you want to process the file? This will change all the customers in the file to the selected node.'),
                     'method' => 'post',
                 ],
+            ]);
+        } else {
+            echo UserA::a(Yii::t('app', 'Generate result csv'), ['node-change-process/generate-result-csv', 'id' => $model->node_change_process_id], [
+                'class' => 'btn btn-default pull-right',
             ]);
         }?>
     </p>
@@ -64,8 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]) ?>
-
-
+    <br>
+    <hr>
+    <h3>Historial de cambios de nodo</h3>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
@@ -99,12 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return long2ip($model->new_ip);
                 }
             ],
-            [
-                'attribute' => 'status',
-                'value' => function($model) {
-                    return Yii::t('app', $model->status);
-                }
-            ],
+            
             [
                 'class' => ActionColumn::class,
                 'template' => '{view} {delete} {rollback}',

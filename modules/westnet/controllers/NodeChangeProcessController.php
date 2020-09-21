@@ -2,6 +2,8 @@
 
 namespace app\modules\westnet\controllers;
 
+use app\components\helpers\EmptyLogger;
+use \app\modules\westnet\components\export\ChangeNodeExport;
 use Yii;
 use yii\filters\VerbFilter;
 use yii\data\ActiveDataProvider;
@@ -149,7 +151,7 @@ class NodeChangeProcessController extends Controller
         if($result['status']){
             Yii::$app->session->addFlash('success', 'Archivo procesado');
             if(!empty($result['errors'])){
-                Yii::$app->session->addFlash('error', 'Errores presente en el archivo');
+                Yii::$app->session->addFlash('error', 'Errores presentes al procesar archivo');
                 foreach ($result['errors'] as $error){
                     Yii::$app->session->addFlash('error', $error);
                 }
@@ -195,5 +197,34 @@ class NodeChangeProcessController extends Controller
         }
 
         return $this->redirect(['index']);
+    }
+        
+    /**
+    * Genera un CSV con el resultado del proceso
+    */
+    public function actionGenerateResultCsv($id)
+    {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
+        $model = $this->findModel($id);
+
+        $csv = new ChangeNodeExport($model->nodeChangeHistories);
+        $csv->parse();
+        $fileName = 'ChangeNodeResult.csv';
+
+        header('Content-Type: text/plain');
+        header('Content-Disposition: attachment;filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header ('Cache-Control: cache, must-revalidate');
+        header ('Pragma: public');
+        try {
+            $csv->writeFile('php://output');
+        } catch( \Exception $ex) {
+            error_log($ex->getMessage());
+        }
+
+        return $this->redirect(['view', 'id' => $id]);
     }
 }

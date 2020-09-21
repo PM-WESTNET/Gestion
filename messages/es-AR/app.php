@@ -1362,4 +1362,9 @@
     'Are you sure you want to process the file? This will change all the customers in the file to the selected node.' => '¿Está seguro que quiere procesar el archivo? Esto cambiará todos los clientes del archivo al nodo seleccionado.',
     'finished' => 'Finalizado',
     'Connection' => 'Conexión',
+    'Old Node' => 'Nodo anterior',
+    'Old Ip' => 'IP anterior',
+    'New Ip' => 'IP actual',
+    'pending' => 'Pendiente',
+    'Generate result csv' => 'Generar CSV de resultado',
  );
