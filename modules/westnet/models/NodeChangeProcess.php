@@ -69,6 +69,7 @@ class NodeChangeProcess extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'node_id' => Yii::t('app', 'Node ID'),
             'creator_user_id' => Yii::t('app', 'Creator User'),
+            'file' => Yii::t('app', 'File'),
         ];
     }
 

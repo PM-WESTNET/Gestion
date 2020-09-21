@@ -1370,5 +1370,5 @@
     'Node Change Processes' => 'Procesos masivos de cambio de nodo',
     'Create Node Change Process' => 'Iniciar proceso masivo de cambio nodos',
     'reverted' => 'Revertido',
-    'applied' => 'Aplicado'
+    'applied' => 'Aplicado',
  );
