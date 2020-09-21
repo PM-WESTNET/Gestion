@@ -24,6 +24,13 @@ class NodeChangeProcessSearch extends NodeChangeProcess
     }
 
     /**
+     * Sobreescribo valores de inicializacion del padre
+     */
+    public function init()
+    {
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function scenarios()

@@ -1367,4 +1367,6 @@
     'New Ip' => 'IP actual',
     'pending' => 'Pendiente',
     'Generate result csv' => 'Generar CSV de resultado',
+    'Node Change Processes' => 'Procesos de cambios de nodos',
+    'Create Node Change Process' => 'Crear proceso de cambio de nodo',
  );
