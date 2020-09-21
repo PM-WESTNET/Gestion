@@ -148,7 +148,7 @@ class NodeChangeProcessController extends Controller
         if($result['status']){
             Yii::$app->session->addFlash('success', 'Archivo procesado');
             if(!empty($result['errors'])){
-                Yii::$app->session->addFlash('error', 'Errores presente en el archivo');
+                Yii::$app->session->addFlash('error', 'Errores presentes al procesar archivo');
                 foreach ($result['errors'] as $error){
                     Yii::$app->session->addFlash('error', $error);
                 }

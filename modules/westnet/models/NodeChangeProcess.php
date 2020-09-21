@@ -5,6 +5,7 @@ namespace app\modules\westnet\models;
 use app\components\db\ActiveRecord;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\components\ChangeNodeReader;
+use Codeception\Util\Debug;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
 use yii\web\UploadedFile;
@@ -189,15 +190,19 @@ class NodeChangeProcess extends ActiveRecord
      */
     public function changeStatus($status)
     {
-        if (in_array($status, NodeChangeProcess::getStatuses())){
+        if (array_key_exists($status, NodeChangeProcess::getStatuses())){
             if($this->status == self::STATUS_CREATED || $this->status == self::STATUS_PENDING){
                 if($status == self::STATUS_FINISHED){
                     $this->updateAttributes(['status' => $status, 'ended_at' => (new \DateTime())->format('Y-m-d H:i:s')]);
-                } else {
-                    $this->updateAttributes(['status' => $status]);
+                    return true;
                 }
+
+                $this->updateAttributes(['status' => $status]);
+                return true;
             }
         }
+
+        return false;
     }
 
     /**
@@ -242,37 +247,33 @@ class NodeChangeProcess extends ActiveRecord
     {
         $errors = [];
         if ($connection->node_id == $new_node_id) {
+            $errors[] = 'El nodo de destino es el nodo actual. Conexion '.$connection->connection_id;
             return ['status' => true, 'errors' => $errors];
         } else {
-            $node = Node::findOne(['node_id'=> $new_node_id]);
-            $node_change_history = $this->fillChangeNodeHistory($connection);
-            $connection->old_server_id = $connection->server_id;
-            $connection->server_id = $node->server_id;
-            $connection->node_id = $new_node_id;
-            $connection->due_date = $connection->due_date? $connection->due_date : null;
-            $connection->updateIp();
-
-            //Lo pongo en un try y catch para poder registrar errores del bahaviour de actualizacion en history
-            $error = false;
             try {
+                $node = Node::findOne(['node_id' => $new_node_id]);
+                $node_change_history = $this->fillChangeNodeHistory($connection);
+                $connection->old_server_id = $connection->server_id;
+                $connection->server_id = $node->server_id;
+                $connection->node_id = $new_node_id;
+                $connection->due_date = $connection->due_date ? $connection->due_date : null;
+                $connection->updateIp();
                 $connection->save();
+
+                $node_change_history->new_ip = $connection->ip4_1;
+                $node_change_history->save();
             } catch (\Exception $ex){
-                $error = true;
-                $errors[] = $ex->getMessage();
+                $errors[] = 'Connection id: '.$connection->connection_id. '. '. $ex->getMessage();
             }
-
-            $node_change_history->new_ip = $connection->ip4_1;
-            $node_change_history->status = $error ? NodeChangeHistory::STATUS_ERROR : NodeChangeHistory::STATUS_APPLIED;
-            $node_change_history->save();
             return ['status' => true, 'errors' => $errors];
-
-
         }
 
         return [ 'status' => false, 'errors' => $errors ];
     }
 
-
+    /**
+     * Llena un modelo ChangeNodeHistory y lo devuelve
+     */
     private function fillChangeNodeHistory(Connection $connection)
     {
         return new NodeChangeHistory([

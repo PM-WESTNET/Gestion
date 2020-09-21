@@ -15,7 +15,6 @@ use Yii;
  * @property int $old_ip
  * @property int $new_ip
  * @property string $created_at
- * @property string $status
  *
  * @property Connection $connection
  * @property Node $newNode
@@ -23,8 +22,6 @@ use Yii;
  */
 class NodeChangeHistory extends ActiveRecord
 {
-    const STATUS_ERROR = 'error';
-    const STATUS_APPLIED = 'applied';
 
     /**
      * {@inheritdoc}
@@ -42,7 +39,7 @@ class NodeChangeHistory extends ActiveRecord
         return [
             [['old_node_id', 'connection_id', 'old_ip', 'new_ip', 'created_at', 'node_change_process_id'], 'required'],
             [['node_change_process_id', 'old_node_id', 'connection_id', 'old_ip', 'new_ip'], 'integer'],
-            [['created_at', 'status'], 'safe'],
+            [['created_at'], 'safe'],
             [['connection_id'], 'exist', 'skipOnError' => true, 'targetClass' => Connection::class, 'targetAttribute' => ['connection_id' => 'connection_id']],
             [['old_node_id'], 'exist', 'skipOnError' => true, 'targetClass' => Node::class, 'targetAttribute' => ['old_node_id' => 'node_id']],
             [['node_change_process_id'], 'exist', 'skipOnError' => true, 'targetClass' => NodeChangeProcess::class, 'targetAttribute' => ['node_change_process_id' => 'node_change_process_id']],

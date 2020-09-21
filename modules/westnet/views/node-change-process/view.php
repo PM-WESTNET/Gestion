@@ -9,7 +9,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\NodeChangeProcess */
 
-$this->title = $model->node_change_process_id;
+$this->title = 'Cambio de nodo '.$model->node_change_process_id;
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Node Change Processes'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -63,8 +63,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ],
     ]) ?>
-
-
+    <br>
+    <hr>
+    <h3>Historial de cambios de nodo</h3>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
