@@ -105,6 +105,10 @@ class NodeChangeHistory extends ActiveRecord
         return $this->hasOne(NodeChangeProcess::class, ['node_change_process_id' => 'node_change_process_id']);
     }
 
+    /**
+     * Revierte el cambio de nodo, asignando el nodo anterior a la conexion.
+     * El rollback se realiza si el cambio fue aplicado correctamente
+     */
     public function rollback() 
     {
         $error = false;

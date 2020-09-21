@@ -289,6 +289,9 @@ class NodeChangeProcess extends ActiveRecord
         ]);
     }
 
+    /**
+     * Recorre cada uno de los registros de cambios realizados y ejecuta el rollback para cada uno
+     */
     public function  rollback() {
         
         $errors= [];
