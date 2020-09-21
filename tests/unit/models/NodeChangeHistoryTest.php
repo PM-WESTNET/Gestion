@@ -51,7 +51,7 @@ class NodeChangeHistoryTest extends Unit
     {
         $connection = Connection::findOne(1);
         $model = new NodeChangeHistory([
-            //'new_node_id' => 1,
+            'old_node_id' => 1,
             'connection_id' => $connection->connection_id,
             'old_ip' => $connection->ip4_1,
             'new_ip' => 1270000001,
@@ -60,6 +60,8 @@ class NodeChangeHistoryTest extends Unit
         ]);
 
         expect('Valid when full and new', $model->validate())->true();
+
+        \Codeception\Util\Debug::debug($model->getErrors());
     }
 
     public function testNotSaveWhenEmptyAndNew()
@@ -72,7 +74,7 @@ class NodeChangeHistoryTest extends Unit
     {
         $connection = Connection::findOne(1);
         $model = new NodeChangeHistory([
-            //'new_node_id' => 1,
+            'old_node_id' => 1,
             'connection_id' => $connection->connection_id,
             'old_ip' => $connection->ip4_1,
             'new_ip' => 1270000001,
