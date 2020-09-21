@@ -3,6 +3,7 @@
 use app\components\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use app\modules\westnet\models\NodeChangeProcess;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\westnet\models\search\NodeChangeProcessSearch */
@@ -48,7 +49,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view}{delete}'
+                'template' => '{view} {delete} {rollback}',
+                'buttons' => [
+                    'rollback' => function($url, $model) {
+                        if ($model->status !== NodeChangeProcess::STATUS_CREATED) {
+                            return Html::a('<span class="glyphicon glyphicon-repeat"></span>', ['node-change-process/rollback-all', 'id' => $model->node_change_process_id],['class' => 'btn btn-warning', 'title' => 'Rollback']);
+                        }
+                    }
+                ]
             ],
         ],
     ]); ?>

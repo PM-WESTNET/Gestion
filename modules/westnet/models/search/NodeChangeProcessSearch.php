@@ -12,6 +12,13 @@ use app\modules\westnet\models\NodeChangeProcess;
  */
 class NodeChangeProcessSearch extends NodeChangeProcess
 {
+
+    public function init() {
+        parent::init();
+
+        //Hacemos estos porque el init del parent pre setea el estado lo que hace que siempre filtre por STATUS_CREATED
+        $this->status = null;
+    }
     /**
      * {@inheritdoc}
      */

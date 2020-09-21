@@ -1,10 +1,11 @@
 <?php
 
-use app\components\helpers\UserA;
-use app\modules\westnet\models\NodeChangeProcess;
-use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\grid\GridView;
 use yii\widgets\DetailView;
+use app\components\helpers\UserA;
+use app\components\grid\ActionColumn;
+use app\modules\westnet\models\NodeChangeProcess;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\NodeChangeProcess */
@@ -103,6 +104,17 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function($model) {
                     return Yii::t('app', $model->status);
                 }
+            ],
+            [
+                'class' => ActionColumn::class,
+                'template' => '{view} {delete} {rollback}',
+                'buttons' => [
+                    'rollback' => function($url, $model) {
+                        if ($model->status !== NodeChangeProcess::STATUS_CREATED) {
+                            return Html::a('<span class="glyphicon glyphicon-repeat"></span>', ['node-change-process/rollback-history', 'history_id' => $model->node_change_history_id],['class' => 'btn btn-warning', 'title' => 'Rollback']);
+                        }
+                    }
+                ]
             ],
         ]
     ])?>

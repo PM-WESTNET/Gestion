@@ -296,5 +296,10 @@ class NodeChangeProcess extends ActiveRecord
 
         }
 
+        return [
+            'status' => empty($errors) ? true : false,
+            'errors' => $errors
+        ];
+
     }
 }
