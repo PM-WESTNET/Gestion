@@ -22,6 +22,10 @@ use Yii;
  */
 class NodeChangeHistory extends ActiveRecord
 {
+    const STATUS_ERROR = 'error';
+    const STATUS_APPLIED = 'applied';
+    const STATUS_REVERTED = 'reverted';
+    const STATUS_PENDING = 'pending';
 
     /**
      * {@inheritdoc}
@@ -39,7 +43,7 @@ class NodeChangeHistory extends ActiveRecord
         return [
             [['old_node_id', 'connection_id', 'old_ip', 'new_ip', 'created_at', 'node_change_process_id'], 'required'],
             [['node_change_process_id', 'old_node_id', 'connection_id', 'old_ip', 'new_ip'], 'integer'],
-            [['created_at'], 'safe'],
+            [['created_at', 'status'], 'safe'],
             [['connection_id'], 'exist', 'skipOnError' => true, 'targetClass' => Connection::class, 'targetAttribute' => ['connection_id' => 'connection_id']],
             [['old_node_id'], 'exist', 'skipOnError' => true, 'targetClass' => Node::class, 'targetAttribute' => ['old_node_id' => 'node_id']],
             [['node_change_process_id'], 'exist', 'skipOnError' => true, 'targetClass' => NodeChangeProcess::class, 'targetAttribute' => ['node_change_process_id' => 'node_change_process_id']],
@@ -99,5 +103,37 @@ class NodeChangeHistory extends ActiveRecord
     public function getNodeChangeProcess()
     {
         return $this->hasOne(NodeChangeProcess::class, ['node_change_process_id' => 'node_change_process_id']);
+    }
+
+    public function rollback() 
+    {
+        $error = false;
+        $errors= [];
+
+        if ($this->status === self::STATUS_APPLIED) {
+
+            $this->connection->ip4_1 = $this->old_ip;
+            $this->connection->node_id = $this->old_node_id;
+            $oldServer =  $this->connection->old_server_id;
+            $this->connection->old_server_id = $this->connection->server_id;
+            $this->connection->server_id = $oldServer;
+            
+            
+            try {
+                $this->connection->save();
+            } catch (\Exception $ex){
+                $error = true;
+                $errors[] = $ex->getMessage();
+            }
+            
+            if (!$error) {
+                $this->updateAttributes(['status' => self::STATUS_REVERTED]);
+                return ['status' => 'success'];
+            }
+        }else {
+            $errors[]= 'No se puede revertir o ya se revirtió';
+        }
+
+        return ['status' => 'error', 'errors' => $errors];
     }
 }

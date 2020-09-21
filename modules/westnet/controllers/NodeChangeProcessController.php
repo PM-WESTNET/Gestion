@@ -5,13 +5,14 @@ namespace app\modules\westnet\controllers;
 use app\components\helpers\EmptyLogger;
 use \app\modules\westnet\components\export\ChangeNodeExport;
 use Yii;
+use yii\filters\VerbFilter;
+use yii\data\ActiveDataProvider;
+use app\components\web\Controller;
+use yii\web\NotFoundHttpException;
+use yii\debug\models\timeline\DataProvider;
 use app\modules\westnet\models\NodeChangeProcess;
 use app\modules\westnet\models\search\NodeChangeProcessSearch;
-use yii\data\ActiveDataProvider;
-use yii\debug\models\timeline\DataProvider;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
+use app\modules\westnet\models\NodeChangeHistory;
 
 /**
  * NodeChangeProcessController implements the CRUD actions for NodeChangeProcess model.
@@ -23,14 +24,14 @@ class NodeChangeProcessController extends Controller
      */
     public function behaviors()
     {
-        return [
+        return array_merge(parent::behaviors(), [
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-        ];
+        ]);
     }
 
     /**
@@ -163,6 +164,39 @@ class NodeChangeProcessController extends Controller
         }
 
         return $this->redirect(['view', 'id' => $id]);
+    }
+
+    public function actionRollbackAll($id) 
+    {
+        $model = $this->findModel($id);
+
+        $result = $model->rollback();
+
+        if (!$result['status']) {
+            foreach($result['errors'] as $error) {
+                Yii::$app->session->addFlash('error', $error);
+            }
+        }
+
+        return $this->redirect(['index']);
+    }
+
+    public function actionRollbackHistory($history_id)
+    {
+        $model = NodeChangeHistory::findOne($history_id);
+
+        if ($model) {
+
+            $result = $model->rollback();
+            
+            if ($result['status'] === 'error') {
+                foreach($result['errors'] as $error) {
+                    Yii::$app->session->addFlash('error', $error);
+                }
+            }
+        }
+
+        return $this->redirect(['view', 'id' => $model->node_change_process_id]);
     }
 
     /**

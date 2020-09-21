@@ -29,6 +29,7 @@ class NodeChangeProcess extends ActiveRecord
     const STATUS_CREATED  = 'created';
     const STATUS_PENDING  = 'pending';
     const STATUS_FINISHED = 'finished';
+    const STATUS_REVERTED = 'reverted';
 
     public $file;
     /**
@@ -183,6 +184,7 @@ class NodeChangeProcess extends ActiveRecord
             self::STATUS_CREATED => Yii::t('app', self::STATUS_CREATED),
             self::STATUS_PENDING => Yii::t('app', self::STATUS_PENDING),
             self::STATUS_FINISHED => Yii::t('app', self::STATUS_FINISHED),
+            self::STATUS_REVERTED => Yii::t('app', self::STATUS_REVERTED),
         ];
     }
 
@@ -198,9 +200,10 @@ class NodeChangeProcess extends ActiveRecord
                     return true;
                 }
 
-                $this->updateAttributes(['status' => $status]);
-                return true;
             }
+
+            $this->updateAttributes(['status' => $status]);
+            return true;
         }
 
         return false;
@@ -282,7 +285,29 @@ class NodeChangeProcess extends ActiveRecord
             'connection_id' => $connection->connection_id,
             'old_ip' => $connection->ip4_1,
             'node_change_process_id' => $this->node_change_process_id,
+            'status' => NodeChangeHistory::STATUS_APPLIED,
             'created_at' => (new \DateTime())->format('Y-m-d H:i:s')
         ]);
+    }
+
+    public function  rollback() {
+        
+        $errors= [];
+        foreach($this->nodeChangeHistories as $history) {
+            $r = $history->rollback();
+
+            if($r['status'] === 'error') {
+                $errors= array_merge($errors, $r['errors']);
+            }
+
+        }
+
+        $this->changeStatus(self::STATUS_REVERTED);
+
+        return [
+            'status' => empty($errors) ? true : false,
+            'errors' => $errors
+        ];
+
     }
 }
