@@ -40,6 +40,7 @@ $this->params['breadcrumbs'][] = $this->title;
         } else {
             echo UserA::a(Yii::t('app', 'Generate result csv'), ['node-change-process/generate-result-csv', 'id' => $model->node_change_process_id], [
                 'class' => 'btn btn-default pull-right',
+                'target' => '_blank'
             ]);
         }?>
     </p>

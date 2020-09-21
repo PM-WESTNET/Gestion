@@ -211,7 +211,7 @@ class NodeChangeProcessController extends Controller
 
         $csv = new ChangeNodeExport($model->nodeChangeHistories);
         $csv->parse();
-        $fileName = 'ChangeNodeResult.csv';
+        $fileName = 'ChangeNodeResult'.$model->node_change_process_id.'.csv';
 
         header('Content-Type: text/plain');
         header('Content-Disposition: attachment;filename="'.$fileName.'"');
@@ -224,7 +224,5 @@ class NodeChangeProcessController extends Controller
         } catch( \Exception $ex) {
             error_log($ex->getMessage());
         }
-
-        return $this->redirect(['view', 'id' => $id]);
     }
 }
