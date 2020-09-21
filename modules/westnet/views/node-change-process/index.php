@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view} {delete} {rollback}',
                 'buttons' => [
                     'rollback' => function($url, $model) {
-                        if ($model->status !== NodeChangeProcess::STATUS_CREATED) {
+                        if ($model->status === NodeChangeProcess::STATUS_FINISHED) {
                             return Html::a('<span class="glyphicon glyphicon-repeat"></span>', ['node-change-process/rollback-all', 'id' => $model->node_change_process_id],['class' => 'btn btn-warning', 'title' => 'Rollback']);
                         }
                     }

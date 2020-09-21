@@ -25,6 +25,7 @@ class NodeChangeHistory extends ActiveRecord
     const STATUS_ERROR = 'error';
     const STATUS_APPLIED = 'applied';
     const STATUS_REVERTED = 'reverted';
+    const STATUS_PENDING = 'pending';
 
     /**
      * {@inheritdoc}
@@ -42,7 +43,7 @@ class NodeChangeHistory extends ActiveRecord
         return [
             [['old_node_id', 'connection_id', 'old_ip', 'new_ip', 'created_at', 'node_change_process_id'], 'required'],
             [['node_change_process_id', 'old_node_id', 'connection_id', 'old_ip', 'new_ip'], 'integer'],
-            [['created_at'], 'safe'],
+            [['created_at', 'status'], 'safe'],
             [['connection_id'], 'exist', 'skipOnError' => true, 'targetClass' => Connection::class, 'targetAttribute' => ['connection_id' => 'connection_id']],
             [['old_node_id'], 'exist', 'skipOnError' => true, 'targetClass' => Node::class, 'targetAttribute' => ['old_node_id' => 'node_id']],
             [['node_change_process_id'], 'exist', 'skipOnError' => true, 'targetClass' => NodeChangeProcess::class, 'targetAttribute' => ['node_change_process_id' => 'node_change_process_id']],

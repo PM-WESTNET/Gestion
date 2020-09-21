@@ -12,7 +12,7 @@ class m200919_110454_add_revert_status_node_change_history extends Migration
      */
     public function safeUp()
     {
-        $this->alterColumn('node_change_history', 'status', "ENUM('error', 'applied', 'reverted')");
+        $this->addColumn('node_change_history', 'status', "ENUM('error', 'applied', 'reverted', 'pending')");
     }
 
     /**
@@ -20,21 +20,8 @@ class m200919_110454_add_revert_status_node_change_history extends Migration
      */
     public function safeDown()
     {
-        $this->alterColumn('node_change_history', 'status', "ENUM('error', 'applied')");
+        $this->dropColumn('node_change_history', 'status');
     }
 
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m200919_000454_add_revert_status_node_change_history cannot be reverted.\n";
-
-        return false;
-    }
-    */
+   
 }

@@ -6,6 +6,7 @@ use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use app\components\grid\ActionColumn;
 use app\modules\westnet\models\NodeChangeProcess;
+use app\modules\westnet\models\NodeChangeHistory;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\NodeChangeProcess */
@@ -29,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ]);
         } ?>
-        <?php if($model->status != NodeChangeProcess::STATUS_FINISHED){
+        <?php if($model->status != NodeChangeProcess::STATUS_FINISHED && $model->status != NodeChangeProcess::STATUS_REVERTED){
             echo UserA::a(Yii::t('app', 'Process file'), ['node-change-process/process-file', 'id' => $model->node_change_process_id], [
                 'class' => 'btn btn-warning pull-right',
                 'data' => [
@@ -42,9 +43,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'btn btn-default pull-right',
                 'target' => '_blank'
             ]);
+
+            echo UserA::a('<span class="glyphicon glyphicon-repeat"></span> '.Yii::t('app', 'Rollback'), ['node-change-process/rollback-all', 'id' => $model->node_change_process_id], [
+                'class' => 'btn btn-warning pull-right',
+            ]);
         }?>
     </p>
-
+        <br>
+        <br>
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
@@ -107,13 +113,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     return long2ip($model->new_ip);
                 }
             ],
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return Yii::t('app', $model->status);
+                }
+            ],
             
             [
                 'class' => ActionColumn::class,
                 'template' => '{view} {delete} {rollback}',
                 'buttons' => [
                     'rollback' => function($url, $model) {
-                        if ($model->status !== NodeChangeProcess::STATUS_CREATED) {
+                        if ($model->status == NodeChangeHistory::STATUS_APPLIED) {
                             return Html::a('<span class="glyphicon glyphicon-repeat"></span>', ['node-change-process/rollback-history', 'history_id' => $model->node_change_history_id],['class' => 'btn btn-warning', 'title' => 'Rollback']);
                         }
                     }

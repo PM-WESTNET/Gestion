@@ -196,9 +196,9 @@ class NodeChangeProcessController extends Controller
             }
         }
 
-        return $this->redirect(['index']);
+        return $this->redirect(['view', 'id' => $model->node_change_process_id]);
     }
-        
+
     /**
     * Genera un CSV con el resultado del proceso
     */
