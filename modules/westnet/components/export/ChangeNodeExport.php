@@ -23,7 +23,7 @@ class ChangeNodeExport extends AbstractExportWriter
         }
 
         try {
-            $this->addLine( new LineResult(), ['new_ip' => 'ip_anterior', 'old_ip' => 'ip_nueva']);
+            $this->addLine( new LineResult(), ['new_ip' => 'ip_nueva', 'old_ip' => 'ip_anterior']);
             foreach ($this->data as $data) {
                 $this->addLine( new LineResult(), $data);
             }
