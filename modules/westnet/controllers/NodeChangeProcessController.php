@@ -2,6 +2,8 @@
 
 namespace app\modules\westnet\controllers;
 
+use app\components\helpers\EmptyLogger;
+use \app\modules\westnet\components\export\ChangeNodeExport;
 use Yii;
 use app\modules\westnet\models\NodeChangeProcess;
 use app\modules\westnet\models\search\NodeChangeProcessSearch;
@@ -158,6 +160,35 @@ class NodeChangeProcessController extends Controller
             foreach ($result['errors'] as $error){
                 Yii::$app->session->addFlash('error', $error);
             }
+        }
+
+        return $this->redirect(['view', 'id' => $id]);
+    }
+
+    /**
+    * Genera un CSV con el resultado del proceso
+    */
+    public function actionGenerateResultCsv($id)
+    {
+        set_time_limit(0);
+        Yii::setLogger(new EmptyLogger());
+
+        $model = $this->findModel($id);
+
+        $csv = new ChangeNodeExport($model->nodeChangeHistories);
+        $csv->parse();
+        $fileName = 'ChangeNodeResult.csv';
+
+        header('Content-Type: text/plain');
+        header('Content-Disposition: attachment;filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+        header('Cache-Control: max-age=1');
+        header ('Cache-Control: cache, must-revalidate');
+        header ('Pragma: public');
+        try {
+            $csv->writeFile('php://output');
+        } catch( \Exception $ex) {
+            error_log($ex->getMessage());
         }
 
         return $this->redirect(['view', 'id' => $id]);

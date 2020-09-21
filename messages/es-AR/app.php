@@ -1365,5 +1365,6 @@
     'Old Node' => 'Nodo anterior',
     'Old Ip' => 'IP anterior',
     'New Ip' => 'IP actual',
-    ''
+    'pending' => 'Pendiente',
+    'Generate result csv' => 'Generar CSV de resultado',
  );

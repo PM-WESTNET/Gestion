@@ -19,13 +19,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
 
-        <?= UserA::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->node_change_process_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
-                'method' => 'post',
-            ],
-        ]); ?>
+        <?php if($model->getDeletable()){
+            echo UserA::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->node_change_process_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    'method' => 'post',
+                ],
+            ]);
+        } ?>
         <?php if($model->status != NodeChangeProcess::STATUS_FINISHED){
             echo UserA::a(Yii::t('app', 'Process file'), ['node-change-process/process-file', 'id' => $model->node_change_process_id], [
                 'class' => 'btn btn-warning pull-right',
@@ -33,6 +35,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     'confirm' => Yii::t('app', 'Are you sure you want to process the file? This will change all the customers in the file to the selected node.'),
                     'method' => 'post',
                 ],
+            ]);
+        } else {
+            echo UserA::a(Yii::t('app', 'Generate result csv'), ['node-change-process/generate-result-csv', 'id' => $model->node_change_process_id], [
+                'class' => 'btn btn-default pull-right',
             ]);
         }?>
     </p>
@@ -97,12 +103,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'new_ip',
                 'value' => function($model) {
                     return long2ip($model->new_ip);
-                }
-            ],
-            [
-                'attribute' => 'status',
-                'value' => function($model) {
-                    return Yii::t('app', $model->status);
                 }
             ],
         ]
