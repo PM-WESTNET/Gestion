@@ -89,7 +89,7 @@ class NodeChangeHistoryTest extends Unit
         $history = NodeChangeHistory::findOne(1);
         $result = false;
         if ($history) {
-            $oldServer = $history->connection->old_server_id;
+            $oldServer = $history->oldNode->server_id;
             $history->rollback();
 
             $result = $history->status === 'reverted' && $history->connection->ip4_1 === $history->old_ip 
@@ -123,5 +123,20 @@ class NodeChangeHistoryTest extends Unit
         }
 
         expect('Fail rollback', $r)->false();
+    }
+
+    public function testRollbackConectionServerIsNotNull()
+    {
+        $history = NodeChangeHistory::findOne(1);
+        $result = false;
+        if ($history) {
+            $oldServer = $history->connection->old_server_id;
+            $history->rollback();
+
+            expect('Server is null', $history->connection->server_id)->notEmpty();
+            return;
+        }
+
+        expect('History not found', false)->true();
     }
 }

@@ -15,6 +15,7 @@ use Yii;
  * @property int $old_ip
  * @property int $new_ip
  * @property string $created_at
+ * @property int $old_server_id
  *
  * @property Connection $connection
  * @property Node $newNode
@@ -43,7 +44,7 @@ class NodeChangeHistory extends ActiveRecord
         return [
             [['old_node_id', 'connection_id', 'old_ip', 'new_ip', 'created_at', 'node_change_process_id'], 'required'],
             [['node_change_process_id', 'old_node_id', 'connection_id', 'old_ip', 'new_ip'], 'integer'],
-            [['created_at', 'status'], 'safe'],
+            [['created_at', 'status', 'old_server_id'], 'safe'],
             [['connection_id'], 'exist', 'skipOnError' => true, 'targetClass' => Connection::class, 'targetAttribute' => ['connection_id' => 'connection_id']],
             [['old_node_id'], 'exist', 'skipOnError' => true, 'targetClass' => Node::class, 'targetAttribute' => ['old_node_id' => 'node_id']],
             [['node_change_process_id'], 'exist', 'skipOnError' => true, 'targetClass' => NodeChangeProcess::class, 'targetAttribute' => ['node_change_process_id' => 'node_change_process_id']],
@@ -118,9 +119,8 @@ class NodeChangeHistory extends ActiveRecord
 
             $this->connection->ip4_1 = $this->old_ip;
             $this->connection->node_id = $this->old_node_id;
-            $oldServer =  $this->connection->old_server_id;
             $this->connection->old_server_id = $this->connection->server_id;
-            $this->connection->server_id = $oldServer;
+            $this->connection->server_id = $this->old_server_id;
             
             
             try {

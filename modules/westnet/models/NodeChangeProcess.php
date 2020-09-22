@@ -286,7 +286,8 @@ class NodeChangeProcess extends ActiveRecord
             'old_ip' => $connection->ip4_1,
             'node_change_process_id' => $this->node_change_process_id,
             'status' => NodeChangeHistory::STATUS_APPLIED,
-            'created_at' => (new \DateTime())->format('Y-m-d H:i:s')
+            'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
+            'old_server_id' => $connection->server_id
         ]);
     }
 

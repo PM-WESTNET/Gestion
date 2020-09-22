@@ -32,7 +32,7 @@ return [
         'payment_code' => null,
         'status_account' => 'clipped',
         'clean' => 0,
-        'old_server_id' => null,
+        'old_server_id' => 1,
     ],
     [
         'connection_id' => 3,
@@ -48,7 +48,7 @@ return [
         'payment_code' => null,
         'status_account' => 'enabled',
         'clean' => 0,
-        'old_server_id' => null,
+        'old_server_id' => 1,
     ],
 //    [
 //        'connection_id' => 4,
