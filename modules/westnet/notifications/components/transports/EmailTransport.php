@@ -13,6 +13,8 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 use yii\validators\EmailValidator;
 use PHPExcel;
 use PHPExcel_IOFactory;
+use app\components\helpers\FileLog;
+
 /**
  * Description of EmailTransport
  *
@@ -89,6 +91,9 @@ class EmailTransport implements TransportInterface {
      */
     public function send($notification, $force_send = false){
 
+        $log = $notification->name . '-'. date('d-m-Y h:mm');
+        FileLog::addLog($log, 'Comenzando envio de notificación');
+
         $emails = [];
         foreach($notification->destinataries as $destinataries){
             $emails = array_merge($emails, $destinataries->getEmails());
@@ -97,7 +102,11 @@ class EmailTransport implements TransportInterface {
         Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
         Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
+        FileLog::addLog($log, 'Cantidad de correos a enviar: ' . count($emails));
+
         $max_rate = (int)Config::getValue('aws_max_send_rate');
+
+        FileLog::addLog($log, 'Cuota máxima por segundo: ' . $max_rate);
 
         //Le restamos 2 al maximo de cuota por segundo para asegurarnos nunca alcanzarla
         $chunks = array_chunk($emails, ($max_rate - 2), true);
@@ -117,8 +126,10 @@ class EmailTransport implements TransportInterface {
             //Por cada grupo
             foreach($chunks as $chunk){
                 $messages = [];
+                FileLog::addLog($log, 'Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk) );
 
                 foreach($chunk as $toMail => $customer_data){
+                    FileLog::addLog($log, 'Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code']);
                     $toName = $customer_data['name'].' '.$customer_data['lastname'];
                     $clone = clone $notification;
                     $clone->content = self::replaceText($notification->content, $customer_data);
@@ -130,6 +141,8 @@ class EmailTransport implements TransportInterface {
                         );
                     }else{
                         $error .= " $toName <$toMail>; ";
+                        FileLog::addLog($log, 'Correo Inválido: ' . $toMail. ' - Customer '. $customer_data['code']);
+
                     }
 
                 }
@@ -137,6 +150,8 @@ class EmailTransport implements TransportInterface {
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;
+                FileLog::addLog($log, 'Enviados hasta ahora' . $ok . ' de ' . count($emails));
+
                 Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                 Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
                 Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
@@ -149,6 +164,10 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
             Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
+
+            FileLog::addLog($log, 'Error: ' . $ex->getMessage());
+            FileLog::addLog($log, $ex->getTraceAsString());
+
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
@@ -157,11 +176,14 @@ class EmailTransport implements TransportInterface {
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);
         if($ok){
+            FileLog::addLog($log, 'Total de correos enviados: ' . $ok);
+            FileLog::addLog($log, 'Finalizado Correctamente');
             return [
                 'status' => 'success',
                 'count' => $ok
             ];
         }else{
+            FileLog::addLog($log, 'Finalizado con error');
             return [
                 'status' => 'error',
                 'error' => $error
