@@ -91,8 +91,7 @@ class EmailTransport implements TransportInterface {
      */
     public function send($notification, $force_send = false){
 
-        $log = $notification->name . '-'. date('d-m-Y h:mm');
-        FileLog::addLog($log, 'Comenzando envio de notificación');
+        Yii::info('Comenzando envio de notificación: ' . $notification->notification_id, 'emails');
 
         $emails = [];
         foreach($notification->destinataries as $destinataries){
@@ -102,11 +101,11 @@ class EmailTransport implements TransportInterface {
         Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
         Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
-        FileLog::addLog($log, 'Cantidad de correos a enviar: ' . count($emails));
+        Yii::info('Cantidad de correos a enviar: ' . count($emails), 'emails');
 
         $max_rate = (int)Config::getValue('aws_max_send_rate');
 
-        FileLog::addLog($log, 'Cuota máxima por segundo: ' . $max_rate);
+        Yii::info('Cuota máxima por segundo: ' . $max_rate, 'emails');
 
         //Le restamos 2 al maximo de cuota por segundo para asegurarnos nunca alcanzarla
         $chunks = array_chunk($emails, ($max_rate - 2), true);
@@ -126,10 +125,10 @@ class EmailTransport implements TransportInterface {
             //Por cada grupo
             foreach($chunks as $chunk){
                 $messages = [];
-                FileLog::addLog($log, 'Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk) );
+                Yii::info('Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk), 'emails' );
 
                 foreach($chunk as $toMail => $customer_data){
-                    FileLog::addLog($log, 'Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code']);
+                    Yii::info('Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
                     $toName = $customer_data['name'].' '.$customer_data['lastname'];
                     $clone = clone $notification;
                     $clone->content = self::replaceText($notification->content, $customer_data);
@@ -141,7 +140,7 @@ class EmailTransport implements TransportInterface {
                         );
                     }else{
                         $error .= " $toName <$toMail>; ";
-                        FileLog::addLog($log, 'Correo Inválido: ' . $toMail. ' - Customer '. $customer_data['code']);
+                        Yii::info('Correo Inválido: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
 
                     }
 
@@ -150,7 +149,7 @@ class EmailTransport implements TransportInterface {
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;
-                FileLog::addLog($log, 'Enviados hasta ahora' . $ok . ' de ' . count($emails));
+                Yii::info('Enviados hasta ahora' . $ok . ' de ' . count($emails), 'emails');
 
                 Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                 Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
@@ -165,8 +164,8 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('error_'.$notification->notification_id);
             Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
 
-            FileLog::addLog($log, 'Error: ' . $ex->getMessage());
-            FileLog::addLog($log, $ex->getTraceAsString());
+            Yii::info('Error: ' . $ex->getMessage(), 'emails');
+            Yii::info($ex->getTraceAsString(), 'emails');
 
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
@@ -176,14 +175,14 @@ class EmailTransport implements TransportInterface {
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);
         if($ok){
-            FileLog::addLog($log, 'Total de correos enviados: ' . $ok);
-            FileLog::addLog($log, 'Finalizado Correctamente');
+            Yii::info('Total de correos enviados: ' . $ok, 'emails');
+            Yii::info('Finalizado Correctamente', 'emails');
             return [
                 'status' => 'success',
                 'count' => $ok
             ];
         }else{
-            FileLog::addLog($log, 'Finalizado con error');
+            Yii::info('Finalizado con error', 'emails');
             return [
                 'status' => 'error',
                 'error' => $error
