@@ -32,7 +32,7 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id', 'company_config_id'], 'required'],
+            [['customer_id'], 'required'],
             [['customer_id', 'company_config_id'], 'integer'],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::className(), 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
@@ -46,7 +46,7 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     {
         return [
             'firstdata_automatic_debit_id' => Yii::t('app', 'Firstdata Automatic Debit ID'),
-            'customer_id' => Yii::t('app', 'Customer ID'),
+            'customer_id' => Yii::t('app', 'Customer'),
             'company_config_id' => Yii::t('app', 'Company Config ID'),
         ];
     }
@@ -73,5 +73,21 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     public function getFirstdataDebitHasExports()
     {
         return $this->hasMany(FirstdataDebitHasExport::className(), ['firstdata_automatic_debit_id' => 'firstdata_automatic_debit_id']);
+    }
+
+    public function beforeSave($insert) {
+
+        if ($this->customer_id) {
+            $config = FirstdataCompanyConfig::findOne(['company_id' => $this->customer->company_id]);
+
+            if ($config){
+                $this->company_config_id = $config->firstdata_company_config_id;
+            } else {
+                $this->addError('config_company_id', Yii::t('app', 'The customer`s company havent firstdata configurations'));
+                return false;
+            }
+        }
+
+        return parent::beforeSave($insert);
     }
 }

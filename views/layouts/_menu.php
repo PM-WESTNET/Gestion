@@ -196,7 +196,8 @@ if (Yii::$app->getModule('checkout')) {
             ['label'=>Yii::t('app','Banks for Automatic Debit'), 'url'=>['/automaticdebit/bank/index']],
             ['label'=>Yii::t('app','Automatic Debit'), 'url'=>['/automaticdebit/automatic-debit/index']],
             '<li class="divider"></li>',
-            ['label'=>Yii::t('app','Firstdata Company Configs'), 'url'=>['/firstdata/firtsdata-company-config/index']],
+            ['label'=>Yii::t('app','Firstdata Automatic Debit'), 'url'=>['/firstdata/firstdata-automatic-debit/index']],
+            ['label'=>Yii::t('app','Firstdata Company Configs'), 'url'=>['/firstdata/firstdata-company-config/index']],
 
     ]];
 }

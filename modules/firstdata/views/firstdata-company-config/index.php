@@ -16,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a(Yii::t('app', 'Create Firstdata Company Config'), ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<span class="glyphicon glyphicon-plus"></span> ' . Yii::t('app', 'Create Firstdata Company Config'), ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= GridView::widget([
@@ -26,8 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'firstdata_company_config_id',
+            [
+                'attribute' => 'company_id',
+                'value' => function ($model) {
+                    if ($model->company) {
+                        return $model->company->name;
+                    }
+                }
+            ],
             'commerce_number',
-            'company_id',
 
             ['class' => 'yii\grid\ActionColumn'],
         ],
