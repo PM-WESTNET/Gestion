@@ -12,8 +12,18 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
+    <?php if ($model->hasErrors()):?>
+        <div class="alert alert-danger">
+            <?= Html::errorSummary($model)?>
+        </div>
+    <?php endif;?>
+
     <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
 
+    <?= $form->field($model, 'status')->dropDownList([
+        'enabled' => Yii::t('app', 'Enabled'),
+        'disabled' => Yii::t('app', 'Disabled'),
+    ])?>
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

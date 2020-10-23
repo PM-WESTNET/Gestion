@@ -198,6 +198,8 @@ if (Yii::$app->getModule('checkout')) {
             '<li class="divider"></li>',
             ['label'=>Yii::t('app','Firstdata Automatic Debit'), 'url'=>['/firstdata/firstdata-automatic-debit/index']],
             ['label'=>Yii::t('app','Firstdata Company Configs'), 'url'=>['/firstdata/firstdata-company-config/index']],
+            ['label'=>Yii::t('app','Firstdata Exports'), 'url'=>['/firstdata/firstdata-export/index']],
+            ['label'=>Yii::t('app','Firstdata Imports'), 'url'=>['/firstdata/firstdata-import/index']],
 
     ]];
 }

@@ -10,6 +10,7 @@ use app\modules\sale\models\Customer;
  *
  * @property int $firstdata_automatic_debit_id
  * @property int $customer_id
+ * @property string $status
  * @property int $company_config_id
  *
  * @property Customer $customer
@@ -32,7 +33,8 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id'], 'required'],
+            [['customer_id', 'status'], 'required'],
+            [['status'], 'string'],
             [['customer_id', 'company_config_id'], 'integer'],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::className(), 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
@@ -47,6 +49,7 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
         return [
             'firstdata_automatic_debit_id' => Yii::t('app', 'Firstdata Automatic Debit ID'),
             'customer_id' => Yii::t('app', 'Customer'),
+            'status' => Yii::t('app', 'Status'),
             'company_config_id' => Yii::t('app', 'Company Config ID'),
         ];
     }

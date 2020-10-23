@@ -6,7 +6,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model app\modules\firstdata\models\FirstdataAutomaticDebit */
 
-$this->title = $model->firstdata_automatic_debit_id;
+$this->title = Yii::t('app', 'Firstdata Automatic Debit'). ': '. $model->customer->fullName . ' ('. $model->customer->code . ')';
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Firstdata Automatic Debits'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -29,8 +29,24 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'firstdata_automatic_debit_id',
-            'customer_id',
-            'company_config_id',
+            [
+                'attribute' => 'customer_id',
+                'value' => function($model) {
+                    return $model->customer->fullName;
+                }
+            ],
+            [
+                'label' => Yii::t('app','Code'),
+                'value' => function($model) {
+                    return $model->customer->code;
+                }
+            ],
+            [
+                'attribute' => 'company_config_id',
+                'value' => function($model) {
+                    return $model->companyConfig->company->name;
+                }
+            ],
         ],
     ]) ?>
 

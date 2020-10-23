@@ -1,6 +1,9 @@
 <?php namespace models;
 
 use app\modules\firstdata\models\FirstdataCompanyConfig;
+use app\tests\fixtures\CompanyFixture;
+use app\tests\fixtures\FirstdataConfigCompanyFixture;
+use app\tests\fixtures\CustomerFixture;
 
 class FirstdataConfigCompanyTest extends \Codeception\Test\Unit
 {
@@ -15,6 +18,18 @@ class FirstdataConfigCompanyTest extends \Codeception\Test\Unit
 
     protected function _after()
     {
+    }
+
+    public function _fixtures() {
+        return [
+            [
+                'class' => CompanyFixture::class
+            ],
+            
+            [
+                'class' => FirstdataConfigCompanyFixture::class
+            ],
+        ];
     }
 
     public function testSaveFailOnNew() {
