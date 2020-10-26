@@ -6,6 +6,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\bills\Bill;
+use app\modules\firstdata\components\FirstdataExport as Export;
 
 /**
  * This is the model class for table "firstdata_export".
@@ -99,6 +100,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
         return $this->hasOne(FirstdataCompanyConfig::className(), ['firstdata_company_config_id' => 'firstdata_config_id']);
     }
 
+    // Formateo de fechas antes de guardar
     private function formatDatesBeforeSave() 
     {
         if ($this->from_date) {
@@ -110,6 +112,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
         }
     }
 
+    // Formateo de Fechas luego de buscar
     private function formatDatesAfterFind() 
     {
         if ($this->from_date) {
@@ -149,6 +152,10 @@ class FirstdataExport extends \yii\db\ActiveRecord
         $this->formatDatesAfterFind();
     }
 
+    /*
+        Busca y enlaza con la exportacion, los comprobantes correspondientes al rango de tiempo indicado
+        El comprobante no debe estar en otra exportacion
+    */
     public function linkBills() 
     {
         $customers = Customer::find()
@@ -181,11 +188,58 @@ class FirstdataExport extends \yii\db\ActiveRecord
                 ];
             }
 
+            // Usamos un batch insert para evitar insertar la relacion comprobante por comprobante
             Yii::$app->db->createCommand()
                 ->batchInsert('bill_has_firstdata_export', ['bill_id', 'firstdata_export_id'], $billsHasExport)
                 ->execute();
 
         }    
 
+    }
+
+    /**
+     * Devuelve la suma del total de todos los comprobantes
+     */
+    public function getTotalImport()
+    {
+        $bills = $this->bills;
+        $total = 0;
+
+        foreach($bills as $bill) {
+            $total += $bill->total;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Genera el archivo para subir a Firstdata
+     */
+    public function export()
+    {
+        $filePath = Yii::getAlias('@app') . '/web/firstdataExports/'. $this->firstdata_export_id;
+
+        if (!file_exists($filePath)) {
+            mkdir($filePath, 0777);
+        }
+
+        $file = $filePath . '/DA168D.txt';
+
+        $resource = fopen($file, 'w+');
+
+        if (!$resource) {
+            return false;
+        }
+
+        $resource = Export::createFile($this, $resource);
+
+        fclose($resource);
+
+        $this->updateAttributes([
+            'status' => 'exported',
+            'file_url' => $file
+        ]);
+
+        return true;
     }
 }

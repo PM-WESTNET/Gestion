@@ -132,4 +132,25 @@ class FirstdataExportController extends Controller
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
+
+    /**
+     * Genera el archivo para firstdata
+     */
+    public function actionCreateFile($id) 
+    {
+        $model = $this->findModel($id);
+
+        if (!$model->export()) {
+            Yii::$app->session->addFlash('error', Yii::t('app', 'Cant generate Firstdata file'));
+        }
+
+        return $this->redirect(['view', 'id' => $model->firstdata_export_id]);
+    }
+
+    public function actionDownload($id) 
+    {
+        $model = $this->findModel($id);
+
+        return Yii::$app->response->sendFile($model->file_url);
+    }
 }

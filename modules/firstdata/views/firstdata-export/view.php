@@ -10,7 +10,8 @@ use yii\grid\ActionColumn;
 /* @var $this yii\web\View */
 /* @var $model app\modules\firstdata\models\FirstdataExport */
 
-$this->title = Yii::t('app', 'Firstdata Export') . ': ' . $model->firstdataConfig->company->name . ' - ' . Yii::$app->formatter->asDate($model->created_at, 'dd-MM-yyyy');
+$this->title = Yii::t('app', 'Firstdata Export') . ': ' . $model->firstdataConfig->company->name . ' - ' .
+     Yii::$app->formatter->asDate($model->created_at, 'dd-MM-yyyy');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Firstdata Exports'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -26,6 +27,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?php if ($model->status === 'draft'):?>
+            <?= Html::a('<span class="glyphicon glyphicon-export"></span> '. Yii::t('app', 'Generate File'),
+             ['create-file', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-success'])?>
+        <?php endif;?>
+
+        <?php if ($model->status === 'exported'):?>
+            <?= Html::a('<span class="glyphicon glyphicon-download"></span> '. Yii::t('app', 'Download File'),
+             ['download', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-warning'])?>
+        <?php endif;?>
     </p>
 
     <?= DetailView::widget([
