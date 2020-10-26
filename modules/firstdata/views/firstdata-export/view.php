@@ -2,11 +2,15 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\grid\GridView;
+use yii\data\ActiveDataProvider;
+use yii\grid\SerialColumn;
+use yii\grid\ActionColumn;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\firstdata\models\FirstdataExport */
 
-$this->title = $model->firstdata_export_id;
+$this->title = Yii::t('app', 'Firstdata Export') . ': ' . $model->firstdataConfig->company->name . ' - ' . Yii::$app->formatter->asDate($model->created_at, 'dd-MM-yyyy');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Firstdata Exports'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -15,7 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->firstdata_export_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -29,10 +32,57 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'firstdata_export_id',
-            'created_at',
-            'file_url:url',
-            'firstdata_config_id',
+            [
+                'attribute' => 'firstdata_config_id',
+                'value' => function($model) {
+                    return $model->firstdataConfig->company->name;
+                }
+            ],
+            'created_at:datetime',
+            'file_url',
+            'from_date',
+            'to_date'
         ],
     ]) ?>
+
+    <h3><?= Yii::t('app', 'Bills')?></h3>
+
+    <hr>
+
+    <?=
+    
+        GridView::widget([
+            'dataProvider' => new ActiveDataProvider(['query' => $model->getBills()]),
+            'columns' => [
+                ['class' => SerialColumn::class],
+
+                [
+                    'label' => Yii::t('app', 'Customer'),
+                    'value' => function($model) {
+                        return $model->customer->fullName . ' (' . $model->customer->code . ')';
+                    }
+                ],
+                [
+                    'label' => Yii::t('app', 'Number'),
+                    'value' => function($model) {
+                        return $model->number;
+                    }
+                ],
+
+                [
+                    'class' => ActionColumn::class,
+                    'buttons' => [
+                        'view' => function($url, $model) {
+                            return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', 
+                            ['/sale/bill/view', 'id' => $model->bill_id], 
+                            ['class' => 'btn btn-default', 'target' => '_blank']);
+                        }
+                    ],
+                    'template' => '{view}'
+                ]
+            ]
+        ])
+    
+    ?>
 
 </div>

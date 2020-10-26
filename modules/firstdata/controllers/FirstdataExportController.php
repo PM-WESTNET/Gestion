@@ -8,6 +8,8 @@ use app\modules\firstdata\models\search\FirstdataExportSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use app\modules\firstdata\models\FirstdataCompanyConfig;
 
 /**
  * FirstdataExportController implements the CRUD actions for FirstdataExport model.
@@ -70,8 +72,11 @@ class FirstdataExportController extends Controller
             return $this->redirect(['view', 'id' => $model->firstdata_export_id]);
         }
 
+        $companies_config = ArrayHelper::map(FirstdataCompanyConfig::find()->all(), 'firstdata_company_config_id', 'company.name');
+
         return $this->render('create', [
             'model' => $model,
+            'companies_config' => $companies_config
         ]);
     }
 
@@ -90,8 +95,11 @@ class FirstdataExportController extends Controller
             return $this->redirect(['view', 'id' => $model->firstdata_export_id]);
         }
 
+        $companies_config = ArrayHelper::map(FirstdataCompanyConfig::find()->all(), 'firstdata_company_config_id', 'company.name');
+
         return $this->render('update', [
             'model' => $model,
+            'companies_config' => $companies_config
         ]);
     }
 
