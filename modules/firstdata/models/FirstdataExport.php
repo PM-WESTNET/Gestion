@@ -51,7 +51,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['firstdata_config_id', 'from_date'], 'required'],
+            [['firstdata_config_id', 'from_date', 'presentation_date', 'due_date'], 'required'],
             [['created_at', 'firstdata_config_id'], 'integer'],
             [['file_url'], 'string', 'max' => 255],
             [['firstdata_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::className(), 'targetAttribute' => ['firstdata_config_id' => 'firstdata_company_config_id']],
@@ -68,6 +68,9 @@ class FirstdataExport extends \yii\db\ActiveRecord
             'created_at' => Yii::t('app', 'Created At'),
             'file_url' => Yii::t('app', 'File Url'),
             'firstdata_config_id' => Yii::t('app', 'Firstdata Config ID'),
+            'presentation_date' => Yii::t('app', 'Presentation Date'),
+            'due_date' => Yii::t('app', 'Due Date'),
+
         ];
     }
 
@@ -110,6 +113,14 @@ class FirstdataExport extends \yii\db\ActiveRecord
         if ($this->to_date) {
             $this->to_date = strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'));
         }
+
+        if ($this->presentation_date) {
+            $this->presentation_date = strtotime(Yii::$app->formatter->asDate($this->presentation_date, 'yyyy-MM-dd'));
+        }
+
+        if ($this->due_date) {
+            $this->due_date = strtotime(Yii::$app->formatter->asDate($this->due_date, 'yyyy-MM-dd'));
+        }
     }
 
     // Formateo de Fechas luego de buscar
@@ -122,6 +133,14 @@ class FirstdataExport extends \yii\db\ActiveRecord
         if ($this->to_date) {
             $this->to_date = Yii::$app->formatter->asDate($this->to_date, 'dd-MM-yyyy');
             
+        }
+
+        if ($this->presentation_date) {
+            $this->presentation_date = Yii::$app->formatter->asDate($this->presentation_date, 'dd-MM-yyyy');
+        }
+
+        if ($this->due_date) {
+            $this->due_date = Yii::$app->formatter->asDate($this->due_date, 'dd-MM-yyyy');
         }
     }
 

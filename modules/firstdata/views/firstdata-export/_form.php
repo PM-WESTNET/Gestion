@@ -32,6 +32,16 @@ use yii\jui\DatePicker;
         'dateFormat' => 'dd-MM-yyyy'
     ])?>
 
+    <?= $form->field($model, 'presentation_date')->widget(DatePicker::class, [
+        'options' => ['class' => 'form-control'],
+        'dateFormat' => 'dd-MM-yyyy'
+    ])?>
+
+    <?= $form->field($model, 'due_date')->widget(DatePicker::class, [
+        'options' => ['class' => 'form-control'],
+        'dateFormat' => 'dd-MM-yyyy'
+    ])?>
+
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>
