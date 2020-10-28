@@ -3,6 +3,8 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use yii\web\UploadedFile;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "firstdata_import".
@@ -18,6 +20,8 @@ use Yii;
  */
 class FirstdataImport extends \yii\db\ActiveRecord
 {
+
+    public $response;
     /**
      * {@inheritdoc}
      */
@@ -26,15 +30,29 @@ class FirstdataImport extends \yii\db\ActiveRecord
         return 'firstdata_import';
     }
 
+    public function behaviors()
+    {
+        return array_merge(parent::behaviors(), [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    self::EVENT_BEFORE_INSERT => ['created_at']
+                ]
+            ]
+        ]);
+    }
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['presentation_date', 'created_at', 'status', 'response_file'], 'required'],
+            [['response_file'], 'required'],
             [['presentation_date', 'created_at'], 'integer'],
             [['status'], 'string'],
+            [['response', 'total', 'registers'],  'safe'],
+            [['response'], 'file', 'extension' => 'txt'],
             [['response_file', 'observation_file'], 'string', 'max' => 255],
         ];
     }
@@ -60,5 +78,29 @@ class FirstdataImport extends \yii\db\ActiveRecord
     public function getFirstdataImportPayments()
     {
         return $this->hasMany(FirstdataImportPayment::className(), ['firstdata_import_id' => 'firstdata_import_id']);
+    }
+
+    public function uploadFiles()
+    {
+        if (empty($this->response) || !$this->validate('response')) {
+            return false;
+        }
+
+        $response = UploadedFile::getInstance($this, 'response');
+        $filepath = Yii::getAlias('@app').'/web/firstdata_imports/'.$this->firstdata_import_id;
+        
+        if (!file_exists($filepath)) {
+            mkdir($filepath, 0777);
+        }
+        
+        $filename = $filepath . '/'. $response->name . '.'. $response->extension;
+        
+        $response->saveAs($filename);
+        
+        $this->response_file = $filename;
+
+
+        return true;
+
     }
 }

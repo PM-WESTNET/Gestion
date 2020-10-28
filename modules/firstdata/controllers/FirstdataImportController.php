@@ -66,7 +66,7 @@ class FirstdataImportController extends Controller
     {
         $model = new FirstdataImport();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->uploadFiles() && $model->save()) {
             return $this->redirect(['view', 'id' => $model->firstdata_import_id]);
         }
 
