@@ -34,9 +34,10 @@ class FirstdataImportPayment extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['firstdata_import_payment_id', 'firstdata_import_id', 'customer_code', 'status'], 'required'],
+            [['firstdata_import_id', 'customer_code', 'status'], 'required'],
             [['firstdata_import_payment_id', 'firstdata_import_id', 'customer_code', 'customer_id', 'payment_id'], 'integer'],
-            [['status'], 'string'],
+            [['status', 'error'], 'string'],
+            [['amount'], 'double'],
             [['firstdata_import_payment_id'], 'unique'],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['firstdata_import_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataImport::className(), 'targetAttribute' => ['firstdata_import_id' => 'firstdata_import_id']],

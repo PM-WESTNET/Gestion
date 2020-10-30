@@ -8,6 +8,8 @@ use app\modules\firstdata\models\search\FirstdataImportSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use app\modules\accounting\models\MoneyBoxAccount;
 
 /**
  * FirstdataImportController implements the CRUD actions for FirstdataImport model.
@@ -70,8 +72,12 @@ class FirstdataImportController extends Controller
             return $this->redirect(['view', 'id' => $model->firstdata_import_id]);
         }
 
+        $accounts = ArrayHelper::map(MoneyBoxAccount::find()
+        ->all(), 'money_box_account_id', 'account.name');
+
         return $this->render('create', [
             'model' => $model,
+            'accounts' => $accounts
         ]);
     }
 

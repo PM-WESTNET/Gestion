@@ -5,6 +5,7 @@ namespace app\modules\firstdata\models;
 use Yii;
 use yii\web\UploadedFile;
 use yii\behaviors\TimestampBehavior;
+use app\modules\firstdata\components\FirstdataImport as Import;
 
 /**
  * This is the model class for table "firstdata_import".
@@ -48,11 +49,11 @@ class FirstdataImport extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['response_file'], 'required'],
+            [['response_file', 'money_box_account_id'], 'required'],
             [['presentation_date', 'created_at'], 'integer'],
             [['status'], 'string'],
             [['response', 'total', 'registers'],  'safe'],
-            [['response'], 'file', 'extension' => 'txt'],
+            [['response'], 'file', 'extensions' => 'txt'],
             [['response_file', 'observation_file'], 'string', 'max' => 255],
         ];
     }
@@ -82,7 +83,7 @@ class FirstdataImport extends \yii\db\ActiveRecord
 
     public function uploadFiles()
     {
-        if (empty($this->response) || !$this->validate('response')) {
+        if (!$this->validate('response')) {
             return false;
         }
 
@@ -102,5 +103,12 @@ class FirstdataImport extends \yii\db\ActiveRecord
 
         return true;
 
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        Import::processFile($this);
     }
 }
