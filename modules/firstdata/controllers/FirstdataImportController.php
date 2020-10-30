@@ -130,4 +130,32 @@ class FirstdataImportController extends Controller
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
     }
+
+    public function actionClosePayments($id) {
+        $model = $this->findModel($id);
+        $errors = 0;
+        foreach($model->firstdataImportPayments as $importPayment) {
+            if ($importPayment->payment) {
+                if ($importPayment->payment->close()) {
+                    $importPayment->updateAttributes(['status' => 'success']);
+                }else {
+                    $importPayment->updateAttributes(['status' => 'error']);
+                    Yii::$app->session->addFlash('error', Yii::t('app','Can`t close payment: {payment}', ['payment' => $importPayment->payment->payment_id]));
+                    $errors++;
+                }
+            }
+        }
+
+        if ($errors == 0) {
+            Yii::$app->session->addFlash('success', 'Payments closed successfully');
+        }else {
+            Yii::$app->session->addFlash('warning', 'Any payments cant be closed');
+
+        }
+
+        $model->updateAttributes(['status' => 'success']);
+
+        return $this->redirect(['view', 'id' => $model->firstdata_import_id]);
+
+    }
 }

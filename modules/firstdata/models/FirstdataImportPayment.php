@@ -3,6 +3,8 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\modules\sale\models\Customer;
+use app\modules\checkout\models\Payment;
 
 /**
  * This is the model class for table "firstdata_import_payment".

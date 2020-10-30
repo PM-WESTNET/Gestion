@@ -2,6 +2,7 @@
 
 namespace app\modules\firstdata\components;
 
+use Yii;
 use app\modules\sale\models\Customer;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentMethod;
@@ -33,6 +34,8 @@ class FirstdataImport
                         $amount = (double)(substr($line, 40, 9) . '.' . substr($line, 49, 2));
                         $reject_code = substr($line, 58, 2);
                         $period = substr($line, 60, 5);
+
+                        Yii::trace($line);
 
                         if ($customer) {
                             self::createPayment($customer, $amount, $reject_code,$period, $import, $paymentMethod->payment_method_id);
@@ -66,19 +69,20 @@ class FirstdataImport
                     'paycheck_id' => null
                 ]);
 
-                return self::createImportPayment($import, $amount, $customer->code, $payment->payment_id);
+                return self::createImportPayment($import, $amount, $customer->code, $customer->customer_id,$payment->payment_id, "00");
             }
         } else {
-            self::createImportPayment($import, $amount, $customer->code, null, "100");
+            self::createImportPayment($import, $amount, $customer->code, null, null, "100");
         }
     }
 
-    private static function createImportPayment($import, $amount, $customer_code, $payment_id = null, $error = null)
+    private static function createImportPayment($import, $amount, $customer_code, $customer_id = null, $payment_id = null, $error = null)
     {
         $importPayment = new FirstdataImportPayment([
             'firstdata_import_id' => $import->firstdata_import_id,
             'payment_id' => $payment_id,
             'customer_code' => $customer_code,
+            'customer_id' => $customer_id,
             'amount' => $amount,
             'status' => 'pending',
             'error' => $error !== "00" ? self::getErrorMessage($error) : null

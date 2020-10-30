@@ -113,7 +113,7 @@ class m201019_190930_firstdata_tables extends Migration
           ENGINE = InnoDB");
 
         $this->execute("CREATE TABLE IF NOT EXISTS `firstdata_import_payment` (
-            `firstdata_import_payment_id` INT NOT NULL,
+            `firstdata_import_payment_id` INT NOT NULL AUTO_INCREMENT,
             `firstdata_import_id` INT NOT NULL,
             `customer_code` INT NOT NULL,
             `customer_id` INT(11) NULL,
