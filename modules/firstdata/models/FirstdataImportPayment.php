@@ -54,9 +54,9 @@ class FirstdataImportPayment extends \yii\db\ActiveRecord
     {
         return [
             'firstdata_import_payment_id' => Yii::t('app', 'Firstdata Import Payment ID'),
-            'firstdata_import_id' => Yii::t('app', 'Firstdata Import ID'),
-            'customer_code' => Yii::t('app', 'Customer Code'),
-            'customer_id' => Yii::t('app', 'Customer ID'),
+            'firstdata_import_id' => Yii::t('app', 'Firstdata Import'),
+            'customer_code' => Yii::t('app', 'Code'),
+            'customer_id' => Yii::t('app', 'Customer'),
             'payment_id' => Yii::t('app', 'Payment ID'),
             'status' => Yii::t('app', 'Status'),
         ];

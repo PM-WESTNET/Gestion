@@ -47,10 +47,10 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'firstdata_automatic_debit_id' => Yii::t('app', 'Firstdata Automatic Debit ID'),
+            'firstdata_automatic_debit_id' => Yii::t('app', 'Firstdata Automatic Debit'),
             'customer_id' => Yii::t('app', 'Customer'),
             'status' => Yii::t('app', 'Status'),
-            'company_config_id' => Yii::t('app', 'Company Config ID'),
+            'company_config_id' => Yii::t('app', 'Company'),
         ];
     }
 

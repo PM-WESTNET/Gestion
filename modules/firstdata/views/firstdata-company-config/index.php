@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'commerce_number',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            ['class' => 'app\components\grid\ActionColumn'],
         ],
     ]); ?>
 </div>

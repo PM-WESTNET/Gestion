@@ -25,11 +25,23 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'firstdata_automatic_debit_id',
-            'customer_id',
-            'company_config_id',
+            [
+                'attribute' => 'customer_id',
+                'value' => function($model) {
+                    return $model->customer->fullName . ' ('. $model->customer->code . ')';
+                }
+                
+            ],
+            [
+                'attribute' => 'company_config_id', 
+                'value' => function($model) {
+                    return $model->companyConfig->company->name;
+                }
+            ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'app\components\grid\ActionColumn'
+            ],
         ],
     ]); ?>
 </div>

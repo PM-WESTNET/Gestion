@@ -20,6 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
+        <?php if (!$model->getBillHasFirstdataExports()->exists()):?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->firstdata_export_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -27,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?php endif;?>
         <?php if ($model->status === 'draft'):?>
             <?= Html::a('<span class="glyphicon glyphicon-export"></span> '. Yii::t('app', 'Generate File'),
              ['create-file', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-success'])?>

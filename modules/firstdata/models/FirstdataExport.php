@@ -64,10 +64,10 @@ class FirstdataExport extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'firstdata_export_id' => Yii::t('app', 'Firstdata Export ID'),
+            'firstdata_export_id' => Yii::t('app', 'Firstdata Export'),
             'created_at' => Yii::t('app', 'Created At'),
             'file_url' => Yii::t('app', 'File Url'),
-            'firstdata_config_id' => Yii::t('app', 'Firstdata Config ID'),
+            'firstdata_config_id' => Yii::t('app', 'Company'),
             'presentation_date' => Yii::t('app', 'Presentation Date'),
             'due_date' => Yii::t('app', 'Due Date'),
 

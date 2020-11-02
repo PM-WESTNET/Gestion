@@ -64,7 +64,7 @@ class FirstdataImport extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'firstdata_import_id' => Yii::t('app', 'Firstdata Import ID'),
+            'firstdata_import_id' => Yii::t('app', 'Firstdata Import'),
             'presentation_date' => Yii::t('app', 'Presentation Date'),
             'created_at' => Yii::t('app', 'Created At'),
             'status' => Yii::t('app', 'Status'),

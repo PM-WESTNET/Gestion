@@ -1371,4 +1371,21 @@
     'Create Node Change Process' => 'Iniciar proceso masivo de cambio nodos',
     'reverted' => 'Revertido',
     'applied' => 'Aplicado',
+    'Firstdata Automatic Debit' => 'Débito Automático Firstdata',
+    'Commerce Number' => 'Número de Comercio',
+    'File Url' => 'Url de Archivo',
+    'Presentation Date' => 'Fecha de Presentación',
+    'Due Date' => 'Fecha de Vencimiento',
+    'Response File' => 'Archivo de Respuesta',
+    'Firstdata Import' => 'Importación Firstdata',
+    'Firstdata Export' => 'Exportación Firstdata',
+    'Firstdata Exports' => 'Exportaciones Firstdata',
+    'Firstdata Imports' => 'Importaciones Firstdata',
+    'Firstdata Company Configs' => 'Configuraciones Empresas Firstdata',
+    'Firstdata Automatic Debits' => 'Débitos Automáticos Firstdata',
+    'Create Firstdata Automatic Debit' => 'Agregar Débito Automático',
+    'Create Firstdata Company Config' => 'Configurar Empresa',
+    'Create Firstdata Export' => 'Nueva Exportación',
+    'Download File' => 'Descargar Archivo'
+
  );

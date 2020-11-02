@@ -46,7 +46,7 @@ class FirstdataCompanyConfig extends \yii\db\ActiveRecord
         return [
             'firstdata_company_config_id' => Yii::t('app', 'Firstdata Company Config ID'),
             'commerce_number' => Yii::t('app', 'Commerce Number'),
-            'company_id' => Yii::t('app', 'Company ID'),
+            'company_id' => Yii::t('app', 'Company'),
         ];
     }
 

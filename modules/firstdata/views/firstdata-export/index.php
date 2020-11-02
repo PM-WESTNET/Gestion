@@ -26,11 +26,19 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'firstdata_export_id',
-            'created_at',
-            'file_url:url',
-            'firstdata_config_id',
+            'created_at:timestamp',
+            'file_url',
+            [
+                'attribute' => 'firstdata_config_id',
+                'value' => function($model) {
+                    return $model->firstdataConfig->company->name;
+                }
+            ],
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'app\components\grid\ActionColumn',
+                'template' => '{view}'
+            ],
         ],
     ]); ?>
 </div>
