@@ -160,7 +160,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            $this->linkBills();
+            $this->linkBills(); //Si estamos insertando, busco los comprobantes
         }
     }
 

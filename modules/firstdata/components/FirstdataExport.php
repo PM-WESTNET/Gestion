@@ -3,7 +3,7 @@
 namespace app\modules\firstdata\components;
 
 use Yii;
-
+use yii\web\Application;
 
 class FirstdataExport {
 
@@ -17,6 +17,16 @@ class FirstdataExport {
         fwrite($resource, self::headerLine($export) . PHP_EOL);
 
         foreach($export->bills as $bill) {
+            $card = CustomerDataHelper::getCustomerCreditCard($bill->customer->code);
+
+            if ($card === false) {
+                if (Yii::$app instanceof Application) {
+                    Yii::$app->session->addFlash('error', Yii::t('app','Customer data not found . Customer : {code}', ['code' => $bill->customer->code]));
+                }
+
+                continue;
+            }
+
             fwrite($resource, self::detailLine($export, $bill) . PHP_EOL);
         }
 
@@ -24,6 +34,9 @@ class FirstdataExport {
 
     }
 
+    /**
+     * Devuelve la linea de cabecera para el archivo
+     */
     private static function headerLine($export)
     {
         $commerce = str_pad($export->firstdataConfig->commerce_number, 8, '0', STR_PAD_LEFT);
@@ -47,11 +60,14 @@ class FirstdataExport {
 
     }
 
+    /**
+     * Devuelve la linea correspondiente al detalle del comprobante recibido
+     */
     private static function detailLine($export, $bill)
     {
         $commerce = str_pad($export->firstdataConfig->commerce_number, 8, '0', STR_PAD_LEFT);
         $register = "2";
-        $card = CustomerDataHelper::getCustomerCreditCard($bill->customer);
+        $card = CustomerDataHelper::getCustomerCreditCard($bill->customer->code);
         $reference = str_pad($bill->customer->code, 12, '0', STR_PAD_LEFT);
         $quote = "001";
         $plan_quotes = "999";
