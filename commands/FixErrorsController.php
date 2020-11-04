@@ -296,44 +296,56 @@ class FixErrorsController extends \yii\console\Controller
         }
     }
 
+    /**
+        Corrige el periodo de facturacion de un proceso de facturacion, corrigiendo las facturas y los productos a facturar
+    */
     public function actionFixPeriodInvoiceProcess(array $invoiceProcesses, $newPeriod)
     {
-        foreach($invoiceProcesses as $process) {
-            $invPro = \Yii::$app->db->createCommand("SELECT * FROM invoice_process where invoice_process_id = $process")->queryOne();
+        $transaction = \Yii::$app->db->beginTransaction();
 
-            if ($invPro) {
-                $oldPeriod = $invPro['period'];
+        try {
 
-                $bills = Bill::find()->andWhere(['invoice_process_id' => $process])->all();
-
-                foreach($bills as $bill) {
-                    $details = $bill->billDetails;
-
-                    foreach($details as $detail) {
-                        $concept = $detail->concept;
-                        $arrayConcept = explode(' - ', $concept);
-
-                        if ($arrayConcept[count($arrayConcept) - 1] === (new \DateTime($oldPeriod))->format('m/Y')) {
-                            $arrayConcept[count($arrayConcept) - 1] = (new \DateTime($newPeriod))->format("m/Y");
-                            $concept = implode(' - ', $arrayConcept);
+            foreach($invoiceProcesses as $process) {
+                $invPro = \Yii::$app->db->createCommand("SELECT * FROM invoice_process where invoice_process_id = $process")->queryOne();
+                
+                if ($invPro) {
+                    $oldPeriod = $invPro['period'];
+                    
+                    $bills = Bill::find()->andWhere(['invoice_process_id' => $process])->all();
+                    
+                    foreach($bills as $bill) {
+                        $details = $bill->billDetails;
+                        
+                        foreach($details as $detail) {
+                            $oldP = (new \DateTime($oldPeriod))->format('m/Y');
+                            $newP = (new \DateTime($newPeriod))->format('m/Y');
+                            $concept = str_replace($oldP, $newP, $detail->concept);
                             $detail->updateAttributes(['concept' => $concept]);
+                            
                         }
-                    }
-
-                    $customerContracts = $bill->customer->contracts;
-
-                    foreach($customerContracts as $contract) {
-                        foreach($contract->contractDetails as $cd) {
-                            $ptis = $cd->getProductToInvoices()->andWhere(['period' => (new \DateTime($oldPeriod))->format('Y-m-d')])->all();
-
-                            foreach($ptis as $pti) {
-                                $pti->updateAttributes(['period' => (new \DateTime($newPeriod))->format('Y-m-d')]);
+                        
+                        $customerContracts = $bill->customer->contracts;
+                        
+                        foreach($customerContracts as $contract) {
+                            foreach($contract->contractDetails as $cd) {
+                                $ptis = $cd->getProductToInvoices()->andWhere(['period' => (new \DateTime($oldPeriod))->format('Y-m-d')])->all();
+                                
+                                foreach($ptis as $pti) {
+                                    $pti->updateAttributes(['period' => (new \DateTime($newPeriod))->format('Y-m-d')]);
+                                }
+                                
                             }
-
                         }
                     }
+
+                    
                 }
             }
+
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollBack();
+            throw $ex;
         }
     }
 }
