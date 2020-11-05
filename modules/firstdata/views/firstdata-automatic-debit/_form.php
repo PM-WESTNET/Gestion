@@ -18,12 +18,40 @@ use yii\widgets\ActiveForm;
         </div>
     <?php endif;?>
 
-    <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
+    <div class="row">
+        <div class="col-xs-12">
+            <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
+        </div>
+    </div>
 
-    <?= $form->field($model, 'status')->dropDownList([
-        'enabled' => Yii::t('app', 'Enabled'),
-        'disabled' => Yii::t('app', 'Disabled'),
-    ])?>
+    <div class="row">
+        <div class="col-xs-12">
+            <?= $form->field($model, 'status')->dropDownList([
+                'enabled' => Yii::t('app', 'Enabled'),
+                'disabled' => Yii::t('app', 'Disabled'),
+            ])?>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <label><?= Yii::t('app', 'Card Number')?></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-3">
+            <?= $form->field($model, 'block1')->textInput(['maxLength' => 4])->label(false)?>
+        </div>
+        <div class="col-xs-3">
+            <?= $form->field($model, 'block2')->textInput(['maxLength' => 4])->label(false)?>
+        </div>
+        <div class="col-xs-3">
+            <?= $form->field($model, 'block3')->textInput(['maxLength' => 4])->label(false)?>
+        </div>
+        <div class="col-xs-3">
+            <?= $form->field($model, 'block4')->textInput(['maxLength' => 4])->label(false)?>
+        </div>
+    </div>
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

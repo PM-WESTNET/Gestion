@@ -39,7 +39,8 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id', 'status'], 'required'],
+            [['customer_id', 'status', 'block1', 'block2', 'block3', 'block4'], 'required'],
+            [['block1', 'block2', 'block3', 'block4'], 'number'],
             [['status'], 'string'],
             [['block1', 'block2', 'block3', 'block4'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
@@ -106,7 +107,11 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            CustomerDataHelper::newCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4);
+            if (CustomerDataHelper::newCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4)) {
+                Yii::$app->session->addFlash('success', Yii::t('app', 'Customer data saved successfully'));
+            } else {
+                Yii::$app->session->addFlash('error', Yii::t('app', 'Cant save customer data'));
+            }
         }else  {
             CustomerDataHelper::modifyCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4, $this->status);
         }

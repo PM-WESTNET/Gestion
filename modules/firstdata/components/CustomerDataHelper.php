@@ -2,6 +2,7 @@
 
 namespace app\modules\firstdata\components;
 
+use Yii;
 use app\modules\config\models\Config;
 
 class CustomerDataHelper {
@@ -62,6 +63,7 @@ class CustomerDataHelper {
 
         $response = curl_exec($curl);
 
+        Yii::trace($response);
         if (curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return false;
         }
@@ -95,6 +97,8 @@ class CustomerDataHelper {
 
         $response = curl_exec($curl);
 
+        Yii::trace($response);
+
         if (curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return false;
         }
@@ -127,6 +131,8 @@ class CustomerDataHelper {
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
         $response = curl_exec($curl);
+
+        Yii::trace($response);
 
         if (curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return false;

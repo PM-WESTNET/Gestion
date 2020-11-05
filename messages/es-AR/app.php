@@ -1386,6 +1386,7 @@
     'Create Firstdata Automatic Debit' => 'Agregar Débito Automático',
     'Create Firstdata Company Config' => 'Configurar Empresa',
     'Create Firstdata Export' => 'Nueva Exportación',
-    'Download File' => 'Descargar Archivo'
+    'Download File' => 'Descargar Archivo',
+    'The customer`s company havent firstdata configurations' => 'La empresa del cliente no está configurada para Firstdata'
 
  );
