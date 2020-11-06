@@ -10,7 +10,6 @@ class CustomerDataHelper {
 
     /**
      * Devuevle el nro de tarjeta de credito del cliente recibido.
-     * TODO: Se debe realizar la integracion con la api a desarrollar por WN. Por el momento se usa un mock
      */
     public static function getCustomerCreditCard($code)
     {
@@ -20,9 +19,28 @@ class CustomerDataHelper {
             return false;
         }
 
-        return $data->card_number;
+        return $data['card_number'];
     }
 
+    /**
+     * Devuevle el nro de tarjeta de credito del cliente recibido.
+     */
+    public static function getCustomerHiddenCreditCard($code)
+    {
+        $data = self::getCustomerData($code);
+
+        if($data === false) {
+            return false;
+        }
+
+        Yii::trace($data);
+
+        return $data['last_four'];
+    }
+
+    /**
+     * Crea el registros de datos del Cliente en el server de firstdata
+     */
     public static function newCustomerData($code, $block1, $block2, $block3, $block4) 
     {
         $data = self::addCustomerData($code, $block1, $block2, $block3, $block4);
@@ -34,6 +52,9 @@ class CustomerDataHelper {
         return true;
     }
 
+    /**
+     * Modifica los datos del cliente
+     */
     public static function modifyCustomerData($code, $block1, $block2, $block3, $block4, $status) 
     {
         $data = self::updateCustomerData($code, $block1, $block2, $block3, $block4, $status);
@@ -45,6 +66,9 @@ class CustomerDataHelper {
         return true;
     }
 
+    /**
+     * Realiza la llamada a la api de firstdata para buscar los datos de un cliente
+     */
     private static function getCustomerData($code)
     {
         $url = Config::getValue('firstdata_server_url'). ':'.Config::getValue('firstdata_server_port').'/get-data';
@@ -63,22 +87,32 @@ class CustomerDataHelper {
 
         $response = curl_exec($curl);
 
-        Yii::trace($response);
+        $response_data = json_decode($response, true);
+
+        Yii::trace($response_data);
         if (curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return false;
+        } else {
+            if ($response_data['status'] === 'not found') {
+                return false;
+            }
         }
 
-        return $response;
+        return $response_data;
 
     }
 
+
+    /**
+     * Llama a la api de firstdata para insertar un nuevo registro de datos
+     */
     private static function addCustomerData($code, $block1, $block2, $block3, $block4)
     {
         $url = Config::getValue('firstdata_server_url'). ':'.Config::getValue('firstdata_server_port').'/add-customer';
         $curl = curl_init($url);
 
         $data = json_encode([
-            'customer_code' => $code,
+            'code' => $code,
             'block1' => $block1,
             'block2' => $block2,
             'block3' => $block3,
@@ -107,13 +141,16 @@ class CustomerDataHelper {
 
     }
 
+    /**
+     * Llama a la api de firstdata para actualizar un registro de datos
+     */
     private static function updateCustomerData($code, $block1, $block2, $block3, $block4, $status)
     {
         $url = Config::getValue('firstdata_server_url'). ':'.Config::getValue('firstdata_server_port').'/update-customer';
         $curl = curl_init($url);
 
         $data = json_encode([
-            'customer_code' => $code,
+            'code' => $code,
             'block1' => $block1,
             'block2' => $block2,
             'block3' => $block3,

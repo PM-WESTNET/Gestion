@@ -116,4 +116,34 @@ class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
             CustomerDataHelper::modifyCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4, $this->status);
         }
     }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        $this->chargeCreditCard();
+    }
+
+    /**
+     * Devuelve el ultimo eslabon del nro de tarjeta, completando el resto con X
+     */
+    public function getHiddenCreditCard() {
+        return CustomerDataHelper::getCustomerHiddenCreditCard($this->customer->code);
+    }
+
+    /**
+     * Devuelve el nro de tarjeta completo, 
+     */
+    public function chargeCreditCard() {
+        $card = CustomerDataHelper::getCustomerCreditCard($this->customer->code);
+
+        if ($card === false) {
+            return false;
+        }
+
+        $this->block1 = substr($card, 0, 4);
+        $this->block2 = substr($card, 4, 4);
+        $this->block3 = substr($card, 8, 4);
+        $this->block4 = substr($card, 12, 4);
+    }
 }

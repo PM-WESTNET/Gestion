@@ -1387,6 +1387,9 @@
     'Create Firstdata Company Config' => 'Configurar Empresa',
     'Create Firstdata Export' => 'Nueva Exportación',
     'Download File' => 'Descargar Archivo',
-    'The customer`s company havent firstdata configurations' => 'La empresa del cliente no está configurada para Firstdata'
+    'The customer`s company havent firstdata configurations' => 'La empresa del cliente no está configurada para Firstdata',
+    'Customer data saved successfully' => 'Datos del cliente actualizados con éxito',
+    'Cant save customer data' => 'No se pudo guardar los datos del cliente',
+    'Credit Card' => 'Tarjeta de Crédito'
 
  );

@@ -82,7 +82,7 @@ class FirstdataExport {
             $import2 = str_pad($import2, 2, '0', STR_PAD_LEFT);
         }
 
-        $period = date('my');
+        $period = date('My');
         $filler1 = " ";
         $vto = date('dmy', strtotime(Yii::$app->formatter->asDate($export->due_date, 'yyyy-MM-dd')));
         $aux = str_pad(' ', 40, ' ');

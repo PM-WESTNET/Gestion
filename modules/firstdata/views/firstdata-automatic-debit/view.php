@@ -47,6 +47,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->companyConfig->company->name;
                 }
             ],
+            [
+                'label' => Yii::t('app', 'Credit Card'),
+                'value' => function($model) {
+                    return $model->hiddenCreditCard;
+                }
+            ]
         ],
     ]) ?>
 
