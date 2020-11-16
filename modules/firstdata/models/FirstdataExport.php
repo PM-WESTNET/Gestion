@@ -19,7 +19,7 @@ use app\modules\firstdata\components\FirstdataExport as Export;
  * @property int $to_date
  * @property string $status
  *
- * @property BillHasFirstdataExport[] $billHasFirstdataExports
+ * @property CustomerHasFirstdataExport[] $customerHasFirstdataExports
  * @property FirstdataDebitHasExport[] $firstdataDebitHasExports
  * @property FirstdataCompanyConfig $firstdataConfig
  */
@@ -77,14 +77,14 @@ class FirstdataExport extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getBillHasFirstdataExports()
+    public function getCustomerHasFirstdataExports()
     {
-        return $this->hasMany(BillHasFirstdataExport::className(), ['firstdata_export_id' => 'firstdata_export_id']);
+        return $this->hasMany(CustomerHasFirstdataExport::className(), ['firstdata_export_id' => 'firstdata_export_id']);
     }
 
-    public function getBills() 
+    public function getCustomers() 
     {
-        return $this->hasMany(Bill::class, ['bill_id' => 'bill_id'])->viaTable('bill_has_firstdata_export', ['firstdata_export_id' => 'firstdata_export_id']);
+        return $this->hasMany(Customer::class, ['customer_id' => 'customer_id'])->viaTable('customer_has_firstdata_export', ['firstdata_export_id' => 'firstdata_export_id']);
     }
 
     /**
@@ -146,7 +146,6 @@ class FirstdataExport extends \yii\db\ActiveRecord
 
     public function beforeSave($insert) 
     {
-
         if ($insert) {
             $this->status = 'draft';
         }
@@ -160,7 +159,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
 
         if ($insert) {
-            $this->linkBills(); //Si estamos insertando, busco los comprobantes
+            $this->linkCustomers(); //Si estamos insertando, busco los clientes
         }
     }
 
@@ -175,41 +174,31 @@ class FirstdataExport extends \yii\db\ActiveRecord
         Busca y enlaza con la exportacion, los comprobantes correspondientes al rango de tiempo indicado
         El comprobante no debe estar en otra exportacion
     */
-    public function linkBills() 
+    public function linkCustomers() 
     {
         $customers = Customer::find()
             ->innerJoin('firstdata_automatic_debit fad', 'fad.customer_id=customer.customer_id')
+            ->leftJoin('customer_has_firstdata_export chfe', 'chfe.customer_id=customer.customer_id')
             ->andWhere(['fad.company_config_id' => $this->firstdata_config_id])
             ->andWhere(['fad.status' => 'enabled'])
+            ->andWhere(['OR', ['IS', 'chfe.customer_id', null], ['<>', 'chfe.month', date('Y-m', $this->from_date)]])
+            ->distinct()
             ->all();
-
+ 
         if ($customers) {
-            $customersIds = array_map(function($customer){ return $customer->customer_id; }, $customers);
+            $customersHasExport = [];
 
-            $billsQuery = Bill::find()
-                ->leftJoin('bill_has_firstdata_export bhfe', 'bhfe.bill_id=bill.bill_id')
-                ->andWhere(['IN', 'customer_id', $customersIds])
-                ->andWhere(['status' => Bill::STATUS_CLOSED])
-                ->andWhere(['IS', 'bhfe.bill_has_firstdata_export_id', NULL])
-                ->andWhere(['>=', 'timestamp', $this->from_date]);
-
-            if ($this->to_date) {
-                $billsQuery->andWhere(['<', 'timestamp', ($this->to_date + 86400)]);
-            }
-            
-            $bills = $billsQuery->all();
-            $billsHasExport = [];
-
-            foreach($bills as $bill) {
-                $billsHasExport[] = [
-                    $bill->bill_id,
-                    $this->firstdata_export_id
+            foreach($customers as $customer) {
+                $customersHasExport[] = [
+                    $customer->customer_id,
+                    $this->firstdata_export_id,
+                    date('Y-m', $this->from_date)
                 ];
             }
 
             // Usamos un batch insert para evitar insertar la relacion comprobante por comprobante
             Yii::$app->db->createCommand()
-                ->batchInsert('bill_has_firstdata_export', ['bill_id', 'firstdata_export_id'], $billsHasExport)
+                ->batchInsert('customer_has_firstdata_export', ['customer_id', 'firstdata_export_id', 'month'], $customersHasExport)
                 ->execute();
 
         }    
@@ -221,11 +210,11 @@ class FirstdataExport extends \yii\db\ActiveRecord
      */
     public function getTotalImport()
     {
-        $bills = $this->bills;
+        $customers = $this->customers;
         $total = 0;
 
-        foreach($bills as $bill) {
-            $total += $bill->total;
+        foreach($customers as $customer) {
+            $total += $customer->current_account_balance;
         }
 
         return $total;

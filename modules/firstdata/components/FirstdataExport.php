@@ -16,18 +16,18 @@ class FirstdataExport {
     {
         fwrite($resource, self::headerLine($export) . PHP_EOL);
 
-        foreach($export->bills as $bill) {
-            $card = CustomerDataHelper::getCustomerCreditCard($bill->customer->code);
+        foreach($export->customers as $customer) {
+            $card = CustomerDataHelper::getCustomerCreditCard($customer->code);
 
             if ($card === false) {
                 if (Yii::$app instanceof Application) {
-                    Yii::$app->session->addFlash('error', Yii::t('app','Customer data not found . Customer : {code}', ['code' => $bill->customer->code]));
+                    Yii::$app->session->addFlash('error', Yii::t('app','Customer data not found . Customer : {code}', ['code' => $customer->code]));
                 }
 
                 continue;
             }
 
-            fwrite($resource, self::detailLine($export, $bill) . PHP_EOL);
+            fwrite($resource, self::detailLine($export, $customer) . PHP_EOL);
         }
 
         return $resource;
@@ -42,7 +42,7 @@ class FirstdataExport {
         $commerce = str_pad($export->firstdataConfig->commerce_number, 8, '0', STR_PAD_LEFT);
         $register = "1";
         $date = date('dmy', strtotime(Yii::$app->formatter->asDate($export->presentation_date, 'yyyy-MM-dd')));
-        $regiter_count = str_pad(count($export->bills), 7, '0', STR_PAD_LEFT);
+        $regiter_count = str_pad(count($export->customers), 7, '0', STR_PAD_LEFT);
         $signo = '0';
 
         $totalImport = $export->totalImport;
@@ -63,17 +63,17 @@ class FirstdataExport {
     /**
      * Devuelve la linea correspondiente al detalle del comprobante recibido
      */
-    private static function detailLine($export, $bill)
+    private static function detailLine($export, $customer)
     {
         $commerce = str_pad($export->firstdataConfig->commerce_number, 8, '0', STR_PAD_LEFT);
         $register = "2";
-        $card = CustomerDataHelper::getCustomerCreditCard($bill->customer->code);
-        $reference = str_pad($bill->customer->code, 12, '0', STR_PAD_LEFT);
+        $card = CustomerDataHelper::getCustomerCreditCard($customer->code);
+        $reference = str_pad($customer->code, 12, '0', STR_PAD_LEFT);
         $quote = "001";
         $plan_quotes = "999";
         $frecuency = "01";
         
-        $totalImport = $bill->total;
+        $totalImport = $customer->current_account_balance;
         $totalint = floor($totalImport);
         $import1 = str_pad($totalint, 9, '0', STR_PAD_LEFT);
         $import2 = round(($totalImport - $totalint),2) * 100;

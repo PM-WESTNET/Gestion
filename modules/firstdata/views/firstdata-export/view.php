@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php if (!$model->getBillHasFirstdataExports()->exists()):?>
+        <?php if (!$model->getCustomerHasFirstdataExports()->exists()):?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->firstdata_export_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -57,36 +57,30 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]) ?>
 
-    <h3><?= Yii::t('app', 'Bills')?></h3>
+    <h3><?= Yii::t('app', 'Customers')?></h3>
 
     <hr>
 
     <?=
     
         GridView::widget([
-            'dataProvider' => new ActiveDataProvider(['query' => $model->getBills()]),
+            'dataProvider' => new ActiveDataProvider(['query' => $model->getCustomers()]),
             'columns' => [
                 ['class' => SerialColumn::class],
 
                 [
                     'label' => Yii::t('app', 'Customer'),
                     'value' => function($model) {
-                        return $model->customer->fullName . ' (' . $model->customer->code . ')';
+                        return $model->fullName . ' (' . $model->code . ')';
                     }
                 ],
-                [
-                    'label' => Yii::t('app', 'Number'),
-                    'value' => function($model) {
-                        return $model->number;
-                    }
-                ],
-
+                
                 [
                     'class' => ActionColumn::class,
                     'buttons' => [
                         'view' => function($url, $model) {
                             return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', 
-                            ['/sale/bill/view', 'id' => $model->bill_id], 
+                            ['/sale/customer/view', 'id' => $model->customer_id], 
                             ['class' => 'btn btn-default', 'target' => '_blank']);
                         }
                     ],
