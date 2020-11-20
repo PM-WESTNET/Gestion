@@ -3,6 +3,7 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\bills\Bill;
@@ -23,7 +24,7 @@ use app\modules\firstdata\components\FirstdataExport as Export;
  * @property FirstdataDebitHasExport[] $firstdataDebitHasExports
  * @property FirstdataCompanyConfig $firstdataConfig
  */
-class FirstdataExport extends \yii\db\ActiveRecord
+class FirstdataExport extends ActiveRecord
 {
     /**
      * {@inheritdoc}
@@ -181,6 +182,7 @@ class FirstdataExport extends \yii\db\ActiveRecord
             ->leftJoin('customer_has_firstdata_export chfe', 'chfe.customer_id=customer.customer_id')
             ->andWhere(['fad.company_config_id' => $this->firstdata_config_id])
             ->andWhere(['fad.status' => 'enabled'])
+            ->andWhere(['>','customer.current_account_balance', 0])
             ->andWhere(['OR', ['IS', 'chfe.customer_id', null], ['<>', 'chfe.month', date('Y-m', $this->from_date)]])
             ->distinct()
             ->all();

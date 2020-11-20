@@ -84,7 +84,7 @@ class FirstdataImport
             'customer_code' => $customer_code,
             'customer_id' => $customer_id,
             'amount' => $amount,
-            'status' => 'pending',
+            'status' => $error === "00" ? 'pending' : 'error',
             'error' => $error !== "00" ? self::getErrorMessage($error) : null
         ]);
 

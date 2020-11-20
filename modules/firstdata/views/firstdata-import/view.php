@@ -70,6 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'amount:currency',
                 'status',
+                'error',
 
                 [
                     'class' => ActionColumn::class,

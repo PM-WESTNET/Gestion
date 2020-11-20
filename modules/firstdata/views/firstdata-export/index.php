@@ -37,7 +37,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template' => '{view}'
+                'template' => '{view} {download}',
+                'buttons' => [
+                    'download' => function($url, $model) {
+                        if ($model->status === 'exported') {
+                           return  Html::a('<span class="glyphicon glyphicon-download"></span>',
+                                ['download', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-warning']);
+                        }
+                    }
+                ]
             ],
         ],
     ]); ?>

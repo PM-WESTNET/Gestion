@@ -4,6 +4,7 @@ namespace app\modules\firstdata\models;
 
 use Yii;
 use yii\web\UploadedFile;
+use app\components\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use app\modules\firstdata\components\FirstdataImport as Import;
 
@@ -19,7 +20,7 @@ use app\modules\firstdata\components\FirstdataImport as Import;
  *
  * @property FirstdataImportPayment[] $firstdataImportPayments
  */
-class FirstdataImport extends \yii\db\ActiveRecord
+class FirstdataImport extends ActiveRecord
 {
 
     public $response;
@@ -88,7 +89,7 @@ class FirstdataImport extends \yii\db\ActiveRecord
         }
 
         $response = UploadedFile::getInstance($this, 'response');
-        $filepath = Yii::getAlias('@app').'/web/firstdata_imports/'.$this->firstdata_import_id;
+        $filepath = Yii::getAlias('@app').'/web/firstdata_imports/'. time();
         
         if (!file_exists($filepath)) {
             mkdir($filepath, 0777);

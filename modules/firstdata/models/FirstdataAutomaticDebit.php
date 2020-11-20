@@ -3,6 +3,7 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
 use app\modules\firstdata\components\CustomerDataHelper;
 
@@ -18,7 +19,7 @@ use app\modules\firstdata\components\CustomerDataHelper;
  * @property FirstdataCompanyConfig $companyConfig
  * @property FirstdataDebitHasExport[] $firstdataDebitHasExports
  */
-class FirstdataAutomaticDebit extends \yii\db\ActiveRecord
+class FirstdataAutomaticDebit extends ActiveRecord
 {
 
     public $block1;

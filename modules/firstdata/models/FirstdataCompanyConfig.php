@@ -3,6 +3,7 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 use app\modules\sale\models\Company;
 
 /**
@@ -16,7 +17,7 @@ use app\modules\sale\models\Company;
  * @property Company $company
  * @property FirstdataExport[] $firstdataExports
  */
-class FirstdataCompanyConfig extends \yii\db\ActiveRecord
+class FirstdataCompanyConfig extends ActiveRecord
 {
     /**
      * {@inheritdoc}

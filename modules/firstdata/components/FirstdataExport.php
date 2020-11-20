@@ -17,6 +17,11 @@ class FirstdataExport {
         fwrite($resource, self::headerLine($export) . PHP_EOL);
 
         foreach($export->customers as $customer) {
+            //Si el saldo es 0 o el cliente tiene credito, no lo agregamos al archivo
+            if ($customer->current_account_balance <= 0) {
+                continue;
+            }
+
             $card = CustomerDataHelper::getCustomerCreditCard($customer->code);
 
             if ($card === false) {

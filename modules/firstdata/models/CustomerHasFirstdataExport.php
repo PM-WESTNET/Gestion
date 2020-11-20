@@ -3,6 +3,7 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 
 /**
  * This is the model class for table "customer_has_firstdata_export".
@@ -15,7 +16,7 @@ use Yii;
  * @property Customer $customer
  * @property FirstdataExport $firstdataExport
  */
-class CustomerHasFirstdataExport extends \yii\db\ActiveRecord
+class CustomerHasFirstdataExport extends ActiveRecord
 {
     /**
      * {@inheritdoc}

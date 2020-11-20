@@ -3,6 +3,7 @@
 namespace app\modules\firstdata\models;
 
 use Yii;
+use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
 use app\modules\checkout\models\Payment;
 
@@ -20,7 +21,7 @@ use app\modules\checkout\models\Payment;
  * @property FirstdataImport $firstdataImport
  * @property Payment $payment
  */
-class FirstdataImportPayment extends \yii\db\ActiveRecord
+class FirstdataImportPayment extends ActiveRecord
 {
     /**
      * {@inheritdoc}

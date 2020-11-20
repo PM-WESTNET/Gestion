@@ -26,13 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'firstdata_import_id',
-            'presentation_date',
-            'created_at',
+            'created_at:datetime',
             'status',
             'response_file',
             //'observation_file',
 
-            ['class' => 'yii\grid\ActionColumn'],
+            [
+                'class' => 'app\components\grid\ActionColumn',
+                'template' => '{view}'
+            ],
         ],
     ]); ?>
 </div>
