@@ -63,6 +63,7 @@ use app\modules\ticket\models\Ticket;
  * @property integer $needs_bill
  * @property string $birthdate
  * @property string $observations
+ * @property string $has_debit_automatic
  *
  *
  * @property Bill[] $bills
@@ -136,7 +137,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
@@ -543,6 +544,7 @@ class Customer extends ActiveRecord {
             'birthdate' => Yii::t('app','Birthdate'),
             'observations' => Yii::t('app', 'Observations'),
             'dataVerified' => Yii::t('app', 'Data Verified'),
+            'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit')
         ];
 
         //Labels adicionales definidos para los profiles

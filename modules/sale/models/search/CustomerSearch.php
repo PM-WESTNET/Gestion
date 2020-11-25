@@ -24,6 +24,10 @@ use app\modules\config\models\Config;
  */
 class CustomerSearch extends Customer {
 
+    const FIRSTDATA_STATUS_INACTIVE = "0";
+    const FIRSTDATA_STATUS_ACTIVE = "1";
+    const FIRSTDATA_STATUS_PENDING = "2";
+    
     public $search_text;
     public $toDate;
     public $fromDate;
@@ -71,15 +75,17 @@ class CustomerSearch extends Customer {
     //Estado de la app
     public $mobile_app_status;
 
+    public $firstdata_status;
+
     public function rules()
     {
         return [
-            [['customer_id', 'document_type_id', 'debt_bills', 'plan_id'], 'integer'],
+            [['customer_id', 'document_type_id', 'debt_bills', 'plan_id', 'firstdata_status'], 'integer'],
             [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to'], 'safe'],
             [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
-            [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id'], 'safe'],
+            [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id', 'firstdata_status'], 'safe'],
             [['email_status', 'email2_status', 'exclude_customers_with_one_bill', 'mobile_app_status'], 'safe'],
         ];
     }
@@ -188,6 +194,7 @@ class CustomerSearch extends Customer {
         $this->filterByPlan($query);
         $this->filterEmailStatus($query);
         $this->filterMobileAppStatus($query);
+        $this->filterByFirstdataAutomaticDebit($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -252,6 +259,7 @@ class CustomerSearch extends Customer {
         $this->filterByIssetGeocode($query);
         $this->filterEmailStatus($query);
         $this->filterMobileAppStatus($query);
+        $this->filterByFirstdataAutomaticDebit($query);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -812,6 +820,46 @@ class CustomerSearch extends Customer {
                         ->andFilterWhere(['>=','uaa.last_activity_datetime', $date_min_last_activity]);
                 }
             };
+        }
+    }
+
+    /**
+     * Filtra los clientes segun si tienen o no debito automatico y si esta esta activo o pendiente de realizar
+     */
+    private function filterByFirstdataAutomaticDebit($query) {
+
+        $query->leftJoin('firstdata_automatic_debit fad', 'fad.customer_id = customer.customer_id');
+
+        if (is_array($this->firstdata_status)) {
+            foreach($this->firstdata_status as $status) {
+                switch ($status) {
+                    case self::FIRSTDATA_STATUS_INACTIVE:
+                        $query->andFilterWhere(['has_debit_automatic' => 'no']);
+                        break;
+                    case self::FIRSTDATA_STATUS_ACTIVE:    
+                        $query->andFilterWhere(['has_debit_automatic' => 'yes']);
+                        $query->andWhere(['IS NOT', 'fad.customer_id', null]);
+                        break;
+                    case self::FIRSTDATA_STATUS_PENDING:
+                        $query->andFilterWhere(['has_debit_automatic' => 'yes']);
+                        $query->andWhere(['IS', 'fad.customer_id', null]);
+                        break;
+                }
+            }
+        }else {
+            switch ($this->firstdata_status) {
+                case self::FIRSTDATA_STATUS_INACTIVE:
+                    $query->andFilterWhere(['has_debit_automatic' => 'no']);
+                    break;
+                case self::FIRSTDATA_STATUS_ACTIVE:    
+                    $query->andFilterWhere(['has_debit_automatic' => 'yes']);
+                    $query->andFilterWhere(['IS NOT', 'fad.customer_id', null]);
+                    break;
+                case self::FIRSTDATA_STATUS_PENDING:
+                    $query->andFilterWhere(['has_debit_automatic' => 'yes']);
+                    $query->andFilterWhere(['IS', 'fad.customer_id', null]);
+                    break;
+            }
         }
     }
 
