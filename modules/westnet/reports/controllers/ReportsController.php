@@ -1040,4 +1040,13 @@ class ReportsController extends Controller
             'searchModel' => $search
         ]);
     }
+
+    public function actionFirstdataDebitReport()
+    {
+        $reportSearch = new ReportSearch();
+
+        $data = $reportSearch->firstdataDebitByDate(Yii::$app->request->get());
+
+        return $this->render('/reports/firstdata-debit', ['data' => $data]);
+    }
 }

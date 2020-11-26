@@ -6,6 +6,7 @@ use Yii;
 use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
 use app\modules\firstdata\components\CustomerDataHelper;
+use yii\behaviors\TimestampBehavior;
 
 /**
  * This is the model class for table "firstdata_automatic_debit".
@@ -14,6 +15,8 @@ use app\modules\firstdata\components\CustomerDataHelper;
  * @property int $customer_id
  * @property string $status
  * @property int $company_config_id
+ * @property int $created_at
+ * @property int $updated_at
  *
  * @property Customer $customer
  * @property FirstdataCompanyConfig $companyConfig
@@ -61,6 +64,19 @@ class FirstdataAutomaticDebit extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'company_config_id' => Yii::t('app', 'Company'),
         ];
+    }
+
+    public function behaviors()
+    {
+        return array_merge(parent::behaviors(), [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    self::EVENT_BEFORE_INSERT => ['created_at', 'updated_at'],
+                    self::EVENT_BEFORE_UPDATE => ['updated_at']
+                ],
+            ]
+        ]);
     }
 
     /**
