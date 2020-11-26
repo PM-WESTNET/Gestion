@@ -3,13 +3,14 @@
 namespace app\modules\firstdata\controllers;
 
 use Yii;
-use app\modules\firstdata\models\FirstdataImport;
-use app\modules\firstdata\models\search\FirstdataImportSearch;
 use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\web\NotFoundHttpException;
+use app\modules\firstdata\models\FirstdataImport;
 use app\modules\accounting\models\MoneyBoxAccount;
+use app\modules\firstdata\models\search\FirstdataImportSearch;
+use app\modules\firstdata\models\search\FirstdataImportPaymentSearch;
 
 /**
  * FirstdataImportController implements the CRUD actions for FirstdataImport model.
@@ -54,8 +55,18 @@ class FirstdataImportController extends Controller
      */
     public function actionView($id)
     {
+
+        $model = $this->findModel($id);
+
+        $importPaymentSearch = new FirstdataImportPaymentSearch();
+        $importPaymentSearch->firstdata_import_id = $model->firstdata_import_id;
+
+        $dataProvider = $importPaymentSearch->search(Yii::$app->request->get());
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'dataProvider' => $dataProvider,
+            'search' => $importPaymentSearch
         ]);
     }
 

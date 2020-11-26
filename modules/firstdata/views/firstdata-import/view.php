@@ -1,11 +1,12 @@
 <?php
 
 use yii\helpers\Html;
-use yii\widgets\DetailView;
 use yii\grid\GridView;
-use yii\data\ActiveDataProvider;
 use yii\grid\SerialColumn;
+use yii\widgets\DetailView;
+use yii\data\ActiveDataProvider;
 use app\components\grid\ActionColumn;
+use app\modules\sale\models\Customer;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\firstdata\models\FirstdataImport */
@@ -53,7 +54,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
 
         echo GridView::widget([
-            'dataProvider' => new ActiveDataProvider(['query' => $model->getFirstdataImportPayments()]),
+            'dataProvider' => $dataProvider,
+            'filterModel' => $search,
             'columns' =>  [
                 ['class' => SerialColumn::class],
 
@@ -65,11 +67,25 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => function($model) {
                         if ($model->customer) {
                             return $model->customer->fullName;
+                        } else {
+                            $customer = Customer::findOne(['code' => $model->customer_code]);
+
+                            if ($customer) {
+                                return $customer->fullName;
+                            }
                         }
-                    }
+                    },
+                    'filter' => $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['model' => $search, 'attribute' => 'customer_id'])
                 ],
                 'amount:currency',
-                'status',
+                [
+                    'attribute' => 'status',
+                    'filter' => [
+                        'pending' => Yii::t('app', 'Pending'),
+                        'success' => Yii::t('app', 'Success'),
+                        'error' => Yii::t('app', 'Error'),
+                    ]
+                ],
                 'error',
 
                 [
