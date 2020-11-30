@@ -1,6 +1,11 @@
 <?php
 
 use dosamigos\chartjs\ChartJs;
+use yii\widgets\ActiveForm;
+use yii\jui\DatePicker;
+use yii\widgets\ActiveField;
+use yii\helpers\Html;
+use kartik\grid\GridView;
 
 $this->title = Yii::t('app', 'Firstdata Automatic Debit Report');
 ?>
@@ -14,11 +19,58 @@ $this->title = Yii::t('app', 'Firstdata Automatic Debit Report');
     <?= ChartJs::widget([
             'type' => 'line',
             'options' => [
-                'height' => 400,
-                'width' => 400
+                'height' => 50,
+                'width' => 100
             ],
-            'data' => $data
+            'data' => $data,
+            'clientOptions' => [
+                'scales' => [
+                    'yAxes' => [
+                        'ticks' => [
+                            'max' => $max + 10,
+                            'beginAtZero' => true
+                        ]
+                    ],
+                    
+                ]
+            ]
         ]);
     ?>
+
+    <br>
+    <?php $form = ActiveForm::begin(['method' => 'GET'])?>
+    <div class="row">
+        <div class="col-xs-5">
+            <?= $form->field($search, 'date_from')->widget(DatePicker::class, [
+                'dateFormat' => 'dd-MM-yyyy',
+                'options' => [
+                    'class' => 'form-control'
+                ]
+            ])?>
+        </div>
+        <div class="col-xs-5">
+            <?= $form->field($search, 'date_to')->widget(DatePicker::class, [
+                'dateFormat' => 'dd-MM-yyyy',
+                'options' => [
+                    'class' => 'form-control'
+                ]
+            ])?>
+        </div>
+        <div class="col-xs-2">
+            <br>
+            <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success'])?>
+        </div>
+    </div>
+
+    <?php ActiveForm::end()?>
+
+    <?= GridView::widget([
+        'dataProvider' => $debits,
+        'columns' => [
+            'customer.fullName',
+            'status',
+            'created_at:date'
+        ]
+    ])?>
 
 </div>

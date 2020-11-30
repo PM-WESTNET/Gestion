@@ -30,6 +30,8 @@ class ReportSearch extends Model
     public $from;
     public $publicity_shape;
 
+    public $max;
+
     public function init()
     {
         parent::init();
@@ -806,15 +808,31 @@ class ReportSearch extends Model
             $query->andWhere(['<', 'created_at', (strtotime(Yii::$app->formatter->asDate($this->date_to, 'yyyy-MM-dd')) + 86400)]);
         }
 
-        //$query->groupBy([new Expression('date_format(created_at, \'%m-%Y\')')]);
-        $query->groupBy(['period']);
+        $query->groupBy([new Expression('date_format(from_unixtime(created_at), \'%m-%Y\')')]);
+        //$query->groupBy(['period']);
 
+        $points = [];
         $data = [];
-        $labels = [];
+        $labels = $this->getDateLabels($this->date_from, $this->date_to);
+        $max = 0;
+
+        foreach($labels as $label) {
+            $points[$label] = [
+                'x' => $label
+            ];
+        }
 
         foreach($query->all() as $item) {
-            $data[] = $item['altas'];
-            $labels[] = $item['period'];
+            $points[$item['period']] = $item['altas'];
+            if ($item['altas'] > $max) {
+                $max = $item['altas'];
+            }
+        }
+
+        $this->max = $max;
+
+        foreach($points as $point) {
+            $data[] = $point;
         }
 
         return [
@@ -822,11 +840,39 @@ class ReportSearch extends Model
             'datasets' => [
                 [
                     'label' => Yii::t('app', 'Firstdata Automatic Debits'),
-                    'backgroundColor' => "#6cbef2",
+                    'backgroundColor' => "rgb(255,255,255,0)",
                     'borderColor' => "#2da7f5",
                     'data' => $data
                 ]
             ]
         ];
+    }
+
+    private function getDateLabels($from_date = null, $to_date = null) {
+        
+        $labels = [];
+
+        if (!empty($from_date)) {
+            $from = (new \DateTime())->setTimestamp(strtotime(Yii::$app->formatter->asDate($from_date, 'yyyy-MM-dd')))->modify('first day of this month')->getTimestamp();
+        }else {
+            $from = (new \DateTime())->modify('-1 year')->getTimestamp();
+        }
+
+        if (!empty($to_date)) {
+            $to = (new \DateTime())->setTimestamp(strtotime(Yii::$app->formatter->asDate($to_date, 'yyyy-MM-dd')))->modify('last day of this month')->getTimestamp();
+        }else {
+            $to = (new \DateTime())->modify('last day of this month')->getTimestamp();
+        }
+
+        for($i = $from; $i <= $to; $i = $i + (86400 * 31)) {
+            $labels[] = Yii::$app->formatter->asDate($i, 'MM-yyyy');
+        }
+
+        if (array_search(Yii::$app->formatter->asDate($to, 'MM-yyyy'), $labels) < 0) {
+            $labels[] = Yii::$app->formatter->asDate($to, 'MM-yyyy');
+        }
+
+
+        return $labels;
     }
 }

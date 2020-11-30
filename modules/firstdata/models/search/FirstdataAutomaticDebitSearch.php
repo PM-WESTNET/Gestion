@@ -12,6 +12,9 @@ use app\modules\firstdata\models\FirstdataAutomaticDebit;
  */
 class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
 {
+    public $from_date;
+    public $to_date;
+    
     /**
      * {@inheritdoc}
      */
@@ -19,6 +22,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
     {
         return [
             [['firstdata_automatic_debit_id', 'customer_id', 'company_config_id'], 'integer'],
+            [['from_date', 'to_date'], 'safe']
         ];
     }
 
@@ -50,18 +54,20 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
 
         $this->load($params);
 
-        if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
-        }
-
-        // grid filtering conditions
+         // grid filtering conditions
         $query->andFilterWhere([
             'firstdata_automatic_debit_id' => $this->firstdata_automatic_debit_id,
             'customer_id' => $this->customer_id,
             'company_config_id' => $this->company_config_id,
         ]);
+
+        if (!empty($this->from_date)) {
+            $query->andWhere(['>=', 'created_at', strtotime(Yii::$app->formatter->asDate($this->from_date, 'yyyy-MM-dd'))]);
+        }
+
+        if (!empty($this->to_date)) {
+            $query->andWhere(['<', 'created_at', strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'))]);
+        }
 
         return $dataProvider;
     }

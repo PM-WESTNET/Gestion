@@ -52,7 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function($model) {
                     return $model->hiddenCreditCard;
                 }
-            ]
+            ],
+            'status'
         ],
     ]) ?>
 

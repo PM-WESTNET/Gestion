@@ -2,35 +2,36 @@
 
 namespace app\modules\sale\models;
 
-use app\components\companies\ActiveRecord;
-use app\components\helpers\CuitValidator;
-use app\modules\accounting\models\Account;
-use app\modules\checkout\models\Payment;
-use app\modules\checkout\models\search\PaymentSearch;
-use app\modules\config\models\Config;
-use app\modules\mobileapp\v1\models\UserApp;
-use app\modules\mobileapp\v1\models\UserAppActivity;
-use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
-use app\modules\sale\models\bills\Credit;
-use app\modules\sale\models\search\CustomerSearch;
-use app\modules\sale\modules\contract\models\Contract;
-use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
-use app\modules\westnet\models\Connection;
-use app\modules\westnet\models\ConnectionForcedHistorial;
-use app\modules\westnet\models\NotifyPayment;
-use app\modules\westnet\models\Vendor;
-use app\modules\westnet\models\EmptyAds;
-use Codeception\Util\Debug;
-use DateTime;
-use webvimark\modules\UserManagement\models\User;
 use Yii;
-use yii\db\ActiveQuery;
-use yii\db\Expression;
+use DateTime;
 use yii\db\Query;
-use yii\helpers\ArrayHelper;
-use yii\validators\RegularExpressionValidator;
+use yii\db\Expression;
+use yii\db\ActiveQuery;
 use yii\web\HttpException;
+use Codeception\Util\Debug;
+use yii\helpers\ArrayHelper;
+use app\modules\config\models\Config;
 use app\modules\ticket\models\Ticket;
+use app\modules\westnet\models\Vendor;
+use app\modules\checkout\models\Payment;
+use app\modules\westnet\models\EmptyAds;
+use app\components\helpers\CuitValidator;
+use app\modules\sale\models\bills\Credit;
+use app\components\companies\ActiveRecord;
+use app\modules\accounting\models\Account;
+use app\modules\westnet\models\Connection;
+use app\modules\mobileapp\v1\models\UserApp;
+use app\modules\westnet\models\NotifyPayment;
+use yii\validators\RegularExpressionValidator;
+use webvimark\modules\UserManagement\models\User;
+use app\modules\sale\models\search\CustomerSearch;
+use app\modules\mobileapp\v1\models\UserAppActivity;
+use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\sale\modules\contract\models\Contract;
+use app\modules\firstdata\models\FirstdataAutomaticDebit;
+use app\modules\westnet\models\ConnectionForcedHistorial;
+use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
+use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 
 /**
  * This is the model class for table "customer".
@@ -2198,5 +2199,16 @@ class Customer extends ActiveRecord {
             ->one();
 
         return $bill ? $bill : false;
+    }
+
+    public function inactiveFirstdataDebit() 
+    {
+        $debit = FirstdataAutomaticDebit::findOne(['customer_id' => $this->customer_id]);
+
+        if ($debit && $debit->status === 'enabled'){
+            $debit->status = 'disabled';
+            $debit->save();
+            Yii::trace($debit->getErrors());
+        }
     }
 }
