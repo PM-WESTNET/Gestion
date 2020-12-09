@@ -2,26 +2,28 @@
 
 namespace app\modules\westnet\reports\controllers;
 
+use Yii;
+use DateTime;
+use yii\db\Query;
+use yii\db\Expression;
+use yii\data\ActiveDataProvider;
+use app\components\web\Controller;
 use app\components\helpers\GraphData;
-use app\modules\checkout\models\PaymentMethod;
 use app\modules\config\models\Config;
-use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\PublicityShape;
 use app\modules\westnet\models\NotifyPayment;
-use app\modules\westnet\models\PaymentExtensionHistory;
-use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
-use app\modules\westnet\models\search\NotifyPaymentSearch;
-use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
-use app\modules\westnet\reports\models\ReportData;
+use app\modules\checkout\models\PaymentMethod;
 use app\modules\westnet\reports\ReportsModule;
-use app\modules\westnet\reports\search\CustomerSearch;
+use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\search\ReportSearch;
-use Yii;
-use app\components\web\Controller;
-use yii\data\ActiveDataProvider;
-use yii\db\Expression;
-use yii\db\Query;
+use app\modules\westnet\reports\search\CustomerSearch;
+use app\modules\westnet\models\PaymentExtensionHistory;
+use app\modules\westnet\models\search\NotifyPaymentSearch;
+use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
+use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
+use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
 /**
  * CustomerController
@@ -1039,5 +1041,36 @@ class ReportsController extends Controller
             'dataProvider' => $dataProvider,
             'searchModel' => $search
         ]);
+    }
+
+    public function actionFirstdataDebitReport()
+    {
+        $reportSearch = new ReportSearch();
+
+        $params = Yii::$app->request->get();
+
+        if (empty($params['ReportSearch']['date_from']) && empty($params['ReportSearch']['date_to'])) {
+            $reportSearch->date_from = (new DateTime())->modify('-1 year')->format('d-m-Y');
+            $reportSearch->date_to = (new DateTime())->modify('last day of this month')->format('d-m-Y');
+        }
+
+        $data = $reportSearch->firstdataDebitByDate($params);
+
+        $max = $reportSearch->max;
+
+        $firstdataSearch = new FirstdataAutomaticDebitSearch();
+        $firstdataSearch->from_date = $reportSearch->date_from;
+        $firstdataSearch->to_date = $reportSearch->date_to;
+        
+        $debits = $firstdataSearch->search(Yii::$app->request->get());
+        
+
+        return $this->render('/reports/firstdata-debit', [
+            'data' => $data, 
+            'max' => $max, 
+            'search' => $reportSearch ,
+            'debits' => $debits,
+            'firstdataSearch' => $firstdataSearch
+            ]);
     }
 }

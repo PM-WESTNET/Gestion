@@ -309,6 +309,12 @@ class Contract extends ActiveRecord {
         
         $this->formatDatesAfterFind();
 
+        // Si comienza el proceso de baja, deshabilito el debito automatico de firstdata
+        if ($this->status === self::STATUS_LOW_PROCESS) {
+            $this->customer->inactiveFirstdataDebit();
+        }
+
+
         if ($insert) {
             $log = new CustomerLog();
             $log->createInsertLog($this->customer_id, 'Contract', $this->contract_id);

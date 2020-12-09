@@ -195,6 +195,12 @@ if (Yii::$app->getModule('checkout')) {
             '<li class="divider"></li>',
             ['label'=>Yii::t('app','Banks for Automatic Debit'), 'url'=>['/automaticdebit/bank/index']],
             ['label'=>Yii::t('app','Automatic Debit'), 'url'=>['/automaticdebit/automatic-debit/index']],
+            '<li class="divider"></li>',
+            ['label'=>Yii::t('app','Firstdata Automatic Debit'), 'url'=>['/firstdata/firstdata-automatic-debit/index']],
+            ['label'=>Yii::t('app','Firstdata Company Configs'), 'url'=>['/firstdata/firstdata-company-config/index']],
+            ['label'=>Yii::t('app','Firstdata Exports'), 'url'=>['/firstdata/firstdata-export/index']],
+            ['label'=>Yii::t('app','Firstdata Imports'), 'url'=>['/firstdata/firstdata-import/index']],
+
     ]];
 }
 
@@ -227,6 +233,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
         ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
+        ['label' => Yii::t('app', 'Firstdata Automatic Debit Report'), 'url' => ['/reports/reports/firstdata-debit-report']],
         '<li class="divider"></li>',
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
         ['label' => ReportsModule::t('app', 'Push notifications report'), 'url' => ['/reports/reports/push-notifications-report']],

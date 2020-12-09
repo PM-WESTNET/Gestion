@@ -12,8 +12,9 @@ use yii\widgets\ActiveForm;
 use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use webvimark\modules\UserManagement\models\User;
+use app\modules\firstdata\models\FirstdataAutomaticDebit;
 
- /**
+/**
  * @var View $this
  * @var Customer $model
  */
@@ -205,6 +206,20 @@ $this->params['breadcrumbs'][] = $this->title;
         'phone3',
         'phone4',
         //'address',
+        [
+            'attribute' => 'has_debit_automatic',
+            'value' => function($model) {
+                if ($model->has_debit_automatic === 'yes') {
+                    if (FirstdataAutomaticDebit::find()->andWhere(['customer_id' => $model->customer_id, 'status' => 'enabled'])->exists()) {
+                        return Yii::t('app', 'Yes') . ' ('. Yii::t('app', 'Active') . ')';
+                    }
+
+                    return Yii::t('app', 'Yes') . ' ('. Yii::t('app', 'Pending') . ')';
+                }
+
+                return 'No';
+            }
+        ],
         [
             'label'=>$model->getAttributeLabel('status'),
             'value'=>Yii::t('app', ucfirst($model->status))

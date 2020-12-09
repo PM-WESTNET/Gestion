@@ -176,6 +176,18 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             <?= $form->field($model, 'phone4')->textInput(['class' => 'form-control phone', 'maxlength' => ($model->isNewRecord ? 10 : 45), 'placeholder'=> 'Ej: 2616XXXXXX']) ?>
 
         </div>
+    </div>
+    <?php if($model->isNewRecord || User::hasRole('first-data-admin')):?>
+    <div class="row">
+        <div class="col-sm-6">
+                <?= $form->field($model, 'has_debit_automatic')->dropDownList([
+                    'no' => Yii::t('app', 'No'),
+                    'yes' => Yii::t('app', 'Yes'),
+                ], ['prompt' => $model->isNewRecord ? '' : null])?>
+        </div>
+    </div>
+    <?php endif;?>
+    <div class="row">
         <div class="col-sm-6 col-xs-12">
 
             <?php

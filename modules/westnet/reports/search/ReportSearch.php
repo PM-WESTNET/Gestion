@@ -8,18 +8,19 @@
 
 namespace app\modules\westnet\reports\search;
 
-use app\components\helpers\DbHelper;
-use app\modules\accounting\models\Account;
-use app\modules\config\models\Config;
-use app\modules\westnet\models\NotifyPayment;
-use app\modules\westnet\reports\models\ReportData;
-use app\modules\westnet\reports\ReportsModule;
-use yii\base\Model;
-use yii\data\ActiveDataProvider;
-use yii\db\Expression;
+use Yii;
 use yii\db\Query;
-use yii\debug\models\timeline\DataProvider;
+use yii\base\Model;
+use yii\db\Expression;
 use yii\web\JsExpression;
+use yii\data\ActiveDataProvider;
+use app\components\helpers\DbHelper;
+use app\modules\config\models\Config;
+use app\modules\accounting\models\Account;
+use yii\debug\models\timeline\DataProvider;
+use app\modules\westnet\models\NotifyPayment;
+use app\modules\westnet\reports\ReportsModule;
+use app\modules\westnet\reports\models\ReportData;
 
 class ReportSearch extends Model
 {
@@ -28,6 +29,8 @@ class ReportSearch extends Model
     public $company_id;
     public $from;
     public $publicity_shape;
+
+    public $max;
 
     public function init()
     {
@@ -787,5 +790,89 @@ class ReportSearch extends Model
             'query' => $query
         ]);
         return $dataProvider;
+    }
+
+    public function firstdataDebitByDate($params) 
+    {
+        $this->load($params);
+
+        $query= (new Query())
+            ->select(["date_format(from_unixtime(created_at), '%m-%Y') as period", "COUNT(customer_id) as altas"])
+            ->from('firstdata_automatic_debit');
+
+        if (!empty($this->date_from)) {
+            $query->andWhere(['>=', 'created_at', strtotime(Yii::$app->formatter->asDate($this->date_from, 'yyyy-MM-dd'))]);
+        }
+
+        if (!empty($this->date_to)) {
+            $query->andWhere(['<', 'created_at', (strtotime(Yii::$app->formatter->asDate($this->date_to, 'yyyy-MM-dd')) + 86400)]);
+        }
+
+        $query->groupBy([new Expression('date_format(from_unixtime(created_at), \'%m-%Y\')')]);
+        //$query->groupBy(['period']);
+
+        $points = [];
+        $data = [];
+        $labels = $this->getDateLabels($this->date_from, $this->date_to);
+        $max = 0;
+
+        foreach($labels as $label) {
+            $points[$label] = [
+                'x' => $label
+            ];
+        }
+
+        foreach($query->all() as $item) {
+            $points[$item['period']] = $item['altas'];
+            if ($item['altas'] > $max) {
+                $max = $item['altas'];
+            }
+        }
+
+        $this->max = $max;
+
+        foreach($points as $point) {
+            $data[] = $point;
+        }
+
+        return [
+            'labels' => $labels,
+            'datasets' => [
+                [
+                    'label' => Yii::t('app', 'Firstdata Automatic Debits'),
+                    'backgroundColor' => "rgb(255,255,255,0)",
+                    'borderColor' => "#2da7f5",
+                    'data' => $data
+                ]
+            ]
+        ];
+    }
+
+    private function getDateLabels($from_date = null, $to_date = null) {
+        
+        $labels = [];
+
+        if (!empty($from_date)) {
+            $from = (new \DateTime())->setTimestamp(strtotime(Yii::$app->formatter->asDate($from_date, 'yyyy-MM-dd')))->modify('first day of this month')->getTimestamp();
+        }else {
+            $from = (new \DateTime())->modify('-1 year')->getTimestamp();
+        }
+
+        if (!empty($to_date)) {
+            $to = (new \DateTime())->setTimestamp(strtotime(Yii::$app->formatter->asDate($to_date, 'yyyy-MM-dd')))->modify('last day of this month')->getTimestamp();
+        }else {
+            $to = (new \DateTime())->modify('last day of this month')->getTimestamp();
+        }
+
+        for($i = $from; $i <= $to; $i = $i + (86400 * 31)) {
+            $labels[] = Yii::$app->formatter->asDate($i, 'MM-yyyy');
+        }
+
+        if (array_search(Yii::$app->formatter->asDate($to, 'MM-yyyy'), $labels) < 0) {
+            $labels[] = Yii::$app->formatter->asDate($to, 'MM-yyyy');
+        }
+
+
+        return $labels;
     }
 }

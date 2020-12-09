@@ -13,6 +13,8 @@ use yii\widgets\ActiveForm;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\search\CustomerSearch;
+
 ?>
 
 <div class="filters-costumer">
@@ -81,6 +83,15 @@ use app\modules\sale\models\Customer;
             <?= $form->field($model, 'mobile_app_status')->checkboxList(['uninstalled' => 'Desintalada', 'installed' => 'Instalada'], ['id' => 'mobile_app_status']) ?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <?= $form->field($model, 'firstdata_status')->checkboxList([
+                CustomerSearch::FIRSTDATA_STATUS_INACTIVE => Yii::t('app', 'Inactive'),
+                CustomerSearch::FIRSTDATA_STATUS_PENDING => Yii::t('app', 'Pending'),
+                CustomerSearch::FIRSTDATA_STATUS_ACTIVE => Yii::t('app', 'Active'),
+            ], ['id' => 'firstdata_status'])?>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-sm-1 ">
@@ -111,6 +122,7 @@ use app\modules\sale\models\Customer;
                 var emailStatus = '';
                 var email2Status = '';
                 var mobileAppStatus = '';
+                var firstdataStatus = '';
 
                 // Para los campos del form que son checkboxList recorro cada checkbox y si esta checkeado agrego el valor a la url
                 $.each($('#customer_status input'), function(i, c){
@@ -146,6 +158,12 @@ use app\modules\sale\models\Customer;
                 $.each($('#mobile_app_status input'), function(i, c){
                     if ($(c).is(':checked')) {
                         mobileAppStatus = mobileAppStatus + '&CustomerSearch%5Bmobile_app_status%5D%5B%5D=' + $(c).val();
+                    }
+                });
+
+                $.each($('#firstdata_status input'), function(i, c){
+                    if ($(c).is(':checked')) {
+                        firstdataStatus = firstdataStatus + '&CustomerSearch%5Bfirstdata_status%5D%5B%5D=' + $(c).val();
                     }
                 });
 
@@ -190,6 +208,7 @@ use app\modules\sale\models\Customer;
                 $('CustomerSearch[email_status]').remove();
                 $('CustomerSearch[email2_status]').remove();
                 $('CustomerSearch[mobile_app_status]').remove();
+                $('CustomerSearch[firstdata_status]').remove();
 
                 //Creo la cadena de parametros de la url, con los valores seteados en los campos del filtro
                 var params= 'CustomerSearch%5Bcustomer_id%5D='+ $('#customersearch-customer_id').val() +
@@ -205,7 +224,8 @@ use app\modules\sale\models\Customer;
                     contractStatus +
                     emailStatus +
                     email2Status +
-                    mobileAppStatus;
+                    mobileAppStatus +
+                    firstdataStatus;
 
                 //re direcciono a la misma pagina enviando los parametros ingresados
                 location.href= '<?= yii\helpers\Url::to(['/sale/customer/index'])?>'+'&'+ params;

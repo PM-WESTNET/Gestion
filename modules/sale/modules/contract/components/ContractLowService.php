@@ -38,6 +38,8 @@ class ContractLowService
                 }
                 if ($contract->updateAttributes($fields)) {
                     $transaction->commit();
+                    //Deshabulito firstdata
+                    $contract->customer->inactiveFirstdataDebit();
                     //Creo nota de credito por la deuda del cliente
                     if ($create_credit) {
                         if (!$contract->customer->createCreditForDebt()) {
@@ -46,7 +48,7 @@ class ContractLowService
                     }
                     return true;
                 } else {
-                    throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
+                    //throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
                 }
             } else {
                 $contract->status = Contract::STATUS_LOW_PROCESS;
@@ -58,6 +60,8 @@ class ContractLowService
                     if ($connection->updateAttributes(['status_account'])) {
                         $this->createTicketLow($contract);
                         $transaction->commit();
+                        //Deshabulito firstdata
+                        $contract->customer->inactiveFirstdataDebit();
                         //Creo nota de credito por la deuda del cliente
                         if ($create_credit) {
                             if (!$contract->customer->createCreditForDebt()) {
@@ -115,4 +119,5 @@ class ContractLowService
         $ticket->setUsers([Yii::$app->user->id]);
         $ticket->save();
     }
+    
 }
