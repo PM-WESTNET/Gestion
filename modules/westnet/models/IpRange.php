@@ -12,8 +12,11 @@ use Yii;
  * @property integer $ip_end
  * @property string $status
  * @property integer $node_id
+ * @property integer $access_point_id
  *
  * @property Node $node
+ * @property AccessPoint $accessPoint
+ * @property IpAddress[] $ipAddresses
  */
 class IpRange extends \app\components\db\ActiveRecord
 {
@@ -64,9 +67,9 @@ class IpRange extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['node_id', 'ip_start', 'ip_end'], 'integer'],
+            [['node_id', 'ip_start', 'ip_end', 'access_point_id'], 'integer'],
             [['node_id', 'ip_start', 'ip_end'], 'required'],
-            [['node'], 'safe'],
+            [['node', 'access_point_id'], 'safe'],
             [['status'], 'string', 'max' => 45]
         ];
     }
@@ -93,6 +96,16 @@ class IpRange extends \app\components\db\ActiveRecord
     public function getNode()
     {
         return $this->hasOne(Node::className(), ['node_id' => 'node_id']);
+    }
+
+    public function getAccessPoint()
+    {
+        return $this->hasOne(AccessPoint::class, ['access_point_id' => 'access_point_id']);
+    }
+
+    public function getIpAddresses()
+    {
+        return $this->hasMany(IpAddress::class, ['ip_range_id' => 'ip_range_id']);
     }
 
     /**
@@ -135,6 +148,22 @@ class IpRange extends \app\components\db\ActiveRecord
     public function getIpEndFormatted()
     {
         return long2ip($this->ip_end);
+    }
+
+    /*
+        Indica si el rango tiene ips disponibles para asignar
+    */
+    public function hasAvailableIp()
+    {
+
+    }
+
+    /*
+        Devuelve una ip disponible para asignar
+    */
+    public function getAvailableIp()
+    {
+
     }
 
 }
