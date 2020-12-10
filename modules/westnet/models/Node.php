@@ -9,6 +9,7 @@ use Yii;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use app\modules\westnet\components\ipStrategy\LegacyStrategy;
 
 /**
  * This is the model class for table "node".
@@ -247,16 +248,19 @@ class Node extends \app\components\db\ActiveRecord
      *
      * @return int|mixed
      */
-    public function getUsableIp()
+    public function getUsableIp($ap = null)
     {
-        // Busco el rango de ip del nodo y genero el nro de ip
-        $ipRange = $this->getIpRange()->one();
-        return $this->validIp($ipRange->ip_start, $ipRange->ip_end);
+        $strategy = new LegacyStrategy();
+
+        return $strategy->getValidIp($this);
     }
 
     /**
+     * 
      * Retorna una ip valida.
-     *
+     * 
+     * @deprecated
+     * 
      * @param $start
      * @param $end
      * @return int
