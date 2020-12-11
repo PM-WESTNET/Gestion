@@ -177,7 +177,7 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         </div>
     </div>
-    <?php if($model->isNewRecord || User::hasRole('first-data-admin')):?>
+    <?php if($model->isNewRecord || User::hasRole('first-data-admin') || User::hasRole('first-data-customer-require')):?>
     <div class="row">
         <div class="col-sm-6">
                 <?= $form->field($model, 'has_debit_automatic')->dropDownList([
