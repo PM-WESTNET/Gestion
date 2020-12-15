@@ -66,4 +66,28 @@ class IpRangeSearch extends IpRange
 
         return $dataProvider;
     }
+
+    public function searchNetworks($params) 
+    {
+        $query = IpRange::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        
+        $query->andFilterWhere([
+            'ip_range_id' => $this->ip_range_id,
+        ]);
+
+        $query->andWhere(['type' => self::NET_TYPE]);
+
+        $query->andFilterWhere(['like', 'ip_start', $this->ip_start])
+            ->andFilterWhere(['like', 'ip_end', $this->ip_end])
+            ->andFilterWhere(['like', 'status', $this->status]);
+
+        return $dataProvider;
+    }
 }

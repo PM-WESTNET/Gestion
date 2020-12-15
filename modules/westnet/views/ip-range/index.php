@@ -29,15 +29,11 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
-            'ip_rank_id',
+            'ip_range_id',
             'ip_start',
             'ip_end',
             'status',
-            [
-                'header'=> 'Node',
-                'value'=>function($model){ if(!empty($model->node)) return $model->node->name; }
-            ],        
-                    
+            'last_ip',                   
             [
                 'class' => 'app\components\grid\ActionColumn',
             ],

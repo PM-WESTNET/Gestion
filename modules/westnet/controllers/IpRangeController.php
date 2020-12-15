@@ -27,7 +27,7 @@ class IpRangeController extends Controller
     public function actionIndex()
     {
         $searchModel = new IpRangeSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->searchNetworks(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,

@@ -351,6 +351,7 @@ if (Yii::$app->getModule('westnet')) {
             ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
             //'<li class="divider"></li>',
             ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/westnet/node/assigned-ip']],
+            ['label'=>Yii::t('westnet','Networks'), 'url'=>['/westnet/ip-range/index']],
             [
                 'label' => Yii::t('westnet', 'Empty ADS not used'),
                 'url' => ['/westnet/empty-ads/index']
