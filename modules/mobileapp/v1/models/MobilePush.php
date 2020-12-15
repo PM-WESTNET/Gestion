@@ -289,6 +289,13 @@ class MobilePush extends ActiveRecord
 
                 } else {
                     $decoded_response = json_decode($response);
+                    if (isset($decoded_response->errors)){
+                        $total_with_errors ++;
+                        foreach ($decoded_response->errors as $e){
+                            Yii::info($e, 'mobile_push');
+                            $errors .= json_encode($e) .' \n';
+                        }
+                    }
                     $total_not_sended ++;
                 }
                 Yii::$app->cache->set('notification_'.$notification_id.'_total', count($one_signal_data));
