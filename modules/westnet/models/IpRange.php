@@ -12,15 +12,16 @@ use Yii;
  * @property integer $ip_end
  * @property string $status
  * @property integer $node_id
- * @property integer $access_point_id
+ * @property string $type
+ * 
  *
  * @property Node $node
- * @property AccessPoint $accessPoint
- * @property IpAddress[] $ipAddresses
  */
 class IpRange extends \app\components\db\ActiveRecord
 {
 
+    const NODE_SUBNET_TYPE = 'node_subnet';
+    const NET_TYPE = 'net';
 
     /**
      * @inheritdoc
@@ -67,9 +68,10 @@ class IpRange extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['node_id', 'ip_start', 'ip_end', 'access_point_id'], 'integer'],
-            [['node_id', 'ip_start', 'ip_end'], 'required'],
-            [['node', 'access_point_id'], 'safe'],
+            [['node_id', 'ip_start', 'ip_end', 'last_ip' ], 'integer'],
+            [['ip_start', 'ip_end'], 'required'],
+            [['node', 'type'], 'safe'],
+            [['type'], 'string'],
             [['status'], 'string', 'max' => 45]
         ];
     }
@@ -89,7 +91,14 @@ class IpRange extends \app\components\db\ActiveRecord
         ];
     }    
 
-
+    public function validateIpsAndNode()
+    {
+        if ($this->type === self::NODE_SUBNET_TYPE) {
+            if (empty($this->node_id)) {
+                $this->addError('node_id', Yii::t('yii', '{attribute} cannot be blank.', ['attribute' => $this->attributeLabels()['node']]));
+            }
+        }
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
