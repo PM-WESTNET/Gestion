@@ -12,11 +12,7 @@ use yii\widgets\ActiveForm;
 
     <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'ip_rank_id')->textInput() ?>
 
-    <?= $form->field($model, 'ip_start')->textInput(['maxlength' => 45]) ?>
-
-    <?= $form->field($model, 'ip_end')->textInput(['maxlength' => 45]) ?>
 
     <?= $form->field($model, 'status')->textInput(['maxlength' => 45]) ?>
 

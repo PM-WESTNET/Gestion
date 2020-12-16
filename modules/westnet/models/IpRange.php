@@ -3,6 +3,7 @@
 namespace app\modules\westnet\models;
 
 use Yii;
+use IPv4\SubnetCalculator;
 
 /**
  * This is the model class for table "ip_range".
@@ -22,6 +23,8 @@ class IpRange extends \app\components\db\ActiveRecord
 
     const NODE_SUBNET_TYPE = 'node_subnet';
     const NET_TYPE = 'net';
+
+    public $net_address;
 
     /**
      * @inheritdoc
@@ -69,9 +72,10 @@ class IpRange extends \app\components\db\ActiveRecord
     {
         return [
             [['node_id', 'ip_start', 'ip_end', 'last_ip' ], 'integer'],
-            [['ip_start', 'ip_end'], 'required'],
-            [['node', 'type'], 'safe'],
-            [['type'], 'string'],
+            [['ip_start', 'ip_end', 'node'], 'required', 'on' => 'insert'],
+            [['net_address'], 'required', 'on' => 'net-insert'],
+            [['node', 'type', 'net_address'], 'safe'],
+            [['type', 'net_address'], 'string'],
             [['status'], 'string', 'max' => 45]
         ];
     }
@@ -91,14 +95,7 @@ class IpRange extends \app\components\db\ActiveRecord
         ];
     }    
 
-    public function validateIpsAndNode()
-    {
-        if ($this->type === self::NODE_SUBNET_TYPE) {
-            if (empty($this->node_id)) {
-                $this->addError('node_id', Yii::t('yii', '{attribute} cannot be blank.', ['attribute' => $this->attributeLabels()['node']]));
-            }
-        }
-    }
+    
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -148,6 +145,12 @@ class IpRange extends \app\components\db\ActiveRecord
         }
     }
 
+    public function beforeSave($insert)
+    {
+        if ($insert && $this->type === self::NET_TYPE) {
+            $this->calculateIpRange();
+        }
+    }
 
     public function getIpStartFormatted()
     {
@@ -158,6 +161,8 @@ class IpRange extends \app\components\db\ActiveRecord
     {
         return long2ip($this->ip_end);
     }
+
+
 
     /*
         Indica si el rango tiene ips disponibles para asignar
@@ -173,6 +178,19 @@ class IpRange extends \app\components\db\ActiveRecord
     public function getAvailableIp()
     {
 
+    }
+
+    public function calculateIpRange()
+    {
+        if (!empty($this->net_address)) {
+            $ip = explode('/', $this->net_address);
+            $calculator = new SubnetCalculator($ip[0], $ip[1]);
+
+            $range = $calculator->getIPAddressRange();
+
+            $this->ip_start = ip2long($range[0]) + 3;
+            $this->ip_end = ip2long($range[1]);
+        }
     }
 
 }
