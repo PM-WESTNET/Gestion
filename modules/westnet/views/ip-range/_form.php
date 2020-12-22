@@ -14,7 +14,7 @@ use yii\widgets\ActiveForm;
 
 
 
-    <?= $form->field($model, 'status')->textInput(['maxlength' => 45]) ?>
+    <?= $form->field($model, 'net_address')->textInput(['maxlength' => 45]) ?>
 
     
     <?= $form->field($model, 'node_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Node::find()->all(), 'node_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>'Select an option...']) ?>
