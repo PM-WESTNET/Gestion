@@ -44,7 +44,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
     {
         return [
             [['customer_id', 'status', 'block1', 'block2', 'block3', 'block4'], 'required'],
-            [['block1', 'block2', 'block3', 'block4'], 'number'],
+            [['block1', 'block2', 'block3', 'block4'], 'string'],
             [['status'], 'string'],
             [['block1', 'block2', 'block3', 'block4'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
