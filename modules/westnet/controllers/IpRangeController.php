@@ -55,6 +55,8 @@ class IpRangeController extends Controller
     public function actionCreate()
     {
         $model = new IpRange();
+        $model->type = IpRange::NET_TYPE;
+        $model->scenario = 'net-insert';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ip_range_id]);

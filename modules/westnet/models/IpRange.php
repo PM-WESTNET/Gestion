@@ -23,6 +23,11 @@ class IpRange extends \app\components\db\ActiveRecord
 
     const NODE_SUBNET_TYPE = 'node_subnet';
     const NET_TYPE = 'net';
+    const SUBNET_TYPE = 'subnet';
+    const ENABLED_STATUS = 'enabled';
+    const DISABLED_STATUS = 'disabled';
+    const AVAILABLE_STATUS = 'available';
+
 
     public $net_address;
 
@@ -73,6 +78,7 @@ class IpRange extends \app\components\db\ActiveRecord
         return [
             [['node_id', 'ip_start', 'ip_end', 'last_ip' ], 'integer'],
             [['ip_start', 'ip_end', 'node'], 'required', 'on' => 'insert'],
+            [['ip_start', 'ip_end'], 'required', 'on' => 'subnet-insert'],
             [['net_address'], 'required', 'on' => 'net-insert'],
             [['node', 'type', 'net_address'], 'safe'],
             [['type', 'net_address'], 'string'],
@@ -150,6 +156,9 @@ class IpRange extends \app\components\db\ActiveRecord
         if ($insert && $this->type === self::NET_TYPE) {
             $this->calculateIpRange();
         }
+
+        return parent::beforeSave($insert);
+        
     }
 
     public function getIpStartFormatted()
@@ -183,13 +192,23 @@ class IpRange extends \app\components\db\ActiveRecord
     public function calculateIpRange()
     {
         if (!empty($this->net_address)) {
-            $ip = explode('/', $this->net_address);
-            $calculator = new SubnetCalculator($ip[0], $ip[1]);
+            $calculator = new SubnetCalculator($this->net_address, 16);
 
-            $range = $calculator->getIPAddressRange();
+            $range = $calculator->getAddressableHostRange();
 
-            $this->ip_start = ip2long($range[0]) + 3;
+            $this->ip_start = ip2long($range[0]);
             $this->ip_end = ip2long($range[1]);
+
+            for ($i = $this->ip_start; $i < $this->ip_end; ($i = $i + 256)) {
+                $subnet = new IpRange();
+                $subnet->ip_start = $i;
+                $subnet->ip_end = $i + 255;
+                $subnet->type = self::SUBNET_TYPE;
+                $subnet->status = self::ENABLED_STATUS;
+
+                $subnet->scenario = 'subnet-insert';
+                $subnet->save();
+            }
         }
     }
 

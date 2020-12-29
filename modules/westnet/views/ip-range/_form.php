@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use app\modules\westnet\models\IpRange;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\IpRank */
@@ -17,7 +18,11 @@ use yii\widgets\ActiveForm;
     <?= $form->field($model, 'net_address')->textInput(['maxlength' => 45]) ?>
 
     
-    <?= $form->field($model, 'node_id')->dropdownList(yii\helpers\ArrayHelper::map(\app\modules\westnet\models\Node::find()->all(), 'node_id', 'name'),['encode'=>false, 'separator'=>'<br/>','prompt'=>'Select an option...']) ?>
+    <?= $form->field($model, 'status')->dropdownList([
+        IpRange::ENABLED_STATUS => Yii::t('app', 'Enabled'),
+        IpRange::DISABLED_STATUS => Yii::t('app', 'Disabled'),
+        IpRange::AVAILABLE_STATUS => Yii::t('app', 'Available'),
+    ]) ?>
 
     
     <div class="form-group">
