@@ -2,6 +2,8 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use kartik\select2\Select2;
+use app\modules\westnet\components\ipStrategy\LegacyStrategy;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\AccessPoint */
@@ -16,9 +18,19 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'status')->dropDownList([ 'enabled' => 'Enabled', 'disabled' => 'Disabled', ], ['prompt' => '']) ?>
 
-    <?= $form->field($model, 'strategy_class')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'strategy_class')->dropDownList([
+        LegacyStrategy::class => Yii::t('app', 'Old strategy'),
+        AccessPointStrategy::class => Yii::t('app', 'Access Point Strategy')
+    ], ['prompt' => '']) ?>
 
-    <?= $form->field($model, 'node_id')->textInput() ?>
+    <?= $form->field($model, 'node_id')->widget(Select2::class, [
+            'data' => $nodes,
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+            'options' => ['placeholder' => Yii::t('app', 'Select an option')]
+        ]) 
+    ?>
 
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>

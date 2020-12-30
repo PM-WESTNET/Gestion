@@ -3,11 +3,15 @@
 namespace app\modules\westnet\controllers;
 
 use Yii;
+use yii\web\Controller;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\data\ActiveDataProvider;
+use yii\web\NotFoundHttpException;
+use app\modules\westnet\models\Node;
+use app\modules\westnet\models\IpRange;
 use app\modules\westnet\models\AccessPoint;
 use app\modules\westnet\models\search\AccessPointSearch;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 
 /**
  * AccessPointController implements the CRUD actions for AccessPoint model.
@@ -67,11 +71,15 @@ class AccessPointController extends Controller
         $model = new AccessPoint();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->access_point_id]);
+            Yii::$app->session->addFlash('success', Yii::t('app', 'Access Point created succesfully'));
+            return $this->redirect(['assign-ip-range', 'ap_id' => $model->access_point_id]);
         }
+
+        $nodes = ArrayHelper::map(Node::find()->andWhere(['status' => 'enabled'])->all(), 'node_id', 'name');
 
         return $this->render('create', [
             'model' => $model,
+            'nodes' => $nodes
         ]);
     }
 
@@ -90,8 +98,11 @@ class AccessPointController extends Controller
             return $this->redirect(['view', 'id' => $model->access_point_id]);
         }
 
+        $nodes = ArrayHelper::map(Node::find()->andWhere(['status' => 'enabled'])->all(), 'node_id', 'name');
+
         return $this->render('update', [
             'model' => $model,
+            'nodes' => $nodes
         ]);
     }
 
@@ -123,5 +134,24 @@ class AccessPointController extends Controller
         }
 
         throw new NotFoundHttpException(Yii::t('app', 'The requested page does not exist.'));
+    }
+
+    public function actionAssignIpRange($ap_id) {
+        $model = $this->findModel($ap_id);
+
+        if ($model->load(Yii::$app->request->post()) && $model->assignIpRange()) {
+            return $this->redirect(['view', 'id' => $model->access_point_id]);
+        }
+
+        $rangeQuery = IpRange::find()
+            ->andWhere(['status' => 'enabled'])
+            ->andWhere(['type' => IpRange::SUBNET_TYPE])
+            ->andWhere(['IS', 'ap_id', null])
+            ->orderBy(['ip_start' => SORT_ASC]);
+
+        $dataProvider = new ActiveDataProvider(['query' => $rangeQuery]);
+
+        return $this->render('assign-range', ['dataProvider' => $dataProvider, 'model' => $model]);
+
     }
 }

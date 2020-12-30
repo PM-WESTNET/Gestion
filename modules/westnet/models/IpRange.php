@@ -14,9 +14,11 @@ use IPv4\SubnetCalculator;
  * @property string $status
  * @property integer $node_id
  * @property string $type
+ * @property integer $ap_id
  * 
  *
  * @property Node $node
+ * @property AccessPoint $access_point
  */
 class IpRange extends \app\components\db\ActiveRecord
 {
@@ -110,10 +112,7 @@ class IpRange extends \app\components\db\ActiveRecord
         return $this->hasOne(Node::className(), ['node_id' => 'node_id']);
     }
 
-    public function getAccessPoint()
-    {
-        return $this->hasOne(AccessPoint::class, ['access_point_id' => 'access_point_id']);
-    }
+    
 
     public function getIpAddresses()
     {
@@ -178,6 +177,9 @@ class IpRange extends \app\components\db\ActiveRecord
         return long2ip($this->ip_end);
     }
 
+    public function getAccessPoint() {
+        return $this->hasOne(AccessPoint::class, ['ap_id' => 'access_point_id']);
+    }
     public function getSubnets() {
         return IpRange::find()
             ->andWhere(['>=', 'ip_start', $this->ip_start])

@@ -1,7 +1,10 @@
 <?php
 
 use yii\helpers\Html;
+use yii\grid\GridView;
 use yii\widgets\DetailView;
+use yii\grid\SerialColumn;
+use yii\data\ActiveDataProvider;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\westnet\models\AccessPoint */
@@ -35,5 +38,39 @@ $this->params['breadcrumbs'][] = $this->title;
             'node_id',
         ],
     ]) ?>
+
+    <h3><?= Yii::t('app', 'Ip Ranges')?></h3>
+
+    <?=
+        GridView::widget([
+            'dataProvider' => new ActiveDataProvider(['query' => $model->getIpRanges()]),
+            'options' => [ 'id' => 'range_table'],
+            'columns' => [
+                ['class' => SerialColumn::class],
+
+                [
+                    'attribute' => 'ip_start',
+                    'value' => function($model) {
+                        return long2ip($model->ip_start);
+                    }
+                ],
+                [
+                    'attribute' => 'ip_end',
+                    'value' => function($model) {
+                        return long2ip($model->ip_end);
+                    }
+                ], 
+                [
+                    'attribute' => 'last_ip',
+                    'value' => function($model) {
+                        if ($model->last_ip) {
+                            return long2ip($model->last_ip);
+                        }
+                    }
+                ],
+            ]
+        ])
+    
+    ?>
 
 </div>

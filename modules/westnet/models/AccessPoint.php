@@ -18,6 +18,8 @@ use Yii;
  */
 class AccessPoint extends \yii\db\ActiveRecord
 {
+
+    public $ranges;
     /**
      * {@inheritdoc}
      */
@@ -37,6 +39,7 @@ class AccessPoint extends \yii\db\ActiveRecord
             [['node_id'], 'integer'],
             [['name'], 'string', 'max' => 90],
             [['strategy_class'], 'string', 'max' => 255],
+            [['ranges'], 'safe'],
             [['node_id'], 'exist', 'skipOnError' => true, 'targetClass' => Node::class, 'targetAttribute' => ['node_id' => 'node_id']],
         ];
     }
@@ -68,7 +71,7 @@ class AccessPoint extends \yii\db\ActiveRecord
      */
     public function getIpRanges()
     {
-        return $this->hasMany(IpRange::class, ['access_point_id' => 'access_point_id']);
+        return $this->hasMany(IpRange::class, ['ap_id' => 'access_point_id']);
     }
 
     public function getActiveIpRange()
@@ -76,5 +79,21 @@ class AccessPoint extends \yii\db\ActiveRecord
 
     }
 
+    public function assignIpRange()
+    {
+        if($this->ranges) {
+            foreach($this->ranges as $range) {
+                $ipRange = IpRange::findOne($range);
+
+                if ($ipRange) {
+                    $ipRange->updateAttributes(['ap_id' => $this->access_point_id]);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
     
 }
