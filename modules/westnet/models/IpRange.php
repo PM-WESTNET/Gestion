@@ -126,6 +126,12 @@ class IpRange extends \app\components\db\ActiveRecord
      */
     public function getDeletable()
     {
+        if ($this->type === self::NET_TYPE) {
+            if ($this->getSubnets()->andWhere(['status' => self::AVAILABLE_STATUS])->exists()) {
+                return false;
+            }
+        }
+
         return true;
     }
     
@@ -144,6 +150,7 @@ class IpRange extends \app\components\db\ActiveRecord
         if (parent::beforeDelete()) {
             if($this->getDeletable()){
                 $this->unlinkWeakRelations();
+                $this->deleteSubnets();
                 return true;
             }
         } else {
@@ -171,6 +178,13 @@ class IpRange extends \app\components\db\ActiveRecord
         return long2ip($this->ip_end);
     }
 
+    public function getSubnets() {
+        return IpRange::find()
+            ->andWhere(['>=', 'ip_start', $this->ip_start])
+            ->andWhere(['<=', 'ip_end', $this->ip_end])
+            ->andWhere(['type' => self::SUBNET_TYPE]);
+            
+    }
 
 
     /*
@@ -202,7 +216,7 @@ class IpRange extends \app\components\db\ActiveRecord
             for ($i = $this->ip_start; $i < $this->ip_end; ($i = $i + 256)) {
                 $subnet = new IpRange();
                 $subnet->ip_start = $i;
-                $subnet->ip_end = $i + 255;
+                $subnet->ip_end = $i + 253;
                 $subnet->type = self::SUBNET_TYPE;
                 $subnet->status = self::ENABLED_STATUS;
 
@@ -210,6 +224,10 @@ class IpRange extends \app\components\db\ActiveRecord
                 $subnet->save();
             }
         }
+    }
+
+    public function deleteSubnets() {
+        IpRange::deleteAll(['AND', ['>=', 'ip_start', $this->ip_start], ['<=', 'ip_end', $this->ip_end]]);
     }
 
 }
