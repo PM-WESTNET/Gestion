@@ -273,6 +273,14 @@ use kartik\select2\Select2;
                 $("#bill-number").focusout(function() {
                     Bill.save();
                 });
+
+                $('#closeBill').on('click', function () {
+                    $('#closeBill').addClass('disabled');
+                });
+
+                $('#pay').on('click', function () {
+                    $('#pay').addClass('disabled');
+                })
             }
             
             //public
