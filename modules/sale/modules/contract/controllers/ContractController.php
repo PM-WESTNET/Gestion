@@ -755,6 +755,11 @@ class ContractController extends Controller {
         if (!$connection) {
             $connection = new Connection();
         }
+
+        $nodes = Node::find();
+        $nodes->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name'])
+            ->leftJoin('server s', 'node.server_id = s.server_id')
+            ->orderBy('node.name');
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
             $code = $_POST['Contract']['customerCodeADS'];
@@ -775,7 +780,8 @@ class ContractController extends Controller {
                 return $this->render('active-contract', [
                     'model' => $model,
                     'connection' => $connection,
-                    'action' => 'active'
+                    'action' => 'active',
+                    'nodes' => $nodes
                 ]);
             }
         }
@@ -802,7 +808,8 @@ class ContractController extends Controller {
         return $this->render('active-contract', [
                     'model' => $model,
                     'connection' => $connection,
-                    'action' => 'active'
+                    'action' => 'active',
+                    'nodes' => $nodes
         ]);
     }
 
