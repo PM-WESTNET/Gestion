@@ -5,6 +5,7 @@ namespace app\modules\westnet\models;
 use app\modules\zone\models\Zone;
 use app\modules\westnet\models\IpRange;
 use app\modules\sale\models\Company;
+use app\modules\westnet\components\ipStrategy\AccessPointStrategy;
 use Yii;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use yii\db\Query;
@@ -250,7 +251,11 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getUsableIp($ap = null)
     {
-        $strategy = new LegacyStrategy();
+        if (empty($ap)) {
+            $strategy = new LegacyStrategy();
+        } else {
+            $strategy = new AccessPointStrategy();
+        }
 
         return $strategy->getValidIp($this);
     }

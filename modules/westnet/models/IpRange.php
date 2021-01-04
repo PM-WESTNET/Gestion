@@ -11,6 +11,7 @@ use IPv4\SubnetCalculator;
  * @property integer $ip_range_id
  * @property integer $ip_start
  * @property integer $ip_end
+ * @property integer $last_ip
  * @property string $status
  * @property integer $node_id
  * @property string $type
@@ -202,7 +203,23 @@ class IpRange extends \app\components\db\ActiveRecord
     */
     public function getAvailableIp()
     {
+        $ip = null;
 
+        if ($this->last_ip === null) {
+            $ip = $this->ip_start;
+            $this->updateAttributes(['status' => self::AVAILABLE_STATUS]);
+            return $ip;
+        }
+
+        
+        $ip = $this->last_ip + 1;
+        $this->updateAttributes(['last_ip' => $ip]);
+        
+        if ($this->ip === $this->ip_end) {
+            $this->updateAttributes(['status' => self::DISABLED_STATUS]);
+        }
+
+        return $ip;
     }
 
     public function calculateIpRange()

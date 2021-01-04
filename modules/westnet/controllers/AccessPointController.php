@@ -3,10 +3,10 @@
 namespace app\modules\westnet\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\data\ActiveDataProvider;
+use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\IpRange;
@@ -18,20 +18,7 @@ use app\modules\westnet\models\search\AccessPointSearch;
  */
 class AccessPointController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete' => ['POST'],
-                ],
-            ],
-        ];
-    }
+    
 
     /**
      * Lists all AccessPoint models.
@@ -42,9 +29,12 @@ class AccessPointController extends Controller
         $searchModel = new AccessPointSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $nodes = ArrayHelper::map(Node::find()->andWhere(['status' => 'enabled'])->all(), 'node_id', 'name');
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'nodes' => $nodes
         ]);
     }
 

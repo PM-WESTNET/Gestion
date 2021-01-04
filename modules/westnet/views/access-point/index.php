@@ -1,5 +1,6 @@
 <?php
 
+use kartik\select2\Select2;
 use yii\helpers\Html;
 use yii\grid\GridView;
 
@@ -27,9 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'access_point_id',
             'name',
-            'status',
-            'strategy_class',
-            'node_id',
+            [
+                'attribute' => 'status',
+                'value' => function($model) {
+                    return $model->statusLabel;
+                },
+                'filter' => [
+                    'enabled' => Yii::t('app', 'Enabled'),
+                    'disabled' => Yii::t('app', 'Disabled'),
+                ]
+            ],
+            [
+                'attribute' => 'node_id',
+                'value' => function($model) {
+                    if($model->node_id) {
+                        return $model->node->name;
+                    }
+                },
+                'filter' => Select2::widget([
+                    'name' => 'AccessPointSearch[node_id]',
+                    'data' => $nodes,
+                    'pluginOptions' => ['allowClear' => true],
+                    'options' => ['prompt' => '']
+                ])
+            ],
 
             ['class' => 'yii\grid\ActionColumn'],
         ],

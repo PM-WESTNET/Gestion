@@ -76,7 +76,22 @@ class AccessPoint extends \yii\db\ActiveRecord
 
     public function getActiveIpRange()
     {
+        $range = $this->getIpRanges()
+            ->andWhere(['status' => IpRange::AVAILABLE_STATUS])->orderBy(['ip_range_id' => SORT_ASC])
+            ->one();
 
+        if (empty($range)) {
+            $range = $this->getIpRanges()
+            ->andWhere(['status' => IpRange::ENABLED_STATUS])->orderBy(['ip_range_id' => SORT_ASC])
+            ->one();
+
+            if (empty($range)) {
+                Yii::t('app', 'Access Point {ap} hasn`t ip ranges available', ['ap' => $this->name]);
+                return false;
+            }
+        } 
+        
+        return $range;
     }
 
     public function assignIpRange()
@@ -94,6 +109,19 @@ class AccessPoint extends \yii\db\ActiveRecord
         }
 
         return false;
+    }
+
+    public function getStatusses() {
+        return [
+            'enabled' => Yii::t('app', 'Enabled'),
+            'disabled' => Yii::t('app', 'Disabled'),
+        ];
+    }
+
+    public function getStatusLabel() {
+        $statusses = $this->statusses;
+
+        return $statusses[$this->status];
     }
     
 }
