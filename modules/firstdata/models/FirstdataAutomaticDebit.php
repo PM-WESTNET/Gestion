@@ -48,8 +48,9 @@ class FirstdataAutomaticDebit extends ActiveRecord
             [['status'], 'string'],
             [['block1', 'block2', 'block3', 'block4'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
-            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::className(), 'targetAttribute' => ['customer_id' => 'customer_id']],
-            [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::className(), 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
+            [['customer_id'], 'unique', 'on' => 'insert', 'message' => Yii::t('app', 'This customer has Firstdata service enabled')],
+            [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
+            [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::class, 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
         ];
     }
 
@@ -84,7 +85,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
      */
     public function getCustomer()
     {
-        return $this->hasOne(Customer::className(), ['customer_id' => 'customer_id']);
+        return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
 
     /**
@@ -92,7 +93,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
      */
     public function getCompanyConfig()
     {
-        return $this->hasOne(FirstdataCompanyConfig::className(), ['firstdata_company_config_id' => 'company_config_id']);
+        return $this->hasOne(FirstdataCompanyConfig::class, ['firstdata_company_config_id' => 'company_config_id']);
     }
 
     /**
@@ -100,7 +101,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
      */
     public function getFirstdataDebitHasExports()
     {
-        return $this->hasMany(FirstdataDebitHasExport::className(), ['firstdata_automatic_debit_id' => 'firstdata_automatic_debit_id']);
+        return $this->hasMany(FirstdataDebitHasExport::class, ['firstdata_automatic_debit_id' => 'firstdata_automatic_debit_id']);
     }
 
     public function beforeSave($insert) {

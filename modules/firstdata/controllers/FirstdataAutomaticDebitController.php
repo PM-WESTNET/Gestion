@@ -65,6 +65,7 @@ class FirstdataAutomaticDebitController extends Controller
     public function actionCreate()
     {
         $model = new FirstdataAutomaticDebit();
+        $model->scenario = 'insert';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->firstdata_automatic_debit_id]);
