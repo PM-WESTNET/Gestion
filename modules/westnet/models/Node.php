@@ -111,19 +111,19 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getZone()
     {
-        return $this->hasOne(Zone::className(), ['zone_id' => 'zone_id']);
+        return $this->hasOne(Zone::class, ['zone_id' => 'zone_id']);
     }
 
     //Devuelve el IpRange asignado al Nodo
     public function getIpRange()
     {
-        return $this->hasOne(IpRange::className(), ['node_id' => 'node_id']);
+        return $this->hasOne(IpRange::class, ['node_id' => 'node_id']);
 
     }
 
     public function getNodeHasEcopago()
     {
-        return $this->hasOne(NodeHasEcopago::className(), ['node_id' => 'node_id']);
+        return $this->hasOne(NodeHasEcopago::class, ['node_id' => 'node_id']);
     }
 
     /**
@@ -131,7 +131,7 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getEcopagos()
     {
-        return $this->hasMany(Ecopago::className(), ['ecopago_id' => 'ecopago_id'])->viaTable('node_has_ecopago', ['node_id' => 'node_id']);
+        return $this->hasMany(Ecopago::class, ['ecopago_id' => 'ecopago_id'])->viaTable('node_has_ecopago', ['node_id' => 'node_id']);
     }
 
     /**
@@ -139,7 +139,7 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getParentNode()
     {
-        return $this->hasOne(Node::className(), ['node_id' => 'parent_node_id']);
+        return $this->hasOne(Node::class, ['node_id' => 'parent_node_id']);
 
     }
 
@@ -148,14 +148,18 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getServer()
     {
-        return $this->hasOne(Server::className(), ['server_id' => 'server_id']);
+        return $this->hasOne(Server::class, ['server_id' => 'server_id']);
     }
 
     public function getConnections()
     {
-        return $this->hasMany(Connection::className(), ['node_id' => 'node_id']);
+        return $this->hasMany(Connection::class, ['node_id' => 'node_id']);
     }
 
+    public function getAccessPoints()
+    {
+        return $this->hasMany(AccessPoint::class, ['node_id' => 'node_id']);
+    }
 
     public function setEcopagos($ecopagos)
     {
@@ -257,7 +261,7 @@ class Node extends \app\components\db\ActiveRecord
             $strategy = new AccessPointStrategy();
         }
 
-        return $strategy->getValidIp($this);
+        return $strategy->getValidIp($this, $ap);
     }
 
     /**

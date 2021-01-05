@@ -200,6 +200,7 @@ class ContractToInvoice
             return true;
         } catch (Exception $ex) {
             error_log($ex->getTraceAsString());
+            Yii::trace($ex->getTraceAsString());
             $transaction->rollBack();
         }
         return false;

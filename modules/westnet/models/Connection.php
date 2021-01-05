@@ -33,6 +33,7 @@ use yii\db\Query;
  * @property string $status_account
  * @property integer $clean
  * @property integer $old_server_id
+ * @property integer $access_point_id
  *
  * @property Contract $contract
  * @property Node $node
@@ -88,9 +89,9 @@ class Connection extends ActiveRecord {
     public function rules() {
         return [
             [['contract_id'], 'required'],
-            [['contract_id', 'node_id', 'server_id', 'ip4_1', 'ip4_2', 'clean', 'old_server_id'], 'integer'],
+            [['contract_id', 'node_id', 'server_id', 'ip4_1', 'ip4_2', 'clean', 'old_server_id', 'access_point_id'], 'integer'],
             [['status', 'ip4_public', 'status_account'], 'string'],
-            [['due_date', 'contract', 'node', 'server', 'use_second_ip', 'has_public_ip' ], 'safe'],
+            [['due_date', 'contract', 'node', 'server', 'use_second_ip', 'has_public_ip', 'access_point_id' ], 'safe'],
             [['due_date'], 'date'],
             ['node_id', 'required', 'on' => self::SCENARIO_DEFAULT],
             [['payment_code'], 'unique']
@@ -117,6 +118,7 @@ class Connection extends ActiveRecord {
             'payment_code' => Yii::t('app', 'Payment Code'),
             'status_account' => Yii::t('app', 'Status Account'),
             'clean' => Yii::t('app', 'Clean'),
+            'access_point_id' => Yii::t('app', 'Access Point'),
         ];
     }
 
@@ -124,21 +126,26 @@ class Connection extends ActiveRecord {
      * @return ActiveQuery
      */
     public function getContract() {
-        return $this->hasOne(Contract::className(), ['contract_id' => 'contract_id']);
+        return $this->hasOne(Contract::class, ['contract_id' => 'contract_id']);
     }
 
     /**
      * @return ActiveQuery
      */
     public function getNode() {
-        return $this->hasOne(Node::className(), ['node_id' => 'node_id']);
+        return $this->hasOne(Node::class, ['node_id' => 'node_id']);
     }
 
     /**
      * @return ActiveQuery
      */
     public function getServer() {
-        return $this->hasOne(Server::className(), ['server_id' => 'server_id']);
+        return $this->hasOne(Server::class, ['server_id' => 'server_id']);
+    }
+
+    public function getAccessPoint()
+    {
+        return $this->hasOne(AccessPoint::class, ['access_point_id' => 'access_point_id']);
     }
 
     /**
@@ -331,8 +338,9 @@ class Connection extends ActiveRecord {
      */
     public function updateIp() {
         $node = $this->node;
+        $ap = $this->accessPoint;
         $this->server_id = $node->server_id;
-        $this->ip4_1 = $node->getUsableIp();
+        $this->ip4_1 = $node->getUsableIp($ap);
     }
 
     /**

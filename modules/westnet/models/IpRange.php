@@ -2,6 +2,7 @@
 
 namespace app\modules\westnet\models;
 
+use app\modules\config\models\Config;
 use Yii;
 use IPv4\SubnetCalculator;
 
@@ -234,7 +235,7 @@ class IpRange extends \app\components\db\ActiveRecord
 
             for ($i = $this->ip_start; $i < $this->ip_end; ($i = $i + 256)) {
                 $subnet = new IpRange();
-                $subnet->ip_start = $i;
+                $subnet->ip_start = $i + (int)Config::getValue('ip_reserve_count');
                 $subnet->ip_end = $i + 253;
                 $subnet->type = self::SUBNET_TYPE;
                 $subnet->status = self::ENABLED_STATUS;

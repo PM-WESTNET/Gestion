@@ -756,10 +756,13 @@ class ContractController extends Controller {
             $connection = new Connection();
         }
 
-        $nodes = Node::find();
-        $nodes->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name'])
+        $nodesQuery = Node::find();
+        $nodesQuery->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name'])
             ->leftJoin('server s', 'node.server_id = s.server_id')
             ->orderBy('node.name');
+            
+
+        $nodes = ArrayHelper::map($nodesQuery->all(), 'node_id', 'name');
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
             $code = $_POST['Contract']['customerCodeADS'];
@@ -1188,5 +1191,29 @@ class ContractController extends Controller {
 
         Yii::$app->session->addFlash('error', Yii::t('app','Errors occurred at update contract on ISP'));
         return $this->redirect(['view', 'id' => $contract->contract_id]);
+    }
+
+    /**
+     * Retorna todos los descuentos por producto y si aplican a producto o customer
+     */
+    public function actionApByNode()
+    {
+        $out = [];
+        $params = Yii::$app->request->post('depdrop_parents', null);
+        $node_id  = $params[0];
+        
+        if($params) {
+            if($node_id) {
+                $query = Node::findOne($node_id)
+                    ->getAccessPoints()
+                    ->select(['access_point_id as id', 'name']);
+                
+                $out = $query->asArray()->all();
+                echo Json::encode(['output'=>$out, 'selected'=>'']);
+                return;
+            }
+
+        }
+        echo Json::encode(['output'=>'', 'selected'=>'']);
     }
 }

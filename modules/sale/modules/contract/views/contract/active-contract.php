@@ -58,7 +58,7 @@ try{
             
             echo $form->field($connection, 'node_id')->widget(Select2::class, [
                     'data' => $nodes,
-                    'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+                    'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false, 'id' => 'node_id'],
                     'pluginOptions' => [
                         'allowClear' => true
                     ]
@@ -84,11 +84,11 @@ try{
                 ],
                 'pluginOptions' => [
                     'depends' => ['node_id'],
-                    'initDepends' => ['plan_product_id', 'is_customer'],
-                    'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')])."...",
-                    'url' => Url::to(['/sale/discount/discount-by-product'])
+                    'initDepends' => ['node_id'],
+                    'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Access Point')])."...",
+                    'url' => Url::to(['/sale/contract/contract/ap-by-node'])
                 ]
-            ])->label(Yii::t('app', 'Discount'));
+            ])->label(Yii::t('app', 'Access Point'));
         
         ?>
 
