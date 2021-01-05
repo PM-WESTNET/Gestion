@@ -142,18 +142,18 @@ class Book {
                     if ($this->model->type == 'buy') {
 
                         if (($tax->pct * 100) == 21) {
-                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_21'];
-                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_21'];
+                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = ($value['total'] < 0 ? '-' : '') . $value['iva_21'] ;
+                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += ($value['total'] < 0 ? '-' : '') .  $value['iva_21'];
                         }
 
                         if (($tax->pct * 100) == 10.5) {
-                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_105'];
-                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_105'];
+                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = ($value['total'] < 0 ? '-' : '') . $value['iva_105'];
+                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += ($value['total'] < 0 ? '-' : '') . $value['iva_105'];
                         }
 
                         if (($tax->pct * 100) == 27) {
-                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = $value['iva_27'];
-                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += $value['iva_27'];
+                            $data[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] = ($value['total'] < 0 ? '-' : '') . $value['iva_27'];
+                            $this->pageTotals[$this->taxNames[$tax->tax_id] . ' ' . ($tax->pct * 100) . '%'] += ($value['total'] < 0 ? '-' : '') . $value['iva_27'];
                         }
 
                         //Para evitar que la consulta se realice mas de una vez por tax.
