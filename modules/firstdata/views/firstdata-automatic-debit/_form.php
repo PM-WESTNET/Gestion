@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\firstdata\models\FirstdataAutomaticDebit */
@@ -39,17 +40,8 @@ use yii\widgets\ActiveForm;
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-3">
-            <?= $form->field($model, 'block1')->textInput(['maxLength' => 4])->label(false)?>
-        </div>
-        <div class="col-xs-3">
-            <?= $form->field($model, 'block2')->textInput(['maxLength' => 4])->label(false)?>
-        </div>
-        <div class="col-xs-3">
-            <?= $form->field($model, 'block3')->textInput(['maxLength' => 4])->label(false)?>
-        </div>
-        <div class="col-xs-3">
-            <?= $form->field($model, 'block4')->textInput(['maxLength' => 4])->label(false)?>
+        <div class="col-xs-12">
+            <?= $form->field($model, 'card')->widget(MaskedInput::class, ['mask' => '9999999999999999'])->label(false)?>
         </div>
     </div>
     <div class="form-group">

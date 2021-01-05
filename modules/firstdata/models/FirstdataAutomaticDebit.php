@@ -29,6 +29,8 @@ class FirstdataAutomaticDebit extends ActiveRecord
     public $block2;
     public $block3;
     public $block4;
+
+    public $card;
     /**
      * {@inheritdoc}
      */
@@ -43,10 +45,11 @@ class FirstdataAutomaticDebit extends ActiveRecord
     public function rules()
     {
         return [
-            [['customer_id', 'status', 'block1', 'block2', 'block3', 'block4'], 'required'],
+            [['customer_id', 'status', 'card'], 'required'],
             [['block1', 'block2', 'block3', 'block4'], 'string'],
+            [['card'], 'string', 'length' => 16],
             [['status'], 'string'],
-            [['block1', 'block2', 'block3', 'block4'], 'safe'],
+            [['block1', 'block2', 'block3', 'block4', 'card'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
             [['customer_id'], 'unique', 'on' => 'insert', 'message' => Yii::t('app', 'This customer has Firstdata service enabled')],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
@@ -124,6 +127,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
     {
         parent::afterSave($insert, $changedAttributes);
 
+        $this->cardToBlocks();
         if ($insert) {
             if (CustomerDataHelper::newCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4)) {
                 Yii::$app->session->addFlash('success', Yii::t('app', 'Customer data saved successfully'));
@@ -163,5 +167,14 @@ class FirstdataAutomaticDebit extends ActiveRecord
         $this->block2 = substr($card, 4, 4);
         $this->block3 = substr($card, 8, 4);
         $this->block4 = substr($card, 12, 4);
+        $this->card= $card;
+    }
+
+    private function cardToBlocks() 
+    {
+        $this->block1 = substr($this->card, 0, 4);
+        $this->block2 = substr($this->card, 4, 4);
+        $this->block3 = substr($this->card, 8, 4);
+        $this->block4 = substr($this->card, 12, 4);
     }
 }
