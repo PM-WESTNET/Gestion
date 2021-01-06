@@ -952,7 +952,7 @@ class ContractController extends Controller {
         $response = [];
 
         $connection = $this->getConnection($connection_id);
-        if ($connection->node_id != $node_id) {
+        if ($connection->node_id != $node_id && $connection->access_point_id != $ap_id) {
             $node = Node::findOne(['node_id'=>$node_id]);
             $connection->old_server_id = $connection->server_id;
             $connection->server_id = $node->server_id;
