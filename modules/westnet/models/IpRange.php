@@ -208,7 +208,7 @@ class IpRange extends \app\components\db\ActiveRecord
 
         if ($this->last_ip === null) {
             $ip = $this->ip_start;
-            $this->updateAttributes(['status' => self::AVAILABLE_STATUS]);
+            $this->updateAttributes(['status' => self::AVAILABLE_STATUS, 'last_ip' => $ip]);
             return $ip;
         }
 
@@ -216,7 +216,7 @@ class IpRange extends \app\components\db\ActiveRecord
         $ip = $this->last_ip + 1;
         $this->updateAttributes(['last_ip' => $ip]);
         
-        if ($this->ip === $this->ip_end) {
+        if ($ip === $this->ip_end) {
             $this->updateAttributes(['status' => self::DISABLED_STATUS]);
         }
 

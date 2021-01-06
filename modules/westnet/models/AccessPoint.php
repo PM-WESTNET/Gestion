@@ -123,5 +123,10 @@ class AccessPoint extends \yii\db\ActiveRecord
 
         return $statusses[$this->status];
     }
+
+    public function getDeletable()
+    {
+        return !Connection::find()->andWhere(['access_point_id' => $this->access_point_id])->exists();
+    }
     
 }

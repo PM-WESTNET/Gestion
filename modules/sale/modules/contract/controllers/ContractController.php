@@ -946,7 +946,7 @@ class ContractController extends Controller {
      * @param $connection_id
      * @param $node_id
      */
-    public function actionChangeNode($connection_id, $node_id) {
+    public function actionChangeNode($connection_id, $node_id, $ap_id = null) {
         Yii::$app->response->format = 'json';
 
         $response = [];
@@ -957,6 +957,7 @@ class ContractController extends Controller {
             $connection->old_server_id = $connection->server_id;
             $connection->server_id = $node->server_id;
             $connection->node_id = $node_id;
+            $connection->access_point_id = $ap_id;
             try {
                 Yii::$app->formatter->asDate($connection->due_date, 'yyyy-MM-dd');
             } catch (\Exception $ex) {

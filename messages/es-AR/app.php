@@ -1391,6 +1391,8 @@
     'The customer`s company havent firstdata configurations' => 'La empresa del cliente no está configurada para Firstdata',
     'Customer data saved successfully' => 'Datos del cliente actualizados con éxito',
     'Cant save customer data' => 'No se pudo guardar los datos del cliente',
-    'Credit Card' => 'Tarjeta de Crédito'
+    'Credit Card' => 'Tarjeta de Crédito',
+    'Access Point {ap} hasn`t ip ranges available' => 'El access point {ap} no posee ips diponibles',
+    'Strategy Class' => 'Clase de Estrategia',
 
  );
