@@ -170,7 +170,9 @@ $this->params['breadcrumbs'][] = $this->title;
                                 [
                                     'header'=>Yii::t('app', 'Customer'),
                                     'value' => function($model) {
-                                        return $model->customer->lastname .', '.$model->customer->name;
+                                        if ($model->customer) {
+                                            return $model->customer->lastname .', '.$model->customer->name;
+                                        }
                                     }
                                 ],
                                 [
