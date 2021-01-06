@@ -68,7 +68,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         return long2ip($model->ip_end);
                     }
                 ],
-                'status',
+                [
+                    'attribute' => 'status',
+                    'value' => function($model) {
+                        return $model->statusLabel;
+                    }
+                ],
+                [
+                    'attribute' => 'node_id', 
+                    'value' => function($model) {
+                        if ($model->node_id) {
+                            return $model->node->name;
+                        }
+                    }
+                ]
             ]
         ])
     

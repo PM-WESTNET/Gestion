@@ -96,7 +96,7 @@ class IpRange extends \app\components\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'ip_range_id' => 'Ip Range ID',
+            'ip_range_id' => Yii::t('app', 'Network'),
             'ip_start' => Yii::t('westnet', 'Ip Start'),
             'ip_end' => Yii::t('westnet', 'Ip End'),
             'status' => Yii::t('westnet', 'Status'),
@@ -248,6 +248,17 @@ class IpRange extends \app\components\db\ActiveRecord
 
     public function deleteSubnets() {
         IpRange::deleteAll(['AND', ['>=', 'ip_start', $this->ip_start], ['<=', 'ip_end', $this->ip_end]]);
+    }
+
+    public function getStatusLabel()
+    {
+        $labels = [
+            'enabled' => Yii::t('app', 'Enabled'),
+            'disabled' => Yii::t('app', 'Disabled'),
+            'available' => Yii::t('app', 'Active'),
+        ] ;
+
+        return $labels[$this->status];
     }
 
 }
