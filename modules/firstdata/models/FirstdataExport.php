@@ -216,7 +216,7 @@ class FirstdataExport extends ActiveRecord
         $total = 0;
 
         foreach($customers as $customer) {
-            $total += $customer->current_account_balance;
+            $total += abs($customer->current_account_balance);
         }
 
         return $total;

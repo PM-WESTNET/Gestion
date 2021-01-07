@@ -78,7 +78,7 @@ class FirstdataExport {
         $plan_quotes = "999";
         $frecuency = "01";
         
-        $totalImport = $customer->current_account_balance;
+        $totalImport = abs($customer->current_account_balance);
         $totalint = floor($totalImport);
         $import1 = str_pad($totalint, 9, '0', STR_PAD_LEFT);
         $import2 = round(($totalImport - $totalint),2) * 100;
