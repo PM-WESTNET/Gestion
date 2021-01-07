@@ -18,7 +18,7 @@ class FirstdataExport {
 
         foreach($export->customers as $customer) {
             //Si el saldo es 0 o el cliente tiene credito, no lo agregamos al archivo
-            if ($customer->current_account_balance <= 0) {
+            if ($customer->current_account_balance === 0) {
                 continue;
             }
 
