@@ -64,7 +64,7 @@ class Node extends \app\components\db\ActiveRecord
         return [
             [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close'], 'integer'],
             [['zone', 'ecopagos', 'parentNode', 'companies', 'company_default', 'geocode'], 'safe'],
-            [['zone_id', 'name', 'status', 'subnet', 'server_id'], 'required'],
+            [['zone_id', 'name', 'status', 'server_id'], 'required'],
             [['name'], 'string', 'max' => 100],
             [['status'], 'string', 'max' => 45],
             ['subnet', 'compare', 'compareValue' => 1, 'operator' => '>='],
@@ -225,7 +225,9 @@ class Node extends \app\components\db\ActiveRecord
 
     public function afterSave($insert, $changedAttributes)
     {
-        $this->saveIpRange();
+        if (!empty($this->subnet)){
+            $this->saveIpRange();
+        }
         parent::afterSave($insert, $changedAttributes);
 
     }
