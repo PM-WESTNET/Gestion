@@ -3,13 +3,13 @@
 namespace app\modules\firstdata\controllers;
 
 use Yii;
-use app\modules\firstdata\models\FirstdataExport;
-use app\modules\firstdata\models\search\FirstdataExportSearch;
-use yii\web\Controller;
-use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use app\components\web\Controller;
+use yii\web\NotFoundHttpException;
+use app\modules\firstdata\models\FirstdataExport;
 use app\modules\firstdata\models\FirstdataCompanyConfig;
+use app\modules\firstdata\models\search\FirstdataExportSearch;
 
 /**
  * FirstdataExportController implements the CRUD actions for FirstdataExport model.
@@ -21,14 +21,14 @@ class FirstdataExportController extends Controller
      */
     public function behaviors()
     {
-        return [
+        return array_merge(parent::behaviors(), [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-        ];
+        ]);
     }
 
     /**

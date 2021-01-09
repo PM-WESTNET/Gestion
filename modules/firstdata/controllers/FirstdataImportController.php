@@ -3,9 +3,9 @@
 namespace app\modules\firstdata\controllers;
 
 use Yii;
-use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\modules\firstdata\models\FirstdataImport;
 use app\modules\accounting\models\MoneyBoxAccount;
@@ -22,14 +22,14 @@ class FirstdataImportController extends Controller
      */
     public function behaviors()
     {
-        return [
+        return array_merge(parent::behaviors(), [
             'verbs' => [
-                'class' => VerbFilter::className(),
+                'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
                 ],
             ],
-        ];
+        ]);
     }
 
     /**
