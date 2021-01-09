@@ -40,7 +40,7 @@ class FirstdataImport
                         if ($customer) {
                             self::createPayment($customer, $amount, $reject_code,$period, $import, $paymentMethod->payment_method_id);
                         } else {
-                            self::createImportPayment($import, $amount, $customer_code);
+                            self::createImportPayment($import, $amount, $customer_code, null, null, $reject_code);
                         }
                 break;
             }
