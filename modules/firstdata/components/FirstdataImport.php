@@ -16,6 +16,10 @@ class FirstdataImport
         $resource = fopen($import->response_file, 'r');
         $paymentMethod = PaymentMethod::findOne(['name' => 'Firstdata']);
 
+        if (empty($paymentMethod)) {
+            $paymentMethod = PaymentMethod::findOne(['name' => 'Débito Automático']);
+        }
+
         while($line = fgets($resource)) {
             $type = substr($line, 2, 1);
             switch ($type) {
