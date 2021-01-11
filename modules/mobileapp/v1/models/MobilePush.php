@@ -328,18 +328,26 @@ class MobilePush extends ActiveRecord
             ->all();
 
         foreach ($userApps as $user){
-           $mphua = new MobilePushHasUserApp([
-               'user_app_id' => $user->user_app_id,
-               'mobile_push_id' => $this->mobile_push_id,
-               'customer_id' => $customer_id,
-               'notification_title' => MobilePush::replaceText($this->title, $customer_data),
-               'notification_content' => MobilePush::replaceText($this->content, $customer_data),
-               'resume' => MobilePush::replaceText($this->resume, $customer_data)
-           ]);
+            // Verificamos que el user app no haya sido agregado antes, para evitar duplicdad de notificaciones
+            if(!MobilePushHasUserApp::find()
+                ->andWhere([
+                    'user_app_id' => $user->user_app_id,
+                     'mobile_push_id' => $this->mobile_push_id])
+                ->exists()) {
 
-           if(!$mphua->save()){
-               Yii::info($mphua->getErrors());
-           }
+                $mphua = new MobilePushHasUserApp([
+                    'user_app_id' => $user->user_app_id,
+                    'mobile_push_id' => $this->mobile_push_id,
+                    'customer_id' => $customer_id,
+                    'notification_title' => MobilePush::replaceText($this->title, $customer_data),
+                    'notification_content' => MobilePush::replaceText($this->content, $customer_data),
+                    'resume' => MobilePush::replaceText($this->resume, $customer_data)
+                ]);
+                    
+                if(!$mphua->save()){
+                    Yii::info($mphua->getErrors());
+                }
+            }
         }
     }
 
