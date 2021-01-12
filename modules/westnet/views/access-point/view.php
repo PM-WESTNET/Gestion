@@ -1,5 +1,6 @@
 <?php
 
+use app\components\helpers\UserA;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\DetailView;
@@ -18,7 +19,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?= Html::a(Yii::t('app', 'Update'), ['update', 'id' => $model->access_point_id], ['class' => 'btn btn-primary']) ?>
+        <?= UserA::a(Yii::t('app', 'Update'), ['update', 'id' => $model->access_point_id], ['class' => 'btn btn-primary']) ?>
+        <?php if ($model->getDeletable()):?>
         <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->access_point_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -26,6 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'method' => 'post',
             ],
         ]) ?>
+        <?php endif;?>
+        <?php if (!$model->getIpRanges()->exists()):?>
+            <?= UserA::a(Yii::t('app', 'Assign Ip Range'), ['assign-ip-range', 'ap_id' => $model->access_point_id], ['class' => 'btn btn-warning']) ?>
+        <?php endif;?>
     </p>
 
     <?= DetailView::widget([

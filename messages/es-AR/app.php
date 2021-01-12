@@ -1397,7 +1397,11 @@
     'Networks' => 'Redes',
     'Network' => 'Red',
     'Create Network' => 'Crear Red',
-    'Subnets' => 'Subredes'
+    'Subnets' => 'Subredes',
+    'Assign Ip Range' => 'Asignar Rango IP',
+    'You must select an Ip Range' => 'Debe seleccionar un Rango de Ip',
+    'You must select only one Ip Range' => 'Debe seleccionar un sólo Rango de Ip',
+    'If node has access point, subnet must be empty' => 'Si el nodo posee access point, subnet debe estar vacío'
 
 
  );

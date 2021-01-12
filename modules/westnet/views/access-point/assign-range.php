@@ -1,9 +1,12 @@
 <?php
+
+use lavrentiev\widgets\toastr\ToastrAsset;
 use yii\grid\GridView;
 use yii\grid\CheckboxColumn;
 use yii\helpers\Html;
 use yii\web\Request;
 
+ToastrAsset::register($this);
 $this->title = Yii::t('app', 'Assign IP Range');
 $this->params['breadcrumbs'][] = ['label' => $model->name, 'url' => ['/westnet/access-point/view', 'id' => $model->access_point_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Assign IP Range');
@@ -67,7 +70,13 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Assign IP Range');
         this.selectRange = function() {
             var rows = $('#range_table').yiiGridView('getSelectedRows');
 
-            if (rows.lenght == 0) {
+            if (rows.length == 0) {
+                toastr.error("<?php echo Yii::t('app', 'You must select an Ip Range')?>")
+                return;
+            }
+
+            if (rows.length > 1) {
+                toastr.error("<?php echo Yii::t('app', 'You must select only one Ip Range')?>")
                 return;
             }
 
