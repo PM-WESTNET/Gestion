@@ -252,4 +252,21 @@ class MobilePushHasUserApp extends \app\components\db\ActiveRecord
 
         Yii::$app->db->createCommand()->update(self::tableName(), ['sent_at' => $timestamp_value], ['in', 'mobile_push_has_user_app_id', $mobile_push_has_user_app_ids_sent])->execute();
     }
+
+    /**
+     * Devuelve un array con los datos que necesita la app para renderizar la vista de la notificacion
+     * Este array se le pasa a One signal en el atributo "data", esto lo recibe la app cuando el usuario
+     * pulsa sobre la notificacion en el centro de notificaciones del SO y redirige la app a la vista de la notificacion 
+     */
+    public function getExtraData() 
+    {
+        return [
+            'mobile_push_has_user_app_id' => $this->mobile_push_has_user_app_id,
+            'notification_title' => $this->notification_title,
+            'resume' => $this->mobilePush->resume,
+            'notification_content' => $this->notification_content,
+            'buttons' => $this->getButtons(),
+            'notification_read' => 0
+        ];
+    }
 }
