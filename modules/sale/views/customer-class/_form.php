@@ -1,5 +1,6 @@
 <?php
 
+use kartik\time\TimePicker;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use kartik\widgets\ColorInput;
@@ -31,6 +32,14 @@ use kartik\widgets\ColorInput;
     <?= $form->field($model, 'percentage_bill')->textInput() ?>
 
     <?= $form->field($model, 'days_duration')->textInput() ?>
+    
+    <?= $form->field($model, 'clip_hour')->widget(TimePicker::class, [
+        'pluginOptions' => [
+            'showSeconds' => false,
+            'showMeridian' => false,
+            'minuteStep' => 1,
+        ]
+    ]) ?>
 
     <?= $form->field($model, 'percentage_tolerance_debt')->textInput() ?>
 

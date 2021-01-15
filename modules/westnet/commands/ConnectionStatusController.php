@@ -505,6 +505,16 @@ class ConnectionStatusController extends Controller
                 $aviso_date->modify('+'.$customerClass->tolerance_days.' day');
                 $cortado_date->modify('+'.$customerClass->days_duration.' day');
 
+                /*
+                    La categoría del cliente nos indica a partir de que hora podemos cortar
+                    Esto lo hacemos para evitar que los clientes que pagan a último momento
+                    se queden sin servicio a medianoche y tengan que esperar hasta que administración
+                    registre los pagos al otro día. Por defecto se corta a partir de las 10 de la mañana
+                */
+                $canClip = strtotime(date('H:i:s')) >= strtotime($customerClass->clip_hour);
+                echo 'actual: ' . strtotime(date('H:i:s')) . "\n";
+                echo "corte: " . strtotime($customerClass->clip_hour) . "\n";
+                echo 'puedo cortar: ' . (int)$canClip . "\n";
                 $contracts = [];
 
                 // Si no tiene deuda o la deuda es menor a la tolerancia, habilito.
@@ -613,7 +623,9 @@ class ConnectionStatusController extends Controller
                             } else if ($es_nueva_instalacion ) {
                                 $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                             } else if( $es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                if ($canClip) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                }
                                 //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
                                 //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
 
@@ -657,7 +669,9 @@ class ConnectionStatusController extends Controller
                                  *  -  Esta forzado y hoy es mayor a la fecha de forzado
                                  *  -  No esta en proceso de baja
                                  */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                if($canClip) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                }
                                 //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
                                 //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill2['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
                             }

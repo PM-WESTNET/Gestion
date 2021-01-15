@@ -44,6 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'percentage_bill',
             'days_duration',
+            'clip_hour',
             'percentage_tolerance_debt',
             'service_enabled:boolean',
             [
