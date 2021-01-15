@@ -47,7 +47,8 @@ class FirstdataAutomaticDebit extends ActiveRecord
         return [
             [['customer_id', 'status', 'card'], 'required'],
             [['block1', 'block2', 'block3', 'block4'], 'string'],
-            [['card'], 'string', 'length' => 16],
+            /* [['card'], 'string', 'length' => 16], */
+            ['card', 'validateCardLenght'],
             [['status'], 'string'],
             [['block1', 'block2', 'block3', 'block4', 'card'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
@@ -55,6 +56,14 @@ class FirstdataAutomaticDebit extends ActiveRecord
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::class, 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
         ];
+    }
+
+    public function validateCardLenght() 
+    {
+        if ($this->card && strlen(trim($this->card, '_')) < 16) {
+            $this->addError('card', Yii::t('app', 'Card number must has 16 digits'));
+            return false;
+        }
     }
 
     /**
