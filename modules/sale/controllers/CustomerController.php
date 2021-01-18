@@ -9,6 +9,7 @@ use app\modules\afip\components\CuitOnlineValidator;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\invoice\components\einvoice\ApiFactory;
 use app\modules\sale\models\Address;
+use app\modules\sale\models\Category;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerMessage;
@@ -65,10 +66,13 @@ class CustomerController extends Controller
             $searchModel->search_text= $_GET['search_text'];
             $dataProvider = $searchModel->searchText(['CustomerSearch' => ['search_text' => $_GET['search_text']] ]);          
         }
+
+        $categoriesPlan = ArrayHelper::map(Category::find()->all(), 'category_id', 'name');
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'categoriesPlan' => $categoriesPlan
         ]);
     }
     

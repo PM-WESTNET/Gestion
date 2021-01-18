@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <h4 class="panel-title">Filtros</h4>            
         </div>
         <div class="panel-body">
-            <?= $this->render('_filters-customer', ['model' => $searchModel]); ?>
+            <?= $this->render('_filters-customer', ['model' => $searchModel, 'categoriesPlan' => $categoriesPlan]); ?>
         </div>
     </div>
 

@@ -77,6 +77,8 @@ class CustomerSearch extends Customer {
 
     public $firstdata_status;
 
+    public $categoriesPlan;
+
     public function rules()
     {
         return [
@@ -85,7 +87,7 @@ class CustomerSearch extends Customer {
             [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
-            [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id', 'firstdata_status'], 'safe'],
+            [['contract_min_age', 'contract_max_age', 'activatedFrom', 'customers_id', 'firstdata_status', 'categoriesPlan'], 'safe'],
             [['email_status', 'email2_status', 'exclude_customers_with_one_bill', 'mobile_app_status'], 'safe'],
         ];
     }
@@ -195,6 +197,8 @@ class CustomerSearch extends Customer {
         $this->filterEmailStatus($query);
         $this->filterMobileAppStatus($query);
         $this->filterByFirstdataAutomaticDebit($query);
+        $this->filterByPlanCategory($query);
+
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -260,6 +264,8 @@ class CustomerSearch extends Customer {
         $this->filterEmailStatus($query);
         $this->filterMobileAppStatus($query);
         $this->filterByFirstdataAutomaticDebit($query);
+        $this->filterByPlanCategory($query);
+
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'lastname', $this->lastname])
@@ -861,6 +867,19 @@ class CustomerSearch extends Customer {
                     break;
             }
         }
+    }
+
+    private function filterByPlanCategory($query)
+    {
+        if (!empty($this->categoriesPlan)) {
+            $query->leftJoin('product', 'product.product_id = contract_detail.product_id');
+            $query->leftJoin('product_has_category prhc', 'prhc.product_id = product.product_id');
+            $query->andWhere(['product.type' => 'plan']);
+            $query->andWhere(['IN', 'prhc.category_id', $this->categoriesPlan]);
+            
+        }
+
+        return $query;
     }
 
     public function searchDebtBills($customer_id)
