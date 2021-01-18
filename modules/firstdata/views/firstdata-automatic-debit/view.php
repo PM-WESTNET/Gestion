@@ -53,7 +53,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->hiddenCreditCard;
                 }
             ],
-            'status'
+            'status',
+            [
+                'label' => Yii::t('app', 'User'),
+                'value' => function($model) {
+                    if (!empty($model->user)){
+                        return $model->user->username;
+                    }
+                }
+            ],
         ],
     ]) ?>
 

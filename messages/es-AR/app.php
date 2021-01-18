@@ -1394,6 +1394,8 @@
     'Credit Card' => 'Tarjeta de Crédito',
     'This customer has Firstdata service enabled' => 'Este cliente ya posee el servicio de firstdata',
     'Card Number' => 'Número de Tarjeta',
-    'Card number must has 16 digits' => 'Número de Tarjeta debe tener 16 dígitos'
+    'Card number must has 16 digits' => 'Número de Tarjeta debe tener 16 dígitos',
+    'Select an option' => 'Seleccione una opción',
+    'Created For' => 'Creado por'
 
  );
