@@ -60,4 +60,15 @@ class CustomerController extends Controller
             'data' => $data
         ]);
     }
+
+    public function actionCustomersUpdatedByUser()
+    {
+        $search = new CustomerSearch();
+        $data = $search->findByCustomersUpdatedByUser(Yii::$app->request->post());
+
+        return $this->render('customers-updated-by-user', [
+            'search' => $search,
+            'data' => $data
+        ]);
+    }
 }

@@ -328,4 +328,33 @@ GROUP BY periodo
 
 
     }
+
+    public function findByCustomersUpdatedByUser($params)
+    {
+        $query = (new Query);
+
+        $query->select(['COUNT(*) as count', 'user_id', 'date']);
+        $query->from('customer_update_register');
+
+        $this->load($params);
+
+        if (!empty($this->date_from)) {
+            $from_date = strtotime(Yii::$app->formatter->asDate($this->date_from, 'yyyy-MM-dd'));
+        }else {
+            $from_date = (new \DateTime())->modify('first day of month')->getTimestamp();
+        }
+
+        if (!empty($this->date_from)) {
+            $to_date = strtotime(Yii::$app->formatter->asDate($this->date_to, 'yyyy-MM-dd'));
+        }else {
+            $to_date = (new \DateTime())->getTimestamp();
+        }
+
+        $query->andWhere(['>=', 'date', $from_date]);
+        $query->andWhere(['<=', 'date', $to_date]);
+
+        $query->groupBy(['user_id']);
+        
+        return $query;
+    } 
 }
