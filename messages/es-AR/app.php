@@ -1393,6 +1393,8 @@
     'Cant save customer data' => 'No se pudo guardar los datos del cliente',
     'Credit Card' => 'Tarjeta de Crédito',
     'This customer has Firstdata service enabled' => 'Este cliente ya posee el servicio de firstdata',
-    'Card Number' => 'Número de Tarjeta'
+    'Card Number' => 'Número de Tarjeta',
+    'Updated Customers Report By User' => 'Clientes Actualizados por Usuario',
+    'Customers Updated' => 'Clientes Actualizados'
 
  );

@@ -7,7 +7,7 @@ use yii\widgets\ActiveForm;
 use yii\data\ArrayDataProvider;
 use webvimark\modules\UserManagement\models\User;
 
-$this->title = Yii::t('app', 'Customer Updated By User');
+$this->title = Yii::t('app', 'Updated Customers Report By User');
 ?>
 
 <div class="customer-updated-by-user">
