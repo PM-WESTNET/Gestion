@@ -92,6 +92,8 @@ try{
         
         ?>
 
+        <?php echo $form->field($connection, 'mac_address')->textInput()?>
+
 
         <div class="form-group field-contract-second-ip required">
             <?php

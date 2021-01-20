@@ -148,7 +148,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         'label' => Yii::t('westnet', 'Forced Activation Due Date'),
                         'format' => 'raw',
                         'value' => $connection->due_date,
-                    ]
+                    ],
+                    'mac_address'
+
                 ],
             ]);
         }
@@ -221,7 +223,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             [
                 'attribute' => 'vendor_id',
                 'value' => function($model){ return $model->vendor ? $model->vendor->fullName : null; }
-            ]
+            ],
         ],
     ]);
     ?>

@@ -34,6 +34,7 @@ use yii\db\Query;
  * @property integer $clean
  * @property integer $old_server_id
  * @property integer $access_point_id
+ * @property integer $mac_address
  *
  * @property Contract $contract
  * @property Node $node
@@ -91,7 +92,7 @@ class Connection extends ActiveRecord {
             [['contract_id'], 'required'],
             [['contract_id', 'node_id', 'server_id', 'ip4_1', 'ip4_2', 'clean', 'old_server_id', 'access_point_id'], 'integer'],
             [['status', 'ip4_public', 'status_account'], 'string'],
-            [['due_date', 'contract', 'node', 'server', 'use_second_ip', 'has_public_ip', 'access_point_id' ], 'safe'],
+            [['due_date', 'contract', 'node', 'server', 'use_second_ip', 'has_public_ip', 'access_point_id', 'mac_address' ], 'safe'],
             [['due_date'], 'date'],
             ['node_id', 'required', 'on' => self::SCENARIO_DEFAULT],
             [['payment_code'], 'unique']

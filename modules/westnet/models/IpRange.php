@@ -206,20 +206,43 @@ class IpRange extends \app\components\db\ActiveRecord
     {
         $ip = null;
 
+        $transaction = Yii::$app->db->beginTransaction();
+
         if ($this->last_ip === null) {
             $ip = $this->ip_start;
-            $this->updateAttributes(['status' => self::AVAILABLE_STATUS, 'last_ip' => $ip]);
-            return $ip;
+
+            if($this->isValid($ip)) {
+                $this->updateAttributes(['status' => self::AVAILABLE_STATUS, 'last_ip' => $ip]);
+                $transaction->commit();
+                return $ip;
+            }
+        }else {
+            $ip = $this->last_ip + 2;
+
+            if ($ip > $this->ip_end) {
+                $transaction->rollBack();
+                return false;
+            }
         }
 
+        // Mientras no sea valida la ip seguimos calculando
+        while (!$this->isValid($ip)) {
+            $ip = $ip + 2;
+
+            if ($ip > $this->ip_end) {
+                $transaction->rollBack();
+                return false;
+            }
+        }
         
-        $ip = $this->last_ip + 1;
+        
         $this->updateAttributes(['last_ip' => $ip]);
         
         if ($ip === $this->ip_end) {
             $this->updateAttributes(['status' => self::DISABLED_STATUS]);
         }
 
+        $transaction->commit();
         return $ip;
     }
 
@@ -259,6 +282,11 @@ class IpRange extends \app\components\db\ActiveRecord
         ] ;
 
         return $labels[$this->status];
+    }
+
+    private function isValid($ip) 
+    {
+        return !Connection::find()->andWhere(['ip4_1' => $ip])->exists();
     }
 
 }
