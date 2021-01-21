@@ -59,6 +59,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ])
 
             ],
+            'created_at:date',
 
             [
                 'class' => 'app\components\grid\ActionColumn'
