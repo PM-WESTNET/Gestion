@@ -100,7 +100,7 @@ class CustomerClass extends \app\components\db\ActiveRecord
             'service_enabled' => Yii::t('app', 'Service Enabled'),
             'percentage_tolerance_debt' => Yii::t('app', 'Tolerance in Debt'),
             'status' =>  Yii::t('app', 'Status'),
-            'clip_hour' => Yii::t('app', 'Clip Hour'),
+            'clip_hour' => Yii::t('app', 'Clip and Notice Hour'),
         ];
     }    
 

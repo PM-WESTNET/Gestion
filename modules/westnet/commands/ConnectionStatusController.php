@@ -652,8 +652,11 @@ class ConnectionStatusController extends Controller
                                  *  -  Tiene deuda mayor a la tolerancia.
                                  *  -  Hoy es mayor a la fecha de aviso y menor a la de corte o
                                  *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
+                                 *  - Si la hora es mayor a la hora programada de aviso y corte
                                  */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
+                                if ($canClip) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
+                                }
                             } else if(
                                 ( ($tiene_deuda && $tiene_deuda_sobre_tolerante ) &&
                                     ( $corta && $debtLastBill >= 1 ) ||

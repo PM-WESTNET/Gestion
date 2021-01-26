@@ -1394,6 +1394,6 @@
     'Credit Card' => 'Tarjeta de Crédito',
     'This customer has Firstdata service enabled' => 'Este cliente ya posee el servicio de firstdata',
     'Card Number' => 'Número de Tarjeta',
-    'Clip Hour' => 'Hora de Corte'
+    'Clip and Notice Hour' => 'Hora de Aviso y Corte'
 
  );
