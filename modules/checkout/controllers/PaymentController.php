@@ -661,7 +661,7 @@ class PaymentController extends Controller {
     /**
      * Envía el recibo de pago por email al cliente.
      */
-    public function actionEmail($id, $from = 'index')
+    public function actionEmail($id, $from = 'index', $email = null)
     {
         $model = $this->findModel($id);
 
@@ -672,11 +672,11 @@ class PaymentController extends Controller {
         fwrite($file, $pdf);
         fclose($file);
 
-        if (trim($model->customer->email) == "") {
+        if (trim($model->customer->email) == "" && trim($model->customer->email2) == "") {
             Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
         }
 
-        if ($model->sendEmail($fileName)) {
+        if ($model->sendEmail($fileName, $email)) {
             Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
         } else {
             Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
@@ -687,7 +687,7 @@ class PaymentController extends Controller {
         } elseif ($from == 'current-account') {
             return $this->redirect(['current-account', 'customer' => $model->customer_id]);
         } else {
-            return $this->redirect(['view', 'customer' => $model->customer_id]);
+            return $this->redirect(['view', 'id' => $model->customer_id]);
         }
     }
 }

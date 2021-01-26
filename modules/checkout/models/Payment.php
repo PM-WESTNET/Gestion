@@ -608,11 +608,14 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @return bool
      * Envia el comprobante por email al cliente correspondiente.
      */
-    public function sendEmail($pdfFileName)
+    public function sendEmail($pdfFileName, $email = null)
     {
         $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
 
-        if ($sender->send( $this->customer->email, "Envio de comprobante", [
+        if (empty($email)) {
+            $email = $this->customer->email;
+        }
+        if ($sender->send( $email, "Envio de comprobante", [
             'params'=>[
                 'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
                 'comprobante'   => sprintf("%08d", $this->number )

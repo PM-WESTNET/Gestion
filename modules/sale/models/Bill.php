@@ -1538,13 +1538,14 @@ class Bill extends ActiveRecord implements CountableInterface
      * Envia el comprobante por email al cliente correspondiente.
      * Se envía un mail por cada correo verificado que tenga
      */
-    public function sendEmail($pdfFileName)
+    public function sendEmail($pdfFileName, $email)
     {
         $pointOfSale = $this->getPointOfSale()->number;
 
         $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
         $send_email1 = true;
         $send_email2 = true;
+        $send = true;
         $message_subject = "Envio de factura de: " . $this->customer->parentCompany->name;
         $message = [
             'params'=>[
@@ -1553,12 +1554,17 @@ class Bill extends ActiveRecord implements CountableInterface
             ]
         ];
 
-        if($this->customer->email_status == Customer::EMAIL_STATUS_ACTIVE) {
-            $send_email1 = $sender->send( $this->customer->email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
-        }
-
-        if($this->customer->email2_status == Customer::EMAIL_STATUS_ACTIVE) {
-            $send_email2 = $sender->send( $this->customer->email2, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;;
+        if (empty($email)) {
+            if($this->customer->email_status == Customer::EMAIL_STATUS_ACTIVE) {
+                $send_email1 = $sender->send( $this->customer->email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
+            }
+            
+            if($this->customer->email2_status == Customer::EMAIL_STATUS_ACTIVE) {
+                $send_email2 = $sender->send( $this->customer->email2, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;;
+            }
+        } else {
+            $send = $sender->send($email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
+            return $send;
         }
 
         return $send_email1 && $send_email2;

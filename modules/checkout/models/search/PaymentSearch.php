@@ -282,7 +282,7 @@ class PaymentSearch extends Payment
         
         $masterQuery = (new Query());
         $masterQuery->select(["b.type","b.customer_id","b.name","b.bill_id","b.payment_id","b.date","b.time","b.number",
-            "b.total", "b.status", "b.payment_method", "b.bill_numbers", "b.company_name", "b.saldo", "c.email"]);
+            "b.total", "b.status", "b.payment_method", "b.bill_numbers", "b.company_name", "b.saldo", "c.email", "c.email2"]);
         $masterQuery->from(["c"=> 'customer'])
                     ->leftJoin(["b"=> $query], "b.customer_id = c.customer_id")
                     ->where("b.customer_id IS NOT NULL");
