@@ -1,5 +1,5 @@
 {
     "require": {
-        "fxp/composer-asset-plugin": "@dev"
+        "fxp/composer-asset-plugin": "*"
     }
 }
