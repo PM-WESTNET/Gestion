@@ -183,7 +183,7 @@ class FirstdataExport extends ActiveRecord
             ->andWhere(['fad.company_config_id' => $this->firstdata_config_id])
             ->andWhere(['fad.status' => 'enabled'])
             ->andWhere(['<','customer.current_account_balance', 0])
-            ->andWhere(['OR', ['IS', 'chfe.customer_id', null], ['<>', 'chfe.month', date('Y-m', $this->from_date)]])
+            //->andWhere(['OR', ['IS', 'chfe.customer_id', null], ['<>', 'chfe.month', date('Y-m', $this->from_date)]])
             ->distinct()
             ->all();
  
