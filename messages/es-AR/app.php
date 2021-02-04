@@ -1396,6 +1396,9 @@
     'Card Number' => 'Número de Tarjeta',
     'Card number must has 16 digits' => 'Número de Tarjeta debe tener 16 dígitos',
     'Select an option' => 'Seleccione una opción',
-    'Created For' => 'Creado por'
+    'Created For' => 'Creado por',
+    'Customer has been deleted successfull' => "El cliente ha sido eliminado con éxito",
+    'Can`t remove this customer' => 'No se puede eliminar ',
+    'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente"
 
  );
