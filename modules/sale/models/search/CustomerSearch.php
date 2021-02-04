@@ -121,7 +121,7 @@ class CustomerSearch extends Customer {
             'email_status' => Yii::t('app', 'Email 1 status'),
             'email2_status' => Yii::t('app', 'Email 2 status'),
             'mobile_app_status' => Yii::t('app', 'Mobile app status'),
-            'categoriesPlan' => Yii::t('app', 'Categories Plan'),
+            'categoriesPlan' => Yii::t('app', 'Technology'),
         ]);
     }
 

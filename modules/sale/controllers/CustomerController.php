@@ -67,7 +67,7 @@ class CustomerController extends Controller
             $dataProvider = $searchModel->searchText(['CustomerSearch' => ['search_text' => $_GET['search_text']] ]);          
         }
 
-        $categoriesPlan = ArrayHelper::map(Category::find()->all(), 'category_id', 'name');
+        $categoriesPlan = ArrayHelper::map(Category::find()->andWhere(['IN', 'name', ['Plan fibra', 'Plan wifi']])->all(), 'category_id', 'name');
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,
