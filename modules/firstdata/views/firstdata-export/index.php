@@ -26,7 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'firstdata_export_id',
-            'created_at:timestamp',
+            'created_at:datetime',
             'file_url',
             [
                 'attribute' => 'firstdata_config_id',

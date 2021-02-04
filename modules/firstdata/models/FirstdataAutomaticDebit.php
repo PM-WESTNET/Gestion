@@ -6,6 +6,7 @@ use Yii;
 use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
 use app\modules\firstdata\components\CustomerDataHelper;
+use webvimark\modules\UserManagement\models\User;
 use yii\behaviors\TimestampBehavior;
 
 /**
@@ -17,10 +18,12 @@ use yii\behaviors\TimestampBehavior;
  * @property int $company_config_id
  * @property int $created_at
  * @property int $updated_at
+ * @property int $user_id
  *
  * @property Customer $customer
  * @property FirstdataCompanyConfig $companyConfig
  * @property FirstdataDebitHasExport[] $firstdataDebitHasExports
+ * @property User $user
  */
 class FirstdataAutomaticDebit extends ActiveRecord
 {
@@ -47,7 +50,8 @@ class FirstdataAutomaticDebit extends ActiveRecord
         return [
             [['customer_id', 'status', 'card'], 'required'],
             [['block1', 'block2', 'block3', 'block4'], 'string'],
-            [['card'], 'string', 'length' => 16],
+            /* [['card'], 'string', 'length' => 16], */
+            ['card', 'validateCardLenght'],
             [['status'], 'string'],
             [['block1', 'block2', 'block3', 'block4', 'card'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
@@ -55,6 +59,14 @@ class FirstdataAutomaticDebit extends ActiveRecord
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['company_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::class, 'targetAttribute' => ['company_config_id' => 'firstdata_company_config_id']],
         ];
+    }
+
+    public function validateCardLenght() 
+    {
+        if ($this->card && strlen(trim($this->card, '_')) < 16) {
+            $this->addError('card', Yii::t('app', 'Card number must has 16 digits'));
+            return false;
+        }
     }
 
     /**
@@ -67,6 +79,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             'customer_id' => Yii::t('app', 'Customer'),
             'status' => Yii::t('app', 'Status'),
             'company_config_id' => Yii::t('app', 'Company'),
+            'user_id' => Yii::t('app','Created For')
         ];
     }
 
@@ -107,7 +120,16 @@ class FirstdataAutomaticDebit extends ActiveRecord
         return $this->hasMany(FirstdataDebitHasExport::class, ['firstdata_automatic_debit_id' => 'firstdata_automatic_debit_id']);
     }
 
+    public function getUser() 
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
     public function beforeSave($insert) {
+
+        if ($insert) {
+            $this->user_id = Yii::$app->user->id;
+        }
 
         if ($this->customer_id) {
             $config = FirstdataCompanyConfig::findOne(['company_id' => $this->customer->company_id]);
