@@ -60,7 +60,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 ['class' => SerialColumn::class],
 
                 [
-                    'attribute' => 'customer_code'
+                    'attribute' => 'customer_code',
+                    'filter' => $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['model' => $search, 'attribute' => 'customer_code'])
                 ],
                 [
                     'attribute' => 'customer_id',
