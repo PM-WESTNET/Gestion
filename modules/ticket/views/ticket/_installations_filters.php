@@ -9,6 +9,8 @@ use yii\helpers\Url;
 use app\modules\ticket\components\schemas\SchemaCobranza;
 use yii\jui\DatePicker;
 use app\modules\ticket\components\schemas\SchemaInstalaciones;
+use app\modules\ticket\models\Ticket;
+use app\modules\ticket\TicketModule;
 
 $form= ActiveForm::begin(['method' => 'GET']);
 ?>
@@ -32,28 +34,6 @@ $form= ActiveForm::begin(['method' => 'GET']);
         </div>
 
         <div class="col-sm-3">
-            <?= $form->field($model, 'assignations')->widget(Select2::class, [
-                'data' => ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username'),
-                'options' => ['placeholder' => Yii::t('app','Select')],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ])?>
-        </div>
-
-        <div class="col-sm-3">
-            <?= $form->field($model, 'created_by')->widget(Select2::class, [
-                'data' => ArrayHelper::map(User::find()->where(['status' => 1])->all(), 'id', 'username'),
-                'options' => ['placeholder' => Yii::t('app','Select')],
-                'pluginOptions' => [
-                    'allowClear' => true
-                ],
-            ])?>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-3">
             <?= $form->field($model, 'start_date_from')->widget(DatePicker::class, [
                     'model' => $model,
                     'attribute' => 'start_date_from',
@@ -74,13 +54,40 @@ $form= ActiveForm::begin(['method' => 'GET']);
                 ]
             ])?>
         </div>
+    </div>
+    <div class="row">
 
-        <div class="col-sm-4">
-            <?= $form->field($model, 'title')->textInput() ?>
+        <div class="col-sm-3">
+            <?= $form->field($model, 'date_from_start_contract')->widget(DatePicker::class, [
+                    'dateFormat' => 'yyyy-MM-dd',
+                    'options' => [
+                            'class' => 'form-control'
+                    ]
+            ])?>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col-sm-3">
+            <?= $form->field($model, 'date_to_start_contract')->widget(DatePicker::class, [
+                'dateFormat' => 'yyyy-MM-dd',
+                'options' => [
+                    'class' => 'form-control'
+                ]
+            ])?>
+        </div>
+
+        <div class="col-sm-3">
             <?= $form->field($model, 'ticket_management_qty')->textInput() ?>
+        </div>
+
+
+        <div class="col-sm-3">
+            <?=$form->field($model, 'discounted')->dropDownList( [
+               '0' => TicketModule::t('app', 'Undiscounted') 
+               ,'1' => TicketModule::t('app', 'Discounted')
+            ],
+            [
+                'prompt'=> Yii::t('app', 'Select an option')
+            ])?>
         </div>
 
     </div>

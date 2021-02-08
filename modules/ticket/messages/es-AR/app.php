@@ -101,4 +101,5 @@ return array(
     'Delete assignation' => 'Borrado de asignación',
     'Task date' => 'Fecha de tarea',
     'Discounted' => 'Descontado',
+    'Undiscounted' => 'No Descontado',
 );
