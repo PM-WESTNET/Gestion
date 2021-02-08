@@ -24,7 +24,7 @@ use kartik\widgets\ColorInput;
     <?= $form->field($model, 'tolerance_days')->textInput() ?>
 
     <?= $form->field($model, 'colour')->
-            widget(ColorInput::classname(), [
+            widget(ColorInput::class, [
                 'options' => ['placeholder' => 'Select color ...'],
             ]);
     ?>
@@ -34,6 +34,14 @@ use kartik\widgets\ColorInput;
     <?= $form->field($model, 'days_duration')->textInput() ?>
     
     <?= $form->field($model, 'clip_hour')->widget(TimePicker::class, [
+        'pluginOptions' => [
+            'showSeconds' => false,
+            'showMeridian' => false,
+            'minuteStep' => 1,
+        ]
+    ]) ?>
+
+    <?= $form->field($model, 'notice_hour')->widget(TimePicker::class, [
         'pluginOptions' => [
             'showSeconds' => false,
             'showMeridian' => false,

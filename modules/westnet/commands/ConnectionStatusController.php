@@ -512,6 +512,7 @@ class ConnectionStatusController extends Controller
                     registre los pagos al otro día. Por defecto se corta a partir de las 10 de la mañana
                 */
                 $canClip = strtotime(date('H:i:s')) >= strtotime($customerClass->clip_hour);
+                $canNotice = strtotime(date('H:i:s')) >= strtotime($customerClass->notice_hour);
                 echo 'actual: ' . strtotime(date('H:i:s')) . "\n";
                 echo "corte: " . strtotime($customerClass->clip_hour) . "\n";
                 echo 'puedo cortar: ' . (int)$canClip . "\n";
@@ -654,7 +655,7 @@ class ConnectionStatusController extends Controller
                                  *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
                                  *  - Si la hora es mayor a la hora programada de aviso y corte
                                  */
-                                if ($canClip) {
+                                if ($canNotice) {
                                     $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
                                 }
                             } else if(

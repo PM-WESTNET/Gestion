@@ -20,6 +20,7 @@ use yii\db\Query;
  * @property integer $percentage_tolerance_debt
  * @property string  $status
  * @property string $clip_hour
+ * @property string $notice_hour
  *
  * @property CustomerClassHasCustomer[] $customerClassHasCustomers
  * @property Customer[] $customers
@@ -76,7 +77,7 @@ class CustomerClass extends \app\components\db\ActiveRecord
             [['code_ext', 'is_invoiced', 'tolerance_days', 'percentage_bill', 'days_duration', 'service_enabled', 'percentage_tolerance_debt'], 'integer'],
             [['name'], 'string', 'max' => 255],
             [['colour'], 'string', 'max' => 54],
-            [['clip_hour'], 'safe'],
+            [['clip_hour', 'notice_hour'], 'safe'],
             [['percentage_bill'], 'integer','min' => 0, 'max' => 100],
             [['name','code_ext', 'is_invoiced', 'tolerance_days', 'percentage_bill', 'days_duration', 'colour', 'percentage_tolerance_debt', 'status'], 'required'],
             [['name', 'colour'], 'filter', 'filter' => '\yii\helpers\HtmlPurifier::process']
@@ -100,7 +101,8 @@ class CustomerClass extends \app\components\db\ActiveRecord
             'service_enabled' => Yii::t('app', 'Service Enabled'),
             'percentage_tolerance_debt' => Yii::t('app', 'Tolerance in Debt'),
             'status' =>  Yii::t('app', 'Status'),
-            'clip_hour' => Yii::t('app', 'Clip and Notice Hour'),
+            'clip_hour' => Yii::t('app', 'Clip Hour'),
+            'notice_hour' => Yii::t('app', 'Notice Hour'),
         ];
     }    
 
@@ -110,7 +112,7 @@ class CustomerClass extends \app\components\db\ActiveRecord
      */
     public function getCustomerClassHasCustomers()
     {
-        return $this->hasMany(CustomerClassHasCustomer::className(), ['customer_class_id' => 'customer_class_id']);
+        return $this->hasMany(CustomerClassHasCustomer::class, ['customer_class_id' => 'customer_class_id']);
     }
 
     /**
@@ -169,7 +171,11 @@ class CustomerClass extends \app\components\db\ActiveRecord
         parent::afterFind();
         if (empty($this->clip_hour)) {
             $this->clip_hour = '10:00:00';
-        }        
+        }    
+        
+        if (empty($this->notice_hour)) {
+            $this->notice_hour = '10:00:00';
+        }    
     }
 
     /**

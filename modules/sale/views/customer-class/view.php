@@ -35,6 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'code_ext',
             'is_invoiced:boolean',
             'tolerance_days',
+            'notice_hour',
             [
                 'attribute'=>'colour', 
                 'format'=>'raw', 
