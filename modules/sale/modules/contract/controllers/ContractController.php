@@ -433,6 +433,15 @@ class ContractController extends Controller {
                     $model->address_id = $address->address_id;
 
                     $model->update(false);
+
+                    // Nos aseguramos que si el contrato esta en estado activo, el cliente quede en estado habilitado
+                    // para evitar errores, especialmente con la facturacion. Usamos el metodo save() para que el cambio quede en el historial
+                    if ($model->status === Contract::STATUS_ACTIVE && $model->customer->status !== Customer::STATUS_ENABLED) {
+                        $model->customer->status = Customer::STATUS_ENABLED;
+                        $model->customer->save();
+                    }
+
+
                     return $this->redirect(['/sale/contract/contract/view',
                                 'id' => $model->contract_id]);
                 } catch (\Exception $ex) {

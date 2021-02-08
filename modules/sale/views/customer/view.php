@@ -334,7 +334,16 @@ $this->params['breadcrumbs'][] = $this->title;
     $attributes[] = [
         'label' => Yii::t('app', 'Document image') ,
         'value' => function ($model) {
-            return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+            $src = $model->getDocumentImageWebPath();
+            $src_arr = explode('.', $src);
+            $ext = $src_arr[count($src_arr) - 1];
+
+            if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'png') {
+                return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
+            } else {
+                return Html::img('images/pdf-icon.jpg', ['width' => "40px", 'height' => "40px"]) . ' '. Html::a(Yii::t('app', 'Download File'), $src, ['target' => "_blank"]);
+            }
+
         },
         'format' => 'raw'
     ];
@@ -342,7 +351,15 @@ $this->params['breadcrumbs'][] = $this->title;
     $attributes[] = [
         'label' => Yii::t('app', 'Tax image') ,
         'value' => function ($model) {
-            return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+            $src = $model->getTaxImageWebPath();
+            $src_arr = explode('.', $src);
+            $ext = $src_arr[count($src_arr) - 1];
+
+            if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'png') {
+                return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
+            } else {
+                return Html::img('images/pdf-icon.jpg', ['width' => "40px", 'height' => "40px"]) . ' '. Html::a(Yii::t('app', 'Download File'), $src, ['target' => "_blank"]);
+            }
         },
         'format' => 'raw'
     ];
