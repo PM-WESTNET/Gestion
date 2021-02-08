@@ -1,9 +1,11 @@
 <?php
 
-use app\modules\firstdata\models\FirstdataCompanyConfig;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
+use webvimark\modules\UserManagement\models\User;
+use app\modules\firstdata\models\FirstdataCompanyConfig;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch */
@@ -42,6 +44,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => ArrayHelper::map(FirstdataCompanyConfig::find()->all(), 'firstdata_company_config_id', 'company.name')
 
             ],
+            [
+                'attribute' => 'user_id', 
+                'value' => function($model) {
+                    if ($model->user){
+                        return $model->user->username;
+                    }
+                },
+                'filter' => Select2::widget([
+                    'name' => 'FirstdataAutomaticDebitSearch[user_id]',
+                    'data' => ArrayHelper::map(User::find()->all(), 'id', 'username'),
+                    'options' => ['placeholder' => Yii::t('app', 'Select an option')],
+                    'pluginOptions' => ['allowClear' => true]
+                ])
+
+            ],
+            'created_at:date',
 
             [
                 'class' => 'app\components\grid\ActionColumn'

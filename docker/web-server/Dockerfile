@@ -14,8 +14,8 @@ RUN curl https://ashberg.de/php-barcode/download/files/genbarcode-0.4.tar.gz -o 
 RUN tar -zxvf genbarcode.tar.gz
 RUN cd genbarcode-0.4; make; make install; cd ..; rm -Rf genbarcode-0.4
 
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-COPY composer.json /root/.composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.19
+COPY composer.json /root/.composer/composer.json
 COPY auth.json /root/.composer/auth.json
 RUN composer global update
 
@@ -25,8 +25,8 @@ RUN apt-get update
 RUN apt-get install -y percona-xtrabackup-24
 
 
-RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jessie_amd64.deb -o wkhtmltox_0.12.5-1.xenial_amd64.deb
-RUN dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb
+#RUN curl -L https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.jessie_amd64.deb -o wkhtmltox_0.12.5-1.xenial_amd64.deb
+#RUN dpkg -i wkhtmltox_0.12.5-1.xenial_amd64.deb
 COPY wkhtmltopdf.sh /usr/local/bin/wkhtmltopdf.sh
 RUN chmod +x /usr/local/bin/wkhtmltopdf.sh
 

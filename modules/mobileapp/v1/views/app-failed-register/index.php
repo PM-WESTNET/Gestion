@@ -38,7 +38,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'document_number',
                 'value' => function($model){
-                    return $model->document_type ?  $model->document_number. ': '. $model->document_number : $model->document_number;
+                    return $model->document_type ?  $model->document_type. ': '. $model->document_number : $model->document_number;
                 },
 
             ],

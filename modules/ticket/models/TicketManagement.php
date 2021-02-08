@@ -20,7 +20,7 @@ class TicketManagement extends \yii\db\ActiveRecord
 
     public static function tableName()
     {
-        return 'arya_ticket.ticket_management';
+        return 'ticket_management';
     }
 
     public static function getDb() {

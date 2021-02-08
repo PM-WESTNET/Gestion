@@ -338,7 +338,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $src_arr = explode('.', $src);
             $ext = $src_arr[count($src_arr) - 1];
 
-            if ($ext === 'jpg') {
+            if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'png') {
                 return Html::img($model->getDocumentImageWebPath(), ['class' => 'img-responsive']);
             } else {
                 return Html::img('images/pdf-icon.jpg', ['width' => "40px", 'height' => "40px"]) . ' '. Html::a(Yii::t('app', 'Download File'), $src, ['target' => "_blank"]);
@@ -355,7 +355,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $src_arr = explode('.', $src);
             $ext = $src_arr[count($src_arr) - 1];
 
-            if ($ext === 'jpg') {
+            if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'png') {
                 return Html::img($model->getTaxImageWebPath(), ['class' => 'img-responsive']);
             } else {
                 return Html::img('images/pdf-icon.jpg', ['width' => "40px", 'height' => "40px"]) . ' '. Html::a(Yii::t('app', 'Download File'), $src, ['target' => "_blank"]);

@@ -1395,6 +1395,9 @@
     'This customer has Firstdata service enabled' => 'Este cliente ya posee el servicio de firstdata',
     'Card Number' => 'Número de Tarjeta',
     'Categories Plan' => 'Categoria de Plan',
-    'Technology' => 'Tecnología'
+    'Technology' => 'Tecnología',
+    'Card number must has 16 digits' => 'Número de Tarjeta debe tener 16 dígitos',
+    'Select an option' => 'Seleccione una opción',
+    'Created For' => 'Creado por',
 
  );

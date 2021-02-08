@@ -22,7 +22,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
     {
         return [
             [['firstdata_automatic_debit_id', 'customer_id', 'company_config_id'], 'integer'],
-            [['from_date', 'to_date'], 'safe']
+            [['from_date', 'to_date', 'user_id'], 'safe']
         ];
     }
 
@@ -59,6 +59,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
             'firstdata_automatic_debit_id' => $this->firstdata_automatic_debit_id,
             'customer_id' => $this->customer_id,
             'company_config_id' => $this->company_config_id,
+            'user_id' => $this->user_id,
         ]);
 
         if (!empty($this->from_date)) {
