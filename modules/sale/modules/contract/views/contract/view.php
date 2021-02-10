@@ -120,6 +120,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         'value' => ($connection->node ? $connection->node->name : "" ),
                     ],
                     [
+                        'label' => Yii::t('westnet', 'Access Point'),
+                        'value' => ($connection->accessPoint ? $connection->accessPoint->name : "" ),
+                    ],
+                    [
                         'label' => Yii::t('westnet', 'ip4_1'),
                         'value' => long2ip($connection->ip4_1),
                     ],
@@ -144,7 +148,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         'label' => Yii::t('westnet', 'Forced Activation Due Date'),
                         'format' => 'raw',
                         'value' => $connection->due_date,
-                    ]
+                    ],
+                    'mac_address'
+
                 ],
             ]);
         }
@@ -217,7 +223,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             [
                 'attribute' => 'vendor_id',
                 'value' => function($model){ return $model->vendor ? $model->vendor->fullName : null; }
-            ]
+            ],
         ],
     ]);
     ?>
@@ -476,9 +482,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
         }
 
         this.changeNode = function () {
-            var id = $('#form-node #connection-node_id').val();
+            var id = $('#form-node #node_id').val();
+            var ap_id = $('#form-node #ap_id').val();
             if (id) {
-                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id, [], '#btn-change-node');
+                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id + '&ap_id=' + ap_id, [], '#btn-change-node');
             }
         }
 

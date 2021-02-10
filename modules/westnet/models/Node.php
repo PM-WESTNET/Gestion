@@ -5,10 +5,12 @@ namespace app\modules\westnet\models;
 use app\modules\zone\models\Zone;
 use app\modules\westnet\models\IpRange;
 use app\modules\sale\models\Company;
+use app\modules\westnet\components\ipStrategy\AccessPointStrategy;
 use Yii;
 use app\modules\westnet\ecopagos\models\Ecopago;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use app\modules\westnet\components\ipStrategy\LegacyStrategy;
 
 /**
  * This is the model class for table "node".
@@ -62,7 +64,7 @@ class Node extends \app\components\db\ActiveRecord
         return [
             [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close'], 'integer'],
             [['zone', 'ecopagos', 'parentNode', 'companies', 'company_default', 'geocode'], 'safe'],
-            [['zone_id', 'name', 'status', 'subnet', 'server_id'], 'required'],
+            [['zone_id', 'name', 'status', 'server_id'], 'required'],
             [['name'], 'string', 'max' => 100],
             [['status'], 'string', 'max' => 45],
             ['subnet', 'compare', 'compareValue' => 1, 'operator' => '>='],
@@ -109,19 +111,19 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getZone()
     {
-        return $this->hasOne(Zone::className(), ['zone_id' => 'zone_id']);
+        return $this->hasOne(Zone::class, ['zone_id' => 'zone_id']);
     }
 
     //Devuelve el IpRange asignado al Nodo
     public function getIpRange()
     {
-        return $this->hasOne(IpRange::className(), ['node_id' => 'node_id']);
+        return $this->hasOne(IpRange::class, ['node_id' => 'node_id']);
 
     }
 
     public function getNodeHasEcopago()
     {
-        return $this->hasOne(NodeHasEcopago::className(), ['node_id' => 'node_id']);
+        return $this->hasOne(NodeHasEcopago::class, ['node_id' => 'node_id']);
     }
 
     /**
@@ -129,7 +131,7 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getEcopagos()
     {
-        return $this->hasMany(Ecopago::className(), ['ecopago_id' => 'ecopago_id'])->viaTable('node_has_ecopago', ['node_id' => 'node_id']);
+        return $this->hasMany(Ecopago::class, ['ecopago_id' => 'ecopago_id'])->viaTable('node_has_ecopago', ['node_id' => 'node_id']);
     }
 
     /**
@@ -137,7 +139,7 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getParentNode()
     {
-        return $this->hasOne(Node::className(), ['node_id' => 'parent_node_id']);
+        return $this->hasOne(Node::class, ['node_id' => 'parent_node_id']);
 
     }
 
@@ -146,14 +148,18 @@ class Node extends \app\components\db\ActiveRecord
      */
     public function getServer()
     {
-        return $this->hasOne(Server::className(), ['server_id' => 'server_id']);
+        return $this->hasOne(Server::class, ['server_id' => 'server_id']);
     }
 
     public function getConnections()
     {
-        return $this->hasMany(Connection::className(), ['node_id' => 'node_id']);
+        return $this->hasMany(Connection::class, ['node_id' => 'node_id']);
     }
 
+    public function getAccessPoints()
+    {
+        return $this->hasMany(AccessPoint::class, ['node_id' => 'node_id']);
+    }
 
     public function setEcopagos($ecopagos)
     {
@@ -219,7 +225,9 @@ class Node extends \app\components\db\ActiveRecord
 
     public function afterSave($insert, $changedAttributes)
     {
-        $this->saveIpRange();
+        if (!empty($this->subnet)){
+            $this->saveIpRange();
+        }
         parent::afterSave($insert, $changedAttributes);
 
     }
@@ -247,16 +255,23 @@ class Node extends \app\components\db\ActiveRecord
      *
      * @return int|mixed
      */
-    public function getUsableIp()
+    public function getUsableIp($ap = null)
     {
-        // Busco el rango de ip del nodo y genero el nro de ip
-        $ipRange = $this->getIpRange()->one();
-        return $this->validIp($ipRange->ip_start, $ipRange->ip_end);
+        if (empty($ap)) {
+            $strategy = new LegacyStrategy();
+        } else {
+            $strategy = new AccessPointStrategy();
+        }
+
+        return $strategy->getValidIp($this, $ap);
     }
 
     /**
+     * 
      * Retorna una ip valida.
-     *
+     * 
+     * @deprecated
+     * 
      * @param $start
      * @param $end
      * @return int

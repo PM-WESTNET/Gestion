@@ -27,7 +27,7 @@ class IpRangeController extends Controller
     public function actionIndex()
     {
         $searchModel = new IpRangeSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->searchNetworks(Yii::$app->request->queryParams);
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -55,6 +55,8 @@ class IpRangeController extends Controller
     public function actionCreate()
     {
         $model = new IpRange();
+        $model->type = IpRange::NET_TYPE;
+        $model->scenario = 'net-insert';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->ip_range_id]);

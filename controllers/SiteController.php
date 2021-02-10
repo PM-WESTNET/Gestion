@@ -18,6 +18,7 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use app\modules\sale\models\search\CustomerSearch;
+use IPv4\SubnetCalculator;
 
 class SiteController extends Controller
 {
@@ -95,13 +96,9 @@ class SiteController extends Controller
 
     public function actionAbout()
     {
-        $paymentSearch = new PaymentSearch();
-        $paymentSearch->customer_id = 6;
+        $calc = new SubnetCalculator('172.1.0.0', 16);
 
-        $debt = round((float)$paymentSearch->accountTotal(), 2);
-
-        var_dump($debt);
-        Yii::trace($debt);
+        echo print_r($calc->getIPAddressRange(), 1);
         die();
         return $this->render('about');
     }

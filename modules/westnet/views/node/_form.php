@@ -53,9 +53,12 @@ use kartik\widgets\Select2;
 
     <?= $form->field($model, 'has_ecopago_close')->checkbox() ?>
 
-    <?php echo $form->field($model, 'subnet')->textInput();?>
+    <?php echo $form->field($model, 'subnet', ['template' => '<div class="form-group">
+                {label}{input}
+                <span class="help-block">'. Yii::t('app', 'If node has access point, subnet must be empty').'</span>
+    </div>'])->textInput();?>
 
-    <?php echo $form->field($model, 'zone_id')->widget(Select2::className(),[
+    <?php echo $form->field($model, 'zone_id')->widget(Select2::class,[
             'data' => ArrayHelper::map(Zone::getForSelect(), 'zone_id', 'name' ),
             'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
             'pluginOptions' => [
