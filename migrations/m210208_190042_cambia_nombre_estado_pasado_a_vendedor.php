@@ -21,6 +21,9 @@ class m210208_190042_cambia_nombre_estado_pasado_a_vendedor extends Migration
                 'name'=>'Plazo Vencido'
             ]);
         }
+        new Status([
+            'name'=>'Pago fuera de plazo'
+        ]);
     }
 
     /**
