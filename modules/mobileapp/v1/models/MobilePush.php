@@ -202,7 +202,7 @@ class MobilePush extends ActiveRecord
                             'en' => $content,
                             'es' => $content
                         ],
-                        'data' => $mphua->getExtraData(),
+                        'data' => ['mobile_push_id' => $this->mobile_push_id],
                         'include_player_ids' => [$mphua->userApp->player_id],
                         'mobile_push_has_user_app_id' => $mphua
                 ]);
@@ -220,7 +220,7 @@ class MobilePush extends ActiveRecord
                     'en' => $content,
                     'es' => $content
                 ],
-                'data' => $this->extra_data,
+                'data' => ['mobile_push_id' => $this->mobile_push_id],
                 'included_segments' => ['All']
             ]);
         }
