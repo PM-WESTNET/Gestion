@@ -1,9 +1,9 @@
-actor: IvrapiTester
+actor: MobileappTester
 modules:
     enabled:
-        - \Helper\Ivrapi
+        - \Helper\Mobileapp
         - REST:
-           url: http://localhost:8081/web/index.php?r=ivr/v1
+           url: http://localhost:8081/web/index.php?r=mobileapp/v1
            depends: Yii2
            part: Json
         - Yii2
