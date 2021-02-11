@@ -52,7 +52,7 @@ $this->title = Yii::t('app', 'Updated Customers Report By User');
                'pluginOptions' => [
                    'allowClear' => true
                ],
-               'options' => ['placeholder' => Yii::t('app', 'Select an Option') ]
+               'options' => ['placeholder' => Yii::t('app', 'Select an option...') ]
            ]);?>
         </div>
     </div>
