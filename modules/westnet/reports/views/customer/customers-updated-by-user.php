@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\jui\DatePicker;
 use kartik\grid\GridView;
+use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
 use yii\data\ArrayDataProvider;
 use webvimark\modules\UserManagement\models\User;
@@ -17,7 +18,7 @@ $this->title = Yii::t('app', 'Updated Customers Report By User');
     <?php $form = ActiveForm::begin(['method' => 'POST']); ?>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 <?= $form->field($search, 'date_from')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
@@ -31,7 +32,7 @@ $this->title = Yii::t('app', 'Updated Customers Report By User');
                 ])?>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 <?= $form->field($search, 'date_to')->widget(DatePicker::class, [
                     'language' => Yii::$app->language,
@@ -44,6 +45,15 @@ $this->title = Yii::t('app', 'Updated Customers Report By User');
                     ]
                 ])?>
             </div>
+        </div>
+        <div class="col-md-4">
+           <?php echo $form->field($search, 'user_id')->widget(Select2::class, [
+               'data' => $users,
+               'pluginOptions' => [
+                   'allowClear' => true
+               ],
+               'options' => ['placeholder' => Yii::t('app', 'Select an Option') ]
+           ]);?>
         </div>
     </div>
     <div class="row">
