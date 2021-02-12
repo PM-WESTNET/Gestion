@@ -1410,5 +1410,7 @@
     'You must select only one Ip Range' => 'Debe seleccionar un sólo Rango de Ip',
     'If node has access point, subnet must be empty' => 'Si el nodo posee access point, subnet debe estar vacío',
 
+    'Updated Customers Report By User' => 'Clientes Actualizados por Usuario',
+    'Customers Updated' => 'Clientes Actualizados'
 
  );
