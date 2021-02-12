@@ -533,6 +533,7 @@ class CustomerController extends Controller
             $model->document_type_id = 2;
         }**/
         Yii::$app->response->format= Response::FORMAT_JSON;
+        // Lleno old_company_id
         
         $model->company_id = $company_id;
         

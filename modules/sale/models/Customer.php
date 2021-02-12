@@ -681,6 +681,8 @@ class Customer extends ActiveRecord {
                             case 'company_id':
                                 $oldCompany= Company::findOne(['company_id' => $oldValue]);
                                 $log = new CustomerLog();
+                                // inserto en Tabla: costumer_company_changed
+                                
                                 $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Company'], ($oldCompany ? $oldCompany->name : '' ), ($this->company ? $this->company->name: '' ), 'Customer', $this->customer_id);
                                 break;
                             default:
