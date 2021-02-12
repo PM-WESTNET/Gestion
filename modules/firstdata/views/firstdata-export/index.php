@@ -37,13 +37,26 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template' => '{view} {download}',
+                'template' => '{view} {download} {delete}',
                 'buttons' => [
                     'download' => function($url, $model) {
                         if ($model->status === 'exported') {
                            return  Html::a('<span class="glyphicon glyphicon-download"></span>',
                                 ['download', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-warning']);
                         }
+                    },
+                    'delete' => function($url, $model) {
+                        if ($model->status === 'draft') {
+
+                            return Html::a('<span class="glyphicon glyphicon-trash"></span>', ['delete', 'id' => $model->firstdata_export_id], [
+                                'class' => 'btn btn-danger',
+                                'data' => [
+                                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                                    'method' => 'post',
+                                ],
+                            ]);
+                        }
+
                     }
                 ]
             ],
