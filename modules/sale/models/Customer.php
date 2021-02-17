@@ -32,6 +32,7 @@ use app\modules\firstdata\models\FirstdataAutomaticDebit;
 use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
+use app\modules\westnet\reports\models\CustomerUpdateRegister;
 
 /**
  * This is the model class for table "customer".
@@ -654,6 +655,7 @@ class Customer extends ActiveRecord {
             } else {
                 if ($this->dataVerified) {
                     $this->updateAttributes(['last_update' => (new DateTime('now'))->format('Y-m-d')]);
+                    CustomerUpdateRegister::createRegister($this->customer_id);
                     $log = new CustomerLog();
                     $log->createUpdateLog($this->customer_id, 'Verificación de Datos', '', '', 'Customer', $this->customer_id);
                 }

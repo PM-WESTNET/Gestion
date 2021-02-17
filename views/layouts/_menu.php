@@ -233,6 +233,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
         ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
+        ['label' => Yii::t('app', 'Updated Customers Report By User'), 'url' => ['/reports/customer/customers-updated-by-user']],
         ['label' => Yii::t('app', 'Firstdata Automatic Debit Report'), 'url' => ['/reports/reports/firstdata-debit-report']],
         '<li class="divider"></li>',
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],

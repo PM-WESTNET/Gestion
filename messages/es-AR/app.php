@@ -1410,5 +1410,10 @@
     'You must select only one Ip Range' => 'Debe seleccionar un sólo Rango de Ip',
     'If node has access point, subnet must be empty' => 'Si el nodo posee access point, subnet debe estar vacío',
 
+    'Updated Customers Report By User' => 'Clientes Actualizados por Usuario',
+    'Customers Updated' => 'Clientes Actualizados',
+    'Customer has been deleted successfull' => "El cliente ha sido eliminado con éxito",
+    'Can`t remove this customer' => 'No se puede eliminar ',
+    'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente"
 
  );

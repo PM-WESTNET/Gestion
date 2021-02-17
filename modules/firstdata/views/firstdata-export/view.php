@@ -14,24 +14,26 @@ $this->title = Yii::t('app', 'Firstdata Export') . ': ' . $model->firstdataConfi
      Yii::$app->formatter->asDate($model->created_at, 'dd-MM-yyyy');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Firstdata Exports'), 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
+$file_id = $model->firstdata_export_id;
+$status = $model->status
 ?>
 <div class="firstdata-export-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-        <?php if (!$model->getCustomerHasFirstdataExports()->exists()):?>
-        <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->firstdata_export_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
-                'method' => 'post',
-            ],
-        ]) ?>
-        <?php endif;?>
+        
         <?php if ($model->status === 'draft'):?>
             <?= Html::a('<span class="glyphicon glyphicon-export"></span> '. Yii::t('app', 'Generate File'),
              ['create-file', 'id' => $model->firstdata_export_id], ['class' => 'btn btn-success'])?>
+
+            <?= Html::a(Yii::t('app', 'Delete'), ['delete', 'id' => $model->firstdata_export_id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => Yii::t('app', 'Are you sure you want to delete this item?'),
+                    'method' => 'post',
+                ],
+            ]) ?>
         <?php endif;?>
 
         <?php if ($model->status === 'exported'):?>
@@ -77,15 +79,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 
                 [
                     'class' => ActionColumn::class,
+                    'contentOptions' => ['class' => 'text-center'],
                     'buttons' => [
                         'view' => function($url, $model) {
                             return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', 
                             ['/sale/customer/view', 'id' => $model->customer_id], 
                             ['class' => 'btn btn-default', 'target' => '_blank']);
-                        }
+                        },
+                        'delete' => function($url, $model) use ($file_id, $status){
+                            if ($status === "draft") {
+                                return Html::a('<span class="glyphicon glyphicon-trash"></span>', 
+                                ['/firstdata/firstdata-export/remove-customer', 'customer_id' => $model->customer_id, 'file_id' => $file_id], 
+                                ['class' => 'btn btn-danger', 'data-confirm' => Yii::t('app', 'Are you sure to delete this customer?')]);
+                            }
+                        },
                     ],
-                    'template' => '{view}'
-                ]
+                    'template' => '{view} {delete}'
+                ]   
             ]
         ])
     
