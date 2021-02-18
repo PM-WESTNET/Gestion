@@ -57,6 +57,11 @@ class CustomerCompanyHistory extends ActiveRecord
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
             [['new_company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['new_company_id' => 'company_id']],
             [['old_company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::class, 'targetAttribute' => ['old_company_id' => 'company_id']],
+            [   'new_company_id', 
+                'compare', 
+                'compareAttribute'=>'old_company_id', 
+                'operator'=>'!==' 
+            ]
         ];
     }
 
