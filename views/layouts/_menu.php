@@ -389,7 +389,7 @@ if (Yii::$app->getModule('westnet')) {
             ],
             '<li class="divider"></li>',
             [
-                'label' => Yii::t('app', 'Mobile App failed registers'), 'url' => ['/mobileapp/v1/app-failed-register/index'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => Yii::t('app', 'Mobile App failed registers'), 'url' => ['/mobileapp/v1/app-failed-register/index'], 'visible' => true
             ],
             '<li class="divider"></li>',
             [
