@@ -2,14 +2,17 @@
 
 namespace app\modules\westnet\reports\controllers;
 
-use app\modules\sale\models\Company;
-use app\modules\westnet\reports\models\ReportData;
-use app\modules\westnet\reports\ReportsModule;
-use app\modules\westnet\reports\search\ReportSearch;
 use Yii;
-use app\components\web\Controller;
+use yii\web\HttpException;
 use yii\data\ActiveDataProvider;
+use app\components\web\Controller;
+use app\modules\sale\models\Company;
+use app\modules\westnet\models\Vendor;
+use app\modules\westnet\reports\ReportsModule;
+use app\modules\westnet\reports\models\ReportData;
+use app\modules\westnet\reports\search\ReportSearch;
 use app\modules\westnet\reports\search\ReportCompanySearch;
+use app\modules\sale\modules\contract\models\search\ContractSearch;
 
 class ReportsCompanyController extends Controller
 {
@@ -294,6 +297,47 @@ class ReportsCompanyController extends Controller
             'movements' => $movementsModel,
             'totalCobrado' => $totalCobrado,
             'totalPagado' => $totalPagado,
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     * Renderiza un gràfico con el porcentaje de egresos e ingresos por empresa
+     */
+    public function actionHistory()
+    {
+        $searchModel = new ContractSearch();
+        $searchModel->setScenario('vendor-search');
+
+        $vendor = Vendor::findByUserId(Yii::$app->user->id);
+        if (empty($vendor)) {
+            throw new HttpException(404, Yii::t('app', 'Are you a vendor?'));
+        }
+        $searchModel->vendor_id = $vendor->vendor_id;
+        
+        $search = new ReportCompanySearch();
+        if (!isset($_GET['ReportSearch'])) {
+            $search->date_from = (new \DateTime('first day of this month'))->format('01-m-Y');
+            $search->date_to = (new \DateTime('last day of this month'))->format('d-m-Y');
+        }
+
+        if(!$search->company_id) {
+            $search->company_id = Company::find()->where(['status' => 'enabled'])->one();
+        }
+
+        $query = $search->findInOut(Yii::$app->request->queryParams);
+        $dataModel = new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => false
+        ]);
+
+
+
+
+        return $this->render('/reports/history', [
+            'searchModel' => $searchModel,
+            'data'  => $dataModel
         ]);
     }
 }

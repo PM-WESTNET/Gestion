@@ -25,6 +25,7 @@ use app\modules\westnet\models\NotifyPayment;
 use yii\validators\RegularExpressionValidator;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\search\CustomerSearch;
+use app\modules\sale\models\CustomerCompanyHistory;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\sale\modules\contract\models\Contract;
@@ -215,10 +216,10 @@ class Customer extends ActiveRecord {
         $this->regexValitation();
 
         // SI SI, HARDCODEADO!! Hay que cambiar los modelos para poder parametrizarlo, o meter config y eso...
-//        if($this->document_type_id != 1) {
-//            $this->docNumberValidation();
-//            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
-//        }
+        //        if($this->document_type_id != 1) {
+        //            $this->docNumberValidation();
+        //            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
+        //        }
 
         return $rules;
     }
@@ -681,8 +682,13 @@ class Customer extends ActiveRecord {
                             case 'company_id':
                                 $oldCompany= Company::findOne(['company_id' => $oldValue]);
                                 $log = new CustomerLog();
-                                // inserto en Tabla: costumer_company_changed
-                                
+                                // Inserto en Tabla: costumer_company_changed
+                                $CompanyHist = new CustomerCompanyHistory();
+                                $CompanyHist->old_company_id = $oldValue;
+                                $CompanyHist->new_company_id = $this->company_id;
+                                $CompanyHist->customer_id = $this->customer_id;
+                                $CompanyHist->save();
+
                                 $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Company'], ($oldCompany ? $oldCompany->name : '' ), ($this->company ? $this->company->name: '' ), 'Customer', $this->customer_id);
                                 break;
                             default:
