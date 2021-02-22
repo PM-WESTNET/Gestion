@@ -15,6 +15,8 @@ $this->title = Yii::t('app', 'Contract of') . ": " . $model->customer->fullName 
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Customers'), 'url' => ['/sale/customer/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['/sale/customer/view', 'id' => $model->customer_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
+
+$customer = $model->customer;
 ?>
 
 <div class="contract-view">
@@ -34,17 +36,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
     <?php $columns = [
         [
             'label' => Yii::t('app', 'Customer'),
-            'value' => $model->customer->fullName
+            'value' => $customer->fullName
         ],
         [
             'label' => Yii::t('app', 'Company'),
-            'value' => function($model){
-                if (!$model->customer->company) {
+            'value' => function($model) use ($customer){
+                $company = $customer->company;
+                $parentCompany = $customer->parentCompany;
+                if (!$company) {
                     return '';
                 }
-                $result = $model->customer->company->name;
-                if ($model->customer->parentCompany) {
-                    $result .= " ( " . $model->customer->parentCompany->name ." )";
+                $result = $company->name;
+                if ($parentCompany) {
+                    $result .= " ( " . $parentCompany->name ." )";
                 }
                 return $result;
             },
@@ -60,7 +64,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
         [
             'label' => Yii::t('app', 'Address'),
             'format' => 'raw',
-            'value' => (isset($model->address) ? $model->address->fullAddress : $model->customer->address ),
+            'value' => (isset($model->address) ? $model->address->fullAddress : $customer->address ),
         ],
     ];
 
