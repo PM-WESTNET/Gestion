@@ -6,6 +6,7 @@
 
 namespace app\components\widgets\agenda\notification;
 
+use app\modules\agenda\models\Task;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\ArrayHelper;
@@ -47,13 +48,32 @@ class Notification extends Widget {
 
         //Fetch notifications
         if (empty($this->notifications)) {
-            $this->notifications = \app\modules\agenda\models\Notification::find()->where([
+            /*$this->notifications = \app\modules\agenda\models\Notification::find()->where([
                         'user_id' => $this->user->id,
                         'show' => true,
                         'status' => \app\modules\agenda\models\Notification::STATUS_UNREAD,
                     ])->orderBy([
                         'datetime' => SORT_ASC
-                    ])->limit(20)->all();
+                    ])->limit(20)->all(); */
+            $this->notifications = Task::find()
+                ->select([
+                    'task.*', 
+                    'n.status AS notification_status', 
+                    'n.reason AS notification_reason', 
+                    'n.notification_id AS notification_id',
+                    'n.datetime AS notifcation_datetime',
+                    's.name AS status_name', 
+                    's.slug AS status_slug'
+                ])
+                ->innerJoin('notification n', 'n.task_id = task.task_id')
+                ->innerJoin('status s', 's.status_id = task.status_id')
+                ->where([
+                    'n.user_id' => $this->user->id,
+                    'n.show' => true,
+                    'n.status' => \app\modules\agenda\models\Notification::STATUS_UNREAD,
+                ])->orderBy([
+                    'datetime' => SORT_ASC
+                ])->limit(20)->all();
         }
         
         //Count

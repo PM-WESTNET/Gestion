@@ -92,7 +92,7 @@ use app\modules\sale\models\search\CustomerSearch;
             ], ['id' => 'firstdata_status'])?>
         </div>
         <div class="col-sm-4">
-            <?= $form->field($model, 'categoriesPlan')->checkboxList($categoriesPlan, ['id' => 'categoriesPlan'])?>
+            <?php //$form->field($model, 'categoriesPlan')->checkboxList($categoriesPlan, ['id' => 'categoriesPlan'])?>
         </div>
     </div>
 

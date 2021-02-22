@@ -116,6 +116,10 @@ class Customer extends ActiveRecord {
 
     //Indica si los datos que ya existen en la base de datos fueron verificados con el cliente
     public $dataVerified;
+
+    public $profileClasses;
+
+
     /**
      * @inheritdoc
      */
@@ -550,9 +554,12 @@ class Customer extends ActiveRecord {
         ];
 
         //Labels adicionales definidos para los profiles
-        $profiles = self::getEnabledProfileClasses();
-        foreach ($profiles as $profile) {
-            $labels['profile_' . $profile->profile_class_id] = $profile->name;
+        $profiles = $this->profileClasses;
+
+        if ($profiles) {
+            foreach ($profiles as $profile) {
+                $labels['profile_' . $profile->profile_class_id] = $profile->name;
+            }
         }
 
         return $labels;
@@ -1045,7 +1052,11 @@ class Customer extends ActiveRecord {
 
     public function checkBillType($billType) {
 
-        return $this->taxCondition->getBillTypes()->where(['bill_type.bill_type_id' => $billType->bill_type_id])->exists();
+        //return $this->taxCondition->getBillTypes()->where(['bill_type.bill_type_id' => $billType->bill_type_id])->exists();
+        return BillType::find()
+            ->innerJoin('tax_condition_has_bill_type tchbt', 'tchbt.bill_type_id = bill_type.bill_type_id')
+            ->andWhere(['tchbt.tax_condition_id' => $this->tax_condition_id, 'tchbt.bill_type_id' => $billType->bill_type_id])
+            ->exists();
     }
 
     /**
@@ -1195,6 +1206,9 @@ class Customer extends ActiveRecord {
         if ($this->email_notification) {
             $this->_notifications_way[] = 'email';
         }
+
+        $this->profileClasses = self::getEnabledProfileClasses();
+
         parent::afterFind();
     }
 

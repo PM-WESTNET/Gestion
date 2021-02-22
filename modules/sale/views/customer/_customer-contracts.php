@@ -32,7 +32,7 @@ use yii\helpers\Url;
         [
             'label'=> Yii::t('app', 'Status Account'),
             'value'=>  function($model){
-                $con = Connection::findOne(['contract_id' => $model->contract_id]);
+                $con = $model->connection;
                 return (!empty($con) ? Yii::t('app', ucfirst($con->status_account). ' Account'): null);
             }
         ],
@@ -69,7 +69,7 @@ use yii\helpers\Url;
                 },
                 'force-connection' => function($url, $model) use ($products, $vendors){
                     if (Yii::$app->getModule('westnet')) {
-                        $connection = Connection::findOne(['contract_id' => $model->contract_id]);
+                        $connection = $model->connection;
                         if($connection) {
                             if($model->status == Contract::STATUS_ACTIVE) {
                                 return Html::a(Yii::t('westnet', 'Force Activation'), null, [
@@ -90,7 +90,7 @@ use yii\helpers\Url;
 
 //Modales para el forzado de las connexiones
 foreach ($contracts->getModels() as $contract) {
-    $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+    $connection = $contract->connection;
     if($connection) { ?>
 
     <div class="modal fade" id="<?='connection-'.$connection->connection_id?>" role="dialog" aria-labelledby="myModalLabel" style="top:25%">
