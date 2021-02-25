@@ -456,7 +456,7 @@ class ContractToInvoice
 
                         // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
                         foreach ($contract->contractDetails as $contractDetail) {
-                            if ($contractDetail->product->type == 'plan' && $includePlan) {
+                            if ($contractDetail->product->type == 'plan' && $includePlan && $contractDetail->status !== ContractDetail::STATUS_LOW) {
                                 if (!$contractDetail->isAddedForInvoice($periods)) {
                                     $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
 
