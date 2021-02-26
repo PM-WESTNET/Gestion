@@ -48,11 +48,12 @@ class TicketSearch extends Ticket {
         return [
             [['ticket_id'], 'integer'],
             [['show_all'], 'boolean'],
+            [['discounted'], 'string'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document',
                     'assignations', 'customer_number','date_from_start_contract', 'date_to_start_contract' , 'discounted'], 
                 'safe', 'on' => 'wideSearch'
             ],
-            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number', 'date_from_start_contract', 'date_to_start_contract'], 
+            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number', 'date_from_start_contract', 'date_to_start_contract', 'discounted' ], 
                 'safe', 'on' => 'activeSearch'],
             [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations', 'show_all'], 'safe'],
         ];
@@ -180,7 +181,14 @@ class TicketSearch extends Ticket {
         $query->andFilterWhere(['>=', 'c.from_date', $this->date_from_start_contract]);
         $query->andFilterWhere(['<=', 'c.from_date', $this->date_to_start_contract]);
 
-        $query->andFilterWhere(['discounted' => $this->discounted]);
+        if (!empty($this->discounted)){
+            Yii::info($this->discounted);
+            if ($this->discounted == 'undiscounted'){
+                $query->andWhere(['IS', 'discounted', null]);
+            }else {
+                $query->andWhere(['discounted' => '1']);
+            }
+        }
 
         if($this->assignations) {
             $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
