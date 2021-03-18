@@ -24,7 +24,7 @@ RUN rm /etc/httpd/conf.d/welcome.conf
 RUN sed -i "s/\;date\.timezone =/date\.timezone=\'America\/Argentina\/Mendoza\'/g" /etc/php.ini
 RUN cp /usr/share/zoneinfo/America/Argentina/Mendoza /etc/localtime
 
-RUN sed -i "s/memory_limit = 128M/memory_limit = 2512M/g" /etc/php.ini
+RUN sed -i "s/memory_limit = 128M/memory_limit = 4512M/g" /etc/php.ini
 
 ENV PATH="/var/www/html/vendor/bin:${PATH}"
 
