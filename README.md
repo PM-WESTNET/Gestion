@@ -1,9 +1,9 @@
-Arya Documentation
+ISPGestioner Documentation
 ================================
 https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#
 
 
-Arya install
+install
 ================================
 
 Para Ubuntu 16.04

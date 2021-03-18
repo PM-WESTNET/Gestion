@@ -7,7 +7,7 @@
         </div>
         <div class="row">
             <div class="col-sm-12" style="margin-top: 50px; font-style: italic;">
-                Arya v0.2 - <a href="//www.westnet.com.ar" target="_blank">Westnet</a> - Copyright 2014 - <?= date('Y') ?> - All rights reserved.
+                 v0.3 - <a href="#" target="_blank"> </a> - Copyright 2020 - <?= date('Y') ?> - All rights reserved.
             </div>
         </div>
     </div>

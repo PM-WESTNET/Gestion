@@ -21,7 +21,7 @@ $items = [];
 $alwaysVisibleItems = [];
 
 //Home
-$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
+// $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 
 if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
@@ -338,7 +338,7 @@ if(User::hasRole('admin')) {
 //Westnet
 if (Yii::$app->getModule('westnet')) {
     $items[] = [
-        'label' => 'Westnet',
+        'label' => 'ISP',
         'items' => [
             ['label'=>Yii::t('partner','Partner'), 'items' => [
                 ['label' => Yii::t('partner', 'Partner'), 'url' => ['/partner/partner']],
@@ -444,7 +444,7 @@ if (Yii::$app->params['ticket_enabled']) {
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
             ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             ['label' => Yii::t('app', 'Mobile app data edition tickets'), 'url' => ['/ticket/ticket/contact-edition-tickets']],
-//            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
+            // ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',
@@ -537,7 +537,15 @@ $items[] = [
             </button>
 
 
-            <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
+            <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>">
+                <?php if(Yii::$app->params['web_logo']){
+                    echo '<img src="'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo_bgblack'].'" style="height:45px; margin-top:-10px; position:absolute;" />';
+                }else{
+                    echo Yii::$app->params['web_title'];
+                }
+
+                 ?>
+            </a>
 
             <?php
             echo Nav::widget([

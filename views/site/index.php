@@ -12,7 +12,7 @@ $this->title = Yii::$app->params['web_title'];
 
 <div class="jumbotron">
     <?php if (!empty(Yii::$app->params['web_logo'])): ?>
-        <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?= Url::to("@web/images/logo-westnet.png") ?>"/>
+        <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?= Url::to("@web/images/logo01.svg") ?>" width="300"/>
 
     <?php endif; ?>
 
@@ -430,7 +430,7 @@ $this->title = Yii::$app->params['web_title'];
             está directamente relacionado con el tipo de factura que se emitirá para el cliente.
         </li>
         <li>Datos personales del cliente.</li>
-        <li>Referenciado por: si un cliente contrata Westnet por una sugerencia de un cliente activo, se debe aclarar
+        <li>Referenciado por: si un cliente contrata la empresa por una sugerencia de un cliente activo, se debe aclarar
             para generar un descuento que genera el contacto.
         </li>
         <li>Formas de notificar: define cómo se le notificará al cliente las novedades de la empresa.</li>
@@ -669,7 +669,7 @@ $this->title = Yii::$app->params['web_title'];
     <p><strong>Exportar</strong></p>
     <p>Permite la exportación de los datos que se visualizan por pantalla en formato Microsoft Excel.</p>
     <h2><strong></strong>Clientes</h2>
-    <p>Este módulo permite el acceso a la información tanto contable cómo de conexiones de cada cliente de Westnet.</p>
+    <p>Este módulo permite el acceso a la información tanto contable cómo de conexiones de cada cliente de la empresa.</p>
     <h3>Clientes</h3>
     <p>Al ingresar a esta sección se debe proporcionar los criterios de búsquedas deseados para acceder a la información
         de un cliente o varios clientes.</p>
@@ -1113,7 +1113,7 @@ $this->title = Yii::$app->params['web_title'];
     </p>
     <h4>Alta</h4>
     <p>
-        Para dar de alta a una nueva notificación, debe ingresar a Westnet > Notificaciones en la barra de navegación
+        Para dar de alta a una nueva notificación, debe ingresar a ISP > Notificaciones en la barra de navegación
         superior. Luego, presione el botón verde "Alta Notificación". A continuación será guiado por una serie de
         pasos para completar el alta.
     </p>
@@ -1336,7 +1336,7 @@ $this->title = Yii::$app->params['web_title'];
         <p><span>Permite detallar si el domicilio es obligatorio en el alta de un cliente.</span></p>
         <h4><span>Sequre</span></h4>
         <p><span></span>Permite configurar el porcentaje de tráfico P2P</p>
-        <h4>Westnet</h4>
+        <h4>la empresa</h4>
         <p>Parámetros de configuración que determinan, por ejemplo cómo se realiza la comunicación del sistema de
             gestión con el sistema de mesa de ayuda.</p>
         <p>Estos parámetros deberían ser modificados solamente por los desarrolladores del sistema.</p>
@@ -1403,7 +1403,7 @@ $this->title = Yii::$app->params['web_title'];
         <h4>Vendedores</h4>
         <p> Se define la
             c<span>antidad de meses que un cliente debe pagar para que el vendedor no sea sancionado.</span></p>
-        <h2>Westnet</h2>
+        <h2>La empresa</h2>
         <h3>Servidores</h3>
         <p>Permite gestionar los servidores que brindan servicio de internet.</p>
         <h4>Mover clientes</h4>
