@@ -82,8 +82,8 @@ $form= ActiveForm::begin(['method' => 'GET']);
 
         <div class="col-sm-3">
             <?=$form->field($model, 'discounted')->dropDownList( [
-               '0' => TicketModule::t('app', 'Undiscounted') 
-               ,'1' => TicketModule::t('app', 'Discounted')
+               'undiscounted' => TicketModule::t('app', 'Undiscounted'),
+               'discounted' => TicketModule::t('app', 'Discounted')
             ],
             [
                 'prompt'=> Yii::t('app', 'Select an option')
