@@ -99,7 +99,7 @@ return array(
     'Observation from Mesa.' => 'Observacion de Mesa.',
     'New assignation' => 'Nueva asignación',
     'Delete assignation' => 'Borrado de asignación',
-    'Task date' => 'Fecha de tarea',
+    'Task date' => 'Fecha de Instalación',
     'Discounted' => 'Descontado',
     'Undiscounted' => 'No Descontado',
 );

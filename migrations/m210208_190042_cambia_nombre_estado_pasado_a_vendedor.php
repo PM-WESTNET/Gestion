@@ -21,9 +21,15 @@ class m210208_190042_cambia_nombre_estado_pasado_a_vendedor extends Migration
                 'name'=>'Plazo Vencido'
             ]);
         }
-        new Status([
-            'name'=>'Pago fuera de plazo'
+        $st = new Status([
+            'name'=>'Pago fuera de plazo',
+            'description'=>'',
+            'is_open'=> 0,
+            'generate_action' => 1
+
         ]);
+        $st->save();
+        // $schema_cobranza = Schema::find()->where(['name' => 'Pago fuera de plazo'])->one();
     }
 
     /**
