@@ -9,6 +9,7 @@ use app\modules\afip\components\CuitOnlineValidator;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\invoice\components\einvoice\ApiFactory;
 use app\modules\sale\models\Address;
+use app\modules\sale\models\Category;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\CustomerMessage;
@@ -65,10 +66,13 @@ class CustomerController extends Controller
             $searchModel->search_text= $_GET['search_text'];
             $dataProvider = $searchModel->searchText(['CustomerSearch' => ['search_text' => $_GET['search_text']] ]);          
         }
+
+        $categoriesPlan = ArrayHelper::map(Category::find()->andWhere(['IN', 'name', ['Plan fibra', 'Plan wifi']])->all(), 'category_id', 'name');
         
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'categoriesPlan' => $categoriesPlan
         ]);
     }
     
@@ -176,7 +180,10 @@ class CustomerController extends Controller
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
 
-            $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+            $products = ArrayHelper::map(Product::find()
+                ->andWhere(['type' => 'product'])
+                ->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])
+                ->all(), 'product_id', 'name');
 
             $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
                 ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])

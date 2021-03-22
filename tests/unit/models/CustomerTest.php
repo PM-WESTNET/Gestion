@@ -445,7 +445,9 @@ class CustomerTest extends \Codeception\Test\Unit
         UserAppActivity::createInstallationRegister($user_app->user_app_id, true);
         $uninstalled_period = Config::getValue('month-qty-to-declare-app-uninstalled') + 1;
         $old_last_activity = (new \DateTime('now'))->modify("-$uninstalled_period months")->getTimestamp();
-        $user_app->activity->updateAttributes(['last_activity_datetime' => $old_last_activity]);
+        if ($user_app->activity) {
+            $user_app->activity->updateAttributes(['last_activity_datetime' => $old_last_activity]);
+        }
 
         expect('Last mobile app activity its too old to be considered installed', $model->hasMobileAppInstalled())->false();
     }

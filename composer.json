@@ -50,7 +50,8 @@
         "light/yii2-swagger": "^1.0",
         "lavrentiev/yii2-toastr": "^2.0",
         "yiisoft/yii2-redis": "~2.0.0",
-        "2amigos/yii2-ckeditor-widget": "2.2.0"
+        "2amigos/yii2-ckeditor-widget": "2.2.0",
+        "markrogoyski/ipv4-subnet-calculator": "3.*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "*",

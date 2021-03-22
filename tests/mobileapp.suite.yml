@@ -1,0 +1,13 @@
+actor: MobileappTester
+modules:
+    enabled:
+        - \Helper\Mobileapp
+        - REST:
+           url: http://localhost:8081/web/index.php?r=mobileapp/v1
+           depends: Yii2
+           part: Json
+        - Yii2
+    config:
+      - Yii2
+          configFile: ../config/test.php
+          part: [orm, fixtures]

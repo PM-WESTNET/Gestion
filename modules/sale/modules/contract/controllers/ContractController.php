@@ -90,7 +90,7 @@ class ContractController extends Controller {
      */
     public function actionView($id) {
         $model= $this->findModel($id);
-        $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+        $products = ArrayHelper::map(Product::find()->andWhere(['type' => 'product'])->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])->all(), 'product_id', 'name');
 
         $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
             ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
@@ -764,6 +764,14 @@ class ContractController extends Controller {
         if (!$connection) {
             $connection = new Connection();
         }
+
+        $nodesQuery = Node::find();
+        $nodesQuery->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name'])
+            ->leftJoin('server s', 'node.server_id = s.server_id')
+            ->orderBy('node.name');
+            
+
+        $nodes = ArrayHelper::map($nodesQuery->all(), 'node_id', 'name');
         
         if (!empty($_POST['Contract']) && $_POST['Contract']['customerCodeADS'] !== '') {
             $code = $_POST['Contract']['customerCodeADS'];
@@ -784,7 +792,8 @@ class ContractController extends Controller {
                 return $this->render('active-contract', [
                     'model' => $model,
                     'connection' => $connection,
-                    'action' => 'active'
+                    'action' => 'active',
+                    'nodes' => $nodes
                 ]);
             }
         }
@@ -811,7 +820,8 @@ class ContractController extends Controller {
         return $this->render('active-contract', [
                     'model' => $model,
                     'connection' => $connection,
-                    'action' => 'active'
+                    'action' => 'active',
+                    'nodes' => $nodes
         ]);
     }
 
@@ -945,17 +955,18 @@ class ContractController extends Controller {
      * @param $connection_id
      * @param $node_id
      */
-    public function actionChangeNode($connection_id, $node_id) {
+    public function actionChangeNode($connection_id, $node_id, $ap_id = null) {
         Yii::$app->response->format = 'json';
 
         $response = [];
 
         $connection = $this->getConnection($connection_id);
-        if ($connection->node_id != $node_id) {
+        if ($connection->node_id != $node_id && (empty($ap_id) || $connection->access_point_id != $ap_id)) {
             $node = Node::findOne(['node_id'=>$node_id]);
             $connection->old_server_id = $connection->server_id;
             $connection->server_id = $node->server_id;
             $connection->node_id = $node_id;
+            $connection->access_point_id = $ap_id;
             try {
                 Yii::$app->formatter->asDate($connection->due_date, 'yyyy-MM-dd');
             } catch (\Exception $ex) {
@@ -1190,5 +1201,29 @@ class ContractController extends Controller {
 
         Yii::$app->session->addFlash('error', Yii::t('app','Errors occurred at update contract on ISP'));
         return $this->redirect(['view', 'id' => $contract->contract_id]);
+    }
+
+    /**
+     * Retorna todos los descuentos por producto y si aplican a producto o customer
+     */
+    public function actionApByNode()
+    {
+        $out = [];
+        $params = Yii::$app->request->post('depdrop_parents', null);
+        $node_id  = $params[0];
+        
+        if($params) {
+            if($node_id) {
+                $query = Node::findOne($node_id)
+                    ->getAccessPoints()
+                    ->select(['access_point_id as id', 'name']);
+                
+                $out = $query->asArray()->all();
+                echo Json::encode(['output'=>$out, 'selected'=>'']);
+                return;
+            }
+
+        }
+        echo Json::encode(['output'=>'', 'selected'=>'']);
     }
 }

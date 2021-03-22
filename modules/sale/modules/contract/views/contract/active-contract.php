@@ -1,12 +1,14 @@
 <?php
 
-use app\modules\config\models\Config;
-use app\modules\westnet\models\Node;
-use kartik\widgets\DatePicker;
-use kartik\widgets\Select2;
+use yii\helpers\Url;
 use yii\helpers\Html;
+use kartik\depdrop\DepDrop;
+use kartik\widgets\Select2;
 use yii\widgets\ActiveForm;
 use yii\widgets\MaskedInput;
+use kartik\widgets\DatePicker;
+use app\modules\westnet\models\Node;
+use app\modules\config\models\Config;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -53,20 +55,44 @@ try{
         <?php if($action=='active') { ?>
         <div class="form-group field-contract-node-id required">
             <?php Html::label(Yii::t('westnet','Node'));
-            $query = Node::find();
-            $query->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name'])
-                ->leftJoin('server s', 'node.server_id = s.server_id')
-                ->orderBy('node.name');
-
-            echo $form->field($connection, 'node_id')->widget(Select2::className(), [
-                    'data' => yii\helpers\ArrayHelper::map($query->all(), 'node_id', 'name' ),
-                    'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+            
+            echo $form->field($connection, 'node_id')->widget(Select2::class, [
+                    'data' => $nodes,
+                    'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false, 'id' => 'node_id'],
                     'pluginOptions' => [
                         'allowClear' => true
                     ]
                 ]
             );?>
         </div>
+
+        <?php
+            if ($connection->access_point_id) {
+                $data = [$connection->access_point_id => $connection->accessPoint->name];
+            }else {
+                $data = [];
+            }
+
+            echo $form->field($connection, 'access_point_id')->widget(DepDrop::class, [
+                'options' => ['id' => 'ap_id'],
+                'data' => $data,
+                //'type'=>DepDrop::TYPE_SELECT2,
+                'select2Options'=>[
+                    'pluginOptions'=>[
+                        'allowClear'=>true,
+                    ],
+                ],
+                'pluginOptions' => [
+                    'depends' => ['node_id'],
+                    'initDepends' => ['node_id'],
+                    'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Access Point')])."...",
+                    'url' => Url::to(['/sale/contract/contract/ap-by-node'])
+                ]
+            ])->label(Yii::t('app', 'Access Point'));
+        
+        ?>
+
+        <?php echo $form->field($connection, 'mac_address')->textInput()?>
 
 
         <div class="form-group field-contract-second-ip required">

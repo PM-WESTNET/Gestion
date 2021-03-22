@@ -141,7 +141,7 @@ class RestRequest
 
         // Agrego el token si es necesario
         if(!is_null($this->token) && $this->token!='') {
-            $headerOptions[] =  'Authorization: Token token=' . $this->token;
+            $headerOptions[] =  $this->getAuthorizationHeader();
         }
         if(!$rawBody) {
             $headerOptions[] =  'Content-Type: application/json';
@@ -151,6 +151,7 @@ class RestRequest
             $this->setOption(CURLOPT_VERBOSE, Yii::$app->params['curl_verbose']);
         }
 
+        \Yii::info($headerOptions);
         $this->setOption(CURLOPT_HTTPHEADER, $headerOptions);
 
         curl_setopt_array($this->_curl, $this->getOptions());
@@ -191,5 +192,19 @@ class RestRequest
      */
     protected function createAPIUrl($url) {
         return $this->base_url. $url;
+    }
+
+    /**
+     * Devuelve la header de autorización
+     * Verificamos la base_url para saber si vamos a un wispro o a soldef
+     * Si vamos a soldef la header de autorizacon es distinta a la del wispro
+     */
+    private function getAuthorizationHeader() {
+
+        if (strpos($this->base_url, 'soldef') !== false) {
+            return 'Authorization: Bearer ' . $this->token;
+        }
+
+        return 'Authorization: Token token=' . $this->token;
     }
 }

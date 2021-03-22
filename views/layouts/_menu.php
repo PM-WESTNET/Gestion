@@ -233,6 +233,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
         ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
+        ['label' => Yii::t('app', 'Updated Customers Report By User'), 'url' => ['/reports/customer/customers-updated-by-user']],
         ['label' => Yii::t('app', 'Firstdata Automatic Debit Report'), 'url' => ['/reports/reports/firstdata-debit-report']],
         '<li class="divider"></li>',
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
@@ -351,6 +352,8 @@ if (Yii::$app->getModule('westnet')) {
             ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
             //'<li class="divider"></li>',
             ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/westnet/node/assigned-ip']],
+            ['label'=>Yii::t('westnet','Networks'), 'url'=>['/westnet/ip-range/index']],
+            ['label'=>Yii::t('westnet','Access Point'), 'url'=>['/westnet/access-point/index']],
             [
                 'label' => Yii::t('westnet', 'Empty ADS not used'),
                 'url' => ['/westnet/empty-ads/index']
@@ -386,7 +389,7 @@ if (Yii::$app->getModule('westnet')) {
             ],
             '<li class="divider"></li>',
             [
-                'label' => Yii::t('app', 'Mobile App failed registers'), 'url' => ['/mobileapp/v1/app-failed-register/index'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => Yii::t('app', 'Mobile App failed registers'), 'url' => ['/mobileapp/v1/app-failed-register/index'], 'visible' => true
             ],
             '<li class="divider"></li>',
             [

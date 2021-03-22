@@ -2,7 +2,7 @@
 
 namespace app\modules\mobileapp\v1\models;
 
-
+use app\components\helpers\FileLog;
 use app\modules\agenda\models\Notification;
 use app\modules\config\models\Config;
 use Yii;
@@ -202,7 +202,7 @@ class MobilePush extends ActiveRecord
                             'en' => $content,
                             'es' => $content
                         ],
-                        'data' => $this->extra_data,
+                        'data' => ['mobile_push_id' => $this->mobile_push_id],
                         'include_player_ids' => [$mphua->userApp->player_id],
                         'mobile_push_has_user_app_id' => $mphua
                 ]);
@@ -220,7 +220,7 @@ class MobilePush extends ActiveRecord
                     'en' => $content,
                     'es' => $content
                 ],
-                'data' => $this->extra_data,
+                'data' => ['mobile_push_id' => $this->mobile_push_id],
                 'included_segments' => ['All']
             ]);
         }
@@ -264,6 +264,7 @@ class MobilePush extends ActiveRecord
                 ]);
 
                 $response = curl_exec($ch);
+                FileLog::addLog('notifications', $response);
                 if (curl_getinfo($ch, CURLINFO_RESPONSE_CODE) == 200){
                     $decoded_response = json_decode($response);
 

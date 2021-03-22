@@ -15,6 +15,8 @@ $this->title = Yii::t('app', 'Contract of') . ": " . $model->customer->fullName 
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Customers'), 'url' => ['/sale/customer/index']];
 $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['/sale/customer/view', 'id' => $model->customer_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
+
+$customer = $model->customer;
 ?>
 
 <div class="contract-view">
@@ -34,17 +36,19 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
     <?php $columns = [
         [
             'label' => Yii::t('app', 'Customer'),
-            'value' => $model->customer->fullName
+            'value' => $customer->fullName
         ],
         [
             'label' => Yii::t('app', 'Company'),
-            'value' => function($model){
-                if (!$model->customer->company) {
+            'value' => function($model) use ($customer){
+                $company = $customer->company;
+                $parentCompany = $customer->parentCompany;
+                if (!$company) {
                     return '';
                 }
-                $result = $model->customer->company->name;
-                if ($model->customer->parentCompany) {
-                    $result .= " ( " . $model->customer->parentCompany->name ." )";
+                $result = $company->name;
+                if ($parentCompany) {
+                    $result .= " ( " . $parentCompany->name ." )";
                 }
                 return $result;
             },
@@ -60,7 +64,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
         [
             'label' => Yii::t('app', 'Address'),
             'format' => 'raw',
-            'value' => (isset($model->address) ? $model->address->fullAddress : $model->customer->address ),
+            'value' => (isset($model->address) ? $model->address->fullAddress : $customer->address ),
         ],
     ];
 
@@ -120,6 +124,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         'value' => ($connection->node ? $connection->node->name : "" ),
                     ],
                     [
+                        'label' => Yii::t('westnet', 'Access Point'),
+                        'value' => ($connection->accessPoint ? $connection->accessPoint->name : "" ),
+                    ],
+                    [
                         'label' => Yii::t('westnet', 'ip4_1'),
                         'value' => long2ip($connection->ip4_1),
                     ],
@@ -144,7 +152,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
                         'label' => Yii::t('westnet', 'Forced Activation Due Date'),
                         'format' => 'raw',
                         'value' => $connection->due_date,
-                    ]
+                    ],
+                    'mac_address'
+
                 ],
             ]);
         }
@@ -217,7 +227,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
             [
                 'attribute' => 'vendor_id',
                 'value' => function($model){ return $model->vendor ? $model->vendor->fullName : null; }
-            ]
+            ],
         ],
     ]);
     ?>
@@ -476,9 +486,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $mode
         }
 
         this.changeNode = function () {
-            var id = $('#form-node #connection-node_id').val();
+            var id = $('#form-node #node_id').val();
+            var ap_id = $('#form-node #ap_id').val();
             if (id) {
-                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id, [], '#btn-change-node');
+                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-node', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&node_id=' + id + '&ap_id=' + ap_id, [], '#btn-change-node');
             }
         }
 

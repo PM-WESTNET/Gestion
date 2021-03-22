@@ -116,8 +116,7 @@ class EmailTransport implements TransportInterface {
         try {
             // Obtengo la instancia para enviar emails.
             $transport = $notification->emailTransport;
-            /** @var MailSender $mailSender */
-            $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
+            
 
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
@@ -125,6 +124,9 @@ class EmailTransport implements TransportInterface {
             //Por cada grupo
             foreach($chunks as $chunk){
                 $messages = [];
+                /** @var MailSender $mailSender */
+                $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
+                
                 Yii::info('Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk), 'emails' );
 
                 foreach($chunk as $toMail => $customer_data){
@@ -156,7 +158,7 @@ class EmailTransport implements TransportInterface {
                 Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
                 //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
-                sleep(3);
+                sleep(1);
             }
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);

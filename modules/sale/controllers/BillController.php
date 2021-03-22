@@ -877,7 +877,7 @@ class BillController extends Controller
      * Envia el comprobante por email al correo del customer
      * @param $id
      */
-    public function actionEmail($id, $from = 'all_bills')
+    public function actionEmail($id, $from = 'all_bills', $email = null)
     {
         $model = $this->findModel($id);
 
@@ -888,12 +888,12 @@ class BillController extends Controller
         fwrite($file, $pdf);
         fclose($file);
 
-        if (trim($model->customer->email) == "") {
+        if (empty($email) && trim($model->customer->email) == "" && trim($model->customer->email2) == "") {
             Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
             return $this->redirect(['index']);
         }
 
-        if ($model->sendEmail($fileName)) {
+        if ($model->sendEmail($fileName, $email)) {
             Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
         } else {
             Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));

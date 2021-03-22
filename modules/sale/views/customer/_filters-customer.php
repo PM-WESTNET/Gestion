@@ -91,6 +91,9 @@ use app\modules\sale\models\search\CustomerSearch;
                 CustomerSearch::FIRSTDATA_STATUS_ACTIVE => Yii::t('app', 'Active'),
             ], ['id' => 'firstdata_status'])?>
         </div>
+        <div class="col-sm-4">
+            <?php echo $form->field($model, 'categoriesPlan')->checkboxList($categoriesPlan, ['id' => 'categoriesPlan'])?>
+        </div>
     </div>
 
     <div class="row">
@@ -123,6 +126,7 @@ use app\modules\sale\models\search\CustomerSearch;
                 var email2Status = '';
                 var mobileAppStatus = '';
                 var firstdataStatus = '';
+                var categoriesPlan = ''
 
                 // Para los campos del form que son checkboxList recorro cada checkbox y si esta checkeado agrego el valor a la url
                 $.each($('#customer_status input'), function(i, c){
@@ -167,6 +171,12 @@ use app\modules\sale\models\search\CustomerSearch;
                     }
                 });
 
+                $.each($('#categoriesPlan input'), function(i, c){
+                    if ($(c).is(':checked')) {
+                        categoriesPlan = categoriesPlan + '&CustomerSearch%5BcategoriesPlan%5D%5B%5D=' + $(c).val();
+                    }
+                });
+
                 // Si en los campos de checkboxList no hay ningun checkbox seleccionado, agrego los campos vacíos
                 if (customerStatus === '') {
                     customerStatus= '&CustomerSearch%5Bcustomer_status%5D=';
@@ -192,6 +202,10 @@ use app\modules\sale\models\search\CustomerSearch;
                     mobileAppStatus = '&CustomerSearch%5BmobileAppStatus%5D=';
                 }
 
+                if (categoriesPlan === '') {
+                    categoriesPlan = '&CustomerSearch%5BcategoriesPlan%5D=';
+                }
+
                 // Remuevo todos los campos ocultos del formulario, esto campos se generan por cada vez que se filtra pero los
                 //del filtro anterior no se eliminan y es eso lo que produce que la url crezca
                 $('CustomerSearch[customer_id]').remove();
@@ -209,6 +223,7 @@ use app\modules\sale\models\search\CustomerSearch;
                 $('CustomerSearch[email2_status]').remove();
                 $('CustomerSearch[mobile_app_status]').remove();
                 $('CustomerSearch[firstdata_status]').remove();
+                $('CustomerSearch[categoriesPlan]').remove();
 
                 //Creo la cadena de parametros de la url, con los valores seteados en los campos del filtro
                 var params= 'CustomerSearch%5Bcustomer_id%5D='+ $('#customersearch-customer_id').val() +
@@ -225,7 +240,8 @@ use app\modules\sale\models\search\CustomerSearch;
                     emailStatus +
                     email2Status +
                     mobileAppStatus +
-                    firstdataStatus;
+                    firstdataStatus+
+                    categoriesPlan;
 
                 //re direcciono a la misma pagina enviando los parametros ingresados
                 location.href= '<?= yii\helpers\Url::to(['/sale/customer/index'])?>'+'&'+ params;
