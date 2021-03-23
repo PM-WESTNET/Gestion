@@ -143,7 +143,7 @@ class Ticket extends \app\components\db\ActiveRecord {
             'task_id' => TicketModule::t('app', 'Task'),
             'color_id' => TicketModule::t('app', 'Color'),
             'category_id' => TicketModule::t('app', 'Category'),
-            'start_date' => TicketModule::t('app', 'Start date'),
+            'start_date' => TicketModule::t('app', 'Instalation date'),
             'finish_date' => TicketModule::t('app', 'Finish date'),
             'title' => TicketModule::t('app', 'Title'),
             'content' => TicketModule::t('app', 'Content'),
