@@ -98,3 +98,6 @@ web/direct_debit/
 web/direct_debit_import/
 web/firstdataExports/
 web/firstdataImports/
+
+# docker
+docker/gestion_westnet/*
