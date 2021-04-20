@@ -100,4 +100,4 @@ web/firstdataExports/
 web/firstdataImports/
 
 # docker
-docker/gestion_westnet/*
+gestion_westnet/*

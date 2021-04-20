@@ -18,7 +18,7 @@
 - Docker
 
 
-#### *Step-by-step*
+### *Step-by-step:*
 
 #### Go to the projects folder (wherever you whant to clone it)
 
@@ -52,7 +52,23 @@ por:
 
     $config = require __DIR__ . '/../config/web.php';
 
+
+
 Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
+
+
+#### Create a custom docker folder to compose locally on your computer
+(could be called "gestion_westnet" for example, and should be ignored by git)
+
+
+**to-do:**  
+1. describe the changes on the docker folder
+On the 
+1. add the just created docker folder to .gitignore: "docker\gestion_westnet" is already ignored in the gitignore by default
+1. describe how to connect to database
+1. describe how to dump the SQL script and the tools required for that; workbench and client
+1. describe how to connect to database
+
 
 ----------------------------------------------------------------------------------------------------------------
 
