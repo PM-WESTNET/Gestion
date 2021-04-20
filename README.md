@@ -3,8 +3,55 @@ Arya Documentation
 https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#
 
 
-Arya install
+Arya (GestionISP) install
 ================================
+
+## Pasos Ubuntu 20.04 (o windows)
+-----------------
+
+#### *Requirements*
+
+- Composer
+- Docker
+
+
+#### *Step-by-step*
+
+#### Go to the projects folder (wherever you whant to clone it)
+
+    $   cd /var/www
+#### Clone the repo
+    $   git clone https://github.com/westnet1/ispGestioner.git gestion
+    
+#### Up the container services and dependencies
+    $   cd docker
+    $   docker-compose up -d
+
+#### Go to the project's base folder and run this commands
+*you can copy-paste this commands*
+
+    $
+    cp config/db.sample.php config/db.php;
+    cp config/web.sample.php config/web.php;
+    cp config/params.sample.php config/params.php;
+    cp config/console.sample.php config/console.php;
+    cp web/index-test.php web/index.php;
+    
+#### Replace with real data the created files
+
+replace "'password' => '*********'" "'password' => '[NEWPASSWORD]'" -- config/db.php
+
+*Nota importante* => En el archivo **index.php** creado, remplazar la linea:
+
+    $config = require __DIR__ . '/../config/test.php';
+
+por:
+
+    $config = require __DIR__ . '/../config/web.php';
+
+Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
+
+----------------------------------------------------------------------------------------------------------------
 
 Para Ubuntu 16.04
 -----------------
