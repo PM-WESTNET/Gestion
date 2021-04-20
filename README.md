@@ -1,12 +1,15 @@
-Arya Documentation
-================================
-https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#
+# Arya (GestionISP)
+
+[//]: # (Add a short  description here)
+
+# [Arya Documentation](https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#)
+[//]: # (You need to be provided access beforehand)
+
+# Arya (GestionISP) Install:
+[//]: # (Setups for common operating systems)
 
 
-Arya (GestionISP) install
-================================
-
-## Pasos Ubuntu 20.04 (o windows)
+## Ubuntu 20.04 (or windows)
 -----------------
 
 #### *Requirements*
@@ -53,7 +56,7 @@ Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y v
 
 ----------------------------------------------------------------------------------------------------------------
 
-Para Ubuntu 16.04
+## Para Ubuntu 16.04
 -----------------
 
 $ sudo apt-get update; sudo apt-get -y upgrade; sudo apt-get -y dist-upgrade; sudo apt-get -y autoremove; sudo reboot
@@ -93,7 +96,7 @@ $ sudo ln -s /home/[user]/develop/westnet /var/www/html/westnet
 
 $ firefox http://localhost/westnet/web/
 
-Run tests
+##  Run tests
 ---------
 
 $ sudo apt-get install default-jre chromium-browser
