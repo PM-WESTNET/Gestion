@@ -41,6 +41,11 @@
     cp web/index-test.php web/index.php;
     
 #### Replace with real data the created files
+Inside the config folder, you will have to change the data of the connections that are described. 
+Do as follows:
+- The **host** should be setted for the container name. (previously it was either an IP or localhost)
+- The **dbname** should be setted for the actual database name like "gestion_westnet" (Example at the time of writing this)
+- The **password** should be setted also (ask)
 
 replace "'password' => '*********'" "'password' => '[NEWPASSWORD]'" -- config/db.php
 
