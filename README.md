@@ -40,15 +40,18 @@
     cp config/console.sample.php config/console.php;
     cp web/index-test.php web/index.php;
     
-#### Replace with real data the created files
+#### Replace in the config folder with real data for connections
 Inside the config folder, you will have to change the data of the connections that are described. 
 Do as follows:
 - The **host** should be setted for the container name. (previously it was either an IP or localhost)
-- The **dbname** should be setted for the actual database name like "gestion_westnet" (Example at the time of writing this)
+- The **dbname** should be setted for the actual database name (ask)
 - The **password** should be setted also (ask)
+*use the "replace all ocurrences" option of your texteditor*
 
 replace "'password' => '*********'" "'password' => '[NEWPASSWORD]'" -- config/db.php
 
+
+#### Replace in the web folder configuration file name
 *Nota importante* => En el archivo **index.php** creado, remplazar la linea:
 
     $config = require __DIR__ . '/../config/test.php';
@@ -58,9 +61,7 @@ por:
     $config = require __DIR__ . '/../config/web.php';
 
 
-
 Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
-
 
 #### Create a custom docker folder to compose locally on your computer
 (could be called "gestion_westnet" for example, and should be ignored by git)
@@ -74,6 +75,10 @@ On the
 1. describe how to dump the SQL script and the tools required for that; workbench and client
 1. describe how to connect to database
 
+----------------------------------------------------------------------------------------------------------------
+
+## Remember to always rebuild the image of the containers when touching the Dockerfile
+    $   docker-compose build
 
 ----------------------------------------------------------------------------------------------------------------
 Para Ubuntu 16.04
