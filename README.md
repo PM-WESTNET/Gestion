@@ -14,8 +14,8 @@
 
 #### *Requirements*
 
-- Composer
-- Docker
+- @Composer
+- @Docker
 
 
 ### *Step-by-step:*
@@ -29,6 +29,24 @@
 #### Up the container services and dependencies
     $   cd docker
     $   docker-compose up -d
+
+#### Make @Composer install all dependencies 
+**(up the containers first!!)**
+From the console, run this commands:
+
+- open this container's terminal
+    $   docker exec -it gestion-web sh
+
+- inside (#) go to the html folder
+    $   cd /var/www/html
+
+- run Composer to install dependencies    
+    $   composer install
+
+- The terminal will output a GitHub URL in which you have to check every box and generate a personal Token
+    (paste the token)
+
+
 
 #### Go to the project's base folder and run this commands
 *you can copy-paste this commands*
@@ -78,14 +96,6 @@ por:
 #### Create a custom docker folder to compose locally on your computer
 (could be called "gestion_westnet" for example, and should be ignored by git)
 
-
-**to-do:**  
-1. describe the changes on the docker folder
-On the 
-1. add the just created docker folder to .gitignore: "docker\gestion_westnet" is already ignored in the gitignore by default
-1. describe how to connect to database
-1. describe how to dump the SQL script and the tools required for that; workbench and client
-1. describe how to connect to database
 
 ----------------------------------------------------------------------------------------------------------------
 
