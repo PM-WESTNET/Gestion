@@ -33,13 +33,16 @@
 #### Go to the project's base folder and run this commands
 *you can copy-paste this commands*
 
-    $
+Create copies of config files, web files and docker files. (extremely important)
+
     cp config/db.sample.php config/db.php;
     cp config/web.sample.php config/web.php;
     cp config/params.sample.php config/params.php;
     cp config/console.sample.php config/console.php;
     cp web/index-test.php web/index.php;
+    cp docker/web-server/gestion.sample.conf docker/web-server/gestion.conf;
     
+
 #### Replace in the config folder with real data for connections
 Inside the config folder, you will have to change the data of the connections that are described. 
 Do as follows:
@@ -77,8 +80,13 @@ On the
 
 ----------------------------------------------------------------------------------------------------------------
 
-## Remember to always rebuild the image of the containers when touching the Dockerfile
+## Remember:
+#### Always rebuild the image of the containers when touching a Dockerfile
     $   docker-compose build
+
+#### Change the endpoint's IP for easy access to containers
+
+*localhost*
 
 ----------------------------------------------------------------------------------------------------------------
 Para Ubuntu 16.04
