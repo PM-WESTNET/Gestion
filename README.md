@@ -63,8 +63,17 @@ por:
 
     $config = require __DIR__ . '/../config/web.php';
 
+#### Add gestion to the list of local-hosts
+- Go to /etc folder in your linux distr system
+- edit the "hosts" file with:
 
-Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
+        $   sudo nano hosts
+    (or any text editor)
+
+- Add a line with Gestion's ip and hostname:
+
+        127.0.0.1   gestion_westnet.local
+
 
 #### Create a custom docker folder to compose locally on your computer
 (could be called "gestion_westnet" for example, and should be ignored by git)
