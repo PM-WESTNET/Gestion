@@ -1,11 +1,11 @@
-# Arya (GestionISP)
+# ISPGestion
 
 [//]: # (Add a short  description here)
 
-# [Arya Documentation](https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#)
+# [ISPGestion Documentation](https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#)
 [//]: # (You need to be provided access beforehand)
 
-# Arya (GestionISP) Install:
+# ISPGestion Install:
 [//]: # (Setups for common operating systems)
 
 
