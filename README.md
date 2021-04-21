@@ -71,8 +71,7 @@ On the
 
 
 ----------------------------------------------------------------------------------------------------------------
-
-## Para Ubuntu 16.04
+Para Ubuntu 16.04
 -----------------
 
 $ sudo apt-get update; sudo apt-get -y upgrade; sudo apt-get -y dist-upgrade; sudo apt-get -y autoremove; sudo reboot
@@ -112,7 +111,7 @@ $ sudo ln -s /home/[user]/develop/westnet /var/www/html/westnet
 
 $ firefox http://localhost/westnet/web/
 
-##  Run tests
+Run tests
 ---------
 
 $ sudo apt-get install default-jre chromium-browser

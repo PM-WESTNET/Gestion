@@ -99,5 +99,10 @@ web/direct_debit_import/
 web/firstdataExports/
 web/firstdataImports/
 
+# @emi ignores
 # docker
-gestion_westnet/*
+gestion_westnet
+
+# @gabi ignores
+gestion-data
+docker/web-server/gestion.sample.conf
