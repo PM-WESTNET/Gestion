@@ -57,11 +57,6 @@ class SiteController extends Controller
         return $this->render('index');
     }
 
-    public function actionPrueba(){
-        var_dump("hola");die();
-        return $this->render('prueba');
-    }
-
     public function actionLogin()
     {
         if (!\Yii::$app->user->isGuest) {
