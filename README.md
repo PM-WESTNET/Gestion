@@ -110,6 +110,10 @@ por:
 #### If you encounter the error exception: 
 "failed to create directory: permission denied"
 
+- Move the **assets** folder inside the **web** folder.
+        
+        (or else, the program wont find it)
+
 - Run a CHMOD:
 
         $   sudo chmod -R 777 gestion_project_folder/
@@ -123,7 +127,7 @@ por:
 
 - Rebuild the docker.
 
-        $   docker-compose build
+        $   sudo docker-compose build
 
 
 ----------------------------------------------------------------------------------------------------------------
