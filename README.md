@@ -107,6 +107,25 @@ por:
 
 *localhost*
 
+#### If you encounter the error exception: 
+"failed to create directory: permission denied"
+
+- Run a CHMOD:
+
+        $   sudo chmod -R 777 gestion_project_folder/
+        (This will recursively add permissions to write)
+
+
+- Go inside the project folder and run:
+
+        $   git config core.fileMode false
+        (Git detects the file changes in writability, this will exclude that from being pushed to remote)
+
+- Rebuild the docker.
+
+        $   docker-compose build
+
+
 ----------------------------------------------------------------------------------------------------------------
 Para Ubuntu 16.04
 -----------------
