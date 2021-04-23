@@ -129,7 +129,7 @@ por:
 
         $   sudo docker-compose build
 
-
+#### At this point you should be able to see Gestion working
 ----------------------------------------------------------------------------------------------------------------
 Para Ubuntu 16.04
 -----------------
