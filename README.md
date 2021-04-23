@@ -6,6 +6,43 @@ https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/
 install
 ================================
 
+Para Ubuntu 20.04
+-----------------
+
+Requisitos:
+
+- Composer
+- Docker
+
+
+*Clonar repositorio*
+
+1) Ejecutar los siguientes comandos en su terminal
+cd /var/www
+git clone https://github.com/westnet1/ispGestioner.git gestion //Repositorio en github
+cd docker
+docker-compose up -d
+cp config/db.sample.php config/db.php
+cp config/web.sample.php config/web.php
+cp config/params.sample.php config/params.php
+cp config/console.sample.php config/console.php
+cp web/index-test.php web/index.php
+
+replace "'password' => '*********'" "'password' => '[NEWPASSWORD]'" -- config/db.php
+
+Nota importante => En el archivo index.php ubicado remplazar la linea
+$config = require __DIR__ . '/../config/test.php';
+
+por
+
+$config = require __DIR__ . '/../config/web.php';
+
+Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
+
+----------------------------------------------------------------------------------------------------------------
+
+
+
 Para Ubuntu 16.04
 -----------------
 

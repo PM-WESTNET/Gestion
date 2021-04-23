@@ -5,7 +5,7 @@ MAINTAINER Marcelo Briones <ing@marcelobriones.com.ar>
 RUN apt-get update && apt-get -y install \
     wget gnupg2 lsb-release curl mysql-client git \
     php5 php5-mysql php5-intl php5-gd php5-curl php5-xdebug\
-	barcode make gcc xvfb xfonts-75dpi fontconfig libxrender1 libjpeg62-turbo
+	barcode make gcc xvfb xfonts-75dpi fontconfig libxrender1 libjpeg62-turbo vim
 
 	
 RUN rm -rf /var/lib/apt/lists/*
@@ -51,6 +51,16 @@ RUN echo "xdebug.remote_handler=dbgp" >> /etc/php5/mods-available/xdebug.ini
 RUN echo "xdebug.remote_mode=req" >> /etc/php5/mods-available/xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /etc/php5/mods-available/xdebug.ini
 RUN echo "xdebug.remote_port=9000" >> /etc/php5/mods-available/xdebug.ini
+
+#Config apache2 and sites-available
+RUN cat /etc/apache2/mods-available/rewrite.load
+RUN a2enmod rewrite
+RUN ls -al /etc/apache2/mods-enabled/rewrite.load
+RUN sed -i "s/AllowOverride None/AllowOverride All/g" /etc/apache2/apache2.conf
+
+COPY gestion.conf /etc/apache2/sites-available/gestion.conf
+RUN chmod +x /etc/apache2/sites-available/gestion.conf
+RUN a2ensite gestion
 
 EXPOSE 80
 EXPOSE 443

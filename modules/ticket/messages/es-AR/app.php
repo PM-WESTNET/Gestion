@@ -13,7 +13,8 @@ return array(
     'Color' => 'Color',
     'Content' => 'Contenido',
     'Date' => 'Fecha',
-    'Start date' => 'Fecha de inicio',
+    'ticket' => 'Fecha de instalación',
+    'Instalation date' => 'Fecha de instalación',
     'Finish date' => 'Fecha de finalización',
     'Description' => 'Descripción',
     'Name' => 'Nombre',
@@ -99,6 +100,7 @@ return array(
     'Observation from Mesa.' => 'Observacion de Mesa.',
     'New assignation' => 'Nueva asignación',
     'Delete assignation' => 'Borrado de asignación',
-    'Task date' => 'Fecha de tarea',
+    'Task date' => 'Fecha de Tarea',
     'Discounted' => 'Descontado',
+    'Undiscounted' => 'No Descontado',
 );

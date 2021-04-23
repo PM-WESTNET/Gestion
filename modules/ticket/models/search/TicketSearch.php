@@ -32,7 +32,9 @@ class TicketSearch extends Ticket {
     public $created_by;
     public $close_from_date;
     public $close_to_date;
-
+    public $date_from_start_contract;
+    public $date_to_start_contract;
+    
     public $categories;
     public $start_date_from;
     public $start_date_to;
@@ -46,8 +48,13 @@ class TicketSearch extends Ticket {
         return [
             [['ticket_id'], 'integer'],
             [['show_all'], 'boolean'],
-            [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document', 'assignations', 'customer_number'], 'safe', 'on' => 'wideSearch'],
-            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number'], 'safe', 'on' => 'activeSearch'],
+            [['discounted'], 'string'],
+            [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document',
+                    'assignations', 'customer_number','date_from_start_contract', 'date_to_start_contract' , 'discounted'], 
+                'safe', 'on' => 'wideSearch'
+            ],
+            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number', 'date_from_start_contract', 'date_to_start_contract', 'discounted' ], 
+                'safe', 'on' => 'activeSearch'],
             [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations', 'show_all'], 'safe'],
         ];
     }
@@ -59,8 +66,10 @@ class TicketSearch extends Ticket {
             'customer_number' => Yii:: t('app', 'Customer Number'),
             'ticket_management_qty' => Yii::t('app', 'Ticket management quantity'),
             'created_by' => Yii::t('app', 'Created by'),
-            'start_date_from' => Yii::t('app', 'Start date from'),
-            'start_date_to' => Yii::t('app', 'Start date to'),
+            'start_date_from' => Yii::t('app', 'Start ticket date from'),
+            'start_date_to' => Yii::t('app', 'Start ticket date to'),
+            'date_from_start_contract' => Yii::t('app', 'Start contract date from'),
+            'date_to_start_contract' => Yii::t('app', 'Start contract date to'),
             'show_all' => Yii::t('app','Show All')
         ]);
     }
@@ -75,7 +84,8 @@ class TicketSearch extends Ticket {
      * @param type $params
      * @return ActiveDataProvider
      */
-    public function search($params) {        
+    public function search($params) {    
+            
         $query = Ticket::find();
 
         $query->joinWith([
@@ -85,11 +95,11 @@ class TicketSearch extends Ticket {
             'users' => function($query) {
                 $userTableName = $this->userModelClass;
                 return $query->from(DbHelper::getDbName(Yii::$app->db) . '.' . $userTableName::tableName());
-            },
+            }
         ]);
         
-         
-            
+        $query->innerJoin( DbHelper::getDbName(Yii::$app->db) . '.contract c', 'c.customer_id = customer.customer_id');
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -167,6 +177,18 @@ class TicketSearch extends Ticket {
         $query->andFilterWhere(['like', 'customer.name', $this->customer]);
         $query->andFilterWhere(['like', 'customer.document_number', $this->document]);
         $query->andFilterWhere(['like', 'customer.code', $this->customer_number]);
+
+        $query->andFilterWhere(['>=', 'c.from_date', $this->date_from_start_contract]);
+        $query->andFilterWhere(['<=', 'c.from_date', $this->date_to_start_contract]);
+
+        if (!empty($this->discounted)){
+            Yii::info($this->discounted);
+            if ($this->discounted == 'undiscounted'){
+                $query->andWhere(['IS', 'discounted', null]);
+            }else {
+                $query->andWhere(['discounted' => '1']);
+            }
+        }
 
         if($this->assignations) {
             $query->leftJoin('assignation assig', 'assig.ticket_id = ticket.ticket_id')
