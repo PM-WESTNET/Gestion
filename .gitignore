@@ -103,6 +103,7 @@ web/firstdataImports/
 # docker
 gestion_westnet
 docker/web-server/gestion.conf
+docker_gestion_*
 
 # @gabi ignores
 gestion-data

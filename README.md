@@ -18,7 +18,7 @@
 - @Docker
 
 
-### *Step-by-step:*
+### - *Step-by-step:*
 
 #### Go to the projects folder (wherever you whant to clone it)
 
@@ -30,7 +30,7 @@
     $   cd docker
     $   docker-compose up -d
 
-#### Make @Composer install all dependencies 
+#### - Make @Composer install all dependencies 
 **(up the containers first!!)**
 From the console, run this commands:
 
@@ -126,10 +126,22 @@ por:
 
         $   sudo docker-compose build
 
-#### At this point you should be able to see Gestion working
+## >>At this point you should be able to see Gestion working.
 
-        $   git config core.fileMode false
+
+# Parameterizing for different ISPs
+
+- first, make a copy of the docker folder.
+
+
+    (replace westnet with the company name)
+
+        $   cp -R docker docker_gestion_westnet;
+
+    (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 ----------------------------------------------------------------------------------------------------------------
+# @old documentation:
+
 Para Ubuntu 16.04
 -----------------
 
