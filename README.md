@@ -1,47 +1,146 @@
-Arya Documentation
-================================
-https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#
+# ISPGestion
+
+[//]: # (Add a short  description here)
+
+# [ISPGestion Documentation](https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#)
+[//]: # (You need to be provided access beforehand)
+
+# ISPGestion Install:
+[//]: # (Setups for common operating systems)
 
 
-Arya install
-================================
-
-Para Ubuntu 20.04
+## Ubuntu 20.04 (or windows)
 -----------------
 
-Requisitos:
+#### *Requirements*
 
-- Composer
-- Docker
+- @Composer
+- @Docker
 
 
-*Clonar repositorio*
+### - *Step-by-step:*
 
-1) Ejecutar los siguientes comandos en su terminal
-cd /var/www
-git clone https://github.com/westnet1/ispGestioner.git gestion //Repositorio en github
-cd docker
-docker-compose up -d
-cp config/db.sample.php config/db.php
-cp config/web.sample.php config/web.php
-cp config/params.sample.php config/params.php
-cp config/console.sample.php config/console.php
-cp web/index-test.php web/index.php
+#### Go to the projects folder (wherever you whant to clone it)
+
+    $   cd /var/www
+#### Clone the repo
+    $   git clone https://github.com/westnet1/ispGestioner.git gestion
+    
+#### Up the container services and dependencies
+    $   cd docker
+    $   docker-compose up -d
+
+#### - Make @Composer install all dependencies 
+**(up the containers first!!)**
+From the console, run this commands:
+
+- open this container's terminal
+    $   docker exec -it gestion-web sh
+
+- inside (#) go to the html folder
+    $   cd /var/www/html
+
+- run Composer to install dependencies    
+    $   composer install
+
+- The terminal will output a GitHub URL in which you have to check every box and generate a personal Token
+    (paste the token)
+
+
+
+#### Go to the project's base folder and run this commands
+*you can copy-paste this commands*
+
+Create copies of config files, web files and docker files. (extremely important)
+
+    cp config/db.sample.php config/db.php;
+    cp config/web.sample.php config/web.php;
+    cp config/params.sample.php config/params.php;
+    cp config/console.sample.php config/console.php;
+    cp web/index-test.php web/index.php;
+    cp docker/web-server/gestion.sample.conf docker/web-server/gestion.conf;
+    
+
+#### Replace in the config folder with real data for connections
+Inside the config folder, you will have to change the data of the connections that are described. 
+Do as follows:
+- The **host** should be setted for the container name. (previously it was either an IP or localhost)
+- The **dbname** should be setted for the actual database name (ask)
+- The **password** should be setted also (ask)
+*use the "replace all ocurrences" option of your texteditor*
 
 replace "'password' => '*********'" "'password' => '[NEWPASSWORD]'" -- config/db.php
 
-Nota importante => En el archivo index.php ubicado remplazar la linea
-$config = require __DIR__ . '/../config/test.php';
 
-por
+#### Replace in the web folder configuration file name
+*Nota importante* => En el archivo **index.php** creado, remplazar la linea:
 
-$config = require __DIR__ . '/../config/web.php';
+    $config = require __DIR__ . '/../config/test.php';
 
-Asegurarse de ingresar la direccion correcta en el archivo db.php en config, y verificar el nombre de las tablas
+por:
 
+    $config = require __DIR__ . '/../config/web.php';
+
+#### Add gestion to the list of local-hosts
+- Go to /etc folder in your linux distr system
+- edit the "hosts" file with:
+
+        $   sudo nano hosts
+    (or any text editor)
+
+- Add a line with Gestion's ip and hostname:
+
+        127.0.0.1   gestion_westnet.local
+
+
+#### Create a custom docker folder to compose locally on your computer
+(could be called "gestion_westnet" for example, and should be ignored by git)
+
+
+## Remember:
+#### Always rebuild the image of the containers when touching a Dockerfile
+    $   docker-compose build
+
+#### Change the endpoint's IP for easy access to containers
+
+*localhost*
+
+#### If you encounter the error exception: 
+"failed to create directory: permission denied"
+
+- Move the **assets** folder inside the **web** folder.
+        
+
+- Run a CHMOD:
+
+        $   sudo chmod -R 777 gestion_project_folder/
+        (This will recursively add permissions to write)
+
+
+- Go inside the project folder and run:
+
+        $   git config core.fileMode false
+        (Git detects the file changes in writability, this will exclude that from being pushed to remote)
+
+- Rebuild the docker.
+
+        $   sudo docker-compose build
+
+## >>At this point you should be able to see Gestion working.
+
+
+# Parameterizing for different ISPs
+
+- first, make a copy of the docker folder.
+
+
+    (replace westnet with the company name)
+
+        $   cp -R docker docker_gestion_westnet;
+
+    (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 ----------------------------------------------------------------------------------------------------------------
-
-
+# @old documentation:
 
 Para Ubuntu 16.04
 -----------------
