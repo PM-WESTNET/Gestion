@@ -99,5 +99,6 @@ web/direct_debit_import/
 web/firstdataExports/
 web/firstdataImports/
 
-gestion-data
-docker/web-server/gestion.sample.conf
+gestion-data/
+!environments/docker_gestion_westnet
+!environments/docker_gestion_bigway
