@@ -299,13 +299,13 @@ $config = [
             ],
         ],
         'mailing' => [
-            'class' => 'quoma\modules\mailing\MailingModule',
+            'class' => 'app\modules\mailing\MailingModule',
         ],
         'pagomiscuentas' => [
             'class' => 'app\modules\pagomiscuentas\PagomiscuentasModule',
         ],
         'notifications' => [
-            'class' => 'app\modules\westnet\NotificationsModule',
+            'class' => 'app\modules\westnet\WestnetModule', //Not exist in module, file NotificationsModule.php
             'modules' => [
                 'v1' => [
                     'class' => 'app\modules\westnet\notifications\integratech\v1\V1Module',
@@ -318,9 +318,9 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
-        'automatic_debit' => [
-            'class' => 'app\module\automatic_debit\AutomaticDebit',
-        ],
+        /*'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit', //Not exist module
+        ],*/ 
         'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',
             'modules' => [
@@ -331,6 +331,9 @@ $config = [
         ],
         'employee' => [
             'class' => 'app\modules\employee\EmployeeModule',
+        ],
+        'firstdata' => [
+            'class' => 'app\modules\firstdata\FirstDataModule'
         ],
     ],
     'aliases' => [

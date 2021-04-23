@@ -1,0 +1,6 @@
+docker pull centos:7
+docker pull mariadb:10.0
+docker pull phpmyadmin/phpmyadmin
+docker pull node
+docker pull selenium/standalone-chrome-debug
+docker pull tophfr/mailcatcher

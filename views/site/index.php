@@ -9,6 +9,7 @@ use yii\web\User;
  */
 $this->title = Yii::$app->params['web_title'];
 ?>
+
 <div class="jumbotron">
     <?php if (!empty(Yii::$app->params['web_logo'])): ?>
         <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?= Url::to("@web/images/logo01.svg") ?>" width="300"/>
