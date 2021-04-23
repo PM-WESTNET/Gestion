@@ -39,6 +39,12 @@ $config = [
         'assetManager' => [
             'linkAssets' => true,
         ],
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'rules' => [
+            ],
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -173,7 +179,8 @@ $config = [
             'cookieValidationKey' => '$4R/4-00034',
             'parsers' => [
                 'application/json' => 'yii\web\JsonParser',
-            ]
+            ],
+            'baseUrl' => '',
         ],
         'response' => [
             'formatters' => [
@@ -292,13 +299,13 @@ $config = [
             ],
         ],
         'mailing' => [
-            'class' => 'quoma\modules\mailing\MailingModule',
+            'class' => 'app\modules\mailing\MailingModule',
         ],
         'pagomiscuentas' => [
             'class' => 'app\modules\pagomiscuentas\PagomiscuentasModule',
         ],
         'notifications' => [
-            'class' => 'app\modules\westnet\NotificationsModule',
+            'class' => 'app\modules\westnet\WestnetModule', //Not exist in module, file NotificationsModule.php
             'modules' => [
                 'v1' => [
                     'class' => 'app\modules\westnet\notifications\integratech\v1\V1Module',
@@ -311,9 +318,9 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
-        'automatic_debit' => [
-            'class' => 'app\module\automatic_debit\AutomaticDebit',
-        ],
+        /*'automatic_debit' => [
+            'class' => 'app\module\automatic_debit\AutomaticDebit', //Not exist module
+        ],*/ 
         'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',
             'modules' => [
@@ -325,6 +332,9 @@ $config = [
         'employee' => [
             'class' => 'app\modules\employee\EmployeeModule',
         ],
+        'firstdata' => [
+            'class' => 'app\modules\firstdata\FirstDataModule'
+        ],
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -334,17 +344,17 @@ $config = [
 ];
 
 if (YII_ENV_DEV) {
-    // configuration adjustments for 'dev' environment
+
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         'allowedIPs' => ['*'],
-    ];
+    ];  
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*'],
         'controllerNamespace' => 'app\templates\controllers',
         'controllerMap' => [
             'default' => 'app\templates\controllers\QiiController'
@@ -352,7 +362,9 @@ if (YII_ENV_DEV) {
         'generators' => [
             'crud' => [
                 'class' => 'app\templates\generators\crud\Generator',
-                'templates' => ['quoma-crud' => '@app/templates/generators/crud/default']
+                'templates' => ['quoma-crud' => '@app/templates/generators/crud/default']        
+                //'class'     => 'yii\gii\generators\crud\Generator',
+                //'templates' => ['arya-crud' => '@app/templates/generators/crud/default']  
             ],
             'model' => [
                 'class' => 'app\templates\generators\model\Generator',
@@ -364,29 +376,6 @@ if (YII_ENV_DEV) {
             ],
         ]
     ];
-
-    // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'debug';
-    $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
-        'allowedIPs' => ['*']
-    ];
-    
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-        'allowedIPs' => ['127.0.0.1', '::1'],
-        'generators' => [
-            'crud'   => [
-                'class'     => 'yii\gii\generators\crud\Generator',
-                'templates' => ['arya-crud' => '@app/templates/generators/crud/default']
-            ]
-        ]
-    ];
-//    $config['modules']['gii'] = [
-//        'class' => 'yii\gii\Module',
-//        'allowedIPs' => ['127.0.0.1', '::1'],
-//    ];
 
 }
 
