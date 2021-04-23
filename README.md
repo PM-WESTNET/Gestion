@@ -97,8 +97,6 @@ por:
 (could be called "gestion_westnet" for example, and should be ignored by git)
 
 
-----------------------------------------------------------------------------------------------------------------
-
 ## Remember:
 #### Always rebuild the image of the containers when touching a Dockerfile
     $   docker-compose build
@@ -112,7 +110,6 @@ por:
 
 - Move the **assets** folder inside the **web** folder.
         
-        (or else, the program wont find it)
 
 - Run a CHMOD:
 
@@ -130,6 +127,8 @@ por:
         $   sudo docker-compose build
 
 #### At this point you should be able to see Gestion working
+
+        $   git config core.fileMode false
 ----------------------------------------------------------------------------------------------------------------
 Para Ubuntu 16.04
 -----------------
