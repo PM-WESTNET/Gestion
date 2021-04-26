@@ -102,9 +102,9 @@ web/firstdataImports/
 # @emi ignores
 # docker
 gestion_westnet
-docker/web-server/gestion.conf
+docker_sample/web-server/gestion.conf
 docker_gestion_*
 
 # @gabi ignores
 gestion-data
-docker/web-server/gestion.sample.conf
+composer.lock
