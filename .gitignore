@@ -108,3 +108,5 @@ docker_gestion_*
 # @gabi ignores
 gestion-data
 composer.lock
+gestion-*-data
+
