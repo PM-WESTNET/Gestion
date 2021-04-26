@@ -16,8 +16,8 @@ services:
         container_name: gestion-data
         image: mariadb:10.0
         volumes:
-            #gestion-westnet-data or gestion-bigway-data
-            - ../gestion-data:/var/lib/mysql
+            #gestion-data-westnet or gestion-data-bigway
+            - /var/vol_db/gestion-data:/var/lib/mysql
         ports:
             - "8200:3306"
         environment:
