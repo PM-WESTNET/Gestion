@@ -49,8 +49,11 @@ install
     (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 #### Replace data in docker-compose.yml file
 
-change each service "container_name" to something like "gestion-wn-web" (in the case of westnet's web container)
+- change each service "container_name" to something like "gestion-wn-web" (in the case of westnet's web container)
+- also, ensure the volume of your database unique for that company
 
+        - /var/vol_db/gestion-[companyName]-data:/var/lib/mysql
+    Save, rebuild docker and up the services again.
 
 #### Up the container services and dependencies
     $   cd docker_gestion_westnet;

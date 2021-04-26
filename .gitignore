@@ -104,6 +104,8 @@ web/firstdataImports/
 gestion_westnet
 docker_sample/web-server/gestion.conf
 docker_gestion_*
+# Ignore all data volumes starting with gestion and ending with data
+gestion-*-data
 
 # @gabi ignores
 gestion-data
