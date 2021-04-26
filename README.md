@@ -18,30 +18,43 @@
 - @Docker
 
 
-### - *Step-by-step:*
+## - *Step-by-step:*
 
 #### Go to the projects folder (wherever you whant to clone it)
 
     $   cd /var/www
 #### Clone the repo
     $   git clone https://github.com/westnet1/ispGestioner.git gestion
-    
+
+#### Parameterizing for different ISPs
+
+- first, make a copy of the docker folder.
+
+
+    (replace westnet with the company name)
+
+        $   cp -R docker docker_gestion_westnet;
+
+    (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 #### Up the container services and dependencies
-    $   cd docker
-    $   docker-compose up -d
+    $   cd docker_gestion_westnet;
+    $   docker-compose up -d;
 
 #### - Make @Composer install all dependencies 
 **(up the containers first!!)**
 From the console, run this commands:
 
 - open this container's terminal
-    $   docker exec -it gestion-web sh
+
+        $   docker exec -it gestion-web sh
 
 - inside (#) go to the html folder
-    $   cd /var/www/html
+    
+        $   cd /var/www/html
 
 - run Composer to install dependencies    
-    $   composer install
+    
+        $   composer install
 
 - The terminal will output a GitHub URL in which you have to check every box and generate a personal Token
     (paste the token)
@@ -92,16 +105,13 @@ por:
 
         127.0.0.1   gestion_westnet.local
 
-
-#### Create a custom docker folder to compose locally on your computer
-(could be called "gestion_westnet" for example, and should be ignored by git)
-
+**Change to the actual's company name!**
 
 ## Remember:
-#### Always rebuild the image of the containers when touching a Dockerfile
+#### Always rebuild docker whenever a Dockerfile is changed
     $   docker-compose build
 
-#### Change the endpoint's IP for easy access to containers
+#### Change the endpoint's IP for easy access to containers (Portainer)
 
 *localhost*
 
@@ -129,16 +139,7 @@ por:
 ## >>At this point you should be able to see Gestion working.
 
 
-# Parameterizing for different ISPs
 
-- first, make a copy of the docker folder.
-
-
-    (replace westnet with the company name)
-
-        $   cp -R docker docker_gestion_westnet;
-
-    (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 ----------------------------------------------------------------------------------------------------------------
 # @old documentation:
 
