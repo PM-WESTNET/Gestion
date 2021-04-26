@@ -44,7 +44,7 @@ install
 
     (replace westnet with the company name)
 
-        $   cp -R docker docker_gestion_westnet;
+        $   cp -R docker_sample docker_gestion_westnet;
 
     (The ignored folder prefix in .gitignore is " docker_gestion_* ")
 #### Replace data in docker-compose.yml file
