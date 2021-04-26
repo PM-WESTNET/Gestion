@@ -100,5 +100,6 @@ web/firstdataExports/
 web/firstdataImports/
 
 gestion-data/
-!environments/docker_gestion_westnet
-!environments/docker_gestion_bigway
+docker_gestion_westnet
+docker_gestion_bigway
+composer.lock
