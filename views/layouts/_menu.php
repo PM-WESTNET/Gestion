@@ -539,7 +539,7 @@ $items[] = [
 
             <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>">
                 <?php if(Yii::$app->params['web_logo']){
-                    echo '<img src="'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo_bgblack'].'" style="height:45px; margin-top:-10px; position:absolute;" />';
+                    echo '<img src="/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo_bgblack'].'" style="height:45px; margin-top:-10px; position:absolute;" />';
                 }else{
                     echo Yii::$app->params['web_title'];
                 }
