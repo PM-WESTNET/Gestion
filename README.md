@@ -1,20 +1,9 @@
-<<<<<<< HEAD
-ISPGestioner Documentation
-================================
-https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#
-=======
 # ISPGestion
->>>>>>> gbermudez
 
 [//]: # (Add a short  description here)
 
-<<<<<<< HEAD
-install
-================================
-=======
 # [ISPGestion Documentation](https://docs.google.com/document/d/1XQ9qM9zJ1bhrtbTwXQV-JC0yCKlHt0WS7KMXf0CussI/edit#)
 [//]: # (You need to be provided access beforehand)
->>>>>>> gbermudez
 
 # ISPGestion Install:
 [//]: # (Setups for common operating systems)
