@@ -166,9 +166,9 @@ class MoneyBox extends \app\components\db\ActiveRecord
         }
     }
 
-    public function findByMoneyBoxType($type)
+    public static function findByMoneyBoxType($type)
     {
-        return MoneyBox::find()->andWhere(['=', 'money_box_type_id',$type]);
+        return self::find()->andWhere(['=', 'money_box_type_id',$type]);
     }
 
     public function getUndefinedOperationTypes()
