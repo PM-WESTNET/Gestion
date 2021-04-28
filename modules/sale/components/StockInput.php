@@ -28,12 +28,11 @@ class StockInput extends \yii\jui\InputWidget{
     ];
 
     public function run(){
-        
-        return $this->render();
+        return $this->render2();
         
     }
     
-    public function render()
+    public function render2()
     {
         
         $contents = [];
