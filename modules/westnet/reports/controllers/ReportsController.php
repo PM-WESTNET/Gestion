@@ -263,15 +263,7 @@ class ReportsController extends Controller
             $category = $item['name'];
 
         }
-        if ($category_low_id != $item['category_low_id'] && $category_low_id != null) {
-            $dataset[] = [
-                'label' => $category,
-                'data' => $datas,
-                'fill' => false,
-                'backgroundColor' => sprintf('rgba(%s,%s,%s,1)', rand(1, 255), rand(1, 255), rand(1, 255)),
-                'yAxisID' => 'y-axis-' . $i
-            ];
-        }
+        
         $funcion = function ($a, $b) {
             return (new \DateTime('01-' . $a))->format('Ymd') - (new \DateTime('01-' . $b))->format('Ymd');
         };
