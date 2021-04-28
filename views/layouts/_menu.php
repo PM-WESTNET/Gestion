@@ -26,7 +26,7 @@ $alwaysVisibleItems = [];
 if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
                 'label' => Yii::t('westnet', 'Ecopago'),
-                'url' => ['/westnet/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
+                'url' => ['/isp/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
                 'linkOptions' => ['class' => 'btn btn-info navbar-btn', 'target' => '_blank'],
     ];
 }
@@ -133,7 +133,7 @@ if (Yii::$app->getModule('afip')) {
         ['label'=> Yii::t('app', 'Installations'), 'url' =>['/sale/customer/installations']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Payments'), 'url'=>['/checkout/payment/index']],
-        ['label'=>Yii::t('app','Notify payments'), 'url'=>['/westnet/notify-payment']],
+        ['label'=>Yii::t('app','Notify payments'), 'url'=>['/isp/notify-payment']],
         ['label'=>Yii::t('app','Programmed plan changes'), 'url'=>['/sale/contract/programmed-plan-change/index']],
         //'<li class="divider"></li>',
         ['label'=>Yii::t('app','Profile Classes'), 'url'=>['/sale/profile-class/index']],
@@ -229,7 +229,7 @@ if (Yii::$app->getModule('reports')) {
         ['label' => Yii::t('app', 'Customers By Node'), 'url' => ['/reports/reports/customers-by-node']],
         ['label' => Yii::t('app', 'Customers by publicity shape'), 'url' => ['/reports/reports/customer-by-publicity-shape']],
         ['label' => Yii::t('app', 'Tickets report'), 'url' => ['/ticket/ticket/report']],
-        ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/westnet/payment-extension-history/index']],
+        ['label' => Yii::t('app', 'Payment extension history'), 'url' => ['/isp/payment-extension-history/index']],
         ['label' => Yii::t('app', 'Notify payments graphics'), 'url' => ['/reports/reports/notify-payments-graphics']],
         ['label' => Yii::t('app', 'Payment extension graphic'), 'url' => ['/reports/reports/payment-extension-graphics']],
         ['label' => Yii::t('app', 'Updated Customers Report'), 'url' => ['/reports/customer/customers-updated']],
@@ -335,8 +335,8 @@ if(User::hasRole('admin')) {
 
 
 
-//Westnet
-if (Yii::$app->getModule('westnet')) {
+//isp
+if (Yii::$app->getModule('isp')) {
     $items[] = [
         'label' => 'ISP',
         'items' => [
@@ -347,20 +347,20 @@ if (Yii::$app->getModule('westnet')) {
                 ['label' => Yii::t('partner', 'Liquidation'), 'url' => ['/partner/liquidation']],
                 ['label' => Yii::t('partner', 'Liquidations'), 'url' => ['/partner/liquidation/list-liquidation']],
             ]],
-            ['label'=>Yii::t('westnet','Servers'), 'url'=>['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
-            ['label'=>Yii::t('westnet','Nodes'), 'url'=>['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
-            ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
+            ['label'=>Yii::t('westnet','Servers'), 'url'=>['/isp/server'], 'visible' => User::canRoute(['/isp/server/index'])],
+            ['label'=>Yii::t('westnet','Nodes'), 'url'=>['/isp/node'], 'visible' => User::canRoute(['/isp/node/index'])],
+            ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/isp/vendor'], 'visible' => User::canRoute(['/isp/vendor/index'])],
             //'<li class="divider"></li>',
-            ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/westnet/node/assigned-ip']],
-            ['label'=>Yii::t('westnet','Networks'), 'url'=>['/westnet/ip-range/index']],
-            ['label'=>Yii::t('westnet','Access Point'), 'url'=>['/westnet/access-point/index']],
+            ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/isp/node/assigned-ip']],
+            ['label'=>Yii::t('westnet','Networks'), 'url'=>['/isp/ip-range/index']],
+            ['label'=>Yii::t('westnet','Access Point'), 'url'=>['/isp/access-point/index']],
             [
                 'label' => Yii::t('westnet', 'Empty ADS not used'),
-                'url' => ['/westnet/empty-ads/index']
+                'url' => ['/isp/empty-ads/index']
             ],
             [
                 'label' => Yii::t('app', 'Create Empty ADS'),
-                'url' => ['/westnet/ads/print-empty-ads']
+                'url' => ['/isp/ads/print-empty-ads']
             ],
             '<li class="divider"></li>',
             [
@@ -368,24 +368,24 @@ if (Yii::$app->getModule('westnet')) {
                 'visible' => Yii::$app->user->isSuperadmin
             ],
             [
-                'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/westnet/ecopagos/ecopago'], 'visible' => User::canRoute(['/westnet/ecopagos/ecopago/index'])
+                'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/isp/ecopagos/ecopago'], 'visible' => User::canRoute(['/isp/ecopagos/ecopago/index'])
             ],
             [
-                'label' => Yii::t('app', 'Cashiers'), 'url' => ['/westnet/ecopagos/cashier'], 'visible' => User::canRoute(['/westnet/ecopagos/cashier/index'])
+                'label' => Yii::t('app', 'Cashiers'), 'url' => ['/isp/ecopagos/cashier'], 'visible' => User::canRoute(['/isp/ecopagos/cashier/index'])
             ],
             [
-                'label' => Yii::t('app', 'Collectors'), 'url' => ['/westnet/ecopagos/collector'], 'visible' => User::canRoute(['/westnet/ecopagos/collector/index'])
+                'label' => Yii::t('app', 'Collectors'), 'url' => ['/isp/ecopagos/collector'], 'visible' => User::canRoute(['/isp/ecopagos/collector/index'])
             ],
             '<li class="divider"></li>',
             [
-                'label' => Yii::t('app', 'Payouts in Ecopagos'), 'url' => ['/westnet/ecopagos/payout'], 'visible' => User::canRoute(['/westnet/ecopagos/payout'])
+                'label' => Yii::t('app', 'Payouts in Ecopagos'), 'url' => ['/isp/ecopagos/payout'], 'visible' => User::canRoute(['/isp/ecopagos/payout'])
             ],
             //'<li class="divider"></li>',
             [
-                'label' => Yii::t('app', 'Batch closures'), 'url' => ['/westnet/ecopagos/batch-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/batch-closure'])
+                'label' => Yii::t('app', 'Batch closures'), 'url' => ['/isp/ecopagos/batch-closure'], 'visible' => User::canRoute(['/isp/ecopagos/batch-closure'])
             ],
             [
-                'label' => Yii::t('app', 'Daily closures'), 'url' => ['/westnet/ecopagos/daily-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/daily-closure'])
+                'label' => Yii::t('app', 'Daily closures'), 'url' => ['/isp/ecopagos/daily-closure'], 'visible' => User::canRoute(['/isp/ecopagos/daily-closure'])
             ],
             '<li class="divider"></li>',
             [
@@ -393,35 +393,35 @@ if (Yii::$app->getModule('westnet')) {
             ],
             '<li class="divider"></li>',
             [
-                'label' => Yii::t('app', 'Notifications'), 'url' => ['/westnet/notifications/notification']
+                'label' => Yii::t('app', 'Notifications'), 'url' => ['/isp/notifications/notification']
             ],
             [
-                'label' => Yii::t('app', 'Transports'), 'url' => ['/westnet/notifications/transport'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => Yii::t('app', 'Transports'), 'url' => ['/isp/notifications/transport'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Integratech'), 'visible' => Yii::$app->user->isSuperadmin],
             [
-                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/isp/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             [
-                'label' => NotificationsModule::t('app', 'Integratech received sms'), 'url' => ['/westnet/notifications/integratech-received-sms'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => NotificationsModule::t('app', 'Integratech received sms'), 'url' => ['/isp/notifications/integratech-received-sms'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Infobip'), 'visible' => Yii::$app->user->isSuperadmin],
             [
-                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/westnet/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' =>  NotificationsModule::t('app', 'Integratech sms filters'), 'url' => ['/isp/notifications/integratech-sms-filter'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             [
-                'label' => Yii::t('app', 'Infobip sended sms'), 'url' => ['/westnet/notifications/infobip/default/sended-messages']
+                'label' => Yii::t('app', 'Infobip sended sms'), 'url' => ['/isp/notifications/infobip/default/sended-messages']
             ],
             [
-                'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
+                'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/isp/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
             ],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Batch Process'), 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
-            ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
-            ['label' => Yii::t('westnet', 'Assign Company to Customers'), 'url' => ['/westnet/batch/company-to-customer']],
+            ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/isp/batch/discount-to-customer']],
+            ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/isp/batch/plans-to-customer']],
+            ['label' => Yii::t('westnet', 'Assign Company to Customers'), 'url' => ['/isp/batch/company-to-customer']],
         ],
     ];
 }

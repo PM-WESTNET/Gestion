@@ -94,15 +94,17 @@ class BillController extends Controller
             $graphDataProvider = $searchModel->searchHistory(Yii::$app->request->getQueryParams());
             $graphDataProvider->sort = false;
 
-            $first = array_shift($graphDataProvider->getModels());
-            $last = array_pop($graphDataProvider->getModels());
+            $graphDataModel = $graphDataProvider->getModels();
+
+            $first = array_shift($graphDataModel);
+            $last = array_pop($graphDataModel);
 
             if ($first != null and $last != null) {
                 $graphData->fromdate = $first->date;
                 $graphData->todate = $last->date;
             }
 
-            $graphData->steps = \yii\helpers\ArrayHelper::getColumn($graphDataProvider->getModels(), 'date');
+            $graphData->steps = \yii\helpers\ArrayHelper::getColumn($graphDataModel, 'date');
 
             //Datos
             $graphData->dataProvider = $graphDataProvider;
