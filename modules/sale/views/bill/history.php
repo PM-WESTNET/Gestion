@@ -33,6 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 
     <?php 
+
     //Debemos mostrar el grafico?
     if($searchModel->chartType != false && $dataProvider->count > 1): ?>
         <?= dosamigos\chartjs\ChartJs::widget([
@@ -41,8 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'graph-responsive'
             ],
             'data' => [
-                'labels' => $graphData->getSteps(),
-                'datasets'=>$graphData->getDatasets()
+                'labels' => ((!empty($graphData->getSteps))?$graphData->getSteps():null),
+                'datasets'=>((!empty($graphData->getDatasets))?$graphData->getDatasets():null)
             ]
         ]);
         ?>
