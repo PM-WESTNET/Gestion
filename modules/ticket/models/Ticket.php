@@ -716,7 +716,7 @@ class Ticket extends \app\components\db\ActiveRecord {
         $client = new Client();
         $response = $client->createRequest()
                 ->setMethod('GET')
-                ->setUrl('https://mesa.bigway.com.ar/gestion/etiquetas')
+                ->setUrl('https://mesa.westnet.com.ar/gestion/etiquetas')
                 ->setHeaders(['content-type' => 'application/x-www-form-urlencoded'])
                 ->send();
         return json_decode($response->content);
@@ -734,7 +734,7 @@ class Ticket extends \app\components\db\ActiveRecord {
         $tag_id = '';
         $response = $client->createRequest()
                 ->setMethod('GET')
-                ->setUrl('https://mesa.bigway.com.ar/gestion/etiquetas')
+                ->setUrl('https://mesa.westnet.com.ar/gestion/etiquetas')
                 ->setHeaders(['content-type' => 'application/x-www-form-urlencoded'])
                 ->send();
 
