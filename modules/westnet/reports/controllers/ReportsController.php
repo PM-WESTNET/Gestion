@@ -263,7 +263,7 @@ class ReportsController extends Controller
             $category = $item['name'];
 
         }
-        
+
         $funcion = function ($a, $b) {
             return (new \DateTime('01-' . $a))->format('Ymd') - (new \DateTime('01-' . $b))->format('Ymd');
         };
@@ -855,16 +855,18 @@ class ReportsController extends Controller
 
         $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
         $dataLineal = $search->searchNotifyPaymentsByDate((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
-
+        
         $first_date = array_key_exists(0, $dataLineal) ? $dataLineal[0] : $search->date_from ;
         $last_date = end($dataLineal) ? end($dataLineal) : $search->date_to;
 
-        $graph  = new GraphData([
-            'fromdate' => $dataLineal[0]['date'],
-            'todate' => end($dataLineal)['date'],
-        ]);
+        if(!empty($dataLineal)){
+            $graph  = new GraphData([
+                'fromdate' => $dataLineal[0]['date'],
+                'todate' => end($dataLineal)['date'],
+            ]);
 
-        $colslineal = $graph->getSteps();
+            $colslineal = $graph->getSteps();
+        }
 
 
         //Columnas del grafico de torta
