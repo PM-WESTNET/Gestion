@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'header' => Yii::t('app', 'Company'),
                 'value' => function ($model){
-                    return $model->company->name;
+                    return (($model && $model->company)?$model->company->name:'Sin definir');
                 }
             ],
             [
