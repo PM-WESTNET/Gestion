@@ -1,3 +1,4 @@
+
 <div class="help">
 
     <h1><?= Yii::t('help', 'Navigation') ?></h1>

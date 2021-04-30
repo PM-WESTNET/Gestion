@@ -318,6 +318,9 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
+        'documentation' => [
+            'class' => 'app\modules\documentation\DocumentationModule',
+        ],
         /*'automatic_debit' => [
             'class' => 'app\module\automatic_debit\AutomaticDebit', //Not exist module
         ],*/ 
