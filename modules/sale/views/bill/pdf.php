@@ -15,7 +15,7 @@ if($profile) {
     $isConsumidorFinal = $profile->value;
 }
 
-?>
+?>	
 <?php if($is_cupon) { ?>
 <?php } else { ?>
 	<div class="container-main">
@@ -26,7 +26,7 @@ if($profile) {
 					<?= Html::img(Yii::$app->params['path'].'/'.Yii::$app->params['web_logo'], ['alt' => 'Logo Caper']) ?>
 				</div>
 				<div class="subtitles-logo">
-					<p><?= $company->fantasy_name; ?> <br>
+					<p>
 						<b><?= $company->taxCondition->name; ?></b> <br>
 						<?= $company->address; ?>
 					</p>
@@ -43,7 +43,7 @@ if($profile) {
 			<div class="data-header">
 				<h3>COMPROBANTE ELECTRÓNICO</h3>
 	            <h2><span><?=substr($model->billType->name,0,strlen($model->billType->name)-1)?></span><?=sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number )?></h2>
-	            <p><span>Fecha de emisión:</span> <b><?=$formatter->asDate($model->date);?></b></p>
+	            <p><span>Fecha de emision:</span> <b><?=$formatter->asDate($model->date);?></b></p>
 	            <p><span>CUIT:</span> <b><?= $companyData->tax_identification ?></b></p>
 	            <p><span>Ingresos Brutos:</span> <b>Nro <?= $companyData->iibb ?></b></p>
 	            <p><span>Inicio de actividades:</span> <b><?= $companyData->start ?></b></p>
@@ -75,12 +75,6 @@ if($profile) {
 		        </div>
 		        <div>IVA: <b><span><?= $model->customer->taxCondition->name ?></span></b></div>
 		        <div>Condición de Venta:<b><span> Cuenta corriente </span></b></div>
-		        <div>
-		        	<?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
-		        	<div class="text_payment_code">
-		        		<?= $model->customer->payment_code ?>      
-		        	</div>   
-		        </div>
 			</div>
 		</div>
 

@@ -89,10 +89,11 @@
 	border: 1px solid black;
 	border-collapse: collapse;
 	padding: 15px;
+	font-size: 10px;
+	text-align: center;
 }
-
-.content .table-content table th{
-	text-align: left;
+.content .table-content table{
+	width: 100%;
 }
 
 .content .mind-content{
