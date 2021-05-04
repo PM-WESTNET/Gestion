@@ -141,13 +141,13 @@
 }
 
 .footer .footer-barcode-img{
-	width: 55%;
+	width: 65%;
 	float: left;
 }
 .footer .footer-barcode-data{
-	width: 40%;
+	width: 30%;
 	float: left;
-	margin-left: 5%;
+	margin-left: 3%;
 }
 .text_payment_code{
 	text-align: center;
