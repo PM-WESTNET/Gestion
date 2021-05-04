@@ -1,0 +1,156 @@
+/*Begin header*/
+.container-main{
+	
+	margin:0 auto;
+	border: 1px solid;
+}
+
+.header{
+	width: 100%;
+	overflow: hidden;
+	margin: 0 auto;
+	margin-top:3%;
+	border-bottom: 2px solid;
+}
+
+.logo-header{
+	width: 17%;
+	float: left;
+	margin-left: 10%;
+}
+
+.logo-header .logo{
+	border: 1px solid;
+	padding: 10px
+}
+
+.subtitles-logo{
+	text-align: center;
+}
+
+.code-header{
+	float: left;
+	width: 7%;
+	margin-left: 10%;
+}
+.code-header .subcode-header{
+	border: 1px solid;
+	text-align: center;
+}
+.code-header p{
+	text-align: center;
+}
+
+.data-header{
+	width: 50%;
+	margin-left: 10%;
+	float: left;
+}
+
+.data-header p{
+	font-size: 0.8rem;
+	text-transform: capitalize;
+}
+
+/*End header*/
+
+/*Begin sub-header*/
+.sub-header{
+	overflow: hidden;
+	border-bottom: 2px solid;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 10px;
+}
+.sub-header .col-personal-data{
+	width: 48%;
+	float: left;
+}
+
+.sub-header .col-data-client{
+	width: 50%;
+	float: left;
+	margin-left: 2%;
+}
+
+
+
+/*End sub-header*/
+
+
+/*Begin Content*/
+.content{
+	border-bottom: 2px solid;
+}
+.content .table-content{
+	padding: 0% 1%;
+}
+.content .table-content table, th, td{
+	border: 1px solid black;
+	border-collapse: collapse;
+	padding: 15px;
+}
+
+.content .table-content table th{
+	text-align: left;
+}
+
+.content .mind-content{
+	padding: 0% 2%;
+}
+.content .mind-content .total-amount .amount{
+	margin: 2%;
+	text-align: right;
+}
+.content .mind-content .total-amount .amount span{
+	font-weight: bold;
+	font-size: 20px;
+
+}
+
+.content .barcode{
+	border-top: 2px solid;
+	overflow: hidden;
+	padding: 0% 1%;
+
+}
+
+.content .barcode-img{
+	width: 60%;
+	float: left;
+	padding-top: 2%;
+}
+
+.content .barcode-data{
+	width: 30%;
+	float: left;
+	margin-left: 5%;
+	font-size: 15px;
+	font-weight: bold;
+}	
+/*End content*/
+
+/*Begin footer*/
+.footer{
+	margin-top: 2%;
+}
+
+.footer .footer-barcode{
+	overflow: hidden;
+	padding: 0% 1%;
+}
+
+.footer .footer-barcode-img{
+	width: 55%;
+	float: left;
+}
+.footer .footer-barcode-data{
+	width: 40%;
+	float: left;
+	margin-left: 5%;
+}
+.text_payment_code{
+	text-align: center;
+	font-weight: bold;
+}
+/*End footer*/
