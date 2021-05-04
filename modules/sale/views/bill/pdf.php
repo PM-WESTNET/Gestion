@@ -42,11 +42,11 @@ if($profile) {
 
 			<div class="data-header">
 				<h3>COMPROBANTE ELECTRÓNICO</h3>
-	            <h2><span><?=substr($model->billType->name,0,strlen($model->billType->name)-1)?></span><?=sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number )?></h2>
-	            <p><span>Fecha de emision:</span> <b><?=$formatter->asDate($model->date);?></b></p>
-	            <p><span>CUIT:</span> <b><?= $companyData->tax_identification ?></b></p>
-	            <p><span>Ingresos Brutos:</span> <b>Nro <?= $companyData->iibb ?></b></p>
-	            <p><span>Inicio de actividades:</span> <b><?= $companyData->start ?></b></p>
+	            <h3><?=substr($model->billType->name,0,strlen($model->billType->name)-1)?> <?=sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number )?></h3>
+	            <p>Fecha de emision: <b><?=$formatter->asDate($model->date);?></b> <br>
+	            CUIT: <b><?= $companyData->tax_identification ?></b> <br>
+	            Ingresos Brutos: <b>Nro <?= $companyData->iibb ?></b> <br>
+	            Inicio de actividades: <b><?= $companyData->start ?></b></p>
 			</div>
 		</div>
 
