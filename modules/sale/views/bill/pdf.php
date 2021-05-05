@@ -17,6 +17,11 @@ if($profile) {
 
 ?>	
 <?php if($is_cupon) { ?>
+
+
+
+
+
 <?php } else { ?>
 	<div class="container-main">
 
@@ -75,6 +80,12 @@ if($profile) {
 		        </div>
 		        <div>IVA: <b><span><?= $model->customer->taxCondition->name ?></span></b></div>
 		        <div>Condición de Venta:<b><span> Cuenta corriente </span></b></div>
+		        <div class="barcode-img">
+		            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+		            <div class="text_payment_code">
+	        			<?= $model->customer->payment_code ?>      
+	        		</div>
+		        </div>
 			</div>
 		</div>
 
@@ -151,27 +162,33 @@ if($profile) {
 			        <?php } ?>
 			        <div class="amount"><span>TOTAL: $ <?= round($model->calculateTotal(),2)?></span></div>
 				</div>
-				<div><?= $model->observation? 'Observación: '. $model->observation : ''?></div>
-		   		<div>Puede retirar su factura en: <?php echo $model->company->address  ?></div>
-			    <?php if (!$model->hasDirectDebit()):?>
-			        <div>Medios de Pago:</div>
-			        <div><ul><li> <?= Config::getValue('pdf_bill_payment_methods')?> </li></ul></div>
-		    	<?php else: ?>
-			        <div><?php echo Config::getValue('direct_debit_bill_text')?></div>
-		    	<?php endif;?>
+				<div class="data-account">
+					<div><?= $model->observation? 'Observación: '. $model->observation : ''?></div>
+			   		<div>Puede retirar su factura en: <?php echo $model->company->address  ?></div>
+					    <?php if (!$model->hasDirectDebit()):?>
+					        <div>Medios de Pago:</div>
+					        <div><ul><li> <?= Config::getValue('pdf_bill_payment_methods')?> </li></ul></div>
+				    	<?php else: ?>
+					        <div><?php echo Config::getValue('direct_debit_bill_text')?></div>
+				    	<?php endif;?>
+		    		</div>
+		    	</div>
+	    		<div class="barcode">
+		        	<div class="barcode-img">
+			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+			            <div class="text_payment_code">
+		        			<?= $model->customer->payment_code ?>      
+		        		</div>
+		        	</div>
+
+			        <div class="barcode-data">
+			            <p>CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
+			            <?php if($debt < 0) { ?>
+			                <p>DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
+			            <?php } ?>
+			        </div>
+	    		</div>
 	    	</div>
-	    	<div class="barcode">
-		        <div class="barcode-img">
-		            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
-		        </div>
-		        <div class="barcode-data">
-		            <p>CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
-		            <?php if($debt < 0) { ?>
-		                <p>DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
-		            <?php } ?>
-		        </div>
-	    	</div>
-	    </div>
 	   	<div class="footer">
 		    <div>
 		        <?php

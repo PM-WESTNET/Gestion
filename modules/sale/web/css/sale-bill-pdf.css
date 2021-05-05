@@ -1,3 +1,6 @@
+
+
+/*Start Bill*/
 /*Begin header*/
 .container-main{
 	
@@ -20,7 +23,6 @@
 }
 
 .logo-header .logo{
-	border: 1px solid;
 	padding: 10px
 }
 
@@ -58,8 +60,6 @@
 .sub-header{
 	overflow: hidden;
 	border-bottom: 2px solid;
-	margin-top: 10px;
-	margin-bottom: 10px;
 	padding: 10px;
 }
 .sub-header .col-personal-data{
@@ -82,18 +82,14 @@
 .content{
 	border-bottom: 2px solid;
 }
-.content .table-content{
-	padding: 0% 1%;
-}
 
 .content .table-content table{
 	width: 100%;
 }
 
 .content .table-content table, th, td{
-	border: 1px solid black;
 	border-collapse: collapse;
-	padding: 15px;
+	padding: 5px;
 	font-size: 10px;
 }
 
@@ -113,6 +109,9 @@
 	font-weight: bold;
 	font-size: 15px;
 
+}
+.content .mind-content .data-account{
+	font-size: 10px;
 }
 
 .content .barcode{
@@ -164,3 +163,4 @@
 	font-weight: bold;
 }
 /*End footer*/
+/*End Bill*/
