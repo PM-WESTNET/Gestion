@@ -15,20 +15,141 @@ if($profile) {
     $isConsumidorFinal = $profile->value;
 }
 
-?>	
+?>
+
 <?php if($is_cupon) { ?>
+	<div class="container-main-coupon">
+		<div class="coupon-header">
+	        <div class="coupon-header-logo">
+	            <?= Html::img(Yii::$app->params['path'].'/'.Yii::$app->params['web_logo'], ['alt' => 'Marca Empresa']) ?>
+	        </div>
+	        <p>
+	        	<b>Nº: <?= str_pad($model->company->defaultPointOfSale->number, 4, "0", STR_PAD_LEFT).'-'. str_pad($model->number, 8, "0", STR_PAD_LEFT)?></b>
+	    	</p>
+	        <p><span>Fecha de emisión: </span><b><?=$formatter->asDate($model->date);?><b></p>
+	        <p>
+	            Documento no válido como factura
+	        </p>
+	    </div>
+	    <div class="coupon-data-client">
+            <div class="data-client" id="col-1">
+                Señores / Razón Social: <span><b><?=(trim($model->customer->lastname)=='' ? '' : trim($model->customer->lastname) .',') .$model->customer->name?></b></span>
+            </div>
+            <div class="data-client" id="col-2">
+                N° de Cliente: <b><span><?= $model->customer->code ?></span></b>
+            </div>
+	    </div>
+	    <div class="coupon-table">
+	    	<table>
+		    	<?php
+			        foreach($model->billDetails as $detail) {
+			            ?>
+
+			            <tr>
+			                <td>
+			                    <p><?= $detail->qty ?></p>
+			                </td>
+			                <td>
+			                    <p><?= $detail->concept ?></p>
+			                </td>
+			                <td>
+			                    <p>
+			                        <span>$</span> <?= (($model->billType->code==1) ? round($detail->unit_net_price,2) : round($detail->unit_final_price,2) ) ?>
+			                    </p>
+			                </td>
+			                <td>
+			                    <p>
+			                        <span>$</span> <?= (($model->billType->code==1) ? round($detail->getSubtotal(),2) : round($detail->getTotal(),2) ) ?>
+			                    </p>
+			                </td>
+			                <?php
+			                if ($model->billType->code==1) {
+			                    ?>
+			                    <td>
+			                        <p>
+			                            <?php
+			                            if(isset($detail->product)) {
+			                                foreach ($detail->product->getTaxRates()->all() as $tax) {
+			                                    echo $tax->pct * 100;
+			                                }
+			                            } elseif($detail->unit_net_price > 0) {
+			                                $pct = abs(1 - ($detail->unit_final_price / $detail->unit_net_price));
+			                                echo $pct * 100;
+			                            } else {
+			                                echo 0;
+			                            }
+			                            ?><span>%</span>
+			                        </p>
+			                    </td>
+			                    <td>
+			                            <span>$</span> <?= round($detail->getTotal(), 2) ?>
+			                        </p>
+			                    </td>
+			                    <?php
+			                }
+			                ?>
+			            </tr>
+			            <?php
+			        }
+			    ?>
+			</table>
+			<div class="content">
+				<div class="mind-content">
+					<div class="total-amount">
+			            <div class="amount">
+			            	<b><span>TOTAL: $ <?= round($model->calculateTotal(),2)?></span></b>
+			            </div>
+			        </div>
+
+		            <div>
+		                <?= $model->observation? 'Observación:'. $model->observation : ''?>
+		            </div>
+
+		            <div>
+		                Puede retirar su factura en: <?= Config::getValue('general_address') ?>
+		            </div>
+
+			            <div>
+			                Medios de Pago:
+			            </div>
+
+			        <div>
+			            <div>
+			                <ul>
+			                    <li> <?= Config::getValue('pdf_bill_payment_methods')?> </li>
+			                </ul>
+			            </div>
+			        </div>
+			    </div>
+	        
+		        <div class="barcode">
+		           <div class="barcode-img">
+			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+			            <div class="text_payment_code">
+		        			<?= $model->customer->payment_code ?>      
+		        		</div>
+			        </div>
+		            <div class="barcode-data">
+		                <p>CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
+		                <?php if($debt < 0) { ?>
+		                    <p>DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
+		                <?php } ?>
+		            </div>
+		        </div>
+		    </div>
+    	</div>
 
 
 
 
-
+    </div>
 <?php } else { ?>
 	<div class="container-main">
 
 		<div class="header">
 			<div class="logo-header">
 				<div class="logo">
-					<?= Html::img(Yii::$app->params['path'].'/'.Yii::$app->params['web_logo'], ['alt' => 'Logo Caper']) ?>
+					<?= Html::img(Yii::$app->params['path'].'/'.Yii::$app->params['web_logo'], ['alt' => 'Marca Empresa']) ?>
 				</div>
 				<div class="subtitles-logo">
 					<p>
@@ -48,7 +169,7 @@ if($profile) {
 			<div class="data-header">
 				<h3>COMPROBANTE ELECTRÓNICO</h3>
 	            <h3><?=substr($model->billType->name,0,strlen($model->billType->name)-1)?> <?=sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number )?></h3>
-	            <p>Fecha de emision: <b><?=$formatter->asDate($model->date);?></b> <br>
+	            <p>Fecha de emisión: <b><?=$formatter->asDate($model->date);?></b> <br>
 	            CUIT: <b><?= $companyData->tax_identification ?></b> <br>
 	            Ingresos Brutos: <b>Nro <?= $companyData->iibb ?></b> <br>
 	            Inicio de actividades: <b><?= $companyData->start ?></b></p>

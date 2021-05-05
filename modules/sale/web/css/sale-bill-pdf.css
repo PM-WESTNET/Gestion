@@ -1,9 +1,55 @@
+#{
+	font-family: Arial, Helvetica, sans-serif;
+}
 
+/*Start Coupon*/
+.container-main-coupon{
+	margin:0 auto;
+	border: 1px solid;
+	border-bottom: 0px solid;
+}
+
+.coupon-header{
+	text-align: center;
+	border-bottom:1px solid;
+}
+
+.coupon-header .coupon-header-logo{
+	margin: 0 auto;
+	width: 17%;
+	padding: 10px;
+}
+
+.coupon-data-client{
+	padding: 2%;
+	border-bottom: 1px solid;
+	overflow: hidden;
+}
+.coupon-data-client #col-1{
+	width: 65%;
+}
+.coupon-data-client #col-2{
+	width: 30%;
+	margin-left: 5%;
+}
+.coupon-data-client .data-client{
+	float:left;
+}
+
+.coupon-table table{
+	width: 100%;
+	
+}
+
+.coupon-table  td{
+	font-size: 12px;
+}
+
+/*End Coupon*/
 
 /*Start Bill*/
 /*Begin header*/
 .container-main{
-	
 	margin:0 auto;
 	border: 1px solid;
 }
@@ -13,7 +59,7 @@
 	overflow: hidden;
 	margin: 0 auto;
 	margin-top:3%;
-	border-bottom: 2px solid;
+	border-bottom: 1px solid;
 }
 
 .logo-header{
@@ -59,7 +105,7 @@
 /*Begin sub-header*/
 .sub-header{
 	overflow: hidden;
-	border-bottom: 2px solid;
+	border-bottom: 1px solid;
 	padding: 10px;
 }
 .sub-header .col-personal-data{
@@ -80,7 +126,7 @@
 
 /*Begin Content*/
 .content{
-	border-bottom: 2px solid;
+	border-bottom: 1px solid;
 }
 
 .content .table-content table{
@@ -115,7 +161,7 @@
 }
 
 .content .barcode{
-	border-top: 2px solid;
+	border-top: 1px solid;
 	overflow: hidden;
 	padding: 0% 1%;
 

@@ -873,9 +873,9 @@ class BillController extends Controller
             
         $pdf = new Pdf([
                
-            'mode' => Pdf::MODE_CORE, 
+            'mode' => Pdf::MODE_UTF8, 
             
-            'format' => Pdf::FORMAT_A4, 
+            'format' => Pdf::FORMAT_LEGAL, 
            
             'orientation' => Pdf::ORIENT_PORTRAIT, 
             
@@ -890,7 +890,8 @@ class BillController extends Controller
             'methods' => [ 
                 'SetTitle' => '',
                 'SetFooter'=>['Página {PAGENO} de {nb}'],
-            ]
+            ],
+            'marginTop' => 5,
         ]);
 
             
