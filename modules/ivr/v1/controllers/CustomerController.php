@@ -1096,7 +1096,8 @@ class CustomerController extends Controller
      *        required = true,
      *        type = "integer",
      *        @SWG\Schema(
-     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *          @SWG\Property(property="dni", type="integer", description="DNI"),
+     *          @SWG\Property(property="cuit", type="integer", description="CUIT o CUIL"),
      *        )
      *     ),
      *
@@ -1165,15 +1166,32 @@ class CustomerController extends Controller
 
             $data = Yii::$app->request->post();
 
-            if (!isset($data['dni']) || empty($data['dni'])) {
+            if (!isset($data['dni']) && !isset($data['cuit'])) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
-                    'msg' => \Yii::t('ivrapi','"dni" param is required')
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is required')
                 ];
             }
 
-            $customer = Customer::find()->where(['document_number' => $data['dni']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
+            if (empty($data['dni']) && empty($data['cuit'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is not empty')
+                ];
+            }
+            if(isset($data['cuit']) && !empty($data['cuit'])){
+                $firstDigit = substr($data['cuit'],0,2);
+                $lastDigit = substr($data['cuit'],-1);
+                $centralNumber = substr($data['cuit'],2,-1);
+
+                if(strlen($centralNumber) == 7)
+                    $centralNumber = '0'.$centralNumber;
+                $data['cuit'] = $firstDigit.'-'.$centralNumber.'-'.$lastDigit;
+            }
+
+            $customer = Customer::find()->where(['document_number' => (isset($data['dni']) && !empty($data['dni']))?$data['dni']:$data['cuit']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
 
             
 
