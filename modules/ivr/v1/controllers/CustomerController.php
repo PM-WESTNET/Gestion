@@ -1081,7 +1081,7 @@ class CustomerController extends Controller
         }
             //Si no es gratuito, se está solicitando una extension de pago
     }
-     /**
+    /**
      * @SWG\Post(path="/customer/get-customer-min",
      *     tags={"Customer"},
      *     summary="",
@@ -1095,7 +1095,8 @@ class CustomerController extends Controller
      *        required = true,
      *        type = "integer",
      *        @SWG\Schema(
-     *          @SWG\Property(property="code", type="integer", description="Código del cliente"),
+     *          @SWG\Property(property="dni", type="integer", description="DNI"),
+     *          @SWG\Property(property="cuit", type="integer", description="CUIT o CUIL"),
      *        )
      *     ),
      *
@@ -1158,24 +1159,40 @@ class CustomerController extends Controller
      * )
      *
      */
-     
     public function actionGetCustomerMin()
     {
         try {
 
             $data = Yii::$app->request->post();
 
-            if (!isset($data['dni']) || empty($data['dni'])) {
+            if (!isset($data['dni']) && !isset($data['cuit'])) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
-                    'msg' => \Yii::t('ivrapi','"dni" param is required')
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is required')
                 ];
             }
 
-            $customer = Customer::find()->where(['document_number' => $data['dni']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
+            if (empty($data['dni']) && empty($data['cuit'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is not empty')
+                ];
+            }
+            if(isset($data['cuit']) && !empty($data['cuit'])){
+                $firstDigit = substr($data['cuit'],0,2);
+                $lastDigit = substr($data['cuit'],-1);
+                $centralNumber = substr($data['cuit'],2,-1);
 
+                if(strlen($centralNumber) == 7)
+                    $centralNumber = '0'.$centralNumber;
+                $data['cuit'] = $firstDigit.'-'.$centralNumber.'-'.$lastDigit;
+            }
 
+            $customer = Customer::find()->where(['document_number' => (isset($data['dni']) && !empty($data['dni']))?$data['dni']:$data['cuit']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
+
+            
 
             $list_customer = [];
             foreach ($customer as $key => $value) {
@@ -1186,7 +1203,7 @@ class CustomerController extends Controller
                         'msg' => \Yii::t('ivrapi','Customer not found')
                     ];
                 }
-
+    
                $value->scenario= 'full';
                $list_customer[] = $value;
             }
@@ -1203,5 +1220,4 @@ class CustomerController extends Controller
             ];
         }
     }
-
 }
