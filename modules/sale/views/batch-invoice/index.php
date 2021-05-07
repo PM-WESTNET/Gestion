@@ -93,6 +93,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             </div>
                         <?php } else { ?>
                             <h3 class="alert alert-dismissible alert-info"> Procesando ... </h3>
+                            <button class="glyphicon glyphicon-pause red" id="stop-process">
+                            <button class="glyphicon glyphicon-play green" id="start-process">
                         <?php } ?>
                     </div>
 
@@ -193,6 +195,40 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 }
             });
 
+            $(document).off('click', "#stop-process").on('click', "#stop-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'paused'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("stop process");
+                        BatchInvoice.processing = false;
+                        BatchInvoice.init();
+                    }
+                })
+                
+
+            });
+
+            $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'pending'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("start process");
+                        BatchInvoice.processing = true;
+                        BatchInvoice.init();
+                    }
+                })
+            });
+
             BatchInvoice.cargarBillType();
             $('#panel-progress').hide();
             $('#panel-filtro').show();
@@ -205,8 +241,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                     if(data.invoice_process_started) {
                         $('#panel-progress').show();
                         $('#panel-filtro').hide();
+                        console.log(data);
                         BatchInvoice.processing = true;
-                        setTimeout(BatchInvoice.getProceso(), 500);
+                        setTimeout(BatchInvoice.getProceso(), 1000);
                     } else {
                         BatchInvoice.processing = false;
                     }

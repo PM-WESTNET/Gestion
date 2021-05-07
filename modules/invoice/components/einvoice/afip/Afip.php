@@ -23,7 +23,7 @@ abstract class Afip extends ApiBase
     protected $url = [];
     protected $urlAuth = [
         'prod' => [
-            "wsdl" => "https://wsaa.afip.gov.ar/ws/services/LoginCms?wsdl",
+            "wsdl" => "https://wsaahomo.afip.gov.ar/ws/services/LoginCms?wsdl",
             "file" => "auth.wsdl",
         ],
         'testing' => [

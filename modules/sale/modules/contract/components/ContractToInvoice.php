@@ -349,15 +349,25 @@ class ContractToInvoice
         //Se hace el cambio a batch para evitar facturacion de contratos duplicados
         foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
             foreach($contractList as $item) {
+                /*Verificar si el proceso esta pausado*/
+                $paused_invoice_process = InvoiceProcess::getPausedInvoiceProcess();
+                if(!empty($paused_invoice_process)){
+                    if($paused_invoice_process->status == InvoiceProcess::STATUS_PAUSED){
+                        echo "This process was paused.\n";
+                        return null;
+                    }
+                }
                 $transaction = Yii::$app->db->beginTransaction();
                 if( array_search($item['customer_id'],  $customers ) === false ) {
                     if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true, $invoice_process_id) ) {
                         $afip_error = true;
+                        echo "Error item['customer_id']: " . $item['customer_id'] . "\n";
                     }
                     Yii::$app->cache->set('_invoice_all_', [
                         'total' => $cantidadTotal,
                         'qty' => $i
                     ]);
+                    echo "Sin Error item['customer_id']: " . $item['customer_id'] . "\n";
                 }
                 /*if($afip_error) {
                     $transaction->rollBack();

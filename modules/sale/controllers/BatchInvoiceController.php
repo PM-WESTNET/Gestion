@@ -344,4 +344,17 @@ class BatchInvoiceController  extends Controller
 
         return [ 'invoice_process_started' => false ];
     }
+
+    /**
+     * Actualizar estado de proceso a pausado"
+     */
+    public function actionUpdateStatusInvoiceProcess(){
+        $status = Yii::$app->request->post("status");
+        if($status == "paused"){
+            InvoiceProcess::pauseProcess();
+
+        }else if($status == "pending"){
+            InvoiceProcess::pendingProcess();
+        }
+    }
 }

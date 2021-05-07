@@ -28,7 +28,7 @@ class InvoiceProcessController extends Controller
     public function actionControlCreationInvoiceProcess()
     {
         $pending_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
-
+        
         if($pending_invoice_process) {
             try {
                 if(Yii::$app->mutex->acquire('mutex_create_bills')) {
