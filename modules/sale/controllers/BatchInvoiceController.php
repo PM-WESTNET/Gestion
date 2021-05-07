@@ -351,10 +351,29 @@ class BatchInvoiceController  extends Controller
     public function actionUpdateStatusInvoiceProcess(){
         $status = Yii::$app->request->post("status");
         if($status == "paused"){
-            InvoiceProcess::pauseProcess();
+            InvoiceProcess::pauseProcess(InvoiceProcess::TYPE_CREATE_BILLS);
 
         }else if($status == "pending"){
-            InvoiceProcess::pendingProcess();
+            InvoiceProcess::pendingProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+            
+        }else if($status == "finished"){
+            InvoiceProcess::endProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+        }
+    }
+
+    /**
+     * Actualizar estado de proceso a pausado"
+     */
+    public function actionUpdateStatusCloseInvoiceProcess(){
+        $status = Yii::$app->request->post("status");
+        if($status == "paused"){
+            InvoiceProcess::pauseProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
+
+        }else if($status == "pending"){
+            InvoiceProcess::pendingProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
+        
+        }else if($status == "finished"){
+            InvoiceProcess::endProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
         }
     }
 }

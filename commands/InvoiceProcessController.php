@@ -28,7 +28,7 @@ class InvoiceProcessController extends Controller
     public function actionControlCreationInvoiceProcess()
     {
         $pending_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
-        
+
         if($pending_invoice_process) {
             try {
                 if(Yii::$app->mutex->acquire('mutex_create_bills')) {
@@ -119,16 +119,28 @@ class InvoiceProcessController extends Controller
 
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
-                $bill->verifyNumberAndDate();
+                /*Verificar si el proceso esta pausado*/
+                $paused_close_invoice_process = InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
+                $pending_close_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
+                if(!empty($paused_close_invoice_process)){
+                    if($paused_close_invoice_process->status == InvoiceProcess::STATUS_PAUSED){
+                        echo "This close-process was paused.\n";
+                        return null;
+                    }
+                }
+                if(!empty($pending_close_invoice_process)){
+                    $bill->verifyNumberAndDate();
 
-                if($bill->close()){
-                    $i++;
-                    Yii::$app->cache->set('_invoice_close_process_', [
-                        'total' => $total,
-                        'qty' => $i
-                    ]);
-                } else {
-                    $bill->addErrorToCacheOrSession("El comprobante $bill->bill_id no pudo cerrarse \n");
+                    if($bill->close()){
+                        $i++;
+                        Yii::$app->cache->set('_invoice_close_process_', [
+                            'total' => $total,
+                            'qty' => $i
+                        ]);
+                    }else{
+                        echo "There are no pending processes\n";
+                        return null;  
+                    }
                 }
             }
         }
