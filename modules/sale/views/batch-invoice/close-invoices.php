@@ -105,12 +105,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
                             </div>
                         </div>
-                    <?php } else { ?>
-                        <h3 id="alert alert-dismissible process-label" class="alert-info"> Procesando ... </h3>
-                        <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
-                        <button type="button" class="glyphicon glyphicon-play green" id="start-process">
-                        <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process">
-                    <?php } ?>
+                        <?php } else { ?>
+                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> Procesando ... 
+                            <span style="float:right;">
+                            <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
+                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;">
+                            <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
+                            </span>
+                            </div>
+                        <?php } ?>
 
                     <?php ActiveForm::end(); ?>
                 </div>
