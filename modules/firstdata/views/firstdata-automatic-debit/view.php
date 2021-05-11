@@ -50,7 +50,12 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app', 'Credit Card'),
                 'value' => function($model) {
-                    return $model->hiddenCreditCard;
+                    if(!$model->hiddenCreditCard){
+                        Yii::$app->session->setFlash('error', "No se encuentra disponible en este momento el servicio que devuelve esta información. Intente nuevamente más tarde o comuníquese con el administrador del sistema.");
+                        return "Servicio no disponible";
+                    }else{
+                        return $model->hiddenCreditCard;
+                    }
                 }
             ],
             'status',
