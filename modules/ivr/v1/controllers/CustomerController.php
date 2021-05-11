@@ -19,6 +19,7 @@ use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
+use app\modules\sale\models\DocumentType;
 use Yii;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
@@ -1221,4 +1222,93 @@ class CustomerController extends Controller
             ];
         }
     }
+
+     /**
+     * @SWG\Post(path="/customer/get-customer-search",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve todos los clientes que tengan alguna coincidencia.
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="document_type", type="string", description="Tipo de documento"),
+     *          @SWG\Property(property="number", type="integer", description="Digítos"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               {
+     *    'error': 'false',
+     *    'data': {
+     *        'customer_id': 405,
+     *        'name': 'COOPERATIVA DE TRABAJO ',
+     *        'document_number': '30-68927112-6',
+     *        'sex': null,
+     *      }  
+     *               
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomerSearch()
+    {
+        try {
+
+            $data = Yii::$app->request->post();
+
+            if (!isset($data['document_type_name']) || !isset($data['number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"document_type_name" or "number" params is required')
+                ];
+            }
+
+            if (empty($data['document_type_name']) || empty($data['number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"document_type_name" or "number" params is not empty')
+                ];
+            }
+
+            $document = DocumentType::find()->where(["name" => $data['document_type_name']])->one();
+
+            $document_number = "%".$data['number']."%";
+            $document_type_id = $document['document_type_id'];
+            $limite = (!empty($data['limit'])?$data['limit']:10);
+
+            $customers= Yii::$app->db->createCommand('SELECT * FROM customer c WHERE c.document_number LIKE :document_number AND c.document_type_id = :document_type_id ORDER BY c.document_number LIMIT :limite')->bindValue('document_number',$document_number)->bindValue('document_type_id', $document_type_id)->bindValue('limite',$limite)->queryAll();
+            var_dump($customers);die();
+            
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
 }
+
