@@ -117,6 +117,7 @@ class InvoiceProcessController extends Controller
             'qty' => $i
         ]);
 
+        $list_client = [];
         foreach ($query->batch() as $bills) {
             foreach ($bills as $bill) {
                 /*Verificar si el proceso esta pausado*/
@@ -128,19 +129,33 @@ class InvoiceProcessController extends Controller
                         return null;
                     }
                 }
-                if(!empty($pending_close_invoice_process)){
-                    $bill->verifyNumberAndDate();
+                if(!in_array($bill->customer_id,$list_client)){
+                    if(!empty($pending_close_invoice_process)){
+                        $bill->verifyNumberAndDate();
 
-                    if($bill->close()){
-                        $i++;
-                        Yii::$app->cache->set('_invoice_close_process_', [
-                            'total' => $total,
-                            'qty' => $i
-                        ]);
-                    }else{
-                        echo "There are no pending processes\n";
-                        return null;  
+                        if($bill->close()){
+                            $i++;
+                            Yii::$app->cache->set('_invoice_close_process_', [
+                                'total' => $total,
+                                'qty' => $i
+                            ]);
+                            $list_client[] = [$bill->customer_id,'cliente facturado correctamente.'];
+                            echo $bill->customer_id . " cliente facturado correctamente. \n";
+                        }else{
+                            echo "There are no pending processes\n";
+                            return null;  
+                        }
                     }
+                }else{
+                    echo $bill->customer_id . " cliente duplicado. \n";
+                    $list_client[] = [$bill->customer_id,'cliente duplicado'];
+                    \Yii::info('---------------------------------------------------------------------------------------------'.
+                        "ID Factura: " . $bill->bill_id . "\n" .
+                        "Codigo cliente: " . $bill->customer_id . "\n" .
+                        "Estado: " . $bill->status . "\n" . 
+                        "Pagado: " . $bill->payed . "\n" .
+                        "Número: " . $bill->number . "\n" . 
+                        "Cliente duplicado. \n", 'duplicados-afip');
                 }
             }
         }

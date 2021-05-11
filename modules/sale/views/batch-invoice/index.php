@@ -92,10 +92,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                                 </div>
                             </div>
                         <?php } else { ?>
-                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> Procesando ... 
+                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> <span id="title-processing">Procesando ...</span> 
                             <span style="float:right;">
                             <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
-                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;">
+                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;" disabled>
                             <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
                             </span>
                             </div>
@@ -213,6 +213,10 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 })
                 console.log("stop process");
                 BatchInvoice.processing = false;
+                $("#stop-process").prop('disabled', true);
+                $("#start-process").prop('disabled', false);
+                $("#title-processing").text("Pausado...");
+
 
             });
 
@@ -230,6 +234,9 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 console.log("start process");
                 BatchInvoice.processing = true;
                 BatchInvoice.init();
+                $("#start-process").prop('disabled', true);
+                $("#stop-process").prop('disabled', false);
+                $("#title-processing").text("Procesando...");
             });
 
             $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){

@@ -246,6 +246,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 })
                 console.log("stop process");
                 BatchInvoice.processing = false;
+                ev.style.display = 'none';
 
             });
 
