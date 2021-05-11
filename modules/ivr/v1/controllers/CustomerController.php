@@ -1081,4 +1081,143 @@ class CustomerController extends Controller
         }
             //Si no es gratuito, se está solicitando una extension de pago
     }
+    /**
+     * @SWG\Post(path="/customer/get-customer-min",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="dni", type="integer", description="DNI"),
+     *          @SWG\Property(property="cuit", type="integer", description="CUIT o CUIL"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               {
+     *    'error': 'false',
+     *    'data': {
+     *        'customer_id': 405,
+     *        'name': 'COOPERATIVA DE TRABAJO ',
+     *        'document_number': '30-68927112-6',
+     *        'sex': null,
+     *        'phone': '2614932378',
+     *        'status': 'enabled',
+     *        'document_type_id': 1,
+     *        'account_id': null,
+     *        'address_id': 405,
+     *        'email2': ',
+     *        'phone2': '2616795534',
+     *        'phone3': '2634660933',
+     *        'customer_reference_id': null,
+     *        'payment_code': '07470000040584',
+     *        'publicity_shape': 'web',
+     *        'screen_notification': 1,
+     *        'sms_notification': 1,
+     *        'email_notification': 1,
+     *        'sms_fields_notifications': 'phone,phone2,phone3',
+     *        'email_fields_notifications': 'email,email2',
+     *        'anchor_customer': 0,
+     *        'needs_bill': 0,
+     *        'parent_company_id': 8,
+     *        'phone4': ',
+     *        'last_update': '2020-08-11',
+     *        'date_new': '2016-03-06',
+     *        'email_status': 'active',
+     *        'email2_status': 'invalid',
+     *        'last_balance': 1619625601,
+     *        'document_image': null,
+     *        'tax_image': null,
+     *        'birthdate': null,
+     *        'observations': ',
+     *        'has_debit_automatic': 'no'
+     *      }  
+     *               
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomerMin()
+    {
+        try {
+
+            $data = Yii::$app->request->post();
+
+            if (!isset($data['dni']) && !isset($data['cuit'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is required')
+                ];
+            }
+
+            if (empty($data['dni']) && empty($data['cuit'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is not empty')
+                ];
+            }
+            if(isset($data['cuit']) && !empty($data['cuit'])){
+                $firstDigit = substr($data['cuit'],0,2);
+                $lastDigit = substr($data['cuit'],-1);
+                $centralNumber = substr($data['cuit'],2,-1);
+
+                if(strlen($centralNumber) == 7)
+                    $centralNumber = '0'.$centralNumber;
+                $data['cuit'] = $firstDigit.'-'.$centralNumber.'-'.$lastDigit;
+            }
+
+            $customer = Customer::find()->where(['document_number' => (isset($data['dni']) && !empty($data['dni']))?$data['dni']:$data['cuit']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
+
+            
+
+            $list_customer = [];
+            foreach ($customer as $key => $value) {
+                if (empty($value)) {
+                    \Yii::$app->response->setStatusCode(400);
+                    return [
+                        'error' => 'true',
+                        'msg' => \Yii::t('ivrapi','Customer not found')
+                    ];
+                }
+    
+               $value->scenario= 'full';
+               $list_customer[] = $value;
+            }
+
+            return [
+                'error' => 'false',
+                'data' => $list_customer,
+            ];
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
 }

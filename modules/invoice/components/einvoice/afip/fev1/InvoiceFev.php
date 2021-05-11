@@ -217,6 +217,17 @@ class InvoiceFev extends InvoiceDTO
             $rta['CbtesAsoc'] = $CbtesAsoc;
         }
 
+	//if( in_array($rta['FeCAEReq']['FeDetReq']['CbteTipo'], ['3','8'] )){ 
+	if( $rta['FeCAEReq']['FeDetReq']['CbteTipo'] = 3){
+	    $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchDesde'] ='20210401';
+            $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchHasta'] ='20210430'; 
+        }
+	// Nota
+	if( $rta['FeCAEReq']['FeDetReq']['CbteTipo'] = 8){
+            $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchDesde'] ='20210401';
+            $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchHasta'] ='20210430';
+        }
+	// echo'<pre>';print_r( $rta );die;
         return $rta;
     }
 
