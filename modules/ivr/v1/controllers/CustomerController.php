@@ -1087,7 +1087,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/get-customer-min",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     description="Devuelve info completa del cliente.",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -1227,7 +1227,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/get-customer-search",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Devuelve todos los clientes que tengan alguna coincidencia.
+     *     description="Devuelve todas las coincidencias de los clientes",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -1237,8 +1237,9 @@ class CustomerController extends Controller
      *        required = true,
      *        type = "integer",
      *        @SWG\Schema(
-     *          @SWG\Property(property="document_type", type="string", description="Tipo de documento"),
-     *          @SWG\Property(property="number", type="integer", description="Digítos"),
+     *          @SWG\Property(property="document_type_name", type="string", description="Nombre tipo de documento"),
+     *          @SWG\Property(property="number", type="integer", description="Número"),
+     *          @SWG\Property(property="limit", type="integer", description="Limite"),
      *        )
      *     ),
      *
@@ -1252,8 +1253,8 @@ class CustomerController extends Controller
      *    'data': {
      *        'customer_id': 405,
      *        'name': 'COOPERATIVA DE TRABAJO ',
-     *        'document_number': '30-68927112-6',
-     *        'sex': null,
+     *        'lastname': 'METAL LINIERS LIMITADA',
+     *        'code': 405
      *      }  
      *               
      *         }"
@@ -1299,8 +1300,12 @@ class CustomerController extends Controller
             $document_type_id = $document['document_type_id'];
             $limite = (!empty($data['limit'])?$data['limit']:10);
 
-            $customers= Yii::$app->db->createCommand('SELECT * FROM customer c WHERE c.document_number LIKE :document_number AND c.document_type_id = :document_type_id ORDER BY c.document_number LIMIT :limite')->bindValue('document_number',$document_number)->bindValue('document_type_id', $document_type_id)->bindValue('limite',$limite)->queryAll();
-            var_dump($customers);die();
+            $customers= Yii::$app->db->createCommand('SELECT c.customer_id, c.name, c.lastname, c.code FROM customer c WHERE c.document_number LIKE :document_number AND c.document_type_id = :document_type_id ORDER BY c.document_number LIMIT :limite')->bindValue('document_number',$document_number)->bindValue('document_type_id', $document_type_id)->bindValue('limite',$limite)->queryAll();
+            
+            return [
+                'error' => 'false',
+                'data' => $customers,
+            ];
             
         } catch (Exception $ex) {
             Yii::$app->response->setStatusCode(400);
