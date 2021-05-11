@@ -1251,7 +1251,6 @@ class CustomerController extends Controller
      *               {
      *    'error': 'false',
      *    'data': {
-     *        'customer_id': 405,
      *        'document_number': 30-68927112-6
      *        'name': 'COOPERATIVA DE TRABAJO ',
      *        'lastname': 'METAL LINIERS LIMITADA',
