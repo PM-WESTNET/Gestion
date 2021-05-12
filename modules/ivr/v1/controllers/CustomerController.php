@@ -1296,7 +1296,7 @@ class CustomerController extends Controller
 
             $document = DocumentType::find()->where(["name" => $data['document_type_name']])->one();
 
-            $document_number = "%".$data['number']."%";
+            $document_number = $data['number']."%";
             $document_type_id = $document['document_type_id'];
             $limite = (!empty($data['limit'])?$data['limit']:10);
 
