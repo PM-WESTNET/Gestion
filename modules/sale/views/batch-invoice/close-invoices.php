@@ -106,10 +106,10 @@ $this->params['breadcrumbs'][] = $this->title;
                             </div>
                         </div>
                         <?php } else { ?>
-                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> Procesando ... 
+                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> <span id="title-processing">Procesando ...</span> 
                             <span style="float:right;">
                             <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
-                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;">
+                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;" disabled>
                             <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
                             </span>
                             </div>
@@ -235,35 +235,42 @@ $this->params['breadcrumbs'][] = $this->title;
 
             $(document).off('click', "#stop-process").on('click', "#stop-process", function(ev){
                 $.ajax({
-                    url: '<?= Url::to(['/sale/batch-invoice/update-status-close-invoice-process'])?>',
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
                     method: 'POST',
                     data: {
                         'status': 'paused'
                     },
                     dataType: 'json',
                     success: function (data) {
+                        
                     }
                 })
                 console.log("stop process");
                 BatchInvoice.processing = false;
-                ev.style.display = 'none';
+                $("#stop-process").prop('disabled', true);
+                $("#start-process").prop('disabled', false);
+                $("#title-processing").text("Pausado...");
+
 
             });
 
             $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
                 $.ajax({
-                    url: '<?= Url::to(['/sale/batch-invoice/update-status-close-invoice-process'])?>',
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
                     method: 'POST',
                     data: {
                         'status': 'pending'
                     },
                     dataType: 'json',
-                    success: function (data) { 
+                    success: function (data) {
                     }
                 })
                 console.log("start process");
                 BatchInvoice.processing = true;
                 BatchInvoice.init();
+                $("#start-process").prop('disabled', true);
+                $("#stop-process").prop('disabled', false);
+                $("#title-processing").text("Procesando...");
             });
 
             $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){
