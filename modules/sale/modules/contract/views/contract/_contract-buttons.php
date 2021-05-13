@@ -15,7 +15,7 @@ use webvimark\modules\UserManagement\models\User;
         echo UserA::a(Yii::t('app', 'Reactive Contract'), ['active-contract-again', 'contract_id' => $model->contract_id], ['class' => 'btn btn-success']);
     }
 
-    if (Yii::$app->getModule('westnet') && $model->status === Contract::STATUS_DRAFT && $model->canPrintAds()) {
+    if (Yii::$app->getModule('isp') && $model->status === Contract::STATUS_DRAFT && $model->canPrintAds()) {
         echo UserA::a(Yii::t('app', 'Print') . ' ADS', '#', ['class' => 'btn btn-success', 'id' => 'print-ads']);
     }
 

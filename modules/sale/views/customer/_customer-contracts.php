@@ -68,7 +68,7 @@ use yii\helpers\Url;
                     }
                 },
                 'force-connection' => function($url, $model) use ($products, $vendors){
-                    if (Yii::$app->getModule('westnet')) {
+                    if (Yii::$app->getModule('isp')) {
                         $connection = $model->connection;
                         if($connection) {
                             if($model->status == Contract::STATUS_ACTIVE) {
