@@ -1300,7 +1300,7 @@ class CustomerController extends Controller
             $document_type_id = $document['document_type_id'];
             $limite = (!empty($data['limit'])?$data['limit']:10);
 
-            $customers= Yii::$app->db->createCommand('SELECT c.document_number, c.name, c.lastname, c.code FROM customer c WHERE c.document_number LIKE :document_number AND c.document_type_id = :document_type_id ORDER BY c.document_number LIMIT :limite')->bindValue('document_number',$document_number)->bindValue('document_type_id', $document_type_id)->bindValue('limite',$limite)->queryAll();
+            $customers= Yii::$app->db->createCommand('SELECT c.document_number, c.name, c.lastname, c.code FROM customer c WHERE c.document_number LIKE :document_number AND c.document_type_id = :document_type_id AND status = "enabled" ORDER BY c.document_number LIMIT :limite')->bindValue('document_number',$document_number)->bindValue('document_type_id', $document_type_id)->bindValue('limite',$limite)->queryAll();
             
             return [
                 'error' => 'false',
