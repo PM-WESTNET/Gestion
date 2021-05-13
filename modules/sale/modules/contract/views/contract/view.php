@@ -73,7 +73,7 @@ $customer = $model->customer;
         'value' => Yii::t('app', Yii::t('app', ucfirst($model->instalation_schedule))),
     ];
 
-    if (Yii::$app->getModule('westnet')) {
+    if (Yii::$app->getModule('isp')) {
         $columns[] = [
             'label' => Yii::t('westnet', 'Vendor'),
             'value' => isset($model->vendor) ? $model->vendor->fullname : '',
@@ -99,7 +99,7 @@ $customer = $model->customer;
         'attributes' => $columns,
     ]);
 
-    if (Yii::$app->getModule('westnet')) {
+    if (Yii::$app->getModule('isp')) {
         $connection = Connection::findOne(['contract_id' => $model->contract_id]);
         if ($connection) {
             ?>

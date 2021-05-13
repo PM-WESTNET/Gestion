@@ -44,7 +44,7 @@ class Cashier extends \app\components\db\ActiveRecord {
 
         parent::init();
 
-        $ecopagosModule = Yii::$app->getModule('westnet')->getModule('ecopagos');
+        $ecopagosModule = Yii::$app->getModule('isp')->getModule('ecopagos');
 
         if (isset($ecopagosModule->params['user']['class']))
             $this->userModelClass = $ecopagosModule->params['user']['class'];
