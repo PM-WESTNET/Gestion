@@ -33,6 +33,83 @@ class ContractController extends RestController
     }
 
     /**
+     * @SWG\Post(path="/isp/api/contract/index",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Retorna el contrato segun el id o el customer_id pasado como parametro, en caso de enviar customer_name retornara una lista de contratos con las coincidencias.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="id", type="integer", description="ID del contrato (Opcional)"),
+     *          @SWG\Property(property="customer_id", type="integer", description="ID del cliente (Opcional)"),
+     *          @SWG\Property(property="customer_name", type="string", description="Nombre del cliente (Opcional)"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               'status': 'success',
+     *               'message': ' ',
+     *               'contracts': [
+     *                   {
+     *                       'customer_code': 979,
+     *                       'payment_code': '09760000097942',
+     *                       'customer_name': 'ENRIQUE ADRIAN',
+     *                       'customer_lastname': 'SACCONE ',
+     *                       'due': -1896.95,
+     *                       'company': {
+     *                           'company_id': 8,
+     *                           'name': 'Westnet'
+     *                       },
+     *                       'connections': [
+     *                           {
+     *                               'contract_id': 100,
+     *                               'ip': '10.18.118.226',
+     *                               'ip_2': '0.0.0.0',
+     *                               'account_status': 'forced',
+     *                               'date': '06-03-2016',
+     *                               'plan': 'NO-USAR-MAS-Hogar-WiFi-6144-EX-3Mbps',
+     *                               'address': 'URQUIZA  S/N,',
+     *                               'geocode': '-32.8988839 , -68.8194614',
+     *                               'node': 18,
+     *                               'server': 'ISP13',
+     *                               'upload': 3072,
+     *                               'download': 6144
+     *                           }
+     *                       ]
+     *                   }
+     *               ]
+     *           }
+     *                      '
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *            {
+     *               'status': 'error',
+     *               'message': 'No contract id specified.',
+     *               'contracts': []
+     *             }
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+
+    /**
      * Retorna el contrato segun el id pasado como parametro.
      *
      * @return mixed
@@ -157,6 +234,102 @@ class ContractController extends RestController
         return $response;
     }
 
+
+    /**
+     * @SWG\Post(path="/isp/api/contract/list-by-id",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Lista los contratos que son enviados por parametro IDs.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="id", type="string", description="IDs concatenados por ',' Ej: 100,101,102"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *        {
+     *           '0': {
+     *               'contract_id': 100,
+     *               'ip': '10.18.118.226',
+     *               'ip_2': '0.0.0.0',
+     *               'account_status': 'forced',
+     *               'address': 'URQUIZA  S/N,',
+     *               'geocode': '-32.8988839 , -68.8194614',
+     *               'date': '06-03-2016',
+     *               'plan': 'NO-USAR-MAS-Hogar-WiFi-6144-EX-3Mbps',
+     *               'node': 18,
+     *               'tentative_node': null,
+     *               'instalation_schedule': null,
+     *               'server': 'ISP13',
+     *               'company': {
+     *                   'company_id': 8,
+     *                   'name': 'Westnet'
+     *               }
+     *           },
+     *           '1': {
+     *               'contract_id': 101,
+     *               'ip': '10.158.251.194',
+     *               'ip_2': '0.0.0.0',
+     *               'account_status': 'enabled',
+     *               'address': ', M-D C-10',
+     *               'geocode': '-32.6074249,-67.57085359999999',
+     *               'date': '06-03-2016',
+     *               'plan': 'NO-USAR-MAS-Hogar-WiFi-6144-EX-3Mbps',
+     *               'node': 158,
+     *               'tentative_node': null,
+     *               'instalation_schedule': null,
+     *               'server': 'ISP08',
+     *               'company': {
+     *                   'company_id': 8,
+     *                   'name': 'Westnet'
+     *               }
+     *           },
+     *           '2': {
+     *               'contract_id': 102,
+     *               'ip': '10.42.185.188',
+     *               'ip_2': '0.0.0.0',
+     *               'account_status': 'enabled',
+     *               'address': 'MEDINA  68,',
+     *               'geocode': '-32.6074249,-67.57085359999996',
+     *               'date': '06-03-2016',
+     *               'plan': 'NO-USAR-MAS-Hogar-WiFi-6144-EX-3Mbps',
+     *               'node': 42,
+     *               'tentative_node': null,
+     *               'instalation_schedule': null,
+     *               'server': 'ISP16',
+     *               'company': {
+     *                   'company_id': 8,
+     *                   'name': 'Westnet'
+     *               }
+     *           },
+     *           'upload': 3072,
+     *           'download': 6144
+     *       }
+     * "
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *              []
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+
     /*
      * Lista los contratos que son enviados por parametro
      * @return array
@@ -205,6 +378,59 @@ class ContractController extends RestController
     }
 
     /**
+     * @SWG\Get(path="/isp/api/contract/mora",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Lista los contratos que tienen aviso de mora o corte con aviso.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     * 
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               [
+     *                   {
+     *                       'contract_id': '496',
+     *                       'name': 'MARIA DALINDA',
+     *                       'customer_code': '2416',
+     *                       'payment_code': '09760000241600',
+     *                       'ip': '10.99.8.4',
+     *                       'ip_2': '0.0.0.0',
+     *                       'account_status': 'clipped',
+     *                       'company_id': '2',
+     *                       'company_name': 'REDES DEL OESTE SA',
+     *                       'due': -4095.97
+     *                   },
+     *                   {
+     *                       'contract_id': '1299',
+     *                       'name': 'GRACIELA FRANCISCA',
+     *                       'customer_code': '4711',
+     *                       'payment_code': '09760000471163',
+     *                       'ip': '10.36.171.98',
+     *                       'ip_2': '0.0.0.0',
+     *                       'account_status': 'clipped',
+     *                       'company_id': '2',
+     *                       'company_name': 'REDES DEL OESTE SA',
+     *                       'due': -3797.98
+     *                   },
+     *               ]    
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *              []
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+
+    /**
      * Lista los contratos que tienen aviso de mora o corte con aviso.
      * @return array
      */
@@ -251,6 +477,68 @@ class ContractController extends RestController
     }
 
     /**
+     * @SWG\POST(path="/isp/api/contract/find-by-node",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="code", type="integer", description="Código"),
+     *        )
+     *     ),
+     * 
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *          [
+     *            {
+     *               'customer_code': 1710,
+     *               'contract_id': 329,
+     *               'company': {
+     *               'company_id': 8,
+     *               'name': 'Westnet'
+     *              }
+     *            },
+     *            {
+     *                'customer_code': 3893,
+     *                'contract_id': 1074,
+     *                'company': {
+     *                'company_id': 8,
+     *                'name': 'Westnet'
+     *               }
+     *             },
+     *             {
+     *                'customer_code': 9025,
+     *                'contract_id': 3068,
+     *                'company': {
+     *                'company_id': 8,
+     *                'name': 'Westnet'
+     *                }
+     *              },
+     *           ]
+     *       "           
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *              []
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+
+    /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
      *
      * @return array
@@ -270,7 +558,7 @@ class ContractController extends RestController
                 ->addParams([':code'=>$code])
                 ->all()
             ;
-
+            
             foreach($contracts  as $contract) {
                 $customer = $contract->customer;
 
@@ -285,11 +573,64 @@ class ContractController extends RestController
 
                 $response[] = $contract;
             }
-
+            
         }
 
         return $response;
     }
+
+
+
+    /**
+     * @SWG\POST(path="/isp/api/contract/set-tentative-node",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Setea el campo tentative_node en la tabla contract.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="id", type="integer", description="Id del contrato"),
+     *          @SWG\Property(property="node", type="integer", description="Subnet del nodo tentativo"),
+     *        )
+     *     ),
+     * 
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *          [
+     *             'status': 'success',
+     *             'messages': 'Set tentative node successfull',
+     *          ]
+     *       "           
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *              [
+     *                   'status': 'error',
+     *                   'message': 'Can`t set tentative node',
+     *              ]
+     *              
+     *              or
+     * 
+     *              [
+     *                   'status': 'error',
+     *                   'message': 'Parameters 'id' and 'node' are required',
+     *              ]
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
     
     /**
      *  Setea el campo tentative_node en la tabla contract. 
@@ -330,6 +671,37 @@ class ContractController extends RestController
         return $response;
         
     }
+
+    /**
+     * @SWG\Get(path="/isp/api/contract/get-browser-notification-customers",
+     *     tags={"Contrato"},
+     *     summary="",
+     *     description="Devuelve los clientes que están incluidos en las notificaciones de explorador.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     * 
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *          [
+     *            
+     *          ]
+     *       "           
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *              [
+     *                   
+     *              ]
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
 
     /**
      * Devuelve los clientes que están incluidos en las notificaciones de explorador.

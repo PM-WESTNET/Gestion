@@ -10,6 +10,6 @@ class WestnetAPIModule extends \yii\base\Module
     {
         parent::init();
         
-       // \Yii::$app->user->enableSession = false;
+        \Yii::$app->user->enableSession = false;
     }
 }
