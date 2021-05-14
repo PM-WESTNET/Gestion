@@ -1160,8 +1160,8 @@ class CustomerController extends Controller
                 ];
             }
 
-            $customer= Yii::$app->db->createCommand("
-                SELECT
+            $customer= Yii::$app->db->createCommand(
+                "SELECT
                 cu.customer_id,
                 CONCAT_WS(' ',cu.lastname,cu.name) AS name,
                 cu.code,
@@ -1172,13 +1172,13 @@ class CustomerController extends Controller
                     THEN 
                         cu.email
                     ELSE 
-                        NULL
+                        ''
                     END AS email,
                 CASE WHEN (cu.email2_status = 'active') 
                     THEN 
                         cu.email2
                     ELSE 
-                        NULL
+                        ''
                     END AS email2,
                 cu.phone,
                 cu.phone2,
@@ -1294,8 +1294,8 @@ class CustomerController extends Controller
             $document_type_id = $document['document_type_id'];
             $limite = (!empty($data['limit'])?$data['limit']:10);
 
-            $customers= Yii::$app->db->createCommand('
-                SELECT 
+            $customers= Yii::$app->db->createCommand(
+                'SELECT 
                 cu.customer_id,
                 cu.date_new,
                 cu.document_number, 
