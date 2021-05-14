@@ -849,6 +849,8 @@ class BillController extends Controller
         $company = (isset($company) ? $company : $model->customer->parentCompany );
         $companyData = $model->company;
 
+        //echo'<pre>'; var_dump( $companyData->name  ); die;
+
         $cuit = str_replace('-', '', $model->company->tax_identification);
         $code = $cuit . sprintf("%02d", $model->billType->code) . sprintf("%04d", $model->getPointOfSale()->number) . $model->ein . (new \DateTime($model->ein_expiration))->format("Ymd");
 
