@@ -119,12 +119,12 @@ $this->params['breadcrumbs'][] = $this->title;
         }
 
         this.create = function(parent) {
-            $("#account-iframe").attr("src", '<?=Url::toRoute(['/accounting/account/create' ])?>&parent_account_id='+parent);
+            $("#account-iframe").attr("src", '<?=Url::toRoute(['/accounting/account/create?parent_account_id=' ])?>'+parent);
         };
 
         this.show = function(id) {
             if(id != 0) {
-                $("#account-iframe").attr("src",'<?=Url::toRoute(['/accounting/account/view' ])?>&id='+id );
+                $("#account-iframe").attr("src",'<?=Url::toRoute(['/accounting/account/view?id=' ])?>'+id );
             }
         };
 
@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
             if(confirm("<?=Yii::t('app', 'Are you sure you want to delete this item?')?>")) {
                 var id = $(elem).data("id");
                 $.ajax({
-                    url: '<?=Url::toRoute(['/accounting/account/delete' ])?>&id='+id,
+                    url: '<?=Url::toRoute(['/accounting/account/delete?id=' ])?>'+id,
                     method: 'POST',
                     dataType: 'json',
                     success: function(data){

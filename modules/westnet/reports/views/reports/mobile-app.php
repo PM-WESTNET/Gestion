@@ -39,14 +39,18 @@ $this->params['breadcrumbs'][] = $this->title;
             <h5><?= ReportsModule::t('app', 'Active customers')?></h5> <br>
             <?= $statistics[0]['customer_qty']?>
         </div>
-        <div class="col-sm-4 list-group-item text-center">
-            <h5><?= ReportsModule::t('app', 'Customers percentage with the app installed')?></h5> <br>
-            <?= round($statistics[0]['installed_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['installed_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
-        </div>
-        <div class="col-sm-4 list-group-item text-center">
-            <h5><?= ReportsModule::t('app', 'Customers percentage using the app')?></h5> <br>
-            <?= round($statistics[0]['used_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['used_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
-        </div>
+        <?php if ($statistics[0]['customer_qty']): ?>
+            <div class="col-sm-4 list-group-item text-center">
+                <h5><?= ReportsModule::t('app', 'Customers percentage with the app installed')?></h5> <br>
+                <?= round($statistics[0]['installed_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['installed_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
+            </div>
+        <?php endif ?>
+        <?php if ($statistics[0]['customer_qty']): ?>
+            <div class="col-sm-4 list-group-item text-center">
+                <h5><?= ReportsModule::t('app', 'Customers percentage using the app')?></h5> <br>
+                <?= round($statistics[0]['used_qty'] / $statistics[0]['customer_qty'] * 100, 2) .'% ('.$statistics[0]['used_qty'].' '.Yii::t('app', 'Customers').')'?> <br>
+            </div>
+        <?php endif ?>
     </div>
 
     <hr>

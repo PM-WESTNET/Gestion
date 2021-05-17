@@ -19,6 +19,7 @@ use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
+use app\modules\sale\models\DocumentType;
 use Yii;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
@@ -1085,7 +1086,7 @@ class CustomerController extends Controller
      * @SWG\Post(path="/customer/get-customer-min",
      *     tags={"Customer"},
      *     summary="",
-     *     description="Devuelve info completa del cliente. Combina las respuestas de 'customer/search', 'customer/balance-account', 'customer/clipped-for-debt'",
+     *     description="Devuelve info completa del cliente.",
      *     produces={"application/json"},
      *     security={{"auth":{}}},
      *     @SWG\Parameter(
@@ -1095,8 +1096,7 @@ class CustomerController extends Controller
      *        required = true,
      *        type = "integer",
      *        @SWG\Schema(
-     *          @SWG\Property(property="dni", type="integer", description="DNI"),
-     *          @SWG\Property(property="cuit", type="integer", description="CUIT o CUIL"),
+     *          @SWG\Property(property="id", type="integer", description="ID del cliente"),
      *        )
      *     ),
      *
@@ -1108,40 +1108,18 @@ class CustomerController extends Controller
      *               {
      *    'error': 'false',
      *    'data': {
-     *        'customer_id': 405,
-     *        'name': 'COOPERATIVA DE TRABAJO ',
-     *        'document_number': '30-68927112-6',
-     *        'sex': null,
-     *        'phone': '2614932378',
-     *        'status': 'enabled',
-     *        'document_type_id': 1,
-     *        'account_id': null,
-     *        'address_id': 405,
-     *        'email2': ',
-     *        'phone2': '2616795534',
-     *        'phone3': '2634660933',
-     *        'customer_reference_id': null,
-     *        'payment_code': '07470000040584',
-     *        'publicity_shape': 'web',
-     *        'screen_notification': 1,
-     *        'sms_notification': 1,
-     *        'email_notification': 1,
-     *        'sms_fields_notifications': 'phone,phone2,phone3',
-     *        'email_fields_notifications': 'email,email2',
-     *        'anchor_customer': 0,
-     *        'needs_bill': 0,
-     *        'parent_company_id': 8,
-     *        'phone4': ',
-     *        'last_update': '2020-08-11',
-     *        'date_new': '2016-03-06',
-     *        'email_status': 'active',
-     *        'email2_status': 'invalid',
-     *        'last_balance': 1619625601,
-     *        'document_image': null,
-     *        'tax_image': null,
-     *        'birthdate': null,
-     *        'observations': ',
-     *        'has_debit_automatic': 'no'
+     *          'customer_id': '56235',
+     *           'name': 'VERDE FLAVIA ROXANA',
+     *           'code': '79078',
+     *           'document_number': '27684863',
+     *           'geocode': '-32.92975221871667,-68.8675480878357',
+     *           'address': 'los jacaranda 156',
+     *           'email': 'sheiilajanet99@gmail.com',
+     * *         'email2': '',
+     *           'phone': '',
+     *           'phone2': '2615416327',S
+     *           'phone3': '',
+     *           'phone4': ''
      *      }  
      *               
      *         }"
@@ -1165,53 +1143,185 @@ class CustomerController extends Controller
 
             $data = Yii::$app->request->post();
 
-            if (!isset($data['dni']) && !isset($data['cuit'])) {
+            if (!isset($data['id'])) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
-                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is required')
+                    'msg' => \Yii::t('ivrapi','"id" params is required')
                 ];
             }
 
-            if (empty($data['dni']) && empty($data['cuit'])) {
+            if (empty($data['id'])) {
                 \Yii::$app->response->setStatusCode(400);
                 return [
                     'error' => 'true',
-                    'msg' => \Yii::t('ivrapi','"cuit" or "dni" params is not empty')
+                    'msg' => \Yii::t('ivrapi','"id" params is not empty')
                 ];
             }
-            if(isset($data['cuit']) && !empty($data['cuit'])){
-                $firstDigit = substr($data['cuit'],0,2);
-                $lastDigit = substr($data['cuit'],-1);
-                $centralNumber = substr($data['cuit'],2,-1);
 
-                if(strlen($centralNumber) == 7)
-                    $centralNumber = '0'.$centralNumber;
-                $data['cuit'] = $firstDigit.'-'.$centralNumber.'-'.$lastDigit;
-            }
-
-            $customer = Customer::find()->where(['document_number' => (isset($data['dni']) && !empty($data['dni']))?$data['dni']:$data['cuit']])->andWhere(['status' => Customer::STATUS_ENABLED])->all();
-
+            $customer= Yii::$app->db->createCommand(
+                "SELECT
+                cu.customer_id,
+                CONCAT_WS(' ',cu.lastname,cu.name) AS name,
+                cu.code,
+                cu.document_number,
+                ad.geocode,
+                CONCAT_WS(' ',ad.street,ad.number) AS address ,
+                CASE WHEN (cu.email_status = 'active') 
+                    THEN 
+                        cu.email
+                    ELSE 
+                        ''
+                    END AS email,
+                CASE WHEN (cu.email2_status = 'active') 
+                    THEN 
+                        cu.email2
+                    ELSE 
+                        ''
+                    END AS email2,
+                cu.phone,
+                cu.phone2,
+                cu.phone3,
+                cu.phone4
+                FROM customer cu 
+                LEFT JOIN address ad ON cu.address_id = ad.address_id
+                WHERE cu.customer_id = :customer_id ORDER BY cu.customer_id DESC LIMIT 1
+            ")
+            ->bindValue('customer_id',$data['id'])
+            ->queryOne();
             
 
-            $list_customer = [];
-            foreach ($customer as $key => $value) {
-                if (empty($value)) {
-                    \Yii::$app->response->setStatusCode(400);
-                    return [
-                        'error' => 'true',
-                        'msg' => \Yii::t('ivrapi','Customer not found')
-                    ];
-                }
-    
-               $value->scenario= 'full';
-               $list_customer[] = $value;
+            if (empty($customer)) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','Customer not found')
+                ];
             }
+
 
             return [
                 'error' => 'false',
-                'data' => $list_customer,
+                'data' => $customer,
             ];
+            
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => $ex->getMessage()
+            ];
+        }
+    }
+
+     /**
+     * @SWG\Post(path="/customer/get-customer-search",
+     *     tags={"Customer"},
+     *     summary="",
+     *     description="Devuelve todas las coincidencias de los clientes",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="document_type_name", type="string", description="Nombre tipo de documento"),
+     *          @SWG\Property(property="number", type="integer", description="Número"),
+     *          @SWG\Property(property="limit", type="integer", description="Limite"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *         {
+     *               {
+     *    'error': 'false',
+     *    'data': {
+     *        'customer_id': '405',
+     *        'date_new': '2016-03-06',
+     *        'document_number': '30-68927112-6',
+     *        'name': 'COOPERATIVA DE TRABAJO ',
+     *        'lastname': 'METAL LINIERS LIMITADA',
+     *        'code': '405'
+     *      }  
+     *               
+     *         }"
+     *
+     *     ),
+     *     @SWG\Response(
+     *         response = 400,
+     *         description = "parametro faltante, cliente no encontrado, o error de autenticacion
+     *          Posibles Mensajes :
+     *              Cliente no encontrado
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+    public function actionGetCustomerSearch()
+    {
+        try {
+
+            $data = Yii::$app->request->post();
+
+            if (!isset($data['document_type_name']) || !isset($data['number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"document_type_name" or "number" params is required')
+                ];
+            }
+
+            if (empty($data['document_type_name']) || empty($data['number'])) {
+                \Yii::$app->response->setStatusCode(400);
+                return [
+                    'error' => 'true',
+                    'msg' => \Yii::t('ivrapi','"document_type_name" or "number" params is not empty')
+                ];
+            }
+
+            $document = DocumentType::find()->where(["name" => $data['document_type_name']])->one();
+
+            $document_number = $data['number']."%";
+            $document_type_id = $document['document_type_id'];
+            $limite = (!empty($data['limit'])?$data['limit']:10);
+
+            $customers= Yii::$app->db->createCommand(
+                'SELECT 
+                cu.customer_id,
+                cu.date_new,
+                cu.document_number, 
+                UPPER(cu.name) AS name, 
+                UPPER(cu.lastname) AS lastname, 
+                cu.code 
+                FROM customer cu
+                WHERE cu.customer_id IN (
+                    SELECT MAX(c.customer_id) 
+                            FROM customer c 
+                            WHERE c.document_number LIKE :document_number 
+                            AND c.document_type_id = :document_type_id
+                            GROUP BY c.document_number
+                    )
+                ORDER BY cu.document_number
+                LIMIT :limite;
+            ')
+             ->bindValue('document_number',$document_number)
+             ->bindValue('document_type_id', $document_type_id)
+             ->bindValue('limite',$limite)
+             ->queryAll();
+            
+            return [
+                'error' => 'false',
+                'data' => $customers,
+            ];
+            
         } catch (Exception $ex) {
             Yii::$app->response->setStatusCode(400);
             return [
@@ -1221,3 +1331,4 @@ class CustomerController extends Controller
         }
     }
 }
+

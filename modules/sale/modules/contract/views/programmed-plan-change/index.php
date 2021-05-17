@@ -48,9 +48,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
             [
                 'label' => Yii::t('app','Customer'),
+                
                 'value' => function ($model){
-                    return  Html::a($model->contract->customer->fullName . ' ('.$model->contract->customer->code. ')', ['/sale/customer/view', 'id' => $model->contract->customer_id]);
-                    return $model->contract->customer->fullName . ' ('.$model->contract->customer->code. ')';
+                    // if contract table is null, do nothing
+                    if (isset($model->contract->customer)) {
+                        // simplifying varibable's names
+                        $customerModel = $model->contract->customer;
+
+                        return  Html::a($customerModel->fullName . ' ('.$customerModel->code. ')', ['/sale/customer/view', 'id' => $model->contract->customer_id]);
+                        return $customerModel->fullName . ' ('.$customerModel->code. ')';
+                    } 
+                    else{
+                        yii::warning("contract table is null");
+                    }
                 },
                 'format' => 'raw'
             ],
@@ -67,7 +77,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'user_id',
                 'value' => function ($model){
-                    return $model->user->username;
+                    // Check if table username is null
+                    if (isset($model->user)){
+                        return $model->user->username;
+                    }
+                    else{
+                        yii::warning("contract table is null");
+                    }
                 },
             ],
 

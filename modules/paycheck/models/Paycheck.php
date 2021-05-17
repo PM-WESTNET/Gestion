@@ -442,7 +442,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
 
     }
 
-    public function createLog()
+    public function createLog($event = null)
     {
         $log = new PaycheckLog();
         $log->paycheck_id = $this->paycheck_id;

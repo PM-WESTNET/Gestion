@@ -26,7 +26,7 @@ AppAsset::register($this);
 <?php $this->beginBody() ?>
     <div class="wrap">
         <div class="text-center">
-            <img src="images/logo-westnet.png" width="180" style="margin-top: 60px;"/>
+            <img src=<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?> width="180" style="margin-top: 60px;"/>
         </div>
         <?= $content ?>
     </div>

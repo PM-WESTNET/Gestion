@@ -114,7 +114,7 @@ class Customer extends \app\modules\sale\models\Customer
                 },
 
                 'email',
-
+                
                 'address' => function($model) {
                     return $model->address->street . " " . $model->address->number;
                 }

@@ -3,7 +3,9 @@ return [
     //Data
     'adminEmail' => '*******',
     'web_title' => '*******', //Por ejemplo, "Arya"
-    'web_logo' => 'http://localhost/arya/web/images/arya.png', //full path, por ejemplo 'http://localhost/arya/web/images/quoma.png',
+    'web_logo' => 'logo-white.jpg', //full path, por ejemplo 'http://localhost/arya/web/images/quoma.png',
+    'web_logo_bgblack' => 'logo01.svg',
+    'path'=> 'images',
     
     //Behaviors:
     

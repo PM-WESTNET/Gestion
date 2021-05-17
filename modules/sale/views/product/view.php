@@ -98,7 +98,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ];
     }
     
-    if (Yii::$app->getModule('westnet')) {
+    if (Yii::$app->getModule('isp')) {
         $attributes[] = [
             'label' => Yii::t('westnet', 'Commission'),
             'value' => ($model->commission ? $model->commission->name : "" )

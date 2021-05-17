@@ -244,7 +244,7 @@ use app\modules\sale\models\search\CustomerSearch;
                     categoriesPlan;
 
                 //re direcciono a la misma pagina enviando los parametros ingresados
-                location.href= '<?= yii\helpers\Url::to(['/sale/customer/index'])?>'+'&'+ params;
+                location.href= '<?= yii\helpers\Url::to(['/sale/customer/index?'])?>'+ params;
             });
         };
 

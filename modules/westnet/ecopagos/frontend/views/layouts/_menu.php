@@ -83,7 +83,7 @@ $items[] = ['label' => '<span class="glyphicon glyphicon-user"></span> (' . Yii:
                 <span class="icon-bar"></span>
             </button>
 
-            <a class="navbar-brand" href="<?= \yii\helpers\Url::to(['site/index']); ?>">WestNet Ecopagos</a>
+            <a class="navbar-brand" href="<?= \yii\helpers\Url::to(['site/index']); ?>">Ecopagos</a>
 
         </div>
 
