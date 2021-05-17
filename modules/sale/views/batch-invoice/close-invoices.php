@@ -90,7 +90,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     </div>
 
-                    <?php if(!InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) { ?>
+                    <?php if(!InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS) && !InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) { ?>
                         <div class="row">
                             <div class="col-sm-offset-6 col-sm-3">
                                 <div class="form-group field-button">
@@ -105,9 +105,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                 </div>
                             </div>
                         </div>
-                    <?php } else { ?>
-                        <h3 id="alert alert-dismissible process-label" class="alert-info"> Procesando ... </h3>
-                    <?php } ?>
+                        <?php } else { ?>
+                            <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> <span id="title-processing">Procesando ...</span> 
+                            <span style="float:right;">
+                            <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
+                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;" disabled>
+                            <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
+                            </span>
+                            </div>
+                        <?php } ?>
 
                     <?php ActiveForm::end(); ?>
                 </div>
@@ -148,58 +154,61 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             </div>
             <!-- Fin de Progress Bar -->
-
+                
             <!-- Inicio Seleccion de datos para filtro de facturas -->
-            <div class="panel panel-default" id="panel-filtro">
-                <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-filter" aria-expanded="true" aria-controls="panel-body-filter">
-                    <h3 class="panel-title"><?= Yii::t('app', 'Bills') ?></h3>
-                </div>
-                <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
-                    <?php Pjax::begin(
-                        [
-                            'id' => 'contracts',
-                            'enablePushState'=>FALSE
-                        ]
-                    );
-                    if ($dataProvider) {
-                        echo GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'pjax'=>true,
-                            'columns' => [
-                                ['class' => 'kartik\grid\SerialColumn'],
-                                [
-                                    'header'=>Yii::t('app', 'Customer'),
-                                    'value' => function($model) {
-                                        if ($model->customer) {
-                                            return $model->customer->lastname .', '.$model->customer->name;
+            <?php if(!InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS) && !InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) { ?>
+                <div class="panel panel-default" id="panel-filtro">
+                    <div class="panel-heading" data-toggle="collapse" data-target="#panel-body-filter" aria-expanded="true" aria-controls="panel-body-filter">
+                        <h3 class="panel-title"><?= Yii::t('app', 'Bills') ?></h3>
+                    </div>
+                    <div class="panel-body collapse in" id="panel-body-filter" aria-expanded="true">
+                        <?php Pjax::begin(
+                            [
+                                'id' => 'contracts',
+                                'enablePushState'=>FALSE
+                            ]
+                        );
+                        if ($dataProvider) {
+                            echo GridView::widget([
+                                'dataProvider' => $dataProvider,
+                                'pjax'=>true,
+                                'columns' => [
+                                    ['class' => 'kartik\grid\SerialColumn'],
+                                    [
+                                        'header'=>Yii::t('app', 'Customer'),
+                                        'value' => function($model) {
+                                            if ($model->customer) {
+                                                return $model->customer->lastname .', '.$model->customer->name;
+                                            }
                                         }
-                                    }
-                                ],
-                                [
-                                    'header'=>Yii::t('app', 'Bill'),
-                                    'value' => function($model){
-                                        $number = $model->status == Bill::STATUS_CLOSED ? ' - '.$model->number : '';
-                                        return $model->billType->name . $number;
-                                    }
-                                ],
-                                [
-                                    'header'=>Yii::t('app', 'Date'),
-                                    'attribute' => 'date',
-                                    'format'=>['date']
-                                ],
-                                [
-                                    'header'=>Yii::t('app', 'Amount'),
-                                    'attribute'=>'amount',
-                                    'format' => ['currency'],
-                                ],
+                                    ],
+                                    [
+                                        'header'=>Yii::t('app', 'Bill'),
+                                        'value' => function($model){
+                                            $number = $model->status == Bill::STATUS_CLOSED ? ' - '.$model->number : '';
+                                            return $model->billType->name . $number;
+                                        }
+                                    ],
+                                    [
+                                        'header'=>Yii::t('app', 'Date'),
+                                        'attribute' => 'date',
+                                        'format'=>['date']
+                                    ],
+                                    [
+                                        'header'=>Yii::t('app', 'Amount'),
+                                        'attribute'=>'amount',
+                                        'format' => ['currency'],
+                                    ],
 
-                            ],
-                        ]);
-                    }
+                                ],
+                            ]);
+                        }
 
-                    Pjax::end() ?>
+                        Pjax::end() ?>
+                    </div>
                 </div>
-            </div> <!-- Fin Seleccion de datos para filtro de facturas -->
+            <?php } ?>    
+                <!-- Fin Seleccion de datos para filtro de facturas -->
 
         </div>
     </div>
@@ -222,6 +231,62 @@ $this->params['breadcrumbs'][] = $this->title;
                         alert('<?= Yii::t('app', 'Company and bill type cant be empty') ?>');
                     }
                 }
+            });
+
+            $(document).off('click', "#stop-process").on('click', "#stop-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'paused'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        
+                    }
+                })
+                console.log("stop process");
+                BatchInvoice.processing = false;
+                $("#stop-process").prop('disabled', true);
+                $("#start-process").prop('disabled', false);
+                $("#title-processing").text("Pausado...");
+
+
+            });
+
+            $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'pending'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                    }
+                })
+                console.log("start process");
+                BatchInvoice.processing = true;
+                BatchInvoice.init();
+                $("#start-process").prop('disabled', true);
+                $("#stop-process").prop('disabled', false);
+                $("#title-processing").text("Procesando...");
+            });
+
+            $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-close-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'finished'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                    }
+                })
+                console.log("finished process");
+                BatchInvoice.processing = false;
+                window.location.reload();
             });
 
             BatchInvoice.cargarBillType();

@@ -5618,7 +5618,7 @@ modules/invoice/components/einvoice/afip/certs/CarlosGarcia.key:-----END RSA PRI
 modules/invoice/components/einvoice/afip/certs/private.crt:-----BEGIN RSA PRIVATE KEY-----
 modules/invoice/components/einvoice/afip/certs/private.crt:-----END RSA PRIVATE KEY-----
 modules/invoice/components/einvoice/afip/auth.wsdl:<?xml version="1.0" encoding="UTF-8"?>
-modules/invoice/components/einvoice/afip/auth.wsdl:<wsdl:definitions targetNamespace="https://wsaa.afip.gov.ar/ws/services/LoginCms" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="https://wsaa.afip.gov.ar/ws/services/LoginCms" xmlns:intf="https://wsaa.afip.gov.ar/ws/services/LoginCms" xmlns:tns1="http://wsaa.view.sua.dvadac.desein.afip.gov" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+modules/invoice/components/einvoice/afip/auth.wsdl:<wsdl:definitions targetNamespace="https://wsaahomo.afip.gov.ar/ws/services/LoginCms" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="https://wsaahomo.afip.gov.ar/ws/services/LoginCms" xmlns:intf="https://wsaahomo.afip.gov.ar/ws/services/LoginCms" xmlns:tns1="http://wsaa.view.sua.dvadac.desein.afip.gov" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 modules/invoice/components/einvoice/afip/auth.wsdl:<!--WSDL created by Apache Axis version: 1.4
 modules/invoice/components/einvoice/afip/auth.wsdl:Built on Apr 22, 2006 (06:55:48 PDT)-->
 modules/invoice/components/einvoice/afip/mtxca/InvoiceMtxca.php:        $this->bill                 = $object;

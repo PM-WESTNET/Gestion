@@ -31,6 +31,8 @@ class InvoiceProcess extends \yii\db\ActiveRecord
     const STATUS_PENDING = 'pending';
     const STATUS_ERROR = 'error';
     const STATUS_FINISHED = 'finished';
+    const STATUS_PAUSED = 'paused';
+    
 
     const TYPE_CREATE_BILLS = 'create_bills';
     const TYPE_CLOSE_BILLS = 'close_bills';
@@ -149,6 +151,11 @@ class InvoiceProcess extends \yii\db\ActiveRecord
         return InvoiceProcess::find()->where(['status' => InvoiceProcess::STATUS_PENDING, 'type' => $type])->one();
     }
 
+    public static function getPausedInvoiceProcess($type)
+    {
+        return InvoiceProcess::find()->where(['status' => InvoiceProcess::STATUS_PAUSED, 'type' => $type])->one();
+    }
+
     public static function endProcess($type)
     {
         $invoice_process = InvoiceProcess::getPendingInvoiceProcess($type);
@@ -156,6 +163,34 @@ class InvoiceProcess extends \yii\db\ActiveRecord
         if($invoice_process) {
             $invoice_process->status = InvoiceProcess::STATUS_FINISHED;
             $invoice_process->end_datetime = (new \DateTime('now'))->getTimestamp();
+            return $invoice_process->save();
+        }
+
+        return false;
+    }
+
+    /**
+    * Cambia el estado del proceso a pausado
+    */
+    public static function pauseProcess($type){
+        $invoice_process = InvoiceProcess::getPendingInvoiceProcess($type);
+
+        if($invoice_process) {
+            $invoice_process->status = InvoiceProcess::STATUS_PAUSED;
+            return $invoice_process->save();
+        }
+
+        return false;
+    }
+
+    /**
+    * Cambia el estado del proceso a pendiente
+    */
+    public static function pendingProcess($type){
+        $invoice_process = InvoiceProcess::getPausedInvoiceProcess($type);
+
+        if($invoice_process) {
+            $invoice_process->status = InvoiceProcess::STATUS_PENDING;
             return $invoice_process->save();
         }
 
