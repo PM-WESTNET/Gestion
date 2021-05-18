@@ -25,6 +25,8 @@ use app\modules\sale\models\TaxRate;
 use app\modules\config\models\Config;
 use yii\helpers\Url;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Da\QrCode\QrCode;
+//use Da\QrCode\Format\BookmarkFormat;
 
 /**
  * BillController implements the CRUD actions for Bill model.
@@ -855,6 +857,26 @@ class BillController extends Controller
         $code = $cuit . sprintf("%02d", $model->billType->code) . sprintf("%04d", $model->getPointOfSale()->number) . $model->ein . (new \DateTime($model->ein_expiration))->format("Ymd");
 
         $barcode = new BarcodeGeneratorPNG();
+
+        $jsonCode = [
+                       "ver" => 1,
+                       "fecha" => $model->date,
+                       "cuit" => str_replace("-","",$companyData->tax_identification),
+                       "ptoVta" => $model->getPointOfSale()->number,
+                       "tipoCmp" => $model->billType->code,
+                       "nroCmp" => $model->number,
+                       "importe" => $model->total,
+                       "moneda" => "PES",
+                       "ctz" => 1,
+                       "tipoDocRec" => $model->customer->documentType->code,
+                       "nroDocRec" => str_replace("-","",$model->customer->document_number),
+                       "tipoCodAut" => "E",
+                       "codAut" => $model->ein
+                    ];
+        $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
+        ->setSize(500)
+        ->setMargin(5);
+
         $content = $this->renderPartial('pdf.php',[
             'model' => $model,
             'dataProvider' => $dataProvider,
@@ -868,7 +890,8 @@ class BillController extends Controller
             'company' => $company,
             'companyData' => $companyData,
             'barcode' => $barcode,
-            'code' => $code
+            'code' => $code,
+            'qrCode' => $qrCode
 
         ]);
 
