@@ -339,7 +339,7 @@ if($profile) {
 	    	<div id="footer-col-2">
 	    		
 				<h5>
-					<?= Html::img('/'.Yii::$app->params['path'].'/'.Yii::$app->params['logo-afip'], ['alt' => 'Logo Afip', 'style'=>'width:100px;']) ?> <br>
+					<?= Html::img(Yii::$app->params['path'].'/'.Yii::$app->params['logo-afip'], ['alt' => 'Logo Afip', 'style'=>'width:100px;']) ?> <br>
 					<b>Comprobante Autorizado </b>
 				</h5>
 	    	</div>
