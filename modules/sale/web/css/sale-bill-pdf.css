@@ -118,8 +118,14 @@
 	float: left;
 	margin-left: 2%;
 }
+.sub-header .col-data-client .barcode-img{
+	width: 60%;
+	margin-top:2px;
+}
 
-
+.sub-header .col-data-client .barcode-img .text_payment_code{
+	font-size: 12px;
+}
 
 /*End sub-header*/
 
@@ -168,13 +174,13 @@
 }
 
 .content .barcode-img{
-	width: 60%;
+	width: 50%;
 	float: left;
 	padding-top: 2%;
 }
 
 .content .barcode-data{
-	width: 30%;
+	width: 40%;
 	float: left;
 	margin-left: 5%;
 	font-size: 15px;
@@ -184,29 +190,51 @@
 
 /*Begin footer*/
 .footer{
-	margin-top: 2%;
+	margin-top: 1%;
 }
 
-
-.footer .footer-barcode{
-	overflow: hidden;
-	padding: 0% 1%;
-}
-
-.footer .footer-barcode-img{
-	padding-top: 1%;
-	width: 47%;
-	float: left;
-}
-.footer .footer-barcode-data{
-	width: 50%;
-	float: left;
-	margin-left: 3%;
-	font-size: 15px;
-}
 .text_payment_code{
 	text-align: center;
 	font-weight: bold;
 }
+
+.footer-barcode{
+	overflow: hidden;
+}
+
+#footer-col-1{
+	text-align: center;
+	width: 24%;
+	float: left;
+	margin-bottom: 5px;
+}
+
+#footer-col-2{
+	width: 26%;
+	float: left;
+	/*background-color: green;*/
+
+}
+
+#footer-col-3{
+	padding-top: 3%;
+	width: 45%;
+	float: left;
+	/*background-color: blue;*/
+	text-align: right;
+	font-size: 12px;
+
+}
+/*
+#cae{
+	width: 50%;
+	align-items: right;
+	text-align: right;
+}
+#date-vto-cae{
+	width: 50%;
+	text-align: left;
+}
+*/
 /*End footer*/
 /*End Bill*/
