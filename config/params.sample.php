@@ -6,7 +6,7 @@ return [
     'web_logo' => 'logo-white.jpg', //full path, por ejemplo 'http://localhost/arya/web/images/quoma.png',
     'web_logo_bgblack' => 'logo01.svg',
     'path'=> 'images',
-    
+    'logo-afip' => 'logo-afip.png',
     //Behaviors:
     
     /*** Products ***/

@@ -335,17 +335,18 @@ if($profile) {
 		</div>
 		<?php if($model->billType->invoice_class_id) { ?>
 	    <div class="footer-barcode">
-            <div class="footer-barcode-img">
-            	<?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($code, $barcode::TYPE_CODABAR, 2, 50)) . '">';?>
-	        	<div class="text_payment_code">
-	        		<?= $code ?>      
-	        	</div> 
-            </div>
-            <div class="footer-barcode-data">
-                <div>Código de Autorización Electrónica</div>
-                <div>C.A.E. Nº: <?=$model->ein ?></div>
-                <div>Fecha de Vencimiento de C.A.E.: <?=$formatter->asDate($model->ein_expiration);?></div>
-            </div>
+	    	<div id="footer-col-1"><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px;']) ?></div>
+	    	<div id="footer-col-2">
+	    		
+				<h5>
+					<?= Html::img('/'.Yii::$app->params['path'].'/'.Yii::$app->params['logo-afip'], ['alt' => 'Logo Afip', 'style'=>'width:100px;']) ?> <br>
+					<b>Comprobante Autorizado </b>
+				</h5>
+	    	</div>
+	    	<div id="footer-col-3">
+	    		<div id="cae"><b>C.A.E. Nº:</b> <?=$model->ein ?></div>
+				<div id="date-vto-cae"><b>Fecha de Vencimiento de C.A.E.:</b> <?=$formatter->asDate($model->ein_expiration);?></div>
+	    	</div>
 	    </div>
 	    <?php } ?>
 	<?php } ?>
