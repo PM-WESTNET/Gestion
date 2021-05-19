@@ -26,12 +26,57 @@ class ZoneController extends RestController
     protected function verbs()
     {
         return [
-            'index' => ['GET', 'HEAD'],
+            'index' => ['GET', 'HEAD', 'POST'],
         ];
     }
 
+
     /**
-     * Retorna el contrato segun el id pasado como parametro.
+     * @SWG\Post(path="/isp/api/zone/index",
+     *     tags={"Zona"},
+     *     summary="",
+     *     description="Retorna la zona segun el id pasado como parametro.",
+     *     produces={"application/json"},
+     *     security={{"auth":{}}},
+     *     @SWG\Parameter(
+     *        in = "body",
+     *        name = "body",
+     *        description = "",
+     *        required = true,
+     *        type = "integer",
+     *        @SWG\Schema(
+     *          @SWG\Property(property="zone_id", type="integer", description="ID de la zona"),
+     *        )
+     *     ),
+     *
+     *
+     *     @SWG\Response(
+     *         response = 200,
+     *         description = "
+     *           {
+     *               
+     *           }
+     *                      
+     *         "
+     *
+     *     ),
+     *       @SWG\Response(
+     *         response = 400,
+     *         description = "
+     *            {
+     *               'Error' => true,
+     *                'Message' => 'No zone_id specified.'
+     *             }
+     *     ",
+     *         @SWG\Schema(ref="#/definitions/Error1"),
+     *     ),
+     *
+     * )
+     *
+     */
+
+    /**
+     * Retorna la zona segun el id pasado como parametro.
      *
      * @return mixed
      */
@@ -40,7 +85,7 @@ class ZoneController extends RestController
 
         $post = Yii::$app->request->post();
 
-        $zone_id = (isset($post['id']) ?  $post['id'] : null);
+        $zone_id = (isset($post['zone_id']) ?  $post['zone_id'] : null);
         $name = (isset($post['name']) ?  $post['name'] : null);
 
         if($zone_id) {
