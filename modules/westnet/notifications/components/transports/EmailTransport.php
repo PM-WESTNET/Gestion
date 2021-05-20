@@ -158,7 +158,7 @@ class EmailTransport implements TransportInterface {
                 Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
                 //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
-                sleep(1);
+                sleep(2);
             }
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
