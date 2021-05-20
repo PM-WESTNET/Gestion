@@ -46,10 +46,7 @@ use yii\widgets\MaskedInput;
     </div>
     <div class="row">
         <div class="col-xs-12">
-            <?= $form->field($model, 'adhered_by')->dropDownList([
-                'administration' => Yii::t('app', 'Administration'),
-                'sales' => Yii::t('app', 'Sales'),
-            ])?>
+            <?= $form->field($model, 'adhered_by')->dropDownList($roles_for_adherence)?>
         </div>
     </div>
     <div class="form-group">
