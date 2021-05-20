@@ -247,7 +247,7 @@ $config = [
         'accounting' => [
             'class' => 'app\modules\accounting\AccountingModule',
         ],
-        'westnet' => [
+        'isp' => [
             'class' => 'app\modules\westnet\WestnetModule',
         ],
         'afip' => [
