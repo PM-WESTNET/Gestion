@@ -16,6 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <?= $this->render('_form', [
         'model' => $model,
+        'roles_for_adherence' => $roles_for_adherence,
     ]) ?>
 
 </div>

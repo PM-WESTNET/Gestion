@@ -18,6 +18,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Update');
 
     <?= $this->render('_form', [
         'model' => $model,
+        'roles_for_adherence' => $roles_for_adherence,
     ]) ?>
 
 </div>
