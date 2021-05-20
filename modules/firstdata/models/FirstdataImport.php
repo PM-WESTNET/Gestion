@@ -17,6 +17,7 @@ use app\modules\firstdata\components\FirstdataImport as Import;
  * @property string $status
  * @property string $response_file
  * @property string $observation_file
+ * @property int $firstdata_config_id
  *
  * @property FirstdataImportPayment[] $firstdataImportPayments
  */
@@ -50,12 +51,13 @@ class FirstdataImport extends ActiveRecord
     public function rules()
     {
         return [
-            [['response_file', 'money_box_account_id'], 'required'],
-            [['presentation_date', 'created_at'], 'integer'],
+            [['response_file', 'money_box_account_id', 'firstdata_config_id'], 'required'],
+            [['presentation_date', 'created_at', 'firstdata_config_id'], 'integer'],
             [['status'], 'string'],
             [['response', 'total', 'registers'],  'safe'],
             [['response'], 'file', 'extensions' => 'txt'],
             [['response_file', 'observation_file'], 'string', 'max' => 255],
+            [['firstdata_config_id'], 'exist', 'skipOnError' => true, 'targetClass' => FirstdataCompanyConfig::className(), 'targetAttribute' => ['firstdata_config_id' => 'firstdata_company_config_id']],
         ];
     }
 
@@ -71,6 +73,7 @@ class FirstdataImport extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'response_file' => Yii::t('app', 'Response File'),
             'observation_file' => Yii::t('app', 'Observation File'),
+            'firstdata_config_id' => Yii::t('app', 'Company'),
         ];
     }
 
@@ -80,6 +83,14 @@ class FirstdataImport extends ActiveRecord
     public function getFirstdataImportPayments()
     {
         return $this->hasMany(FirstdataImportPayment::className(), ['firstdata_import_id' => 'firstdata_import_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFirstdataConfig()
+    {
+        return $this->hasOne(FirstdataCompanyConfig::className(), ['firstdata_company_config_id' => 'firstdata_config_id']);
     }
 
     public function uploadFiles()
