@@ -16,6 +16,25 @@ use app\modules\sale\models\BillType;
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
+$this->registerJs("
+    $(document).ready(function(){
+        let nameButton = null;
+
+        $('form').submit(function(e){
+            $('button').attr('disabled', true);
+
+            if($('button').attr('disabled') == 'disabled'){
+                if(nameButton == null)
+                    nameButton = $('button',this).text();
+                $('button').text('Cargando...');
+            }
+
+            setTimeout(function(){
+                $('button').attr('disabled', false).text(nameButton);
+            }, 2000);
+        });
+    });
+");
 
 $items = [];
 $alwaysVisibleItems = [];
