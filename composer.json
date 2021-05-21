@@ -53,7 +53,8 @@
         "2amigos/yii2-ckeditor-widget": "2.2.*",
         "markrogoyski/ipv4-subnet-calculator": "3.*",
         "picqer/php-barcode-generator": "^0.3.0",
-        "2amigos/qrcode-library": "^2.0"
+        "2amigos/qrcode-library": "^2.0",
+        "kartik-v/yii2-field-range": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "2.0.*",
