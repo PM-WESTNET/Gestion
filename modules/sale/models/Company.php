@@ -373,4 +373,8 @@ class Company extends \app\components\db\ActiveRecord
     {
         return Company::find()->where(['parent_id' => null])->andWhere(['status' => 'enabled'])->all();
     }
+
+    public static function FindCompanyByID($company_id){
+        return self::find()->where(['company_id' => $company_id])->one();
+    }
 }
