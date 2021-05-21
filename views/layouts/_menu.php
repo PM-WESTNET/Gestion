@@ -238,6 +238,8 @@ if (Yii::$app->getModule('reports')) {
         '<li class="divider"></li>',
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
         ['label' => ReportsModule::t('app', 'Push notifications report'), 'url' => ['/reports/reports/push-notifications-report']],
+        ['label' => ReportsModule::t('app', 'Changes of company name'), 'url' => ['/reports/reports/change-company-name']],
+        
     ]];
 }
 
