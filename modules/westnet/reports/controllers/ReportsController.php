@@ -16,10 +16,6 @@ use app\components\web\Controller;
 
 use app\components\helpers\GraphData;
 
-use app\components\helpers\ExcelExporter;
-
-use PHPExcel_Style_NumberFormat;
-
 use app\modules\config\models\Config;
 
 use app\modules\sale\models\Customer;
@@ -37,7 +33,6 @@ use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 
-use webvimark\modules\UserManagement\models\User;
 
 use app\modules\checkout\models\PaymentMethod;
 
