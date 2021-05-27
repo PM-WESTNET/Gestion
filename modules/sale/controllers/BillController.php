@@ -499,6 +499,9 @@ class BillController extends Controller
 
         $model = $this->findModel($id);
 
+        if(empty($model->total))
+            Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+
         if (!empty($model->billDetails) && $model->status != 'closed') {
             if (!$model->close()) {
                 $keys = Bill::getConcatedKeyErrors($model);
