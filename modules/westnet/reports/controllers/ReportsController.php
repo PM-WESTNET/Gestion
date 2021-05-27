@@ -16,6 +16,10 @@ use app\components\web\Controller;
 
 use app\components\helpers\GraphData;
 
+use app\components\helpers\ExcelExporter;
+
+use PHPExcel_Style_NumberFormat;
+
 use app\modules\config\models\Config;
 
 use app\modules\sale\models\Customer;
@@ -33,6 +37,7 @@ use app\modules\westnet\models\search\NotifyPaymentSearch;
 use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 
+use webvimark\modules\UserManagement\models\User;
 
 use app\modules\checkout\models\PaymentMethod;
 
@@ -1105,5 +1110,32 @@ class ReportsController extends Controller
             'dataProvider' => $dataProvider,
         ]);
 
+    }
+
+    public function actionCustomersByNodeExport(){
+
+        $search = new CustomerSearch();
+
+        $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
+
+        if (User::hasRole('admin')) {
+            $excel = ExcelExporter::getInstance();
+            $excel->create('clientes-por-nodo', [
+                'A' => ['node', 'Nodo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+                'B' => ['total', 'Total', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            ])->createHeader();
+
+            foreach ($dataProvider->allModels as $key => $value) {
+                $excel->writeRow([
+                    'node'=> $value['node'],
+                    'total' => $value['total']
+                ]);
+            }
+            
+            $excel->download('clientes-por-nodo.xls');
+        }else{
+            Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
+            return $this->redirect('/reports/reports/customers-by-node');
+        }
     }
 }
