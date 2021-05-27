@@ -7,6 +7,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
+use app\modules\config\models\Config;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\sale\modules\contract\models\Contract */
@@ -16,6 +17,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Customers'), 'url' =
 $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['/sale/customer/view', 'id' => $model->customer_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
 
+$google_api_key = Config::getValue('google_maps_api_key');
 $customer = $model->customer;
 ?>
 
@@ -232,6 +234,7 @@ $customer = $model->customer;
     ]);
     ?>
 
+    <!-- Here starts google maps stuff -->
     <label>Dirección del Contrato</label>
     <div id="map_canvas" style="width: 100%; height: 300px;">
 
@@ -258,7 +261,7 @@ $customer = $model->customer;
 <?= $this->render('_modal-contract-start-low-process')?>
 
 <script>
-    var ContractView = new function () {
+    var ContractView = new function(){
         
         this.tentative_node= '<?php 
                              $tentativeNode= Node::findOne(['subnet' => $model->tentative_node]); 
@@ -504,6 +507,8 @@ $customer = $model->customer;
                     echo "lat:" . $lt[0] . ", lng:" . $lt[1];
                 }
                 ?>};
+                
+            // here it gets the div component that its rendered
             var map = new google.maps.Map(document.getElementById('map_canvas'), {
                 center: lat,
                 scrollwheel: false,
@@ -569,6 +574,6 @@ $customer = $model->customer;
 
     }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=<?$google_api_key?>"></script>
 
 <?php $this->registerJs("ContractView.init();"); ?>
