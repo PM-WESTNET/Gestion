@@ -1129,7 +1129,7 @@ class ReportsController extends Controller
             $excel->download('clientes-por-nodo.xls');
         }else{
             Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
-            return $this->redirect('/reports/reports/customers-by-node');
+            $this->redirect('/reports/reports/customers-by-node');
         }
     }
 }
