@@ -18,6 +18,7 @@ use yii\filters\VerbFilter;
 use app\modules\sale\components\BillExpert;
 use yii\data\ActiveDataProvider;
 use yii\web\Response;
+use Da\QrCode\QrCode;
 
 /**
  * BillController implements the CRUD actions for Bill model.
@@ -837,9 +838,30 @@ class BillController extends Controller
             'pagination' => false
         ]);
 
+        $jsonCode = [
+           "ver" => 1,
+           "fecha" => $model->date,
+           "cuit" => str_replace("-","",$companyData->tax_identification),
+           "ptoVta" => $model->getPointOfSale()->number,
+           "tipoCmp" => $model->billType->code,
+           "nroCmp" => $model->number,
+           "importe" => $model->total,
+           "moneda" => "PES",
+           "ctz" => 1,
+           "tipoDocRec" => $model->customer->documentType->code,
+           "nroDocRec" => str_replace("-","",$model->customer->document_number),
+           "tipoCodAut" => "E",
+           "codAut" => $model->ein
+        ];
+        $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
+        ->setSize(500)
+        ->setMargin(5);
+
         $view = $this->render('pdf', [
             'model' => $model,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
+            'qrCode' => $qrCode
+
         ]);
 
         $pdf = ' ';

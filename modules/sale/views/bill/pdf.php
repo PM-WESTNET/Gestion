@@ -455,6 +455,7 @@ $companyData = $model->company;
                 <tr>
                     <td style="width: 50%;">
                         <img width="100%" src="<?=Url::toRoute(['/sale/bill/barcode', 'id'=>$model->bill_id], true) ?>"/>
+                        <div id="footer-col-1"><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px;']) ?></div>
                     </td>
                     <td style="width: 50%;">
                         <div class="titulo">Código de Autorización Electrónica</div>
