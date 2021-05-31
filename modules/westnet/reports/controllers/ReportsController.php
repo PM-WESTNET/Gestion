@@ -45,6 +45,7 @@ use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
+use yii\data\ArrayDataProvider;
 
 /**
  * CustomerController
@@ -1131,5 +1132,22 @@ class ReportsController extends Controller
             Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
             return $this->redirect('/reports/reports/customers-by-node');
         }
+    }
+
+    public function actionCustomersBySpeed(){
+        $list_customer_by_speed = Yii::$app->db->createCommand('SELECT cu.customer_id, cu.name, cu.lastname, cu.code, co.contract_id, cd.contract_detail_id, pr.product_id, pr.name as name_product FROM customer cu
+            LEFT JOIN contract co ON co.customer_id = cu.customer_id 
+            LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
+            LEFT JOIN product pr ON pr.product_id = cd.product_id
+            WHERE pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC')->queryAll();
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $list_customer_by_speed,
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+
+        return $this->render('customer-by-speed',['dataProvider' => $dataProvider]);
     }
 }
