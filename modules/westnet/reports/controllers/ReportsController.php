@@ -1135,19 +1135,11 @@ class ReportsController extends Controller
     }
 
     public function actionCustomersBySpeed(){
-        $list_customer_by_speed = Yii::$app->db->createCommand('SELECT cu.customer_id, cu.name, cu.lastname, cu.code, co.contract_id, cd.contract_detail_id, pr.product_id, pr.name as name_product FROM customer cu
-            LEFT JOIN contract co ON co.customer_id = cu.customer_id 
-            LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
-            LEFT JOIN product pr ON pr.product_id = cd.product_id
-            WHERE pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC')->queryAll();
+        $reportSearch = new ReportSearch();
+        $list_customer_by_speed = $reportSearch->findCustomerBySpeed(Yii::$app->request->get());
+        
+        
 
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $list_customer_by_speed,
-            'pagination' => [
-                'pageSize' => 15,
-            ],
-        ]);
-
-        return $this->render('customer-by-speed',['dataProvider' => $dataProvider]);
+        return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
     }
 }
