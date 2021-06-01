@@ -1282,6 +1282,7 @@
     'Document image' => 'Imagen de documento',
     'Tax image' => 'Imagen de impuesto',
     'Customers By Node' => 'Clientes por Nodo',
+    'Customers By Speed' => 'Clientes por Velocidad',
     'Created at' => 'Creado el',
     'Customers by publicity shape' => 'Clientes por canales de publicidad',
     'gigantografía' => 'Gigantografía',
