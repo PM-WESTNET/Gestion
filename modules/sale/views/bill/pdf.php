@@ -454,7 +454,7 @@ $companyData = $model->company;
             <table class="table table-bordered">
                 <tr>
                     <td style="width: 50%;">
-                        <div><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px;']) ?></div>
+                        <div><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px; margin-left:80px;']) ?></div>
                     </td>
                     <td style="width: 50%;">
                         <div class="titulo">Código de Autorización Electrónica</div>
