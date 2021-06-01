@@ -16,6 +16,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Customers'), 'url' =
 $this->params['breadcrumbs'][] = ['label' => $model->customer->name, 'url' => ['/sale/customer/view', 'id' => $model->customer_id]];
 $this->params['breadcrumbs'][] = Yii::t('app', 'Contract Number') . ": " . $model->contract_id;
 
+$google_api_key = Config::getValue('google_maps_api_key');
 $customer = $model->customer;
 ?>
 
@@ -569,6 +570,6 @@ $customer = $model->customer;
 
     }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=<?php echo $google_api_key ?>"></script>
 
 <?php $this->registerJs("ContractView.init();"); ?>
