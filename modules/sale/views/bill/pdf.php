@@ -410,6 +410,7 @@ $companyData = $model->company;
     <tr style=" display: block; border-top: 2px solid black;padding-bottom: 5px;padding-top: 5px;padding-left: 30px; font-size: 16px;">
         <td>
             <img width="100%" src="<?=Url::toRoute(['/sale/customer/barcode', 'code'=>$model->customer->payment_code], true) ?>"/>
+            <div id="footer-col-1"><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px;']) ?></div>
         </td>
         <td>
             <p style="margin-bottom:5px; margin-top:5px;padding-left: 30px; font-weight: 700;">CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
@@ -455,7 +456,6 @@ $companyData = $model->company;
                 <tr>
                     <td style="width: 50%;">
                         <img width="100%" src="<?=Url::toRoute(['/sale/bill/barcode', 'id'=>$model->bill_id], true) ?>"/>
-                        <div id="footer-col-1"><?= Html::img($qrCode->writeDataUri(), ['alt' => 'Código QR', 'style' => 'width:100px;']) ?></div>
                     </td>
                     <td style="width: 50%;">
                         <div class="titulo">Código de Autorización Electrónica</div>

@@ -831,6 +831,8 @@ class BillController extends Controller
         $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
         $model = $this->findModel($id);
+        $companyData = $model->company;
+
         $this->layout = '//pdf';
 
         $dataProvider = new \yii\data\ActiveDataProvider([
