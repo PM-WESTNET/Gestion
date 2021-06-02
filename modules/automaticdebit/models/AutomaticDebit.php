@@ -58,21 +58,18 @@ class AutomaticDebit extends ActiveRecord
         return [
             [['customer_id', 'bank_id', 'cbu', 'status'], 'required'],
             [['customer_id', 'bank_id', 'status', 'created_at', 'updated_at'], 'integer'],
-
-            //[['cbu','beneficiario_number'], 'string', 'length' => 22], // old code
-
-            [['beneficiario_number'], 'string', 'length' => 22], // this variable with the same rules as before
-            //[['cbu'], 'number'], // turning CBU into a number input doesnt work because we want to limit the 'string length'
+            [['beneficiario_number'], 'string', 'length' => 22], 
             // so, we use a regex to match any number and then accept the input as a string (numbers only).
-            [['cbu'], 'match', 'pattern' => '/^[0-9]+$/'], // this will invalidate any input that isnt a number
-            [['cbu'], 'string', 'length' => 22],
-
+            [['cbu'], 'match', 'pattern' => '/^[0-9]{22}$/'], // this will invalidate any input that isnt a number with length 22
+            // 9999999999999999999999
             [['customer_type'], 'string'],
             [['bank_id'], 'exist', 'skipOnError' => true, 'targetClass' => Bank::class, 'targetAttribute' => ['bank_id' => 'bank_id']],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
         ];
     }
 
+
+    
     /**
      * {@inheritdoc}
      */
