@@ -14,6 +14,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
 {
     public $from_date;
     public $to_date;
+    public $adhered_by;
     
     /**
      * {@inheritdoc}
@@ -22,7 +23,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
     {
         return [
             [['firstdata_automatic_debit_id', 'customer_id', 'company_config_id'], 'integer'],
-            [['from_date', 'to_date', 'user_id'], 'safe']
+            [['from_date', 'to_date', 'user_id','created_at','adhered_by'], 'safe']
         ];
     }
 
@@ -69,6 +70,10 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
         if (!empty($this->to_date)) {
             $query->andWhere(['<', 'created_at', (strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'))+86400)]);
         }
+
+        $query->andFilterWhere([
+            'adhered_by' => $this->adhered_by,
+        ]);
 
         return $dataProvider;
     }

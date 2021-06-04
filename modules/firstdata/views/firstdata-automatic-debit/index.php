@@ -64,8 +64,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function($model) {
                     return $model->adhered_by;
                        
-
-                }
+                },
+                'filter' => Select2::widget([
+                    'name' => 'FirstdataAutomaticDebitSearch[adhered_by]',
+                    'data' => $roles_for_adherence,
+                    'options' => ['placeholder' => Yii::t('app', 'Seleccione un rol...')],
+                    'pluginOptions' => ['allowClear' => true]
+                ])
             ],
             'created_at:date',
 

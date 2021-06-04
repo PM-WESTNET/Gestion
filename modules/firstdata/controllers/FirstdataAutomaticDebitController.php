@@ -38,9 +38,18 @@ class FirstdataAutomaticDebitController extends Controller
         $searchModel = new FirstdataAutomaticDebitSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
+        $roles_for_adherence = [' ' => 'Todos'];
+        $roles_for_adherence[] = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
+
+        foreach ($roles_for_adherence[0] as $key => $value) {
+            unset($roles_for_adherence[$key]);
+            $roles_for_adherence[$value] = $value;
+        }
+
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'roles_for_adherence' => $roles_for_adherence,
         ]);
     }
 
