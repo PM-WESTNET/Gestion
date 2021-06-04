@@ -898,7 +898,7 @@ class ReportSearch extends Model
                 LEFT JOIN contract co ON co.customer_id = cu.customer_id 
                 LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
                 LEFT JOIN product pr ON pr.product_id = cd.product_id
-                WHERE pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC';
+                WHERE cu.status = "enabled" AND pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC';
 
         if(!empty($this->code) || !empty($this->name) || !empty($this->lastname) || !empty($this->name_product)){
 
@@ -921,8 +921,8 @@ class ReportSearch extends Model
 
             }
             if (!empty($this->name_product)) {
-                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$this->name_product.'%')->queryAll();
+                $query_new = str_replace('ORDER BY','AND pr.product_id = :name_product ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product',$this->name_product)->queryAll();
             }
         }else{
             $result = Yii::$app->db->createCommand($query)->queryAll();

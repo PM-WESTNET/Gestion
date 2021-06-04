@@ -1133,4 +1133,13 @@ class Product extends ActiveRecord
         return false;
     }
 
+
+    /**
+     * Devuelve todo los tipos de planes
+     * @param
+     */
+
+    public static function findAllPlan(){
+        return self::find()->where(['status' => 'enabled'])->andWhere(['type' => 'plan'])->all();
+    }
 }

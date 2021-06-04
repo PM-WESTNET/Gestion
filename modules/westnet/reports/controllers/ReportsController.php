@@ -10,7 +10,9 @@ use yii\db\Expression;
 
 
 use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 
+use yii\helpers\ArrayHelper;
 
 use app\components\web\Controller;
 
@@ -24,6 +26,7 @@ use app\modules\config\models\Config;
 
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\PublicityShape;
+use app\modules\sale\models\Product;
 
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\models\ReportData;
@@ -44,8 +47,6 @@ use app\modules\checkout\models\PaymentMethod;
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
-
-use yii\data\ArrayDataProvider;
 
 /**
  * CustomerController
@@ -1137,9 +1138,12 @@ class ReportsController extends Controller
     public function actionCustomersBySpeed(){
         $reportSearch = new ReportSearch();
         $list_customer_by_speed = $reportSearch->findCustomerBySpeed(Yii::$app->request->get());
+        $list_plan = Product::findAllPlan();
         
-        
-
-        return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
+        return $this->render('customer-by-speed',
+            ['dataProvider' => $list_customer_by_speed,
+             'reportSearch' => $reportSearch,
+             'list_plan' => ArrayHelper::map($list_plan,'product_id','name')
+            ]);
     }
 }

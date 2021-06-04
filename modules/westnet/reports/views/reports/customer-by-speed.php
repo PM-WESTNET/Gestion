@@ -1,4 +1,7 @@
 <?php
+use yii\helpers\Html;
+use kartik\select2\Select2;
+
 $this->title = Yii::t('app','Customers By Speed');
 ?>
 
@@ -27,8 +30,16 @@ $this->title = Yii::t('app','Customers By Speed');
             ],
             [
                 'attribute' => 'name_product',
-                'format' => 'text',
+                'format' => 'raw',
                 'label' => 'Plan',
+                'filter'=> Select2::widget([
+                    'name' => 'ReportSearch[name_product]',
+                    'data' => $list_plan,
+                    'options' => ['placeholder' => 'Seleccione un plan...'],
+                    'pluginOptions' => [
+                        'allowClear' => true
+                    ],
+                ]),
             ],
         ]
     ])?>
