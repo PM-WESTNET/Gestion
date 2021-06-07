@@ -120,6 +120,7 @@ class NotificationController extends Controller
      * Comando para enviar las campañas de email no calendarizadas. Implementa mutex
      */
     public function actionSendEmails() {
+        die("ActionSendMails llego");
 
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
