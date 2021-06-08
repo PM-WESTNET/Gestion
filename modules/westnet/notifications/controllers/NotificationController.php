@@ -386,11 +386,13 @@ class NotificationController extends Controller {
         Yii::$app->response->format = 'json';
 
         $return = [
-            'status' => 'ko'
+            'status' => 'ok'
         ];
 
         $transport_id = Yii::$app->request->post('transport_id');
         $company_id = Yii::$app->request->post('company_id');
+
+        die("variables:\ntransport_id: ".$transport_id."\ncompany_id: ".$company_id);
 
         if($transport_id && $company_id) {
             $transport = Transport::findOne(['transport_id'=>$transport_id]);
@@ -406,6 +408,7 @@ class NotificationController extends Controller {
                         $data[] = $item;
                     }
                 }
+                //die("llego al return interior");
                 $return = [
                     'status' => 'ok',
                     'data' => $data,
@@ -413,6 +416,7 @@ class NotificationController extends Controller {
                 ];
             }
         }
+        //die("llego al return exterior");
         return $return;
     }
 
