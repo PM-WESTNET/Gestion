@@ -92,7 +92,7 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
             var transport_id = $('#transport').val();
 
             $.ajax({
-                url: '<?= Url::to(['/westnet/notifications/notification/find-email-transports'])  ?>',
+                url: '<?= Url::to(['/isp/notifications/notification/find-email-transports'])  ?>',
                 data: {
                     company_id: company_id,
                     transport_id: transport_id
