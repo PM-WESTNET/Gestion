@@ -1300,8 +1300,13 @@ class CustomerController extends Controller
                 cu.document_number, 
                 UPPER(cu.name) AS name, 
                 UPPER(cu.lastname) AS lastname, 
-                cu.code 
+                cu.code,
+                ad.street,
+                ad.number,
+                zo.name
                 FROM customer cu
+                LEFT JOIN address ad ON cu.address_id = ad.address_id
+                LEFT JOIN zone zo ON ad.zone_id = zo.zone_id
                 WHERE cu.customer_id IN (
                     SELECT MAX(c.customer_id) 
                             FROM customer c 
