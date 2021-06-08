@@ -1304,9 +1304,11 @@ class CustomerController extends Controller
                 cu.code,
                 ad.street,
                 ad.number,
-                zo.name
+                zo.name,
+                co.contract_id
                 FROM customer cu
-                LEFT JOIN address ad ON cu.address_id = ad.address_id
+                LEFT JOIN contract co ON  co.customer_id = cu.customer_id
+                LEFT JOIN address ad ON co.address_id = ad.address_id
                 LEFT JOIN zone zo ON ad.zone_id = zo.zone_id
                 WHERE cu.customer_id IN (
                     SELECT MAX(c.customer_id) 
