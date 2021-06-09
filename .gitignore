@@ -103,7 +103,8 @@ web/firstdataImports/
 # docker
 docker_sample/web-server/gestion.conf
 docker_gestion_*
+web/images/logo-white.jpg
+web/images/logo01.jpg
 
 # @gabi ignores
 composer.lock
-
