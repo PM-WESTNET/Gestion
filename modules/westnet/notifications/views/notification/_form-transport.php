@@ -89,8 +89,11 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
         }
 
         this.loadEmail = function(){
+            //throw new Error("romper1");
             var company_id = $('#notification-company_id').val();
             var transport_id = $('#transport').val();
+            console.log(company_id);
+            console.log(transport_id);
 
             $.ajax({
                 url: '<?= Url::to(['/isp/notifications/notification/find-email-transports'])  ?>',
@@ -103,6 +106,7 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
             }).done(function(data){
                 $('#field-email_transport_id').hide();
                 if(data.status == 'ok') {
+                    console.log(`status ${data.status}`);
                     var select = $('#notification-email_transport_id');
                     select.html('');
                     if(!data.data.length){
@@ -119,6 +123,8 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
                         $('#field-email_transport_id label').html('Layout');
                     }
                     $('#field-email_transport_id').show();
+                }else{
+                    console.log(`status ${data.status}`);
                 }
             });
         }

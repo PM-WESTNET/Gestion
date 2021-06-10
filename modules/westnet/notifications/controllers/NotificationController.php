@@ -79,18 +79,17 @@ class NotificationController extends Controller {
     public function create() {
         $model = new Notification();
         $model->scenario = 'create';
-
-        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-
+        $request = Yii::$app->request;
+        //die("test");
+        if ($request->isPost && $model->load($request->post())) {
             if ($model->save()) {
-                return $this->redirect(['wizard', 'id' => $model->notification_id, 'step' => 1]);
+                return $this->redirect(['wizard', 'id' => $model->notification_id, 'step' => 1]); //the array makes a composed url which ends up in actionWizard
             } else {
                 return $this->render('create', [
                     'model' => $model,
                 ]);
             }
         } else {
-
             return $this->render('create', [
                     'model' => $model,
             ]);
@@ -101,8 +100,9 @@ class NotificationController extends Controller {
     {
         $model = $this->findModel($id);
         $model->scenario = 'update';
+        $request = Yii::$app->request;
 
-        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
+        if ($request->isPost && $model->load($request->post())) {
 
             if ($model->save()) {
                 if($wizard){
@@ -115,6 +115,7 @@ class NotificationController extends Controller {
                     'model' => $model,
                 ]);
             }
+
         } else {
             return $this->render('update', [
                 'model' => $model,
@@ -384,15 +385,14 @@ class NotificationController extends Controller {
     public function actionFindEmailTransports()
     {
         Yii::$app->response->format = 'json';
+        $request = Yii::$app->request;
 
         $return = [
-            'status' => 'ok'
+            'status' => 'err'
         ];
 
-        $transport_id = Yii::$app->request->post('transport_id');
-        $company_id = Yii::$app->request->post('company_id');
-
-        die("variables:\ntransport_id: ".$transport_id."\ncompany_id: ".$company_id);
+        $transport_id = $request->post('transport_id');
+        $company_id = $request->post('company_id');
 
         if($transport_id && $company_id) {
             $transport = Transport::findOne(['transport_id'=>$transport_id]);
@@ -408,7 +408,6 @@ class NotificationController extends Controller {
                         $data[] = $item;
                     }
                 }
-                //die("llego al return interior");
                 $return = [
                     'status' => 'ok',
                     'data' => $data,
@@ -416,7 +415,6 @@ class NotificationController extends Controller {
                 ];
             }
         }
-        //die("llego al return exterior");
         return $return;
     }
 
