@@ -110,6 +110,7 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
                     var select = $('#notification-email_transport_id');
                     select.html('');
                     if(!data.data.length){
+                        //$('#field-email_transport_id').hide();
                         select.append('<option><?php echo Yii::t('app', 'No results') ?></option>');
                     } else {
                         $.each(data.data, function(i, item){
