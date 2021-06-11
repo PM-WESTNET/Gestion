@@ -68,12 +68,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             ],
-            [
-                'attribute' => 'adhered_by',
-                'value' => function($model) {
-                    return ($model->adhered_by == "administration"?Yii::t('app', "Administration"):Yii::t('app', "Sales"));
-                }
-            ],
             'created_at:date'
             
         ],

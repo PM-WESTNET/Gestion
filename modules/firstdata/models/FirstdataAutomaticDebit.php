@@ -19,7 +19,6 @@ use yii\behaviors\TimestampBehavior;
  * @property int $created_at
  * @property int $updated_at
  * @property int $user_id
- * @property string $adhered_by
  *
  * @property Customer $customer
  * @property FirstdataCompanyConfig $companyConfig
@@ -54,7 +53,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             /* [['card'], 'string', 'length' => 16], */
             ['card', 'validateCardLenght'],
             [['status'], 'string'],
-            [['block1', 'block2', 'block3', 'block4', 'card', 'adhered_by'], 'safe'],
+            [['block1', 'block2', 'block3', 'block4', 'card'], 'safe'],
             [['customer_id', 'company_config_id'], 'integer'],
             [['customer_id'], 'unique', 'on' => 'insert', 'message' => Yii::t('app', 'This customer has Firstdata service enabled')],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Customer::class, 'targetAttribute' => ['customer_id' => 'customer_id']],
@@ -80,8 +79,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             'customer_id' => Yii::t('app', 'Customer'),
             'status' => Yii::t('app', 'Status'),
             'company_config_id' => Yii::t('app', 'Company'),
-            'user_id' => Yii::t('app','Created For'),
-            'adhered_by' => 'Adherido por'
+            'user_id' => Yii::t('app','Created For')
         ];
     }
 
