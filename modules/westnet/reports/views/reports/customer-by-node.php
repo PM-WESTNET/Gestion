@@ -21,9 +21,7 @@ $this->title = Yii::t('app','Customers By Node');
             <?php echo $this->render('_customers-by-node-filters')?>
         </div>
     </div>
-    <div class="btn-export">
-        <a href="/reports/reports/customers-by-node-export" class="btn btn-primary">Exportar</a>
-    </div>
+
     <?php echo \yii\grid\GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
