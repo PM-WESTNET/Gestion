@@ -1418,7 +1418,6 @@
     'Customers Updated' => 'Clientes Actualizados',
     'Customer has been deleted successfull' => "El cliente ha sido eliminado con éxito",
     'Can`t remove this customer' => 'No se puede eliminar ',
-    'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente",
-    'Firstdata Automatic Debit Report' => 'Reporte Firstdata débito automático'
+    'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente"
 
  );

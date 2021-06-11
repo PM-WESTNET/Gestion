@@ -67,16 +67,9 @@ $this->title = Yii::t('app', 'Firstdata Automatic Debit Report');
     <?= GridView::widget([
         'dataProvider' => $debits,
         'columns' => [
-            [
-                'label' => 'Nombre Completo',
-                'value' => 'customer.fullName'
-            ],
+            'customer.fullName',
             'status',
-            [
-                'label' => 'Fecha de Creación',
-                'value' => 'created_at',
-                'format' => 'date'
-            ],
+            'created_at:date'
         ]
     ])?>
 
