@@ -59,6 +59,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 ])
 
             ],
+            [
+                'attribute' => 'adhered_by',
+                'value' => function($model) {
+                    return $model->adhered_by;
+                       
+
+                }
+            ],
             'created_at:date',
 
             [

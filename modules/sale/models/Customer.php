@@ -2227,4 +2227,11 @@ class Customer extends ActiveRecord {
             Yii::trace($debit->getErrors());
         }
     }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCompany() {
+        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
+    }
 }

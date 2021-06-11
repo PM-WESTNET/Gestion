@@ -8,7 +8,7 @@ use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\modules\firstdata\models\FirstdataAutomaticDebit;
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
-
+use app\modules\config\models\Config;
 /**
  * FirstdataAutomaticDebitController implements the CRUD actions for FirstdataAutomaticDebit model.
  */
@@ -65,14 +65,23 @@ class FirstdataAutomaticDebitController extends Controller
     public function actionCreate()
     {
         $model = new FirstdataAutomaticDebit();
+        $roles_for_adherence = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
+        
+        foreach ($roles_for_adherence as $key => $value) {
+            unset($roles_for_adherence[$key]);
+            $roles_for_adherence[$value] = $value;
+        }
+
         $model->scenario = 'insert';
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
             return $this->redirect(['view', 'id' => $model->firstdata_automatic_debit_id]);
         }
 
         return $this->render('create', [
             'model' => $model,
+            'roles_for_adherence' => $roles_for_adherence,
         ]);
     }
 
@@ -86,13 +95,20 @@ class FirstdataAutomaticDebitController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $roles_for_adherence = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
+        
+        foreach ($roles_for_adherence as $key => $value) {
+            unset($roles_for_adherence[$key]);
+            $roles_for_adherence[$value] = $value;
+        }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {   
             return $this->redirect(['view', 'id' => $model->firstdata_automatic_debit_id]);
         }
 
         return $this->render('update', [
             'model' => $model,
+            'roles_for_adherence' => $roles_for_adherence,
         ]);
     }
 
