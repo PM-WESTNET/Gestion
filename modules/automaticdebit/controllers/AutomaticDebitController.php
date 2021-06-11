@@ -89,7 +89,6 @@ class AutomaticDebitController extends Controller
      */
     public function actionUpdate($id)
     {
-
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -97,9 +96,6 @@ class AutomaticDebitController extends Controller
         }
 
         $banks = ArrayHelper::map(Bank::find()->andWhere(['status' => Bank::STATUS_ENABLED])->all(), 'bank_id', 'name');
-
-        //print_r($banks);
-        //die();
 
         return $this->render('update', [
             'model' => $model,
