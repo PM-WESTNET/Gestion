@@ -89,7 +89,6 @@ class FirstdataAutomaticDebitController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $roles_for_adherence = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->firstdata_automatic_debit_id]);
@@ -97,7 +96,6 @@ class FirstdataAutomaticDebitController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'roles_for_adherence' => $roles_for_adherence,
         ]);
     }
 
