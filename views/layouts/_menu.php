@@ -215,7 +215,6 @@ if (Yii::$app->getModule('reports')) {
             ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
             ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
             ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
-            ['label' => ReportsModule::t('app', 'Changes of company name'), 'url' => ['/reports/reports/change-company-name']],
         ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],
         ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports/costumer-variation-per-month']],
@@ -239,6 +238,7 @@ if (Yii::$app->getModule('reports')) {
         '<li class="divider"></li>',
         ['label' => ReportsModule::t('app', 'Mobile app report'), 'url' => ['/reports/reports/mobile-app']],
         ['label' => ReportsModule::t('app', 'Push notifications report'), 'url' => ['/reports/reports/push-notifications-report']],
+        ['label' => ReportsModule::t('app', 'Changes of company name'), 'url' => ['/reports/reports/change-company-name']],
         
     ]];
 }
