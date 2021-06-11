@@ -62,9 +62,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'adhered_by',
                 'value' => function($model) {
-                    return $model->adhered_by;
-                       
+                    if($model->adhered_by == "administration")
+                        return Yii::t('app', "Administration");
 
+                    else if($model->adhered_by == "sales")
+                        return Yii::t('app', "Sales");
+
+                    return null;
                 }
             ],
             'created_at:date',
