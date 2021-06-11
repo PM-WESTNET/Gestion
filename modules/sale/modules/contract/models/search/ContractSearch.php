@@ -237,8 +237,7 @@ class ContractSearch extends Contract {
                 ->leftJoin(['pti' => $subQueryPti], 'pti.contract_detail_id = cd.contract_detail_id AND ( pti.period = ' . $period->format('Ym') . " OR (" .
                     " pti.period = if( con.from_date >= date_add(date_format(now(), '%Y-%m-01'), INTERVAL (select value from `$configDB`.config where item_id = (select item_id from `$configDB`.item where attr = 'contract_days_for_invoice_next_month'))-1 DAY), " . $nextPeriod->format('Ym') . ", " . $period->format('Ym') . ") "
                         . ") ) ")
-                ->andWhere($where)
-                ->andWhere(['!=','cd.status', 'low']);
+                ->andWhere($where);
 
 
         if($this->date_new_from) {
