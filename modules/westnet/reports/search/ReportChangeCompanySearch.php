@@ -15,7 +15,7 @@ class ReportChangeCompanySearch extends ReportChangeCompany
     public function attributes()
     {
         // add related fields to searchable attributes
-        return array_merge(parent::attributes(), ['customer.name','customer.code','date2']);
+        return array_merge(parent::attributes(), ['customer.name','customer.code']);
     }
 
     public function rules()
@@ -74,6 +74,18 @@ class ReportChangeCompanySearch extends ReportChangeCompany
         ->andFilterWhere(['like', 'date', $this->date]);
             
 
+         /* if($this->start_date && $this->start_date_2){
+            $query  ->andFilterWhere([">=", 'DATE_FORMAT(formalities.start_date,"%Y-%m-%d")', $this->start_date])
+                    ->andFilterWhere(["<=", 'DATE_FORMAT(formalities.start_date,"%Y-%m-%d")', $this->start_date_2]);
+        }else{
+            $query->andFilterWhere(['like','formalities.start_date', $this->start_date]);
+        }
+
+        if($this->tray_start_date && $this->tray_start_date_2){
+            $query->andWhere('idformality in (SELECT formality_idformality from formalities_has_trays WHERE DATE_FORMAT(start_date,"%Y-%m-%d") BETWEEN "'.$this->tray_start_date.'" and "'.$this->tray_start_date_2.'" and end_date is null)');
+        }else if($this->tray_start_date && isnull($this->tray_start_date_2)){
+            $query->andWhere('idformality in (SELECT formality_idformality from formalities_has_trays WHERE start_date LIKE "'.$this->tray_start_date.'" and end_date is null)');
+        }*/   
         return $dataProvider;
     }
 }
