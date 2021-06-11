@@ -67,7 +67,7 @@ class FirstdataAutomaticDebitSearch extends FirstdataAutomaticDebit
         }
 
         if (!empty($this->to_date)) {
-            $query->andWhere(['<', 'created_at', (strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'))+86400)]);
+            $query->andWhere(['<', 'created_at', strtotime(Yii::$app->formatter->asDate($this->to_date, 'yyyy-MM-dd'))]);
         }
 
         return $dataProvider;
