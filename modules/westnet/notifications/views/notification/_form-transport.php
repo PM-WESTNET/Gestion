@@ -109,16 +109,22 @@ $integratech_transport = Transport::findOne(['slug' => 'sms-integratech']);
                     console.log(`status ${data.status}`);
                     var select = $('#notification-email_transport_id');
                     select.html('');
-                    if(!data.data.length){
-                        //$('#field-email_transport_id').hide();
-                        select.append('<option><?php echo Yii::t('app', 'No results') ?></option>');
+
+                    // debugging
+                    var isEmpty = !data.data.length;  // returns a boolean if the array has any lenght
+                    console.log(`debug data: ${isEmpty}`);
+                    console.log(`debug data: ${typeof isEmpty}`);
+
+                    if(isEmpty){
+                        select.append('<option><?php echo Yii::t('app', 'No items found') ?></option>');
+                        // consider just not showing the dropdown selection when no results are available.
                     } else {
                         $.each(data.data, function(i, item){
                             select.append('<option value="'+item.email_transport_id+'">'+item.name+'</option>');
                         });
 
                     }
-                    if(data.transport == 'email') {
+                    if(data.transport == 'email') { // transport = slug
                         $('#field-email_transport_id label').html('Email Transport');
                     } else if(data.transport == 'browser') {
                         $('#field-email_transport_id label').html('Layout');

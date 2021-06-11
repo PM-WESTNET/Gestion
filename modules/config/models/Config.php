@@ -143,7 +143,8 @@ class Config extends \app\components\db\ActiveRecord
             throw new \yii\web\HttpException(404, 'Configuration item not found: ' . $attr);
         }
         
-        if($item->multiple){
+        $isMultiConfig = $item->multiple; // generally, they all seem to be 'single' configs, but just in case.
+        if($isMultiConfig){
             $config = self::find()->where(['item_id' => $item->item_id])->all();
         }else{
             $config = self::find()->where(['item_id' => $item->item_id])->one();
