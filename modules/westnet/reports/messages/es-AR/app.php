@@ -48,5 +48,4 @@ return array(
     'Push notifications report' => 'Reporte de notificaciones push',
     'sent' => 'Enviada',
     'no sent' => 'No enviada',
-    'Changes of company name' => 'Cambios de razones sociales'
 );
