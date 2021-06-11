@@ -67,7 +67,7 @@ if($payment_method_tranferencia) {
             'from',
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template' => '{view} {update} {verify}',
+                'template' => '{view}{verify}',
                 'buttons' => [
                     'verify' => function($url, $model, $key) use ($payment_method_tranferencia_id) {
                         if($payment_method_tranferencia_id == $model->payment_method_id && $model->verified == 0) {

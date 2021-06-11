@@ -8,7 +8,6 @@ use app\modules\westnet\models\search\NotifyPaymentSearch;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\components\web\Controller;
-use app\modules\checkout\models\PaymentMethod;
 
 /**
  * NotifyPaymentController implements the CRUD actions for NotifyPayment model.
@@ -86,14 +85,13 @@ class NotifyPaymentController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->notify_payment_id]);
         }
 
         return $this->render('update', [
             'model' => $model,
-            'payment_methods' => PaymentMethod::getPaymentMethodForSelect(),
         ]);
     }
 
