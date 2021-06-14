@@ -2227,7 +2227,7 @@ class Customer extends ActiveRecord {
             Yii::trace($debit->getErrors());
         }
     }
-
+    
     /**
      * @return ActiveQuery
      */

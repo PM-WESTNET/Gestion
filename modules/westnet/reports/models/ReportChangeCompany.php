@@ -25,7 +25,7 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
     {
         return 'report_changes_companies';
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -83,11 +83,11 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
         ];
     }    
 
-    
+
     /**
      * @inheritdoc
      */
-     
+
     public function beforeSave($insert)
     {
         if (parent::beforeSave($insert)) {            
@@ -97,7 +97,7 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
             return false;
         }     
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -106,7 +106,7 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
         $this->formatDatesAfterFind();
         parent::afterFind();
     }
-     
+
     /**
      * @brief Format dates using formatter local configuration
      */
@@ -114,7 +114,7 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
     {
             $this->date = Yii::$app->formatter->asDate($this->date);
         }
-     
+
     /**
      * @brief Format dates as database requieres it
      */
@@ -122,8 +122,8 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
     {
             $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
         }
-    
-     
+
+
     /**
      * @inheritdoc
      * Strong relations: None.
@@ -132,14 +132,14 @@ class ReportChangeCompany extends \app\components\db\ActiveRecord
     {
         return true;
     }
-    
+
     /**
      * @brief Deletes weak relations for this model on delete
      * Weak relations: None.
      */
     protected function unlinkWeakRelations(){
     }
-    
+
     /**
      * @inheritdoc
      */

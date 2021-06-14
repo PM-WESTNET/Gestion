@@ -535,7 +535,7 @@ class CustomerController extends Controller
         $reportChangeCompany->new_business_name = Company::FindCompanyByID($company_id)['name'];
         $reportChangeCompany->old_business_name = $model->company->name;
         $reportChangeCompany->date = Date("Y-m-d");
-
+        
         /**if ($model->lastname == '') {
             $model->lastname= ' - ';
         }

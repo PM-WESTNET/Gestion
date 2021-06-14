@@ -61,7 +61,7 @@ class ReportChangeCompanySearch extends ReportChangeCompany
             return $dataProvider;
         }
 
-        
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id_report_change_company' => $this->id_report_change_company,
@@ -72,8 +72,9 @@ class ReportChangeCompanySearch extends ReportChangeCompany
         ->andFilterWhere(['like', 'new_business_name', $this->new_business_name])
         ->andFilterWhere(['like', 'old_business_name', $this->old_business_name])
         ->andFilterWhere(['like', 'date', $this->date]);
-            
 
+
+         
         return $dataProvider;
     }
 }

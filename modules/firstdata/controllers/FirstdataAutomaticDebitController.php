@@ -66,8 +66,8 @@ class FirstdataAutomaticDebitController extends Controller
     {
         $model = new FirstdataAutomaticDebit();
         $roles_for_adherence = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
-        
-        foreach ($roles_for_adherence as $key => $value) {
+
+         foreach ($roles_for_adherence as $key => $value) {
             unset($roles_for_adherence[$key]);
             $roles_for_adherence[$value] = $value;
         }
@@ -96,13 +96,13 @@ class FirstdataAutomaticDebitController extends Controller
     {
         $model = $this->findModel($id);
         $roles_for_adherence = explode(',',Config::getConfig('roles_for_adherence')->getDescription());
-        
+
         foreach ($roles_for_adherence as $key => $value) {
             unset($roles_for_adherence[$key]);
             $roles_for_adherence[$value] = $value;
         }
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {   
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {  
             return $this->redirect(['view', 'id' => $model->firstdata_automatic_debit_id]);
         }
 

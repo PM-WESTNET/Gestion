@@ -319,7 +319,7 @@ class ContractDetail extends ActiveRecord
      * Crea un archivo de log con sus propios datos
      * @return bool
      */
-    public function createLog()
+    public function createLog($event=null)
     {
         if ($this->status=='draft') {
             return false;

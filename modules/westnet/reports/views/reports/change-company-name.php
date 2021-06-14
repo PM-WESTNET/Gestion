@@ -55,8 +55,8 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
      <div class="form-group text-center" id="buttonIndex">
-              
+
         <?=Html::a('<span class="fa fa-reply"></span> Volver', ['/'], ['data-pjax' => '0', 'class' => 'btn btn-warning']);?>
-    
+
     </div>
-</div>
+</div> 
