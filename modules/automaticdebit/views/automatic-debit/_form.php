@@ -3,6 +3,7 @@
 use app\modules\automaticdebit\models\AutomaticDebit;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\AutomaticDebit */
