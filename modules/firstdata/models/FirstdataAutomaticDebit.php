@@ -81,7 +81,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             'status' => Yii::t('app', 'Status'),
             'company_config_id' => Yii::t('app', 'Company'),
             'user_id' => Yii::t('app','Created For'),
-            'adhered_by' => 'Adherido por
+            'adhered_by' => 'Adherido por'
         ];
     }
 
