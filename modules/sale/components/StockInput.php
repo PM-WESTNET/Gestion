@@ -33,7 +33,7 @@ class StockInput extends \yii\jui\InputWidget{
         
     }
     
-    public function render($view = null, $params = null)
+    public function render()
     {
         
         $contents = [];
