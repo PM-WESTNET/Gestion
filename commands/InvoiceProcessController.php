@@ -142,7 +142,7 @@ class InvoiceProcessController extends Controller
                             $list_client[] = [$bill->customer_id,'cliente facturado correctamente.'];
                             echo $bill->customer_id . " cliente facturado correctamente. \n";
                         }else{
-                            echo "There are no pending processes\n";
+                            echo "The invoice could not be closed\n";
                             return null;  
                         }
                     }
