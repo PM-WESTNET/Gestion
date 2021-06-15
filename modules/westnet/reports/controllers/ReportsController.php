@@ -40,6 +40,7 @@ use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
+use yii\data\ArrayDataProvider;
 
 /**
  * CustomerController
@@ -1132,6 +1133,13 @@ class ReportsController extends Controller
             Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
             return $this->redirect('/reports/reports/customers-by-node');
         }
+    }
+
+    public function actionCustomersBySpeed(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_speed = $reportSearch->findCustomerBySpeed(Yii::$app->request->get());
+
+        return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
     }
 
 }
