@@ -34,9 +34,11 @@ class Facturas extends AbstractExportWriter
             $cantidad = 0;
             $total = 0;
             foreach ($this->data['data'] as $data) {
-                $this->addLine( new Detalle(), $data);
-                $total += $data['importe_1_vto'];
-                $cantidad++;
+                if($data['current_account_balance'] < 0) {    
+                    $this->addLine( new Detalle(), $data);
+                    $total += abs($data['current_account_balance']);
+                    $cantidad++;
+                }
             }
 
             $this->addLine(new Trailer(), [
