@@ -1167,7 +1167,7 @@ class CustomerController extends Controller
                 cu.code,
                 cu.document_number,
                 ad.geocode,
-                CONCAT_WS(' ',ad.street,ad.number) AS address ,
+                CONCAT_WS(' ',ad.street,ad.number,zo.name) AS address ,
                 CASE WHEN (cu.email_status = 'active') 
                     THEN 
                         cu.email
@@ -1185,11 +1185,17 @@ class CustomerController extends Controller
                 cu.phone3,
                 cu.phone4
                 FROM customer cu 
-                LEFT JOIN address ad ON cu.address_id = ad.address_id
-                WHERE cu.customer_id = :customer_id ORDER BY cu.customer_id DESC LIMIT 1
+                LEFT JOIN contract co ON co.customer_id = cu.customer_id
+                LEFT JOIN address ad ON co.address_id = ad.address_id
+                LEFT JOIN zone zo ON zo.zone_id = ad.zone_id 
+                WHERE cu.customer_id = :customer_id ORDER BY cu.customer_id
             ")
             ->bindValue('customer_id',$data['id'])
             ->queryOne();
+
+
+            $model = $this->findModel($customer['customer_id']);
+            $customer['address'] = $model->address->shortAddress;
             
 
             if (empty($customer)) {
@@ -1302,19 +1308,12 @@ class CustomerController extends Controller
                 UPPER(cu.name) AS name, 
                 UPPER(cu.lastname) AS lastname, 
                 cu.code,
-                ad.street,
-                ad.number,
-                zo.name
+                CONCAT_WS(" ",ad.street,ad.number,zo.name) AS address 
                 FROM customer cu
                 LEFT JOIN address ad ON cu.address_id = ad.address_id
                 LEFT JOIN zone zo ON ad.zone_id = zo.zone_id
-                WHERE cu.customer_id IN (
-                    SELECT MAX(c.customer_id) 
-                            FROM customer c 
-                            WHERE c.document_number LIKE :document_number 
-                            AND c.document_type_id = :document_type_id
-                            GROUP BY c.document_number
-                    )
+                WHERE cu.document_number LIKE :document_number 
+                    AND cu.document_type_id = :document_type_id
                 ORDER BY cu.document_number
                 LIMIT :limite;
             ')
@@ -1322,6 +1321,11 @@ class CustomerController extends Controller
              ->bindValue('document_type_id', $document_type_id)
              ->bindValue('limite',$limite)
              ->queryAll();
+
+            foreach ($customers as $key => $value) {
+                $model = $this->findModel($customers[$key]['customer_id']);
+                $customers[$key]['address'] = $model->address->shortAddress;
+            }
             
             return [
                 'error' => 'false',
@@ -1334,6 +1338,15 @@ class CustomerController extends Controller
                 'error' => 'true',
                 'msg' => $ex->getMessage()
             ];
+        }
+    }
+
+    protected function findModel($id)
+    {
+        if (($model = Customer::findOne($id)) !== null) {
+            return $model;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
 }
