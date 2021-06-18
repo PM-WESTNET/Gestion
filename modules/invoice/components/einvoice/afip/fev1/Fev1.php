@@ -80,11 +80,11 @@ class Fev1 extends Afip
     {
         try {
             $dto = new InvoiceFev($object);
+            $dto_request = $dto->getRequest();
+
             if ($dto->validate()) {
-                $result = $this->soapCall("FECAESolicitar", $dto->getRequest(), true);
-		\Yii::info( '------------------------' , 'facturacion');
-        	// \Yii::info( $result , 'facturacion');    
-	    if ( $this->rechaza() ) {
+                $result = $this->soapCall("FECAESolicitar", $dto_request, true);
+                if ( $this->rechaza() ) {
                     throw new \Exception(Yii::t('afip', 'The function {function} is rejected.', ['function'=>'Solicitar CAE']));
                 }
             } else {
@@ -92,52 +92,67 @@ class Fev1 extends Afip
                 throw new \Exception(Yii::t('afip', 'Validation fails.'));
             }
 
-            \Yii::info("---------------------------------------------------------------------------------------------\n".
-                        "****ENVIO**** \n" . 
-                        "FeCAEReq: " . "\n" .
-                            "\tFeCabReq: " . "\n" .
-                                "\t\tCantReg: " . $dto['FeCAEReq']['FeCabReq']['CantReg'] . "\n" .
-                                "\t\tPtoVta: " . $dto['FeCAEReq']['FeCabReq']['PtoVta'] . "\n" .
-                                "\t\tCbteTipo: " . $dto['FeCAEReq']['FeCabReq']['CbteTipo'] . "\n" .
-                            "\tFECAEDetRequest:  \n" . 
-                                "\t\tConcepto: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Concepto'] . "\n" . 
-                                "\t\tDocTipo: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocTipo'] . "\n" .
-                                "\t\tDocNro: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocNro'] . "\n" .
-                                "\t\tCbteDesde: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteDesde'] . "\n" .
-                                "\t\tCbteHasta: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteHasta'] . "\n" .
-                                "\t\tCbteFch: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteFch'] . "\n" .
-                                "\t\tImpTotal: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotal'] . "\n" . 
-                                "\t\tImpTotConc: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotConc'] . "\n" .
-                                "\t\tImpNeto: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpNeto'] . "\n" .
-                                "\t\tImpOpEx: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpOpEx'] . "\n" .
-                                "\t\tImpTrib: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTrib'] . "\n" .
-                                "\t\tImpIVA: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpIVA'] . "\n" .
-                                "\t\tFchVtoPago:" . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchVtoPago'] . "\n" .
-                                "\t\tMonId: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonId'] . "\n" .
-                                "\t\tMonCotiz: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonCotiz'] . "\n" .
-                                "\t\tIva: \n" .
-                                    "\t\t\tAlicIva: \n" . 
-                                        "\t\t\t\tId: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Id'] . "\n" .
-                                        "\t\t\t\tImporte: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Importe'] . "\n" .
-                                        "\t\t\t\tBaseImp: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['BaseImp'] . "\n" .
-                        "****RESPUESTA**** \n" .
-                        "Status: " . $result['status'] . "\n" . 
-                        "Result: \n" .
-                            "\tResultado:" . $result['result']['resultado'] . "\n" .
-                            "\tCAE: " . $result['result']['cae'] . "\n" . 
-                            "\tNumero: " . $result['result']['numero'] . "\n" .
-                            "\tVencimiento: " . $result['result']['vencimiento'] . "\n".
-                        "Observations: \n".
-                            "\tCode: " . $result['observations'][0]['code'] . "\n".
-                            "\tMessage: " . $result['observations'][0]['message'] . "\n" 
-                        , 'duplicados-afip');
-
             $this->result = [
                 'resultado'     => $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->Resultado,
                 'cae'           => $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CAE,
                 'numero'        => '',
                 'vencimiento'   => $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CAEFchVto
             ];
+            $resultado = $this->getResult();
+            \Yii::info("---------------------------------------------------------------------------------------------\n".
+                        "****ENVIO**** \n" . 
+                        "FeCAEReq: " . "\n" .
+                            "\tFeCabReq: " . "\n" .
+                                "\t\tCantReg: " . $dto_request['FeCAEReq']['FeCabReq']['CantReg'] . "\n" .
+                                "\t\tPtoVta: " . $dto_request['FeCAEReq']['FeCabReq']['PtoVta'] . "\n" .
+                                "\t\tCbteTipo: " . $dto_request['FeCAEReq']['FeCabReq']['CbteTipo'] . "\n" .
+                            "\tFECAEDetRequest:  \n" . 
+                                "\t\tConcepto: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Concepto'] . "\n" . 
+                                "\t\tDocTipo: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocTipo'] . "\n" .
+                                "\t\tDocNro: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocNro'] . "\n" .
+                                "\t\tCbteDesde: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteDesde'] . "\n" .
+                                "\t\tCbteHasta: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteHasta'] . "\n" .
+                                "\t\tCbteFch: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteFch'] . "\n" .
+                                "\t\tImpTotal: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotal'] . "\n" . 
+                                "\t\tImpTotConc: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotConc'] . "\n" .
+                                "\t\tImpNeto: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpNeto'] . "\n" .
+                                "\t\tImpOpEx: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpOpEx'] . "\n" .
+                                "\t\tImpTrib: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTrib'] . "\n" .
+                                "\t\tImpIVA: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpIVA'] . "\n" .
+                                "\t\tFchVtoPago:" . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchVtoPago'] . "\n" .
+                                "\t\tMonId: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonId'] . "\n" .
+                                "\t\tMonCotiz: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonCotiz'] . "\n" .
+                                "\t\tIva: \n" .
+                                    "\t\t\tAlicIva: \n" . 
+                                        "\t\t\t\tId: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Id'] . "\n" .
+                                        "\t\t\t\tImporte: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Importe'] . "\n" .
+                                        "\t\t\t\tBaseImp: " . $dto_request['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['BaseImp'] . "\n" .
+                        "****RESPUESTA**** \n" .
+                        "FECAESolicitarResult: \n" .
+                            "\tFeCabResp: \n".
+                                "\t\tCuit:" . $result->FECAESolicitarResult->FeCabResp->Cuit . "\n" .
+                                "\t\tPtoVta:" . $result->FECAESolicitarResult->FeCabResp->PtoVta . "\n" .
+                                "\t\tCbteTipo:" . $result->FECAESolicitarResult->FeCabResp->CbteTipo . "\n" .
+                                "\t\tFchProceso:" . $result->FECAESolicitarResult->FeCabResp->FchProceso . "\n" .
+                                "\t\tCantReg:" . $result->FECAESolicitarResult->FeCabResp->CantReg . "\n" .
+                                "\t\tResultado:" . $result->FECAESolicitarResult->FeCabResp->Resultado . "\n" .
+                                "\t\tReproceso:" . $result->FECAESolicitarResult->FeCabResp->Reproceso . "\n" .
+                            "\tFeDetResp: \n".
+                                "\t\tFECAEDetResponse: \n" .
+                                    "\t\t\tConcepto: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->Concepto . "\n" .
+                                    "\t\t\tDocTipo: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->DocTipo . "\n" .
+                                    "\t\t\tDocNro: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->DocNro . "\n"  .
+                                    "\t\t\tCbteDesde: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CbteDesde . "\n" .
+                                    "\t\t\tCbteHasta: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CbteHasta . "\n" .
+                                    "\t\t\tCbteFch: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CbteFch . "\n" .
+                                    "\t\t\tResultado: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->Resultado . "\n" .
+                                    "\t\t\tObservaciones: \n" .
+                                        "\t\t\t\t Obs: \n" .
+                                            "\t\t\t\t\tCode: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->Observaciones->Obs->Code . "\n" .
+                                            "\t\t\t\t\tMsg: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->Observaciones->Obs->Msg . "\n" .
+                                    "\t\t\tCAE: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CAE . "\n" .
+                                    "\t\t\tCAEFchVto: " . $result->FECAESolicitarResult->FeDetResp->FECAEDetResponse->CAEFchVto . "\n"
+                        , 'duplicados-afip');
             return true;
         } catch (\Exception $ex) {
             $this->errors[] = [
