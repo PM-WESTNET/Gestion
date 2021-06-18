@@ -82,7 +82,9 @@ class Fev1 extends Afip
             $dto = new InvoiceFev($object);
             if ($dto->validate()) {
                 $result = $this->soapCall("FECAESolicitar", $dto->getRequest(), true);
-                if ( $this->rechaza() ) {
+		\Yii::info( '------------------------' , 'facturacion');
+        	// \Yii::info( $result , 'facturacion');    
+	    if ( $this->rechaza() ) {
                     throw new \Exception(Yii::t('afip', 'The function {function} is rejected.', ['function'=>'Solicitar CAE']));
                 }
             } else {
