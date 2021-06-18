@@ -218,7 +218,7 @@ class InvoiceFev extends InvoiceDTO
         }
 
         // Nota de credito
-        if( in_array( $this->billType, [3,8]){
+        if( in_array( $this->billType, [3,8])) {
             $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchDesde'] = (new \DateTime($this->serviceDateFrom))->format("Ymd");
             $rta['FeCAEReq']['FeDetReq']['FECAEDetRequest']['PeriodoAsoc']['FchHasta'] = (new \DateTime($this->serviceDateFrom))->format("Ymd");
         }
