@@ -20,6 +20,8 @@ use app\modules\mailing\components\sender\MailSender;
 use app\modules\accounting\components\AccountMovementRelationManager;
 use webvimark\modules\UserManagement\models\User;
 
+use app\modules\invoice\components\einvoice\afip\fev1\InvoiceFev;
+
 /**
  * This is the model class for table "bill".
  *
@@ -682,9 +684,49 @@ class Bill extends ActiveRecord implements CountableInterface
                 try {
                     $invoice = Invoice::getInstance();
                     $result = $invoice->invoice($this);
-
+                    $dto = new InvoiceFev($this);
                     // Si no registra contra ws se vuelve a draft
                     $backToDraft = true;
+
+                    \Yii::info("---------------------------------------------------------------------------------------------\n".
+                                "****ENVIO**** \n" . 
+                                "FeCAEReq: " . "\n" .
+                                "\tFeCabReq: " . "\n" .
+                                "\t\tCantReg: " . $dto['FeCAEReq']['FeCabReq']['CantReg'] . "\n" .
+                                "\t\tPtoVta: " . $dto['FeCAEReq']['FeCabReq']['PtoVta'] . "\n" .
+                                "\t\tCbteTipo: " . $dto['FeCAEReq']['FeCabReq']['CbteTipo'] . "\n" .
+                                "\tFECAEDetRequest: \n" . 
+                                "\t\tConcepto: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Concepto'] . "\n" . 
+                                "\t\tDocTipo: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocTipo'] . "\n" .
+                                "\t\tDocNro: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['DocNro'] . "\n" .
+                                "\t\tCbteDesde: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteDesde'] . "\n" .
+                                "\t\tCbteHasta: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteHasta'] . "\n" .
+                                "\t\tCbteFch: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['CbteFch'] . "\n" .
+                                "\t\tImpTotal: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotal'] . "\n" . 
+                                "\t\tImpTotConc: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTotConc'] . "\n" .
+                                "\t\tImpNeto: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpNeto'] . "\n" .
+                                "\t\tImpOpEx: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpOpEx'] . "\n" .
+                                "\t\tImpTrib: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpTrib'] . "\n" .
+                                "\t\tImpIVA: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['ImpIVA'] . "\n" .
+                                "\t\tFchVtoPago:" . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['FchVtoPago'] . "\n" .
+                                "\t\tMonId: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonId'] . "\n" .
+                                "\t\tMonCotiz: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['MonCotiz'] . "\n" .
+                                "\t\tIva: \n" .
+                                "\t\t\tAlicIva: \n" . 
+                                "\t\t\t\tId: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Id'] . "\n" .
+                                "\t\t\t\tImporte: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['Importe'] . "\n" .
+                                "\t\t\t\tBaseImp: " . $dto['FeCAEReq']['FeDetReq']['FECAEDetRequest']['Iva']['AlicIva'][0]['BaseImp'] . "\n" .
+                                "****RESPUESTA**** \n" .
+                                "Status: " . $result['status'] . "\n" . 
+                                "Result: \n" .
+                                "\tResultado:" . $result['result']['resultado'] . "\n" .
+                                "\tCAE: " . $result['result']['cae'] . "\n" . 
+                                "\tNumero: " . $result['result']['numero'] . "\n" .
+                                "\tVencimiento: " . $result['result']['vencimiento'] . "\n".
+                                "Observations: \n".
+                                "\tCode: " . $result['observations'][0]['code'] . "\n".
+                                "\tMessage: " . $result['observations'][0]['message'] . "\n" 
+                                , 'duplicados-afip');
 
                     if ($result['status'] == 'success') {
                         // Si esta aprobado
