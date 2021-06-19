@@ -81,6 +81,8 @@ class Fev1 extends Afip
         try {
             $dto = new InvoiceFev($object);
             if ($dto->validate()) {
+		\Yii::info("5) FECAESolicitar", 'duplicados-afip');
+		\Yii::info("----------------------------------------", 'duplicados-afip');
                 $result = $this->soapCall("FECAESolicitar", $dto->getRequest(), true);
 		\Yii::info( '------------------------' , 'facturacion');
         	// \Yii::info( $result , 'facturacion');    
@@ -335,7 +337,8 @@ class Fev1 extends Afip
     }
 
     public function getUltimoComprobanteAutorizado($codigoTipoComprobante, $numeroPuntoVenta)
-    {
+    {	
+	\Yii::info("4) FECompUltimoAutorizado", 'duplicados-afip');
         $function_name = 'Ultimo Comprobante autorizado';
         $result = $this->exec($function_name, "FECompUltimoAutorizado", [
             'PtoVta'    => $numeroPuntoVenta,
