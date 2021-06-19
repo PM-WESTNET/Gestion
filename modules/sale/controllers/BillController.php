@@ -226,7 +226,9 @@ class BillController extends Controller
                 }
             }
             $model->save();
-
+            if(isset(Yii::$app->request->post()['close-bill'])){
+                return $this->redirect(array('close', 'id'=>$id));
+            }
             //Si la clase cambio:
             if ($previousClass != $model->class) {
                 //Debemos volver a instanciar
@@ -486,9 +488,17 @@ class BillController extends Controller
 
     public function actionClose($id, $ajax = false, $payAfterClose = false)
     {	
-	\Yii::info("----------------------------------------", 'duplicados-afip');
-	\Yii::info("1) Entre en actionClose", 'duplicados-afip');
+	//$request = Yii::$app->request->post();
+	//var_dump($request);die();
         $model = $this->findModel($id);
+	\Yii::info("----------------------------------------", 'duplicados-afip');
+	\Yii::info("1) Entre en actionClose"
+    ."ID: ".$id."\n"
+    ."Ajax: ".$ajax."\n"
+    ."PayAfterClose: ".$payAfterClose."\n"
+    ."Status: ".$model->getAttributes()['status']
+    , 'duplicados-afip');
+
 	//var_dump($model->getAttributes());die();
 
         //if(empty($model->total))

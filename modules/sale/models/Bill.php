@@ -713,7 +713,6 @@ class Bill extends ActiveRecord implements CountableInterface
                         $backToDraft = true;
                     }
                     $this->save();
-
                     if ($backToDraft) {
                         $this->payed = false;
                         $this->status = 'draft';
