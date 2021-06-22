@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\DetailView;
+use yii\widgets\ActiveForm;
 use app\modules\sale\components\BillExpert;
 use yii\helpers\Url;
 use app\components\helpers\UserA;
@@ -22,38 +23,39 @@ $formatter = Yii::$app->formatter;
 <div class="bill-view">
     
     <div class="title">
-        <h1><?= $this->title ?></h1>
-        <p>
-            <?php if($model->isEditable): ?>
-            <a class="btn btn-primary " href="<?= \yii\helpers\Url::toRoute(['bill/update','id'=>$model->bill_id]) ?>">
-                <span class="glyphicon glyphicon-pencil"></span> <?= Yii::t('app','Update'); ?>
-            </a>
-            <?php endif; ?>
+            <?php ActiveForm::begin(['id'=>'bill-form']); ?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <?php if($model->isEditable): ?>
+                        <a class="btn btn-primary " href="<?= \yii\helpers\Url::toRoute(['bill/update','id'=>$model->bill_id]) ?>">
+                            <span class="glyphicon glyphicon-pencil"></span> <?= Yii::t('app','Update'); ?>
+                        </a>
+                        <?php endif; ?>
+                    
+                        <?php if($model->status != 'closed'): ?>
+                               <button type="submit" class="btn btn-danger" name="close-bill" value="close-bill"><span class="glyphicon glyphicon-remove"></span>Cerrar</button>
+                        <?php endif; ?>
 
-            <?php if($model->status != 'closed'): ?>
-            <a id="closeBill" class="btn btn-danger <?= (!$model->customer_id) ? ' disabled' : '' ?>" href="<?= \yii\helpers\Url::toRoute(['bill/close','id'=>$model->bill_id]) ?>">
-                <span class="glyphicon glyphicon-remove"></span> <?= Yii::t('app','Close'); ?>
-            </a>
-            <?php endif; ?>
-
-            <?php if(!$model->getDebt(false) == 0 && $model->customer !== null && $model::$payable && Yii::$app->getModule('checkout')): ?>
-                <a class="btn btn-success" href="<?= yii\helpers\Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>">
-                    <span class="glyphicon glyphicon-usd"></span> <?= Yii::t('app', 'Pay') ?>
-                </a>
-            <?php endif; ?>
-
-            <!-- Se agrega la opción para cargar manualmente el CAE y la Fecha de vencimiento sólo si el comprobante
-                esta en cerrado y no los posee. Lo cual significaría que ha sido cargado de forma manual-->
-            <?php if($model->status == 'closed' && (!$model->ein) && (!$model->ein_expiration) && ($model->billType->invoice_class_id != null)) {
-                echo Html::a("<span class='glyphicon glyphicon-asterisk'></span> " . Yii::t('app', 'Set ein and ein expiration'), ['#'], [
-                    'class' => 'btn btn-default',
-                    'data-toggle' => 'modal',
-                    'data-target' => '#ein-modal',
-                    'id' => 'btn-ein-modal'
-                ]);
-            } ?>
-            <a class="btn btn-default" href="<?= \yii\helpers\Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
-        </p>
+                        <?php if(!$model->getDebt(false) == 0 && $model->customer !== null && $model::$payable && Yii::$app->getModule('checkout')): ?>
+                            <a class="btn btn-success" href="<?= yii\helpers\Url::toRoute(['/checkout/payment/pay-bill', 'bill' => $model->bill_id]) ?>">
+                                <span class="glyphicon glyphicon-usd"></span> <?= Yii::t('app', 'Pay') ?>
+                            </a>
+                        <?php endif; ?>
+                    
+                    <!-- Se agrega la opción para cargar manualmente el CAE y la Fecha de vencimiento sólo si el comprobante
+                    esta en cerrado y no los posee. Lo cual significaría que ha sido cargado de forma manual-->
+                    <?php if($model->status == 'closed' && (!$model->ein) && (!$model->ein_expiration) && ($model->billType->invoice_class_id != null)) {
+                        echo Html::a("<span class='glyphicon glyphicon-asterisk'></span> " . Yii::t('app', 'Set ein and ein expiration'), ['#'], [
+                            'class' => 'btn btn-default',
+                            'data-toggle' => 'modal',
+                            'data-target' => '#ein-modal',
+                            'id' => 'btn-ein-modal'
+                        ]);
+                    } ?>
+                    <a class="btn btn-default" href="<?= \yii\helpers\Url::to(['bill/group', 'footprint' => $model->footprint]) ?>"><span class="glyphicon glyphicon-time"></span> <?= Yii::t('app', 'History') ?></a>
+                    </div>
+                </div>
+            <?php ActiveForm::end(); ?>
     </div>
     <h4  class="text-center font-bold">
         <?php if(!$model->active): ?>

@@ -129,6 +129,12 @@ class BillController extends Controller
     {
         $model = $this->findModel($id);
 
+        if(isset(Yii::$app->request->post()['close-bill'])){
+            if($model->total > 0)
+                    $this->close($id);      
+                else
+                    Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+        }
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $model->getBillDetails(),
             'pagination' => false
@@ -227,7 +233,11 @@ class BillController extends Controller
             }
             $model->save();
             if(isset(Yii::$app->request->post()['close-bill'])){
-                return $this->redirect(array('close', 'id'=>$id));
+                if($model->total > 0)
+                    $this->close($id);      
+                else
+                    Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+                    
             }
             //Si la clase cambio:
             if ($previousClass != $model->class) {
@@ -486,23 +496,18 @@ class BillController extends Controller
 
     }
 
-    public function actionClose($id, $ajax = false, $payAfterClose = false)
+    public function close($id, $ajax = false, $payAfterClose = false)
     {	
-	//$request = Yii::$app->request->post();
-	//var_dump($request);die();
+
         $model = $this->findModel($id);
-	\Yii::info("----------------------------------------", 'duplicados-afip');
-	\Yii::info("1) Entre en actionClose"
-    ."ID: ".$id."\n"
-    ."Ajax: ".$ajax."\n"
-    ."PayAfterClose: ".$payAfterClose."\n"
-    ."Status: ".$model->getAttributes()['status']
-    , 'duplicados-afip');
+    	\Yii::info("----------------------------------------", 'duplicados-afip');
+    	\Yii::info("1) Entre en actionClose"
+        ."ID: ".$id."\n"
+        ."Ajax: ".$ajax."\n"
+        ."PayAfterClose: ".$payAfterClose."\n"
+        ."Status: ".$model->getAttributes()['status']
+        , 'duplicados-afip');
 
-	//var_dump($model->getAttributes());die();
-
-        //if(empty($model->total))
-            //Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
 
         if (!empty($model->billDetails) && $model->status != 'closed') {
             if (!$model->close()) {
