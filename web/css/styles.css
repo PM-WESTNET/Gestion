@@ -1424,12 +1424,17 @@ a.ui-state-default.ui-state-active {
   min-height: 75%;
 }
 
-.panel-body form{
+.row .panel-default .panel-body{
+  width:100%;
+}
+
+.row .panel-default .panel-body form{
   overflow: auto;
   height: 460px;
   margin-bottom: 20px;
+  width: 100%;
 }
-.panel-body .btn{
+.row .panel-default .panel-body .btn{
   position:absolute;
 	bottom:20px;
 }
