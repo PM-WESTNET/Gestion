@@ -1424,10 +1424,6 @@ a.ui-state-default.ui-state-active {
   min-height: 75%;
 }
 
-.row .panel-default .panel-body{
-  width:100%;
-}
-
 .row .panel-default .panel-body form{
   overflow: auto;
   height: 460px;
