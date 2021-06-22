@@ -1423,3 +1423,13 @@ a.ui-state-default.ui-state-active {
 .wrap {
   min-height: 75%;
 }
+
+.panel-body form{
+  overflow: auto;
+  height: 460px;
+  margin-bottom: 20px;
+}
+.panel-body .btn{
+  position:absolute;
+	bottom:20px;
+}
