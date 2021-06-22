@@ -1426,11 +1426,22 @@ a.ui-state-default.ui-state-active {
 
 .row .panel-default .panel-body form{
   overflow: auto;
-  height: 460px;
+  height: 550px;
   margin-bottom: 20px;
   width: 100%;
 }
-.row .panel-default .panel-body .btn{
+
+#routes-list{ terminar de hacer este ticket hijo de puta
+  overflow: auto;
+  height: 550px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.row .panel-default .panel-body button.btn.btn-primary.btn-sm{
   position:absolute;
 	bottom:20px;
+}
+.row .panel-default .panel-body .row .col-sm-3{
+  margin-left: -70px;
 }
