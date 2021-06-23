@@ -186,6 +186,14 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                 ], ['prompt' => $model->isNewRecord ? '' : null])?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-sm-6">
+                <?= $form->field($model, 'has_direct_debit')->dropDownList([
+                    0 => Yii::t('app', 'No'),
+                    1 => Yii::t('app', 'Yes'),
+                ], ['prompt' => $model->isNewRecord ? '' : null])?>
+        </div>
+    </div>
     <?php endif;?>
     <div class="row">
         <div class="col-sm-6 col-xs-12">
