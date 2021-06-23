@@ -67,6 +67,7 @@ use app\modules\westnet\reports\models\CustomerUpdateRegister;
  * @property string $birthdate
  * @property string $observations
  * @property string $has_debit_automatic
+ * @property string $has_direct_debit
  *
  *
  * @property Bill[] $bills
@@ -144,7 +145,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic','has_direct_debit'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
@@ -551,7 +552,8 @@ class Customer extends ActiveRecord {
             'birthdate' => Yii::t('app','Birthdate'),
             'observations' => Yii::t('app', 'Observations'),
             'dataVerified' => Yii::t('app', 'Data Verified'),
-            'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit')
+            'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit'),
+            'has_direct_debit' => Yii::t('app', 'Require Direct Debit')
         ];
 
         //Labels adicionales definidos para los profiles

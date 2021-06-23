@@ -13,7 +13,7 @@ use yii\widgets\DetailView;
 use app\components\helpers\UserA;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\firstdata\models\FirstdataAutomaticDebit;
-
+use app\modules\automaticdebit\models\AutomaticDebit;
 /**
  * @var View $this
  * @var Customer $model
@@ -218,7 +218,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
 
                 return 'No';
-            }
+            },
+            'label' => Yii::t('app','Require Automatic Debit')
+        ],
+        [
+            'attribute' => 'has_direct_debit',
+            'value' => function($model) {
+                if ($model->has_direct_debit) {
+                    if (AutomaticDebit::find()->andWhere(['customer_id' => $model->customer_id, 'status' => 10])->exists()) {
+                        return Yii::t('app', 'Yes') . ' ('. Yii::t('app', 'Active') . ')';
+                    }
+
+                    return Yii::t('app', 'Yes') . ' ('. Yii::t('app', 'Pending') . ')';
+                }
+
+                return 'No';
+            },
+            'label' => Yii::t('app','Require Direct Debit')
         ],
         [
             'label'=>$model->getAttributeLabel('status'),
