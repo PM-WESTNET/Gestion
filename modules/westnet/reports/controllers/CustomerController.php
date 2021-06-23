@@ -62,17 +62,4 @@ class CustomerController extends Controller
             'data' => $data
         ]);
     }
-
-
-    public function actionChangeCompanyHistory()
-    {   
-        $search = new CustomerSearch();
-        $data = $search->changeCompanyHistory(Yii::$app->request->getQueryParams());
-        return $this->render(
-            'customer-change-company',[
-                'search' => $search,
-                'data' => $data,
-            ]
-        );
-    }
 }
