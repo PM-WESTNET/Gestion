@@ -7,6 +7,8 @@ use app\modules\ticket\models\Category;
 use app\modules\westnet\reports\search\CustomerSearch;
 use Yii;
 use app\components\web\Controller;
+use webvimark\modules\UserManagement\models\User;
+use yii\helpers\ArrayHelper;
 
 /**
  * CustomerController

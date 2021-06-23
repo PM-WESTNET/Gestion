@@ -30,6 +30,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'status',
             'response_file',
             //'observation_file',
+            [
+                'attribute' => 'firstdata_config_id',
+                'value' => function($model) {
+                    return ($model->firstdataConfig?$model->firstdataConfig->company->name:null);
+                }
+            ],
 
             [
                 'class' => 'app\components\grid\ActionColumn',

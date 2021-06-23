@@ -28,45 +28,45 @@ AgendaBundle::register($this);
 
     <?php if (!empty($notifications)) : ?>
 
-        <?php foreach ($notifications as $notification) : ?>
+        <?php foreach ($notifications as $task) : ?>
 
-            <?php $task = $notification->task; ?>
+            <?php //$task = $notification->task; ?>
 
-            <div data-notification-container="<?= $notification->notification_id; ?>" data-notification-status="<?= $notification->status; ?>" class="task task-default task-<?= $notification->reason; ?> margin-quarter">
+            <div data-notification-container="<?= $task->notification_id; ?>" data-notification-status="<?= $task->notification_status; ?>" class="task task-default task-<?= $task->notification_reason; ?> margin-quarter">
 
                 <div class="row">
 
                     <div class="col-md-9 col-sm-9">
-                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $notification->task->task_id], true); ?>">
+                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $task->task_id], true); ?>">
                             <span class="label label-default margin-right-quarter">
-                                <?= Yii::$app->formatter->asDatetime($notification->datetime); ?>
+                                <?= Yii::$app->formatter->asDatetime($task->datetime); ?>
                             </span>
                         </a>
-                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $notification->task->task_id], true); ?>">
-                            <span class="label label-<?= $notification->reason; ?>">
-                                <?= \app\modules\agenda\AgendaModule::t('app', $notification->reason); ?>
+                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $task->task_id], true); ?>">
+                            <span class="label label-<?= $task->notification_reason; ?>">
+                                <?= \app\modules\agenda\AgendaModule::t('app', $task->notification_reason); ?>
                             </span>
                         </a>
-                        <a class="hidden-xs" href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $notification->task->task_id], true); ?>">
-                            <span class="notification-name padding-left-quarter"><?= $notification->task->name; ?></span>
+                        <a class="hidden-xs" href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $task->task_id], true); ?>">
+                            <span class="notification-name padding-left-quarter"><?= $task->name; ?></span>
                         </a>
                     </div>
 
                     <div class="col-xs-12 visible-xs">
-                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $notification->task->task_id], true); ?>">
-                            <span class="notification-name padding-left-quarter"><?= $notification->task->name; ?></span>
+                        <a href="<?= yii\helpers\Url::to(['/agenda/task/update', 'id' => $task->task_id], true); ?>">
+                            <span class="notification-name padding-left-quarter"><?= $task->name; ?></span>
                         </a>
                     </div>
 
                     <div class="col-sm-3">
                         <div class="btn-group btn-group-xs pull-right" role="group">
-                            <a type="button" class="btn btn-<?= $notification->task->status->slug; ?>" disabled>
-                                <?= $notification->task->status->name; ?>
+                            <a type="button" class="btn btn-<?= $task->status_slug; ?>" disabled>
+                                <?= $task->status_name; ?>
                             </a>
-                            <a data-notification="mark-as-read" data-status="<?= app\modules\agenda\models\Notification::STATUS_READ; ?>" data-id="<?= $notification->notification_id; ?>" type="button" class="btn btn-info" title="<?= Yii::t('app', "Mark as read"); ?>">
+                            <a data-notification="mark-as-read" data-status="<?= app\modules\agenda\models\Notification::STATUS_READ; ?>" data-id="<?= $task->notification_id; ?>" type="button" class="btn btn-info" title="<?= Yii::t('app', "Mark as read"); ?>">
                                 <span class="glyphicon glyphicon-ok"></span>
                             </a>
-                            <a data-notification="mark-as-unread" data-status="<?= app\modules\agenda\models\Notification::STATUS_UNREAD; ?>" data-id="<?= $notification->notification_id; ?>" type="button" class="btn btn-info" title="<?= Yii::t('app', "Mark as unread"); ?>">
+                            <a data-notification="mark-as-unread" data-status="<?= app\modules\agenda\models\Notification::STATUS_UNREAD; ?>" data-id="<?= $task->notification_id; ?>" type="button" class="btn btn-info" title="<?= Yii::t('app', "Mark as unread"); ?>">
                                 <span class="glyphicon glyphicon-repeat"></span>
                             </a>
                         </div>

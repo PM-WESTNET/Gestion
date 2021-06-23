@@ -37,7 +37,10 @@ class CurrentAccountBalanceController extends Controller
         foreach ($customers_to_update as $customer) {
             $searchModel = new PaymentSearch();
             $searchModel->customer_id = $customer->customer_id;
-            $total = $searchModel->accountTotal();
+            
+            $total = $searchModel->totalCalculationForQuery($customer->customer_id);
+
+            echo "Customer_ID: " . $customer->customer_id . "\n" . "Update Total: " . round($total,2) . "\n";
 
             $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
         }

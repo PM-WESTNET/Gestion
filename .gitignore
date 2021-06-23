@@ -98,3 +98,12 @@ web/direct_debit/
 web/direct_debit_import/
 web/firstdataExports/
 web/firstdataImports/
+
+#### added some changes from branch desarrollo (bigway) and deleted the old docker folder which no longer exists
+#>> this will eventually be merged into the same project
+
+# docker
+docker_sample/web-server/gestion.conf
+docker_gestion_*
+
+composer.lock

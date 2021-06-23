@@ -11,6 +11,7 @@ use app\modules\firstdata\models\FirstdataImport;
 use app\modules\accounting\models\MoneyBoxAccount;
 use app\modules\firstdata\models\search\FirstdataImportSearch;
 use app\modules\firstdata\models\search\FirstdataImportPaymentSearch;
+use app\modules\firstdata\models\FirstdataCompanyConfig;
 
 /**
  * FirstdataImportController implements the CRUD actions for FirstdataImport model.
@@ -85,10 +86,12 @@ class FirstdataImportController extends Controller
 
         $accounts = ArrayHelper::map(MoneyBoxAccount::find()
         ->all(), 'money_box_account_id', 'account.name');
+         $companies_config = ArrayHelper::map(FirstdataCompanyConfig::find()->all(), 'firstdata_company_config_id', 'company.name');
 
         return $this->render('create', [
             'model' => $model,
-            'accounts' => $accounts
+            'accounts' => $accounts,
+            'companies_config' => $companies_config
         ]);
     }
 

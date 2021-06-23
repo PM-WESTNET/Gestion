@@ -80,29 +80,30 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
     ])
     ?>
-
-    <h4><?= EcopagosModule::t('app', 'Re-prints and cancelled') ?></h4><br>
-    <?=
-    GridView::widget([
-        'dataProvider' => $dataProvider,
-        'summary' => false,
-        'columns' => [
-            [
-                'attribute' => 'type',
-                'value' => function ($model) {
-                    if ($model->type == Justification::TYPE_CANCELLATION) {
-                        return '<label style="color: red;">' . EcopagosModule::t('app', $model->type) . '</label>';
-                    }
-                    return EcopagosModule::t('app', $model->type);
-                },
-                'format' => 'raw',
-            ],
-            'cause',
-            'date'
-        ]
-    ]);
-    ?>
-
+    <div class="reprint no-print">
+        <h4><?= EcopagosModule::t('app', 'Re-prints and cancelled') ?></h4><br>
+        <?=
+        GridView::widget([
+            'dataProvider' => $dataProvider,
+            'summary' => false,
+            'columns' => [
+                [
+                    'attribute' => 'type',
+                    'value' => function ($model) {
+                        if ($model->type == Justification::TYPE_CANCELLATION) {
+                            return '<label style="color: red;">' . EcopagosModule::t('app', $model->type) . '</label>';
+                        }
+                        return EcopagosModule::t('app', $model->type);
+                    },
+                    'format' => 'raw',
+                ],
+                'cause',
+                'date'
+            ]
+        ]);
+        ?>
+    </div>
+    
 </div>
 
 <!--MODALS-->
@@ -280,8 +281,17 @@ $this->params['breadcrumbs'][] = $this->title;
             $('#print-modal').modal('hide');
         }
     };
-
 </script>
+
+<style>
+@media print
+{    
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+}
+</style>
 
 <?php
 $this->registerJs("PayoutView.init()");

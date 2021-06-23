@@ -6,6 +6,7 @@ use Yii;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use app\components\web\Controller;
+use app\modules\firstdata\models\CustomerHasFirstdataExport;
 use yii\web\NotFoundHttpException;
 use app\modules\firstdata\models\FirstdataExport;
 use app\modules\firstdata\models\FirstdataCompanyConfig;
@@ -152,5 +153,18 @@ class FirstdataExportController extends Controller
         $model = $this->findModel($id);
 
         return Yii::$app->response->sendFile($model->file_url);
+    }
+
+    public function actionRemoveCustomer($customer_id, $file_id)
+    {
+        $chfe = CustomerHasFirstdataExport::findOne(['customer_id' => $customer_id, 'firstdata_export_id' => $file_id]);
+
+        if ($chfe && $chfe->delete()) {
+            Yii::$app->session->addFlash('success',  Yii::t('app', 'Customer has been deleted successfull'));
+        }else {
+            Yii::$app->session->addFlash('error',  Yii::t('app', 'Can`t remove this customer'));
+        } 
+
+        return $this->redirect(['view', 'id' => $file_id]);
     }
 }

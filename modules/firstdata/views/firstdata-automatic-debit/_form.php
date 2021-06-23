@@ -44,6 +44,11 @@ use yii\widgets\MaskedInput;
             <?= $form->field($model, 'card')->widget(MaskedInput::class, ['mask' => '9999999999999999'])->label(false)?>
         </div>
     </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <?= $form->field($model, 'adhered_by')->dropDownList($roles_for_adherence)?>
+        </div>
+    </div>
     <div class="form-group">
         <?= Html::submitButton(Yii::t('app', 'Save'), ['class' => 'btn btn-success']) ?>
     </div>

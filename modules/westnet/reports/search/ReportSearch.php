@@ -13,6 +13,7 @@ use yii\db\Query;
 use yii\base\Model;
 use yii\db\Expression;
 use yii\web\JsExpression;
+use yii\data\ArrayDataProvider;
 use yii\data\ActiveDataProvider;
 use app\components\helpers\DbHelper;
 use app\modules\config\models\Config;
@@ -32,6 +33,11 @@ class ReportSearch extends Model
 
     public $max;
 
+    public $code;
+    public $name;
+    public $lastname;
+    public $name_product;
+
     public function init()
     {
         parent::init();
@@ -39,14 +45,16 @@ class ReportSearch extends Model
         $this->date_to = (new \DateTime('last day of this month'))->format('d-m-Y');
     }
 
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe']
+            [['date_from', 'date_to','name','lastname','name_product'], 'string'],
+            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe'],
+            [['code'],'number']
         ];
     }
 
@@ -874,5 +882,59 @@ class ReportSearch extends Model
 
 
         return $labels;
+    }
+
+    /**
+     * Se busca a clientes con sus respectivas velocidades
+     *
+     * @param $params
+     * @return array
+     */
+    public function findCustomerBySpeed($params)
+    {
+        $this->load($params);
+
+        $query = 'SELECT cu.customer_id, cu.name, cu.lastname, cu.code, co.contract_id, cd.contract_detail_id, pr.product_id, pr.name as name_product FROM customer cu
+                LEFT JOIN contract co ON co.customer_id = cu.customer_id 
+                LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
+                LEFT JOIN product pr ON pr.product_id = cd.product_id
+                WHERE pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC';
+
+        if(!empty($this->code) || !empty($this->name) || !empty($this->lastname) || !empty($this->name_product)){
+
+            if(!empty($this->code)){
+                $query_new = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('code','%'.$this->code.'%')->queryAll();
+                
+            }
+
+            if (!empty($this->name)) {
+                $query_new = str_replace('ORDER BY','AND cu.name LIKE :name ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name','%'.$this->name.'%')->queryAll();
+
+
+            }
+            if (!empty($this->lastname)) {
+                $query_new = str_replace('ORDER BY','AND cu.lastname LIKE :lastname ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('lastname','%'.$this->lastname.'%')->queryAll();
+
+
+            }
+            if (!empty($this->name_product)) {
+                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$this->name_product.'%')->queryAll();
+            }
+        }else{
+            $result = Yii::$app->db->createCommand($query)->queryAll();
+        }
+
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $result,
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+            
+        return $dataProvider;
     }
 }

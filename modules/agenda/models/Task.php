@@ -44,6 +44,16 @@ class Task extends ActiveRecord {
     public $userModelId;
     public $assignAllUsers = false;
     public $userGroups = [];
+
+    // Atributos para optimizar widget de Agenda
+    public $notification_status;
+    public $notification_reason;
+    public $notification_id;
+    public $notification_datetime;
+    public $status_name;
+    public $status_slug;
+
+
     private $_users;
     private $_events;
     private $_added_note = false;
@@ -102,7 +112,10 @@ class Task extends ActiveRecord {
             //[['time'], 'compare', 'compareValue' => $workDayStart, 'operator' => '>='],
             //[['time'], 'compare', 'compareValue' => $workDayEnd, 'operator' => '<='],
             [['duration'], 'compare', 'compareValue' => $workHoursQuantity, 'operator' => '<='],
-            [['date', 'time', 'datetime', 'status', 'category', 'taskType', 'users', 'events', 'assignAllUsers', 'userGroups'], 'safe'],
+            [['date', 'time', 'datetime', 'status', 'category', 'taskType', 'users', 'events', 
+                'assignAllUsers', 'userGroups', 
+                'notification_status', 'notification_reason', 'notification_id', 'notification_datetime', 
+                'status_name', 'status_slug'], 'safe'],
             [['name'], 'string', 'max' => 255]
         ];
     }

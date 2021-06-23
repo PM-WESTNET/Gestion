@@ -1223,6 +1223,10 @@
     'See ticket' => 'Ver ticket',
     'Created by' => 'Creado por',
     'Start date from' => 'Fecha desde',
+    'Start ticket date from' => 'Fecha de tarea desde',
+    'Start ticket date to' => 'Fecha de tarea hasta',
+    'Start contract date from' => 'Fecha contrato desde',
+    'Start contract date to' => 'Fecha contrato hasta',
     'Start date to' => 'Fecha hasta',
     'Theres one or more notify payments by transference not verified' => 'Hay uno o mas informes de pago por transferencia no verificados',
     'Mark as verified' => 'Marcar como verificada',
@@ -1278,6 +1282,7 @@
     'Document image' => 'Imagen de documento',
     'Tax image' => 'Imagen de impuesto',
     'Customers By Node' => 'Clientes por Nodo',
+    'Customers By Speed' => 'Clientes por Velocidad',
     'Created at' => 'Creado el',
     'Customers by publicity shape' => 'Clientes por canales de publicidad',
     'gigantografía' => 'Gigantografía',
@@ -1410,5 +1415,11 @@
     'You must select only one Ip Range' => 'Debe seleccionar un sólo Rango de Ip',
     'If node has access point, subnet must be empty' => 'Si el nodo posee access point, subnet debe estar vacío',
 
+    'Updated Customers Report By User' => 'Clientes Actualizados por Usuario',
+    'Customers Updated' => 'Clientes Actualizados',
+    'Customer has been deleted successfull' => "El cliente ha sido eliminado con éxito",
+    'Can`t remove this customer' => 'No se puede eliminar ',
+    'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente",
+    'Firstdata Automatic Debit Report' => 'Reporte Firstdata débito automático'
 
  );

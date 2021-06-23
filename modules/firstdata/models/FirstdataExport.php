@@ -171,6 +171,19 @@ class FirstdataExport extends ActiveRecord
         $this->formatDatesAfterFind();
     }
 
+    public function beforeDelete()
+    {
+        if ($this->customerHasFirstdataExports) {
+            $this->unlinkAll('customerHasFirstdataExports', true);
+        }
+
+        if ($this->firstdataDebitHasExports) {
+            $this->unlinkAll('firstdata_debit_has_exports', true);
+        }
+
+        return true;
+    }
+
     /*
         Busca y enlaza con la exportacion, los comprobantes correspondientes al rango de tiempo indicado
         El comprobante no debe estar en otra exportacion
@@ -252,4 +265,6 @@ class FirstdataExport extends ActiveRecord
 
         return true;
     }
+
+    
 }

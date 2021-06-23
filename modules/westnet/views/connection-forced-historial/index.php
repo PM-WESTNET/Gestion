@@ -20,8 +20,8 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Contract Number').':
 
     <h1><?= Html::encode($this->title) ?></h1>
     
-    <h3><?=  Yii::t('app', 'Customer').': ' . $contract->customer->fullName?></h3>
-    <h3><?=  Yii::t('app', 'Address').': ' . $contract->address->fullAddress?></h3>
+    <h3><?=  Yii::t('app', 'Customer').': ' . (isset($contract->customer)?$contract->customer->fullName:'')?></h3>
+    <h3><?=  Yii::t('app', 'Address').': ' . (isset($contract->address)?$contract->address->fullAddress:'')?></h3>
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     

@@ -108,6 +108,15 @@ class Customer extends \app\modules\sale\models\Customer
                         return "true";
                     }
                     return "false";
+                },
+                'geo' => function($model) {
+                    return $model->address->geocode;
+                },
+
+                'email',
+
+                'address' => function($model) {
+                    return $model->address->street . " " . $model->address->number;
                 }
             ];
         }else {

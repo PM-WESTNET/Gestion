@@ -349,29 +349,46 @@ class ContractToInvoice
         //Se hace el cambio a batch para evitar facturacion de contratos duplicados
         foreach($contractSearch->searchForInvoice($params)->batch() as $contractList) {
             foreach($contractList as $item) {
-                $transaction = Yii::$app->db->beginTransaction();
-                if( array_search($item['customer_id'],  $customers ) === false ) {
-                    if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true, $invoice_process_id) ) {
-                        $afip_error = true;
+                /*Verificar si el proceso esta pausado*/
+                $paused_invoice_process = InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+                $pending_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+                if(!empty($paused_invoice_process)){
+                    if($paused_invoice_process->status == InvoiceProcess::STATUS_PAUSED){
+                        echo "This process was paused.\n";
+                        return null;
                     }
-                    Yii::$app->cache->set('_invoice_all_', [
-                        'total' => $cantidadTotal,
-                        'qty' => $i
-                    ]);
                 }
-                /*if($afip_error) {
-                    $transaction->rollBack();
-                    //break;
-                } else {*/
-                    $customers[] = $item['customer_id'];
+                if(!empty($pending_invoice_process)){   
+                    $transaction = Yii::$app->db->beginTransaction();
+                    if( array_search($item['customer_id'],  $customers ) === false ) {
+                        if(!$this->invoice($company, $contractSearch->bill_type_id, $item['customer_id'], $period, true, $bill_observation, $invoice_date, false, true, $invoice_process_id) ) {
+                            $afip_error = true;
+                            echo "Error item['customer_id']: " . $item['customer_id'] . "\n";
+                        }
+                        Yii::$app->cache->set('_invoice_all_', [
+                            'total' => $cantidadTotal,
+                            'qty' => $i
+                        ]);
+                        echo "Sin Error item['customer_id']: " . $item['customer_id'] . "\n";
+                    }
+                    /*if($afip_error) {
+                        $transaction->rollBack();
+                        //break;
+                    } else {*/
+                        $customers[] = $item['customer_id'];
 
-                    // Agrego al cliente a la notificacion, para que se le notifique
-//                    $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
+                        // Agrego al cliente a la notificacion, para que se le notifique
+    //                    $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
 
-//                    Yii::$app->session->close();
-                    $i++;
-                    $transaction->commit();
-                //}
+    //                    Yii::$app->session->close();
+                        $i++;
+                        $transaction->commit();
+                    //}
+                }else{
+                  echo "There are no pending processes\n";
+                  return null;  
+                }
+                
             }
         }
 
@@ -456,7 +473,7 @@ class ContractToInvoice
 
                         // Verifico que el plan tenga item a facturar, en caso de no tener agrego los Planes
                         foreach ($contract->contractDetails as $contractDetail) {
-                            if ($contractDetail->product->type == 'plan' && $includePlan) {
+                            if ($contractDetail->product->type == 'plan' && $includePlan && $contractDetail->status !== ContractDetail::STATUS_LOW) {
                                 if (!$contractDetail->isAddedForInvoice($periods)) {
                                     $discount = $this->getDiscount($contractDetail->product_id, $customerActiveDiscount, true);
 

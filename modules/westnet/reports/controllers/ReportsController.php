@@ -4,26 +4,43 @@ namespace app\modules\westnet\reports\controllers;
 
 use Yii;
 use DateTime;
+
 use yii\db\Query;
 use yii\db\Expression;
+
+
 use yii\data\ActiveDataProvider;
+
+
 use app\components\web\Controller;
+
 use app\components\helpers\GraphData;
+
 use app\modules\config\models\Config;
+
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\PublicityShape;
-use app\modules\westnet\models\NotifyPayment;
-use app\modules\checkout\models\PaymentMethod;
+
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\search\ReportSearch;
 use app\modules\westnet\reports\search\CustomerSearch;
+use app\modules\westnet\reports\search\ReportChangeCompanySearch;
+
+use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\models\search\NotifyPaymentSearch;
-use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\westnet\models\search\PaymentExtensionHistorySearch;
 use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
+
+
+use app\modules\checkout\models\PaymentMethod;
+
+use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
+
+use yii\data\ArrayDataProvider;
 
 /**
  * CustomerController
@@ -1073,4 +1090,56 @@ class ReportsController extends Controller
             'firstdataSearch' => $firstdataSearch
             ]);
     }
+    
+
+    /**
+    *Lists all ReportChangeCompanyName models
+    *@return mixed
+    */
+    public function actionChangeCompanyName(){
+
+        $searchModel = new ReportChangeCompanySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('change-company-name',[
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+
+    }
+
+    public function actionCustomersByNodeExport(){
+
+        $search = new CustomerSearch();
+
+        $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
+
+        if (User::hasRole('admin')) {
+            $excel = ExcelExporter::getInstance();
+            $excel->create('clientes-por-nodo', [
+                'A' => ['node', 'Nodo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+                'B' => ['total', 'Total', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            ])->createHeader();
+
+            foreach ($dataProvider->allModels as $key => $value) {
+                $excel->writeRow([
+                    'node'=> $value['node'],
+                    'total' => $value['total']
+                ]);
+            }
+
+            $excel->download('clientes-por-nodo.xls');
+        }else{
+            Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
+            return $this->redirect('/reports/reports/customers-by-node');
+        }
+    }
+
+    public function actionCustomersBySpeed(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_speed = $reportSearch->findCustomerBySpeed(Yii::$app->request->get());
+
+        return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
+    }
+
 }

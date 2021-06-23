@@ -3,6 +3,7 @@
 use app\modules\automaticdebit\models\AutomaticDebit;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\widgets\MaskedInput;
 
 /* @var $this yii\web\View */
 /* @var $model app\modules\automaticdebit\models\AutomaticDebit */
@@ -17,7 +18,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'bank_id')->dropDownList($banks) ?>
 
-    <?= $form->field($model, 'cbu')->textInput(['maxlength' => 22]) ?>
+    <?= $form->field($model, 'cbu')->widget(MaskedInput::class, ['mask' => '9999999999999999999999']) ?>
 
     <?= $form->field($model, 'status')->dropDownList([
         AutomaticDebit::ENABLED_STATUS => Yii::t('app','Active'),

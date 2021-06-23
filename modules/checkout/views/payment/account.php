@@ -165,12 +165,65 @@ $contracts = new ActiveDataProvider([
                         }
                     },
                     'email' => function ($url, $model, $key) {
-                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
-                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+
+                        if($model['type'] !== 'Payment' && $model['status'] === 'closed' ){
+                            $email = ($model['customer_id'] ? trim($model['email']) : "" );
+                            $email2 = ($model['customer_id'] ? trim($model['email2']) : "" );
+
+                            if ($email != "" && $email2 != "") {
+                                return '<div class="btn-group">
+                                            <a href="'. Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current']).'"class="btn btn-info"><span class="glyphicon glyphicon-envelope"></span></a>
+                                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                <li>'. Html::a('Email 1: '. $email, Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email]), ['title' => Yii::t('app', 'Send By Email')]).'</li>
+                                                <li>'. Html::a('Email 2: '. $email2, Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email2]), ['title' => Yii::t('app', 'Send By Email Secondary')]).'</li>
+                                            </ul>
+                                        </div>';
+
+                            } else {
+                                if ($email != "") {
+                                    return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                                }
+
+                                if ($email2 != "") {
+                                    return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email2]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);                                
+                                }
+
+                                return '';
+                            }
                         }
 
-                        if($model['type'] == 'Payment' && $model['status'] === Payment::PAYMENT_CLOSED && ($model['customer_id'] ? trim($model['email']) : "" ) !=""){
-                            return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current-account']), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                        if($model['type'] == 'Payment' && $model['status'] === Payment::PAYMENT_CLOSED ){
+                            $email = ($model['customer_id'] ? trim($model['email']) : "" );
+                            $email2 = ($model['customer_id'] ? trim($model['email2']) : "" );
+
+                            if ($email != "" && $email2 != "") {
+                                return '<div class="btn-group">
+                                            <a class="btn btn-info" href="'. Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current_account']). '"><span class="glyphicon glyphicon-envelope"></span></a>
+                                            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                <li>'. Html::a('Email 1: '. $email, Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current_account', 'email' => $email]), ['title' => Yii::t('app', 'Send By Email')]).'</li>
+                                                <li>'. Html::a('Email 2: '. $email2, Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'current_account', 'email' => $email2]), ['title' => Yii::t('app', 'Send By Email Secondary')]).'</li>
+                                            </ul>
+                                        </div>';
+
+                            } else {
+                                if ($email != "") {
+                                    return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'account_current', 'email' => $email]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);
+                                }
+
+                                if ($email2 != "") {
+                                    return  Html::a('<span class="glyphicon glyphicon-envelope"></span>', Url::toRoute(['email', 'id' => $model['payment_id'], 'from' => 'account_current', 'email' => $email2]), ['title' => Yii::t('app', 'Send By Email'), 'class' => 'btn btn-info']);                                
+                                }
+
+                                return '';
+                            }
                         }
                     },
                     

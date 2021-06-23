@@ -41,6 +41,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'firstdata_import_id',
+             [
+                'attribute' => 'firstdata_config_id',
+                'value' => function($model) {
+                    return $model->firstdataConfig->company->name;
+                }
+            ],
             'presentation_date',
             'created_at',
             'status',

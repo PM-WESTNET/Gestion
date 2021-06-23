@@ -58,6 +58,29 @@ class NotificationController extends Controller
         return ['notifications' => []];
     }
 
+
+    /**
+     * Devuelve una mobile push para el usuario logueado
+     */
+    public function actionView() {
+        $userApp = $this->getUserApp();
+
+        if ($userApp) {
+            $mobile_push_id = \Yii::$app->request->post('mobile_push_id');
+
+            if ($mobile_push_id) {
+                $mphua = MobilePushHasUserApp::findOne(['mobile_push_id' => $mobile_push_id, 'user_app_id' => $userApp->user_app_id]);
+
+                if ($mphua) {
+                    return $mphua;
+                }
+            }
+        }
+
+        \Yii::$app->response->setStatusCode(400);
+        return ['notification' => []];
+    }
+
     /**
      * Marca una notificación como leída
      */

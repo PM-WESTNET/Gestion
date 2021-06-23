@@ -32,6 +32,7 @@ use yii\web\UploadedFile;
 use yii2fullcalendar\yii2fullcalendar;
 use app\modules\sale\models\Product;
 use app\modules\westnet\models\Vendor;
+use app\modules\westnet\reports\models\ReportChangeCompany;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -180,7 +181,10 @@ class CustomerController extends Controller
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
 
-            $products = ArrayHelper::map(Product::find()->all(), 'product_id', 'name');
+            $products = ArrayHelper::map(Product::find()
+                ->andWhere(['type' => 'product'])
+                ->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])
+                ->all(), 'product_id', 'name');
 
             $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
                 ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
@@ -524,6 +528,13 @@ class CustomerController extends Controller
     public function actionChangeCompany($customer_id, $company_id ){
         
         $model= $this->findModel($customer_id);
+
+        $reportChangeCompany = new ReportChangeCompany();
+
+        $reportChangeCompany->customer_id_customer = $customer_id;
+        $reportChangeCompany->new_business_name = Company::FindCompanyByID($company_id)['name'];
+        $reportChangeCompany->old_business_name = $model->company->name;
+        $reportChangeCompany->date = Date("Y-m-d");
         
         /**if ($model->lastname == '') {
             $model->lastname= ' - ';
@@ -538,6 +549,8 @@ class CustomerController extends Controller
         $model->company_id = $company_id;
         
         if ($model->save(false)) {
+            if($reportChangeCompany->new_business_name != $reportChangeCompany->old_business_name)
+                $reportChangeCompany->save();
             return ['status' => 'success'];
         }else{
             return ['status' => 'error', 'message' => $model->getErrors() ];

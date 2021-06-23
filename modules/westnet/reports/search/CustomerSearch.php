@@ -38,6 +38,8 @@ class CustomerSearch extends Model
     // Rango de tiempo para el reporte de clientes actualizados
     public $range;
 
+    public $user_id;
+
     public function init()
     {
         parent::init();

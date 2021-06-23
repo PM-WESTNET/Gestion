@@ -24,7 +24,7 @@ $title = $notification->subject;
         <thead>
           <tr>
             <th colspan="9">
-              <img style="margin: 0 auto; width: 140px;" src="<?php echo \yii\helpers\Url::base(true) .'/'. $notification->emailTransport->getObject()->getLogoWebPath() ?>" alt="Westnet">
+              <img style="margin: 0 auto; width: 140px;" src=<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?> alt="Westnet">
             </th>
           </tr>
         </thead>

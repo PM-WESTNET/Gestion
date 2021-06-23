@@ -18,6 +18,7 @@ use yii\filters\VerbFilter;
 use app\modules\sale\components\BillExpert;
 use yii\data\ActiveDataProvider;
 use yii\web\Response;
+use Da\QrCode\QrCode;
 
 /**
  * BillController implements the CRUD actions for Bill model.
@@ -128,6 +129,12 @@ class BillController extends Controller
     {
         $model = $this->findModel($id);
 
+        if(isset(Yii::$app->request->post()['close-bill'])){
+            if($model->total > 0)
+                    $this->close($id);      
+                else
+                    Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+        }
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $model->getBillDetails(),
             'pagination' => false
@@ -225,7 +232,13 @@ class BillController extends Controller
                 }
             }
             $model->save();
-
+            if(isset(Yii::$app->request->post()['close-bill'])){
+                if($model->total > 0)
+                    $this->close($id);      
+                else
+                    Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+                    
+            }
             //Si la clase cambio:
             if ($previousClass != $model->class) {
                 //Debemos volver a instanciar
@@ -483,10 +496,18 @@ class BillController extends Controller
 
     }
 
-    public function actionClose($id, $ajax = false, $payAfterClose = false)
-    {
+    public function close($id, $ajax = false, $payAfterClose = false)
+    {	
 
         $model = $this->findModel($id);
+    	\Yii::info("----------------------------------------", 'duplicados-afip');
+    	\Yii::info("1) Entre en actionClose"
+        ."ID: ".$id."\n"
+        ."Ajax: ".$ajax."\n"
+        ."PayAfterClose: ".$payAfterClose."\n"
+        ."Status: ".$model->getAttributes()['status']
+        , 'duplicados-afip');
+
 
         if (!empty($model->billDetails) && $model->status != 'closed') {
             if (!$model->close()) {
@@ -830,6 +851,8 @@ class BillController extends Controller
         $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
         $model = $this->findModel($id);
+        $companyData = $model->company;
+
         $this->layout = '//pdf';
 
         $dataProvider = new \yii\data\ActiveDataProvider([
@@ -837,9 +860,30 @@ class BillController extends Controller
             'pagination' => false
         ]);
 
+        $jsonCode = [
+           "ver" => 1,
+           "fecha" => $model->date,
+           "cuit" => str_replace("-","",$companyData->tax_identification),
+           "ptoVta" => $model->getPointOfSale()->number,
+           "tipoCmp" => $model->billType->code,
+           "nroCmp" => $model->number,
+           "importe" => $model->total,
+           "moneda" => "PES",
+           "ctz" => 1,
+           "tipoDocRec" => $model->customer->documentType->code,
+           "nroDocRec" => str_replace("-","",$model->customer->document_number),
+           "tipoCodAut" => "E",
+           "codAut" => $model->ein
+        ];
+        $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
+        ->setSize(500)
+        ->setMargin(5);
+
         $view = $this->render('pdf', [
             'model' => $model,
-            'dataProvider' => $dataProvider
+            'dataProvider' => $dataProvider,
+            'qrCode' => $qrCode
+
         ]);
 
         $pdf = ' ';
@@ -877,7 +921,7 @@ class BillController extends Controller
      * Envia el comprobante por email al correo del customer
      * @param $id
      */
-    public function actionEmail($id, $from = 'all_bills')
+    public function actionEmail($id, $from = 'all_bills', $email = null)
     {
         $model = $this->findModel($id);
 
@@ -888,12 +932,12 @@ class BillController extends Controller
         fwrite($file, $pdf);
         fclose($file);
 
-        if (trim($model->customer->email) == "") {
+        if (empty($email) && trim($model->customer->email) == "" && trim($model->customer->email2) == "") {
             Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
             return $this->redirect(['index']);
         }
 
-        if ($model->sendEmail($fileName)) {
+        if ($model->sendEmail($fileName, $email)) {
             Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
         } else {
             Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
