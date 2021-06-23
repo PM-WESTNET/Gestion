@@ -9,16 +9,17 @@
 namespace app\modules\westnet\reports\search;
 
 
+use Yii;
+use yii\db\Query;
+use yii\base\Model;
+use yii\db\Expression;
+use yii\data\ArrayDataProvider;
+use yii\data\ActiveDataProvider;
 use app\components\helpers\DbHelper;
 use app\modules\westnet\models\Node;
 use app\modules\sale\models\Customer;
 use app\modules\westnet\reports\ReportsModule;
-use Yii;
-use yii\base\Model;
-use yii\data\ActiveDataProvider;
-use yii\data\ArrayDataProvider;
-use yii\db\Expression;
-use yii\db\Query;
+use app\modules\sale\models\CustomerCompanyHistory;
 
 class CustomerSearch extends Model
 {
@@ -30,10 +31,12 @@ class CustomerSearch extends Model
     public $date_from;
     public $date_to;
 
+    public $customer_id;
+    public $company_id_from;
+    public $company_id_to;
+
     // Rango de tiempo para el reporte de clientes actualizados
     public $range;
-
-    public $user_id;
 
     public function init()
     {
@@ -48,7 +51,7 @@ class CustomerSearch extends Model
     public function rules() {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'range'], 'safe']
+            [['date_from', 'date_to', 'range', 'customer_id', 'company_id_from', 'company_id_to'], 'safe']
         ];
     }
 
@@ -57,10 +60,12 @@ class CustomerSearch extends Model
         return [
             'date_from' => ReportsModule::t('app', 'Date From'),
             'date_to' => ReportsModule::t('app', 'Date To'),
-            'range' => Yii::t('app', 'Time Range')
+            'customer_id' => Yii::t('app', 'Customer'),
+            'range' => Yii::t('app', 'Time Range'),
+            'company_id_from'=> ReportsModule::t('app', 'Company from'),
+            'company_id_to'=> ReportsModule::t('app', 'Company to'),
         ];
     }
-
 
     public function findPerMonth($params)
     {
@@ -87,27 +92,27 @@ class CustomerSearch extends Model
 
     public function findDifferenceByMonth()
     {
-/*
-select periodo, sum(alta) as alta, sum(baja) as baja, sum(alta) - sum(baja) as diferencia from (
-  SELECT
-    date_format(c.from_date, '%Y-%m') AS periodo,
-    count(*)                          AS alta,
-    0                                 AS baja
-  FROM contract c
-  WHERE c.status = 'active'
-  GROUP BY date_format(c.from_date, '%Y-%m')
-  UNION ALL
-  SELECT
-    date_format(to_date, '%Y-%m') AS periodo,
-    0                                baja,
-    count(*)                      AS baja
-  FROM contract
-  WHERE status = 'low'
-  GROUP BY date_format(to_date, '%Y-%m')
-) t
-GROUP BY periodo
-;
- * */
+        /*
+        select periodo, sum(alta) as alta, sum(baja) as baja, sum(alta) - sum(baja) as diferencia from (
+        SELECT
+            date_format(c.from_date, '%Y-%m') AS periodo,
+            count(*)                          AS alta,
+            0                                 AS baja
+        FROM contract c
+        WHERE c.status = 'active'
+        GROUP BY date_format(c.from_date, '%Y-%m')
+        UNION ALL
+        SELECT
+            date_format(to_date, '%Y-%m') AS periodo,
+            0                                baja,
+            count(*)                      AS baja
+        FROM contract
+        WHERE status = 'low'
+        GROUP BY date_format(to_date, '%Y-%m')
+        ) t
+        GROUP BY periodo
+        ;
+        * */
 
     }
 
@@ -193,6 +198,37 @@ GROUP BY periodo
 
     }
 
+    public function changeCompanyHistory($params)
+    {
+        $query = CustomerCompanyHistory::find();
+        $this->load($params);
+
+        $query->andFilterWhere([
+            'customer_id' => $this->customer_id
+        ]);
+        $query->andFilterWhere([
+            'old_company_id' => $this->company_id_from
+        ]);
+        $query->andFilterWhere([
+            'new_company_id' => $this->company_id_to
+        ]);
+
+        if ($this->date_from) {
+            $query->andFilterWhere([ '>=', 'created_at', strtotime( Yii::$app->formatter->asDate($this->date_from, 'yyyy-MM-dd')) ]);
+        }
+
+        if($this->date_to) {
+            $query->andFilterWhere([ '<=', 'created_at', strtotime( Yii::$app->formatter->asDate($this-> date_to, 'yyyy-MM-dd')) + 86400 ]);
+        }
+
+        $query->orderBy(['created_at'=>SORT_DESC]);
+
+        $data = new ActiveDataProvider([
+            "query"=> $query
+        ]);
+        return $data;
+    }
+    
     private function filterByNode($query){
         if (!empty($this->node_id)) {
             $query->andWhere(['connection.node_id' => $this->node_id]);
@@ -255,7 +291,6 @@ GROUP BY periodo
             $query->andWhere(['ccathc.customer_category_id' => $this->customer_category_id]);
         }
     }
-
 
     /**
      * Datos para reporte de Clientes Actualizdos
@@ -330,4 +365,6 @@ GROUP BY periodo
 
 
     }
+
+    
 }
