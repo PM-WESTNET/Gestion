@@ -39,6 +39,7 @@ class ReportSearch extends Model
     public $name_product;
     public $fullname;
     public $node;
+    public $speed;
 
     public function init()
     {
@@ -54,7 +55,7 @@ class ReportSearch extends Model
     public function rules()
     {
         return [
-            [['date_from', 'date_to','name','lastname','name_product','fullname','node'], 'string'],
+            [['date_from', 'date_to','name','lastname','name_product','fullname','node', 'speed'], 'string'],
             [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe'],
             [['code'],'number']
         ];
@@ -959,7 +960,7 @@ class ReportSearch extends Model
                 WHERE co.status = "active" AND pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC';
 
      
-        if(!empty($this->code) || !empty($this->name) || !empty($this->lastname) || !empty($this->name_product)){
+        if(!empty($this->code)  || !empty($this->fullname) || !empty($this->name_product) || !empty($this->node)){
 
             if(!empty($this->code)){
                 $query_new = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
@@ -970,7 +971,6 @@ class ReportSearch extends Model
             if (!empty($this->fullname)) {
                 $query_new = str_replace('ORDER BY','AND CONCAT_WS(" ",cu.name, cu.lastname) LIKE :fullname ORDER BY',$query);
                 $result = Yii::$app->db->createCommand($query_new)->bindValue('fullname','%'.$this->fullname.'%')->queryAll();
-
 
             }
             /*if (!empty($this->lastname)) {
