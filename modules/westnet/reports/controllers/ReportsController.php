@@ -1142,4 +1142,17 @@ class ReportsController extends Controller
         return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
     }
 
+
+    /**
+    *Lists all ReportChangeCompanyName models
+    *@return mixed
+    */
+    public function actionCustomerRegistrations(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
+
+        return $this->render('customer-registrations', ['dataProvider' => $list_customer_by_plan, 'reportSearch' => $reportSearch]);
+
+    }
+
 }

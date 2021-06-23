@@ -37,6 +37,8 @@ class ReportSearch extends Model
     public $name;
     public $lastname;
     public $name_product;
+    public $fullname;
+    public $node;
 
     public function init()
     {
@@ -52,7 +54,7 @@ class ReportSearch extends Model
     public function rules()
     {
         return [
-            [['date_from', 'date_to','name','lastname','name_product'], 'string'],
+            [['date_from', 'date_to','name','lastname','name_product','fullname','node'], 'string'],
             [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe'],
             [['code'],'number']
         ];
@@ -928,6 +930,63 @@ class ReportSearch extends Model
             $result = Yii::$app->db->createCommand($query)->queryAll();
         }
 
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $result,
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+            
+        return $dataProvider;
+    }
+
+    /**
+     * Se busca a clientes con sus respectivos planes
+     *
+     * @param $params
+     * @return array
+     */
+    public function findCustomerByPlan($params)
+    {
+        $this->load($params);
+
+        $query = 'SELECT cu.code, CONCAT_WS(" ",cu.name, cu.lastname) as fullname, pr.name as name_product, no.name as node FROM customer cu
+                LEFT JOIN contract co ON co.customer_id = cu.customer_id 
+                LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
+                LEFT JOIN product pr ON pr.product_id = cd.product_id
+                LEFT JOIN connection con ON con.contract_id = co.contract_id
+                LEFT JOIN node no ON no.node_id = con.node_id
+                WHERE co.status = "active" AND pr.status = "enabled" AND pr.type = "plan" ORDER BY pr.name ASC';
+
+     
+        if(!empty($this->code) || !empty($this->name) || !empty($this->lastname) || !empty($this->name_product)){
+
+            if(!empty($this->code)){
+                $query_new = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('code','%'.$this->code.'%')->queryAll();
+                
+            }
+
+            if (!empty($this->fullname)) {
+                $query_new = str_replace('ORDER BY','AND CONCAT_WS(" ",cu.name, cu.lastname) LIKE :fullname ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('fullname','%'.$this->fullname.'%')->queryAll();
+
+
+            }
+            /*if (!empty($this->lastname)) {
+                $query_new = str_replace('ORDER BY','AND cu.lastname LIKE :lastname ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('lastname','%'.$this->lastname.'%')->queryAll();
+
+
+            }
+            if (!empty($this->name_product)) {
+                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$this->name_product.'%')->queryAll();
+            }*/
+        }else{
+            $result = Yii::$app->db->createCommand($query)->queryAll();
+        }
+      
         $dataProvider = new ArrayDataProvider([
             'allModels' => $result,
             'pagination' => [

@@ -216,6 +216,7 @@ if (Yii::$app->getModule('reports')) {
             ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
             ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
             ['label' => ReportsModule::t('app', 'Changes of company name'), 'url' => ['/reports/reports/change-company-name']],
+            ['label' => ReportsModule::t('app', 'Customer Registrations'), 'url' => ['/reports/reports/customer-registrations']],
         ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],
         ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports/costumer-variation-per-month']],
