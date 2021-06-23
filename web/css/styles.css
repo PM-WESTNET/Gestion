@@ -1423,3 +1423,40 @@ a.ui-state-default.ui-state-active {
 .wrap {
   min-height: 75%;
 }
+
+
+
+#user-management-permission-view #routes-list, 
+#user-management-permission-view .col-sm-6:first-child form .row{
+  overflow: scroll;
+  overflow-x: hidden;
+  max-height: 550px;
+}
+#user-management-role-view form {
+  overflow: scroll;
+  overflow-x: hidden;
+  height: 550px;
+  margin-bottom: 20px;
+}
+#user-management-permission-view form{
+  overflow: hidden;
+  height: 550px;
+  margin-bottom: 20px;
+}
+
+#user-management-role-view button.btn.btn-primary.btn-sm, 
+#user-management-permission-view button.btn.btn-primary.btn-sm{
+  position:absolute;
+	bottom:20px;
+}
+#user-management-permission-view form .row .col-sm-3 button.btn.btn-primary.btn-sm{
+  position:static;
+	bottom:0px;
+}
+#user-management-permission-view form .row .col-sm-3{
+  margin-left: -25px;
+}
+
+
+
+
