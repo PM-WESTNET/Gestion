@@ -25,6 +25,7 @@ use app\modules\westnet\models\NotifyPayment;
 use yii\validators\RegularExpressionValidator;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\search\CustomerSearch;
+use app\modules\sale\models\CustomerCompanyHistory;
 use app\modules\mobileapp\v1\models\UserAppActivity;
 use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\sale\modules\contract\models\Contract;
@@ -66,6 +67,7 @@ use app\modules\westnet\reports\models\CustomerUpdateRegister;
  * @property string $birthdate
  * @property string $observations
  * @property string $has_debit_automatic
+ * @property string $has_direct_debit
  *
  *
  * @property Bill[] $bills
@@ -143,7 +145,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic','has_direct_debit'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
@@ -220,10 +222,10 @@ class Customer extends ActiveRecord {
         $this->regexValitation();
 
         // SI SI, HARDCODEADO!! Hay que cambiar los modelos para poder parametrizarlo, o meter config y eso...
-//        if($this->document_type_id != 1) {
-//            $this->docNumberValidation();
-//            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
-//        }
+        //        if($this->document_type_id != 1) {
+        //            $this->docNumberValidation();
+        //            //$rules[] = ['document_number', 'compare', 'compareValue' => 999999, 'operator' => '>=', 'type' => 'number'];
+        //        }
 
         return $rules;
     }
@@ -550,7 +552,8 @@ class Customer extends ActiveRecord {
             'birthdate' => Yii::t('app','Birthdate'),
             'observations' => Yii::t('app', 'Observations'),
             'dataVerified' => Yii::t('app', 'Data Verified'),
-            'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit')
+            'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit'),
+            'has_direct_debit' => Yii::t('app', 'Require Direct Debit')
         ];
 
         //Labels adicionales definidos para los profiles
@@ -690,6 +693,13 @@ class Customer extends ActiveRecord {
                             case 'company_id':
                                 $oldCompany= Company::findOne(['company_id' => $oldValue]);
                                 $log = new CustomerLog();
+                                // Inserto en Tabla: costumer_company_changed
+                                $CompanyHist = new CustomerCompanyHistory();
+                                $CompanyHist->old_company_id = $oldValue;
+                                $CompanyHist->new_company_id = $this->company_id;
+                                $CompanyHist->customer_id = $this->customer_id;
+                                $CompanyHist->save();
+
                                 $log->createUpdateLog($this->customer_id, $this->attributeLabels()['Company'], ($oldCompany ? $oldCompany->name : '' ), ($this->company ? $this->company->name: '' ), 'Customer', $this->customer_id);
                                 break;
                             default:

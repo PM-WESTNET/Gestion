@@ -534,6 +534,8 @@
   'Providers' => 'Proveedores',
   'Provisioning' => 'Pago indirecto',
   'Publicity Shape' => '¿Como conoció a la empresa?',
+  'Require Automatic Debit' => '¿Requiere Débito Automático?',
+  'Require Direct Debit' => '¿Requiere Débito Directo?',
   'Qty' => 'Cant.',
   'Quantity' => 'Cantidad',
   'Quantity Payments' => 'Cantidad de pagos',

@@ -7,8 +7,6 @@ use app\modules\ticket\models\Category;
 use app\modules\westnet\reports\search\CustomerSearch;
 use Yii;
 use app\components\web\Controller;
-use webvimark\modules\UserManagement\models\User;
-use yii\helpers\ArrayHelper;
 
 /**
  * CustomerController
@@ -63,17 +61,16 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function actionCustomersUpdatedByUser()
-    {
+
+    public function actionChangeCompanyHistory()
+    {   
         $search = new CustomerSearch();
-        $data = $search->findByCustomersUpdatedByUser(Yii::$app->request->post());
-
-        $users = ArrayHelper::map(User::find()->all(), 'id', 'username');
-
-        return $this->render('customers-updated-by-user', [
-            'search' => $search,
-            'data' => $data,
-            'users' => $users
-        ]);
+        $data = $search->changeCompanyHistory(Yii::$app->request->getQueryParams());
+        return $this->render(
+            'customer-change-company',[
+                'search' => $search,
+                'data' => $data,
+            ]
+        );
     }
 }

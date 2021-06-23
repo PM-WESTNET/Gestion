@@ -618,7 +618,8 @@ class Bill extends ActiveRecord implements CountableInterface
      * @return boolean
      */
     public function close()
-    {
+    {	
+        \Yii::info("2) Entre en modules/sale/models/bill/function_close", 'duplicados-afip');
         $transaction = $this->db->beginTransaction();
 
         try{
@@ -680,6 +681,8 @@ class Bill extends ActiveRecord implements CountableInterface
                 //Si electronic_billing del punto de venta esta en 1 significa que la factura electronica debe realizarse.
 
                 try {
+		\Yii::info("3) Entre en modules/sale/models/bill/function_invoice", 'duplicados-afip');
+
                     $invoice = Invoice::getInstance();
                     $result = $invoice->invoice($this);
 
@@ -710,7 +713,6 @@ class Bill extends ActiveRecord implements CountableInterface
                         $backToDraft = true;
                     }
                     $this->save();
-
                     if ($backToDraft) {
                         $this->payed = false;
                         $this->status = 'draft';

@@ -72,21 +72,18 @@ use kartik\select2\Select2;
                  <?php 
                 //Si la factura ha sido modificada y se debe mostrar el boton "Cerrar" (params)
                 if($model->formName() !== 'bill' || ($model->status != 'closed' && Yii::$app->params['bill_close_button']/* && $model->billType->multiplier !== 1*/)): ?>
-                <a id="closeBill" class="btn btn-success <?= (!$model->customer_id) ? ' disabled' : '' ?>" href="<?= \yii\helpers\Url::toRoute(['bill/close','id'=>$model->bill_id]) ?>">
-                    <span class="glyphicon glyphicon-ok"></span>
-                    <?= Yii::t('app','To Accept'); ?>
-                </a>
+		<button type="submit" class="btn btn-success" name="close-bill" value="close-bill">Aceptar</button>
                 <?php endif; ?>
                 
                     
                 <?php 
                 // Si el modulo pagos esta habilitado, mostramos el boton de pago. TODO: cambiar condicion == bill
-                if(Yii::$app->getModule('checkout') && $model::$payable): ?>
-                <a id="pay" class="btn btn-primary disabled" href="<?= \yii\helpers\Url::toRoute(['bill/close', 'id' => $model->bill_id, 'payAfterClose' => true]) ?>">
+                /*if(Yii::$app->getModule('checkout') && $model::$payable): */?>
+                <!--<a id="pay" class="btn btn-primary disabled" href="<?/*= \yii\helpers\Url::toRoute(['bill/close', 'id' => $model->bill_id, 'payAfterClose' => true]) */?>">
                     <span class="glyphicon glyphicon-ok"></span>
-                    <?= Yii::t('app','To Accept and Pay'); ?>
-                </a>
-                <?php endif; ?>    
+                    <?/*= Yii::t('app','To Accept and Pay');*/ ?>
+                </a>-->
+                <?php /*endif;*/ ?>    
 
             </div>
             <div class="col-md-6 text-right">

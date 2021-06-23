@@ -48,5 +48,8 @@ return array(
     'Push notifications report' => 'Reporte de notificaciones push',
     'sent' => 'Enviada',
     'no sent' => 'No enviada',
-    'Changes of company name' => 'Cambios de razones sociales'
+    'Change History company' => 'Historial de cambios de empresa',
+    'Customers change company history' => 'Historial de cambios de empresa',
+    'Company from' => 'Empresa destino',
+    'Company to' => 'Empresa destino'
 );
