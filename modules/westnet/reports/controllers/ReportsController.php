@@ -15,6 +15,7 @@ use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 
 use app\components\helpers\GraphData;
+use app\components\helpers\ExcelExporter;
 
 use app\modules\config\models\Config;
 
@@ -41,6 +42,8 @@ use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
 use yii\data\ArrayDataProvider;
+
+use PHPExcel_Style_NumberFormat;
 
 /**
  * CustomerController
@@ -1140,6 +1143,71 @@ class ReportsController extends Controller
         $list_customer_by_speed = $reportSearch->findCustomerBySpeed(Yii::$app->request->get());
 
         return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
+    }
+
+
+    /**
+    *Lists all ReportChangeCompanyName models
+    *@return mixed
+    */
+    public function actionCustomerRegistrations(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
+
+        return $this->render('customer-registrations', ['dataProvider' => $list_customer_by_plan, 'reportSearch' => $reportSearch]);
+
+    }
+
+    /**
+    *Return count of client with connection in determined date
+    *@return mixed
+    */
+    public function actionNumberOfClients(){
+        $reportSearch = new ReportSearch();
+        return $reportSearch->findNumberOfClientsForConnection(Yii::$app->request->get())['count_clients'];
+    }
+
+
+    public function actionCustomerRegistrationsExport(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
+
+        $excel = ExcelExporter::getInstance();
+        $excel->create('clientes-por-plan', [
+            'A' => ['code', 'Código', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'B' => ['fullname', 'Nombre Completo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'C' => ['tecnology', 'Tecnología', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'D' => ['speed', 'Velocidad', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'E' => ['node', 'Nodo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'F' => ['date', 'Fecha', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+        ])->createHeader();
+
+        foreach ($list_customer_by_plan->allModels as $key => $value) {
+
+            $tecnology = ''; 
+            if(str_contains(strtolower($value['name_product']),'ftth')){
+                $tecnology = "FIBRA";
+            }else if(str_contains(strtolower($value['name_product']),'wifi')){
+                $tecnology = "WIRELESS";
+            }else{
+                $tecnology = "Sin Identificar";
+            }
+
+            $speed = preg_match('/[0-9]/', $value['name_product'], $matches, PREG_OFFSET_CAPTURE);
+            $speed = substr($value['name_product'],$matches[0][1]);
+            $excel->writeRow([
+                'code'=> $value['code'],
+                'fullname' => $value['fullname'],
+                'tecnology' => $tecnology,
+                'speed' => $speed,
+                'node' => $value['node'],
+                'date' => $value['date'],
+            ]);
+        }
+
+        $excel->download('clientes-por-nodo.xls');
+        return $this->redirect('/reports/reports/customer-registrations');
+
     }
 
 }

@@ -52,4 +52,5 @@ return array(
     'Customers change company history' => 'Historial de cambios de empresa',
     'Company from' => 'Empresa destino',
     'Company to' => 'Empresa destino'
+    'Customer Registrations' => 'Alta de Clientes'
 );
