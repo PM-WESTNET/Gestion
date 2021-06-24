@@ -53,7 +53,7 @@ class UserA extends Component{
     
     /**
      * crea un parametro estandar para el ID del BODY (html) en base a la url actual
-     *
+     * @prettyUrl
      */
     public static function getBodyId(){
         $currentURL = Url::current();
