@@ -6,7 +6,7 @@ use Yii;
 use yii\base\Component;
 use yii\helpers\Html;
 use webvimark\modules\UserManagement\models\User;
-
+use yii\helpers\Url;
 /**
  * Para renderizar un link y verificar al mismo tiempo si el usuario actual
  * tiene permisos para acceder.
@@ -49,6 +49,28 @@ class UserA extends Component{
             // relative to module
             return ltrim(Yii::$app->controller->module->getUniqueId() . '/' . $route, '/');
         }
+    }
+    
+    /**
+     * crea un parametro estandar para el ID del BODY (html) en base a la url actual
+     * @prettyUrl
+     */
+    public static function getBodyId(){
+        $currentURL = Url::current();
+        $isPrettyUrl = Yii::$app->urlManager->enablePrettyUrl;
+        $patterns = '';
+        $replaces = '';
+        
+        if($isPrettyUrl){
+            $patterns = array('/\?.*/' , '/\//');
+            $replaces = array('' , '-');
+        }
+        else{
+            $patterns = array('/\&.*/' , '/%2F/', '/.*r=/');
+            $replaces = array('' , '-' , '');
+        }
+        $stringRep = preg_replace($patterns, $replaces , $currentURL);
+        return $bodyId = ltrim($stringRep, '-');
     }
     
 }
