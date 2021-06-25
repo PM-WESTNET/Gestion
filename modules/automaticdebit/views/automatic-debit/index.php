@@ -31,10 +31,19 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'customer_id',
                 'value' => function ($model) {
-                    return $model->customer->fullName;
+                    return $model->customer->fullName . ' ('. $model->customer->code . ')';
                 },
                 'filter' => $this->render('../../../sale/views/customer/_find-with-autocomplete', ['form' => null, 'model' => $searchModel, 'attribute' => 'customer_id', 'label' => Yii::t('app','Customer')])
             ],
+            [
+                'attribute' => 'company_name',
+                'value' => function($model) {
+                    return $model->customer->company->name;
+                },
+                'label' => Yii::t('app', 'Company'),
+            ],
+            // agregar creado por
+            
             [
                 'attribute' => 'bank_id',
                 'value' => function ($model) {
@@ -53,7 +62,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     AutomaticDebit::DISABLED_STATUS => Yii::t('app','Disabled')
                 ]
             ],
-
+            [
+                'attribute' => 'created_at',
+                'value' => function($model) {
+                    return date('d-m-Y', $model->created_at);
+                },
+                'label' => Yii::t('app', 'Created at'),
+            ],
             ['class' => 'app\components\grid\ActionColumn'],
         ],
     ]); ?>
