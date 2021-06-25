@@ -312,7 +312,6 @@ class ContractController extends Controller {
                     ])
                     ->distinct()
                     ->orderBy('product.name');
-                    var_dump(Yii::$app->user->identity);die();
         }
         
         if ($customer->customerCategory->name === 'Familia') {
