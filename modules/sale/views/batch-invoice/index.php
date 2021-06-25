@@ -213,8 +213,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 })
                 console.log("stop process");
                 BatchInvoice.processing = false;
-                $("#stop-process").prop('disabled', true);
-                $("#start-process").prop('disabled', false);
+                $("#stop-process").attr('disabled', true);
+                $("#start-process").attr('disabled', false);
                 $("#title-processing").text("Pausado...");
 
 
@@ -234,8 +234,8 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                 console.log("start process");
                 BatchInvoice.processing = true;
                 BatchInvoice.init();
-                $("#start-process").prop('disabled', true);
-                $("#stop-process").prop('disabled', false);
+                $("#start-process").attr('disabled', true);
+                $("#stop-process").attr('disabled', false);
                 $("#title-processing").text("Procesando...");
             });
 
@@ -351,6 +351,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                                 }
                             }
                         });
+                        window.location.reload();
                     }, 1000);
                 }
             }
