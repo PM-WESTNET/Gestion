@@ -39,6 +39,7 @@ use yii\db\Query;
  * @property integer $debt_from
  * @property integer $debt_to
  * @property string $has_app
+ * @property integer $has_automatic_debit
  *
  * @property Customer[] $customers
  * @property Notification $notification
@@ -94,7 +95,7 @@ class Destinatary extends ActiveRecord {
             [['notification_id', 'all_subscribed', 'all_unsubscribed', 'overdue_bills_from', 'overdue_bills_to', 'contract_min_age', 'contract_max_age'], 'integer'],
             [['debt_from', 'debt_to'], 'double'],
             [['name'], 'string'],
-            [['notification', '_nodes', '_companies', '_customer_categories', '_customer_class', '_plans', '_contract_statuses', '_customer_statuses', 'customers', 'has_app'], 'safe'],
+            [['notification', '_nodes', '_companies', '_customer_categories', '_customer_class', '_plans', '_contract_statuses', '_customer_statuses', 'customers', 'has_app', 'has_automatic_debit'], 'safe'],
             [['code'], 'string', 'max' => 255],
         ];
     }
@@ -127,6 +128,7 @@ class Destinatary extends ActiveRecord {
             'debt_from' => NotificationsModule::t('app', 'Debt From'),
             'debt_to' => NotificationsModule::t('app', 'Debt To'),
             'has_app' => NotificationsModule::t('app', 'Has App'),
+            'has_app' => NotificationsModule::t('app', 'Has Automatic Debit'),
         ];
     }
 

@@ -108,6 +108,7 @@ return array(
     'By filters' => 'Por filtros',
     'By customers' => 'Por clientes',
     'Contract status' => 'Estado de contrato',
+    'Has Automatic Debit' => '¿Tiene débito automático?',
     
     //Contracts
     'Customer' => 'Cliente',
