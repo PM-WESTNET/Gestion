@@ -324,7 +324,7 @@ class BatchInvoiceController  extends Controller
     {
         Yii::$app->response->format = 'json';
 
-        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+        if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS) || InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
             return [ 'invoice_process_started' => true ];
         }
 
