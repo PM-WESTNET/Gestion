@@ -12,6 +12,7 @@ use app\modules\automaticdebit\models\AutomaticDebit;
  */
 class AutomaticDebitSearch extends AutomaticDebit
 {
+    public $company_name;
     /**
      * {@inheritdoc}
      */
@@ -19,7 +20,7 @@ class AutomaticDebitSearch extends AutomaticDebit
     {
         return [
             [['automatic_debit_id', 'customer_id', 'bank_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['cbu', 'beneficiario_number'], 'safe'],
+            [['cbu', 'beneficiario_number', 'company_name'], 'safe'],
         ];
     }
 
@@ -48,6 +49,7 @@ class AutomaticDebitSearch extends AutomaticDebit
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
+        $query->joinWith(['customer', 'customer.company']);
 
         $this->load($params);
 
@@ -65,10 +67,9 @@ class AutomaticDebitSearch extends AutomaticDebit
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-        ]);
-
-        $query->andFilterWhere(['like', 'cbu', $this->cbu])
-            ->andFilterWhere(['like', 'beneficiario_number', $this->beneficiario_number]);
+        ])  ->andFilterWhere(['like', 'cbu', $this->cbu])
+            ->andFilterWhere(['like', 'beneficiario_number', $this->beneficiario_number])
+            ->andFilterWhere(['like', 'company.name', $this->company_name]);
 
         return $dataProvider;
     }

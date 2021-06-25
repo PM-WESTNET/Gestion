@@ -65,8 +65,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->adhered_by;
                 }
             ],
-            'created_at:date',
-
+            [
+                'attribute' => 'created_at',
+                'value' => function($model) {
+                    return date('d-m-Y', $model->created_at);
+                },
+                'label' => Yii::t('app', 'Created at'),
+            ],
             [
                 'class' => 'app\components\grid\ActionColumn'
             ],
