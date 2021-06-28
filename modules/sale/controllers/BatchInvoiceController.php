@@ -325,7 +325,7 @@ class BatchInvoiceController  extends Controller
         Yii::$app->response->format = 'json';
 
         if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS) || InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
-            return [ 'invoice_process_started' => true ];
+            return [ 'invoice_process_started' => true, 'status' => 'paused' ];
         }
 
         return [ 'invoice_process_started' => false ];
@@ -346,18 +346,23 @@ class BatchInvoiceController  extends Controller
     }
 
     /**
-     * Actualizar estado de proceso a pausado"
+     * Actualizar estado del proceso"
      */
     public function actionUpdateStatusInvoiceProcess(){
         $status = Yii::$app->request->post("status");
+        Yii::$app->response->format = 'json';
+
         if($status == "paused"){
             InvoiceProcess::pauseProcess(InvoiceProcess::TYPE_CREATE_BILLS);
 
         }else if($status == "pending"){
             InvoiceProcess::pendingProcess(InvoiceProcess::TYPE_CREATE_BILLS);
+
         }else if($status == "finished"){
             InvoiceProcess::endProcess(InvoiceProcess::TYPE_CREATE_BILLS);
         }
+
+        return ['status' => $status];
     }
 
     /**
@@ -365,6 +370,8 @@ class BatchInvoiceController  extends Controller
      */
     public function actionUpdateStatusCloseInvoiceProcess(){
         $status = Yii::$app->request->post("status");
+        Yii::$app->response->format = 'json';
+
         if($status == "paused"){
             InvoiceProcess::pauseProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
 
@@ -373,6 +380,40 @@ class BatchInvoiceController  extends Controller
 
         }else if($status == "finished"){
             InvoiceProcess::endProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
+        }
+
+        return ['status' => $status];
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionStatusInvoiceProcess()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+            return [ 'status' => "paused" ];
+        }else if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CREATE_BILLS)) {
+            return [ 'status' => "pending" ];
+        }else{
+            return ['status' => "finished"];
+        }
+    }
+
+    /**
+     * Indica si el proceso de facturación se ha iniciado
+     */
+    public function actionStatusCloseInvoiceProcess()
+    {
+        Yii::$app->response->format = 'json';
+
+        if(InvoiceProcess::getPausedInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) {
+            return [ 'status' => "paused" ];
+        }else if(InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS)) {
+            return [ 'status' => "pending" ];
+        }else{
+            return ['status' => "finished"];
         }
     }
 }

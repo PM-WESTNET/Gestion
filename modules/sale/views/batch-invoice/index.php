@@ -95,7 +95,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                             <div class="alert alert-dismissible alert-info" style="margin-top:25px;"> <span id="title-processing">Procesando ...</span> 
                             <span style="float:right;">
                             <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
-                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;" disabled>
+                            <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;">
                             <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
                             </span>
                             </div>
@@ -201,58 +201,57 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
 
             $(document).off('click', "#stop-process").on('click', "#stop-process", function(ev){
                 $.ajax({
-                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    url: '<?= Url::to(['update-status-invoice-process'])?>',
                     method: 'POST',
                     data: {
                         'status': 'paused'
                     },
                     dataType: 'json',
                     success: function (data) {
-                        
+                        console.log("stop process");
+                        BatchInvoice.processing = false;
+                        BatchInvoice.init();
+                        $("#stop-process").attr('disabled', true);
+                        $("#start-process").attr('disabled', false);
+                        $("#title-processing").text("Pausado...");
                     }
                 })
-                console.log("stop process");
-                BatchInvoice.processing = false;
-                $("#stop-process").attr('disabled', true);
-                $("#start-process").attr('disabled', false);
-                $("#title-processing").text("Pausado...");
+                
 
 
             });
 
             $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
                 $.ajax({
-                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    url: '<?= Url::to(['update-status-invoice-process'])?>',
                     method: 'POST',
                     data: {
                         'status': 'pending'
                     },
                     dataType: 'json',
                     success: function (data) {
+                        BatchInvoice.processing = true;
+                        BatchInvoice.init();
+                        $("#start-process").attr('disabled', true);
+                        $("#stop-process").attr('disabled', false);
+                        $("#title-processing").text("Procesando...");
                     }
-                })
-                console.log("start process");
-                BatchInvoice.processing = true;
-                BatchInvoice.init();
-                $("#start-process").attr('disabled', true);
-                $("#stop-process").attr('disabled', false);
-                $("#title-processing").text("Procesando...");
+                })        
             });
+
 
             $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){
                 $.ajax({
-                    url: '<?= Url::to(['/sale/batch-invoice/update-status-invoice-process'])?>',
+                    url: '<?= Url::to(['update-status-invoice-process'])?>',
                     method: 'POST',
                     data: {
                         'status': 'finished'
                     },
                     dataType: 'json',
                     success: function (data) {
+                        window.location.reload();
                     }
                 })
-                console.log("finished process");
-                BatchInvoice.processing = false;
-                window.location.reload();
             });
 
             BatchInvoice.cargarBillType();
@@ -260,18 +259,29 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
             $('#panel-filtro').show();
 
             $.ajax({
-                url: '<?= Url::to(["invoice-process-create-bill-is-started"])?>',
+                url: '<?= Url::to(["status-invoice-process"])?>',
                 method: 'GET',
                 datatType: 'json',
                 success: function (data) {
-                    if(data.invoice_process_started) {
+                    if(data.status == "paused") {
+                        $("#stop-process").attr('disabled', true); //Pausado muestra boton play activado
+                        $("#start-process").attr('disabled', false);
+                        $("#title-processing").text("Pausado...");
                         $('#panel-progress').show();
                         $('#panel-filtro').hide();
+                        BatchInvoice.processing = false;
 
+                    } else if(data.status == "pending") {
+                        $("#stop-process").attr('disabled', false);
+                        $("#start-process").attr('disabled', true);
+                        $('#panel-progress').show();
+                        $('#panel-filtro').hide();
                         BatchInvoice.processing = true;
                         setTimeout(BatchInvoice.getProceso(), 1000);
                     } else {
                         BatchInvoice.processing = false;
+                        $('#panel-progress').hide();
+                        $('#panel-filtro').show();
                     }
                 }
             })
@@ -396,6 +406,7 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                         }
 
                         if( BatchInvoice.processing ) {
+                            console.log(data);
                             BatchInvoice.getProceso();
                         }
                     }
