@@ -5,10 +5,12 @@ use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use app\modules\automaticdebit\models\Bank;
 use app\modules\automaticdebit\models\AutomaticDebit;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\automaticdebit\models\AutomaticDebitSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
+/* @var $userData  webvimark\modules\UserManagement\models\User */
 
 $this->title = Yii::t('app', 'Automatic Debits');
 $this->params['breadcrumbs'][] = $this->title;
@@ -42,8 +44,23 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'label' => Yii::t('app', 'Company'),
             ],
-            // agregar creado por
-            
+            [
+                'attribute' => 'user_id', 
+                'value' => function($model) {
+                    //var_dump($model);
+                    //die;
+                    if ($model->user){
+                        return $model->user->username;      
+                    }
+                },
+                'filter' => Select2::widget([
+                    'name' => 'FirstdataAutomaticDebitSearch[user_id]',
+                    'data' => ArrayHelper::map($userData, 'id', 'username'),
+                    'options' => ['placeholder' => Yii::t('app', 'Select an option')],
+                    'pluginOptions' => ['allowClear' => true]
+                ])
+
+            ],
             [
                 'attribute' => 'bank_id',
                 'value' => function ($model) {

@@ -10,6 +10,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use webvimark\modules\UserManagement\models\User;
 
 /**
  * AutomaticDebitController implements the CRUD actions for AutomaticDebit model.
@@ -39,10 +40,12 @@ class AutomaticDebitController extends Controller
     {
         $searchModel = new AutomaticDebitSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $userData = User::find()->all();
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'userData' => $userData,
         ]);
     }
 

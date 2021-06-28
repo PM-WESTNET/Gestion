@@ -114,6 +114,11 @@ class AutomaticDebit extends ActiveRecord
         return $labels[$this->status];
     }
 
+    public function getUser() 
+    {
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
     public function beforeSave($insert)
     {
 
