@@ -9,14 +9,14 @@ class m210625_171403_add_has_automatic_debit_columns_to_destinatary_table extend
 {
     public function init() 
     {
-        $this->db = 'arya_notifications';
+        $this->db = 'dbnotifications';
         parent::init();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
+    public function Up()
     {
         $this->addColumn('{{%destinatary}}','has_automatic_debit', $this->integer());
     }
@@ -24,7 +24,7 @@ class m210625_171403_add_has_automatic_debit_columns_to_destinatary_table extend
     /**
      * {@inheritdoc}
      */
-    public function safeDown()
+    public function Down()
     {
         $this->dropColumn('{{%destinatary}}','has_automatic_debit');
     }
