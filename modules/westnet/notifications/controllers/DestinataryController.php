@@ -60,6 +60,12 @@ class DestinataryController extends Controller {
 
         if ($destinatary->notification->transport->slug === 'email') {
             $customerQuery->andWhere(['email_status' => 'active']);
+            if($destinatary->has_automatic_debit)
+                $customerQuery->andWhere(['has_debit_automatic' => 'yes']);
+            else if($destinatary->has_automatic_debit == 0){
+                $customerQuery->andWhere(['has_debit_automatic' => 'no']);
+            }
+            
         }
 
         $dataProvider = new ActiveDataProvider([
