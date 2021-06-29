@@ -39,9 +39,9 @@ $this->title = Yii::t('app','Customer Registrations');
             [
                 'attribute' => 'name_product',
                 'value' => function($model){
-                    if(str_contains(strtolower($model['name_product']),'ftth')){
+                    if(strpos(strtolower($model['name_product']),'ftth')){
                         return "FIBRA";
-                    }else if(str_contains(strtolower($model['name_product']),'wifi')){
+                    }else if(strpos(strtolower($model['name_product']),'wifi')){
                         return "WIRELESS";
                     }else{
                         return "Sin Identificar";

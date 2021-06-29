@@ -242,12 +242,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     dataType: 'json',
                     success: function (data) {
+                        BatchInvoice.processing = false;
+                        $("#stop-process").attr('disabled', true);
+                        $("#start-process").attr('disabled', false);
+                        $("#title-processing").text("Pausado...");
+                        BatchInvoice.init();
                     }
-                })
-                console.log("stop process");
-                BatchInvoice.processing = false;
-                ev.style.display = 'none';
-                
+                })       
             });
 
             $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
@@ -259,11 +260,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     dataType: 'json',
                     success: function (data) { 
+                        BatchInvoice.processing = true;
+                        $("#start-process").attr('disabled', true);
+                        $("#stop-process").attr('disabled', false);
+                        $("#title-processing").text("Procesando...");
+                        BatchInvoice.init();
                     }
                 })
-                console.log("start process");
-                BatchInvoice.processing = true;
-                BatchInvoice.init();
             });
 
             $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){
@@ -275,11 +278,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     },
                     dataType: 'json',
                     success: function (data) {
+                        BatchInvoice.processing = false;
+                        window.location.reload();
                     }
                 })
-                console.log("finished process");
-                BatchInvoice.processing = false;
-                window.location.reload();
             });
 
             BatchInvoice.cargarBillType();
@@ -287,17 +289,30 @@ $this->params['breadcrumbs'][] = $this->title;
             $('#panel-filtro').show();
 
             $.ajax({
-                url: '<?= Url::to(["invoice-process-close-bill-is-started"])?>',
+                url: '<?= Url::to(["status-close-invoice-process"])?>',
                 method: 'GET',
                 datatType: 'json',
                 success: function (data) {
-                    if(data.invoice_process_started) {
+                    if(data.status == "paused") {
+                        $("#stop-process").attr('disabled', true); //Pausado muestra boton play activado
+                        $("#start-process").attr('disabled', false);
+                        $("#title-processing").text("Pausado...");
+                        $('#panel-progress').show();
+                        $('#panel-filtro').hide();
+                        BatchInvoice.processing = false;
+
+                    } else if(data.status == "pending") {
+                        $("#stop-process").attr('disabled', false);
+                        $("#start-process").attr('disabled', true);
                         $('#panel-progress').show();
                         $('#panel-filtro').hide();
                         BatchInvoice.processing = true;
+                        console.log("Proceso Pendiente");
                         setTimeout(BatchInvoice.getProceso(), 500);
                     } else {
                         BatchInvoice.processing = false;
+                        $('#panel-progress').hide();
+                        $('#panel-filtro').show();
                     }
                 }
             })
@@ -375,6 +390,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 }
                             }
                         });
+                        window.location.reload();
                     }, 500);
                 }
             }

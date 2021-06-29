@@ -1185,9 +1185,9 @@ class ReportsController extends Controller
         foreach ($list_customer_by_plan->allModels as $key => $value) {
 
             $tecnology = ''; 
-            if(str_contains(strtolower($value['name_product']),'ftth')){
+            if(strpos(strtolower($value['name_product']),'ftth')){
                 $tecnology = "FIBRA";
-            }else if(str_contains(strtolower($value['name_product']),'wifi')){
+            }else if(strpos(strtolower($value['name_product']),'wifi')){
                 $tecnology = "WIRELESS";
             }else{
                 $tecnology = "Sin Identificar";
@@ -1205,7 +1205,7 @@ class ReportsController extends Controller
             ]);
         }
 
-        $excel->download('clientes-por-nodo.xls');
+        $excel->download('clientes-registrados.xls');
         return $this->redirect('/reports/reports/customer-registrations');
 
     }

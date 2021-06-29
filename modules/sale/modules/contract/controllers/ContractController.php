@@ -312,7 +312,6 @@ class ContractController extends Controller {
                     ])
                     ->distinct()
                     ->orderBy('product.name');
-                    var_dump(Yii::$app->user->identity);die();
         }
         
         if ($customer->customerCategory->name === 'Familia') {
@@ -502,19 +501,40 @@ class ContractController extends Controller {
                         ['company_id'=>null]
                     ])
                     ->orderBy('product.name');
-                    
-        } else {
-            $subQueryplans = Product::find()
-                    ->where(['type'=>'plan', 'status' => 'enabled' ])
+            }else if(Yii::$app->user->identity->hasRole('internal-seller', false)){
+                $subQueryplans = Product::find()
+                    ->distinct()
+                    ->where(['product.type' => 'plan', 'product.status' => 'enabled'])
+                    ->joinWith('categories')
+                    ->andWhere(['category.system' => 'plan-para-vendedores-internos'])
                     ->andWhere(['or',
                         ['company_id'=>$customer->parent_company_id],
                         ['company_id'=>null]
                     ])
-                    ->distinct()
                     ->orderBy('product.name');
-                    
-        }
-        
+  
+            }else if(Yii::$app->user->identity->hasRole('external-seller', false)){
+                        $subQueryplans = Product::find()
+                        ->distinct()
+                        ->where(['product.type' => 'plan', 'product.status' => 'enabled'])
+                        ->joinWith('categories')
+                        ->andWhere(['category.system' => 'plan-para-vendedores-externos'])
+                        ->andWhere(['or',
+                            ['company_id'=>$customer->parent_company_id],
+                            ['company_id'=>null]
+                        ])
+                        ->orderBy('product.name');           
+            } else {
+                $subQueryplans = Product::find()
+                        ->where(['type'=>'plan', 'status' => 'enabled' ])
+                        ->andWhere(['or',
+                            ['company_id'=>$customer->parent_company_id],
+                            ['company_id'=>null]
+                        ])
+                        ->distinct()
+                        ->orderBy('product.name');
+                        
+            }
         if ($customer->customerCategory->name === 'Familia') {
             $queryplans = Product::find()
                     ->from(['sub' => $subQueryplans])

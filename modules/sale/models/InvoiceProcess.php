@@ -159,7 +159,9 @@ class InvoiceProcess extends \yii\db\ActiveRecord
     public static function endProcess($type)
     {
         $invoice_process = InvoiceProcess::getPendingInvoiceProcess($type);
-
+        if(!$invoice_process)
+            $invoice_process = InvoiceProcess::getPausedInvoiceProcess($type);
+        
         if($invoice_process) {
             $invoice_process->status = InvoiceProcess::STATUS_FINISHED;
             $invoice_process->end_datetime = (new \DateTime('now'))->getTimestamp();

@@ -25,15 +25,10 @@ use kartik\depdrop\DepDrop;
         <div class="col-sm-6">
             <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['model' => $model, 'attribute' => 'customer_id', 'form' => $form])?>
         </div>
+
         <div class="col-sm-6">
-            <?= $form->field($model, 'product_id')->widget(DepDrop::class, [
-                'options' => ['id' => 'select-product-id'],
-                'pluginOptions' => [
-                    'depends' => ['programmedplanchange-customer_id'],
-                    'placeholder' => Yii::t('app', 'Select ...'),
-                    'url' => Url::to(['/sale/contract/plan/get-plans-by-customer'])
-                ]
-            ])?>
+            <?= $form->field($model, 'product_id')->dropdownList(ArrayHelper::map($plans,
+                        'product_id', function($plan){ return $plan->name.' - $'.round($plan->finalPrice,2); }),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'plan_product_id']) ?>
         </div>
     </div>
 
