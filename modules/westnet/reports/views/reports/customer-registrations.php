@@ -21,7 +21,8 @@ $this->title = Yii::t('app','Customer Registrations');
 <div class="customer-registrations">
 
     <h1><?php echo $this->title ?></h1>
-    <a href="customer-registrations-export" class="btn btn-success">Exportar</a>
+    <form action="customer-registrations" method="GET">
+        <button type="submit" class="btn btn-success" name="export" value="export">Exportar</button>
     <?php echo \yii\grid\GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $reportSearch,
@@ -86,6 +87,7 @@ $this->title = Yii::t('app','Customer Registrations');
             ], 
         ]
     ])?>
+    </form>
 
 
 </div>
