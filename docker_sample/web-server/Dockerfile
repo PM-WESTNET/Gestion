@@ -1,7 +1,5 @@
 FROM debian:jessie-slim
 
-MAINTAINER Marcelo Briones <ing@marcelobriones.com.ar>
-
 RUN apt-get update && apt-get -y install \
     wget gnupg2 lsb-release curl mysql-client git \
     php5 php5-mysql php5-intl php5-gd php5-curl php5-xdebug\
