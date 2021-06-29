@@ -20,6 +20,7 @@ use app\components\helpers\ExcelExporter;
 use app\modules\config\models\Config;
 
 use app\modules\sale\models\Customer;
+use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\PublicityShape;
 
 use app\modules\westnet\reports\ReportsModule;
@@ -1154,6 +1155,10 @@ class ReportsController extends Controller
         $reportSearch = new ReportSearch();
         $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
 
+        if(Yii::$app->request->get() && isset(Yii::$app->request->get()['export'])){
+            return $this->renderPartial("customer-registrations-excel",['list_customers' => $list_customer_by_plan]);
+        }
+
         return $this->render('customer-registrations', ['dataProvider' => $list_customer_by_plan, 'reportSearch' => $reportSearch]);
 
     }
@@ -1166,48 +1171,4 @@ class ReportsController extends Controller
         $reportSearch = new ReportSearch();
         return $reportSearch->findNumberOfClientsForConnection(Yii::$app->request->get())['count_clients'];
     }
-
-
-    public function actionCustomerRegistrationsExport(){
-        $reportSearch = new ReportSearch();
-        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
-
-        $excel = ExcelExporter::getInstance();
-        $excel->create('clientes-por-plan', [
-            'A' => ['code', 'Código', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'B' => ['fullname', 'Nombre Completo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'C' => ['tecnology', 'Tecnología', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'D' => ['speed', 'Velocidad', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'E' => ['node', 'Nodo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'F' => ['date', 'Fecha', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-        ])->createHeader();
-
-        foreach ($list_customer_by_plan->allModels as $key => $value) {
-
-            $tecnology = ''; 
-            if(strpos(strtolower($value['name_product']),'ftth')){
-                $tecnology = "FIBRA";
-            }else if(strpos(strtolower($value['name_product']),'wifi')){
-                $tecnology = "WIRELESS";
-            }else{
-                $tecnology = "Sin Identificar";
-            }
-
-            $speed = preg_match('/[0-9]/', $value['name_product'], $matches, PREG_OFFSET_CAPTURE);
-            $speed = substr($value['name_product'],$matches[0][1]);
-            $excel->writeRow([
-                'code'=> $value['code'],
-                'fullname' => $value['fullname'],
-                'tecnology' => $tecnology,
-                'speed' => $speed,
-                'node' => $value['node'],
-                'date' => $value['date'],
-            ]);
-        }
-
-        $excel->download('clientes-registrados.xls');
-        return $this->redirect('/reports/reports/customer-registrations');
-
-    }
-
 }
