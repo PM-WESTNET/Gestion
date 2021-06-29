@@ -4,6 +4,7 @@ namespace app\modules\sale\modules\contract\controllers;
 
 use app\components\web\Controller;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\Contract;
 use webvimark\modules\UserManagement\models\User;
 use Yii;
@@ -92,10 +93,75 @@ class ProgrammedPlanChangeController extends Controller
             $model->contract_id = $contract->contract_id;
         }
 
+        if (Yii::$app->user->identity->hasRole('seller', false)) {
+            $subQueryplans = Product::find()
+                    ->distinct()
+                    ->where(['product.type' => 'plan', 'product.status' => 'enabled'])
+                    ->joinWith('categories')
+                    ->andWhere(['category.system' => 'seller-plan'])
+                    ->andWhere(['or',
+                        ['company_id'=>$customer->parent_company_id],
+                        ['company_id'=>null]
+                    ])
+                    ->orderBy('product.name');
+            }else if(Yii::$app->user->identity->hasRole('internal-seller', false)){
+                $subQueryplans = Product::find()
+                    ->distinct()
+                    ->where(['product.type' => 'plan', 'product.status' => 'enabled'])
+                    ->joinWith('categories')
+                    ->andWhere(['category.system' => 'plan-para-vendedores-internos'])
+                    ->andWhere(['or',
+                        ['company_id'=>$customer->parent_company_id],
+                        ['company_id'=>null]
+                    ])
+                    ->orderBy('product.name');
+  
+            }else if(Yii::$app->user->identity->hasRole('external-seller', false)){
+                        $subQueryplans = Product::find()
+                        ->distinct()
+                        ->where(['product.type' => 'plan', 'product.status' => 'enabled'])
+                        ->joinWith('categories')
+                        ->andWhere(['category.system' => 'plan-para-vendedores-externos'])
+                        ->andWhere(['or',
+                            ['company_id'=>$customer->parent_company_id],
+                            ['company_id'=>null]
+                        ])
+                        ->orderBy('product.name');           
+            } else {
+                $subQueryplans = Product::find()
+                        ->where(['type'=>'plan', 'status' => 'enabled' ])
+                        ->andWhere(['or',
+                            ['company_id'=>$customer->parent_company_id],
+                            ['company_id'=>null]
+                        ])
+                        ->distinct()
+                        ->orderBy('product.name');
+                        
+            }
+        if ($customer->customerCategory->name === 'Familia') {
+            $queryplans = Product::find()
+                    ->from(['sub' => $subQueryplans])
+                    ->joinWith('categories')
+                    ->andWhere(['category.system' => 'planes-de-internet-residencial'])
+                    ->orderBy('sub.name');
+            $plans = $queryplans->all();  
+            
+        }elseif($customer->customerCategory->name === 'Empresa'){
+             $queryplans = Product::find()
+                    ->from(['sub' => $subQueryplans])
+                    ->joinWith('categories')
+                    ->andWhere(['category.system' => 'planes-de-internet-empresa'])
+                    ->orderBy('sub.name');
+            $plans = $queryplans->all();  
+        }else{
+            $plans= $subQueryplans->all();
+        }
+
         return $this->render('create', [
             'model' => $model,
             'customer' => $customer,
             'contract_id' => $contract_id,
+            'plans' => $plans
         ]);
     }
 
