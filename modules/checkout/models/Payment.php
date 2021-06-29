@@ -630,7 +630,7 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * @return double
      * Retorna el total de las facturas del clientes
      */
-    public function totalCalculationForQuery($customer_id){
+    public static function totalCalculationForQuery($customer_id){
         $payment_method_id = Yii::$app->db->createCommand('SELECT payment_method_id FROM payment_method WHERE type = "account"')->queryOne();
         $payment_method_id  = !$payment_method_id ? 0 : $payment_method_id;
         $payed = Yii::$app->db->createCommand('SELECT sum(coalesce(pi.amount, payment.amount)) as payed FROM payment LEFT JOIN payment_item pi ON payment.payment_id = pi.payment_id WHERE pi.payment_method_id NOT IN (:payment_method_id) AND customer_id = :customer_id')->bindValue('payment_method_id',$payment_method_id)->bindValue('customer_id',$customer_id)->queryOne()['payed'];

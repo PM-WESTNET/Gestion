@@ -73,22 +73,26 @@ class BancoFrances implements BankInterface
         $totalOperations = 0;
         $totalAmount = 0;
         foreach ($debits as $debit) {
+            
             $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
+            if(!empty($bills)){
+                $totalImport = Payment::totalCalculationForQuery($bills[0]->customer_id);
+                if($totalImport < 0) {
+                    $totalImport = abs($totalImport);
+                    $resource = $this->addFirstLine($resource, $debit, $bills[0], $export->concept,$totalImport);
+                    $resource = $this->addSecondLine($resource, $debit);
+                    $resource = $this->addThirdLine($resource, $debit);
+                    $resource = $this->addConceptLine($resource, $debit);
 
-            foreach ($bills as $bill) {
-                $resource = $this->addFirstLine($resource, $debit, $bill, $export->concept);
-                $resource = $this->addSecondLine($resource, $debit);
-                $resource = $this->addThirdLine($resource, $debit);
-                $resource = $this->addConceptLine($resource, $debit);
+                    $totalRegister = $totalRegister + 4;
+                    $totalOperations++;
+                    $totalAmount = $totalAmount + $totalImport;
 
-                $totalRegister = $totalRegister + 4;
-                $totalOperations++;
-                $totalAmount = $totalAmount + $bill->total;
+                    $bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
 
-                $bhetd = new BillHasExportToDebit(['bill_id' => $bill->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
-
-                $bhetd->save();
-            }
+                    $bhetd->save();
+                }
+            }            
 
         }
 
@@ -292,19 +296,21 @@ class BancoFrances implements BankInterface
      * @param Bill $bill
      * Añade la primera línea
      */
-    private function addFirstLine($resource, $beneficiary, $bill, $concept)
-    {
+    private function addFirstLine($resource, $beneficiary, $bill, $concept, $totalImport)
+    {   
+        
+            
         $register_code = '4210';
         $companyId = $this->getCompanyIdentification();
         $free1= str_pad(' ', 2, ' ');
         $beneficiary_number = $beneficiary->beneficiario_number;
         $cbu = $beneficiary->cbu;
 
-        $intamount = floor($bill->total);
+        $intamount = floor($totalImport);
 
         $import1 = str_pad($intamount, 13, '0', STR_PAD_LEFT);
 
-        $import2 = round(($bill->total - $intamount), 2) * 100;
+        $import2 = round(($totalImport - $intamount), 2) * 100;
 
         if ($import2 < 10) {
             $import2 = str_pad($import2, 2, 0, STR_PAD_LEFT);
@@ -450,6 +456,7 @@ class BancoFrances implements BankInterface
             ->andWhere(['bt.multiplier' => 1])
             ->andWhere(['LIKE', 'bt.class', 'app\modules\sale\models\bills\Bill'])
             ->andWhere(['bill.company_id' => $company_id])
+            ->orderBy(['bill.bill_id' => SORT_DESC])
             ->all();
 
         return $bills;
@@ -512,4 +519,6 @@ class BancoFrances implements BankInterface
             return str_pad($this->companyConfig->other_service_code, 10, ' ');
         }
     }
+
+
 }
