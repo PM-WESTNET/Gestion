@@ -67,7 +67,7 @@ class AutomaticDebitSearch extends AutomaticDebit
         // grid filtering conditions
         $query->andFilterWhere([
             'automatic_debit_id' => $this->automatic_debit_id,
-            'customer_id' => $this->customer_id,
+            'automatic_debit.customer_id' => $this->customer_id,
             'bank_id' => $this->bank_id,
             'status' => $this->status,
             'created_at' => $this->created_at,
