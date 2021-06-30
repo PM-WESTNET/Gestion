@@ -55,7 +55,15 @@ $status = $model->status
             'created_at:datetime',
             'file_url',
             'from_date',
-            'to_date'
+            'to_date',
+            [
+                'attribute' => 'totalImport',
+                'label' => 'Importe Total',
+                'value' => function($model){
+                    return '$' . $model->totalImport;
+                }
+            ],
+
         ],
     ]) ?>
 
@@ -74,6 +82,13 @@ $status = $model->status
                     'label' => Yii::t('app', 'Customer'),
                     'value' => function($model) {
                         return $model->fullName . ' (' . $model->code . ')';
+                    }
+                ],
+                [
+                    'attribute' => 'current_account_balance',
+                    'label' => Yii::t('app', 'Current Account Balance'),
+                    'value' => function($model){
+                        return '$' . ($model->current_account_balance * -1);
                     }
                 ],
                 

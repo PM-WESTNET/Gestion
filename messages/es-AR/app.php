@@ -186,6 +186,7 @@
   'Current customer could not be billed with selected company. Previous company used instead.' => 'El cliente actual no puede ser facturado con la empresa seleccionada. Por favor, seleccione otra empresa o utilice la actual.',
   'Current customer requires "{billType}"' => 'El cliente seleccionado requiere "{billType}"',
   'Current customer requires "{billType}". Bill type changed.' => 'El cliente seleccionado requiere "{billType}". Tipo de factura modificado nuevamente.',
+  'Current Account Balance' => 'Saldo Cuenta Corriente',
   'Customer' => 'Cliente',
   'Customer Categories' => 'Rubros de Cliente',
   'Customer Category' => 'Rubro de Cliente',
