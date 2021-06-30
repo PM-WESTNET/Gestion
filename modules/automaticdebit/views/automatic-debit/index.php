@@ -5,6 +5,7 @@ use yii\grid\GridView;
 use yii\helpers\ArrayHelper;
 use app\modules\automaticdebit\models\Bank;
 use app\modules\automaticdebit\models\AutomaticDebit;
+use kartik\select2\Select2;
 
 /* @var $this yii\web\View */
 /* @var $searchModel app\modules\automaticdebit\models\AutomaticDebitSearch */
@@ -42,10 +43,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'label' => Yii::t('app', 'Company'),
             ],
-            // agregar creado por
-            
             [
                 'attribute' => 'bank_id',
+                'contentOptions' => ['style' => 'min-width:130px; white-space: normal;'],
                 'value' => function ($model) {
                     return $model->bank->name;
                 },
@@ -68,6 +68,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     return date('d-m-Y', $model->created_at);
                 },
                 'label' => Yii::t('app', 'Created at'),
+            ],
+            [
+                'attribute' => 'user_id',
+                'value' => function($model) {
+                    //var_dump($model);
+                    //die;
+                    if ($model->user){
+                        return $model->user->username;      
+                    }
+                },
+                'filter' => Select2::widget([
+                    'name' => 'AutomaticDebitSearch[user_id]',
+                    'data' => ArrayHelper::map($userData, 'id', 'username'),
+                    'options' => ['placeholder' => Yii::t('app', 'Select an option')],
+                    'pluginOptions' => ['allowClear' => true]
+                ]),
+                'label' => Yii::t('app', 'Created by'),
+
             ],
             ['class' => 'app\components\grid\ActionColumn'],
         ],
