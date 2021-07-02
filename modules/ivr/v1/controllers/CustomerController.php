@@ -1183,7 +1183,7 @@ class CustomerController extends Controller
                 cu.phone,
                 cu.phone2,
                 cu.phone3,
-                cu.phone4
+                cu.phone4,
                 cu.current_account_balance
                 FROM customer cu 
                 LEFT JOIN contract co ON co.customer_id = cu.customer_id
