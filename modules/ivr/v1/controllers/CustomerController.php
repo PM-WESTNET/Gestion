@@ -1183,7 +1183,8 @@ class CustomerController extends Controller
                 cu.phone,
                 cu.phone2,
                 cu.phone3,
-                cu.phone4
+                cu.phone4,
+                cu.current_account_balance
                 FROM customer cu 
                 LEFT JOIN contract co ON co.customer_id = cu.customer_id
                 LEFT JOIN address ad ON co.address_id = ad.address_id
@@ -1308,7 +1309,8 @@ class CustomerController extends Controller
                 UPPER(cu.name) AS name, 
                 UPPER(cu.lastname) AS lastname, 
                 cu.code,
-                CONCAT_WS(" ",ad.street,ad.number,zo.name) AS address 
+                CONCAT_WS(" ",ad.street,ad.number,zo.name) AS address,
+                cu.current_account_balance 
                 FROM customer cu
                 LEFT JOIN address ad ON cu.address_id = ad.address_id
                 LEFT JOIN zone zo ON ad.zone_id = zo.zone_id
