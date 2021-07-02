@@ -47,6 +47,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'user_id', 
                 'value' => function($model) {
+                    //var_dump($model);
+                    //die;
                     if ($model->user){
                         return $model->user->username;
                     }
