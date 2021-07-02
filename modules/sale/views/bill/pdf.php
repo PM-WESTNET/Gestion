@@ -124,7 +124,7 @@ if($profile) {
 	        
 		        <div class="barcode">
 		           <div class="barcode-img">
-			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODE_128, 3, 50)) . '">';?>
 			            <div class="text_payment_code">
 		        			<?= $model->customer->payment_code ?>      
 		        		</div>
@@ -202,7 +202,7 @@ if($profile) {
 		        <div>IVA: <b><span><?= $model->customer->taxCondition->name ?></span></b></div>
 		        <div>Condición de Venta:<b><span> Cuenta corriente </span></b></div>
 		        <div class="barcode-img">
-		            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+		            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODE_128, 3, 50 )) . '">';?>
 		            <div class="text_payment_code">
 	        			<?= $model->customer->payment_code ?>      
 	        		</div>
@@ -296,7 +296,7 @@ if($profile) {
 		    	</div>
 	    		<div class="barcode">
 		        	<div class="barcode-img">
-			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODABAR, 3, 50)) . '">';?>
+			            <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($model->customer->payment_code, $barcode::TYPE_CODE_128, 3, 50)) . '">';?>
 			            <div class="text_payment_code">
 		        			<?= $model->customer->payment_code ?>      
 		        		</div>
