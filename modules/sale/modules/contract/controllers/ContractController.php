@@ -3,6 +3,7 @@
 namespace app\modules\sale\modules\contract\controllers;
 
 use app\components\web\Controller;
+use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\config\models\Config;
 use app\modules\sale\models\Address;
 use app\modules\sale\models\Customer;
@@ -928,7 +929,12 @@ class ContractController extends Controller {
                     //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
+                    if(isset($model->customer->automaticDebit)){
+                       $model->customer->automaticDebit->status = AutomaticDebit::DISABLED_STATUS;
+                       $model->customer->automaticDebit->save();
+                    }
                     $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];
                 }else{
