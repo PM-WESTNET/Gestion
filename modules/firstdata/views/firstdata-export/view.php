@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
-use yii\data\ActiveDataProvider;
+use yii\data\ArrayDataProvider;
 use yii\grid\SerialColumn;
 use yii\grid\ActionColumn;
 
@@ -66,7 +66,7 @@ $status = $model->status
     <?=
     
         GridView::widget([
-            'dataProvider' => new ActiveDataProvider(['query' => $model->getCustomers()]),
+            'dataProvider' => $provider,
             'columns' => [
                 ['class' => SerialColumn::class],
 
