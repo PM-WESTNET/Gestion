@@ -20,6 +20,7 @@ use yii\widgets\ActiveForm;
 /* @var $this View */
 /* @var $model Destinatary */
 /* @var $form ActiveForm */
+//var_dump($model);die();
 ?>
 
 <div class="destinatary-form">
@@ -173,7 +174,22 @@ use yii\widgets\ActiveForm;
             <?php if ($notification->transport->slug !== 'mobile-push'):?>
                 <div class="row toClear">
                     <div class="col-lg-6 no-padding-left">
-                        <?php echo $form->field($model, 'has_app')->radioList(['installed' => NotificationsModule::t('westnetDestinatary','Installed'), 'not_installed' => NotificationsModule::t('app','Not Installed')])?>
+                        <?php echo $form->field($model, 'has_app')->radioList(['installed' => NotificationsModule::t('app','Installed'), 'not_installed' => NotificationsModule::t('app','Not Installed')])->label('¿Tiene instalada la App?')?>
+                    </div>
+                    <div class="col-lg-6 no-padding-left">
+                        <?= 
+                       // echo $form->field($model, 'has_automatic_debit')->radioList(['1' => 'Si', '0' => 'No' ])->label('¿Tiene débito automático?')
+                        $form->field($model, 'has_automatic_debit')->widget(Select2::classname(), [
+                            'language' => 'es',
+                            'data' =>['1' => 'Si', '0' => 'No'],
+                            'options' => [
+                                'placeholder' => NotificationsModule::t('app', 'Select an option...')
+                            ],
+                            'pluginOptions' => [
+                                'allowClear' => true
+                            ],
+                        ]);
+                        ?>
                     </div>
                 </div>
             <?php endif;?>

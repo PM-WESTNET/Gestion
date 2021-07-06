@@ -15,10 +15,12 @@ use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 
 use app\components\helpers\GraphData;
+use app\components\helpers\ExcelExporter;
 
 use app\modules\config\models\Config;
 
 use app\modules\sale\models\Customer;
+use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\PublicityShape;
 
 use app\modules\westnet\reports\ReportsModule;
@@ -41,6 +43,8 @@ use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
 use yii\data\ArrayDataProvider;
+
+use PHPExcel_Style_NumberFormat;
 
 /**
  * CustomerController
@@ -1142,4 +1146,29 @@ class ReportsController extends Controller
         return $this->render('customer-by-speed',['dataProvider' => $list_customer_by_speed,'reportSearch' => $reportSearch]);
     }
 
+
+    /**
+    *Lists all ReportChangeCompanyName models
+    *@return mixed
+    */
+    public function actionCustomerRegistrations(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
+
+        if(Yii::$app->request->get() && isset(Yii::$app->request->get()['export'])){
+            return $this->renderPartial("customer-registrations-excel",['list_customers' => $list_customer_by_plan]);
+        }
+
+        return $this->render('customer-registrations', ['dataProvider' => $list_customer_by_plan, 'reportSearch' => $reportSearch]);
+
+    }
+
+    /**
+    *Return count of client with connection in determined date
+    *@return mixed
+    */
+    public function actionNumberOfClients(){
+        $reportSearch = new ReportSearch();
+        return $reportSearch->findNumberOfClientsForConnection(Yii::$app->request->get())['count_clients'];
+    }
 }

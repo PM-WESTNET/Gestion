@@ -37,6 +37,11 @@ class ReportSearch extends Model
     public $name;
     public $lastname;
     public $name_product;
+    public $fullname;
+    public $node;
+    public $speed;
+    public $date;
+    public $date2;
 
     public function init()
     {
@@ -52,8 +57,8 @@ class ReportSearch extends Model
     public function rules()
     {
         return [
-            [['date_from', 'date_to','name','lastname','name_product'], 'string'],
-            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape'], 'safe'],
+            [['date_from', 'date_to','name','lastname','name_product','fullname','node', 'speed'], 'string'],
+            [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape','date','date2'], 'safe'],
             [['code'],'number']
         ];
     }
@@ -936,5 +941,105 @@ class ReportSearch extends Model
         ]);
             
         return $dataProvider;
+    }
+
+    /**
+     * Se busca a clientes con sus respectivos planes
+     *
+     * @param $params
+     * @return array
+     */
+    public function findCustomerByPlan($params)
+    {
+        $this->load($params);
+
+        $query = 'SELECT cu.code, CONCAT_WS(" ",cu.name, cu.lastname) as fullname, pr.name as name_product, no.name as node, co.date FROM customer cu
+                LEFT JOIN contract co ON co.customer_id = cu.customer_id 
+                LEFT JOIN contract_detail cd ON cd.contract_id = co.contract_id
+                LEFT JOIN product pr ON pr.product_id = cd.product_id
+                LEFT JOIN connection con ON con.contract_id = co.contract_id
+                LEFT JOIN node no ON no.node_id = con.node_id
+                WHERE co.status = "active" AND pr.status = "enabled" AND pr.type = "plan" ORDER BY cu.code ASC';
+
+     
+        if(!empty($this->code)  || !empty($this->fullname) || !empty($this->name_product) || !empty($this->speed) || !empty($this->node) || !empty($this->date)){
+
+            if(!empty($this->code)){
+                $query_new = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('code','%'.$this->code.'%')->queryAll();
+                
+            }
+
+            if (!empty($this->fullname)) {
+                $query_new = str_replace('ORDER BY','AND CONCAT_WS(" ",cu.name, cu.lastname) LIKE :fullname ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('fullname','%'.$this->fullname.'%')->queryAll();
+
+            }
+            if (!empty($this->name_product)) {
+                $name_product = '';
+                if(strpos("fibra", strtolower($this->name_product)) !== false){
+                    $name_product = "FTTH";
+                }else if(strpos("wireless", strtolower($this->name_product)) !== false){
+                    $name_product = "WiFi";
+                }
+        
+                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$name_product.'%')->queryAll();
+
+
+            }
+            if (!empty($this->speed)) {
+                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$this->speed.'%')->queryAll();
+
+
+            }
+            if(!empty($this->node)){
+                $query_new = str_replace('ORDER BY','AND no.name LIKE :node ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('node','%'.$this->node.'%')->queryAll();
+                
+            }
+            if(!empty($this->date)){
+                $query_new = str_replace('ORDER BY','AND co.date >= :date ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('date',$this->date)->queryAll();
+            }
+            if(!empty($this->date) && !empty($this->date2)){
+                $query_new = str_replace('ORDER BY','AND co.date >= :date AND co.date <= :date2 ORDER BY',$query);
+                $result = Yii::$app->db->createCommand($query_new)->bindValue('date',$this->date)->bindValue('date2',$this->date2)->queryAll();
+            }
+        }else{
+            $result = Yii::$app->db->createCommand($query)->queryAll();
+        }
+      
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $result,
+            'pagination' => [
+                'pageSize' => 15,
+            ],
+        ]);
+            
+        return $dataProvider;
+    }
+
+    /**
+     * Se busca a clientes con sus respectivos planes
+     *
+     * @param $params
+     * @return array
+     */
+    public function findNumberOfClientsForConnection($params)
+    {
+        $this->load($params);
+        if(!empty($params['date']) && !empty($params['date2'])){
+            $query = 'SELECT count(cu.customer_id) as count_clients FROM customer cu
+                  LEFT JOIN contract co ON co.customer_id = cu.customer_id
+                  LEFT JOIN connection con ON con.contract_id = co.contract_id
+                  WHERE cu.status = "enabled" AND co.status = "active" AND con.ip4_1 IS NOT NULL AND co.date >= :date AND co.date <= :date2';
+
+            return Yii::$app->db->createCommand($query)->bindValue('date',$params['date'])->bindValue('date2',$params['date2'])->queryOne();
+        }else{
+            return ["count_clients" => "error"];
+        }
+        
     }
 }

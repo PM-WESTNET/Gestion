@@ -12,6 +12,8 @@ use app\modules\automaticdebit\models\AutomaticDebit;
  */
 class AutomaticDebitSearch extends AutomaticDebit
 {
+    public $company_name;
+    public $user_id;
     /**
      * {@inheritdoc}
      */
@@ -19,7 +21,7 @@ class AutomaticDebitSearch extends AutomaticDebit
     {
         return [
             [['automatic_debit_id', 'customer_id', 'bank_id', 'status', 'created_at', 'updated_at'], 'integer'],
-            [['cbu', 'beneficiario_number'], 'safe'],
+            [['cbu', 'beneficiario_number', 'company_name'], 'safe'],
         ];
     }
 
@@ -42,34 +44,42 @@ class AutomaticDebitSearch extends AutomaticDebit
     public function search($params)
     {
         $query = AutomaticDebit::find();
-
+        
         // add conditions that should always apply here
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['automatic_debit_id'=>SORT_DESC]],
         ]);
+        $query->joinWith(['customer', 'customer.company']);
 
         $this->load($params);
+
+        
 
 //        if (!$this->validate()) {
 //            // uncomment the following line if you do not want to return any records when validation fails
 //            // $query->where('0=1');
 //            return $dataProvider;
 //        }
-
+        /* var_dump($params);
+        die(); */
         // grid filtering conditions
         $query->andFilterWhere([
             'automatic_debit_id' => $this->automatic_debit_id,
-            'customer_id' => $this->customer_id,
+            'automatic_debit.customer_id' => $this->customer_id,
             'bank_id' => $this->bank_id,
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-        ]);
+        ])  ->andFilterWhere(['like', 'cbu', $this->cbu])
+            ->andFilterWhere(['like', 'beneficiario_number', $this->beneficiario_number])
+            ->andFilterWhere(['like', 'company.name', $this->company_name]);
 
-        $query->andFilterWhere(['like', 'cbu', $this->cbu])
-            ->andFilterWhere(['like', 'beneficiario_number', $this->beneficiario_number]);
-
+        if (isset($params['AutomaticDebitSearch']['user_id'])){
+            $query->andFilterWhere(['user_id' => $params['AutomaticDebitSearch']['user_id']]);
+        }
+            
         return $dataProvider;
     }
 }

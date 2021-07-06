@@ -358,6 +358,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app', 'Phone'),
                 'attribute'=>'phone',
             ],
+            [
+                'label' => NotificationsModule::t('app', 'Has Automatic Debit'),
+                'attribute'=>'has_debit_automatic',
+                'value' => function($model){ 
+                    if($model['has_debit_automatic'] === "yes")
+                        return "Si"; 
+                    else
+                        return "No";
+                }
+            ],
         ];
 
         echo "<h3>Cantidad actual: $dataProvider->totalCount</h3>";
@@ -380,4 +390,4 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 
 </div>
-<!-- end Customers filter -->    
+<!-- end Customers filter -->

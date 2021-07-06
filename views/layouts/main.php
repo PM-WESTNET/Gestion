@@ -7,15 +7,13 @@ use lavrentiev\widgets\toastr\Notification;
 use app\components\widgets\agenda\task\Task;
 use app\assets\AppAsset;
 use app\components\widgets\agenda\ticket\TicketBundle;
-use yii\helpers\Url;
+use app\components\helpers\UserA;
 
 /**
  * @var \yii\web\View $this
  * @var string $content
  */
 AppAsset::register($this);
-$stringRep = preg_replace(array('/\?.*/','/\//'), array('','-'), Url::current());
-$actual_link = ltrim($stringRep, '-');
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html>
@@ -30,8 +28,7 @@ $actual_link = ltrim($stringRep, '-');
     
     <?php TicketBundle::register($this); ?>
 </head>
-<body id=<?php echo $actual_link ?>>
-
+<body id=<?= UserA::getBodyId() ?>>
 <?php $this->beginBody() ?>
     <div class="wrap">
         <?php
