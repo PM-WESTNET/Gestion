@@ -145,7 +145,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic','has_direct_debit'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
@@ -158,7 +158,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified','has_direct_debit'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
