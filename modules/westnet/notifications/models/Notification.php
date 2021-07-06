@@ -115,6 +115,7 @@ class Notification extends ActiveRecord {
             [['transport_id', 'name'], 'required', 'on' => 'create'],
             [['transport_id', 'email_transport_id', 'company_id', 'test_phone_frecuency'], 'integer'],
             [['content', 'layout', 'test_phone', 'buttons', 'resume', 'error_msg'], 'string'],
+            [['content', 'subject'],'required'],
             [['status'], 'in', 'range' => [self::STATUS_CREATED, self::STATUS_ENABLED, self::STATUS_DISABLED,
                 self::STATUS_ERROR, self::STATUS_SENT, self::STATUS_CANCELLED, self::STATUS_PENDING], 'on' => 'update-status'],
             [['status', 'error_msg'], 'safe'],
