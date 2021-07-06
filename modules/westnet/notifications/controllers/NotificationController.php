@@ -3,6 +3,7 @@
 namespace app\modules\westnet\notifications\controllers;
 
 use app\modules\sale\models\Company;
+use app\modules\sale\models\Bill;
 use app\modules\westnet\notifications\models\IntegratechReceivedSms;
 use app\modules\westnet\notifications\models\Transport;
 use app\modules\mailing\models\EmailTransport;
@@ -16,6 +17,8 @@ use yii\filters\VerbFilter;
 use app\modules\westnet\notifications\models\search\NotificationSearch;
 use app\modules\westnet\notifications\NotificationsModule;
 use yii\web\Response;
+use app\modules\westnet\notifications\components\siro\ApiSiro;
+use app\modules\config\models\Config;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -488,4 +491,41 @@ class NotificationController extends Controller {
             }
         } 
     }
+
+
+    public function actionRedirectBankRoela($bill_id){
+        $result_search = ApiSiro::SearchPaymentIntention($bill_id);
+
+        if(!$result_search){
+            $result_create = ApiSiro::CreatePaymentIntention($bill_id);
+            if($result_create){
+               return $this->redirect($result_create['Url']);
+
+            }else
+                return $this->redirect('/');
+        }else{
+            var_dump($result_search);die();
+            $this->redirect($result_search['url']);
+        }
+        
+        
+    }
+
+
+    public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
+        var_dump($IdResultado);die();
+        $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $idReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+
+        $paymentIntention->id_resultado = $id_resultado;
+        $paymentIntention->updatedAt = date('Y-m-d_H-i');
+        $paymentIntention->save(false);
+
+        $result_search = ApiSiro::SearchPaymentIntention($bill_id,$idReferenciaOperacion);
+
+        var_dump($result_search);die();
+    }
+
+    
+
+
 }
