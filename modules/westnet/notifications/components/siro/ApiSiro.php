@@ -96,7 +96,7 @@ class ApiSiro extends Component{
         $referenciaOperacion = md5($bill->bill_id.'-'.$bill->date);
         $data = array(
             "nro_cliente_empresa" => str_pad($company_client_number, 19, '0', STR_PAD_LEFT),
-            "nro_comprobante" => str_pad(19, 20, '0', STR_PAD_LEFT),
+            "nro_comprobante" => str_pad(24, 20, '0', STR_PAD_LEFT),
             "Concepto" => $invoice_concept,
             "Importe" => $bill->total,
             "URL_OK" => $url_ok,
@@ -111,7 +111,7 @@ class ApiSiro extends Component{
 
         $token = ApiSiro::GetTokenApi();
         $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
-        var_dump($result);die();
+        
         if(!isset($result['Message'])){
 	        $paymentIntention = new SiroPaymentIntention;
 	        $paymentIntention->bill_id = $bill_id;
@@ -129,16 +129,14 @@ class ApiSiro extends Component{
 
     }
 
-    public static function SearchPaymentIntention($bill_id, $reference=null){
+    public static function SearchPaymentIntention($bill_id=null, $reference=null, $id_resultado=null){
     	if(isset($bill_id) && !isset($reference))
-    		$paymentIntention = SiroPaymentIntention::find()->where(['bill_id' => $bill_id])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+    		$paymentIntention = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'pending'])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
     	else{
     		$paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
-
     		if($paymentIntention){
     		   $token = ApiSiro::GetTokenApi();
-
-    	       return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $paymentIntention->id_resultado));
+    	       return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));
     	    }
     	}
     	

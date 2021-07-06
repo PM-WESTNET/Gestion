@@ -19,6 +19,7 @@ use app\modules\westnet\notifications\NotificationsModule;
 use yii\web\Response;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\config\models\Config;
+use app\modules\westnet\notifications\models\SiroPaymentIntention;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -494,18 +495,35 @@ class NotificationController extends Controller {
 
 
     public function actionRedirectBankRoela($bill_id){
-        $result_search = ApiSiro::SearchPaymentIntention($bill_id);
+        $result_search = ApiSiro::SearchPaymentIntention($bill_id,null,null);
 
-        if(!$result_search){
+        if(!$result_search){ //juntar todo en este if
             $result_create = ApiSiro::CreatePaymentIntention($bill_id);
-            if($result_create){
+            if($result_create)
                return $this->redirect($result_create['Url']);
-
-            }else
-                return $this->redirect('/');
+            else
+                $this->redirect('https://www.investing.com/crypto/currencies');
         }else{
-            var_dump($result_search);die();
-            $this->redirect($result_search['url']);
+            $hour = date('H', strtotime($result_search->createdAt));
+            $min = date('i', strtotime($result_search->createdAt));
+            $seg = ($hour * 60 * 60) + ($min * 60);
+
+            $current_time = date('H:i');
+
+            $current_hour = date('H', strtotime($current_time));
+            $current_min = date('i', strtotime($current_time));
+            $current_seg = ($current_hour * 60 * 60) + ($current_min * 60);
+
+            $expiry_time = 60*60; //1 hs
+            if(($seg + $expiry_time) < $current_seg)
+                $this->redirect($result_search['url']);
+            else{
+                $result_create = ApiSiro::CreatePaymentIntention($bill_id);
+                if($result_create)
+                return $this->redirect($result_create['Url']);
+                else
+                    $this->redirect('https://www.investing.com/crypto/currencies');
+            }          
         }
         
         
@@ -513,16 +531,17 @@ class NotificationController extends Controller {
 
 
     public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
-        var_dump($IdResultado);die();
-        $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $idReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+        $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $IdReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
 
-        $paymentIntention->id_resultado = $id_resultado;
+        $result_search = ApiSiro::SearchPaymentIntention(null,$IdReferenciaOperacion,$IdResultado);
+
+        $paymentIntention->id_resultado = $IdResultado;
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : "canceled";
+        $paymentIntention->id_operacion = $result_search['IdOperacion'];
         $paymentIntention->save(false);
 
-        $result_search = ApiSiro::SearchPaymentIntention($bill_id,$idReferenciaOperacion);
-
-        var_dump($result_search);die();
+        $this->redirect("https://google.com.ar");
     }
 
     
