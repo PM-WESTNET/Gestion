@@ -10,8 +10,9 @@ if(isset($notification)) {
     $notification = Yii::$app->view->params['notification'];
 }
 
-// check que no se rompa la app si el contenido de la notificacion esta vacio (ya habiendo apretado el boton de actualizar)
-if (isset($notification->content)){
+// check que no se rompa la app si el contenido de la notificacion esta vacio 
+//(ya habiendo apretado el boton de actualizar)
+if (!isset($notification->content)){
     $notification->content = "!!cuerpo de notificacion vacio!!";
     Yii::warning("Actualizar notificacion - cuerpo vacio");
 }
