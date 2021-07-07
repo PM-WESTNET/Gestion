@@ -8,7 +8,9 @@ use app\modules\sale\models\Bill;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 
 class ApiSiro extends Component{
-
+    /**
+     * Return token access api
+     */
 	public static function GetTokenApi(){
 		$username = Config::getConfig('siro_username');
 		$password = Config::getConfig('siro_password');
@@ -39,7 +41,9 @@ class ApiSiro extends Component{
         return json_decode($respuesta,true);
 	}
 
-
+    /**
+     * Create a intention payment in API
+     */
 	public static function CreatePaymentIntentionApi($token,$data){
 		$url = Config::getConfig('siro_url_create_payment_intention');
 		$authorization = "Authorization: Bearer ".$token['access_token'];
@@ -63,6 +67,9 @@ class ApiSiro extends Component{
         return json_decode($respuesta,true);
 	} 
 
+    /**
+     * Search intention payment created in BD of Siro
+     */
 	public static function SearchPaymentIntentionApi($token,$data){
 		$url = Config::getConfig('siro_url_search_payment_intention');
 		$authorization = "Authorization: Bearer ".$token['access_token'];
@@ -131,9 +138,9 @@ class ApiSiro extends Component{
 
     public static function SearchPaymentIntention($bill_id=null, $reference=null, $id_resultado=null){
     	if(isset($bill_id) && !isset($reference))
-    		$paymentIntention = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'pending'])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+    		$paymentIntention = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'pending'])->one();
     	else{
-    		$paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+    		$paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->one();
     		if($paymentIntention){
     		   $token = ApiSiro::GetTokenApi();
     	       return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));

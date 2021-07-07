@@ -20,6 +20,7 @@ use yii\web\Response;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\config\models\Config;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use yii\filters\AccessControl;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -27,7 +28,16 @@ use app\modules\westnet\notifications\models\SiroPaymentIntention;
 class NotificationController extends Controller {
 
     public function behaviors() {
-        return array_merge(parent::behaviors(),[
+        return array_merge(parent::behaviors(),['access' => [
+            'class' => AccessControl::class,
+            'only' => ['redirect-bank-roela', 'success-bank-roela'],
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['?'],
+                ],
+            ],
+        ],
         ]);
     }
 
@@ -495,36 +505,40 @@ class NotificationController extends Controller {
 
 
     public function actionRedirectBankRoela($bill_id){
-        $result_search = ApiSiro::SearchPaymentIntention($bill_id,null,null);
-
-        if(!$result_search){ //juntar todo en este if
-            $result_create = ApiSiro::CreatePaymentIntention($bill_id);
-            if($result_create)
-               return $this->redirect($result_create['Url']);
-            else
-                $this->redirect('https://www.investing.com/crypto/currencies');
-        }else{
-            $hour = date('H', strtotime($result_search->createdAt));
-            $min = date('i', strtotime($result_search->createdAt));
-            $seg = ($hour * 60 * 60) + ($min * 60);
-
-            $current_time = date('H:i');
-
-            $current_hour = date('H', strtotime($current_time));
-            $current_min = date('i', strtotime($current_time));
-            $current_seg = ($current_hour * 60 * 60) + ($current_min * 60);
-
-            $expiry_time = 60*60; //1 hs
-            if(($seg + $expiry_time) < $current_seg)
-                $this->redirect($result_search['url']);
-            else{
+        if(Config::getConfig('siro_communication_bank_roela')->item->description){
+            $result_search = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'payed'])->one();
+            if(!$result_search)
+                $result_search = ApiSiro::SearchPaymentIntention($bill_id);
+            
+            if(!$result_search){
                 $result_create = ApiSiro::CreatePaymentIntention($bill_id);
                 if($result_create)
                 return $this->redirect($result_create['Url']);
                 else
-                    $this->redirect('https://www.investing.com/crypto/currencies');
-            }          
-        }
+                    $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+
+            }else if($result_search['status'] == 'pending'){
+                $current_date = strtotime(date("d-m-Y H:i:00",time()));
+                $payment_date = strtotime($result_search->createdAt);
+                $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
+
+                if($current_date < ($payment_date + $expiry_time))
+                    $this->redirect($result_search['url']);
+                else{
+                    $result_create = ApiSiro::CreatePaymentIntention($bill_id);
+                    if($result_create){
+                        $result_search->status = "canceled";
+                        $result_search->save();
+                        return $this->redirect($result_create['Url']);
+                    }else
+                        $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+                }          
+            }else{
+                $this->redirect("http://192.168.2.115:3000/portal/bill-payed");
+            }
+        }else
+            $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
+        
         
         
     }
@@ -537,11 +551,14 @@ class NotificationController extends Controller {
 
         $paymentIntention->id_resultado = $IdResultado;
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
-        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : "canceled";
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : "pending";
         $paymentIntention->id_operacion = $result_search['IdOperacion'];
+        $paymentIntention->estado = $result_search['Estado'];
+        $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
+        $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
 
-        $this->redirect("https://google.com.ar");
+        $this->redirect("http://192.168.2.115:3000/portal/success");
     }
 
     
