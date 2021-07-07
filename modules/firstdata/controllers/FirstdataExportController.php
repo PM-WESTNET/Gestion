@@ -11,6 +11,8 @@ use yii\web\NotFoundHttpException;
 use app\modules\firstdata\models\FirstdataExport;
 use app\modules\firstdata\models\FirstdataCompanyConfig;
 use app\modules\firstdata\models\search\FirstdataExportSearch;
+use app\modules\checkout\models\Payment;
+use yii\data\ArrayDataProvider;
 
 /**
  * FirstdataExportController implements the CRUD actions for FirstdataExport model.
@@ -54,9 +56,30 @@ class FirstdataExportController extends Controller
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($id)
-    {
+    {   
+        $payment = new Payment();
+        $model = $this->findModel($id);
+
+        $customers = [];
+        foreach($model->customers as $customer){
+            if(abs($payment->totalCalculationForQuery($customer->customer_id)) > 0){
+                $customers[] = $customer;
+            }   
+        }
+
+        $provider = new ArrayDataProvider([
+            'allModels' => $customers,
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+            'sort' => [
+                'attributes' => ['customer_id'],
+            ],
+        ]);
+
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'provider' => $provider
         ]);
     }
 

@@ -55,7 +55,6 @@ class DestinataryController extends Controller {
      */
     public function actionView($id) {
         $destinatary = $this->findModel($id);
-
         $customerQuery = $destinatary->getCustomersQuery( $destinatary->notification->transport->slug != 'sms');
 
         if ($destinatary->notification->transport->slug === 'email') {

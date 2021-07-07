@@ -565,12 +565,11 @@ class Destinatary extends ActiveRecord {
             'contract_max_age' => $this->contract_max_age,
             'plan_id' => $this->getPlansIds(),
             'status' => 'enabled',
-            //'has_automatic_debit' => $this->has_automatic_debit
         ];
 
 
         if($this->type == 'by_customers') {
-            foreach( $this->getCustomers()->select(['customer_id'])->where(['has_debit_automatic' => 'yes'])->asArray()->all() as $customer) {
+            foreach( $this->getCustomers()->select(['customer_id'])->asArray()->all() as $customer) {
                 $params['CustomerSearch']['customers_id'][] = $customer['customer_id'];
             }
         }
@@ -596,7 +595,6 @@ class Destinatary extends ActiveRecord {
 
         // Filtro de instalacion de app
         $this->filterMobileAppStatus($query);
-        $this->filterDebitAutomaticStatus($query);
         $subquery = new Query();
         $subquery->select("im.customer_id as customer_integratech, im.status as status_integratech, im.integratech_message_id")
                 ->from(DbHelper::getDbName(Yii::$app->dbnotifications).".integratech_message im")
@@ -731,24 +729,6 @@ class Destinatary extends ActiveRecord {
             }
         }
 
-
-    }
-
-
-    /**
-     * @param $query
-     * @throws \Exception
-     * Filtra por el estado del débito automático
-     */
-    private function filterDebitAutomaticStatus($query){
-        
-        if(!empty($this->has_automatic_debit)) {
-           // $query->leftJoin('customer cu', 'cu.customer_id = b.customer_id');
-
-            /*if($this->has_automatic_debit) {
-                $query->andFilterWhere(['customer.has_debit_automatic' => 'yes']);
-            }*/
-        }
 
     }
 }
