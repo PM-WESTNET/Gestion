@@ -136,9 +136,14 @@ class Transport extends \app\components\db\ActiveRecord {
     
     public function send($notification, $force_send = false)
     {
+        Yii::info("funcion send inicio", 'notificationcampaign');
+        
         $transport = $this->newTransportClass();
         
+        Yii::info(var_dump($transport), 'notificationcampaign');
+        
         $response = $transport->send($notification, $force_send);
+
 
         if(Yii::$app->request->isConsoleRequest) {
             echo "Respuesta final: ". print_r($response, 1);

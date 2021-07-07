@@ -90,6 +90,9 @@ class EmailTransport implements TransportInterface {
      * @return array
      */
     public function send($notification, $force_send = false){
+        $debmsg = "inside EmailTransport->send() \n";
+        echo $debmsg;
+        Yii::info($debmsg, 'notificationcampaign');
 
         Yii::info('Comenzando envio de notificación: ' . $notification->notification_id, 'emails');
 

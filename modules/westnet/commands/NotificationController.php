@@ -12,6 +12,7 @@ use yii\console\Controller;
 use app\modules\westnet\notifications\components\scheduler\Scheduler;
 use app\modules\westnet\notifications\models\Notification;
 use yii\helpers\Console;
+use Yii;
 
 /**
  * Description of NotificationController
@@ -120,28 +121,47 @@ class NotificationController extends Controller
      * Comando para enviar las campañas de email no calendarizadas. Implementa mutex
      */
     public function actionSendEmails() {
+        $debmsg = "\nInicio script + logging \n";
+        echo $debmsg;
+        Yii::info($debmsg, 'notificationcampaign');
 
         $notifications = Notification::find()
             ->innerJoin('transport t', 't.transport_id=notification.transport_id')
             ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
             ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
-            ->all();
+            ->all();        
 
-        foreach ($notifications as $notification) {
-            if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
-                $notification->updateAttributes(['status' => 'in_process']);
-                $transport = $notification->transport;
-                $result = $transport->send($notification);
+        if (empty($notifications)) {
+            $debmsg = "No se encontraron notificaciones PENDING \n";
+            echo $debmsg;
+            Yii::info($debmsg, 'notificationcampaign');
+        }
+        else{
+            $i = 0;
+            foreach ($notifications as $notification) {
+                $debmsg = "notificacion numero: ".($i+1)."\n";
+                echo $debmsg;
+                Yii::info($debmsg, 'notificationcampaign');
+                $i++;
+    
+                if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
+                    $debmsg = "no blocks from mutex lock \n";
+                    echo $debmsg;
+                    Yii::info($debmsg, 'notificationcampaign');
 
-                if ($result['status'] === 'success') {
-                    $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
-                }else {
-                    $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+                    $notification->updateAttributes(['status' => 'in_process']);
+                    $transport = $notification->transport;
+                    $result = $transport->send($notification);
+    
+                    if ($result['status'] === 'success') {
+                        $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+                    }else {
+                        $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+                    }
+    
+                    \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
                 }
-
-                \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
             }
-
         }
     }
 
