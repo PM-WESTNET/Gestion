@@ -106,7 +106,7 @@ class PagomiscuentasFileSearch extends PagomiscuentasFile
         $vto = (new \DateTime($pago_mis_cuentas_file->date))->modify('last day of this month');
         $query = new Query();
         $query
-            ->select(["c.code", "c.customer_id", "b.bill_id",
+            ->select(["c.code", "c.customer_id","c.current_account_balance", "b.bill_id",
                 new Expression( "'" . $vto->format('Ymd')."' as fecha_1_vto"),
                 new Expression( "'" . $vto->format('Ymd')."' as fecha_2_vto"),
                 new Expression( "'' as fecha_3_vto"),
