@@ -653,11 +653,14 @@ class Destinatary extends ActiveRecord {
         $emails = [];
 
         //Batch para obtener emails
+        $aux = 0;
         foreach($query->each() as $customer){
-            $emails[$customer['email']] = $customer;
+            $aux++;
+            $emails[$aux.$customer['email']] = $customer;
             if($customer['email2_status'] == Customer::EMAIL_STATUS_ACTIVE) {
-                $emails[$customer['email2']] = $customer;
+                $emails[$aux.$customer['email2']] = $customer;
             }
+            
         }
 
         return $emails;

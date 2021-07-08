@@ -5,7 +5,7 @@
  * @license http://www.yiiframework.com/license/
  */
 
-namespace app\modules\westnet\commands;
+namespace app\modules\westnet\notifications\controllers;
 
 use app\modules\westnet\notifications\components\transports\InfobipService;
 use yii\console\Controller;
@@ -18,7 +18,7 @@ use yii\helpers\Console;
  *
  * @author martin
  */
-class NotificationController extends Controller
+class PruebaEmailController extends Controller
 {
     /**
      * Action para envio de notificaciones. Debe ser cargado en un cron daily.
@@ -132,7 +132,7 @@ class NotificationController extends Controller
                 $notification->updateAttributes(['status' => 'in_process']);
                 $transport = $notification->transport;
                 $result = $transport->send($notification);
-                var_dump($result);die();
+                
                 if ($result['status'] === 'success') {
                     $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
                 }else {

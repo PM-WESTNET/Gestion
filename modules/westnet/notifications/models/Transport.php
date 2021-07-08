@@ -129,7 +129,7 @@ class Transport extends \app\components\db\ActiveRecord {
     
     private function newTransportClass()
     {
-        $class = $this->class;
+        $class = $this->class; // no se refiere a si misma
         return new $class;
         
     }
@@ -139,19 +139,19 @@ class Transport extends \app\components\db\ActiveRecord {
         $transport = $this->newTransportClass();
         
         $response = $transport->send($notification, $force_send);
-
+        
         if(Yii::$app->request->isConsoleRequest) {
             echo "Respuesta final: ". print_r($response, 1);
             echo "\n";
         }
         Yii::trace($response);
-
+        
         if($response['status'] == 'success'){
             $notification->markSending();
         }else{
             $notification->markAsError($response['error']);
         }
-        
+       
         return $response;
     }
     

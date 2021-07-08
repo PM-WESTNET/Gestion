@@ -63,7 +63,7 @@
 
         var send = function () {
             $.ajax({
-                url: '<?php echo \yii\helpers\Url::to(['/mailing/email-transport/test']) ?>&id=' + $('#modalTest #email_transport_id').val(),
+                url: '<?php echo \yii\helpers\Url::to(['/mailing/email-transport/test']) ?>?id=' + $('#modalTest #email_transport_id').val(),
                 data: {
                     email_to: $('#modalTest #email').val()
                 },

@@ -60,24 +60,26 @@ class MailSender
      * @return Message
      */
     public function prepareMessage($to, $subject = '', $content = [], $cc = [], $bcc = [], $attachment = [])
-    {
-        try {
+    {   
+        
+        
             Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
 
             $view = (array_key_exists('view', $content) !== false ? ($content['view']!='' ? $content['view'] : $this->email_transport->layout ) : $this->email_transport->layout );
             $layout = (array_key_exists('layout', $content) !== false ? ($content['layout']!='' ? $content['layout'] : $this->email_transport->layout ) : $this->email_transport->layout );
             $params = (array_key_exists('params', $content) ?  $content['params'] : [] );
+            
             $mailer = Yii::$app->mail;
             $mailer->htmlLayout = $layout;
             Yii::$app->view->params = $params;
-
+            
             /** @var Message $message */
             $message = $mailer
                 ->compose( $view, $params )
                 ->setFrom($this->email_transport->from_email)
                 ->setTo((is_array($to) ? [$to['email'] => $to['name']] : $to))
-                ->setSubject($subject)
-            ;
+                ->setSubject($subject);
+    
             if (empty($cc)) {
                 $message->setCc($cc);
             }
@@ -99,9 +101,6 @@ class MailSender
                 }
             }
             return $message;
-        }catch(\Exception $ex) {
-            throw $ex;
-        }
     }
 
     /**

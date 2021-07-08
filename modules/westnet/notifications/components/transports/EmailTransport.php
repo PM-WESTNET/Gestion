@@ -147,7 +147,7 @@ class EmailTransport implements TransportInterface {
                     }
 
                 }
-
+                //var_dump($mailSender->sendMultiple($messages));die();
                 $result = $mailSender->sendMultiple($messages);
 
                 $ok += $result;

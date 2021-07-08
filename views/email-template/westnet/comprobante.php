@@ -6,8 +6,8 @@ $formatter = new \yii\i18n\Formatter();
     <!-- Header -->
     <tr >
         <td style="height:80px; width: 50%; padding-bottom: 20px; padding-top: 20px; border-bottom: 1px solid gray;">
-            <img style="height: 100%; display: inline-block; float: left;"  src="<?php echo $message->embed(Yii::$app->view->params['image'], ['contentType'=>'image/jpeg']) ?>" alt="Logo">
-            <p style="text-align: right; display: inline; width: 80%; float: left; color: gray; font-size: 16px; font-family: Arial, sans-serif;">
+            <img style="height: 100%; display: inline-block; float: left;"  src=<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?> alt="Logo">
+            < style="text-align: right; display: inline; width: 80%; float: left; color: gray; font-size: 16px; font-family: Arial, sans-serif;">
                 <?= $formatter->asDate(new \DateTime("now"))?>
             </p>
         </td>
@@ -15,12 +15,13 @@ $formatter = new \yii\i18n\Formatter();
     <!-- Contenido -->
     <tr>
         <td style="width: 100%; padding: 20px; color: gray; font-size: 16px; font-family: Arial, sans-serif; line-height: 24px;">
+            <?//php var_dump(Yii::$app->view->params);die(); ?>
             <p style="">
                 Estimado cliente,
-                le adjuntamos en formato pdf el siguiente comprobante: <?php echo Yii::$app->view->params['comprobante']?>
+                le adjuntamos en formato pdf el siguiente comprobante: Borre echo
 
                 Atentamente,
-            </p>
+            </php>
         </td>
     </tr>
     <!-- Footer -->
