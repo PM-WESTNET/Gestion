@@ -21,6 +21,9 @@ use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\config\models\Config;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 use yii\filters\AccessControl;
+use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentItem;
+use app\modules\checkout\models\PaymentMethod;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -505,41 +508,45 @@ class NotificationController extends Controller {
 
 
     public function actionRedirectBankRoela($bill_id){
-        if(Config::getConfig('siro_communication_bank_roela')->item->description){
-            $result_search = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'payed'])->one();
-            if(!$result_search)
-                $result_search = ApiSiro::SearchPaymentIntention($bill_id);
-            
-            if(!$result_search){
-                $result_create = ApiSiro::CreatePaymentIntention($bill_id);
-                if($result_create)
-                return $this->redirect($result_create['Url']);
-                else
-                    $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
-
-            }else if($result_search['status'] == 'pending'){
-                $current_date = strtotime(date("d-m-Y H:i:00",time()));
-                $payment_date = strtotime($result_search->createdAt);
-                $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
-
-                if($current_date < ($payment_date + $expiry_time))
-                    $this->redirect($result_search['url']);
-                else{
+        $bill = Bill::find()->where(['status' => 'closed'])->andWhere(['bill_id' => $bill_id])->one();
+        if($bill){
+            if(Config::getConfig('siro_communication_bank_roela')->item->description){
+                $result_search = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'payed'])->one();
+                if(!$result_search)
+                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);
+                
+                if(!$result_search){
                     $result_create = ApiSiro::CreatePaymentIntention($bill_id);
-                    if($result_create){
-                        $result_search->status = "canceled";
-                        $result_search->save();
-                        return $this->redirect($result_create['Url']);
-                    }else
+                    if($result_create)
+                    return $this->redirect($result_create['Url']);
+                    else
                         $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
-                }          
-            }else{
-                $this->redirect("http://192.168.2.115:3000/portal/bill-payed");
-            }
-        }else
-            $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
-        
-        
+
+                }else if($result_search['status'] == 'pending'){
+                    $current_date = strtotime(date("d-m-Y H:i:00",time()));
+                    $payment_date = strtotime($result_search->createdAt);
+                    $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
+
+                    if($current_date < ($payment_date + $expiry_time))
+                        $this->redirect($result_search['url']);
+                    else{
+                        $result_create = ApiSiro::CreatePaymentIntention($bill_id);
+                        if($result_create){
+                            $result_search->status = "canceled";
+                            $result_search->save();
+                            return $this->redirect($result_create['Url']);
+                        }else
+                            $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+                    }          
+                }else{
+                    $this->redirect("http://192.168.2.115:3000/portal/bill-payed");
+                }
+            }else
+                $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
+            
+        }else{
+            $this->redirect("http://192.168.2.115:3000/portal/error-bill-draft");
+        }
         
     }
 
@@ -557,6 +564,38 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
+
+        if($result_search['PagoExitoso'] == 'payed'){
+            $transaction = Yii::$app->db->beginTransaction();
+            $bill = Bill::findOne(['bill_id' => $paymentIntention->bill_id]);
+            $payment_method = PaymentMethod::findOne(['name' => 'Banco Roela']);
+
+            $payment = new Payment([
+                'customer_id' => $bill->customer_id,
+                'amount' => $bill['total'],
+                'partner_distribution_model_id' => $bill->company->partner_distribution_model_id,
+                'company_id' => $bill->company_id,
+                'date' => (new \DateTime('now'))->format('Y-m-d')
+            ]);
+            
+            if ($payment->save(false)) {
+
+                $paymentIntention->payment_id = $payment['payment_id'];
+                $paymentIntention->save(false);
+                
+                $payment_item = new PaymentItem();
+                $payment_item->amount = $payment['amount'];
+                $payment_item->description = 'Banco Roela intención de pago  ' . $paymentIntention['siro_payment_intention_id'];
+                $payment_item->payment_method_id = $payment_method->payment_method_id;
+                $payment_item->payment_id = $payment->payment_id;
+                $payment_item->paycheck_id = null;
+
+                $payment_item->save(false);
+                $transaction->commit();
+            } else {
+                $transaction->rollBack();
+            }
+        }
 
         $this->redirect("http://192.168.2.115:3000/portal/success");
     }
