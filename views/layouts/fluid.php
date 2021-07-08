@@ -4,6 +4,7 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use app\components\helpers\UserA;
 
 /**
  * @var \yii\web\View $this
@@ -21,7 +22,7 @@ AppAsset::register($this);
     <?php $this->head() ?>
     <?= Html::csrfMetaTags() ?>
 </head>
-<body>
+<body id=<?= UserA::getBodyId() ?>>
 
 <?php $this->beginBody() ?>
     <div class="wrap">

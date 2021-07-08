@@ -6,6 +6,7 @@ use yii\widgets\Breadcrumbs;
 use app\components\widgets\agenda\notification\Notification;
 use app\components\widgets\agenda\task\Task;
 use app\assets\AppAsset;
+use app\components\helpers\UserA;
 
 /**
  * @var \yii\web\View $this
@@ -26,7 +27,7 @@ AppAsset::register($this);
     <!-- Css Arya -->
     <link rel="stylesheet/css" type="text/css" href="<?= Yii::$app->urlManager->baseUrl; ?>/css/styles.css" />
 </head>
-<body>
+<body id=<?= UserA::getBodyId() ?>>
 
 <?php $this->beginBody() ?>
     <div class="wrap">
