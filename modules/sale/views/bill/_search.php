@@ -112,6 +112,13 @@ use app\modules\sale\models\Currency;
             </div>
             <div class="row">
                 <div class="col-sm-6">
+                    <?= $form->field($model, 'number', [
+                        'template' => '{label}<div class="input-group" style="z-index:0;">{input}</div>'
+                    ])->label('Numero de comprobante'); ?>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <div class="input-group" style="z-index:0;">
                             <?php

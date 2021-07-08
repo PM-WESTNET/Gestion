@@ -53,7 +53,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         <span class="font-light-gray font-s"><?= Yii::t('app', 'Customer') ?>:</span> <span class="font-bold"> <?= $searchModel->customer->fullName; ?></span>
     </h4>
     <?php endif; ?>
-    
+    <!--this is the filter dropdown menu -->
     <?= Collapse::widget([
         'items' => [
             [
@@ -175,6 +175,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
     }
     ?>
     
+    <!--this is the table view for all bills -->
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         
