@@ -99,11 +99,12 @@ class ApiSiro extends Component{
         $url_ok = Config::getConfig('siro_url_ok')->item->description;
         $url_error = Config::getConfig('siro_url_error')->item->description;
 
-        $referenciaOperacion = md5($customer->customer_id.'-'.$customer->code);
-        
         $transaction = Yii::$app->db->beginTransaction();
         $paymentIntention = new SiroPaymentIntention;
         $paymentIntention->save(false);
+
+        $referenciaOperacion = md5($paymentIntention->siro_payment_intention_id.'-'.$customer->customer_id.'-'.$customer->code);
+        
         $data = array(
             "nro_cliente_empresa" => str_pad($company_client_number, 19, '0', STR_PAD_LEFT),
             "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
@@ -139,16 +140,12 @@ class ApiSiro extends Component{
 
     }
 
-    public static function SearchPaymentIntention($bill_id=null, $reference=null, $id_resultado=null){
-    	if(isset($bill_id) && !isset($reference))
-    		$paymentIntention = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'pending'])->one();
-    	else{
-    		$paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->one();
-    		if($paymentIntention){
-    		   $token = ApiSiro::GetTokenApi();
-    	       return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));
-    	    }
-    	}
+    public static function SearchPaymentIntention($reference, $id_resultado){
+        $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->one();
+        if($paymentIntention){
+            $token = ApiSiro::GetTokenApi();
+            return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));
+        }
     	
     	if($paymentIntention){
     	    return $paymentIntention;

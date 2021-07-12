@@ -8,7 +8,7 @@ use Yii;
  * This is the model class for table "siro_payment_intention".
  *
  * @property integer $siro_payment_intention_id
- * @property string $bill_id
+ * @property string $customer_id
  * @property string $hash
  * @property string $reference
  * @property string $url
@@ -67,11 +67,10 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
     {
         return [
             [['createdAt', 'updatedAt', 'status'], 'safe'],
-            [['bill_id'], 'string', 'max' => 45],
             [['hash','id_resultado'], 'string', 'max' => 100],
             [['reference'], 'string', 'max' => 50],
             [['url'], 'string', 'max' => 70],
-            [['siro_payment_intention_id'], 'number']
+            [['siro_payment_intention_id','customer_id'], 'number']
         ];
     }
 
@@ -82,7 +81,7 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
     {
         return [
             'siro_payment_intention_id' => 'Siro Payment Intention ID',
-            'bill_id' => 'Bill ID',
+            'customer_id' => 'Cliente ID',
             'hash' => 'Hash',
             'reference' => 'Reference',
             'url' => 'Url',
