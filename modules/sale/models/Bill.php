@@ -1648,4 +1648,11 @@ class Bill extends ActiveRecord implements CountableInterface
     public static function findBillForId($bill_id){
         return self::find()->where(['bill_id' => $bill_id])->one();
     }
+
+    /**
+     * Return last bill for params customer_id
+     */
+    public static function findLastBillForCustomerID($customer_id){
+        return Yii::$app->db->createCommand('SELECT bi.bill_id FROM bill bi WHERE bi.customer_id = :customer_id AND bi.status = "closed" ORDER BY bi.bill_id DESC LIMIT 1')->bindValue(':customer_id',$customer_id)->queryOne();
+    }
 }

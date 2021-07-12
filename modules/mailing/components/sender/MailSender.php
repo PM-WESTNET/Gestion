@@ -63,8 +63,7 @@ class MailSender
     {   
         
         
-            Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
-
+            //Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
             $view = (array_key_exists('view', $content) !== false ? ($content['view']!='' ? $content['view'] : $this->email_transport->layout ) : $this->email_transport->layout );
             $layout = (array_key_exists('layout', $content) !== false ? ($content['layout']!='' ? $content['layout'] : $this->email_transport->layout ) : $this->email_transport->layout );
             $params = (array_key_exists('params', $content) ?  $content['params'] : [] );
@@ -79,7 +78,6 @@ class MailSender
                 ->setFrom($this->email_transport->from_email)
                 ->setTo((is_array($to) ? [$to['email'] => $to['name']] : $to))
                 ->setSubject($subject);
-    
             if (empty($cc)) {
                 $message->setCc($cc);
             }
@@ -116,7 +114,7 @@ class MailSender
                          $cc = [], $bcc = [], $attachment = [])
     {
         try {
-            Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
+            //Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
 
             $mailer = Yii::$app->mail;
             // Si en la configuracion tengo un template lo pongo.
@@ -144,7 +142,7 @@ class MailSender
     public function sendMultiple($messages)
     {
         try {
-            Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
+            //Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
 
             /** @var Mailer $mailer */
             $mailer = Yii::$app->mail;

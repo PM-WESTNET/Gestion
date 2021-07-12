@@ -128,7 +128,7 @@ class EmailTransport implements TransportInterface {
                 $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
                 
                 Yii::info('Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk), 'emails' );
-
+                
                 foreach($chunk as $toMail => $customer_data){
                     Yii::info('Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
                     $toName = $customer_data['name'].' '.$customer_data['lastname'];
@@ -195,7 +195,7 @@ class EmailTransport implements TransportInterface {
     private function replaceText($text, $customer)
     {
         $replaced_text = $text;
-
+        
         $replace_max_string = SMSIntegratechTransport::getMaxLengthReplacement();
         $replaced_text = str_replace('@Nombre', trim($customer['name']), $replaced_text);
         $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
@@ -208,7 +208,7 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@FacturasAdeudadas', substr($customer['debt_bills'], 0, $replace_max_string['@FacturasAdeudadas']), $replaced_text);
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
-
+        $replaced_text = str_replace('@BotonDePago', "  <button style='background-color:orange;border-radius:90px;'><a href=http://test1.westnet.com.ar/westnet/notifications/notification/redirect-bank-roela?bill_id=".$customer['bill_id']." style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>", $replaced_text);
         return $replaced_text;
 
     }

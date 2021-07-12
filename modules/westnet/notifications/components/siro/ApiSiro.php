@@ -103,7 +103,7 @@ class ApiSiro extends Component{
         $referenciaOperacion = md5($bill->bill_id.'-'.$bill->date);
         $data = array(
             "nro_cliente_empresa" => str_pad($company_client_number, 19, '0', STR_PAD_LEFT),
-            "nro_comprobante" => str_pad(24, 20, '0', STR_PAD_LEFT),
+            "nro_comprobante" => str_pad($bill_id, 20, '0', STR_PAD_LEFT),
             "Concepto" => $invoice_concept,
             "Importe" => $bill->total,
             "URL_OK" => $url_ok,
@@ -118,7 +118,7 @@ class ApiSiro extends Component{
 
         $token = ApiSiro::GetTokenApi();
         $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
-        
+        //var_dump($result,$token,$data);die();
         if(!isset($result['Message'])){
 	        $paymentIntention = new SiroPaymentIntention;
 	        $paymentIntention->bill_id = $bill_id;

@@ -525,9 +525,10 @@ class NotificationController extends Controller {
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
                     $payment_date = strtotime($result_search->createdAt);
+                    var_dump($payment_date);die();
                     $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
-
-                    if($current_date < ($payment_date + $expiry_time))
+                    var_dump($current_date > ($payment_date + $expiry_time),$current_date,$payment_date,$expiry_time);die();
+                    if($current_date > ($payment_date + $expiry_time))
                         $this->redirect($result_search['url']);
                     else{
                         $result_create = ApiSiro::CreatePaymentIntention($bill_id);

@@ -21,6 +21,7 @@ use yii\db\ActiveQuery;
 use yii\db\Connection;
 use yii\db\Expression;
 use yii\db\Query;
+use app\modules\sale\models\Bill;
 
 /**
  * This is the model class for table "destinatary".
@@ -656,9 +657,10 @@ class Destinatary extends ActiveRecord {
         $aux = 0;
         foreach($query->each() as $customer){
             $aux++;
-            $emails[$aux.$customer['email']] = $customer;
+            $customer['bill_id'] = Bill::findLastBillForCustomerID($customer['customer_id'])['bill_id'];
+            $emails[$customer['email']] = $customer;
             if($customer['email2_status'] == Customer::EMAIL_STATUS_ACTIVE) {
-                $emails[$aux.$customer['email2']] = $customer;
+                $emails[$customer['email2']] = $customer;
             }
             
         }

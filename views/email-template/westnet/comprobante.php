@@ -15,13 +15,13 @@ $formatter = new \yii\i18n\Formatter();
     <!-- Contenido -->
     <tr>
         <td style="width: 100%; padding: 20px; color: gray; font-size: 16px; font-family: Arial, sans-serif; line-height: 24px;">
-            <?//php var_dump(Yii::$app->view->params);die(); ?>
+            <?php var_dump(Yii::$app->view->params);die(); ?>
             <p style="">
                 Estimado cliente,
-                le adjuntamos en formato pdf el siguiente comprobante: Borre echo
+                le adjuntamos en formato pdf el siguiente comprobante: <?php echo Yii::$app->view->params['comprobante']?>
 
                 Atentamente,
-            </php>
+            </p>
         </td>
     </tr>
     <!-- Footer -->
