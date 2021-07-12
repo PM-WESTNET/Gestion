@@ -298,20 +298,17 @@ class BancoFrances implements BankInterface
      */
     private function addFirstLine($resource, $beneficiary, $bill, $concept, $totalImport)
     {   
-        
-            
         $register_code = '4210';
         $companyId = $this->getCompanyIdentification();
         $free1= str_pad(' ', 2, ' ');
         $beneficiary_number = $beneficiary->beneficiario_number;
         $cbu = $beneficiary->cbu;
 
-        $intamount = floor($totalImport);
+        $intamount = floor(round($totalImport, 2));
 
         $import1 = str_pad($intamount, 13, '0', STR_PAD_LEFT);
 
-        $import2 = round(($totalImport - $intamount), 2) * 100;
-
+        $import2 = round(($totalImport - $intamount)* 100, 2) ;
         if ($import2 < 10) {
             $import2 = str_pad($import2, 2, 0, STR_PAD_LEFT);
         }
@@ -324,8 +321,30 @@ class BancoFrances implements BankInterface
         $status_dev = str_pad(' ', 1, ' ');
         $descr_dev = str_pad(' ', 40, ' ');
         $free3 = str_pad(' ', 86, ' ');
-
-        $line = $register_code.$companyId.$free1.$beneficiary_number.$cbu.$import1.$import2.$code_dev.$ref.$fecha.$free2.$bill_number.$status_dev.$descr_dev.$free3;
+        $sep = '';
+        $line = $register_code
+            .$sep.$companyId
+            .$sep.$free1
+            .$sep.$beneficiary_number
+            .$sep.$cbu
+            .$sep.$import1
+            .$sep.$import2
+            .$sep.$code_dev
+            .$sep.$ref
+            .$sep.$fecha
+            .$sep.$free2
+            .$sep.$bill_number
+            .$sep.$status_dev
+            .$sep.$descr_dev
+            .$sep. $free3
+        ;
+        if(strlen($import2) > 2 ){
+            echo '$totalImport: '.$totalImport .'<br>'.
+            '$intamount: '.$intamount .'<br>'.
+            '$import1: '.$import1 .'<br>'.
+            '$import2: '.$import2 .'<br>'.
+            '$line: '.$line; die(); 
+        }
 
         fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
