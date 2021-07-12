@@ -3,7 +3,7 @@
 namespace app\modules\westnet\notifications\controllers;
 
 use app\modules\sale\models\Company;
-use app\modules\sale\models\Bill;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\notifications\models\IntegratechReceivedSms;
 use app\modules\westnet\notifications\models\Transport;
 use app\modules\mailing\models\EmailTransport;
@@ -507,21 +507,22 @@ class NotificationController extends Controller {
     }
 
 
-    public function actionRedirectBankRoela($bill_id){
-        $bill = Bill::find()->where(['status' => 'closed'])->andWhere(['bill_id' => $bill_id])->one();
-        if($bill){
-            if(Config::getConfig('siro_communication_bank_roela')->item->description){
-                $result_search = SiroPaymentIntention::find()->where(['bill_id' => $bill_id,'status' => 'payed'])->one();
-                if(!$result_search)
-                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);
-                
-                if(!$result_search){
-                    $result_create = ApiSiro::CreatePaymentIntention($bill_id);
-                    if($result_create)
-                    return $this->redirect($result_create['Url']);
-                    else
-                        $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+    public function actionRedirectBankRoela($customer_id){
+        $customer = Customer::findOne(['customer_id' => $customer_id]);
 
+        if($customer){
+            if(Config::getConfig('siro_communication_bank_roela')->item->description){
+                $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer_id,'status' => 'pending'])->one();
+                /*if(!$result_search)
+                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);*/
+                
+                if(!$result_search && $customer->current_account_balance < 0){
+                    $result_create = ApiSiro::CreatePaymentIntention($customer);
+                    if($result_create)
+                        return $this->redirect($result_create['Url']);
+                    else
+                        $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment"); //error created intention payment
+                    var_dump($result_create);die();
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
                     $payment_date = strtotime($result_search->createdAt);
@@ -545,7 +546,7 @@ class NotificationController extends Controller {
                 $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
             
         }else{
-            $this->redirect("http://192.168.2.115:3000/portal/error-bill-draft");
+            $this->redirect("http://192.168.2.115:3000/portal/error-bill-draft"); //Customer not find
         }
         
     }
@@ -564,25 +565,23 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
-
+        
         if($result_search['PagoExitoso'] == 'payed'){
             $transaction = Yii::$app->db->beginTransaction();
-            $bill = Bill::findOne(['bill_id' => $paymentIntention->bill_id]);
+            $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Banco Roela']);
 
             $payment = new Payment([
-                'customer_id' => $bill->customer_id,
-                'amount' => $bill['total'],
-                'partner_distribution_model_id' => $bill->company->partner_distribution_model_id,
-                'company_id' => $bill->company_id,
+                'customer_id' => $customer->customer_id,
+                'amount' => abs($customer['current_account_balance']),
+                'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
+                'company_id' => $customer->company_id,
                 'date' => (new \DateTime('now'))->format('Y-m-d')
             ]);
-            
-            if ($payment->save(false)) {
-
-                $paymentIntention->payment_id = $payment['payment_id'];
-                $paymentIntention->save(false);
                 
+            if ($payment->save(false)) {
+                $paymentIntention->payment_id = $payment['payment_id'];
+    
                 $payment_item = new PaymentItem();
                 $payment_item->amount = $payment['amount'];
                 $payment_item->description = 'Banco Roela intención de pago  ' . $paymentIntention['siro_payment_intention_id'];
@@ -590,7 +589,12 @@ class NotificationController extends Controller {
                 $payment_item->payment_id = $payment->payment_id;
                 $payment_item->paycheck_id = null;
 
+                $customer->current_account_balance -= $customer->current_account_balance;
+
+                $paymentIntention->save(false);
                 $payment_item->save(false);
+                $customer->save(false);
+
                 $transaction->commit();
             } else {
                 $transaction->rollBack();

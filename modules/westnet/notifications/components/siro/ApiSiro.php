@@ -92,25 +92,27 @@ class ApiSiro extends Component{
 
 
 
-	public static function CreatePaymentIntention($bill_id){
+	public static function CreatePaymentIntention($customer){
 
         $company_client_number = Config::getConfig('siro_company_client_number')->item->description;
         $invoice_concept = Config::getConfig('siro_invoice_concept')->item->description;
         $url_ok = Config::getConfig('siro_url_ok')->item->description;
         $url_error = Config::getConfig('siro_url_error')->item->description;
-        $bill = Bill::findBillForId($bill_id);
 
-        $referenciaOperacion = md5($bill->bill_id.'-'.$bill->date);
+        $referenciaOperacion = md5($customer->customer_id.'-'.$customer->code);
+        
+        $transaction = Yii::$app->db->beginTransaction();
+        $paymentIntention = new SiroPaymentIntention;
+        $paymentIntention->save(false);
         $data = array(
             "nro_cliente_empresa" => str_pad($company_client_number, 19, '0', STR_PAD_LEFT),
-            "nro_comprobante" => str_pad(24, 20, '0', STR_PAD_LEFT),
-            "Concepto" => $invoice_concept,
-            "Importe" => $bill->total,
+            "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
+            "Concepto" => str_replace('@Cliente',$customer->code,$invoice_concept),
+            "Importe" => abs($customer->current_account_balance),
             "URL_OK" => $url_ok,
             "URL_ERROR" => $url_error,
             "IdReferenciaOperacion" => $referenciaOperacion,
-            "Detalle" => [
-                
+            "Detalle" => [ 
             ]
         );
 
@@ -118,20 +120,21 @@ class ApiSiro extends Component{
 
         $token = ApiSiro::GetTokenApi();
         $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
-        
+
         if(!isset($result['Message'])){
-	        $paymentIntention = new SiroPaymentIntention;
-	        $paymentIntention->bill_id = $bill_id;
+	        $paymentIntention->customer_id = $customer->customer_id;
 	        $paymentIntention->hash = $result['Hash'];
 	        $paymentIntention->reference = $referenciaOperacion;
 	        $paymentIntention->url = $result['Url'];
-	        $paymentIntention->createdAt = date('Y-m-d_H-i');
-	        $paymentIntention->updatedAt = date('Y-m-d_H-i');
+	        $paymentIntention->createdAt = date('Y-m-d H:i');
+	        $paymentIntention->updatedAt = date('Y-m-d H:i');
 	        $paymentIntention->status = 'pending';
-	        if($paymentIntention->save(false))
+	        if($paymentIntention->save(false)){
+                $transaction->commit();
 	        	return $result;
+            }
 	    }
-
+        $transaction->rollBack();
 	    return false;
 
     }
