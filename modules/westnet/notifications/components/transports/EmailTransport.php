@@ -92,7 +92,7 @@ class EmailTransport implements TransportInterface {
     public function send($notification, $force_send = false){
 
         Yii::info('Comenzando envio de notificación: ' . $notification->notification_id, 'emails');
-
+        log_email('Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
         $emails = [];
         foreach($notification->destinataries as $destinataries){
             $emails = array_merge($emails, $destinataries->getEmails());
@@ -122,15 +122,18 @@ class EmailTransport implements TransportInterface {
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
             //Por cada grupo
+            $aux = 0;
             foreach($chunks as $chunk){
                 $messages = [];
                 /** @var MailSender $mailSender */
                 $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
                 
                 Yii::info('Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk), 'emails' );
-
+                
                 foreach($chunk as $toMail => $customer_data){
                     Yii::info('Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
+                    log_email($customer_data);
+                    echo $toMail . "\n";
                     $toName = $customer_data['name'].' '.$customer_data['lastname'];
                     $clone = clone $notification;
                     $clone->content = self::replaceText($notification->content, $customer_data);
@@ -149,7 +152,7 @@ class EmailTransport implements TransportInterface {
                 }
 
                 $result = $mailSender->sendMultiple($messages);
-
+                $aux += $result;
                 $ok += $result;
                 Yii::info('Enviados hasta ahora' . $ok . ' de ' . count($emails), 'emails');
 
@@ -158,8 +161,14 @@ class EmailTransport implements TransportInterface {
                 Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
 
                 //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
-                sleep(2);
+                sleep(3);
+
+                if($aux >= 5000){
+                    $aux = 0;
+                    sleep(10);
+                }
             }
+            log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
@@ -208,7 +217,8 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@FacturasAdeudadas', substr($customer['debt_bills'], 0, $replace_max_string['@FacturasAdeudadas']), $replaced_text);
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
-
+        $replaced_text = str_replace('@BotonDePago', "  <button style='background-color:orange;border-radius:90px;'><a href=http://test1.westnet.com.ar/westnet/notifications/notification/redirect-bank-roela?customer_id=".$customer['customer_id']." style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>", $replaced_text);
+        
         return $replaced_text;
 
     }
