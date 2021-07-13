@@ -3,6 +3,7 @@
 namespace app\modules\westnet\notifications\controllers;
 
 use app\modules\sale\models\Company;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\notifications\models\IntegratechReceivedSms;
 use app\modules\westnet\notifications\models\Transport;
 use app\modules\mailing\models\EmailTransport;
@@ -16,6 +17,13 @@ use yii\filters\VerbFilter;
 use app\modules\westnet\notifications\models\search\NotificationSearch;
 use app\modules\westnet\notifications\NotificationsModule;
 use yii\web\Response;
+use app\modules\westnet\notifications\components\siro\ApiSiro;
+use app\modules\config\models\Config;
+use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use yii\filters\AccessControl;
+use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentItem;
+use app\modules\checkout\models\PaymentMethod;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -23,7 +31,16 @@ use yii\web\Response;
 class NotificationController extends Controller {
 
     public function behaviors() {
-        return array_merge(parent::behaviors(),[
+        return array_merge(parent::behaviors(),['access' => [
+            'class' => AccessControl::class,
+            'only' => ['redirect-bank-roela', 'success-bank-roela'],
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['?'],
+                ],
+            ],
+        ],
         ]);
     }
 
@@ -488,4 +505,107 @@ class NotificationController extends Controller {
             }
         } 
     }
+
+
+    public function actionRedirectBankRoela($customer_id){
+        $customer = Customer::findOne(['customer_id' => $customer_id]);
+
+        if($customer){
+            if(Config::getConfig('siro_communication_bank_roela')->item->description){
+                $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer_id,'status' => 'pending'])->one();
+                /*if(!$result_search)
+                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);*/
+                
+                if(!$result_search && $customer->current_account_balance < 0){
+                    $result_create = ApiSiro::CreatePaymentIntention($customer);
+                    if($result_create)
+                        return $this->redirect($result_create['Url']);
+                    else
+                        $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment"); //error created intention payment
+
+                }else if($result_search['status'] == 'pending'){
+                    $current_date = strtotime(date("d-m-Y H:i:00",time()));
+                    $payment_date = strtotime($result_search->createdAt);
+                    $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
+
+                    if($current_date < ($payment_date + $expiry_time))
+                        $this->redirect($result_search['url']);
+                    else{
+                        $result_create = ApiSiro::CreatePaymentIntention($customer);
+                        if($result_create){
+                            $result_search->status = "canceled";
+                            $result_search->save(false);
+                            return $this->redirect($result_create['Url']);
+                        }else
+                            $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+                    }          
+                }else{
+                    $this->redirect("http://192.168.2.115:3000/portal/bill-payed");
+                }
+            }else
+                $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
+            
+        }else{
+            $this->redirect("http://192.168.2.115:3000/portal/error-bill-draft"); //Customer not find
+        }
+        
+    }
+
+
+    public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
+        $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $IdReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
+
+        $result_search = ApiSiro::SearchPaymentIntention($IdReferenciaOperacion,$IdResultado);
+
+        $paymentIntention->id_resultado = $IdResultado;
+        $paymentIntention->updatedAt = date('Y-m-d_H-i');
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : "pending";
+        $paymentIntention->id_operacion = $result_search['IdOperacion'];
+        $paymentIntention->estado = $result_search['Estado'];
+        $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
+        $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
+        $paymentIntention->save(false);
+        
+        if($result_search['PagoExitoso'] == 'payed'){
+            $transaction = Yii::$app->db->beginTransaction();
+            $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
+            $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
+
+            $payment = new Payment([
+                'customer_id' => $customer->customer_id,
+                'amount' => abs($customer['current_account_balance']),
+                'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
+                'company_id' => $customer->company_id,
+                'date' => (new \DateTime('now'))->format('Y-m-d'),
+                'status' => 'closed'
+            ]);
+                
+            if ($payment->save(false)) {
+                $paymentIntention->payment_id = $payment['payment_id'];
+    
+                $payment_item = new PaymentItem();
+                $payment_item->amount = $payment['amount'];
+                $payment_item->description = 'Intención de Pago (Banco Roela) ' . $paymentIntention['siro_payment_intention_id'];
+                $payment_item->payment_method_id = $payment_method->payment_method_id;
+                $payment_item->payment_id = $payment->payment_id;
+                $payment_item->paycheck_id = null;
+                
+                $customer->current_account_balance -= $customer->current_account_balance;
+
+                $paymentIntention->save(false);
+                $payment_item->save(false);
+                $customer->save(false);
+
+                $transaction->commit();
+            } else {
+                $transaction->rollBack();
+            }
+        }
+
+        $this->redirect("http://192.168.2.115:3000/portal/success");
+    }
+
+    
+
+
 }

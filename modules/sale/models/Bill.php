@@ -1641,4 +1641,11 @@ class Bill extends ActiveRecord implements CountableInterface
 
         return false;
     }
+
+    /**
+     * Return bill for id
+     */
+    public static function findBillForId($bill_id){
+        return self::find()->where(['bill_id' => $bill_id])->one();
+    }
 }
