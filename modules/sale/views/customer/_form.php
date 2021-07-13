@@ -177,7 +177,10 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         </div>
     </div>
-    <?php if($model->isNewRecord || User::hasRole('first-data-admin') || User::hasRole('first-data-customer-require')):?>
+    <?php if($model->isNewRecord ||
+            User::hasPermission("actualizar-clientes-adhesion-debito")):
+    ?>
+
     <div class="row">
         <div class="col-sm-6">
                 <?= $form->field($model, 'has_debit_automatic')->dropDownList([
