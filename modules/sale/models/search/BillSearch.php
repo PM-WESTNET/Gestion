@@ -268,16 +268,24 @@ class BillSearch extends Bill
      */
     private function filterDates($query)
     {
+        // both empty
         if (empty($this->fromDate) && empty($this->toDate)) {
             $this->fromDate = (new \DateTime('now -1 month'))->format('Y-m-d');
             $query->andFilterWhere(['>=', "bill.timestamp", strtotime($this->fromDate)]);
-        } else if (!empty($this->fromDate) && empty($this->toDate)) {
+        } 
+        // toDate empty
+        else if (!empty($this->fromDate) && empty($this->toDate)) {
             $this->fromDate = Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd');
             $query->andFilterWhere(['>=', "bill.timestamp", strtotime($this->fromDate)]);
-        } else if (empty($this->fromDate) && !empty($this->toDate)) {
+
+        } 
+        // fromDate empty
+        else if (empty($this->fromDate) && !empty($this->toDate)) {
             $this->toDate = Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd');
             $query->andFilterWhere(['<=', "bill.timestamp", strtotime($this->toDate)]);
-        } else {
+        } 
+        // both filled
+        else {
             $this->fromDate = Yii::$app->formatter->asDate($this->fromDate, 'yyyy-MM-dd');
             $this->toDate = Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd');
 
