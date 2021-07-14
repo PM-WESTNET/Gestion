@@ -177,7 +177,12 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
         </div>
     </div>
-    <?php if($model->isNewRecord || User::hasRole('first-data-admin') || User::hasRole('first-data-customer-require')):?>
+    <?php if($model->isNewRecord || 
+                //User::hasRole('first-data-admin') ||    // is a firstdata admin (most privilegies)
+                //User::hasRole('first-data-customer-require') || // role for only showing this field (old implementation but has users attached)
+                User::hasPermission('actualizar-clientes-adhesion-debito') // new permission only for showing this field -- will be inherited by some roles
+            ):
+    ?>
     <div class="row">
         <div class="col-sm-6">
                 <?= $form->field($model, 'has_debit_automatic')->dropDownList([
