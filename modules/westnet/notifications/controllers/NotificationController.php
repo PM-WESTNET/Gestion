@@ -10,6 +10,7 @@ use app\modules\mailing\models\EmailTransport;
 use app\modules\mailing\models\search\EmailTransportSearch;
 use Yii;
 use app\modules\westnet\notifications\models\Notification;
+use app\modules\westnet\notifications\models\NotificationHasCustomer;
 use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -240,6 +241,14 @@ class NotificationController extends Controller {
                 
                 case 3:
                     $notification = $this->findModel($id);
+                    
+                    if(empty(NotificationHasCustomer::FindAllCustomersForNotificationID($id)))
+                        $this->InsertCustomersInNotificationHasCustomer($notification);
+                    else{
+                        NotificationHasCustomer::RemoveAllCustomersForNotificationID($id);
+                        $this->InsertCustomersInNotificationHasCustomer($notification);
+                    }
+                    
                     if($notification->scheduler && $notification->status != 'enabled'){
                         return $this->redirect(['update-status', 'id' => $id]);
                     }else{
@@ -606,6 +615,36 @@ class NotificationController extends Controller {
     }
 
     
+    public function InsertCustomersInNotificationHasCustomer($notification){
+        $emails = [];
+        foreach($notification->destinataries as $destinataries){
+            $emails = array_merge($emails, $destinataries->getEmails());
+        }
+        $transaction = Yii::$app->db->beginTransaction();
+        $flag = false;
+        foreach($emails as $email => $customer){
+            $notification_has_customer = new NotificationHasCustomer();
 
+            $notification_has_customer->notification_id = $notification->notification_id;
+            $notification_has_customer->customer_id = (int)$customer['customer_id'];
+            $notification_has_customer->email = $email;
+            $notification_has_customer->status = 'pending';
+            $notification_has_customer->createdAt = date('Y-m-d H:i');
+            $notification_has_customer->updatedAt = date('Y-m-d H:i');
+            $notification_has_customer->node = $customer['node'];
+            $notification_has_customer->saldo = $customer['saldo'];
+            $notification_has_customer->company_code = $customer['company_code'];
+            $notification_has_customer->debt_bills = $customer['debt_bills'];
+            $notification_has_customer->category = $customer['category'];
+            $flag = $notification_has_customer->save();
+
+            if(!$flag)
+                break;
+        }
+        if($flag)
+            $transaction->commit();
+        else 
+            $transaction->rollBack(); 
+    }
 
 }
