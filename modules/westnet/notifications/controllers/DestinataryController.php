@@ -120,7 +120,7 @@ class DestinataryController extends Controller {
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $this->redirect(['view', 'id' => $model->destinatary_id]);
+            $this->redirect(['notification/wizard', 'id' => $model->notification_id, 'step' => 3]);
         } else {
 
             $notification = Notification::findOne($model->notification_id);

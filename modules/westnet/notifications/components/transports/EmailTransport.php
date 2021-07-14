@@ -6,6 +6,7 @@ use app\modules\config\models\Config;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\sale\models\Customer;
 use app\modules\westnet\notifications\models\Notification;
+use app\modules\westnet\notifications\models\NotificationHasCustomer;
 use Yii;
 use yii\base\Component;
 use app\components\helpers\EmptyLogger;
@@ -90,83 +91,56 @@ class EmailTransport implements TransportInterface {
      * @return array
      */
     public function send($notification, $force_send = false){
-
-        Yii::info('Comenzando envio de notificación: ' . $notification->notification_id, 'emails');
         log_email('Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
-        $emails = [];
-        foreach($notification->destinataries as $destinataries){
-            $emails = array_merge($emails, $destinataries->getEmails());
-        }
+        
+        $customers = NotificationHasCustomer::GetCustomerToCampaign($notification->notification_id);
 
         Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
-        Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
-
-        Yii::info('Cantidad de correos a enviar: ' . count($emails), 'emails');
+        Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
 
         $max_rate = (int)Config::getValue('aws_max_send_rate');
+        $time_sleep = 2 / $max_rate;
 
-        Yii::info('Cuota máxima por segundo: ' . $max_rate, 'emails');
-
-        //Le restamos 2 al maximo de cuota por segundo para asegurarnos nunca alcanzarla
-        $chunks = array_chunk($emails, ($max_rate - 2), true);
-        
         $ok = 0;
         $error = 'Error: ';
 
         try {
-            // Obtengo la instancia para enviar emails.
-            $transport = $notification->emailTransport;
-            
-
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
-            //Por cada grupo
-            $aux = 0;
-            foreach($chunks as $chunk){
-                $messages = [];
+            
+            foreach($customers as $customer){
+                $result = 0;
                 /** @var MailSender $mailSender */
                 $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
-                
-                Yii::info('Nuevo grupo de correos a enviar. Cantidad: ' . count($chunk), 'emails' );
-                
-                foreach($chunk as $toMail => $customer_data){
-                    Yii::info('Enviando correo: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
-                    log_email($customer_data);
-                    echo $toMail . "\n";
-                    $toName = $customer_data['name'].' '.$customer_data['lastname'];
-                    $clone = clone $notification;
-                    $clone->content = self::replaceText($notification->content, $customer_data);
-                    if ($validator->validate($toMail, $err)) {
-                        $messages[] = $mailSender->prepareMessage(
-                            ['email'=>$toMail, 'name' => $toName],
-                            $notification->subject,
-                            [ 'view'=> $layout ,'params' => ['notification' => $clone]]
-                        );
-                    }else{
-                        $error .= " $toName <$toMail>; ";
-                        Yii::info('Correo Inválido: ' . $toMail. ' - Customer '. $customer_data['code'], 'emails');
 
-                    }
+                log_email($customer);
+                $toName = $customer['name'].' '.$customer['lastname'];
+                $clone = clone $notification;
+                $clone->content = self::replaceText($notification->content, $customer);
 
+                if ($validator->validate($customer['email'], $err)) {
+                    $result = $mailSender->prepareMessageAndSend(
+                        ['email'=>$customer['email'], 'name' => $toName],
+                        $notification->subject,
+                        [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                    );
+                    if($result)
+                        NotificationHasCustomer::MarkSendEmail($customer['email'],'sent');
+                    else
+                        NotificationHasCustomer::MarkSendEmail($customer['email'],'error');
+                }else{
+                    $error .= " $toName <$toMail>; ";
+                    log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
                 }
 
-                $result = $mailSender->sendMultiple($messages);
-                $aux += $result;
                 $ok += $result;
-                Yii::info('Enviados hasta ahora' . $ok . ' de ' . count($emails), 'emails');
-
+               
                 Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                 Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
-                Yii::$app->cache->set('total_'.$notification->notification_id, count($emails), 600);
+                Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
 
-                //Esperamos 3 segundos para enviar el siguiente paquete, esto evitara que se supere la cuota maxima por segundo
-                sleep(3);
-
-                if($aux >= 5000){
-                    $aux = 0;
-                    sleep(10);
-                }
+                sleep($time_sleep);
             }
             log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
         } catch(\Exception $ex) {
@@ -174,9 +148,6 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
             Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
-
-            Yii::info('Error: ' . $ex->getMessage(), 'emails');
-            Yii::info($ex->getTraceAsString(), 'emails');
 
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
@@ -222,4 +193,5 @@ class EmailTransport implements TransportInterface {
         return $replaced_text;
 
     }
+
 }

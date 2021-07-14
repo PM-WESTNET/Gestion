@@ -155,4 +155,60 @@ class MailSender
             throw $ex;
         }
     }
+
+
+    /**
+     * Prepara un mensaje para ser enviado.
+     * @param $to
+     * @param string $subject
+     * @param array $content
+     * @param array $cc
+     * @param array $bcc
+     * @param array $attachment
+     * @return Message
+     */
+    public function prepareMessageAndSend($to, $subject = '', $content = [], $cc = [], $bcc = [], $attachment = [])
+    {
+        try {
+            Yii::$app->mail->setTransport($this->email_transport->getConfigArray());
+
+            $view = (array_key_exists('view', $content) !== false ? ($content['view']!='' ? $content['view'] : $this->email_transport->layout ) : $this->email_transport->layout );
+            $layout = (array_key_exists('layout', $content) !== false ? ($content['layout']!='' ? $content['layout'] : $this->email_transport->layout ) : $this->email_transport->layout );
+            $params = (array_key_exists('params', $content) ?  $content['params'] : [] );
+            $mailer = Yii::$app->mail;
+            $mailer->htmlLayout = $layout;
+            Yii::$app->view->params = $params;
+
+            /** @var Message $message */
+            $message = $mailer
+                ->compose( $view, $params )
+                ->setFrom($this->email_transport->from_email)
+                ->setTo((is_array($to) ? [$to['email'] => $to['name']] : $to))
+                ->setSubject($subject)
+            ;
+            if (empty($cc)) {
+                $message->setCc($cc);
+            }
+
+            if (empty($bcc)) {
+                $message->setBcc($bcc);
+            }
+            // Los attachmentes, pueden ser con un archivo del file system o con contenido on-defly
+            if(!empty($attachment)) {
+                foreach($attachment as $attach) {
+                    if(is_array($attach)) {
+                        $message->attachContent($attach['view'], $attach['options']);
+                    } else {
+                        if (file_exists($attach)) {
+                            Yii::debug('1');
+                            $message->attach($attach);
+                        }
+                    }
+                }
+            }
+            return $message->send();
+        }catch(\Exception $ex) {
+            throw $ex;
+        }
+    }
 }
