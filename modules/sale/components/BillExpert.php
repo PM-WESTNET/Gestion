@@ -28,13 +28,6 @@ class BillExpert {
     {
         $type = BillType::findOne($type);
 
-        //El usuario puede crear este tipo de documento?
-        if(!YII_ENV_TEST) {
-            if(!static::checkAccess('create', $type->class)){
-                throw new \yii\web\ForbiddenHttpException(Yii::t('yii', 'You are not allowed to perform this action.'));
-            }
-        }
-
         if($type != null && class_exists($type->class)){
             $bill = Yii::createObject($type->class);
             $bill->bill_type_id = $type->bill_type_id;
