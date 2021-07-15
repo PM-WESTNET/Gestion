@@ -15,6 +15,7 @@ use yii\validators\EmailValidator;
 use PHPExcel;
 use PHPExcel_IOFactory;
 use app\components\helpers\FileLog;
+use \yii\helpers\VarDumper;
 
 /**
  * Description of EmailTransport
@@ -108,7 +109,7 @@ class EmailTransport implements TransportInterface {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
-            
+
             foreach($customers as $customer){
                 $result = 0;
                 /** @var MailSender $mailSender */
@@ -118,7 +119,7 @@ class EmailTransport implements TransportInterface {
                 $toName = $customer['name'].' '.$customer['lastname'];
                 $clone = clone $notification;
                 $clone->content = self::replaceText($notification->content, $customer);
-
+                
                 if ($validator->validate($customer['email'], $err)) {
                     $result = $mailSender->prepareMessageAndSend(
                         ['email'=>$customer['email'], 'name' => $toName],
@@ -127,11 +128,14 @@ class EmailTransport implements TransportInterface {
                     );
                     if($result)
                         NotificationHasCustomer::MarkSendEmail($customer['email'],'sent');
-                    else
+                    else if(!$result)
                         NotificationHasCustomer::MarkSendEmail($customer['email'],'error');
+                    else
+                        NotificationHasCustomer::MarkObservationEmail($customer['email'],'error',VarDumper::dumpAsString($result));
                 }else{
                     $error .= " $toName <$toMail>; ";
-                    log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                    log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+                    NotificationHasCustomer::MarkObservationEmail($customer['email'],'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
                 }
 
                 $ok += $result;
