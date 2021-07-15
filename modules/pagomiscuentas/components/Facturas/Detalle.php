@@ -94,13 +94,13 @@ class Detalle extends AbstractLine
         $this->line .= "0";
 
         $this->line .= sprintf("%'.08d", ($values['fecha_1_vto']));
-        $this->line .= str_replace(".", "", sprintf("%'.012.2f", $values['importe_1_vto']));
+        $this->line .= str_replace(".", "", sprintf("%'.012.2f", abs($values['current_account_balance'])));
 
         $this->line .= sprintf("%'.08d", ($values['fecha_2_vto']));
-        $this->line .= str_replace(".", "", sprintf("%'.012.2f", $values['importe_2_vto']));
+        $this->line .= str_replace(".", "", sprintf("%'.012.2f", abs($values['current_account_balance'])));
 
         $this->line .= sprintf("%'.08d", ($values['fecha_3_vto']));
-        $this->line .= str_replace(".", "", sprintf("%'.012.2f", $values['importe_3_vto']));
+        $this->line .= str_replace(".", "", sprintf("%'.012.2f", abs($values['current_account_balance'])));
 
         $this->line .= sprintf("%'.019d", "0");
 
