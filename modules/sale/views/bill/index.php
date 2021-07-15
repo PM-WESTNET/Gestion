@@ -11,6 +11,7 @@ use yii\jui\DatePicker;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use app\modules\sale\models\Bill;
+use yii\widgets\ActiveForm;
 
 /**
  * @var yii\web\View $this
@@ -53,7 +54,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         <span class="font-light-gray font-s"><?= Yii::t('app', 'Customer') ?>:</span> <span class="font-bold"> <?= $searchModel->customer->fullName; ?></span>
     </h4>
     <?php endif; ?>
-    
+    <!--this is the filter dropdown menu -->
     <?= Collapse::widget([
         'items' => [
             [
@@ -125,8 +126,15 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
         </div>
         
         <!-- Modulo Filtros por fecha -->
-        <div class="col-sm-8 text-right">
+        <div class="col-sm-5 text-right">
             <form class="form-inline" role="form">
+                <div class="form-group">
+                    <?php $form = ActiveForm::begin(['method' => 'get']); ?>
+                        <?=$form->field($searchModel, 'number')
+                        ->input('bill-number', ['placeholder' => "Numero Comprobante"])
+                        ->label(false); ?>
+                    <?php ActiveForm::end(); ?>
+                </div>
                 <div class="form-group">
                     <?= Html::activeLabel($searchModel, 'fromDate', ['class'=>'sr-only']); ?>
                     <?= DatePicker::widget([
@@ -175,6 +183,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
     }
     ?>
     
+    <!--this is the table view for all bills -->
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         

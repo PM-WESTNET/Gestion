@@ -34,6 +34,7 @@ use app\modules\westnet\models\ConnectionForcedHistorial;
 use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use app\modules\sale\components\CodeGenerator\CodeGeneratorFactory;
 use app\modules\westnet\reports\models\CustomerUpdateRegister;
+use app\modules\automaticdebit\models\AutomaticDebit;
 
 /**
  * This is the model class for table "customer".
@@ -639,6 +640,11 @@ class Customer extends ActiveRecord {
     public function getTickets()
     {
         return $this->hasMany(Ticket::class, ['customer_id' => 'customer_id']);
+    }
+
+    public function getAutomaticDebit()
+    {
+        return $this->hasOne(AutomaticDebit::class, ['customer_id' => 'customer_id']);
     }
 
 

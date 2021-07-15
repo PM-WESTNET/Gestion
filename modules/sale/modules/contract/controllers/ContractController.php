@@ -3,6 +3,7 @@
 namespace app\modules\sale\modules\contract\controllers;
 
 use app\components\web\Controller;
+use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\config\models\Config;
 use app\modules\sale\models\Address;
 use app\modules\sale\models\Customer;
@@ -928,7 +929,9 @@ class ContractController extends Controller {
                     //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
+                    
                     $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];
                 }else{
@@ -1096,6 +1099,10 @@ class ContractController extends Controller {
             $credit = Yii::$app->request->post('credit');
 
             if($service->startLowProcess($contract, $date, $category_id, $credit)){
+                if(isset($model->customer->automaticDebit)){
+                    $model->customer->automaticDebit->status = AutomaticDebit::DISABLED_STATUS;
+                    $model->customer->automaticDebit->save(false);
+                }
                 Yii::$app->session->addFlash('success', Yii::t('app','Low proccess begin successfull'));
             }
 

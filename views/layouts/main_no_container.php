@@ -6,6 +6,7 @@ use yii\widgets\Breadcrumbs;
 use app\components\widgets\agenda\notification\Notification;
 use app\components\widgets\agenda\task\Task;
 use app\assets\AppAsset;
+use app\components\helpers\UserA;
 
 /**
  * @var \yii\web\View $this
@@ -24,7 +25,7 @@ AppAsset::register($this);
     <?php $this->head() ?>
     <?= Html::csrfMetaTags() ?>
 </head>
-<body>
+<body id=<?= UserA::getBodyId() ?>>
 
 <?php $this->beginBody() ?>
     <div class="wrap">

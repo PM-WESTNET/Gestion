@@ -1458,5 +1458,26 @@ a.ui-state-default.ui-state-active {
 }
 
 
+/* collapse menu properties */
 
+#sale-bill-index div.form-group{
+  margin-right: 0;
+}
+/* .input-group is the div behing the input tag. practically invisible */
+#sale-bill-index .col-sm-8 .col-sm-6 .input-group{
+  margin : 0;
+  width: 100%;
+}
+
+#sale-bill-index div.bill-index div.row{
+  display: flex;
+
+  justify-content: space-between;
+
+}
+
+#sale-bill-index div .text-right{
+  display: flex;
+  justify-content: space-between;
+}
 
