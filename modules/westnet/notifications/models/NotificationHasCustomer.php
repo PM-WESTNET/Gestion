@@ -160,7 +160,7 @@ class NotificationHasCustomer extends \app\components\db\ActiveRecord
                 cu.payment_code, nhc.node, nhc.saldo, nhc.company_code, nhc.debt_bills,
                 cu.status, nhc.category 
                 FROM notification_has_customer nhc 
-                LEFT JOIN westnet2.customer cu ON cu.customer_id = nhc.customer_id 
+                LEFT JOIN westnet_2.customer cu ON cu.customer_id = nhc.customer_id 
                 WHERE 
                     nhc.notification_id=:notification_id 
                 AND nhc.status = "pending"')
@@ -174,6 +174,18 @@ class NotificationHasCustomer extends \app\components\db\ActiveRecord
     public static function MarkSendEmail($email, $status){
         $model = self::find()->where(['email' => $email])->one();
         $model->status = $status;
+        $model->updatedAt = date('Y-m-d H:i');
+        $model->save(false); 
+    }
+
+    /**
+     * Return customer fo customer_id
+     */
+    public static function MarkObservationEmail($email, $status, $observation){
+        $model = self::find()->where(['email' => $email])->one();
+        $model->status = $status;
+        $model->observation = $observation;
+        $model->updatedAt = date('Y-m-d H:i');
         $model->save(false); 
     }
 }
