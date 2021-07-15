@@ -109,7 +109,7 @@ class EmailTransport implements TransportInterface {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
-
+           
             foreach($customers as $customer){
                 $result = 0;
                 /** @var MailSender $mailSender */
@@ -126,16 +126,17 @@ class EmailTransport implements TransportInterface {
                         $notification->subject,
                         [ 'view'=> $layout ,'params' => ['notification' => $clone]]
                     );
-                    if($result)
-                        NotificationHasCustomer::MarkSendEmail($customer['email'],'sent');
-                    else if(!$result)
-                        NotificationHasCustomer::MarkSendEmail($customer['email'],'error');
+		    
+                    if($result){
+                        NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
+                    }else if(!$result)
+                        NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
                     else
-                        NotificationHasCustomer::MarkObservationEmail($customer['email'],'error',VarDumper::dumpAsString($result));
+                        NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
                 }else{
                     $error .= " $toName <$toMail>; ";
                     log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
-                    NotificationHasCustomer::MarkObservationEmail($customer['email'],'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                    NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
                 }
 
                 $ok += $result;
