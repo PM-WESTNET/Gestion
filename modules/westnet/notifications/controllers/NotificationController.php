@@ -85,7 +85,7 @@ class NotificationController extends Controller {
     }
 
     public function actionCreate()
-    {
+    {   
         return $this->create();
     }
     
@@ -99,8 +99,7 @@ class NotificationController extends Controller {
         $model->scenario = 'create';
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-
-            if ($model->save()) {
+            if ($model->save(false)) {
                 return $this->redirect(['wizard', 'id' => $model->notification_id, 'step' => 1]);
             } else {
                 return $this->render('create', [
