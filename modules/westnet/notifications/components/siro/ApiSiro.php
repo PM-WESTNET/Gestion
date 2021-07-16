@@ -5,22 +5,25 @@ use Yii;
 use yii\base\Component;
 use app\modules\config\models\Config;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 
 class ApiSiro extends Component{
     /**
      * Return token access api
      */
-	public static function GetTokenApi(){
-		$username = Config::getConfig('siro_username');
-		$password = Config::getConfig('siro_password');
+	public static function GetTokenApi($company_id){
+        $company = Company::findOne(['company_id' => $company_id]);
+		$username = Config::getConfigForCompanyID('siro_username_'.$company->fantasy_name,$company_id)['description'];
+		$password = Config::getConfigForCompanyID('siro_password_'.$company->fantasy_name, $company_id)['description'];
+
 		$url = Config::getConfig('siro_url_get_token');
 
         $conexion = curl_init();
 
         $datos = array(
-            "Usuario" => $username->item->description,
-            "Password" => $password->item->description
+            "Usuario" => $username,
+            "Password" => $password
         );
 
         curl_setopt($conexion, CURLOPT_URL,$url->item->description);
@@ -93,8 +96,8 @@ class ApiSiro extends Component{
 
 
 	public static function CreatePaymentIntention($customer){
-
-        $company_client_number = Config::getConfig('siro_company_client_number')->item->description;
+        $company = Company::findOne(['company_id' => $customer->company_id]);
+        $company_client_number = Config::getConfigForCompanyID('siro_company_client_number_'.$company->fantasy_name,$company->company_id)['description'];
         $invoice_concept = Config::getConfig('siro_invoice_concept')->item->description;
         $url_ok = Config::getConfig('siro_url_ok')->item->description;
         $url_error = Config::getConfig('siro_url_error')->item->description;
@@ -119,7 +122,7 @@ class ApiSiro extends Component{
 
 
 
-        $token = ApiSiro::GetTokenApi();
+        $token = ApiSiro::GetTokenApi($customer->company_id);
         $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
 
         if(!isset($result['Message'])){
@@ -130,6 +133,7 @@ class ApiSiro extends Component{
 	        $paymentIntention->createdAt = date('Y-m-d H:i');
 	        $paymentIntention->updatedAt = date('Y-m-d H:i');
 	        $paymentIntention->status = 'pending';
+            $paymentIntention->company_id = $company->company_id; 
 	        if($paymentIntention->save(false)){
                 $transaction->commit();
 	        	return $result;
