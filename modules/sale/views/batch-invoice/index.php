@@ -155,16 +155,27 @@ $this->params['breadcrumbs'][] = Yii::t('app', 'Batch Invoice');
                         ]
                     );
                     if ($dataProvider) {
+                        //var_dump($searchModel);die();
                         echo GridView::widget([
                             'dataProvider' => $dataProvider,
+                            'filterModel' => $searchModel,
                             'pjax'=>true,
                             'columns' => [
                                 ['class' => 'kartik\grid\SerialColumn'],
-                                [
+                                [   
+                                    'attribute' => 'customer_code',
+                                    'format' => 'raw',
+                                    'value'=>function($model){
+                                        return Html::a($model['code'], ['/sale/customer/view', 'id' => $model['customer_id']]);
+                                    },
+
+                                ],
+                                [   
+                                    'attribute' => 'customer',
                                     'header'=>Yii::t('app', 'Customer'),
                                     'format' => 'raw',
                                     'value'=>function($model){
-                                        return Html::a($model['code'] . ' - ' . $model['customer'], ['/sale/customer/view', 'id' => $model['customer_id']]);
+                                        return Html::a($model['customer'], ['/sale/customer/view', 'id' => $model['customer_id']]);
                                     },
 
                                 ],

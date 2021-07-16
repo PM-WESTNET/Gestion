@@ -20,6 +20,8 @@ class ContractSearch extends Contract {
     public $bill_type_id;
     public $contracts;
     public $customer_id;
+    public $customer_code;
+
     //Atributos para filtro de instalaciones pendientes
     public $document_number;
     public $customer_number;
@@ -42,13 +44,15 @@ class ContractSearch extends Contract {
     public $date_new_from;
     public $date_new_to;
 
+    public $customer;
+
     /**
      * @inheritdoc
      */
     public function rules() {
         return [
-            [['contract_id', 'customer_id', 'address_id', 'contracts', 'vendor_id', 'customer_number', 'zone_id'], 'integer'],
-            [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date', 'date_new_from', 'date_new_to'], 'safe'],
+            [['contract_id', 'customer_id', 'address_id', 'contracts', 'vendor_id', 'customer_number', 'zone_id', 'customer_code'], 'integer'],
+            [['status', 'document_number', 'customer_number', 'name', 'last_name', 'date', 'vendor_id', 'tentative_node', 'zone_id', 'min_bills_count', 'max_bills_count', 'min_debt', 'max_debt', 'min_tickets_count', 'max_tickets_count', 'from_date', 'to_date', 'date_new_from', 'date_new_to', 'customer'], 'safe'],
             [['period', 'date', 'invoice_date'], 'date'],
             [['period', 'company_id', 'bill_type_id'], 'required', 'on' => 'for-invoice'],
             [['vendor_id'], 'required', 'on' => 'vendor-search']
@@ -68,7 +72,8 @@ class ContractSearch extends Contract {
         $labels['invoice_date']= Yii::t('app', 'Invoice Date');
         $labels['date_new_from']= Yii::t('app', 'Date new customer from');
         $labels['date_new_to']= Yii::t('app', 'Date new customer to');
-        
+        $labels['customer']= Yii::t('app', 'Customer');
+        $labels['customer_code']= "Código Cliente";
         return $labels;
     }
 
@@ -77,7 +82,7 @@ class ContractSearch extends Contract {
      */
     public function scenarios() {
         $scenarios = parent::scenarios();
-        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id', 'invoice_date', 'date_new_from', 'date_new_to'];
+        $scenarios['for-invoice'] = ['period', 'company_id', 'bill_type_id', 'invoice_date', 'date_new_from', 'date_new_to', 'customer','contracts', 'customer_code'];
         return $scenarios;
     }
 
@@ -247,6 +252,14 @@ class ContractSearch extends Contract {
 
         if($this->date_new_to) {
             $query->andFilterWhere(['<=', 'c.date_new', $this->date_new_to]);
+        }
+
+        if($this->customer) {
+            $query->andFilterWhere(['LIKE', 'c.name', $this->customer]);
+        }
+
+        if($this->customer_code) {
+            $query->andFilterWhere(['LIKE', 'c.code', $this->customer_code]);
         }
 
         //Se ordena la consulta, en MariaDb si la consulta no está ordenada, hay riesgos de que no siempre traiga los registros en el mismo orden
