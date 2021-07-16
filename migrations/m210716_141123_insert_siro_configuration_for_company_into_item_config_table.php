@@ -39,19 +39,19 @@ class m210716_141123_insert_siro_configuration_for_company_into_item_config_tabl
         $company = Company::findOne(['fantasy_name' => 'SISTECOM']);
 
         $this->update('{{%item}}', [
-            'attr' => 'siro_username_las_heras',
+            'attr' => 'siro_username_sistecom',
             'label' => 'Usuario Siro - Las Heras',
             'company_id' => $company->company_id
         ], ['attr' => 'siro_username']);
 
         $this->update('{{%item}}', [
-            'attr' => 'siro_password_las_heras',
+            'attr' => 'siro_password_sistecom',
             'label' => 'Password Siro - Las Heras',
             'company_id' => $company->company_id
         ],['attr' => 'siro_password']);
 
         $this->update('{{%item}}', [
-            'attr' => 'siro_company_client_number_las_heras',
+            'attr' => 'siro_company_client_number_sistecom',
             'label' => 'Numero de cliente Siro - Las Heras',
             'company_id' => $company->company_id
         ], ['attr' => 'siro_company_client_number']);
