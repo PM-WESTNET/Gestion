@@ -104,6 +104,18 @@ class ReportsController extends Controller
                     'dataProvider' => $dataProvider,
                     'discountSearch' => $discountSearch,
                 ]);
+
+                /* USAR ESTO PARA RESOLVER LO DE LAS RELACIONES INTERNAS DE LOS VIEWS
+                    [
+                    'attribute' => 'company',
+                    'label' => Yii::t('app','Company'),
+                    'format' => 'raw',
+                    'value' => function($model){
+                        if(!$model->company_id)
+                            return null;
+                        return $model->company->name;
+                    }
+                ], */
     }
 
 
