@@ -1,7 +1,8 @@
 <?php
 
 namespace app\modules\westnet\notifications\models;
-
+use app\modules\sale\models\Customer;
+use app\modules\sale\models\Company;
 use Yii;
 
 /**
@@ -124,4 +125,18 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
         }
     }
 
+    public function getCustomer(){
+        return $this->hasOne(Customer::class,['customer_id' => 'customer_id']);
+    }
+
+    public function getCompany(){
+        return $this->hasOne(Company::class,['company_id' => 'company_id']);
+    }
+
+    /**
+    * Return payment intention
+    */
+    public static function FindPaymentIntentionByID($id){
+        return self::findOne(['siro_payment_intention_id' => $id]);
+    }
 }

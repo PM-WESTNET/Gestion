@@ -147,13 +147,9 @@ class ApiSiro extends Component{
     public static function SearchPaymentIntention($reference, $id_resultado){
         $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->one();
         if($paymentIntention){
-            $token = ApiSiro::GetTokenApi();
+            $token = ApiSiro::GetTokenApi($paymentIntention->company_id);
             return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));
         }
-    	
-    	if($paymentIntention){
-    	    return $paymentIntention;
-    	}
 
     	return false;
     	
