@@ -93,6 +93,8 @@ class ReportsController extends Controller
      * view controller for discounts view
      */
     public function actionDiscount(){
+        $this->layout = '/fluid';
+
         $discountSearch = new DiscountSearch();
 
         $dataProvider = $discountSearch->search(Yii::$app->request->get()); 
