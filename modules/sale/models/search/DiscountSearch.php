@@ -21,6 +21,8 @@ class DiscountSearch extends Discount
             [['discount_id'], 'integer'],
             [['value'], 'integer'],
             [['name', 'referenced'], 'safe'],
+            [['status'], 'string'],
+            [['from_date', 'to_date'], 'string'], // mejorar implementacion de esto
             [['referenced'], 'boolean'],
         ];
     }
@@ -59,13 +61,16 @@ class DiscountSearch extends Discount
 
         $query->andFilterWhere([
             'discount_id' => $this->discount_id,
-            'status' => $this->status,
-            'value' => $this->value,
-            'type' => $this->type
         ]);
-
         $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['like', 'status', $this->status]);
+        $query->andFilterWhere(['like', 'from_date', $this->from_date]);
+        $query->andFilterWhere(['like', 'to_date', $this->to_date]);
+        $query->andFilterWhere(['like', 'type', $this->type]);
+        $query->andFilterWhere(['like', 'value', $this->value]);
 
+
+        
         return $dataProvider;
     }
 }
