@@ -874,21 +874,33 @@ class CustomerController extends Controller
 
     }
 
-    public function actionSendPaymentButtonEmail($email){
+    public function actionSendPaymentButtonEmail($email,$customer_id){
         Yii::$app->response->format = 'json';
-  
-        $transport = EmailTransport::find()->where(['name' => 'NOTIFICACION'])->one();
-        Yii::$app->mail->setTransport($transport->getConfigArray());
+
+        $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
+        $transport = EmailTransport::FindEmailTransportByNotificacion();
+        //Yii::$app->mail->setTransport($transport->getConfigArray());
 
         $mailer = Yii::$app->mail;
-        $mailer->htmlLayout = $transport->layout;
+        $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
+        $params = ['emailTransport' => $transport,
+                    'subject' => "¡Ahora puede abonar su cuenta con nuestro nuevo medio de pago!",
+                    'content' => "<button style='background-color:orange;border-radius:90px;'><a href=".str_replace('${customer_id}',$customer_id,$url_redirect_gestion). " style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>"
+            ];
+        Yii::$app->view->params['notification'] = $params; 
 
         $message = $mailer
-                ->compose($transport->layout,'probando')
+                ->compose('@app/modules/westnet/notifications/body/layouts/PaymentButton')
                 ->setFrom($transport->from_email)
                 ->setTo($email)
-                ->setSubject('Testing');
-
-        return $sender->send();
+                ->setSubject('Botón de Pago');
+        
+        if($message->send()){
+            Yii::$app->session->setFlash('success', 'Correo enviado correctamente a ' . $email);
+            $this->redirect(['view','id' => $customer_id]);
+        }else{
+            Yii::$app->session->setFlash('error', 'Ha ocurrido un error y el correo no ha podido ser enviado.');
+            $this->redirect(['view','id' => $customer_id]);
+        }
     }
 }

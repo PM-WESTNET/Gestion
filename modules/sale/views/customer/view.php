@@ -520,11 +520,11 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="modal-body">
                 <?php if ($model->email_status == "active"):?>
-                    <?= \yii\bootstrap\Html::a('Email ('.$model->email.')', ['send-payment-button-email','email' => $model->email],['target' => '_blank'])?>
+                    <?= \yii\bootstrap\Html::a('Email ('.$model->email.')', ['send-payment-button-email','email' => $model->email, 'customer_id' => $model->customer_id],['target' => '_blank'])?>
                     <br>
                 <?php endif;?>
                 <?php if ($model->email2_status == "active"):?>
-                    <?= \yii\bootstrap\Html::a('Email 2 ('.$model->email2.')', ['send-payment-button-email','email' => $model->email2],['target' => '_blank'])?>
+                    <?= \yii\bootstrap\Html::a('Email 2 ('.$model->email2.')', ['send-payment-button-email','email' => $model->email2, 'customer_id' => $model->customer_id],['target' => '_blank'])?>
                     <br>
                 <?php endif;?>
             </div>
