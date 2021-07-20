@@ -41,15 +41,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'value' => function($model){
                     if($model->status == 'payed')
-                        return '<span class="label label-success">Pagado</span>';
+                        return '<span class="label label-success">Pagado <i class="glyphicon glyphicon-ok"></i></span>';
 
                     else if($model->status == 'pending')
-                        return '<span class="label label-warning">Pendiente</span>';
+                        return '<span class="label label-warning">Pendiente <i class="glyphicon glyphicon-warning-sign"></i></span>';
                     
                     else if($model->status == 'canceled')
-                        return '<span class="label label-danger">Cancelado</span>';
+                        return '<span class="label label-danger">Cancelado <i class="glyphicon glyphicon-remove"></i></span>';
                     else
-                        return '<span class="label label-danger">Error</span>';
+                        return '<span class="label label-danger">Error <i class="glyphicon glyphicon-remove"></i></span>';
                 }
             ],
             'estado',
