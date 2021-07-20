@@ -1432,6 +1432,10 @@ a.ui-state-default.ui-state-active {
   overflow-x: hidden;
   max-height: 550px;
 }
+#user-management-permission-view .col-sm-6:nth-of-type(2) #routes-list{
+  height: 85% ;
+} 
+
 #user-management-role-view form {
   overflow: scroll;
   overflow-x: hidden;
@@ -1450,13 +1454,22 @@ a.ui-state-default.ui-state-active {
 	bottom:20px;
 }
 #user-management-permission-view form .row .col-sm-3 button.btn.btn-primary.btn-sm{
-  position:static;
+  position:relative;
 	bottom:0px;
 }
-#user-management-permission-view form .row .col-sm-3{
-  margin-left: -25px;
+#user-management-permission-view .col-sm-6:nth-of-type(2) .row {
+  display: flex;
+  justify-content: space-between;
 }
 
+
+#user-management-permission-view .col-sm-6:nth-of-type(2) form .row div.col-sm-3,
+#user-management-permission-view .col-sm-6:nth-of-type(2) form .row div.col-sm-6{
+  margin: 0 ;
+  padding: 0 ;
+  width: auto;
+  
+}
 
 /* collapse menu properties */
 
