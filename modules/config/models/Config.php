@@ -4,6 +4,8 @@ namespace app\modules\config\models;
 
 use Yii;
 use app\modules\config\ConfigModule;
+use app\modules\sale\models\Company;
+use app\components\helpers\DbHelper;
 
 /**
  * This is the model class for table "config".
@@ -218,6 +220,38 @@ class Config extends \app\components\db\ActiveRecord
     
     public function getDescription(){
         return $this->item->description;
+    }
+
+
+    public static function getConfigForCompanyID($attr,$company_id)
+    {
+        $attr = '%'.explode(' ',strtolower($attr))[0].'%';
+        $item = Yii::$app->db->createCommand('SELECT * FROM '.DbHelper::getDbName(Yii::$app->dbconfig).'.item' .' WHERE attr LIKE :attr AND company_id = :company_id')
+        ->bindValue('attr',$attr)
+        ->bindValue('company_id',$company_id)
+        ->queryOne();
+
+        if($item === null){
+            throw new \yii\web\HttpException(404, 'Configuration item not found: ' . $attr);
+        }
+        
+
+        $config = self::find()->where(['item_id' => $item['item_id']])->one();
+        
+        
+        if(empty($config)){
+            $config = new self;
+            $config->item_id =  $item['item_id'];
+            $config->value =  $item['default'];
+            $config->save();
+            
+            if($item->multiple){
+                $config = [$config];
+            }
+        }
+        
+        return $config;
+        
     }
 
 }
