@@ -146,6 +146,17 @@ $this->params['breadcrumbs'][] = $this->title;
                     </ul>
                 </div>
             </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Botón de Pago <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><?= \yii\bootstrap\Html::a('Whatsapp <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
+                          <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
+                        </svg>', '#', ['class' => 'btn btn-success select_msj_payment_button'])?></li>
+                    <li><?= \yii\bootstrap\Html::a('Email  <i class="glyphicon glyphicon-send"></i>', '#', ['class' => 'btn btn-danger select_email_payment_button'])?></li>
+                </ul>
+            </div>
             <?php endif;?>
         </div>
     </div>
@@ -460,6 +471,70 @@ $this->params['breadcrumbs'][] = $this->title;
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+
+<div class="modal fade" id="phoneModalPaymentButton" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo Yii::t('app','Select the phones to send message')?></h4>
+            </div>
+            <div class="modal-body">
+                <?php 
+                    $url_whatsapp = str_replace('${customer_id}',$model->customer_id,$url_whatsapp);
+                ?>
+                <?php if ($model->phone):?>
+                    <?php $url_whatsapp_phone = str_replace('${phone}',$model->phone,$url_whatsapp);?>
+                    <?= \yii\bootstrap\Html::a('Teléfono 1 ('.$model->phone.')', $url_whatsapp_phone,['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone2):?>
+                    <?php $url_whatsapp_phone2 = str_replace('${phone}',$model->phone2,$url_whatsapp);?>
+                    <?= \yii\bootstrap\Html::a('Teléfono 2 ('.$model->phone2.')', $url_whatsapp_phone2,['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone3):?>
+                    <?php$url_whatsapp_phone3 = str_replace('${phone}',$model->phone3,$url_whatsapp);?>
+                    <?= \yii\bootstrap\Html::a('Teléfono 3 ('.$model->phone3.')', $url_whatsapp_phone3,['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->phone4):?>
+                    <?php$url_whatsapp_phone4 = str_replace('${phone}',$model->phone4,$url_whatsapp);?>
+                    <?= \yii\bootstrap\Html::a('Teléfono 4 ('.$model->phone4.')', $url_whatsapp_phone4,['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo Yii::t('app','Close')?></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" id="emailModalPaymentButton" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo Yii::t('app','Select the emails to send message')?></h4>
+            </div>
+            <div class="modal-body">
+                <?php if ($model->email_status == "active"):?>
+                    <?= \yii\bootstrap\Html::a('Email ('.$model->email.')', ['send-payment-button-email','email' => $model->email],['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+                <?php if ($model->email2_status == "active"):?>
+                    <?= \yii\bootstrap\Html::a('Email 2 ('.$model->email2.')', ['send-payment-button-email','email' => $model->email2],['target' => '_blank'])?>
+                    <br>
+                <?php endif;?>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo Yii::t('app','Close')?></button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 <script>
     var CustomerView= new function(){
         
@@ -473,6 +548,14 @@ $this->params['breadcrumbs'][] = $this->title;
             $(document).on('click', '.select_msj', function (e) {
                 e.preventDefault();
                 CustomerView.selectPhones($(this));
+            })
+            $(document).on('click', '.select_msj_payment_button', function (e) {
+                e.preventDefault();
+                CustomerView.selectPhonesPaymentButton($(this));
+            })
+            $(document).on('click', '.select_email_payment_button', function (e) {
+                e.preventDefault();
+                CustomerView.selectEmailsPaymentButton($(this));
             })
             $(document).on('click', '#send-message-btn', function (e) {
                 e.preventDefault();
@@ -498,6 +581,14 @@ $this->params['breadcrumbs'][] = $this->title;
         this.selectPhones = function (opt) {
             $('#send-message-btn').data('message_id', $(opt).data('message_id'))
             $('#phoneModal').modal('show');
+        }
+
+        this.selectPhonesPaymentButton = function (opt) {
+            $('#phoneModalPaymentButton').modal('show');
+        }
+
+        this.selectEmailsPaymentButton = function (opt) {
+            $('#emailModalPaymentButton').modal('show');
         }
 
         this.sendMessage = function (message) {

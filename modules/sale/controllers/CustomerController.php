@@ -33,6 +33,9 @@ use yii2fullcalendar\yii2fullcalendar;
 use app\modules\sale\models\Product;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\reports\models\ReportChangeCompany;
+use app\modules\config\models\Config;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\mailing\models\EmailTransport;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -191,6 +194,7 @@ class CustomerController extends Controller
                 ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
                 ->all(), 'vendor_id', 'fullName');
 
+            $url_whatsapp = Config::getConfig('siro_url_payment_button_whatsapp')->item->description;
 
             return $this->render('view', [
                 'model' => $model,
@@ -198,7 +202,8 @@ class CustomerController extends Controller
                 'contracts' => $contracts,
                 'messages' => $messages,
                 'products' => $products,
-                'vendors' => $vendors
+                'vendors' => $vendors,
+                'url_whatsapp' => $url_whatsapp
             ]);
         }else{
            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
@@ -867,5 +872,23 @@ class CustomerController extends Controller
             return false;
         }
 
+    }
+
+    public function actionSendPaymentButtonEmail($email){
+        Yii::$app->response->format = 'json';
+  
+        $transport = EmailTransport::find()->where(['name' => 'NOTIFICACION'])->one();
+        Yii::$app->mail->setTransport($transport->getConfigArray());
+
+        $mailer = Yii::$app->mail;
+        $mailer->htmlLayout = $transport->layout;
+
+        $message = $mailer
+                ->compose($transport->layout,'probando')
+                ->setFrom($transport->from_email)
+                ->setTo($email)
+                ->setSubject('Testing');
+
+        return $sender->send();
     }
 }
