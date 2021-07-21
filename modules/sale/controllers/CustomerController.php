@@ -882,7 +882,7 @@ class CustomerController extends Controller
         $subject_email = Config::getConfig('siro_subject_email_payment_button')->item->description;
         
         $transport = EmailTransport::FindEmailTransportByNotificacion();
-        //Yii::$app->mail->setTransport($transport->getConfigArray());
+        Yii::$app->mail->setTransport($transport->getConfigArray());
 
         $mailer = Yii::$app->mail;
         $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
