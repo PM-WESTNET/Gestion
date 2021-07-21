@@ -1,6 +1,6 @@
 <?php 
 use app\modules\config\models\Config;
-
+use yii\helpers\Url;
 /* @var $this \yii\web\View view component instance */
 /* @var $message \yii\mail\MessageInterface the message being composed */
 /* @var $content string main view render result */
@@ -24,7 +24,7 @@ $title = $notification->subject;
         <thead>
           <tr>
             <th colspan="9">
-                <img style="margin: 0 auto; width: 140px;" src="<?php echo \yii\helpers\Url::base(true) .'/'. $notification->emailTransport->getObject()->getLogoWebPath() ?>" alt="Westnet">
+            <?= Html::img(Url::base(true).'/images/logo-westnet.png', ['alt' => 'Westnet', 'style' => 'margin: 0 auto; width: 140px;']) ?>
             </th>
           </tr>
         </thead>

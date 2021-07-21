@@ -876,16 +876,19 @@ class CustomerController extends Controller
 
     public function actionSendPaymentButtonEmail($email,$customer_id){
         Yii::$app->response->format = 'json';
-
+        
         $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
+        $content_email = Config::getConfig('siro_content_email_payment_button')->item->description;
+        $subject_email = Config::getConfig('siro_subject_email_payment_button')->item->description;
+        
         $transport = EmailTransport::FindEmailTransportByNotificacion();
         //Yii::$app->mail->setTransport($transport->getConfigArray());
 
         $mailer = Yii::$app->mail;
         $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
         $params = ['emailTransport' => $transport,
-                    'subject' => "¡Ahora puede abonar su cuenta con nuestro nuevo medio de pago!",
-                    'content' => "<button style='background-color:orange;border-radius:90px;'><a href=".str_replace('${customer_id}',$customer_id,$url_redirect_gestion). " style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>"
+                    'subject' => $subject_email,
+                    'content' => "<div style='text-align:center'>".$content_email."<br><button style='background-color:orange;border-radius:0.5em;height:2.5em;transition-duration: 0.4s;'><a href=".str_replace('${customer_id}',$customer_id,$url_redirect_gestion). " style='color:black;text-decoration:none;'>Botón de Pago</a></button></div>"
             ];
         Yii::$app->view->params['notification'] = $params; 
 
@@ -893,7 +896,7 @@ class CustomerController extends Controller
                 ->compose('@app/modules/westnet/notifications/body/layouts/PaymentButton')
                 ->setFrom($transport->from_email)
                 ->setTo($email)
-                ->setSubject('Botón de Pago');
+                ->setSubject($subject_email);
         
         if($message->send()){
             Yii::$app->session->setFlash('success', 'Correo enviado correctamente a ' . $email);
