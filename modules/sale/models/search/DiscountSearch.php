@@ -12,6 +12,7 @@ use yii\data\ActiveDataProvider;
  */
 class DiscountSearch extends Discount
 {
+
     /**
      * @inheritdoc
      */
@@ -68,7 +69,6 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'to_date', $this->to_date]);
         $query->andFilterWhere(['like', 'type', $this->type]);
         $query->andFilterWhere(['like', 'value', $this->value]);
-
 
         
         return $dataProvider;
