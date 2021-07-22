@@ -37,6 +37,7 @@ class CustomerSearch extends Model
 
     // Rango de tiempo para el reporte de clientes actualizados
     public $range;
+    public $user_id;
 
     public function init()
     {
@@ -51,7 +52,7 @@ class CustomerSearch extends Model
     public function rules() {
         return [
             [['date_from', 'date_to'], 'string'],
-            [['date_from', 'date_to', 'range', 'customer_id', 'company_id_from', 'company_id_to'], 'safe']
+            [['date_from', 'date_to', 'range', 'customer_id', 'company_id_from', 'company_id_to','user_id'], 'safe']
         ];
     }
 
@@ -365,6 +366,36 @@ class CustomerSearch extends Model
 
 
     }
+
+    public function findByCustomersUpdatedByUser($params)
+    {
+        $query = (new Query);
+
+        $query->select(['COUNT(*) as count', 'user_id', 'date']);
+        $query->from('customer_update_register');
+
+        $this->load($params);
+
+        if (!empty($this->date_from)) {
+            $from_date = strtotime(Yii::$app->formatter->asDate($this->date_from, 'yyyy-MM-dd'));
+        }else {
+            $from_date = (new \DateTime())->modify('first day of month')->getTimestamp();
+        }
+
+        if (!empty($this->date_from)) {
+            $to_date = strtotime(Yii::$app->formatter->asDate($this->date_to, 'yyyy-MM-dd'));
+        }else {
+            $to_date = (new \DateTime())->getTimestamp();
+        }
+
+        $query->andFilterWhere(['>=', 'date', $from_date]);
+        $query->andFilterWhere(['<=', 'date', $to_date]);
+        $query->andFilterWhere(['user_id' => $this->user_id]);
+
+        $query->groupBy(['user_id']);
+
+        return $query->all();
+    } 
 
     
 }

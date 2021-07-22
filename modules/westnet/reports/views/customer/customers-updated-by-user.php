@@ -5,7 +5,6 @@ use yii\jui\DatePicker;
 use kartik\grid\GridView;
 use kartik\select2\Select2;
 use yii\widgets\ActiveForm;
-use yii\data\ArrayDataProvider;
 use webvimark\modules\UserManagement\models\User;
 
 $this->title = Yii::t('app', 'Updated Customers Report By User');
@@ -65,7 +64,7 @@ $this->title = Yii::t('app', 'Updated Customers Report By User');
 
 
     <?= GridView::widget([
-        'dataProvider' => (new ArrayDataProvider(['models' => $data->all()])),
+        'dataProvider' => $data,
         'columns' => [
             [
                 'label' => Yii::t('app', 'Users'),
