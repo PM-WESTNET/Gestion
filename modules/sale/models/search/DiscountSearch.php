@@ -12,6 +12,7 @@ use yii\data\ActiveDataProvider;
  */
 class DiscountSearch extends Discount
 {
+    public $amount;
 
     /**
      * @inheritdoc
@@ -25,6 +26,7 @@ class DiscountSearch extends Discount
             [['status'], 'string'],
             [['from_date', 'to_date'], 'string'], // mejorar implementacion de esto
             [['referenced'], 'boolean'],
+            [['amount'], 'integer'],
         ];
     }
 
@@ -47,11 +49,12 @@ class DiscountSearch extends Discount
     public function search($params)
     {
         $query = Discount::find();
+                //->joinWith('CustomerHasDiscount');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
-
+        
         $this->load($params);
 
         if (!$this->validate()) {
@@ -63,14 +66,23 @@ class DiscountSearch extends Discount
         $query->andFilterWhere([
             'discount_id' => $this->discount_id,
         ]);
+
         $query->andFilterWhere(['like', 'name', $this->name]);
         $query->andFilterWhere(['like', 'status', $this->status]);
         $query->andFilterWhere(['like', 'from_date', $this->from_date]);
         $query->andFilterWhere(['like', 'to_date', $this->to_date]);
         $query->andFilterWhere(['like', 'type', $this->type]);
         $query->andFilterWhere(['like', 'value', $this->value]);
+        $query->andFilterWhere(['like', 'amount', $this->amount]);
 
+        /*
         
+        SELECT COUNT(*) as amount, d.*
+        FROM discount d
+        LEFT JOIN customer_has_discount chd ON d.discount_id=chd.discount_id
+        GROUP BY d.discount_id
+        */
+
         return $dataProvider;
     }
 }

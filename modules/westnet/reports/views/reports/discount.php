@@ -22,9 +22,14 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Descripcion',
                         ],
                         [
-                            'attribute' => 'customer_amount',
+                            'attribute' => 'amount',
                             'format' => 'text',
                             'label' => 'Cantidad de Clientes',
+                            'value' => function ($model) {
+                                var_dump($model->amount);
+                                die();
+                                return $model->amount->first_name;
+                            }
                         ],
                         [
                             'attribute' => 'status',
