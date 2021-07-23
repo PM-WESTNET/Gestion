@@ -54,6 +54,8 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
     const STATUS_COLLECTED = 'collected';
     const STATUS_RENDERED = 'rendered';
     const STATUS_CANCELED = 'canceled';
+    const STATUS_IRRECOVERABLE = 'irrecoverable';
+    const STATUS_DUPLICATE = 'duplicate';
 
     //Collector info for creation
     public $collector_number;
@@ -104,7 +106,7 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
             [['last_batch_closure_id', 'ecopago_id', 'collector_id', 'datetime', 'payment_count'], 'integer'],
             [['number', 'first_payout_number', 'last_payout_number'], 'string', 'max' => 50],
             [['total', 'commission', 'discount', 'real_total', 'money_box_account_id', 'difference'], 'number'],
-            [['date', 'time', 'collector', 'ecopago'], 'safe'],
+            [['date', 'time', 'collector', 'ecopago', 'observation'], 'safe'],
             [['ecopago_id', 'collector_id'], 'required'],
             [['date'], 'date'],
             [['real_total', 'money_box_account_id', 'difference'], 'required', 'on' => static::SCENARIO_RENDER],
@@ -192,6 +194,8 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
             static::STATUS_COLLECTED => EcopagosModule::t('app', 'Collected'),
             static::STATUS_RENDERED => EcopagosModule::t('app', 'Rendered'),
             static::STATUS_CANCELED => EcopagosModule::t('app', 'Canceled'),
+            static::STATUS_IRRECOVERABLE => EcopagosModule::t('app', 'Irrecuperable'),
+            static::STATUS_DUPLICATE => EcopagosModule::t('app', 'Duplicado'),
         ];
     }
 
@@ -204,6 +208,8 @@ class BatchClosure extends ActiveRecord implements CountableInterface {
             static::STATUS_COLLECTED => EcopagosModule::t('app', 'Collected'),
             static::STATUS_RENDERED => EcopagosModule::t('app', 'Rendered'),
             static::STATUS_CANCELED => EcopagosModule::t('app', 'Canceled'),
+            static::STATUS_IRRECOVERABLE => EcopagosModule::t('app', 'Irrecuperable'),
+            static::STATUS_DUPLICATE => EcopagosModule::t('app', 'Duplicado'),
         ];
     }
 
