@@ -69,7 +69,7 @@ use app\modules\automaticdebit\models\AutomaticDebit;
  * @property string $observations
  * @property string $has_debit_automatic
  * @property string $has_direct_debit
- *
+ * @property integer $hash_customer_id
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -159,7 +159,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified','has_direct_debit'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified','has_direct_debit', 'hash_customer_id'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],

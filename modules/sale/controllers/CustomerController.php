@@ -878,6 +878,12 @@ class CustomerController extends Controller
         Yii::$app->response->format = 'json';
         
         $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
+        $customer = Customer::findOne(['customer_id' => $customer_id]);
+        if($customer != null && $customer->hash_customer_id == null){
+            $customer->hash_customer_id = md5($customer->customer_id);
+            $customer->save(false);
+        }
+        $url_redirect_gestion = str_replace('${customer_id}',$customer['hash_customer_id'],$url_redirect_gestion);
         $content_email = Config::getConfig('siro_content_email_payment_button')->item->description;
         $subject_email = Config::getConfig('siro_subject_email_payment_button')->item->description;
         
@@ -888,7 +894,7 @@ class CustomerController extends Controller
         $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
         $params = ['emailTransport' => $transport,
                     'subject' => $subject_email,
-                    'content' => "<div style='text-align:center'>".$content_email."<br><button style='background-color:orange;border-radius:0.5em;height:2.5em;transition-duration: 0.4s;'><a href=".str_replace('${customer_id}',$customer_id,$url_redirect_gestion). " style='color:black;text-decoration:none;'>Botón de Pago</a></button></div>"
+                    'content' => "<div style='text-align:center'>".$content_email."<br><button style='background-color:orange;border-radius:0.5em;height:2.5em;transition-duration: 0.4s;'><a href=".$url_redirect_gestion. " style='color:black;text-decoration:none;'>Botón de Pago</a></button></div>"
             ];
         Yii::$app->view->params['notification'] = $params; 
 
