@@ -12,7 +12,7 @@ $this->title = Yii::$app->params['web_title'];
 
 <div class="jumbotron">
     <?php if (!empty(Yii::$app->params['web_logo'])): ?>
-        <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?= Url::to("@web/images/logo-westnet.png") ?>"/>
+        <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?>"/>
 
     <?php endif; ?>
 
