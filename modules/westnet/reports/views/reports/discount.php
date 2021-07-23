@@ -22,13 +22,11 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Descripcion',
                         ],
                         [
-                            'attribute' => 'amount',
+                            'attribute' => 'customerAmount',
                             'format' => 'text',
-                            'label' => 'Cantidad de Clientes',
+                            'label' => 'Cant Clientes',
                             'value' => function ($model) {
-                                var_dump($model->amount);
-                                die();
-                                return $model->amount->first_name;
+                                return $model->customerAmount;
                             }
                         ],
                         [
@@ -59,38 +57,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-12">
             
                 <h1>Clientes</h1>
-                <?php echo \yii\grid\GridView::widget([
-                    'dataProvider' => $dataProvider,
-                    'filterModel' => $discountSearch,
-                    'columns' => [
-                        ['class' => SerialColumn::class],
-                        [
-                            'attribute' => 'name',
-                            'format' => 'text',
-                            'label' => 'Descripcion',
-                        ],
-                        [
-                            'attribute' => 'status',
-                            'format' => 'text',
-                            'label' => 'Estado',
-                        ],
-                        [
-                            'attribute' => 'value',
-                            'format' => 'text',
-                            'label' => 'Valor',
-                        ],
-                        [
-                            'attribute' => 'from_date',
-                            'format' => 'text',
-                            'label' => 'Desde',
-                        ],
-                        [
-                            'attribute' => 'to_date',
-                            'format' => 'text',
-                            'label' => 'Hasta',
-                        ],
-                    ]
-                ])?>
+                
 
             </div>
 

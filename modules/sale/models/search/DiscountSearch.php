@@ -12,8 +12,6 @@ use yii\data\ActiveDataProvider;
  */
 class DiscountSearch extends Discount
 {
-    public $amount;
-
     /**
      * @inheritdoc
      */
@@ -23,10 +21,10 @@ class DiscountSearch extends Discount
             [['discount_id'], 'integer'],
             [['value'], 'integer'],
             [['name', 'referenced'], 'safe'],
-            [['status'], 'string'],
+            [['status'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
             [['from_date', 'to_date'], 'string'], // mejorar implementacion de esto
             [['referenced'], 'boolean'],
-            [['amount'], 'integer'],
+            [['customerAmount'], 'integer'],
         ];
     }
 
@@ -48,20 +46,36 @@ class DiscountSearch extends Discount
      */
     public function search($params)
     {
-        $query = Discount::find();
-                //->joinWith('CustomerHasDiscount');
+        $this->load($params);
+
+        $query = Discount::find()
+                ->select('COUNT(*) AS customerAmount, d.*')
+                ->from('discount d')
+                ->leftJoin('customer_has_discount chd', 'd.discount_id = chd.discount_id' )
+                ->groupBy('d.discount_id')
+                ->filterHaving(['like', 'COUNT(*)', $this->customerAmount])
+                ;
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> [
+                'attributes' => ['customerAmount'],
+                'defaultOrder' => ['customerAmount' => SORT_DESC]
+            ],
         ]);
         
-        $this->load($params);
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
         }
+
+        /* $dataProvider->sort->attributes['customerAmount'] = [
+
+            'asc' => ['customerAmount' => SORT_ASC],
+            'desc' => ['customerAmount' => SORT_DESC],
+        ];  */
 
         $query->andFilterWhere([
             'discount_id' => $this->discount_id,
@@ -73,15 +87,6 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'to_date', $this->to_date]);
         $query->andFilterWhere(['like', 'type', $this->type]);
         $query->andFilterWhere(['like', 'value', $this->value]);
-        $query->andFilterWhere(['like', 'amount', $this->amount]);
-
-        /*
-        
-        SELECT COUNT(*) as amount, d.*
-        FROM discount d
-        LEFT JOIN customer_has_discount chd ON d.discount_id=chd.discount_id
-        GROUP BY d.discount_id
-        */
 
         return $dataProvider;
     }
