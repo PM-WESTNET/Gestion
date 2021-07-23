@@ -179,4 +179,12 @@ class EmailTransport extends ActiveRecord
         }
         return null;
     }
+
+    /**
+     * return email transport by notificacion name
+     */
+
+     public static function FindEmailTransportByNotificacion(){
+         return self::find()->where(['name' => 'NOTIFICACION'])->one();
+     }
 }

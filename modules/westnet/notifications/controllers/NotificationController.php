@@ -515,12 +515,12 @@ class NotificationController extends Controller {
     }
 
 
-    public function actionRedirectBankRoela($customer_id){
-        $customer = Customer::findOne(['customer_id' => $customer_id]);
+    public function actionRedirectBankRoela($id){
+        $customer = Customer::findOne(['hash_customer_id' => $id]);
 
         if($customer){
             if(Config::getConfig('siro_communication_bank_roela')->item->description){
-                $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer_id,'status' => 'pending'])->one();
+                $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
                 /*if(!$result_search)
                     $result_search = ApiSiro::SearchPaymentIntention($bill_id);*/
                 

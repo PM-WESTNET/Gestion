@@ -109,45 +109,57 @@ class EmailTransport implements TransportInterface {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
-           
-            foreach($customers as $customer){
-                $result = 0;
-                /** @var MailSender $mailSender */
-                $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
 
-                log_email($customer);
-                $toName = $customer['name'].' '.$customer['lastname'];
-                $clone = clone $notification;
-                $clone->content = self::replaceText($notification->content, $customer);
+            if(!empty($customers)){
+                foreach($customers as $customer){
+                    $customerObject = Customer::findOne(['customer_id' => $customer['customer_id']]);
+                    if($customerObject != null && $customerObject->hash_customer_id == null){
+                        $customerObject->hash_customer_id = md5($customerObject->customer_id);
+                        $customerObject->save(false);
+                    }
+
+                    $customer['hash_customer_id'] = $customerObject->hash_customer_id;
+                    
+                    $result = 0;
+                    /** @var MailSender $mailSender */
+                    $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
+
+                    log_email($customer);
+                    $toName = $customer['name'].' '.$customer['lastname'];
+                    $clone = clone $notification;
+                    $clone->content = self::replaceText($notification->content, $customer);
+                    
+                    if ($validator->validate($customer['email'], $err)) {
+                        $result = $mailSender->prepareMessageAndSend(
+                            ['email'=>$customer['email'], 'name' => $toName],
+                            $notification->subject,
+                            [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                        );
                 
-                if ($validator->validate($customer['email'], $err)) {
-                    $result = $mailSender->prepareMessageAndSend(
-                        ['email'=>$customer['email'], 'name' => $toName],
-                        $notification->subject,
-                        [ 'view'=> $layout ,'params' => ['notification' => $clone]]
-                    );
-		    
-                    if($result){
-                        NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
-                    }else if(!$result)
-                        NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
-                    else
-                        NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
-                }else{
-                    $error .= " $toName <$toMail>; ";
-                    log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
-                    NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                        if($result){
+                            NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
+                        }else if(!$result)
+                            NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
+                        else
+                            NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
+                    }else{
+                        $error .= " $toName <$toMail>; ";
+                        log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+                        NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                    }
+
+                    $ok += $result;
+                
+                    Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
+                    Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
+                    Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
+
+                    sleep($time_sleep);
                 }
-
-                $ok += $result;
-               
-                Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
-                Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
-                Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
-
-                sleep($time_sleep);
+                log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
+            }else{
+                $error = 'No hay mas destinatarios!';
             }
-            log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
@@ -180,7 +192,9 @@ class EmailTransport implements TransportInterface {
     private function replaceText($text, $customer)
     {
         $replaced_text = $text;
-
+        $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
+        $url_redirect_gestion = str_replace('${customer_id}',$customer['hash_customer_id'],$url_redirect_gestion);
+        
         $replace_max_string = SMSIntegratechTransport::getMaxLengthReplacement();
         $replaced_text = str_replace('@Nombre', trim($customer['name']), $replaced_text);
         $replaced_text = str_replace('@Telefono1', substr($customer['phone'], 0, $replace_max_string['@Telefono1']), $replaced_text);
@@ -193,7 +207,7 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@FacturasAdeudadas', substr($customer['debt_bills'], 0, $replace_max_string['@FacturasAdeudadas']), $replaced_text);
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
-        $replaced_text = str_replace('@BotonDePago', "  <button style='background-color:orange;border-radius:90px;'><a href=http://test1.westnet.com.ar/westnet/notifications/notification/redirect-bank-roela?customer_id=".$customer['customer_id']." style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>", $replaced_text);
+        $replaced_text = str_replace('@BotonDePago', "  <button style='background-color:orange;border-radius:90px;'><a href='".$url_redirect_gestion."'". "style='color:black;font-family:sans-serif;text-decoration:none;'>Botón de Pago</a></button>", $replaced_text);
         
         return $replaced_text;
 

@@ -33,6 +33,9 @@ use yii2fullcalendar\yii2fullcalendar;
 use app\modules\sale\models\Product;
 use app\modules\westnet\models\Vendor;
 use app\modules\westnet\reports\models\ReportChangeCompany;
+use app\modules\config\models\Config;
+use app\modules\mailing\components\sender\MailSender;
+use app\modules\mailing\models\EmailTransport;
 
 /**
  * CustomerController implements the CRUD actions for Customer model.
@@ -191,6 +194,7 @@ class CustomerController extends Controller
                 ->orderBy(['lastname' => SORT_ASC, 'name' => SORT_ASC])
                 ->all(), 'vendor_id', 'fullName');
 
+            $url_whatsapp = Config::getConfig('siro_url_payment_button_whatsapp')->item->description;
 
             return $this->render('view', [
                 'model' => $model,
@@ -198,7 +202,8 @@ class CustomerController extends Controller
                 'contracts' => $contracts,
                 'messages' => $messages,
                 'products' => $products,
-                'vendors' => $vendors
+                'vendors' => $vendors,
+                'url_whatsapp' => $url_whatsapp
             ]);
         }else{
            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
@@ -867,5 +872,44 @@ class CustomerController extends Controller
             return false;
         }
 
+    }
+
+    public function actionSendPaymentButtonEmail($email,$customer_id){
+        Yii::$app->response->format = 'json';
+        
+        $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
+        $customer = Customer::findOne(['customer_id' => $customer_id]);
+        if($customer != null && $customer->hash_customer_id == null){
+            $customer->hash_customer_id = md5($customer->customer_id);
+            $customer->save(false);
+        }
+        $url_redirect_gestion = str_replace('${customer_id}',$customer['hash_customer_id'],$url_redirect_gestion);
+        $content_email = Config::getConfig('siro_content_email_payment_button')->item->description;
+        $subject_email = Config::getConfig('siro_subject_email_payment_button')->item->description;
+        
+        $transport = EmailTransport::FindEmailTransportByNotificacion();
+        Yii::$app->mail->setTransport($transport->getConfigArray());
+
+        $mailer = Yii::$app->mail;
+        $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
+        $params = ['emailTransport' => $transport,
+                    'subject' => $subject_email,
+                    'content' => "<div style='text-align:center'>".$content_email."<br><button style='background-color:orange;border-radius:0.5em;height:2.5em;transition-duration: 0.4s;'><a href=".$url_redirect_gestion. " style='color:black;text-decoration:none;'>Botón de Pago</a></button></div>"
+            ];
+        Yii::$app->view->params['notification'] = $params; 
+
+        $message = $mailer
+                ->compose('@app/modules/westnet/notifications/body/layouts/PaymentButton')
+                ->setFrom($transport->from_email)
+                ->setTo($email)
+                ->setSubject($subject_email);
+        
+        if($message->send()){
+            Yii::$app->session->setFlash('success', 'Correo enviado correctamente a ' . $email);
+            $this->redirect(['view','id' => $customer_id]);
+        }else{
+            Yii::$app->session->setFlash('error', 'Ha ocurrido un error y el correo no ha podido ser enviado.');
+            $this->redirect(['view','id' => $customer_id]);
+        }
     }
 }
