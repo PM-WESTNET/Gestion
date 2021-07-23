@@ -29,9 +29,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     <span class="glyphicon glyphicon-ban-circle"></span> <?= EcopagosModule::t('app', 'Cancel batch closure'); ?>
                 </a>
             <?php endif; ?>
+            <?php if($model->status != "rendered"): ?>
+                <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . Yii::t('app', 'Update'), ['update', 'id' => $model->batch_closure_id], ['class' => 'btn btn-primary']) ?>
+            <?php endif; ?>
         </p>
     </div>
-
+   
     <?=
     DetailView::widget([
         'model' => $model,
@@ -44,7 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'format' => 'html',
                 'label' => EcopagosModule::t('app', 'Status'),
-                'value' => EcopagosModule::t('app', $model->status),
+                'value' => $model->fetchStatuses()[$model->status],
             ],
             [
                 'format' => 'html',
