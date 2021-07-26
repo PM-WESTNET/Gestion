@@ -243,6 +243,18 @@ class BankController extends Controller
     }
 
     /**
+     * @param $import_id
+     * @return string
+     * Genere un archivo excel con los datos de los pagos fallidos
+     */
+    public function actionImportViewExport($import_id)
+    {
+        $import = DebitDirectImport::findOne($import_id);
+        return $this->renderPartial('import-view-export', ['dataProviderFailedPayments' => $import->failedPayments]);
+
+    }
+
+    /**
      * @param $bank_id
      * @return string
      * @throws BadRequestHttpException

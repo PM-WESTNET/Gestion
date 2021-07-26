@@ -96,9 +96,11 @@ $dataProviderFailedPayments = new ActiveDataProvider(['query' => $import->getFai
     }
 
     echo '<hr>';
-
     if ($dataProviderFailedPayments->count >= 1) {
         echo '<h3>' . Yii::t('app', 'Failed payments') . '</h3>';
+        echo '<div>
+                <a href="/automaticdebit/bank/import-view-export?import_id='.$import->debit_direct_import_id.'" class="btn btn-success">Exportar</a>
+              </div>';
         echo GridView::widget([
             'dataProvider' => new ActiveDataProvider(['query' => $import->getFailedPayments()]),
             'columns' => [
