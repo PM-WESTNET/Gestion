@@ -1152,25 +1152,12 @@ class ReportsController extends Controller
 
     public function actionCustomersByNodeExport(){
 
-        $search = new CustomerSearch();
-
-        $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
-
         if (User::hasRole('admin')) {
-            $excel = ExcelExporter::getInstance();
-            $excel->create('clientes-por-nodo', [
-                'A' => ['node', 'Nodo', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-                'B' => ['total', 'Total', PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            ])->createHeader();
+            $search = new CustomerSearch();
+            $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
 
-            foreach ($dataProvider->allModels as $key => $value) {
-                $excel->writeRow([
-                    'node'=> $value['node'],
-                    'total' => $value['total']
-                ]);
-            }
+            return $this->renderPartial('customer-by-node-excel',['dataProvider' => $dataProvider]);
 
-            $excel->download('clientes-por-nodo.xls');
         }else{
             Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
             return $this->redirect('/reports/reports/customers-by-node');

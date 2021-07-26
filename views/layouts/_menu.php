@@ -25,9 +25,9 @@ $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/inde
 
 if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
-                'label' => Yii::t('westnet', 'Ecopago'),
-                'url' => ['/westnet/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
-                'linkOptions' => ['class' => 'btn btn-info navbar-btn', 'target' => '_blank'],
+        'label' => Yii::t('westnet', 'Ecopago'),
+        'url' => ['/westnet/ecopagos/frontend/site/index'], 'visible' => !Yii::$app->user->isGuest,
+        'linkOptions' => ['class' => 'btn btn-info navbar-btn', 'target' => '_blank'],
     ];
 }
 
@@ -55,28 +55,28 @@ foreach ($billTypes2Create as $item) {
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice'), 'url' => ['/sale/batch-invoice/index']];
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice with filters'), 'url' => ['/sale/batch-invoice/index-with-filters']];
-$billItems[] = ['label' => Yii::t('app','Close Pending Batch Invoices'), 'url' => ['/sale/batch-invoice/close-invoices-index']];
+$billItems[] = ['label' => Yii::t('app', 'Close Pending Batch Invoices'), 'url' => ['/sale/batch-invoice/close-invoices-index']];
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Customer Invoice'), 'url' => ['/sale/bill/invoice-customer']];
 
 if (User::hasRole('batch-invoice-rol')) {
-    $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Billing'), 'items'=>$billItems];
+    $alwaysVisibleItems[] = ['label' => Yii::t('app', 'Billing'), 'items' => $billItems];
 }
 
 //Bills (indexes y otros modelos relacionados):
 $billIndexItems = [
     ['label' => Yii::t('app', 'Configuration'), 'items' => [
-            ['label' => Yii::t('app', 'Bill Types'), 'url' => ['/sale/bill-type/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Units'), 'url' => ['/sale/unit/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Currencies'), 'url' => ['/sale/currency/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Taxes'), 'url' => ['/sale/tax/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Tax Rates'), 'url' => ['/sale/tax-rate/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index'], 'visible' => Yii::$app->user->isSuperadmin],
-            //'<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Bill Types'), 'url' => ['/sale/bill-type/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Units'), 'url' => ['/sale/unit/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Currencies'), 'url' => ['/sale/currency/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Taxes'), 'url' => ['/sale/tax/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Tax Rates'), 'url' => ['/sale/tax-rate/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index'], 'visible' => Yii::$app->user->isSuperadmin],
+        //'<li class="divider"></li>',
 
-            ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('app', 'Invoice Classes'), 'url' => ['/sale/invoice-class/index'], 'visible' => Yii::$app->user->isSuperadmin]
+        ['label' => '<li class="divider"></li>', 'visible' => Yii::$app->user->isSuperadmin],
+        ['label' => Yii::t('app', 'Invoice Classes'), 'url' => ['/sale/invoice-class/index'], 'visible' => Yii::$app->user->isSuperadmin]
     ], 'visible' => Yii::$app->user->isSuperadmin],
 
 ];
@@ -91,15 +91,16 @@ if (User::hasRole('batch-invoice-rol')) {
 
 //En este menu debemos mostrar un index por cada tipo de comprobante
 $billTypes2Index = BillType::find()->orderBy(['class' => SORT_ASC, 'name' => SORT_ASC])->all();
-if($billTypes2Index){
-    $billIndexItems[] ='<li class="divider"></li>';
+if ($billTypes2Index) {
+    $billIndexItems[] = '<li class="divider"></li>';
 }
 
 if (!User::hasRole('seller')) {
 
     foreach ($billTypes2Index as $item) {
 
-        $billIndexItems[] = ['label' => Yii::t('app', 'List: {name}', [
+        $billIndexItems[] = [
+            'label' => Yii::t('app', 'List: {name}', [
                 'name' => \app\components\helpers\Inflector::getInflector()->pluralize($item->name)
             ]), 'url' => ['/sale/bill/index', 'BillSearch[bill_types][]' => "$item->bill_type_id"]
         ];
@@ -124,39 +125,39 @@ if (Yii::$app->getModule('afip')) {
 }
 
 //if (!User::hasRole('seller')){
-    //Clientes
-    $items[] = ['label' => Yii::t('app','Customers'), 'items'=>[
-        ['label'=>Yii::t('app','Customers'), 'url'=>['/sale/customer/index']],
-        ['label'=>Yii::t('app','Cashing panel'), 'url'=>['/sale/customer/cashing-panel']],
-    ['label'=>Yii::t('app', 'Positive Balance Customers'), 'url'=>['/sale/customer/positive-balance-customers']],
-        ['label'=> Yii::t('app', 'Pending Installations'), 'url' =>['/sale/customer/pending-installations']],
-        ['label'=> Yii::t('app', 'Installations'), 'url' =>['/sale/customer/installations']],
-        //'<li class="divider"></li>',
-        ['label'=>Yii::t('app','Payments'), 'url'=>['/checkout/payment/index']],
-        ['label'=>Yii::t('app','Notify payments'), 'url'=>['/westnet/notify-payment']],
-        ['label'=>Yii::t('app','Programmed plan changes'), 'url'=>['/sale/contract/programmed-plan-change/index']],
-        //'<li class="divider"></li>',
-        ['label'=>Yii::t('app','Profile Classes'), 'url'=>['/sale/profile-class/index']],
-        ['label'=>'<li class="divider"></li>', 'encode'=>false],
-        ['label'=>Yii::t('app','Document Types'), 'url'=>['/sale/document-type/index']],
-        ['label'=>Yii::t('app','Tax Conditions'), 'url'=>['/sale/tax-condition/index']],
-        ['label'=>Yii::t('app','Customer Hour range'), 'url'=>['/sale/hour-range/index']],
-        //'<li class="divider"></li>',
-        ['label'=>Yii::t('app','Customer Classes'), 'url'=>['/sale/customer-class/index']],
-        ['label'=>Yii::t('app','Customer Categories'), 'url'=>['/sale/customer-category/index']],
-        ['label' => Yii::t('app','Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
-        //'<li class="divider"></li>',
-        ['label'=>Yii::t('app','Discounts'), 'url'=>['/sale/discount/index']],
-        ['label'=>Yii::t('app','Publicity Shapes'), 'url'=>['/sale/publicity-shape/index']],
-        ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => User::canRoute('/checkout/payment-method/index')],
-        '<li class="divider"></li>',
-        ['label'=>Yii::t('app','Billed and Cashed'), 'url'=>['/sale/customer/billed-and-cashed']],
-        '<li class="divider"></li>',
-        ['label'=>Yii::t('app','Enviar comprobantes por email masivamente'), 'url'=>['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
-        ['label'=>Yii::t('app','Predefined Customer SMS Messages'), 'url'=>['/sale/customer-message/index']],
-        ['label'=>Yii::t('app','Verify Emails'), 'url'=>['/sale/customer/verify-emails']],
-        ['label'=>Yii::t('app','Customer Debts'), 'url'=>['/sale/customer/debtors']],
-    ]];
+//Clientes
+$items[] = ['label' => Yii::t('app', 'Customers'), 'items' => [
+    ['label' => Yii::t('app', 'Customers'), 'url' => ['/sale/customer/index']],
+    ['label' => Yii::t('app', 'Cashing panel'), 'url' => ['/sale/customer/cashing-panel']],
+    ['label' => Yii::t('app', 'Positive Balance Customers'), 'url' => ['/sale/customer/positive-balance-customers']],
+    ['label' => Yii::t('app', 'Pending Installations'), 'url' => ['/sale/customer/pending-installations']],
+    ['label' => Yii::t('app', 'Installations'), 'url' => ['/sale/customer/installations']],
+    //'<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Payments'), 'url' => ['/checkout/payment/index']],
+    ['label' => Yii::t('app', 'Notify payments'), 'url' => ['/westnet/notify-payment']],
+    ['label' => Yii::t('app', 'Programmed plan changes'), 'url' => ['/sale/contract/programmed-plan-change/index']],
+    //'<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Profile Classes'), 'url' => ['/sale/profile-class/index']],
+    ['label' => '<li class="divider"></li>', 'encode' => false],
+    ['label' => Yii::t('app', 'Document Types'), 'url' => ['/sale/document-type/index']],
+    ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index']],
+    ['label' => Yii::t('app', 'Customer Hour range'), 'url' => ['/sale/hour-range/index']],
+    //'<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Customer Classes'), 'url' => ['/sale/customer-class/index']],
+    ['label' => Yii::t('app', 'Customer Categories'), 'url' => ['/sale/customer-category/index']],
+    ['label' => Yii::t('app', 'Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
+    //'<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Discounts'), 'url' => ['/sale/discount/index']],
+    ['label' => Yii::t('app', 'Publicity Shapes'), 'url' => ['/sale/publicity-shape/index']],
+    ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => User::canRoute('/checkout/payment-method/index')],
+    '<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Billed and Cashed'), 'url' => ['/sale/customer/billed-and-cashed']],
+    '<li class="divider"></li>',
+    ['label' => Yii::t('app', 'Enviar comprobantes por email masivamente'), 'url' => ['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
+    ['label' => Yii::t('app', 'Predefined Customer SMS Messages'), 'url' => ['/sale/customer-message/index']],
+    ['label' => Yii::t('app', 'Verify Emails'), 'url' => ['/sale/customer/verify-emails']],
+    ['label' => Yii::t('app', 'Customer Debts'), 'url' => ['/sale/customer/debtors']],
+]];
 //}
 //Productos
 $productItems = [];
@@ -186,20 +187,20 @@ $items[] = ['label' => Yii::t('app', 'Products'), 'items' => $productItems];
 //Pagos
 if (Yii::$app->getModule('checkout')) {
     $items[] = ['label' => Yii::t('app', 'Payments'), 'items' => [
-            ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index']],
-            ['label' => Yii::t('app', 'Payment Plans'), 'url' => ['/checkout/payment-plan/list']],
-            ['label' => Yii::t('app', 'Pago Fácil Files'), 'url' => ['/checkout/payment/pagofacil-payments-index']],
-            '<li class="divider"></li>',
-            ['label'=>Yii::t('pagomiscuentas','Export Pagomiscuentas'), 'url'=>['/pagomiscuentas/export/index']],
-            ['label'=>Yii::t('pagomiscuentas','Import Pagomiscuentas'), 'url'=>['/pagomiscuentas/import/index']],
-            '<li class="divider"></li>',
-            ['label'=>Yii::t('app','Banks for Automatic Debit'), 'url'=>['/automaticdebit/bank/index']],
-            ['label'=>Yii::t('app','Automatic Debit'), 'url'=>['/automaticdebit/automatic-debit/index']],
-            '<li class="divider"></li>',
-            ['label'=>Yii::t('app','Firstdata Automatic Debit'), 'url'=>['/firstdata/firstdata-automatic-debit/index']],
-            ['label'=>Yii::t('app','Firstdata Company Configs'), 'url'=>['/firstdata/firstdata-company-config/index']],
-            ['label'=>Yii::t('app','Firstdata Exports'), 'url'=>['/firstdata/firstdata-export/index']],
-            ['label'=>Yii::t('app','Firstdata Imports'), 'url'=>['/firstdata/firstdata-import/index']],
+        ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index']],
+        ['label' => Yii::t('app', 'Payment Plans'), 'url' => ['/checkout/payment-plan/list']],
+        ['label' => Yii::t('app', 'Pago Fácil Files'), 'url' => ['/checkout/payment/pagofacil-payments-index']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('pagomiscuentas', 'Export Pagomiscuentas'), 'url' => ['/pagomiscuentas/export/index']],
+        ['label' => Yii::t('pagomiscuentas', 'Import Pagomiscuentas'), 'url' => ['/pagomiscuentas/import/index']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Banks for Automatic Debit'), 'url' => ['/automaticdebit/bank/index']],
+        ['label' => Yii::t('app', 'Automatic Debit'), 'url' => ['/automaticdebit/automatic-debit/index']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Firstdata Automatic Debit'), 'url' => ['/firstdata/firstdata-automatic-debit/index']],
+        ['label' => Yii::t('app', 'Firstdata Company Configs'), 'url' => ['/firstdata/firstdata-company-config/index']],
+        ['label' => Yii::t('app', 'Firstdata Exports'), 'url' => ['/firstdata/firstdata-export/index']],
+        ['label' => Yii::t('app', 'Firstdata Imports'), 'url' => ['/firstdata/firstdata-import/index']],
 
     ]];
 }
@@ -251,13 +252,13 @@ if (Yii::$app->getModule('reports')) {
 //Proveedores
 if (Yii::$app->getModule('provider')) {
     $items[] = ['label' => Yii::t('app', 'Providers'), 'items' => [
-            ['label' => Yii::t('app', 'Providers'), 'url' => ['/provider/provider/index']],
-            ['label' => Yii::t('app', 'Provider Debts'), 'url' => ['/provider/provider/debts']],
-            '<li class="divider"></li>',
-            ['label' => Yii::t('app', 'Provider Bills'), 'url' => ['/provider/provider-bill/index']],
-            ['label' => Yii::t('app', 'Provider Payments'), 'url' => ['/provider/provider-payment/index']],
-            '<li class="divider"></li>',
-            ['label' => Yii::t('app', 'Provider Bills And Payments'), 'url' => ['/provider/provider/bills-and-payments']],
+        ['label' => Yii::t('app', 'Providers'), 'url' => ['/provider/provider/index']],
+        ['label' => Yii::t('app', 'Provider Debts'), 'url' => ['/provider/provider/debts']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Provider Bills'), 'url' => ['/provider/provider-bill/index']],
+        ['label' => Yii::t('app', 'Provider Payments'), 'url' => ['/provider/provider-payment/index']],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('app', 'Provider Bills And Payments'), 'url' => ['/provider/provider/bills-and-payments']],
     ]];
 }
 
@@ -302,10 +303,10 @@ if (Yii::$app->getModule('accounting')) {
     }
 
     $smallBoxes = app\modules\accounting\models\MoneyBoxAccount::findDailyBoxes();
-    if($smallBoxes){
+    if ($smallBoxes) {
         $items[count($items) - 1]['items'][] = '<li class="divider"></li>';
     }
-    foreach($smallBoxes as $small){
+    foreach ($smallBoxes as $small) {
         $items[count($items) - 1]['items'][] = ['label' => Yii::t('accounting', $small->account->name), 'url' => ['/accounting/money-box-account/daily-box-movements', 'id' => $small->money_box_account_id]];
     }
 }
@@ -336,7 +337,7 @@ if (Yii::$app->user->isSuperadmin) {
 }
 
 //App
-if(User::hasRole('admin')) {
+if (User::hasRole('admin')) {
     $items[] = ['label' => Yii::t('app', 'Application'), 'items' => $config];
 }
 
@@ -347,20 +348,20 @@ if (Yii::$app->getModule('westnet')) {
     $items[] = [
         'label' => 'Westnet',
         'items' => [
-            ['label'=>Yii::t('partner','Partner'), 'items' => [
+            ['label' => Yii::t('partner', 'Partner'), 'items' => [
                 ['label' => Yii::t('partner', 'Partner'), 'url' => ['/partner/partner']],
                 ['label' => Yii::t('partner', 'Partner Distribution Models'), 'url' => ['/partner/partner-distribution-model']],
                 '<li class="divider"></li>',
                 ['label' => Yii::t('partner', 'Liquidation'), 'url' => ['/partner/liquidation']],
                 ['label' => Yii::t('partner', 'Liquidations'), 'url' => ['/partner/liquidation/list-liquidation']],
             ]],
-            ['label'=>Yii::t('westnet','Servers'), 'url'=>['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
-            ['label'=>Yii::t('westnet','Nodes'), 'url'=>['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
-            ['label'=>Yii::t('westnet','Vendors'), 'url'=>['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
+            ['label' => Yii::t('westnet', 'Servers'), 'url' => ['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
+            ['label' => Yii::t('westnet', 'Nodes'), 'url' => ['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
+            ['label' => Yii::t('westnet', 'Vendors'), 'url' => ['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],
             //'<li class="divider"></li>',
-            ['label'=>Yii::t('westnet','Assigned IPs'), 'url'=>['/westnet/node/assigned-ip']],
-            ['label'=>Yii::t('westnet','Networks'), 'url'=>['/westnet/ip-range/index']],
-            ['label'=>Yii::t('westnet','Access Point'), 'url'=>['/westnet/access-point/index']],
+            ['label' => Yii::t('westnet', 'Assigned IPs'), 'url' => ['/westnet/node/assigned-ip']],
+            ['label' => Yii::t('westnet', 'Networks'), 'url' => ['/westnet/ip-range/index']],
+            ['label' => Yii::t('westnet', 'Access Point'), 'url' => ['/westnet/access-point/index']],
             [
                 'label' => Yii::t('westnet', 'Empty ADS not used'),
                 'url' => ['/westnet/empty-ads/index']
@@ -434,11 +435,11 @@ if (Yii::$app->getModule('westnet')) {
 }
 
 $items[] = [
-    'label' => Yii::t('app','Help'),
+    'label' => Yii::t('app', 'Help'),
     'items' => [
-        ['label' => Yii::t('app','Instructive'), 'url' => ['/instructive/instructive/index']],
+        ['label' => Yii::t('app', 'Instructive'), 'url' => ['/instructive/instructive/index']],
         '<li class="divider"></li>',
-        ['label' => Yii::t('app','Instructive Category'), 'url' => ['/instructive/instructive-category/index']]
+        ['label' => Yii::t('app', 'Instructive Category'), 'url' => ['/instructive/instructive-category/index']]
     ]
 ];
 
@@ -451,7 +452,7 @@ if (Yii::$app->params['ticket_enabled']) {
             ['label' => Yii::t('app', 'Cashier Manage Tickets'), 'url' => ['/ticket/ticket/collection-tickets']],
             ['label' => Yii::t('app', 'Installations Manage Tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             ['label' => Yii::t('app', 'Mobile app data edition tickets'), 'url' => ['/ticket/ticket/contact-edition-tickets']],
-//            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
+            //            ['label' => Yii::t('app', 'Mobile app registration tickets'), 'url' => ['/ticket/ticket/installations-tickets']],
             '<li class="divider"></li>',
             ['label' => Yii::t('app', 'Create Ticket'), 'url' => ['/ticket/ticket/create']],
             '<li class="divider"></li>',
@@ -474,15 +475,16 @@ if (Yii::$app->params['agenda_enabled']) {
         ['label' => Yii::t('app', 'My agenda'), 'url' => ['/agenda']],
         ['label' => Yii::t('app', 'Tasks'), 'url' => ['/agenda/task']],
         '<li class="divider"></li>',
-        ['label' => Yii::t('app', 'Create Task'), 'url' => ['/agenda'],
+        [
+            'label' => Yii::t('app', 'Create Task'), 'url' => ['/agenda'],
             'linkOptions' => [
                 'data-task' => 'create',
             ],
         ],
-        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible'=> User::canRoute('/agenda/category/*')],
-        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible'=> User::canRoute('/agenda/task-type/*')],
-        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'],'visible'=> User::canRoute('/agenda/status/*')],
-        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'],'visible'=> User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Categories'), 'url' => ['/agenda/category'], 'visible' => User::canRoute('/agenda/category/*')],
+        ['label' => Yii::t('app', 'Task Types'), 'url' => ['/agenda/task-type'], 'visible' => User::canRoute('/agenda/task-type/*')],
+        ['label' => Yii::t('app', 'Task Statuses'), 'url' => ['/agenda/status'], 'visible' => User::canRoute('/agenda/status/*')],
+        ['label' => Yii::t('app', 'Event Types'), 'url' => ['/agenda/task-type'], 'visible' => User::canRoute('/agenda/task-type/*')],
     ];
 
     $items[] = [
@@ -518,14 +520,14 @@ $items[] = [
 $items[] = [
     'label' => '<span class="glyphicon glyphicon-user"></span> (' . Yii::$app->user->identity->username . ')',
     'items' => [
-    ['label' => Yii::$app->user->identity->username, 'visible' => !Yii::$app->user->isGuest],
-    '<li class="divider"></li>',
-    ['label' => Yii::t('modules/user-management/front', 'Login'), 'url' => ['/user-management/auth/login'], 'visible' => Yii::$app->user->isGuest],
-    ['label' => Yii::t('modules/user-management/front', 'Logout'), 'url' => ['/user-management/auth/logout'], 'visible' => !Yii::$app->user->isGuest],
-    ['label' => Yii::t('modules/user-management/front', 'Registration'), 'url' => ['/user-management/auth/registration'], 'visible' => Yii::$app->user->isGuest],
-    ['label' => Yii::t('modules/user-management/front', 'Change own password'), 'url' => ['/user-management/auth/change-own-password']],
-    ['label' => Yii::t('modules/user-management/front', 'Password recovery'), 'url' => ['/user-management/auth/password-recovery']],
-    ['label' => Yii::t('modules/user-management/front', 'E-mail confirmation'), 'url' => ['/user-management/auth/confirm-email']],
+        ['label' => Yii::$app->user->identity->username, 'visible' => !Yii::$app->user->isGuest],
+        '<li class="divider"></li>',
+        ['label' => Yii::t('modules/user-management/front', 'Login'), 'url' => ['/user-management/auth/login'], 'visible' => Yii::$app->user->isGuest],
+        ['label' => Yii::t('modules/user-management/front', 'Logout'), 'url' => ['/user-management/auth/logout'], 'visible' => !Yii::$app->user->isGuest],
+        ['label' => Yii::t('modules/user-management/front', 'Registration'), 'url' => ['/user-management/auth/registration'], 'visible' => Yii::$app->user->isGuest],
+        ['label' => Yii::t('modules/user-management/front', 'Change own password'), 'url' => ['/user-management/auth/change-own-password']],
+        ['label' => Yii::t('modules/user-management/front', 'Password recovery'), 'url' => ['/user-management/auth/password-recovery']],
+        ['label' => Yii::t('modules/user-management/front', 'E-mail confirmation'), 'url' => ['/user-management/auth/confirm-email']],
     ],
 ];
 ?>
@@ -555,7 +557,7 @@ $items[] = [
             ]);
             ?>
 
-            
+
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->

@@ -1,6 +1,7 @@
 <?php
 
-namespace app\modules\westnet\reports\controllers;
+// namespace app\modules\westnet\reports\controllers;
+namespace app\modules\westnet\reports\commands;
 
 use Yii;
 use yii\web\HttpException;
