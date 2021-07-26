@@ -69,7 +69,7 @@ class ProgrammedPlanChangeSearch extends ProgrammedPlanChange
 
         if($this->date) {
             $date = (new \DateTime($this->date))->getTimestamp();
-            $query->andFilterWhere(['date' => $date]);
+            $query->andFilterWhere(['programmed_plan_change.date' => $date]);
         }
 
         if($this->customer_id) {
@@ -83,7 +83,7 @@ class ProgrammedPlanChangeSearch extends ProgrammedPlanChange
             $query->andFilterWhere(['applied' => null]);
         }
 
-        $query->orderBy(['date' => SORT_DESC]);
+        $query->orderBy(['programmed_plan_change.date' => SORT_DESC]);
 
         return $dataProvider;
     }
