@@ -22,12 +22,15 @@ use app\modules\config\models\Config;
 use app\modules\sale\models\Customer;
 use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\PublicityShape;
+use app\modules\sale\models\search\DiscountSearch;
+use app\modules\sale\models\Discount;
 
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\search\ReportSearch;
 use app\modules\westnet\reports\search\CustomerSearch;
 use app\modules\westnet\reports\search\ReportChangeCompanySearch;
+
 
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
@@ -86,6 +89,41 @@ class ReportsController extends Controller
             'rgba(241, 132, 182)'
         ];
 
+    /**
+     * view controller for discounts view
+     */
+    public function actionDiscount(){
+/*         $this->layout = '/fluid';
+ */
+        $discountSearch = new DiscountSearch();
+
+        $dataProvider = $discountSearch->searchDiscounts(Yii::$app->request->get()); 
+
+        return $this->render('discount',
+                [
+                    'dataProvider' => $dataProvider,
+                    'discountSearch' => $discountSearch,
+                ]);
+    }
+    public function actionCustomerPerDiscount($discount_id){
+        /*         
+        $this->layout = '/fluid';
+        */
+        //http://gestion_westnet.local:8100/index.php?r=sale%2Fcustomer-has-discount%2Findex&customer_id=2789
+        $model = Discount::findOne(['discount_id' => $discount_id]);
+        
+        $discountSearch = new DiscountSearch();
+        $dataProvider = $discountSearch->searchCustomersOfDiscount(Yii::$app->request->get()); 
+
+        return $this->render('customer-per-discount',
+                [
+                    'model' => $model,
+                    'dataProvider' => $dataProvider,
+                    'discountSearch' => $discountSearch,
+                ]);
+    }
+
+    
     /**
      * List Customers per month
      *
