@@ -1493,3 +1493,8 @@ a.ui-state-default.ui-state-active {
   display: flex;
   justify-content: space-between;
 }
+
+#reports-reports-discount table{
+  background: hsla(192, 100%, 85%, 0.26);
+  
+}
