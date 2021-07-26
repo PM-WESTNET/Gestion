@@ -19,8 +19,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         ['class' => SerialColumn::class],
                         [
                             'attribute' => 'name',
-                            'format' => 'text',
+                            'format' => 'html',
                             'label' => 'Descripcion',
+                            'value' => function($model){
+                                return Html::a($model->name, 
+                                            ['/sale/discount/view', 'id' => $model->discount_id], 
+                                            ['class' => 'profile-link']);
+                            }
                         ],
                         [
                             'attribute' => 'customerAmount',
@@ -42,6 +47,9 @@ $this->params['breadcrumbs'][] = $this->title;
                             'attribute' => 'value',
                             'format' => 'text',
                             'label' => 'Valor',
+                            'value' => function ($model) {
+                                return ($model->type == "fixed")? "$".$model->value : $model->value."%";
+                            }
                         ],
                         [
                             'attribute' => 'from_date',
@@ -55,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         [
                             'class' => 'app\components\grid\ActionColumn',
-                            'template'=>'{view} {update}',
+                            'template'=>'{view}',
                             'buttons'=>[
                                 'view'=>function ($url, $model, $key) {
                                     return Html::a(
