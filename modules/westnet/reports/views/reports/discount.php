@@ -1,4 +1,5 @@
 <?php
+use yii\helpers\Html;
 use yii\grid\SerialColumn;
 $this->title = Yii::t('app','Discounts');
 $this->params['breadcrumbs'][] = $this->title;
@@ -6,12 +7,12 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">
     
-    <h1>Filtrar Por</h1>
+    <h1>Filtrar Por Descuentos</h1>
     <div class="row">
-        <div class="col-md-6">
-            <div class="col-md-12">
-                <h1>Descuentos</h1>
-                <?php echo \yii\grid\GridView::widget([
+<!--         <div class="col-md-6">
+ -->            <div class="col-md-12">
+<!--                 <h1>Descuentos</h1>
+ -->                <?php echo \yii\grid\GridView::widget([
                     'dataProvider' => $dataProvider,
                     'filterModel' => $discountSearch,
                     'columns' => [
@@ -31,8 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                         [
                             'attribute' => 'status',
-                            'format' => 'text',
-                            'label' => 'Estado',
+                            'format' => 'html',
+                            'value' => function ($model) {
+                                $labelType = ($model->status == "enabled")? "success" : "danger";
+                                return "<span class='label label-$labelType'>$model->status</span>";
+                            }
                         ],
                         [
                             'attribute' => 'value',
@@ -49,11 +53,24 @@ $this->params['breadcrumbs'][] = $this->title;
                             'format' => 'text',
                             'label' => 'Hasta',
                         ],
+                        [
+                            'class' => 'app\components\grid\ActionColumn',
+                            'template'=>'{view} {update}',
+                            'buttons'=>[
+                                'view'=>function ($url, $model, $key) {
+                                    return Html::a(
+                                        '<span class="glyphicon glyphicon-eye-open updateItem btn btn-primary"></span>',
+                                        ['reports/customer-per-discount',
+                                        'discount_id' =>  $model->discount_id]
+                                    );
+                                }
+                            ]
+                        ],
                     ]
                 ])?>        
             </div>
         </div>
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
             <div class="col-md-12">
             
                 <h1>Clientes</h1>
@@ -61,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             </div>
 
-        </div>
+        </div> -->
 
     </div>
 </div>

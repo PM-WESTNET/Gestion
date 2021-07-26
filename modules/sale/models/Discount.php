@@ -27,6 +27,10 @@ use Yii;
  */
 class Discount extends \app\components\db\ActiveRecord
 {
+    public $customer_id;
+    public $lastname;
+    public $code;
+
     public $customerAmount;
 
     const STATUS_ENABLED = 'enabled';

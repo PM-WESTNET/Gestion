@@ -93,11 +93,11 @@ class ReportsController extends Controller
      * view controller for discounts view
      */
     public function actionDiscount(){
-        $this->layout = '/fluid';
-
+/*         $this->layout = '/fluid';
+ */
         $discountSearch = new DiscountSearch();
 
-        $dataProvider = $discountSearch->search(Yii::$app->request->get()); 
+        $dataProvider = $discountSearch->searchDiscounts(Yii::$app->request->get()); 
 
         return $this->render('discount',
                 [
@@ -105,7 +105,23 @@ class ReportsController extends Controller
                     'discountSearch' => $discountSearch,
                 ]);
     }
+    public function actionCustomerPerDiscount($discount_id){
+        /*         
+        $this->layout = '/fluid';
+        */
+        //http://gestion_westnet.local:8100/index.php?r=sale%2Fcustomer-has-discount%2Findex&customer_id=2789
+        $model = Discount::findOne(['discount_id' => $discount_id]);
+        
+        $discountSearch = new DiscountSearch();
+        $dataProvider = $discountSearch->searchCustomersOfDiscount(Yii::$app->request->get()); 
 
+        return $this->render('customer-per-discount',
+                [
+                    'model' => $model,
+                    'dataProvider' => $dataProvider,
+                    'discountSearch' => $discountSearch,
+                ]);
+    }
 
     
     /**

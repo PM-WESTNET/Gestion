@@ -1481,7 +1481,7 @@ a.ui-state-default.ui-state-active {
   justify-content: space-between;
 }
 
-#reports-reports-discount .col-md-12{
-  background: rgb(236, 254, 255);
+#reports-reports-discount table{
+  background: hsla(192, 100%, 85%, 0.26);
   
 }
