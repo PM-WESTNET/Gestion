@@ -608,6 +608,8 @@ class NotificationController extends Controller {
             } else {
                 $transaction->rollBack();
             }
+        }else{
+            $this->redirect("http://192.168.2.115:3000/portal/not-success");
         }
 
         $this->redirect("http://192.168.2.115:3000/portal/success");
