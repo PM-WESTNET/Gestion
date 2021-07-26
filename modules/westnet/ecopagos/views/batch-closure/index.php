@@ -69,10 +69,16 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'app\components\grid\ActionColumn',
-            'template' => '{view}',
-        ]
+            'template' => '{view} {update}',
+            'buttons' => [
+                'update' => function ($url, $model) {
+                    if($model->status != 'rendered')
+                        return Html::a('<i class="glyphicon glyphicon-pencil"></i>', ['batch-closure/update', 'id' => $model->batch_closure_id],["class" => "btn btn-primary"]);
+                }
+            ]
+        ]    
     ];
-    ?>
+?>
 
     <?php
     echo GridView::widget([

@@ -129,4 +129,39 @@ class BatchClosureController extends Controller {
         }
     }
 
+
+     /**
+     * Updates an existing VisadoConfiguration model.
+     * If update is successful, the browser will be redirected to the 'view' page.
+     * @param integer $id
+     * @return mixed
+     * @throws NotFoundHttpException if the model cannot be found
+     */
+    public function actionUpdate($id)
+    {   
+        
+        $model = $this->findModel($id);
+       
+        if($model->status != "rendered" && Yii::$app->request->post() != null){
+            $request =  Yii::$app->request->post();
+
+            $model->status = $request['BatchClosure']['status'];
+            $model->observation = $request['BatchClosure']['observation'];
+
+            if ($model->save(false)) {
+                return $this->redirect(['view', 'id' => $model->batch_closure_id]);
+            }else{
+                Yii::$app->session->setFlash('error', 'No se pudo actualizar el estado del lote');
+                return $this->redirect(['view', 'id' => $model->batch_closure_id]);
+            }
+        }else if($model->status == "rendered"){
+            Yii::$app->session->setFlash('error', 'No se puede actualizar el estado de un lote rendido');
+            return $this->redirect(['view', 'id' => $model->batch_closure_id]);
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
+
 }
