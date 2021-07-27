@@ -119,12 +119,12 @@ class DiscountSearch extends Discount
         ]);
 
         // AND WHERE LIKE-s (pattern match)
-        $query->andFilterWhere(['like', 'name', $this->name]);
-        $query->andFilterWhere(['like', 'status', $this->status]);
-        $query->andFilterWhere(['like', 'from_date', $this->from_date]);
-        $query->andFilterWhere(['like', 'to_date', $this->to_date]);
-        $query->andFilterWhere(['like', 'type', $this->type]);
-        $query->andFilterWhere(['like', 'value', $this->value]);
+        $query->andFilterWhere(['like', 'd.name', $this->name]);
+        $query->andFilterWhere(['like', 'd.status', $this->status]);
+        $query->andFilterWhere(['like', 'd.from_date', $this->from_date]);
+        $query->andFilterWhere(['like', 'd.to_date', $this->to_date]);
+        $query->andFilterWhere(['like', 'd.type', $this->type]);
+        $query->andFilterWhere(['like', 'd.value', $this->value]);
        
         return $dataProvider;
     }
