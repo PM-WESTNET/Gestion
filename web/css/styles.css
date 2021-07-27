@@ -1494,7 +1494,8 @@ a.ui-state-default.ui-state-active {
   justify-content: space-between;
 }
 
-#reports-reports-discount table{
+#reports-reports-discount table,
+#reports-reports-customer-per-discount table{
   background: hsla(192, 100%, 85%, 0.26);
   
 }

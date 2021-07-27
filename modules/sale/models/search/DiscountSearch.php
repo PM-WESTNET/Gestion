@@ -21,7 +21,8 @@ class DiscountSearch extends Discount
             [['discount_id','customerAmount','value','code'], 'integer'],
             [['name', 'referenced'], 'safe'],
             [['status'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
-            [['from_date', 'to_date', 'lastname'], 'string'], // mejorar implementacion de esto
+            /* [['from_date', 'to_date', 'lastname'], 'string'], */ // mejorar implementacion de esto
+            [['lastname'], 'string'], 
             [['referenced'], 'boolean'],
         ];
     }

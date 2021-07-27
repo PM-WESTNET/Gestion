@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 [
                     'attribute' => 'name',
                     'format' => 'html',
-                    'label' => 'nomb',
+                    'label' => 'Cliente',
                     'value' => function($model){
                         return Html::a($model->lastname . ' ' . $model->name . ' (' .$model->code . ')', 
                                     ['/sale/customer/view', 'id' => $model->customer_id], 
@@ -31,7 +31,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     'value' => function ($model) {
                         $labelType = ($model->status == "enabled")? "success" : "danger";
                         return "<span class='label label-$labelType'>$model->status</span>";
-                    }
+                    },
+                    'filter'=>['enabled'=>Yii::t('app','Enabled'), 'disabled'=>Yii::t('app','Disabled')]
                 ],
                 [
                     'attribute' => 'from_date',
