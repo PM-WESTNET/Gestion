@@ -41,7 +41,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             'value' => function ($model) {
                                 $labelType = ($model->status == "enabled")? "success" : "danger";
                                 return "<span class='label label-$labelType'>$model->status</span>";
-                            }
+                            },
+                            'filter'=>['enabled'=>Yii::t('app','Enabled'), 'disabled'=>Yii::t('app','Disabled')],
                         ],
                         [
                             'attribute' => 'value',
@@ -49,7 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'label' => 'Valor',
                             'value' => function ($model) {
                                 return ($model->type == "fixed")? "$".$model->value : $model->value."%";
-                            }
+                            },
                         ],
                         [
                             'attribute' => 'from_date',
