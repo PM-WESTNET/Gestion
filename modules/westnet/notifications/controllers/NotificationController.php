@@ -574,6 +574,7 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
         
+        
         if($result_search['PagoExitoso'] == 'payed'){
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
@@ -605,14 +606,14 @@ class NotificationController extends Controller {
                 $customer->save(false);
 
                 $transaction->commit();
+
+                $this->redirect("http://192.168.2.115:3000/portal/success");
             } else {
                 $transaction->rollBack();
             }
         }else{
             $this->redirect("http://192.168.2.115:3000/portal/not-success");
         }
-
-        $this->redirect("http://192.168.2.115:3000/portal/success");
     }
 
     
