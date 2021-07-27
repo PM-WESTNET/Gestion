@@ -96,7 +96,7 @@ class DiscountSearch extends Discount
                 ->from('discount d')
                 ->leftJoin('customer_has_discount chd', 'd.discount_id = chd.discount_id' )
                 ->groupBy('d.discount_id')
-                ->filterHaving(['like', 'COUNT(*)', $this->customerAmount])
+                ->filterHaving(['like', 'COUNT(*)', $this->customerAmount.'%', false])
                 ;
 
         // creates the ActiveDataProvider instance
@@ -128,7 +128,7 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'd.from_date', $this->from_date]);
         $query->andFilterWhere(['like', 'd.to_date', $this->to_date]);
         $query->andFilterWhere(['like', 'd.type', $this->type]);
-        $query->andFilterWhere(['like', 'd.value', $this->value]);
+        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
        
         return $dataProvider;
     }
