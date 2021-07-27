@@ -67,8 +67,11 @@ class DiscountSearch extends Discount
         }
 
         $query->andFilterWhere(['like', 'concat(concat(c.name," ",c.lastname), " ", c.code)', $this->name]);
-        $query->andFilterWhere(['like', 'lastname', $this->lastname]);
-        $query->andFilterWhere(['like', 'code', $this->code]);
+        $query->andFilterWhere(['like', 'c.lastname', $this->lastname]);
+        $query->andFilterWhere(['like', 'c.code', $this->code]);
+        $query->andFilterWhere(['like', 'chd.status', $this->status]);
+        $query->andFilterWhere(['like', 'chd.from_date', $this->from_date]);
+        $query->andFilterWhere(['like', 'chd.to_date', $this->to_date]);
 
         return $dataProvider;
     }
