@@ -481,7 +481,11 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="modal-body">
                 <?php 
-                    $url_whatsapp = str_replace('${customer_id}',$model->customer_id,$url_whatsapp);
+                    if($model != null && $model->hash_customer_id == null){
+                        $model->hash_customer_id = md5($model->customer_id);
+                        $model->save(false);
+                    }
+                    $url_whatsapp = str_replace('${customer_id}',$model->hash_customer_id,$url_whatsapp);
                 ?>
                 <?php if ($model->phone):?>
                     <?php $url_whatsapp_phone = str_replace('${phone}',$model->phone,$url_whatsapp);?>
@@ -494,12 +498,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     <br>
                 <?php endif;?>
                 <?php if ($model->phone3):?>
-                    <?php$url_whatsapp_phone3 = str_replace('${phone}',$model->phone3,$url_whatsapp);?>
+                    <?php $url_whatsapp_phone3 = str_replace('${phone}',$model->phone3,$url_whatsapp);?>
                     <?= \yii\bootstrap\Html::a('Teléfono 3 ('.$model->phone3.')', $url_whatsapp_phone3,['target' => '_blank'])?>
                     <br>
                 <?php endif;?>
                 <?php if ($model->phone4):?>
-                    <?php$url_whatsapp_phone4 = str_replace('${phone}',$model->phone4,$url_whatsapp);?>
+                    <?php $url_whatsapp_phone4 = str_replace('${phone}',$model->phone4,$url_whatsapp);?>
                     <?= \yii\bootstrap\Html::a('Teléfono 4 ('.$model->phone4.')', $url_whatsapp_phone4,['target' => '_blank'])?>
                     <br>
                 <?php endif;?>

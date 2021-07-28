@@ -567,14 +567,19 @@ class NotificationController extends Controller {
 
         $paymentIntention->id_resultado = $IdResultado;
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
-        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : "pending";
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : ($result_search['Estado'] == 'CANCELADA')?'canceled':'pending';
         $paymentIntention->id_operacion = $result_search['IdOperacion'];
         $paymentIntention->estado = $result_search['Estado'];
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
+<<<<<<< HEAD
         
         
+=======
+       
+
+>>>>>>> origin/BDP-23-intencion-de-pago-cancelada
         if($result_search['PagoExitoso'] == 'payed'){
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
@@ -611,9 +616,14 @@ class NotificationController extends Controller {
             } else {
                 $transaction->rollBack();
             }
+        }else if($result_search['Estado'] == 'CANCELADA'){
+
+            $this->redirect("http://192.168.2.115:3000/portal/canceled-pay");
         }else{
             $this->redirect("http://192.168.2.115:3000/portal/not-success");
         }
+
+        
     }
 
     
