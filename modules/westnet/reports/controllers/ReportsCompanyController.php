@@ -13,6 +13,9 @@ use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\search\ReportSearch;
 use app\modules\westnet\reports\search\ReportCompanySearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
+use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use app\modules\westnet\notifications\models\search\SiroPaymentIntentionSearch;
+use app\modules\westnet\notifications\components\siro\ApiSiro;
 
 class ReportsCompanyController extends Controller
 {
@@ -339,5 +342,23 @@ class ReportsCompanyController extends Controller
             'searchModel' => $searchModel,
             'data'  => $dataModel
         ]);
+    }
+
+
+    public function actionPaymentIntention(){
+        $searchModel = new SiroPaymentIntentionSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        return $this->render('/reports/payment-intention', ['dataProvider' => $dataProvider, 'searchModel' => $searchModel]);
+    }
+
+    public function actionPaymentIntentionView($id){
+        $model = SiroPaymentIntention::FindPaymentIntentionByID($id);
+
+        return $this->render('/reports/payment-intention-view',['model' => $model]);
+    }
+
+    public function actionResultPaymentIntention($reference,$id_resultado){
+        return json_encode(ApiSiro::SearchPaymentIntention($reference, $id_resultado));
     }
 }

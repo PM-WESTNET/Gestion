@@ -216,10 +216,9 @@ if (Yii::$app->getModule('reports')) {
             ['label' => ReportsModule::t('app', 'Cost effectiveness'), 'url' => ['/reports/reports-company/cost-effectiveness']],
             ['label' => ReportsModule::t('app', 'Total Customer Variation'), 'url' => ['/reports/reports-company/up-down-variation']],
             ['label' => ReportsModule::t('app', 'Ingresos y Egresos'), 'url' => ['/reports/reports-company/in-out']],
-
             ['label' => ReportsModule::t('app', 'Change History company'), 'url' => ['/reports/customer/change-company-history']],
-
             ['label' => ReportsModule::t('app', 'Customer Registrations'), 'url' => ['/reports/reports/customer-registrations']],
+            ['label' => ReportsModule::t('app', 'Intenciones de Pago'), 'url' => ['/reports/reports-company/payment-intention']],
         ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],
         ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports/costumer-variation-per-month']],
