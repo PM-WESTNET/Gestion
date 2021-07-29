@@ -1,23 +1,23 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 $this->title = 'Intención de Pago N° '.$model->siro_payment_intention_id;
 $this->params['breadcrumbs'][] = ['label' => 'Intenciones de Pago', 'url' => ['reports-company/payment-intention']];
 $this->params['breadcrumbs'][] = $this->title;
+$url =  Url::toRoute(['result-payment-intention','reference'=>$model->reference, 'id_resultado' => $model->id_resultado]);
 
 $this->registerJs("
     var reference = '$model->reference';
     var id_resultado = '$model->id_resultado';
     var result_table  = document.querySelector('.result-table');
-    console.log('result-payment-intention?reference='+encodeURIComponent(reference)+'&id_resultado='+encodeURIComponent(id_resultado));
     $('#check-status').click(function(){
-        $.ajax({ url: 'result-payment-intention?reference='+encodeURIComponent(reference)+'&id_resultado='+encodeURIComponent(id_resultado),
+        $.ajax({ url: '$url',
             type: 'GET',
             success: function(data) {
                     data = JSON.parse(data);
-                    console.log(data);
                     const tr = document.createElement('tr');
 
                     const tdEstado = document.createElement('td');
