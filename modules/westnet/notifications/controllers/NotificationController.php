@@ -654,4 +654,16 @@ class NotificationController extends Controller {
             $transaction->rollBack(); 
     }
 
+
+    public function actionUpdateStatusNotification(){
+        Yii::$app->response->format = 'json';
+        $request = Yii::$app->request->post();
+
+        $model= $this->findModel($request['id']);
+        $model->status = $request['status'];
+        $model->save(false);
+
+        return ['status' => $model->status];
+    }
+
 }

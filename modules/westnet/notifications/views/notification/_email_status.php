@@ -5,6 +5,7 @@
  * Date: 05/12/19
  * Time: 11:07
  */
+use yii\helpers\Url;
 
 $total = Yii::$app->cache->get('total_'.$model->notification_id);
 $success = Yii::$app->cache->get('success_'.$model->notification_id);
@@ -28,6 +29,11 @@ if ($total) {
                         <span class="sr-only">60% Complete</span>
                     </div>
                 </div>
+                <span style="float:right;">
+                    <button type="button" class="glyphicon glyphicon-pause red" id="stop-process">
+                    <button type="button" class="glyphicon glyphicon-play green" id="start-process" style="margin-left: 2px;">
+                    <button type="button" class="glyphicon glyphicon-remove red" id="cancel-process" style="margin-left: 2px;">
+                </span>
             </div>
         </div>
     </div>
@@ -50,6 +56,59 @@ if ($total) {
 
         this.init = function () {
             EmailStatus.interval = setInterval(function(){ EmailStatus.getProcess()}, 3000);
+
+            $(document).off('click', "#start-process").on('click', "#start-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['update-status-notification'])?>',
+                    method: 'POST',
+                    data: {
+                        'id': <?=$model->notification_id?>,
+                        'status': 'pending'
+                    },
+                    dataType: 'json',
+                    success: function (data) { 
+                        $("#start-process").attr('disabled', true);
+                        $("#stop-process").attr('disabled', false);
+                        $('#sta-lbl').html("Procesando...");
+                        EmailStatus.init();
+                    }
+                })
+                console.log("btn-click-play");
+            });
+
+            $(document).off('click', "#stop-process").on('click', "#stop-process", function(ev){
+                $.ajax({
+                    url: '<?= Url::to(['update-status-notification'])?>',
+                    method: 'POST',
+                    data: {
+                        'id': <?=$model->notification_id?>,
+                        'status': 'paused'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#stop-process").attr('disabled', true);
+                        $("#start-process").attr('disabled', false);
+                    }
+                })
+                console.log("btn-click-pause");       
+            });
+
+            $(document).off('click', "#cancel-process").on('click', "#cancel-process", function(ev){
+                /*$.ajax({
+                    url: '<?= Url::to(['/sale/batch-invoice/update-status-close-invoice-process'])?>',
+                    method: 'POST',
+                    data: {
+                        'status': 'finished'
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        BatchInvoice.processing = false;
+                        window.location.reload();
+                    }
+                })*/
+                console.log("btn-click-pause");
+            });
+
         };
 
         this.getProcess = function () {
@@ -83,6 +142,15 @@ if ($total) {
                         clearInterval(EmailStatus.interval);
                         $("#bar").css('background-color', 'green');
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
+                    }else if (response.status === 'paused') {
+                        clearInterval(EmailStatus.interval);
+                        $("#bar").css('background-color', 'yellow');
+                        $('#sta-lbl').html("Pausado...");
+
+                    }else if (response.status === 'canceled') {
+                        clearInterval(EmailStatus.interval);
+                        $("#bar").css('background-color', 'red');
+                        $('#sta-lbl').html("Cancelado...");
                     }
                 }
             })
