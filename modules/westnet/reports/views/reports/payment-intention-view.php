@@ -110,7 +110,11 @@ $this->registerJs("
                 'label' => Yii::t('app','payment'),
                 'format' => 'raw',
                 'value' => function($model){
-                    if(!$model->payment_id)
+                    if(!$model->payment_id && $model->status == 'pending'){
+                        return  Html::a('<span class="label label-success">Generar Pago Manual</span>', 
+                        ['payment-intention-generate-pay', 'id' => $model->siro_payment_intention_id], 
+                        ['class' => 'profile-link']);   
+                    }else if(!$model->payment_id)
                         return null;
                     return Html::a('Pago N° '.$model->payment_id , 
                                 ['/checkout/payment/view', 'id' => $model->payment_id], 

@@ -567,7 +567,7 @@ class NotificationController extends Controller {
 
         $paymentIntention->id_resultado = $IdResultado;
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
-        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : ($result_search['Estado'] == 'CANCELADA')?'canceled':'pending';
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : (($result_search['Estado'] == 'CANCELADA')?'canceled':'pending');
         $paymentIntention->id_operacion = $result_search['IdOperacion'];
         $paymentIntention->estado = $result_search['Estado'];
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
