@@ -78,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=>'createdAt',
                 'label' => 'Fecha',
-                'filter'=>DatePicker::widget([
+                /*'filter'=>DatePicker::widget([
                     'model' => $searchModel,
                     'attribute' => 'from_date',
                     'value' => '2014-01-01',
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'autoclose'=>true,
                         'format' => 'yyyy-mm-dd'
                     ]
-                ])
+                ])*/
             ], 
             [
                 'class' => 'yii\grid\ActionColumn',

@@ -82,13 +82,13 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
               ->andFilterWhere(['like', 'payment_id', $this->payment_id]);
         
         
-        if($this->from_date){
+        /*if($this->from_date){
             $query->andFilterWhere(['>=','createdAt', $this->from_date]);
         }
 
         if($this->to_date){
             $query->andFilterWhere(['<=','createdAt', $this->to_date]);
-        }      
+        }*/      
 
         return $dataProvider;
     }
