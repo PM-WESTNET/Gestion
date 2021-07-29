@@ -1,12 +1,13 @@
 <?php 
 use app\modules\config\models\Config;
+use yii\helpers\Html;
 use yii\helpers\Url;
 /* @var $this \yii\web\View view component instance */
 /* @var $message \yii\mail\MessageInterface the message being composed */
 /* @var $content string main view render result */
 
 $notification = Yii::$app->view->params['notification'];
-$title = $notification->subject;
+$title = $notification['subject'];
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -30,10 +31,9 @@ $title = $notification->subject;
         </thead>
 
         <tbody>
-            
-          <!-- Mensaje info -->
+          <!-- Mensaje Danger -->
           <tr>
-            <td style="background-color: #0069ff; padding: 10px; color: white;">
+            <td style="background-color: red; padding: 10px; color: white;">
                <h4 style="margin: 10px; text-align: center; line-height: 1.5em;"><?= Config::getValue('mail-top-title') ?></h4>
                <h2 style="margin: 10px; text-align: center; line-height: 1.5em;"><?= $title ?></h2>
             </td>            
@@ -41,13 +41,13 @@ $title = $notification->subject;
           
           <tr>
             <td>
-                <?= $notification->content ?>
+                <?= $notification['content'] ?>
             </td>
           </tr>
-          
+
         </tbody>
 
-          <?= $this->renderFile('@app/modules/westnet/notifications/body/partials/_footer.php', ['company'=> $notification->emailTransport->getObject()]) ?>
+        <?= $this->renderFile('@app/modules/westnet/notifications/body/partials/_footer.php', ['company'=> $notification['emailTransport']->getObject()]) ?>
         
       </table>
     </div>
