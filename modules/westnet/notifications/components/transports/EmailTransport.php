@@ -105,61 +105,71 @@ class EmailTransport implements TransportInterface {
         $ok = 0;
         $error = 'Error: ';
 
-        //try {
+        try {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
 
             if(!empty($customers)){
                 foreach($customers as $customer){
-                    $customerObject = Customer::findOne(['customer_id' => $customer['customer_id']]);
-                    if(!empty($customerObject) && empty($customerObject->hash_customer_id)){
-                        $customerObject->hash_customer_id = md5($customerObject->customer_id);
-                        $customerObject->save(false);
-                    }
+                    $status_notification = Notification::findOne(['notification_id' => $notification->notification_id])->status;
+                    if($status_notification === "pending" || $status_notification === "in_process"){
 
-                    $customer['hash_customer_id'] = $customerObject->hash_customer_id;
-                    $result = 0;
-                    /** @var MailSender $mailSender */
-                    $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
+                        $customerObject = Customer::findOne(['customer_id' => $customer['customer_id']]);
+                        if(!empty($customerObject) && empty($customerObject->hash_customer_id)){
+                            $customerObject->hash_customer_id = md5($customerObject->customer_id);
+                            $customerObject->save(false);
+                        }
 
-                    log_email($customer);
-                    $toName = $customer['name'].' '.$customer['lastname'];
-                    $clone = clone $notification;
-                    $clone->content = self::replaceText($notification->content, $customer);
-                    
-                    if ($validator->validate($customer['email'], $err)) {
-                        /*$result = $mailSender->prepareMessageAndSend(
-                            ['email'=>$customer['email'], 'name' => $toName],
-                            $notification->subject,
-                            [ 'view'=> $layout ,'params' => ['notification' => $clone]]
-                        );*/
-                        $result = true;
-                        if($result){
-                            NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
-                        }else if(!$result)
-                            NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
-                        else
-                            NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
+                        $customer['hash_customer_id'] = $customerObject->hash_customer_id;
+                        $result = 0;
+                        /** @var MailSender $mailSender */
+                        $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
+
+                        log_email($customer);
+                        $toName = $customer['name'].' '.$customer['lastname'];
+                        $clone = clone $notification;
+                        $clone->content = self::replaceText($notification->content, $customer);
+                        
+                        if ($validator->validate($customer['email'], $err)) {
+                            $result = $mailSender->prepareMessageAndSend(
+                                ['email'=>$customer['email'], 'name' => $toName],
+                                $notification->subject,
+                                [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                            );
+                            $result = true;
+                            if($result){
+                                NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
+                            }else if(!$result)
+                                NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
+                            else
+                                NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
+                        }else{
+                            $error .= " $toName <$toMail>; ";
+                            log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+                            NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                        }
+
+                        $ok += $result;
+
+                        Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
+                        Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
+                        Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
+
+                        sleep($time_sleep);
                     }else{
-                        $error .= " $toName <$toMail>; ";
-                        log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
-                        NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                        Yii::info('Envio de camapaña pausada', 'emails');
+                        return [
+                            'status' => 'paused',
+                            'count' => $ok
+                        ];
                     }
-
-                    $ok += $result;
-                     
-                    Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
-                    Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
-                    Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
-
-                    sleep($time_sleep);
                 }
                 log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
             }else{
                 $error = 'No hay mas destinatarios!';
             }
-        /*} catch(\Exception $ex) {
+        } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
@@ -168,7 +178,7 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-        }*/
+        }
 
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);

@@ -130,6 +130,7 @@ if ($total) {
                         $('#total').html(response.total);
                         $('#success').html(response.success);
                         $('#error').html(response.error);
+                        $("#bar").css('background-color', 'green');
 
                         if(process === 100) {
                             clearInterval(EmailStatus.interval);
@@ -151,7 +152,7 @@ if ($total) {
                         $('#sta-lbl').html("<?php echo \app\modules\westnet\notifications\NotificationsModule::t('app', 'Finished')?>")
                     }else if (response.status === 'paused') {
                         clearInterval(EmailStatus.interval);
-                        $("#bar").css('background-color', 'yellow');
+                        $("#bar").css('background-color', 'orange');
                         $("#stop-process").attr('disabled', true);
                         $("#stop-process").css('color', 'gray');
                         $('#sta-lbl').html("Pausado...");
