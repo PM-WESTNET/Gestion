@@ -1012,13 +1012,11 @@ class Customer extends ActiveRecord {
      * @param string $template define el template para construir el nombre completo
      * @return string
      */
-    public function getFullName($template = '{lastname}, {name}') {
-        if (!empty($this->lastname)) {
-            return str_replace(['{lastname}','{name}'], [$this->lastname, $this->name], $template);
-        }else{
-            $template = '{name}';
-             return str_replace(['{lastname}','{name}'], [$this->lastname, $this->name], $template);
-        }
+    public function getFullName($template = '{lastname}, {name} {description}') {
+
+            return str_replace(['{lastname}','{name}', '{description}'], [$this->lastname, $this->name, '('.$this->description.')'], $template);
+        
+
        
     }
 
