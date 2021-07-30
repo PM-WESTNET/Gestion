@@ -105,7 +105,7 @@ class EmailTransport implements TransportInterface {
         $ok = 0;
         $error = 'Error: ';
 
-        try {
+        //try {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
@@ -113,13 +113,12 @@ class EmailTransport implements TransportInterface {
             if(!empty($customers)){
                 foreach($customers as $customer){
                     $customerObject = Customer::findOne(['customer_id' => $customer['customer_id']]);
-                    if($customerObject != null && $customerObject->hash_customer_id == null){
+                    if(!empty($customerObject) && empty($customerObject->hash_customer_id)){
                         $customerObject->hash_customer_id = md5($customerObject->customer_id);
                         $customerObject->save(false);
                     }
 
                     $customer['hash_customer_id'] = $customerObject->hash_customer_id;
-                    
                     $result = 0;
                     /** @var MailSender $mailSender */
                     $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
@@ -130,12 +129,12 @@ class EmailTransport implements TransportInterface {
                     $clone->content = self::replaceText($notification->content, $customer);
                     
                     if ($validator->validate($customer['email'], $err)) {
-                        $result = $mailSender->prepareMessageAndSend(
+                        /*$result = $mailSender->prepareMessageAndSend(
                             ['email'=>$customer['email'], 'name' => $toName],
                             $notification->subject,
                             [ 'view'=> $layout ,'params' => ['notification' => $clone]]
-                        );
-                
+                        );*/
+                        $result = true;
                         if($result){
                             NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
                         }else if(!$result)
@@ -149,7 +148,7 @@ class EmailTransport implements TransportInterface {
                     }
 
                     $ok += $result;
-                
+                     
                     Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                     Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
                     Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
@@ -160,7 +159,7 @@ class EmailTransport implements TransportInterface {
             }else{
                 $error = 'No hay mas destinatarios!';
             }
-        } catch(\Exception $ex) {
+        /*} catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
@@ -169,7 +168,7 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-        }
+        }*/
 
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);
