@@ -573,21 +573,16 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
-<<<<<<< HEAD
-        
-        
-=======
-       
 
->>>>>>> origin/BDP-23-intencion-de-pago-cancelada
-        if($result_search['PagoExitoso'] == 'payed'){
+        if($result_search['PagoExitoso'] == 'payed' && empty($paymentIntention->payment_id)){
+
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
 
             $payment = new Payment([
                 'customer_id' => $customer->customer_id,
-                'amount' => abs($customer['current_account_balance']),
+                'amount' => $result_search['Request']['Importe'],
                 'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
                 'company_id' => $customer->company_id,
                 'date' => (new \DateTime('now'))->format('Y-m-d'),
