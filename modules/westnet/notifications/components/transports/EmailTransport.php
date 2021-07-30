@@ -137,7 +137,7 @@ class EmailTransport implements TransportInterface {
                                 $notification->subject,
                                 [ 'view'=> $layout ,'params' => ['notification' => $clone]]
                             );
-                            $result = true;
+                            
                             if($result){
                                 NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
                             }else if(!$result)
