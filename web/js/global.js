@@ -37,11 +37,13 @@ $(document).ready(function(){
                 if (_t.html().indexOf(input.val()) > -1) {
                     _t.closest('label').removeClass('hide');
                     _t.closest('label').next().removeClass('hide');
+                    _t.closest('label').next().next().removeClass('hide');
                 }
                 else
                 {
                     _t.closest('label').addClass('hide');
                     _t.closest('label').next().addClass('hide');
+                    _t.closest('label').next().next().addClass('hide');
                 }
                 
             });
