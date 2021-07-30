@@ -156,7 +156,7 @@ class CustomerLog extends ActiveRecord {
         if ( YII_ENV_TEST || Yii::$app instanceof \yii\console\Application || (Yii::$app->controller->module->id === 'mobileapp' || Yii::$app->controller->module->id === 'v1' )) {
             $this->user_id = User::findOne(['username'=>'superadmin'])->id;
         } else {
-            $this->user_id = Yii::$app->user->identity->id;
+            $this->user_id = (Yii::$app->user && Yii::$app->user->identity)?Yii::$app->user->identity->id:0;
         }
 
         $this->before_value = $oldValue;

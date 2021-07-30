@@ -556,6 +556,7 @@ class Customer extends ActiveRecord {
             'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit'),
             'has_direct_debit' => Yii::t('app', 'Require Direct Debit'),
 	    'hash_customer_id' => Yii::t('app', 'Hash Cliente ID'),
+	    'current_account_balance' => Yii::t('app','Current Account Balance'),
         ];
 
         //Labels adicionales definidos para los profiles
