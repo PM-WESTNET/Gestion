@@ -282,10 +282,10 @@ class BillSearch extends Bill
             $this->toDate = Yii::$app->formatter->asDate($this->toDate, 'yyyy-MM-dd');
 
             //Ingnoramos si el valor esta vacio
-
+            //var_dump(strtotime($this->toDate));die();
             $query->andFilterWhere(['and',
                 ['>=', "bill.timestamp", strtotime($this->fromDate)],
-                ['<=', "bill.timestamp", strtotime($this->toDate)]
+                ['<=', "bill.timestamp", strtotime($this->toDate)+84600]
             ]);
         }
     }
