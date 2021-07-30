@@ -148,6 +148,9 @@ class Transport extends \app\components\db\ActiveRecord {
 
         if($response['status'] == 'success'){
             $notification->markSending();
+
+        }else if($response['status'] == 'paused'){
+            $notification->markSending();
         }else{
             $notification->markAsError($response['error']);
         }

@@ -60,6 +60,7 @@ class Notification extends ActiveRecord {
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_PENDING = 'pending';
     const STATUS_IN_PROCESS = 'in_process';
+    const STATUS_PAUSED = 'paused';
 
     //Buttons
     const BUTTON_PAYMENT_EXTENSION = 'payment_extension';
@@ -214,6 +215,7 @@ class Notification extends ActiveRecord {
             static::STATUS_ERROR => NotificationsModule::t('app', 'Error'),
             static::STATUS_PENDING => NotificationsModule::t('app', 'Pending'),
             static::STATUS_IN_PROCESS => NotificationsModule::t('app', 'In Process'),
+            static::STATUS_PAUSED => NotificationsModule::t('app', 'Paused'),
         ];
     }
 
