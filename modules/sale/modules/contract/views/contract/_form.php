@@ -52,136 +52,137 @@ use webvimark\modules\UserManagement\models\User;
     <?php endif; ?>
     
     
-    
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title"><?= Yii::t('app','Plan'); ?></h3>
-        </div>
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <?= $form->field($contractDetailPlan, 'product_id')->dropdownList(ArrayHelper::map($plans,
-                        'product_id', function($plan){ return $plan->name.' - $'.round($plan->finalPrice,2); }),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'plan_product_id']) ?>
-                </div>
+    <?php if(User::hasPermission('user-view-plans')): ?>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><?= Yii::t('app','Plan'); ?></h3>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <?php
-                    if (isset($contractDetailPlan->discount) && $contractDetailPlan->discount!==null) {
-                        $data = [$contractDetailPlan->discount->discount_id=>$contractDetailPlan->discount->name];
-                    } else {
-                        $data = [];
-                    }
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <?= $form->field($contractDetailPlan, 'product_id')->dropdownList(ArrayHelper::map($plans,
+                            'product_id', function($plan){ return $plan->name.' - $'.round($plan->finalPrice,2); }),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'plan_product_id']) ?>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php
+                        if (isset($contractDetailPlan->discount) && $contractDetailPlan->discount!==null) {
+                            $data = [$contractDetailPlan->discount->discount_id=>$contractDetailPlan->discount->name];
+                        } else {
+                            $data = [];
+                        }
 
-                    echo $form->field($contractDetailPlan, 'discount_id')->widget(DepDrop::className(), [
-                        'options' => ['id' => 'discount_id'],
-                        'data' => $data,
-                        //'type'=>DepDrop::TYPE_SELECT2,
-                        'select2Options'=>[
-                            'pluginOptions'=>[
-                                'allowClear'=>true,
-                            ],
-                        ],
-                        'pluginOptions' => [
-                            'depends' => ['plan_product_id', 'is_customer'],
-                            'initDepends' => ['plan_product_id', 'is_customer'],
-                            'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')])."...",
-                            'url' => Url::to(['/sale/discount/discount-by-product'])
-                        ]
-                    ])->label(Yii::t('app', 'Discount'));
-                    ?>
-                </div>
-            </div>
-            <?php if($model->isNewRecord):?>
-            <?= $form->field($contractDetailIns, 'count')->hiddenInput(['id' => 'instCount', 'name'=>'contractDetailIns[count]', 'value' => '1'])->label('')?>
-            <div class="row">
-                <input type="hidden" name="is_customer_detail" id="is_customer_detail" value="0"/>
-                <div class="col-md-4">
-                    <?=
-                       $form->field($contractDetailIns, 'product_id')->dropdownList(ArrayHelper::map($instalationProd,
-                        'product_id', function($prod){ return $prod->name.' - $'.round($prod->finalPrice,2); }),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'inst_product_id', 'name'=>'contractDetailIns[product_id]'])->label(Yii::t('app', 'Instalation Charges')) ?>
-                </div>
-               
-                
-                
-                <div class="col-md-4">
-                    <?php
-                        if ($contractDetailIns->isNewRecord) {
-                            $data = [];
-                        } else {
-                            $search = new FundingPlanSearch();
-                            $data =  ArrayHelper::map($search->searchByProduct($contractDetailIns->product_id, 1), 'id', 'name' );
-                        }
-                        echo $form->field($contractDetailIns, 'funding_plan_id')->widget(DepDrop::classname(), [
-                            'options'=>['id'=>'funding_plan_id', 'name'=>'contractDetailIns[funding_plan_id]'],
-                            'data'=> $data,
-                            'type'=>DepDrop::TYPE_SELECT2,
-                            'pluginOptions'=>[
-                               'depends' => ['inst_product_id', 'instCount'],
-                               'initDepends' => ['inst_product_id', 'instCount'],
-                               'initialize' => true,
-                               'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Funding Plan')]),
-                               'url' => Url::to(['/sale/contract/contract/funding-plans'])
-                            ]
-                        ]);
-                    ?>
-                </div>
-                <div class="col-md-4">
-                    <?php
-                        if ($model->isNewRecord) {
-                            $data = [];
-                        } else {
-                            if($model->discount) {
-                                $data = [$model->discount->discount_id=>$model->discount->name];
-                            } else {
-                                $data = [];
-                            }
-                        }
-                        echo $form->field($contractDetailIns, 'tmp_discount_id')->widget(DepDrop::className(), [
-                            'options' => ['id' => 'tmp_discount_id', 'name'=>'contractDetailIns[discount_id]'],
+                        echo $form->field($contractDetailPlan, 'discount_id')->widget(DepDrop::className(), [
+                            'options' => ['id' => 'discount_id'],
                             'data' => $data,
-                            'select2Options'=>['pluginOptions'=>['allowClear'=>true]],
+                            //'type'=>DepDrop::TYPE_SELECT2,
+                            'select2Options'=>[
+                                'pluginOptions'=>[
+                                    'allowClear'=>true,
+                                ],
+                            ],
                             'pluginOptions' => [
-                                'loading' => true,
-                                'depends' => ['inst_product_id', 'is_customer_detail'],
-                                'initDepends' => ['inst_product_id', 'is_contract_detail'],
-                                'initialize' => true,
-                                'placeholder' =>  Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')]),
+                                'depends' => ['plan_product_id', 'is_customer'],
+                                'initDepends' => ['plan_product_id', 'is_customer'],
+                                'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')])."...",
                                 'url' => Url::to(['/sale/discount/discount-by-product'])
                             ]
                         ])->label(Yii::t('app', 'Discount'));
                         ?>
+                    </div>
                 </div>
+                <?php if($model->isNewRecord):?>
+                <?= $form->field($contractDetailIns, 'count')->hiddenInput(['id' => 'instCount', 'name'=>'contractDetailIns[count]', 'value' => '1'])->label('')?>
+                <div class="row">
+                    <input type="hidden" name="is_customer_detail" id="is_customer_detail" value="0"/>
+                    <div class="col-md-4">
+                        <?=
+                           $form->field($contractDetailIns, 'product_id')->dropdownList(ArrayHelper::map($instalationProd,
+                            'product_id', function($prod){ return $prod->name.' - $'.round($prod->finalPrice,2); }),['encode'=>false, 'separator'=>'<br/>','prompt'=>Yii::t('app', 'Select an option...'), 'id'=> 'inst_product_id', 'name'=>'contractDetailIns[product_id]'])->label(Yii::t('app', 'Instalation Charges')) ?>
+                    </div>
+                   
                     
-            </div>        
-               <?php endif;?>     
-                
-           
-            <?php if(!$model->isNewRecord && (User::hasRole('seller-office') || (User::hasPermission('update-contract') && !User::hasRole('seller')))):?>
-            <div class="row" id="divPlanFromDate">
-                <div class="col-md-6">
-                    <?=$form->field($contractDetailPlan, 'from_date')->widget(DatePicker::classname(), [
-                        'type' => 1,
-                        'language' => Yii::$app->language,
-                        'model' => $contractDetailPlan,
-                        'attribute' => 'from_date',
-                        'pluginOptions' => [
-                            'autoclose'=>true,
-                            'format' => 'dd-mm-yyyy',
-                        ],
-                        'options'=>[
-                            'class'=>'form-control filter dates',
-                            'placeholder'=>Yii::t('app','Date'),
-                            'id' => 'plan_from_date',
-                             
-                        ]
-                    ])->label(Yii::t('app', 'Start date for the new plan'));
-                    ?>
+                    
+                    <div class="col-md-4">
+                        <?php
+                            if ($contractDetailIns->isNewRecord) {
+                                $data = [];
+                            } else {
+                                $search = new FundingPlanSearch();
+                                $data =  ArrayHelper::map($search->searchByProduct($contractDetailIns->product_id, 1), 'id', 'name' );
+                            }
+                            echo $form->field($contractDetailIns, 'funding_plan_id')->widget(DepDrop::classname(), [
+                                'options'=>['id'=>'funding_plan_id', 'name'=>'contractDetailIns[funding_plan_id]'],
+                                'data'=> $data,
+                                'type'=>DepDrop::TYPE_SELECT2,
+                                'pluginOptions'=>[
+                                   'depends' => ['inst_product_id', 'instCount'],
+                                   'initDepends' => ['inst_product_id', 'instCount'],
+                                   'initialize' => true,
+                                   'placeholder' => Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Funding Plan')]),
+                                   'url' => Url::to(['/sale/contract/contract/funding-plans'])
+                                ]
+                            ]);
+                        ?>
+                    </div>
+                    <div class="col-md-4">
+                        <?php
+                            if ($model->isNewRecord) {
+                                $data = [];
+                            } else {
+                                if($model->discount) {
+                                    $data = [$model->discount->discount_id=>$model->discount->name];
+                                } else {
+                                    $data = [];
+                                }
+                            }
+                            echo $form->field($contractDetailIns, 'tmp_discount_id')->widget(DepDrop::className(), [
+                                'options' => ['id' => 'tmp_discount_id', 'name'=>'contractDetailIns[discount_id]'],
+                                'data' => $data,
+                                'select2Options'=>['pluginOptions'=>['allowClear'=>true]],
+                                'pluginOptions' => [
+                                    'loading' => true,
+                                    'depends' => ['inst_product_id', 'is_customer_detail'],
+                                    'initDepends' => ['inst_product_id', 'is_contract_detail'],
+                                    'initialize' => true,
+                                    'placeholder' =>  Yii::t('app', 'Select {modelClass}', ['modelClass'=>Yii::t('app','Discount')]),
+                                    'url' => Url::to(['/sale/discount/discount-by-product'])
+                                ]
+                            ])->label(Yii::t('app', 'Discount'));
+                            ?>
+                    </div>
+                        
+                </div>        
+                   <?php endif;?>     
+                    
+               
+                <?php if(!$model->isNewRecord && (User::hasRole('seller-office') || (User::hasPermission('update-contract') && !User::hasRole('seller')))):?>
+                <div class="row" id="divPlanFromDate">
+                    <div class="col-md-6">
+                        <?=$form->field($contractDetailPlan, 'from_date')->widget(DatePicker::classname(), [
+                            'type' => 1,
+                            'language' => Yii::$app->language,
+                            'model' => $contractDetailPlan,
+                            'attribute' => 'from_date',
+                            'pluginOptions' => [
+                                'autoclose'=>true,
+                                'format' => 'dd-mm-yyyy',
+                            ],
+                            'options'=>[
+                                'class'=>'form-control filter dates',
+                                'placeholder'=>Yii::t('app','Date'),
+                                'id' => 'plan_from_date',
+                                 
+                            ]
+                        ])->label(Yii::t('app', 'Start date for the new plan'));
+                        ?>
+                    </div>
                 </div>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
         </div>
-    </div>
+    <?php endif;?>
     
     <div class="row">
         <div class="col-md-12">
