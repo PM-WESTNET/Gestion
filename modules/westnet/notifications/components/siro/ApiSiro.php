@@ -108,7 +108,7 @@ class ApiSiro extends Component{
 
         $referenciaOperacion = md5($paymentIntention->siro_payment_intention_id.'-'.$customer->customer_id.'-'.$customer->code);
 
-        $invoice_concept = str_replace('@Cliente',$customer->code . ' - ' . $customer->lastname,$invoice_concept);
+        $invoice_concept = str_replace('@Cliente',$customer->code . ' ' . $customer->lastname,$invoice_concept);
 
         $data = array(
             "nro_cliente_empresa" => str_pad($customer->customer_id.$company_client_number, 19, '0', STR_PAD_LEFT),

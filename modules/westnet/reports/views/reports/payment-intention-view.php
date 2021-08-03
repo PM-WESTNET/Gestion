@@ -149,7 +149,11 @@ $this->registerJs("
                 </tbody>
             </table>
         </div>
-    <?php endif ?>
+    <?php else: ?>
+        <div class="mb-2 mt-2">
+            <h5>* No se puede consultar el estado en línea de la intención de pago, porque el usuario no ha continuado con el proceso de la misma. </h5>
+        </div>
+       <?php endif ?>
     <div class="form-group text-center" id="buttonIndex">   
               
         <?=Html::a('<span class="fa fa-reply"></span> Volver', ['/reports/reports-company/payment-intention'], ['data-pjax' => '0', 'class' => 'btn btn-warning']);?>
