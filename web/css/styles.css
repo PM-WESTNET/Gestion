@@ -1424,9 +1424,15 @@ a.ui-state-default.ui-state-active {
   min-height: 75%;
 }
 
-[id^="user-management-"] div.panel-default {
+/* [id^="user-management-"] div.panel-default {
+  height: 40em;
+} */
+#user-management-permission-view .panel-default, 
+#user-management-role-view .panel-default,
+#user-management-user-permission-set .panel-default{
   height: 40em;
 }
+
 
 #user-management-permission-view form,
 #user-management-role-view form,
