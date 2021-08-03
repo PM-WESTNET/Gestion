@@ -521,8 +521,6 @@ class NotificationController extends Controller {
         if($customer){
             if(Config::getConfig('siro_communication_bank_roela')->item->description){
                 $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
-                /*if(!$result_search)
-                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);*/
                 
                 if(!$result_search && $customer->current_account_balance < 0){
                     $result_create = ApiSiro::CreatePaymentIntention($customer);

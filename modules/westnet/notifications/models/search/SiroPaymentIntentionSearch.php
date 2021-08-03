@@ -58,9 +58,9 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
             'query' => $query,
         ]);
 
-        $dataProvider->sort->attributes['status'] = [
-            'asc' => ['spi.status' => SORT_ASC],
-            'desc' => ['spi.status' => SORT_DESC],
+        $dataProvider->sort->attributes['createdAt'] = [
+            'asc' => ['spi.createdAt' => SORT_ASC],
+            'desc' => ['spi.createdAt' => SORT_DESC],
         ];
 
         $this->load($params);
