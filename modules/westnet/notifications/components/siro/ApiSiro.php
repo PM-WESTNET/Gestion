@@ -111,7 +111,7 @@ class ApiSiro extends Component{
         $data = array(
             "nro_cliente_empresa" => str_pad($customer->customer_id.$company_client_number, 19, '0', STR_PAD_LEFT),
             "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
-            "Concepto" => str_pad(str_replace('@Cliente',$customer->code . ' - ' . $customer->last_name,$invoice_concept),40,'',STR_PAD_RIGHT),
+            "Concepto" => str_pad(str_replace('@Cliente',$customer->code . ' - ' . $customer->lastname,$invoice_concept),40,'',STR_PAD_RIGHT),
             "Importe" => abs($customer->current_account_balance),
             "URL_OK" => $url_ok,
             "URL_ERROR" => $url_error,
