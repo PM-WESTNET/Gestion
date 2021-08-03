@@ -1424,32 +1424,31 @@ a.ui-state-default.ui-state-active {
   min-height: 75%;
 }
 
+[id^="user-management-"] div.panel-default {
+  height: 40em;
+}
 
-
-#user-management-permission-view #routes-list, 
-#user-management-permission-view .col-sm-6:first-child form .row{
+#user-management-permission-view form,
+#user-management-role-view form,
+#user-management-user-permission-set form {
   overflow: scroll;
   overflow-x: hidden;
-  max-height: 550px;
+  height: 33.5em;
+  margin-bottom: 10em;
 }
-#user-management-permission-view .col-sm-6:nth-of-type(2) #routes-list{
-  height: 85% ;
-} 
-
-#user-management-role-view form {
+#user-management-user-permission-set div.col-sm-8 div.panel-body{
   overflow: scroll;
   overflow-x: hidden;
-  height: 550px;
-  margin-bottom: 20px;
+  height: 35em;
 }
-#user-management-permission-view form{
-  overflow: hidden;
-  height: 550px;
-  margin-bottom: 20px;
+
+#user-management-permission-view .col-sm-6:nth-of-type(2) form{
+  overflow-x: scroll;
 }
 
 #user-management-role-view button.btn.btn-primary.btn-sm, 
-#user-management-permission-view button.btn.btn-primary.btn-sm{
+#user-management-permission-view button.btn.btn-primary.btn-sm,
+#user-management-user-permission-set button.btn.btn-primary.btn-sm{
   position:absolute;
 	bottom:20px;
 }
