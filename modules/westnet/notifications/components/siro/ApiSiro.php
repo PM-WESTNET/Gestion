@@ -107,11 +107,13 @@ class ApiSiro extends Component{
         $paymentIntention->save(false);
 
         $referenciaOperacion = md5($paymentIntention->siro_payment_intention_id.'-'.$customer->customer_id.'-'.$customer->code);
-        
+
+        $invoice_concept = str_replace('@Cliente',$customer->code . ' ' . $customer->lastname,$invoice_concept);
+
         $data = array(
-            "nro_cliente_empresa" => str_pad($company_client_number, 19, '0', STR_PAD_LEFT),
+            "nro_cliente_empresa" => str_pad($customer->customer_id.$company_client_number, 19, '0', STR_PAD_LEFT),
             "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
-            "Concepto" => str_replace('@Cliente',$customer->code,$invoice_concept),
+            "Concepto" => (strlen($invoice_concept) > 40) ? substr($invoice_concept, 0, 40) : $invoice_concept,
             "Importe" => abs($customer->current_account_balance),
             "URL_OK" => $url_ok,
             "URL_ERROR" => $url_error,
@@ -120,11 +122,9 @@ class ApiSiro extends Component{
             ]
         );
 
-
-
         $token = ApiSiro::GetTokenApi($customer->company_id);
         $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
-
+        
         if(!isset($result['Message'])){
 	        $paymentIntention->customer_id = $customer->customer_id;
 	        $paymentIntention->hash = $result['Hash'];
@@ -152,9 +152,5 @@ class ApiSiro extends Component{
         }
 
     	return false;
-    	
-
-
     }
-
 }

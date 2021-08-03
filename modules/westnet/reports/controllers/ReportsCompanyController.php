@@ -13,9 +13,13 @@ use app\modules\westnet\reports\models\ReportData;
 use app\modules\westnet\reports\search\ReportSearch;
 use app\modules\westnet\reports\search\ReportCompanySearch;
 use app\modules\sale\modules\contract\models\search\ContractSearch;
+use app\modules\sale\models\Customer;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 use app\modules\westnet\notifications\models\search\SiroPaymentIntentionSearch;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
+use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentItem;
+use app\modules\checkout\models\PaymentMethod;
 
 class ReportsCompanyController extends Controller
 {
@@ -360,5 +364,63 @@ class ReportsCompanyController extends Controller
 
     public function actionResultPaymentIntention($reference,$id_resultado){
         return json_encode(ApiSiro::SearchPaymentIntention($reference, $id_resultado));
+    }
+
+    public function actionPaymentIntentionGeneratePay($id){
+        $paymentIntention = SiroPaymentIntention::find()->where(['siro_payment_intention_id' => $id])->one();
+        $result_search = ApiSiro::SearchPaymentIntention($paymentIntention->reference,$paymentIntention->id_resultado);
+        
+        $paymentIntention->updatedAt = date('Y-m-d_H-i');
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : (($result_search['Estado'] == 'CANCELADA')?'canceled':'pending');
+        $paymentIntention->id_operacion = $result_search['IdOperacion'];
+        $paymentIntention->estado = $result_search['Estado'];
+        $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
+        $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
+        $paymentIntention->save(false);
+
+        if($result_search['PagoExitoso'] == 'payed'){
+            $transaction = Yii::$app->db->beginTransaction();
+            $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
+            $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
+
+            $payment = new Payment([
+                'customer_id' => $customer->customer_id,
+                'amount' => abs($customer['current_account_balance']),
+                'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
+                'company_id' => $customer->company_id,
+                'date' => (new \DateTime('now'))->format('Y-m-d'),
+                'status' => 'closed'
+            ]);
+                
+            if ($payment->save(false)) {
+                $paymentIntention->payment_id = $payment['payment_id'];
+    
+                $payment_item = new PaymentItem();
+                $payment_item->amount = $payment['amount'];
+                $payment_item->description = 'Intención de Pago (Banco Roela) ' . $paymentIntention['siro_payment_intention_id'];
+                $payment_item->payment_method_id = $payment_method->payment_method_id;
+                $payment_item->payment_id = $payment->payment_id;
+                $payment_item->paycheck_id = null;
+                
+                $customer->current_account_balance -= $customer->current_account_balance;
+
+                $paymentIntention->save(false);
+                $payment_item->save(false);
+                $customer->save(false);
+
+                $transaction->commit();
+                Yii::$app->session->setFlash('success', 'Creación de pago generada correctamente.');
+                
+            } else {
+                Yii::$app->session->setFlash('error', 'La creacion del pago no pudo ser generada.');
+                $transaction->rollBack();
+            }
+        }else if($result_search['Estado'] == 'CANCELADA'){
+            Yii::$app->session->setFlash('error', 'La intención de pago se encuentra cancelada.');
+
+        }else{
+            Yii::$app->session->setFlash('error', 'Ha habido un error con la intención de pago.');
+        }
+        $this->redirect(array('payment-intention-view', 'id' => $paymentIntention->siro_payment_intention_id));
     }
 }

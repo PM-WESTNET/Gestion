@@ -521,15 +521,13 @@ class NotificationController extends Controller {
         if($customer){
             if(Config::getConfig('siro_communication_bank_roela')->item->description){
                 $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
-                /*if(!$result_search)
-                    $result_search = ApiSiro::SearchPaymentIntention($bill_id);*/
                 
                 if(!$result_search && $customer->current_account_balance < 0){
                     $result_create = ApiSiro::CreatePaymentIntention($customer);
                     if($result_create)
                         return $this->redirect($result_create['Url']);
                     else
-                        $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment"); //error created intention payment
+                        $this->redirect("http://portal.westnet.com.ar:3000/portal/error-intention-payment"); //error created intention payment
 
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
@@ -545,16 +543,16 @@ class NotificationController extends Controller {
                             $result_search->save(false);
                             return $this->redirect($result_create['Url']);
                         }else
-                            $this->redirect("http://192.168.2.115:3000/portal/error-intention-payment");
+                            $this->redirect("http://portal.westnet.com.ar:3000/portal/error-intention-payment");
                     }          
                 }else{
-                    $this->redirect("http://192.168.2.115:3000/portal/bill-payed");
+                    $this->redirect("http://portal.westnet.com.ar:3000/portal/bill-payed");
                 }
             }else
-                $this->redirect("http://192.168.2.115:3000/portal/system-disabled");
+                $this->redirect("http://portal.westnet.com.ar:3000/portal/system-disabled");
             
         }else{
-            $this->redirect("http://192.168.2.115:3000/portal/error-bill-draft"); //Customer not find
+            $this->redirect("http://portal.westnet.com.ar:3000/portal/error-bill-draft"); //Customer not find
         }
         
     }
@@ -567,7 +565,7 @@ class NotificationController extends Controller {
 
         $paymentIntention->id_resultado = $IdResultado;
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
-        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : ($result_search['Estado'] == 'CANCELADA')?'canceled':'pending';
+        $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : (($result_search['Estado'] == 'CANCELADA')?'canceled':'pending');
         $paymentIntention->id_operacion = $result_search['IdOperacion'];
         $paymentIntention->estado = $result_search['Estado'];
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
@@ -575,14 +573,14 @@ class NotificationController extends Controller {
         $paymentIntention->save(false);
        
 
-        if($result_search['PagoExitoso'] == 'payed'){
+        if($result_search['PagoExitoso'] == 'payed' && empty($paymentIntention->payment_id)){
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
 
             $payment = new Payment([
                 'customer_id' => $customer->customer_id,
-                'amount' => abs($customer['current_account_balance']),
+                'amount' => $result_search['Request']['Importe'],
                 'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
                 'company_id' => $customer->company_id,
                 'date' => (new \DateTime('now'))->format('Y-m-d'),
@@ -607,15 +605,15 @@ class NotificationController extends Controller {
 
                 $transaction->commit();
 
-                $this->redirect("http://192.168.2.115:3000/portal/success");
+                $this->redirect("http://portal.westnet.com.ar:3000/portal/success");
             } else {
                 $transaction->rollBack();
             }
         }else if($result_search['Estado'] == 'CANCELADA'){
 
-            $this->redirect("http://192.168.2.115:3000/portal/canceled-pay");
+            $this->redirect("http://portal.westnet.com.ar:3000/portal/canceled-pay");
         }else{
-            $this->redirect("http://192.168.2.115:3000/portal/not-success");
+            $this->redirect("http://portal.westnet.com.ar:3000/portal/not-success");
         }
 
         

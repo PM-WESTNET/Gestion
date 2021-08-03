@@ -1,23 +1,23 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\DetailView;
 
 $this->title = 'Intención de Pago N° '.$model->siro_payment_intention_id;
 $this->params['breadcrumbs'][] = ['label' => 'Intenciones de Pago', 'url' => ['reports-company/payment-intention']];
 $this->params['breadcrumbs'][] = $this->title;
+$url =  Url::toRoute(['result-payment-intention','reference'=>$model->reference, 'id_resultado' => $model->id_resultado]);
 
 $this->registerJs("
     var reference = '$model->reference';
     var id_resultado = '$model->id_resultado';
     var result_table  = document.querySelector('.result-table');
-    console.log('result-payment-intention?reference='+encodeURIComponent(reference)+'&id_resultado='+encodeURIComponent(id_resultado));
     $('#check-status').click(function(){
-        $.ajax({ url: 'result-payment-intention?reference='+encodeURIComponent(reference)+'&id_resultado='+encodeURIComponent(id_resultado),
+        $.ajax({ url: '$url',
             type: 'GET',
             success: function(data) {
                     data = JSON.parse(data);
-                    console.log(data);
                     const tr = document.createElement('tr');
 
                     const tdEstado = document.createElement('td');
@@ -110,7 +110,11 @@ $this->registerJs("
                 'label' => Yii::t('app','payment'),
                 'format' => 'raw',
                 'value' => function($model){
-                    if(!$model->payment_id)
+                    if(!$model->payment_id && $model->status == 'pending'){
+                        return  Html::a('<span class="label label-success">Generar Pago Manual</span>', 
+                        ['payment-intention-generate-pay', 'id' => $model->siro_payment_intention_id], 
+                        ['class' => 'profile-link']);   
+                    }else if(!$model->payment_id)
                         return null;
                     return Html::a('Pago N° '.$model->payment_id , 
                                 ['/checkout/payment/view', 'id' => $model->payment_id], 
@@ -145,7 +149,11 @@ $this->registerJs("
                 </tbody>
             </table>
         </div>
-    <?php endif ?>
+    <?php else: ?>
+        <div class="mb-2 mt-2">
+            <h5>* No se puede consultar el estado en línea de la intención de pago, porque el usuario no ha continuado con el proceso de la misma. </h5>
+        </div>
+       <?php endif ?>
     <div class="form-group text-center" id="buttonIndex">   
               
         <?=Html::a('<span class="fa fa-reply"></span> Volver', ['/reports/reports-company/payment-intention'], ['data-pjax' => '0', 'class' => 'btn btn-warning']);?>

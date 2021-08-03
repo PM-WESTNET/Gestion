@@ -50,7 +50,7 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
         ->from('siro_payment_intention spi')
         ->leftJoin('customer c', 'c.customer_id = spi.customer_id')
         ->leftJoin('company com', 'com.company_id = spi.company_id')
-        ->orderBy(['spi.status' => SORT_DESC]);
+        ->orderBy(['spi.createdAt' => SORT_DESC]);
  
         // add conditions that should always apply here
 
@@ -82,13 +82,13 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
               ->andFilterWhere(['like', 'payment_id', $this->payment_id]);
         
         
-        if($this->from_date){
+        /*if($this->from_date){
             $query->andFilterWhere(['>=','createdAt', $this->from_date]);
         }
 
         if($this->to_date){
             $query->andFilterWhere(['<=','createdAt', $this->to_date]);
-        }      
+        }*/      
 
         return $dataProvider;
     }
