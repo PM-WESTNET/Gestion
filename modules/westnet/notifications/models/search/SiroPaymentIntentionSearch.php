@@ -50,7 +50,7 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
         ->from('siro_payment_intention spi')
         ->leftJoin('customer c', 'c.customer_id = spi.customer_id')
         ->leftJoin('company com', 'com.company_id = spi.company_id')
-        ->orderBy(['spi.status' => SORT_DESC]);
+        ->orderBy(['spi.createdAt' => SORT_DESC]);
  
         // add conditions that should always apply here
 
@@ -58,9 +58,9 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
             'query' => $query,
         ]);
 
-        $dataProvider->sort->attributes['createdAt'] = [
-            'asc' => ['spi.createdAt' => SORT_ASC],
-            'desc' => ['spi.createdAt' => SORT_DESC],
+        $dataProvider->sort->attributes['status'] = [
+            'asc' => ['spi.status' => SORT_ASC],
+            'desc' => ['spi.status' => SORT_DESC],
         ];
 
         $this->load($params);
