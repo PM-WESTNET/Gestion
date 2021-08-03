@@ -70,6 +70,7 @@ use app\modules\automaticdebit\models\AutomaticDebit;
  * @property string $has_debit_automatic
  * @property string $has_direct_debit
  * @property integer $hash_customer_id
+ * @property string $description
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -159,7 +160,7 @@ class Customer extends ActiveRecord {
             [['company_id', 'parent_company_id', 'customer_reference_id', 'publicity_shape', 'phone','phone2', 'phone3',
                 'screen_notification', 'sms_notification', 'email_notification', 'sms_fields_notifications',
                 'email_fields_notifications', '_notifications_way', '_sms_fields_notifications', '_email_fields_notifications',
-                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified','has_direct_debit', 'hash_customer_id'], 'safe'],
+                'phone4', 'last_update', 'hourRanges', 'birthdate', 'observations', 'dataVerified','has_direct_debit', 'hash_customer_id', 'description'], 'safe'],
             [['code', 'payment_code'], 'unique'],
             //['document_number', CuitValidator::className()],
             ['document_number', 'compareDocument'],
@@ -555,8 +556,9 @@ class Customer extends ActiveRecord {
             'dataVerified' => Yii::t('app', 'Data Verified'),
             'has_debit_automatic' => Yii::t('app', 'Require Automatic Debit'),
             'has_direct_debit' => Yii::t('app', 'Require Direct Debit'),
-	    'hash_customer_id' => Yii::t('app', 'Hash Cliente ID'),
-	    'current_account_balance' => Yii::t('app','Current Account Balance'),
+	        'hash_customer_id' => Yii::t('app', 'Hash Cliente ID'),
+	        'current_account_balance' => Yii::t('app','Current Account Balance'),
+            'description' => Yii::t('app','Description'),
         ];
 
         //Labels adicionales definidos para los profiles
@@ -1010,13 +1012,11 @@ class Customer extends ActiveRecord {
      * @param string $template define el template para construir el nombre completo
      * @return string
      */
-    public function getFullName($template = '{lastname}, {name}') {
-        if (!empty($this->lastname)) {
-            return str_replace(['{lastname}','{name}'], [$this->lastname, $this->name], $template);
-        }else{
-            $template = '{name}';
-             return str_replace(['{lastname}','{name}'], [$this->lastname, $this->name], $template);
-        }
+    public function getFullName($template = '{lastname}, {name} {description}') {
+
+            return str_replace(['{lastname}','{name}', '{description}'], [$this->lastname, $this->name, '('.$this->description.')'], $template);
+        
+
        
     }
 

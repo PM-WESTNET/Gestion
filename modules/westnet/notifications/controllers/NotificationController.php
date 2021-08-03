@@ -571,7 +571,7 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
-       
+
 
         if($result_search['PagoExitoso'] == 'payed' && empty($paymentIntention->payment_id)){
             $transaction = Yii::$app->db->beginTransaction();
@@ -650,6 +650,18 @@ class NotificationController extends Controller {
             $transaction->commit();
         else 
             $transaction->rollBack(); 
+    }
+
+
+    public function actionUpdateStatusNotification(){
+        Yii::$app->response->format = 'json';
+        $request = Yii::$app->request->post();
+
+        $model= $this->findModel($request['id']);
+        $model->status = $request['status'];
+        $model->save(false);
+
+        return ['status' => $model->status];
     }
 
 }

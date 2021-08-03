@@ -135,6 +135,10 @@ class NotificationController extends Controller
 
                 if ($result['status'] === 'success') {
                     $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+
+                }else if($result['status'] === 'paused') {
+                    $notification->updateAttributes(['status' => Notification::STATUS_PAUSED]);
+
                 }else {
                     $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
                 }

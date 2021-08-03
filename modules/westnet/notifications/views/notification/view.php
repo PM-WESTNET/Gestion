@@ -63,7 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php
-    if ($model->status === 'in_process' || $model->status === 'pending') {
+    if ($model->status === 'in_process' || $model->status === 'pending' || $model->status === 'paused') {
         if ($model->transport->slug === 'email') {
             echo $this->render('_email_status', ['model' => $model]);
         } elseif ($model->transport->slug === 'mobile-push') {
@@ -139,7 +139,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ?>
 </div>
 
-<?php if ($model->status === 'in_process' || $model->status === 'pending') : ?>
+<?php if ($model->status === 'in_process' || $model->status === 'pending' || $model->status === 'paused') : ?>
 
     <?php
     if ($model->transport->name === 'Email') {
