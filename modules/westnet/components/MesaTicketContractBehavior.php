@@ -81,7 +81,7 @@ class MesaTicketContractBehavior extends Behavior
             $ticket->user_id = Yii::$app->user->id;
             $ticket->external_tag_id = Ticket::getTagByName('LLEVAR ADS ORIGINAL');
             $ticket->setUsers([Yii::$app->user->id]);
-            $ticket->save();
+            $ticket->save(false);
         }
     }
 }
