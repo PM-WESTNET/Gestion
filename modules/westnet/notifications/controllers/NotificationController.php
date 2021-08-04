@@ -571,7 +571,7 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
-       
+
 
         if($result_search['PagoExitoso'] == 'payed' && empty($paymentIntention->payment_id)){
             $transaction = Yii::$app->db->beginTransaction();

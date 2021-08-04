@@ -89,8 +89,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?php
                 //Está habilitado manejo de planes?
                 if(Yii::$app->params['plan_product']): ?>
-                <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?> <br>
-                <?= UserA::a('<span class="glyphicon glyphicon-time"></span> '.Yii::t('app', 'Create programmed plan change'), ['/sale/contract/programmed-plan-change/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning pull-right']) ?>
+                    <?php if(User::canRoute('/sale/contract/contract/create')): ?>
+                        <?= UserA::a('<span class="glyphicon glyphicon-plus"></span> '.Yii::t('app', 'Create Contract'), ['/sale/contract/contract/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-success pull-right']) ?> <br>
+                    <?php endif; ?>
+                    <?= UserA::a('<span class="glyphicon glyphicon-time"></span> '.Yii::t('app', 'Create programmed plan change'), ['/sale/contract/programmed-plan-change/create',  'customer_id' => $model->customer_id], ['class' => 'btn btn-warning pull-right']) ?>
                 <?php endif; ?>
                 <?= UserA::a(Yii::t('app', 'Customer Log'), ['/sale/customer-log/index', 'customer_id' => $model->customer_id], ['class' => 'btn btn-info']) ?>
             </p>

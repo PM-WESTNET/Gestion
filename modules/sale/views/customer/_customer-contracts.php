@@ -16,7 +16,7 @@ use kartik\widgets\DatePicker;
 use kartik\select2\Select2;
 use app\modules\config\models\Config;
 use yii\helpers\Url;
-
+use webvimark\modules\UserManagement\models\User;
 ?>
 <h2> <?= Yii::t('app', 'Contracts') ?> </h2>
 
@@ -52,7 +52,7 @@ use yii\helpers\Url;
             'template'=>'{view} {update} {force-connection}',
             'buttons'=>[
                 'view' => function ($url, $model) {
-                    if($model->canView()){
+                    if(User::hasPermission('contract-view')){
                         return UserA::a('<span class="glyphicon glyphicon-eye-open"></span>',['/sale/contract/contract/view',  'id' => $model->contract_id], [
                             'title' => Yii::t('yii', 'View'),
                             'class' => 'btn btn-view'
@@ -71,7 +71,7 @@ use yii\helpers\Url;
                     if (Yii::$app->getModule('westnet')) {
                         $connection = $model->connection;
                         if($connection) {
-                            if($model->status == Contract::STATUS_ACTIVE) {
+                            if($model->status == Contract::STATUS_ACTIVE && User::canRoute('/westnet/connection/force')) {
                                 return Html::a(Yii::t('westnet', 'Force Activation'), null, [
                                     'class' => 'btn btn-danger',
                                     'data-loading-text' => Yii::t('westnet', 'Enabling') . "...",
