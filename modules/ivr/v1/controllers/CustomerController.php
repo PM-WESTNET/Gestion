@@ -1361,6 +1361,7 @@ class CustomerController extends Controller
             $customer->phone2 = $data['telefono2'];
             $customer->phone3 = $data['celular1'];
             $customer->phone4 = $data['celular2'];
+            $customer->user_napear = $data['usuario'];
 
             $customer->_notifications_way = ['screen','sms','email'];
             $customer->_sms_fields_notifications = ['phone','phone2','phone3','phone4'];

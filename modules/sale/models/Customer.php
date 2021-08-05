@@ -124,6 +124,8 @@ class Customer extends ActiveRecord {
     public $profileClasses;
 
 
+    public $user_napear = null;
+
     /**
      * @inheritdoc
      */
@@ -671,7 +673,8 @@ class Customer extends ActiveRecord {
         if (!YII_ENV_TEST){
             if ($insert) {
                 $log = new CustomerLog();
-                $log->createInsertLog($this->customer_id, 'Customer', $this->customer_id);
+                
+                $log->createInsertLog($this->customer_id, 'Customer', $this->customer_id, $this->user_napear);
             } else {
                 if ($this->dataVerified) {
                     $this->updateAttributes(['last_update' => (new DateTime('now'))->format('Y-m-d')]);

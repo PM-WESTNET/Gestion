@@ -131,7 +131,7 @@ class CustomerLog extends ActiveRecord {
         }
     }
 
-    public function createInsertLog($customer_id, $class_name, $object_id) {
+    public function createInsertLog($customer_id, $class_name, $object_id, $user_napear = null) {
 
         $this->date = (new DateTime('now'))->format('Y-m-d H:i:s');
         $this->action = 'Alta de Datos de ' . Yii::t('app', $class_name);
@@ -141,7 +141,9 @@ class CustomerLog extends ActiveRecord {
         } else {
             $this->user_id = 1;
         }
-        $this->observations = 'Alta ' . $class_name . ': ' . $object_id;
+
+        $this->observations = (empty($user_napear)) ? 'Alta ' . $class_name . ': ' . $object_id : 'Alta ' . $class_name . ': ' . $object_id .' - ' . $user_napear;
+
         $this->object_id = $object_id;
         $this->class_name = $class_name;
 
