@@ -11,14 +11,15 @@ body{
     padding: 0;
 }
 body::-webkit-scrollbar{
-    width: .8rem;
+    width: .6rem;
 }
-
 body::-webkit-scrollbar-track{
     background: var(--bg-primary);
 }
 body::-webkit-scrollbar-thumb{
     background: var(--accent);
+    border-radius: .2rem;
+
 }
 main{
     margin-left: 12rem;
@@ -37,7 +38,8 @@ main{
 .custom-navbar-flex {
   position: fixed;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center;
   width: 100%;

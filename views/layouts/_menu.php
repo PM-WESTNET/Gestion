@@ -21,7 +21,7 @@ $items = [];
 $alwaysVisibleItems = [];
 
 //Home
-$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
+//$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 
 if (UserHelper::isCashier()) {
     $alwaysVisibleItems[] = [
@@ -532,9 +532,9 @@ $items[] = [
 ?>
 
 
-<nav id="main-menu" class="navbar navbar-inverse <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>">
+<nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>">
 
-    <div class="container-fluid">
+    <div class="container-fluid custom-navbar-flex" >
 
         <div class="navbar-header" id="narrow-navbar">
             <button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
@@ -558,6 +558,8 @@ $items[] = [
 
 
         </div>
+        <!-- searchbar -->
+        <input type="text" id="search" name="search" class="search-bar" />
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="wide-navbar">
@@ -573,3 +575,11 @@ $items[] = [
         </div>
     </div>
 </nav>
+
+
+<?php
+//Searchbar JS filter script
+$this->registerJsFile('web/js/searchFilter.js');
+//custom CSS for the NAVBAR element
+//$this->registerCSSFile('web/css/navbar.css');
+?>
