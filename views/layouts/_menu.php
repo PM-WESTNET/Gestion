@@ -528,6 +528,7 @@ $items[] = [
         ['label' => Yii::t('modules/user-management/front', 'Password recovery'), 'url' => ['/user-management/auth/password-recovery']],
         ['label' => Yii::t('modules/user-management/front', 'E-mail confirmation'), 'url' => ['/user-management/auth/confirm-email']],
     ],
+    'options' => ['class' => 'not-filter']
 ];
 ?>
 

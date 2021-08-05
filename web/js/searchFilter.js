@@ -2,7 +2,7 @@ $(document).ready(function () {
     //console.log('ready ~ script runns');
     $("#search").on("keyup", function () {
         if (this.value.length > 0) {
-            $("li", ".navbar-nav")
+            $("li", ".navbar-nav").not(".not-filter") //terminar de implementar el filtro
                 .hide()
                 .filter(function () {
                     return (
@@ -14,7 +14,7 @@ $(document).ready(function () {
                 })
                 .show();
         } else {
-            $("li", ".navbar-nav").show();
+            $("li", ".navbar-nav").not(".not-filter").show();
         }
     });
 });
