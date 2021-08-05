@@ -14,6 +14,7 @@ use app\modules\ivr\v1\components\Controller;
 use app\modules\ivr\v1\models\Customer;
 use app\modules\ivr\v1\models\search\CustomerSearch;
 use app\modules\sale\models\Bill;
+use app\modules\sale\models\Address;
 use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
@@ -1337,6 +1338,63 @@ class CustomerController extends Controller
             return [
                 'error' => 'true',
                 'msg' => $ex->getMessage()
+            ];
+        }
+    }
+
+
+    public function actionCreateCustomer(){
+        $data = Yii::$app->request->post();
+        try{
+            $customer = new Customer();
+            $address = new Address();
+            $customer->scenario= 'insert';
+            $address->scenario = 'insert';
+
+            $document_type = DocumentType::findOne(['name' => strtoupper($data['tipo_doc'])]);
+
+            $customer->name = $data['nombre'];
+            $customer->lastname = $data['apellido'];
+            $customer->document_type_id = ($document_type !== null) ? $document_type->document_type_id : null;
+            $customer->document_number = $data['nro_doc'];
+            $customer->phone = $data['telefono1'];
+            $customer->phone2 = $data['telefono2'];
+            $customer->phone3 = $data['celular1'];
+            $customer->phone4 = $data['celular2'];
+
+            $customer->_notifications_way = ['screen','sms','email'];
+            $customer->_sms_fields_notifications = ['phone','phone2','phone3','phone4'];
+            $customer->_email_fields_notifications = ['email','email2'];
+            $customer->tax_condition_id = 3;
+            $customer->birthdate = '1990-01-01';
+            $customer->publicity_shape = 'poster';
+            $customer->has_debit_automatic = 'no';
+            $customer->company_id = 1;
+            $customer->parent_company_id = 8;
+            $customer->status = 'enabled';
+            $customer->setCustomerClass(1);
+            $customer->setCustomerCategory(1);
+            $customer->updatePaymentCode();
+
+            $address->street = $data['calle'];
+            $address->number = $data['nro_calle'];
+            $address->geocode = $data['geo'];
+            $address->save(false);
+
+            $customer->setAddress($address);
+            $customer->save(false);
+            
+            return [
+                'error' => 'false',
+                'customer_id' => $customer->customer_id,
+            ];
+            
+        } catch (Exception $ex) {
+            Yii::$app->response->setStatusCode(400);
+            return [
+                'error' => 'true',
+                'msg' => $ex->getMessage(),
+                'data' => $customer->getErrors() 
             ];
         }
     }
