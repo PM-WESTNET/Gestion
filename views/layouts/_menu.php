@@ -529,7 +529,7 @@ $notFilterable[] = [
         ['label' => Yii::t('modules/user-management/front', 'Password recovery'), 'url' => ['/user-management/auth/password-recovery']],
         ['label' => Yii::t('modules/user-management/front', 'E-mail confirmation'), 'url' => ['/user-management/auth/confirm-email']],
     ],
-    'options' => ['class' => 'not-filter']
+    'options' => ['class' => 'not-filter btn-inverted']
 ];
 ?>
 
@@ -552,7 +552,7 @@ $notFilterable[] = [
 
         </div>
         <!-- searchbar -->
-        <input type="text" id="search" name="search" class="search-bar" />
+        <input type="text" id="search" name="search" class="glyphicon glyphicon-search search-bar" />
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="wide-navbar">

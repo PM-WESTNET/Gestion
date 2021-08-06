@@ -2,9 +2,12 @@ $(document).ready(function () {
     //console.log('ready ~ script runns');
     $("#search").on("keyup", function () {
         if (this.value.length > 0) {
-            $("li", ".navbar-nav").not(".not-filter")
+            //ul#w0.navbar-nav.navbar-left.nav
+            //console.log($("li", ".navbar-nav"));
+            $("li", "#w0")
                 .hide()
                 .filter(function () {
+                    console.log(this.value);
                     return (
                         $(this)
                             .text()
@@ -14,7 +17,7 @@ $(document).ready(function () {
                 })
                 .show();
         } else {
-            $("li", ".navbar-nav").not(".not-filter").show();
+            $("li", "#w0").show();
         }
     });
 });

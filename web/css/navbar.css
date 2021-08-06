@@ -53,7 +53,16 @@ main {
     justify-content: space-around;
 }
 .search-bar {
-  width: 2rem;
-  border-radius: 0.5rem;
-  border: 1px solid;
+  --border-radius: 0.4rem;
+  width: 6rem;
+  height: 2rem;
+  border-radius: var(--border-radius);
+  border: .15rem solid var(--bg-primary);
+}
+.search-bar:hover{
+  border: .15rem solid var(--accent);
+}
+.search-bar:focus {
+  border: .15rem solid var(--accent);
+  outline: none;
 }
