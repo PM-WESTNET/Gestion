@@ -76,23 +76,25 @@ class BancoFrances implements BankInterface
             
             $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
             if(!empty($bills)){
-                $totalImport = Payment::totalCalculationForQuery($bills[0]->customer_id);
-                if($totalImport < 0) {
-                    $totalImport = abs($totalImport);
-                    $resource = $this->addFirstLine($resource, $debit, $bills[0], $export->concept,$totalImport);
-                    $resource = $this->addSecondLine($resource, $debit);
-                    $resource = $this->addThirdLine($resource, $debit);
-                    $resource = $this->addConceptLine($resource, $debit);
-
-                    $totalRegister = $totalRegister + 4;
-                    $totalOperations++;
-                    $totalAmount = $totalAmount + $totalImport;
-
-                    $bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
-
-                    $bhetd->save();
+                $totalImport = abs(Payment::totalCalculationForQuery($bills[0]->customer_id));
+                if ($totalImport === 0) {
+                    continue;
                 }
-            }            
+
+                $totalImport = abs($totalImport);
+                $resource = $this->addFirstLine($resource, $debit, $bills[0], $export->concept,$totalImport);
+                $resource = $this->addSecondLine($resource, $debit);
+                $resource = $this->addThirdLine($resource, $debit);
+                $resource = $this->addConceptLine($resource, $debit);
+
+                $totalRegister = $totalRegister + 4;
+                $totalOperations++;
+                $totalAmount = $totalAmount + $totalImport;
+
+                $bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
+
+                $bhetd->save();
+            }           
 
         }
 
