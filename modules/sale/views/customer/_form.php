@@ -85,6 +85,9 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     </div>
 
     <div class="row">
+        <div class="col-sm-6 col-xs-12 ">
+            <?= $form->field($model, 'description')->textInput(['maxlength' => 100]) ?>
+        </div>
         <div class="col-sm-6 col-xs-12">
 
             <?= $form->field($model, 'birthdate')->widget(\yii\jui\DatePicker::class, [

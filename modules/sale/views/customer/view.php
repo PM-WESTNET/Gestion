@@ -184,6 +184,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'code',
         'name',
         'lastname',
+        'description',
         [
             'attribute'=>'tax_condition_id',
             'value'=>$model->taxCondition ? $model->taxCondition->name : null,
