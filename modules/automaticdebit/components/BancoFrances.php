@@ -308,9 +308,9 @@ class BancoFrances implements BankInterface
 
         $import1 = str_pad($intamount, 13, '0', STR_PAD_LEFT);
 
-        $import2 = round(($totalImport - $intamount)* 100, 2) ;
+        $import2 = round(($totalImport - $intamount), 2) * 100 ;
         if ($import2 < 10) {
-            $import2 = str_pad($import2, 2, 0, STR_PAD_LEFT);
+            $import2 = str_pad(abs($import2), 2, 0, STR_PAD_LEFT);
         }
 
         $code_dev = str_pad(' ', 6, ' ');
