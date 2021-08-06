@@ -27,6 +27,7 @@ class AppAsset extends AssetBundle
         'js/global.js',
         'js/util.js',
         'js/searchFilter.js',
+        'js/userManagementFilters.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',
