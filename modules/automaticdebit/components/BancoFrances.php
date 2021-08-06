@@ -340,14 +340,7 @@ class BancoFrances implements BankInterface
             .$sep.$descr_dev
             .$sep. $free3
         ;
-        if(strlen($import2) > 2 ){
-            echo '$totalImport: '.$totalImport .'<br>'.
-            '$intamount: '.$intamount .'<br>'.
-            '$import1: '.$import1 .'<br>'.
-            '$import2: '.$import2 .'<br>'.
-            '$line: '.$line; die(); 
-        }
-
+        
         fwrite($resource, mb_convert_encoding($line.PHP_EOL, 'Windows-1252'));
 
         return $resource;
