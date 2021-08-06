@@ -19,6 +19,7 @@ $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
 
 $items = [];
 $alwaysVisibleItems = [];
+$notFilterable = [];
 
 //Home
 //$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
@@ -516,7 +517,7 @@ $items[] = [
 ];
 
 // Cuenta de usuario
-$items[] = [
+$notFilterable[] = [
     'label' => '<span class="glyphicon glyphicon-user"></span> (' . Yii::$app->user->identity->username . ')',
     'items' => [
         ['label' => Yii::$app->user->identity->username, 'visible' => !Yii::$app->user->isGuest],
@@ -535,7 +536,7 @@ $items[] = [
 
 <nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>">
 
-    <div class="container-fluid custom-navbar-flex" >
+    <div class="container-fluid custom-navbar-flex custom-flex-start" >
 
         <div class="navbar-header" id="narrow-navbar">
             <button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
@@ -548,15 +549,6 @@ $items[] = [
 
             <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
 
-            <?php
-            echo Nav::widget([
-                'options' => ['class' => ' navbar-nav navbar-right pull-right no-margin display-navbar-breakpoint navbar-links-responsive '],
-                'items' => $alwaysVisibleItems,
-                'encodeLabels' => false,
-                'activateParents' => true
-            ]);
-            ?>
-
 
         </div>
         <!-- searchbar -->
@@ -567,12 +559,27 @@ $items[] = [
 
             <?php
             echo Nav::widget([
-                'options' => ['class' => 'navbar-nav navbar-right'],
+                'options' => ['class' => 'navbar-nav navbar-left'],
                 'items' => array_merge($alwaysVisibleItems, $items),
                 'encodeLabels' => false,
                 'activateParents' => true
             ]);
             ?>
+        </div>
+        
+    </div>
+    
+    <div class="container-fluid custom-navbar-flex custom-flex-end" >
+        <div class="collapse navbar-collapse">
+
+                <?php
+                echo Nav::widget([
+                    'options' => ['class' => 'navbar-nav'],
+                    'items' => $notFilterable,
+                    'encodeLabels' => false,
+                    'activateParents' => true
+                ]);
+                ?>
         </div>
     </div>
 </nav>

@@ -2,7 +2,7 @@ $(document).ready(function () {
     //console.log('ready ~ script runns');
     $("#search").on("keyup", function () {
         if (this.value.length > 0) {
-            $("li", ".navbar-nav").not(".not-filter") //terminar de implementar el filtro
+            $("li", ".navbar-nav").not(".not-filter")
                 .hide()
                 .filter(function () {
                     return (
