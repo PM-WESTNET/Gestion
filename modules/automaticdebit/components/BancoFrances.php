@@ -77,7 +77,7 @@ class BancoFrances implements BankInterface
             $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
             if(!empty($bills)){
                 $totalImport = abs(Payment::totalCalculationForQuery($bills[0]->customer_id));
-                if ($totalImport === 0) {
+                if ($totalImport == 0) {
                     continue;
                 }
 
