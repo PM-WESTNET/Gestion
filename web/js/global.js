@@ -32,10 +32,10 @@ $(document).ready(function () {
   }); */
 
   if (specificViewFilters.some((i) => {
-        console.log(`value ${i} is ` + (i === bodyID));
+        //console.log(`value ${i} is ` + (i === bodyID));
         return i === bodyID;
     })) {
-    console.log("valid view ~ script running");
+    //console.log("valid view ~ script running");
     var firstForm = $(".panel-body form").first();
     firstForm.prepend(
       '<div class="row" style="overflow: hidden;"><div class="col-sm-12"><input id="search-in-child-permissions" autofocus="off" type="text" class="form-control input-sm" placeholder="buscar"></div></div><hr/>'
@@ -72,6 +72,6 @@ $(document).ready(function () {
       });
     });
   } else {
-    console.log("body ID doesnt match");
+    //console.log("body ID doesnt match");
   }
 });
