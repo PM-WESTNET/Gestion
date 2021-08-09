@@ -70,6 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'has_ecopago_close',
                 'value'=>Yii::t('app', ($model->has_ecopago_close  ? 'Yes' : 'No' )),
             ],
+            [
+                'attribute'=>'vlan',
+            ],
         ],
     ]) ?>
 

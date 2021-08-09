@@ -67,6 +67,8 @@ use kartik\widgets\Select2;
         ]);?>
     </br>
 
+    <?= $form->field($model, 'vlan')->textInput(['maxlength' => 4]) ?>
+
     <?= $form->field($model, 'ecopagos')->checkboxList(yii\helpers\ArrayHelper::map(app\modules\westnet\ecopagos\models\Ecopago::find()->all(),'ecopago_id','name'),['encode'=>false, 'separator'=>'<br/>'])?>
     
     <?= $this->render('_address', ['model' => $model, 'form' => $form])?>
