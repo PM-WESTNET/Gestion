@@ -13,6 +13,11 @@ use webvimark\modules\UserManagement\models\User;
 use app\modules\westnet\notifications\NotificationsModule;
 use app\modules\westnet\models\Vendor;
 use app\modules\sale\models\BillType;
+// user management assets
+use app\assets\UserManagementAsset;
+// implementation of menu scripts
+use app\assets\MenuAsset;
+MenuAsset::register($this);
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
@@ -309,6 +314,7 @@ if (Yii::$app->getModule('accounting')) {
         $items[count($items) - 1]['items'][] = ['label' => Yii::t('accounting', $small->account->name), 'url' => ['/accounting/money-box-account/daily-box-movements', 'id' => $small->money_box_account_id]];
     }
 }
+
 $appMenu = [];
 if (User::canRoute('/log/index')) {
     $appMenu = [
@@ -510,6 +516,7 @@ if (Yii::$app->params['agenda_enabled']) {
 }
 
 //Usuarios
+UserManagementAsset::register($this);
 $items[] = [
     'label' => 'Usuarios',
     'items' => webvimark\modules\UserManagement\UserManagementModule::menuItems()

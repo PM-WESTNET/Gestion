@@ -25,7 +25,7 @@ class AppAsset extends AssetBundle
         'js/inputmask/jquery.inputmask.bundle.js',
         'js/global.js',
         'js/util.js',
-        'js/userManagementFilters.js',
+        //'js/userManagementFilters.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',
