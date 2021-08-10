@@ -26,7 +26,6 @@ $(document).ready(function() {
             if($(this).children().first().is("li.divider")){
                 $(this).children().first().remove();
             }
-            console.log("-end-");
         });
     });
 

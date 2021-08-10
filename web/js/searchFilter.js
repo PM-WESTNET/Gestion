@@ -1,18 +1,15 @@
 $(document).ready(function () {
-    //console.log('ready ~ script runns');
     $("#search").on("keyup", function () {
-        if (this.value.length > 0) {
-            //ul#w0.navbar-nav.navbar-left.nav
-            //console.log($("li", ".navbar-nav"));
+        var inputValue = this.value;
+        if (inputValue.length > 0) {
             $("li", "#w0")
                 .hide()
                 .filter(function () {
-                    console.log(this.value);
+                    //console.log(this);
                     return (
-                        $(this)
-                            .text()
-                            .toLowerCase()
-                            .indexOf($("#search").val().toLowerCase()) != -1
+                        removeAccents($(this).text())                        
+                                .toLowerCase()
+                                .indexOf($("#search").val().toLowerCase()) != -1
                     );
                 })
                 .show();
@@ -20,4 +17,10 @@ $(document).ready(function () {
             $("li", "#w0").show();
         }
     });
+
+
+    // Remove tildes from text filtering
+    const removeAccents = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    } 
 });

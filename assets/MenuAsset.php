@@ -19,9 +19,11 @@ class MenuAsset extends AssetBundle
     public $baseUrl = '@web';
     public $css = [
         'css/styles.css',
+        'css/navbar.css',
     ];
     public $js = [
         'js/layoutMenu.js',
+        'js/searchFilter.js',
     ];
     public $depends = [
         'yii\web\YiiAsset',
