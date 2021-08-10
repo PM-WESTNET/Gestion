@@ -11,12 +11,12 @@ class CustomerController extends Controller{
         $customers = Customer::find()->where(['LIKE','name','%(%',false])->orWhere(['LIKE','lastname','%(%',false])->all();
 
         foreach ($customers as $key => $customer) {
-            if((str_contains($customer->name, '(') || str_contains($customer->name, ')')) && (!str_contains($customer->lastname, '(') && !str_contains($customer->lastname, ')'))){
+            if((strpos($customer->name, '(') || strpos($customer->name, ')')) && (!strpos($customer->lastname, '(') && !strpos($customer->lastname, ')'))){
 
                 $customer->description = str_replace(')','',substr($customer->name, (strpos($customer->name, '(')+1),(strpos($customer->name, ')')+1)));
                 $customer->name = str_replace(substr($customer->name, strpos($customer->name, '('),(strpos($customer->name, ')')+1)),'',$customer->name);
 
-            }else if((str_contains($customer->lastname, '(') || str_contains($customer->lastname, ')')) && (!str_contains($customer->name, '(') && !str_contains($customer->name, ')'))){
+            }else if((strpos($customer->lastname, '(') || strpos($customer->lastname, ')')) && (!strpos($customer->name, '(') && !strpos($customer->name, ')'))){
                 
                 $customer->description = str_replace(')','',substr($customer->lastname, (strpos($customer->lastname, '(')+1),(strpos($customer->lastname, ')')+1)));
                 $customer->lastname = str_replace(substr($customer->lastname, strpos($customer->lastname, '('),(strpos($customer->lastname, ')')+1)),'',$customer->lastname);

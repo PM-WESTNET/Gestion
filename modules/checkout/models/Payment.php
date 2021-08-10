@@ -637,9 +637,10 @@ class Payment extends  ActiveRecord  implements CountableInterface
 
         $totalCredit = Yii::$app->db->createCommand('SELECT sum(bill.total * bill_type.multiplier) as total_credit FROM bill LEFT JOIN bill_type ON bill.bill_type_id = bill_type.bill_type_id WHERE customer_id = :customer_id')->bindValue('customer_id',$customer_id)->queryOne()['total_credit'];
 
+        
         $payed = abs($payed) > 0.0 ? $payed : 0.0;
         $totalCredit = abs($totalCredit) > 0.0 ? $totalCredit : 0.0;
 
-        return $payed - $totalCredit;
+        return round($payed,2) - round($totalCredit,2);
     } 
 }

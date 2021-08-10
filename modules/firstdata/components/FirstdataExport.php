@@ -22,7 +22,7 @@ class FirstdataExport {
 
             //Si el saldo es 0 o el cliente tiene credito, no lo agregamos al archivo
             $totalImport = abs($payment->totalCalculationForQuery($customer->customer_id));
-            if ($totalImport === 0) {
+            if ($totalImport == 0) {
                 continue;
             }
 
