@@ -19,6 +19,10 @@ use app\assets\UserManagementAsset;
 use app\assets\MenuAsset;
 MenuAsset::register($this);
 
+$this->registerJsFile('js/layoutMenu.js');
+$this->registerJsFile('js/searchFilter.js');
+
+
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
 
@@ -590,11 +594,3 @@ $notFilterable[] = [
         </div>
     </div>
 </nav>
-
-
-<?php
-//Searchbar JS filter script
-$this->registerJsFile('web/js/searchFilter.js');
-//custom CSS for the NAVBAR element
-//$this->registerCSSFile('web/css/navbar.css');
-?>
