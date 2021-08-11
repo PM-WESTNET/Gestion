@@ -1411,17 +1411,23 @@ class CustomerController extends Controller
     public function actionGetAddress(){
 	if(isset(Yii::$app->request->post()['id'])){
             $model = Customer::findOne(['code' => Yii::$app->request->post()['id']]);
+            if($model)  
+            	return [
+                	'error' => 'false',
+                	'data' => [
+                    		'street' => $model->address->street,
+                    		'number' => $model->address->number,
+                    		'geocode' => $model->address->geocode,
+                    		'zone' => $model->address->zone->getFullZoneAPI($model->address->zone_id)
 
-            return [
-                'error' => 'false',
-                'data' => [
-                    'street' => $model->address->street,
-                    'number' => $model->address->number,
-                    'geocode' => $model->address->geocode,
-                    'zone' => $model->address->zone->getFullZoneAPI($model->address->zone_id)
-
-                ]
+                	]
+            	];
+	   else
+		return [
+                'error' => 'true',
+                'message' => 'El código ingresado no es valido'
             ];
+
         }else{
             return [
                 'error' => 'true',
