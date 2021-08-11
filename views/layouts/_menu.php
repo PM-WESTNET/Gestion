@@ -563,8 +563,17 @@ $notFilterable[] = [
 
         </div>
         <!-- searchbar -->
-        <input type="text" id="search" name="search" class="glyphicon glyphicon-search search-bar" />
-
+        <div class="search-container">
+            <div class="search-icon">
+                <span class="glyphicon glyphicon-search"></span>
+            </div>
+            <div class="input">
+                <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.."/>
+            </div>
+            <div class="close-icon">
+                <span class="glyphicon glyphicon-plus"></span>
+            </div>
+        </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="wide-navbar">
 
