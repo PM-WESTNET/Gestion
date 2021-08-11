@@ -1425,7 +1425,7 @@ class CustomerController extends Controller
         }else{
             return [
                 'error' => 'true',
-                'message' => 'prueba'
+                'message' => 'Por favor asegurese de enviar el codigo de cliente como parametro'
             ];
         }
     }
