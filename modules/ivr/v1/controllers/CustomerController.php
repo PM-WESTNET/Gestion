@@ -1408,9 +1408,9 @@ class CustomerController extends Controller
         }
     }
 
-    public function actionGetAddress($id){
-        if(isset($id)){
-            $model = Customer::findOne(['code' => $id]);
+    public function actionGetAddress(){
+	if(isset(Yii::$app->request->post()['id'])){
+            $model = Customer::findOne(['code' => Yii::$app->request->post()['id']]);
 
             return [
                 'error' => 'false',
