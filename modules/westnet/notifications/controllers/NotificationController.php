@@ -527,7 +527,7 @@ class NotificationController extends Controller {
                     if($result_create)
                         return $this->redirect($result_create['Url']);
                     else
-                        $this->redirect("http://portal.westnet.com.ar:3000/portal/error-intention-payment"); //error created intention payment
+                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment"); //error created intention payment
 
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
@@ -543,16 +543,16 @@ class NotificationController extends Controller {
                             $result_search->save(false);
                             return $this->redirect($result_create['Url']);
                         }else
-                            $this->redirect("http://portal.westnet.com.ar:3000/portal/error-intention-payment");
+                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment");
                     }          
                 }else{
-                    $this->redirect("http://portal.westnet.com.ar:3000/portal/bill-payed");
+                    $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
                 }
             }else
-                $this->redirect("http://portal.westnet.com.ar:3000/portal/system-disabled");
+                $this->redirect("http://pago.westnet.com.ar:3000/portal/system-disabled");
             
         }else{
-            $this->redirect("http://portal.westnet.com.ar:3000/portal/error-bill-draft"); //Customer not find
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-bill-draft"); //Customer not find
         }
         
     }
@@ -605,15 +605,15 @@ class NotificationController extends Controller {
 
                 $transaction->commit();
 
-                $this->redirect("http://portal.westnet.com.ar:3000/portal/success");
+                $this->redirect("http://pago.westnet.com.ar:3000/portal/success");
             } else {
                 $transaction->rollBack();
             }
         }else if($result_search['Estado'] == 'CANCELADA'){
 
-            $this->redirect("http://portal.westnet.com.ar:3000/portal/canceled-pay");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/canceled-pay");
         }else{
-            $this->redirect("http://portal.westnet.com.ar:3000/portal/not-success");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/not-success");
         }
 
         

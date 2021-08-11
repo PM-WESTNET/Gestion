@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    //alert("userManagementFilter.js");
     const bodyID = $('body').attr('id');
 
     const specificViewFilters = [
