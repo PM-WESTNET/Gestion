@@ -6,6 +6,8 @@ use app\modules\westnet\components\VendorLiquidationService;
 use app\modules\westnet\models\Vendor;
 use Yii;
 use app\modules\westnet\models\VendorLiquidation;
+use app\modules\westnet\models\VendorLiquidationProcess;
+use app\modules\westnet\models\ProductCommission;
 use app\modules\westnet\models\search\VendorLiquidationSearch;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
@@ -14,6 +16,8 @@ use app\modules\westnet\models\BatchLiquidationModel;
 use yii\data\ActiveDataProvider;
 use app\components\helpers\EmptyLogger;
 use app\modules\sale\modules\contract\models\ContractDetail;
+use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\models\Product;
 use yii\data\ArrayDataProvider;
 use app\modules\westnet\models\VendorLiquidationItem;
 use app\modules\checkout\models\search\PaymentSearch;
@@ -134,7 +138,7 @@ class VendorLiquidationController extends Controller
     {
         Yii::setLogger(new EmptyLogger());
         set_time_limit(0);
-        
+        ini_set('memory_limit', '-1');
         $model = new BatchLiquidationModel();
         
         if($model->load(Yii::$app->request->post()) && $model->validate()){
@@ -146,12 +150,13 @@ class VendorLiquidationController extends Controller
             $contractDetailsQuery = $model->findContractsDetails();
             
             $transaction = Yii::$app->db->beginTransaction();
-
+            $aux = 0;
             try{
             
                 //Por cada vendedor
                 foreach($query->batch() as $vendors){
                     foreach ($vendors as $vendor) {
+                        $aux++;
                         $liq = VendorLiquidation::create($vendor, $model->period);
 
                         //Clonamos la query para agregar vendor_id a la condicion de busqueda
@@ -420,5 +425,81 @@ class VendorLiquidationController extends Controller
             }
 
         }
+    }
+
+     /**
+     * Liquidacion por lotes
+     * @return mixed
+     */
+    public function actionBatchNuevo()
+    {
+        Yii::setLogger(new EmptyLogger());
+        $model = new VendorLiquidationProcess();
+
+        if($model->load(Yii::$app->request->post())){
+            $model->period = (new \DateTime($model->period))->format('Y-m-d'); 
+            $model->save(false);
+
+            $vendors = $model->findVendorsSQL();
+
+            foreach ($vendors as $vendor) {
+               VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
+            }
+
+            $this->redirect('vendor-liquidation-process'); 
+        }
+        return $this->render('batch', ['model' => $model]);
+    }
+
+
+    /**
+     * Liquidacion por lotes
+     * @return mixed
+     */
+    public function actionVendorLiquidationProcess()
+    {
+        Yii::setLogger(new EmptyLogger());
+        
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => VendorLiquidationProcess::find()->all(),
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+        
+        return $this->render('vendor-liquidation-process', [
+            'dataProvider' => $dataProvider,
+        ]);
+
+    }
+
+    public function actionChangeStatusLiquidation($id){
+        $model = VendorLiquidationProcess::findOne(['vendor_liquidation_process_id' => $id]);
+        
+        $model->status = 'pending';
+        $model->save(false);
+
+        $vendor_liquidations = VendorLiquidation::find()->where(['period' => $model->period, 'vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
+        
+        foreach ($vendor_liquidations as $value) {
+            $value->status = 'pending';
+            $value->save(false);
+        }
+
+        $this->redirect('vendor-liquidation-process'); 
+    }
+
+    public function actionRemoveVendorLiquidationProcess($id){
+        $model = VendorLiquidationProcess::findOne(['vendor_liquidation_process_id' => $id]);
+
+        $vendor_liquidations = VendorLiquidation::find()->where(['period' => $model->period, 'vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
+        
+        foreach ($vendor_liquidations as $value) {
+            $value->delete();
+        }
+
+        $model->delete();
+
+        $this->redirect('vendor-liquidation-process'); 
     }
 }
