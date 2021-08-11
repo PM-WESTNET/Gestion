@@ -1407,4 +1407,26 @@ class CustomerController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    public function actionGetAddress($id){
+        if(isset($id)){
+            $model = Customer::findOne(['code' => $id]);
+
+            return [
+                'error' => 'false',
+                'data' => [
+                    'street' => $model->address->street,
+                    'number' => $model->address->number,
+                    'geocode' => $model->address->geocode,
+                    'zone' => $model->address->zone->getFullZoneAPI($model->address->zone_id)
+
+                ]
+            ];
+        }else{
+            return [
+                'error' => 'true',
+                'message' => 'prueba'
+            ];
+        }
+    }
 }

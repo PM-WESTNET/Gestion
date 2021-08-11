@@ -266,4 +266,30 @@ class Zone extends \app\components\db\ActiveRecord
             
 
     }
+
+    /**
+     * @param $zone_id
+     * @return string
+     * Devuelve un string con el arbol de padres de una zona
+     */
+    public function getFullZoneAPI($zone_id)
+    {
+        $zone =  Zone::findOne($zone_id);
+        $full_zone=[];
+        if (!empty($zone)) {
+            $zone_zone=true;
+            $zone_aux= $zone->name;
+            if($zone->type!= 'zone'){
+                $zone_zone=false;
+                $zone_aux = $zone->name;
+            }
+
+            while (!empty($zone->parent)) {
+                $full_zone[$zone->parent->type] = $zone->parent->name;
+                $zone = $zone->parent;
+            }
+        }
+
+        return $full_zone;
+    }
 }
