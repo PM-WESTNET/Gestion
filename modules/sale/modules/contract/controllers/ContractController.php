@@ -837,7 +837,7 @@ class ContractController extends Controller {
                 $customer->company_id = $emptyAds->company_id;
                 $customer->status = Customer::STATUS_ENABLED;
                 $emptyAds->used = true;
-                $customer->updateAttributes(['code', 'payment_code', 'company_id', 'status']);
+                $customer->save(false);
                 $emptyAds->updateAttributes(['used']);
             }else{
                 Yii::$app->session->setFlash('error', Yii::t('app', 'This ADS has been used before or not exist'));
