@@ -23,6 +23,7 @@ use app\modules\westnet\components\ipStrategy\LegacyStrategy;
  * @property integer $server_id
  * @property integer $parent_node_id
  * @property integer $has_ecopago_close
+ * @property vlan
  *
  * @property IpRange[] $ipRanges
  * @property Zone $zone
@@ -62,7 +63,7 @@ class Node extends \app\components\db\ActiveRecord
     {
 
         return [
-            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close'], 'integer'],
+            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close', 'vlan'], 'integer'],
             [['zone', 'ecopagos', 'parentNode', 'companies', 'company_default', 'geocode'], 'safe'],
             [['zone_id', 'name', 'status', 'server_id'], 'required'],
             [['name'], 'string', 'max' => 100],
@@ -92,6 +93,7 @@ class Node extends \app\components\db\ActiveRecord
             'parent_node_id' => Yii::t('westnet', 'Parent Node'),
             'has_ecopago_close' => Yii::t('westnet', 'Has Ecopago Close'),
             'geocode' => Yii::t('westnet', 'Geocode'),
+            'vlan' => Yii::t('westnet', 'VLAN'),
         ];
     }
 

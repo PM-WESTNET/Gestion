@@ -19,6 +19,10 @@ use app\assets\UserManagementAsset;
 use app\assets\MenuAsset;
 MenuAsset::register($this);
 
+$this->registerJsFile('js/layoutMenu.js');
+$this->registerJsFile('js/searchFilter.js');
+
+
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
 
@@ -559,8 +563,17 @@ $notFilterable[] = [
 
         </div>
         <!-- searchbar -->
-        <input type="text" id="search" name="search" class="glyphicon glyphicon-search search-bar" />
-
+        <div class="search-container">
+            <div class="search-icon">
+                <span class="glyphicon glyphicon-search"></span>
+            </div>
+            <div class="input">
+                <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.."/>
+            </div>
+            <div class="close-icon">
+                <span class="glyphicon glyphicon-plus"></span>
+            </div>
+        </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="wide-navbar">
 
@@ -590,11 +603,4 @@ $notFilterable[] = [
         </div>
     </div>
 </nav>
-
-
-<?php
-//Searchbar JS filter script
-$this->registerJsFile('web/js/searchFilter.js');
-//custom CSS for the NAVBAR element
-//$this->registerCSSFile('web/css/navbar.css');
-?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

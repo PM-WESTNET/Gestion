@@ -5,6 +5,10 @@
   --bg-primary: #23232e;
   --bg-secondary: #141418;
   --accent: #ff8944;
+
+  --bootstrap-dark : #222222;
+  --bootstrap-light : #9D9D9D;
+
 }
 body {
   margin: 0;
@@ -14,7 +18,7 @@ body::-webkit-scrollbar {
   width: 0.6rem;
 }
 body::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--bootstrap-dark);
 }
 body::-webkit-scrollbar-thumb {
   background: var(--accent);
@@ -52,17 +56,94 @@ main {
 .custom-flex-space-around {
     justify-content: space-around;
 }
+
+.search-container {
+  --width-and-height : 1.8rem;
+  --border-radius-collapsed: 50%;
+  --searchbar-width : 8rem;
+  margin: 0 .4rem;
+  position: relative;
+  width: var(--width-and-height);
+  height: var(--width-and-height);
+  border-radius: 1rem;
+  box-shadow: 0 0 0 .07rem rgb(255, 255, 255);
+  transition: 0.2s;
+  overflow: hidden;
+  background: #FFFFFF;
+}
+
+.search-container.active {
+  width: var(--searchbar-width);
+}
+.search-container .input {
+  position: relative;
+  width: var(--searchbar-width);
+  height: auto;
+  left: 2.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-icon span{
+  color: rgb(255, 255, 255);
+}
+.search-icon:hover span{
+  color:#222222;
+}
+.search-container .close-icon {
+  position: relative;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.close-icon span{
+  position: absolute;
+  top: .4rem;
+  right: .2rem;
+  color: var(--bootstrap-light);
+  transform: rotate(45deg);
+}
+.close-icon span:hover{
+  color: #000;
+}
+.search-container .search-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--width-and-height);
+  height: var(--width-and-height);
+  background: var(--bootstrap-light);
+
+/*   background: #3ec45b;
+ */
+  border-radius: var(--border-radius-collapsed);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+
 .search-bar {
-  --border-radius: 0.4rem;
-  width: 6rem;
-  height: 2rem;
-  border-radius: var(--border-radius);
-  border: .15rem solid var(--bg-primary);
-}
-.search-bar:hover{
-  border: .15rem solid var(--accent);
-}
-.search-bar:focus {
-  border: .15rem solid var(--accent);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58%;
+  height: var(--width-and-height);
+  border: none;
   outline: none;
+  
+  font-size: .85rem;
+  font-family:'latoregular';
+
 }
+
+.highlight {
+/*   border: solid .1rem rgba(100, 255, 55, 0.5);
+ */
+  box-shadow: inset .15rem 0 var(--accent);
+}
+

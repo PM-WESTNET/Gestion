@@ -118,6 +118,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
+                'attribute' => 'vlan',
+            ],
+            [
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>'{view} {update} {delete} {move}',
                 'buttons'=>[
