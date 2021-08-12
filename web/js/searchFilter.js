@@ -13,19 +13,22 @@ $(document).ready(function () {
             return false;
         }
          */
+        var srcStrHtml = $("li", "#w0");
         if (inputValue.length > 0) {
-            $("li", "#w0")
-                .hide()
-                .filter(function () {
-                    return (
-                        removeAccents($(this).text())                        
-                                .toLowerCase()
-                                .indexOf(searchBar.val().toLowerCase()) != -1
-                    );
-                })
-                .show();
+            //highlight(inputValue, srcStrHtml.html());
+            srcStrHtml.hide();
+            var srcStrHtml = srcStrHtml.filter(function () {
+                var text = $(this).text();
+                text = removeAccents(text);
+                text = text.toLowerCase();
+                return (
+                    text.indexOf(searchBar.val().toLowerCase()) != -1
+                );
+            });
+            srcStrHtml.show();
+            
         } else {
-            $("li", "#w0").show();
+            srcStrHtml.show();
         }
     });
 
@@ -50,5 +53,18 @@ $(document).ready(function () {
     clearBtn.click(function () {
         searchBar.val('');
         searchBar.keyup();
-    })
+    });
+
+    const highlight = (inputStr, srcStrHtml) => {
+        console.log(inputStr);
+        //var srcStrHtml = $("#se").html();
+        //var inputStr = "s";
+        inputStr = inputStr.replace(/(\s+)/,"(<[^>]+>)*$1(<[^>]+>)*");
+        var pattern = new RegExp("("+inputStr+")", "gi");
+
+        srcStrHtml = srcStrHtml.replace(pattern, "<mark>$1</mark>");
+        srcStrHtml = srcStrHtml.replace(/(<mark>[^<>]*)((<[^>]+>)+)([^<>]*<\/mark>)/,"$1</mark>$2<mark>$4");
+
+        $("li", "#w0").html(srcStrHtml);
+    }
 });

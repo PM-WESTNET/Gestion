@@ -139,12 +139,10 @@ main {
   font-size: .85rem;
   font-family:'latoregular';
 
-}/* 
-.search-bar:hover{
-  border: .15rem solid var(--accent);
 }
-.search-bar:focus {
-  border: .15rem solid var(--accent);
-  outline: none;
+
+mark {
+  color: orange;
+  padding: 0;
 }
- */
+
