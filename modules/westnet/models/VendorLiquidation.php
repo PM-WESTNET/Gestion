@@ -361,7 +361,7 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
     }
 
 
-    public static function deleteVendorLiquidationSQL($vendor_liquidation_item){
+    public static function deleteVendorLiquidationSQL($vendor_liquidation_id){
         return Yii::$app->db->createCommand()->delete('vendor_liquidation', ['vendor_liquidation_id' => $vendor_liquidation_id])->execute();
     }
 
@@ -383,5 +383,30 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
         )
         ->bindValue('vendor_liquidation_id',$vendor_liquidation_id)
         ->queryOne(); 
+    }
+
+
+    public static function FindVendorLiquidationPendingAll($vendor_liquidation_process_id){
+        return Yii::$app->db->createCommand(
+            'SELECT * FROM vendor_liquidation WHERE status = "pending" AND vendor_liquidation_process_id = :vendor_liquidation_process_id'
+        )
+        ->bindValue('vendor_liquidation_process_id',$vendor_liquidation_process_id)
+        ->queryAll();
+    }
+
+    public static function UpdateStatusVendorLiquidation($new_status, $vendor_liquidation_id){
+        return Yii::$app->db->createCommand(
+            'UPDATE vendor_liquidation SET status = :status WHERE vendor_liquidation_id = :vendor_liquidation_id')
+        ->bindValue('status', $new_status)
+        ->bindValue('vendor_liquidation_id', $vendor_liquidation_id)
+        ->execute();
+    }
+
+    public static function ProgressStatusVendorLiquidation($id){
+        return Yii::$app->db->createCommand(
+            'SELECT status, COUNT(status) as cantidad FROM gestion_westnet0108.vendor_liquidation WHERE vendor_liquidation_process_id = :id GROUP BY status'
+        )
+        ->bindValue('id',$id)
+        ->queryAll();
     }
 }

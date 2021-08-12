@@ -18,6 +18,15 @@ class VendorLiquidationController extends Controller{
     public function actionLiquidationByLot(){
         $model = VendorLiquidationProcess::find()->where(['status' => 'pending'])->one();
         $this->LiquidationProcess($model);
+
+        $model->status = 'success';
+        $model->save(false);
+
+        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id, 'status' => 'cancelled'])->all();
+
+        foreach ($vendor_liquidations as $key => $value) {
+            $value->delete();
+        }
     }
 
 
@@ -27,25 +36,18 @@ class VendorLiquidationController extends Controller{
      */
     public function LiquidationProcess($model)
     {
-        $vendor_liquidations = VendorLiquidation::find()->where(['status' => 'pending', 'vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
-        $aux = 0;
+        $vendor_liquidations = VendorLiquidation::FindVendorLiquidationPendingAll($model->vendor_liquidation_process_id);
+
         foreach ($vendor_liquidations as $liquidation) {
-            $contractDetails = $model->findContractsDetailsSQL($liquidation->vendor_id);
-            echo "Liquidation " . $liquidation->vendor_liquidation_id . "\n"; 
+            $contractDetails = $model->findContractsDetailsSQL($liquidation['vendor_id']);
+            echo "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n"; 
+
             if ($contractDetails) {
                 $this->liquidateVendorItems($liquidation, $contractDetails);
-                $liquidation->status = 'success';
-                
+                VendorLiquidation::UpdateStatusVendorLiquidation('success', $liquidation['vendor_liquidation_id']);
+
             }else{
-                $liquidation->status = 'cancelled';
-            }
-            $liquidation->save(false);
-            //Si el total es 0, lo borramos
-            /*if (!(VendorLiquidation::getTotalSQL($liquidation->vendor_liquidation_id) > 0)) {
-                VendorLiquidation::deleteVendorLiquidationSQL($liquidation->vendor_liquidation_id);
-            }*/
-            if (!($liquidation->total > 0)) {
-                $liquidation->delete();
+                VendorLiquidation::UpdateStatusVendorLiquidation('cancelled', $liquidation['vendor_liquidation_id']);
             }
         }
     }
@@ -62,12 +64,12 @@ class VendorLiquidationController extends Controller{
 
         foreach($details as $detail){
             $price = Product::findOne(['product_id' => $detail['product_id']])->getPriceFromDate($detail['date'])->one();
-            
+
             //Si el precio del producto es mayor a 0
             if($price->finalPrice > 0){
                 $contract = Contract::findOne(['contract_id' => $detail['contract_id']]);
                 $customer = $contract->customer;
-                
+
                 //Por problemas con datos migrados, agregamos esta cond de customer_id > 22200
                 if($customer->customer_id > 22200 && $contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
 
@@ -76,12 +78,12 @@ class VendorLiquidationController extends Controller{
 
                     //Si es un plan, la comision se calcula por vendedor (VendorCommission
                     if($product->type == 'plan'){
-                        $vendor = Vendor::findOne(['vendor_id' => $liq->vendor_id]);
+                        $vendor = Vendor::findOne(['vendor_id' => $liq['vendor_id']]);
                         $amount = $vendor->commission->calculateCommission($price->finalPrice);
 
                     //Si es un producto, la comision se calcula por producto (solo si el producto tiene asociada una comision)
                     }else{
-                        
+
                         if(isset($product->commission)){
                             $amount = $product->commission->calculateCommission($price->finalPrice);
                         }
@@ -90,7 +92,7 @@ class VendorLiquidationController extends Controller{
                     $liqItem = [
                         'contract_detail_id' => $detail['contract_detail_id'],
                         'description' => $product->name,
-                        'vendor_liquidation_id' => $liq->vendor_liquidation_id,
+                        'vendor_liquidation_id' => $liq['vendor_liquidation_id'],
                         'amount' => $amount
                     ];
 
@@ -99,33 +101,35 @@ class VendorLiquidationController extends Controller{
             }
         }
 
-
         VendorLiquidation::batchInsertLiquidationItems($vendor_liquidation_items);
-
     }
 
     private function hasPayedFirstBill($customer, $contractDetail, $liquidation)
     {
-        
+
         $paymentModel = new PaymentSearch();
         $paymentModel->customer_id = $customer->customer_id;
-
-        //Consideramos el saldo hasta el ultimo dia habil del mes que se esta liquidando
-        $toDate = (new \DateTime( $liquidation->period ))->format('Y-m-t');
-        $fromDate = (new \DateTime( $contractDetail['date'] ))->format('Y-m-d');
         
-        $current_account = $paymentModel->totalCalculationForQuerySQL($fromDate, $toDate);
+        //Consideramos el saldo hasta el ultimo dia habil del mes que se esta liquidando
+        $toDate = (new \DateTime( $liquidation['period'] ))->format('Y-m-t');
+        $fromDate = (new \DateTime( $contractDetail['date'] ))->format('Y-m-d');
 
+        //Facturas desde la fecha de contrato; una factura anterior no incluiria este contrato
+        $billed = $paymentModel->accountTotalCredit($fromDate, $toDate);
+        
         //Si no se ha facturado nada, devolvemos false
-        if($current_account == 0){
+        if($billed == 0){
             return false;
         }
- 
-        if($current_account < Yii::$app->params['account_tolerance']){
+        
+        //Pagos desde la fecha de contrato, porque el pago puede existir antes de la factura
+        $payed = $paymentModel->accountPayed($fromDate, $toDate);
+        
+        if(($billed - $payed) < Yii::$app->params['account_tolerance']){
             return true;
         }else{
             return false;
         }
-        
+
     }
-}
+} 

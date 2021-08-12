@@ -21,6 +21,7 @@ use app\modules\sale\models\Product;
 use yii\data\ArrayDataProvider;
 use app\modules\westnet\models\VendorLiquidationItem;
 use app\modules\checkout\models\search\PaymentSearch;
+use yii\helpers\ArrayHelper;
 
 /**
  * VendorLiquidationController implements the CRUD actions for VendorLiquidation model.
@@ -138,7 +139,7 @@ class VendorLiquidationController extends Controller
     {
         Yii::setLogger(new EmptyLogger());
         set_time_limit(0);
-        ini_set('memory_limit', '-1');
+
         $model = new BatchLiquidationModel();
         
         if($model->load(Yii::$app->request->post()) && $model->validate()){
@@ -150,13 +151,10 @@ class VendorLiquidationController extends Controller
             $contractDetailsQuery = $model->findContractsDetails();
             
             $transaction = Yii::$app->db->beginTransaction();
-            $aux = 0;
             try{
-            
                 //Por cada vendedor
                 foreach($query->batch() as $vendors){
                     foreach ($vendors as $vendor) {
-                        $aux++;
                         $liq = VendorLiquidation::create($vendor, $model->period);
 
                         //Clonamos la query para agregar vendor_id a la condicion de busqueda
@@ -175,7 +173,6 @@ class VendorLiquidationController extends Controller
                         }
                     }
                 }
-                
                 $transaction->commit();
                 
             } catch (\Exception $e){
@@ -431,7 +428,7 @@ class VendorLiquidationController extends Controller
      * Liquidacion por lotes
      * @return mixed
      */
-    public function actionBatchNuevo()
+    public function actionBatchVendorLiquidationProcess()
     {
         Yii::setLogger(new EmptyLogger());
         $model = new VendorLiquidationProcess();
@@ -482,11 +479,10 @@ class VendorLiquidationController extends Controller
         $vendor_liquidations = VendorLiquidation::find()->where(['period' => $model->period, 'vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
         
         foreach ($vendor_liquidations as $value) {
-            $value->status = 'pending';
-            $value->save(false);
+            VendorLiquidation::UpdateStatusVendorLiquidation('pending',$value->vendor_liquidation_id);
         }
 
-        $this->redirect('vendor-liquidation-process'); 
+        $this->redirect('index'); 
     }
 
     public function actionRemoveVendorLiquidationProcess($id){
@@ -501,5 +497,21 @@ class VendorLiquidationController extends Controller
         $model->delete();
 
         $this->redirect('vendor-liquidation-process'); 
+    }
+
+    public function actionViewVendorLiquidationProcess($id){
+        $model = VendorLiquidationProcess::findOne(['vendor_liquidation_process_id' => $id]);
+    
+        return $this->render('view-vendor-liquidation-process',['model' => $model]);
+    }
+
+    public function actionStatusVendorLiquidationProcess(){
+        $data = ArrayHelper::map(VendorLiquidation::ProgressStatusVendorLiquidation(Yii::$app->request->post()['id']),'status', 'cantidad');
+        $cant_status = [
+            'pending' => isset($data['pending']) ? $data['pending'] : 0, 
+            'success' => isset($data['success']) ? $data['success'] : 0, 
+            'cancelled' => isset($data['cancelled']) ? $data['cancelled'] : 0];
+
+        return json_encode($data);
     }
 }

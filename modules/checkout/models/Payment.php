@@ -643,33 +643,4 @@ class Payment extends  ActiveRecord  implements CountableInterface
 
         return round($payed,2) - round($totalCredit,2);
     } 
-
-    /**
-     * Retorna el total de deuda de un customer, teniendo en cuenta la cuenta corriente.
-     * La suma se calcula teniendo en cuenta el multiplicador del tipo de comprobantes.
-     *
-     * @return float|mixed
-     */
-    public function totalCalculationForQuerySQL($fromDate = null, $toDate = null, $only_closed = true)
-    {
-
-        $payment_method_id = Yii::$app->db->createCommand('SELECT payment_method_id FROM payment_method WHERE type = "account"')->queryOne();
-        $payment_method_id  = !$payment_method_id ? 0 : $payment_method_id;
-        $payed = Yii::$app->db->createCommand('SELECT sum(coalesce(pi.amount, payment.amount)) as payed FROM payment LEFT JOIN payment_item pi ON payment.payment_id = pi.payment_id WHERE pi.payment_method_id NOT IN (:payment_method_id) AND customer_id = :customer_id AND date >= :fromDate AND date <= :toDate ')->bindValue('payment_method_id',$payment_method_id)
-        ->bindValue('customer_id',$this->customer_id)
-        ->bindValue('fromDate', $fromDate)
-        ->bindValue('toDate', $toDate)
-        ->queryOne()['payed'];
-
-        $totalCredit = Yii::$app->db->createCommand('SELECT sum(bill.total * bill_type.multiplier) as total_credit FROM bill LEFT JOIN bill_type ON bill.bill_type_id = bill_type.bill_type_id WHERE customer_id = :customer_id AND date >= :fromDate AND date <= :toDate ')
-        ->bindValue('customer_id',$this->customer_id)
-        ->bindValue('fromDate', $fromDate)
-        ->bindValue('toDate', $toDate)
-        ->queryOne()['total_credit'];
-
-        $payed = abs($payed) > 0.0 ? $payed : 0.0;
-        $totalCredit = abs($totalCredit) > 0.0 ? $totalCredit : 0.0;
-
-        return round($payed,2) - round($totalCredit,2);
-    }
 }

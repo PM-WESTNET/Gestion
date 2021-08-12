@@ -3,6 +3,7 @@
 namespace app\modules\westnet\models;
 
 use Yii;
+use app\modules\sale\modules\contract\models\ContractDetail;
 
 /**
  * This is the model class for table "vendor_liquidation_process".
@@ -108,17 +109,13 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
      */
     public function findContractsDetailsSQL($vendor_id)
     {
-        $year = Yii::$app->formatter->asDate($this->period, 'yyyy');
-        $month = Yii::$app->formatter->asDate($this->period, 'MM');
-        
+
         //Detalles del mes correspondiente al periodo
         return $contract_details = Yii::$app->db->createCommand(
-            'SELECT * FROM contract_detail cd
-             LEFT JOIN vendor_liquidation_item vli ON vli.contract_detail_id = cd.contract_detail_id
-             WHERE MONTH(date) <= :month AND YEAR(date) <= :year AND vli.vendor_liquidation_id IS NULL AND cd.vendor_id = :vendor_id 
+            'SELECT cd.contract_detail_id, cd.contract_id, cd.product_id, cd.date FROM contract_detail cd
+             NATURAL LEFT JOIN vendor_liquidation_item vli
+             WHERE (vli.vendor_liquidation_id IS NULL) AND (cd.vendor_id = :vendor_id)
             ')
-        ->bindValue('month', $month)
-        ->bindValue('year',$year)
         ->bindValue('vendor_id', $vendor_id)
         ->queryAll();
 
