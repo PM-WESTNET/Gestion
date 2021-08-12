@@ -67,7 +67,7 @@ main {
   height: var(--width-and-height);
   border-radius: 1rem;
   box-shadow: 0 0 0 .07rem rgb(255, 255, 255);
-  transition: 0.3s;
+  transition: 0.2s;
   overflow: hidden;
   background: #FFFFFF;
 }
@@ -141,8 +141,9 @@ main {
 
 }
 
-mark {
-  color: orange;
-  padding: 0;
+.highlight {
+/*   border: solid .1rem rgba(100, 255, 55, 0.5);
+ */
+  box-shadow: inset .15rem 0 var(--accent);
 }
 
