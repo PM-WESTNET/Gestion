@@ -44,12 +44,20 @@ class BatchInvoiceController  extends Controller
     {
         $searchModel = new ContractSearch();
         $searchModel->setScenario('for-invoice');
-        $dataProvider = new ActiveDataProvider([
-            'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),
-            'pagination' => [
-                'pageSize' => 10
-            ]
-        ]);
+        $dataProvider = null;
+
+        if(isset(Yii::$app->request->getQueryParams()['ContractSearch']['period'])){
+            $period = Yii::$app->request->getQueryParams()['ContractSearch']['period'];
+            if(date('m',strtotime($period)) < date('m'))
+                \Yii::$app->session->setFlash('error', 'No se puede generar un lote de facturas de un periodo anterior al que se encuentra en curso.');  
+            else
+                $dataProvider = new ActiveDataProvider([
+                    'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),
+                    'pagination' => [
+                        'pageSize' => 10
+                    ]
+                ]);
+        }
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -65,12 +73,20 @@ class BatchInvoiceController  extends Controller
     {
         $searchModel = new ContractSearch();
         $searchModel->setScenario('for-invoice');
-        $dataProvider = new ActiveDataProvider([
-            'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),
-            'pagination' => [
-                'pageSize' => 10
-            ]
-        ]);
+        $dataProvider = null;
+
+        if(isset(Yii::$app->request->getQueryParams()['ContractSearch']['period'])){
+            $period = Yii::$app->request->getQueryParams()['ContractSearch']['period'];
+            if(date('m',strtotime($period)) < date('m'))
+                \Yii::$app->session->setFlash('error', 'No se puede generar un lote de facturas de un periodo anterior al que se encuentra en curso.');  
+            else
+                $dataProvider = new ActiveDataProvider([
+                    'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),
+                    'pagination' => [
+                        'pageSize' => 10
+                    ]
+                ]);
+        }
 
         return $this->render('index-with-filters', [
             'dataProvider' => $dataProvider,
