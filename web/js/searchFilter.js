@@ -1,5 +1,6 @@
 $(document).ready(function () {
     var searchBar = $("#search");
+
     searchBar.on("keyup", function (event) {
         var inputValue = this.value;
         /* var regex = new RegExp("/^[A-Z]+$/i");
@@ -19,6 +20,7 @@ $(document).ready(function () {
             srcStrHtml.hide();
             var srcStrHtml = srcStrHtml.filter(function () {
                 var text = $(this).text();
+                console.log(text);
                 text = removeAccents(text);
                 text = text.toLowerCase();
                 return (
@@ -46,6 +48,7 @@ $(document).ready(function () {
         // we utilize this function to prevent a propagation error. https://stackoverflow.com/questions/8238599/jquery-click-fires-twice-when-clicking-on-label/49336534
         evt.stopImmediatePropagation();
         search.toggleClass('active');
+        if(search.hasClass('active')){setTimeout(() => {$("#search").focus();}, 300);};
     });
 
     // clear button logic
@@ -55,16 +58,4 @@ $(document).ready(function () {
         searchBar.keyup();
     });
 
-    const highlight = (inputStr, srcStrHtml) => {
-        console.log(inputStr);
-        //var srcStrHtml = $("#se").html();
-        //var inputStr = "s";
-        inputStr = inputStr.replace(/(\s+)/,"(<[^>]+>)*$1(<[^>]+>)*");
-        var pattern = new RegExp("("+inputStr+")", "gi");
-
-        srcStrHtml = srcStrHtml.replace(pattern, "<mark>$1</mark>");
-        srcStrHtml = srcStrHtml.replace(/(<mark>[^<>]*)((<[^>]+>)+)([^<>]*<\/mark>)/,"$1</mark>$2<mark>$4");
-
-        $("li", "#w0").html(srcStrHtml);
-    }
 });
