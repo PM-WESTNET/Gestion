@@ -19,9 +19,6 @@ use app\assets\UserManagementAsset;
 use app\assets\MenuAsset;
 MenuAsset::register($this);
 
-$this->registerJsFile('js/layoutMenu.js');
-$this->registerJsFile('js/searchFilter.js');
-
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
@@ -580,7 +577,7 @@ $notFilterable[] = [
 
             <?php
             echo Nav::widget([
-                'options' => ['class' => 'navbar-nav navbar-left'],
+                'options' => ['class' => 'navbar-nav navbar-left','id' => 'menu-layout-navbar'],
                 'items' => array_merge($alwaysVisibleItems, $items),
                 'encodeLabels' => false,
                 'activateParents' => true
@@ -604,4 +601,3 @@ $notFilterable[] = [
         </div>
     </div>
 </nav>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
