@@ -542,12 +542,12 @@ $notFilterable[] = [
 ?>
 
 
-<nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>">
-
-    <div class="container-fluid custom-navbar-flex custom-flex-start" >
-
+<nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>" role="navigation">
+<div class="container-fluid">
+    <div class=".custom-navbar-flex .custom-flex-start" >
+        <!-- no tocar el codigo del boton que hace que el nav sea responsive -->
         <div class="navbar-header" id="narrow-navbar">
-            <button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -560,36 +560,26 @@ $notFilterable[] = [
 
         </div>
         <!-- searchbar -->
-        <div class="search-container">
-            <div class="search-icon">
-                <span class="glyphicon glyphicon-search"></span>
+            <div class="search-container">
+                <div class="search-icon">
+                    <span class="glyphicon glyphicon-search"></span>
+                </div>
+                <div class="input">
+                    <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.."/>
+                </div>
+                <div class="close-icon">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </div>
             </div>
-            <div class="input">
-                <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.."/>
-            </div>
-            <div class="close-icon">
-                <span class="glyphicon glyphicon-plus"></span>
-            </div>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="wide-navbar">
-
-            <?php
-            echo Nav::widget([
-                'options' => ['class' => 'navbar-nav navbar-left','id' => 'menu-layout-navbar'],
-                'items' => array_merge($alwaysVisibleItems, $items),
-                'encodeLabels' => false,
-                'activateParents' => true
-            ]);
-            ?>
-        </div>
-        
-    </div>
-    
-    <div class="container-fluid custom-navbar-flex custom-flex-end" >
-        <div class="collapse navbar-collapse">
-
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="wide-navbar">
                 <?php
+                echo Nav::widget([
+                    'options' => ['class' => 'navbar-nav navbar-left menu-layout-navbar'],
+                    'items' => array_merge($alwaysVisibleItems, $items),
+                    'encodeLabels' => false,
+                    'activateParents' => true
+                ]);
                 echo Nav::widget([
                     'options' => ['class' => 'navbar-nav'],
                     'items' => $notFilterable,
@@ -597,6 +587,10 @@ $notFilterable[] = [
                     'activateParents' => true
                 ]);
                 ?>
-        </div>
+            </div>
+        
     </div>
+    
+    
+</div>
 </nav>
