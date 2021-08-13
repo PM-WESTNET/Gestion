@@ -1408,4 +1408,32 @@ class CustomerController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
+
+    public function actionGetAddress(){
+	if(isset(Yii::$app->request->post()['id'])){
+            $model = Customer::findOne(['code' => Yii::$app->request->post()['id']]);
+            if($model)  
+            	return [
+                	'error' => 'false',
+                	'data' => [
+                    		'street' => $model->address->street,
+                    		'number' => $model->address->number,
+                    		'geocode' => $model->address->geocode,
+                    		'zone' => $model->address->zone->getFullZoneAPI($model->address->zone_id)
+
+                	]
+            	];
+	   else
+		return [
+                'error' => 'true',
+                'message' => 'El código ingresado no es valido'
+            ];
+
+        }else{
+            return [
+                'error' => 'true',
+                'message' => 'Por favor asegurese de enviar el codigo de cliente como parametro'
+            ];
+        }
+    }
 }
