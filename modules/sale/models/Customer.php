@@ -126,6 +126,9 @@ class Customer extends ActiveRecord {
 
     public $user_napear = null;
 
+    public $customer;
+    public $total_client;
+
     /**
      * @inheritdoc
      */
