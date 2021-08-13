@@ -160,7 +160,7 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
      * @brief Format dates as database requieres it
      */
     private function formatDatesBeforeSave()
-    {
+    {   
         $this->date = Yii::$app->formatter->asDate($this->date, 'yyyy-MM-dd');
         $this->period = $this->period ? Yii::$app->formatter->asDate($this->period, 'yyyy-MM-dd') : NULL;
     }
@@ -341,5 +341,72 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
         Yii::$app->db->createCommand()->batchInsert('vendor_liquidation_item', [
             'contract_detail_id', 'description', 'vendor_liquidation_id', 'amount'
         ], $liquidation_items)->execute();
+    }
+
+
+    /**
+     * Crea una nueva liquidacion para el vendedor y periodos indicados
+     */
+    public static function createVendorLiquidationSQL($vendor_id, $period, $vendor_liquidation_process_id)
+    {
+        $period = date_format(date_create($period), 'Y-m-d');
+        return Yii::$app->db->createCommand()->insert('vendor_liquidation',
+            [
+                'vendor_id' => $vendor_id,
+                'period' => $period,
+                'date' => date('Y-m-d'),
+                'status' => 'draft',
+                'vendor_liquidation_process_id' => $vendor_liquidation_process_id
+            ])->execute();
+    }
+
+
+    public static function deleteVendorLiquidationSQL($vendor_liquidation_id){
+        return Yii::$app->db->createCommand()->delete('vendor_liquidation', ['vendor_liquidation_id' => $vendor_liquidation_id])->execute();
+    }
+
+    public static function findVendorLiquidationSQL($vendor_id, $period){
+
+        return Yii::$app->db->createCommand(
+            'SELECT * FROM vendor_liquidation WHERE vendor_id = :vendor_id AND period = :period'
+        )
+        ->bindValue('vendor_id', $vendor_id)
+        ->bindValue('period', (new \DateTime( $period ))->format('Y-m-d'))
+        ->queryOne();
+    }
+
+     //Total
+    public static function getTotalSQL($vendor_liquidation_id)
+    {   
+        return Yii::$app->db->createCommand(
+            'SELECT SUM(amount) as total FROM vendor_liquidation_item vli WHERE vli.vendor_liquidation_id = :vendor_liquidation_id AND amount <> 0.0'
+        )
+        ->bindValue('vendor_liquidation_id',$vendor_liquidation_id)
+        ->queryOne(); 
+    }
+
+
+    public static function FindVendorLiquidationPendingAll($vendor_liquidation_process_id){
+        return Yii::$app->db->createCommand(
+            'SELECT * FROM vendor_liquidation WHERE status = "pending" AND vendor_liquidation_process_id = :vendor_liquidation_process_id'
+        )
+        ->bindValue('vendor_liquidation_process_id',$vendor_liquidation_process_id)
+        ->queryAll();
+    }
+
+    public static function UpdateStatusVendorLiquidation($new_status, $vendor_liquidation_id){
+        return Yii::$app->db->createCommand(
+            'UPDATE vendor_liquidation SET status = :status WHERE vendor_liquidation_id = :vendor_liquidation_id')
+        ->bindValue('status', $new_status)
+        ->bindValue('vendor_liquidation_id', $vendor_liquidation_id)
+        ->execute();
+    }
+
+    public static function ProgressStatusVendorLiquidation($id){
+        return Yii::$app->db->createCommand(
+            'SELECT status, COUNT(status) as cantidad FROM gestion_westnet0108.vendor_liquidation WHERE vendor_liquidation_process_id = :id GROUP BY status'
+        )
+        ->bindValue('id',$id)
+        ->queryAll();
     }
 }
