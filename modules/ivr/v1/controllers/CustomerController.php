@@ -1164,7 +1164,9 @@ class CustomerController extends Controller
             $customer= Yii::$app->db->createCommand(
                 "SELECT
                 cu.customer_id,
-                CONCAT_WS(' ',cu.lastname,cu.name) AS name,
+                cu.name,
+                cu.lastname,
+                cu.description,
                 cu.code,
                 cu.document_number,
                 ad.geocode,
