@@ -17,6 +17,7 @@ use app\modules\sale\models\BillType;
 use app\assets\UserManagementAsset;
 // implementation of menu scripts
 use app\assets\MenuAsset;
+
 MenuAsset::register($this);
 
 
@@ -543,34 +544,32 @@ $notFilterable[] = [
 
 
 <nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>" role="navigation">
-<div class="container-fluid">
-    <div class=".custom-navbar-flex .custom-flex-start" >
-        <!-- no tocar el codigo del boton que hace que el nav sea responsive -->
-        <div class="navbar-header" id="narrow-navbar">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-
-
-            <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
-
-
-        </div>
-        <!-- searchbar -->
-            <div class="search-container">
-                <div class="search-icon">
-                    <span class="glyphicon glyphicon-search"></span>
+    <div class="container-fluid">
+            <!-- no tocar el codigo del boton que hace que el nav sea responsive -->
+            <div class="navbar-header navbar-header-custom-css" id="narrow-navbar">
+                <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
+                
+                <!-- searchbar -->
+                <div class="search-container">
+                    <div class="search-icon">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </div>
+                    <div class="input">
+                        <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.." />
+                    </div>
+                    <div class="close-icon">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </div>
                 </div>
-                <div class="input">
-                    <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.."/>
-                </div>
-                <div class="close-icon">
-                    <span class="glyphicon glyphicon-plus"></span>
-                </div>
+
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
             </div>
+
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="wide-navbar">
                 <?php
@@ -588,9 +587,7 @@ $notFilterable[] = [
                 ]);
                 ?>
             </div>
-        
+
+
     </div>
-    
-    
-</div>
 </nav>
