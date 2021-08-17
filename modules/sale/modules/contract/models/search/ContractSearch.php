@@ -208,7 +208,11 @@ class ContractSearch extends Contract {
             ['con.status' => 'active'],
             ['c.status' => 'enabled'],
             ['c.company_id' => $this->company_id],
-            ['tchbt.bill_type_id' => $this->bill_type_id],
+            /*
+               Se solicita desde administracion que los iva inscripto solo puedan facturar Facturas A, y evitar el caso de que pueden ser ambas, ya que les permitia emitir a estos Facturas B
+            */
+            //['tchbt.bill_type_id' => $this->bill_type_id],
+            ('IF(tchbt.bill_type_id="2" AND c.tax_condition_id = "1",FALSE,tchbt.bill_type_id='.$this->bill_type_id.')'), 
             ['product_to_invoice_id' => null],
             ['<=', 'con.from_date', (new DateTime($period->format('Y-m-d')))->modify('last day of this month')->format('Y-m-d')],
             ['>', 'cc.percentage_bill', 0]];
