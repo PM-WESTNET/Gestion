@@ -6,7 +6,7 @@ use app\components\web\Controller;
 /**
  * Gives the actions for the system navigation module
  */
-class SystemNavigationTutorialController extends Controller
+class SystemNavigationController extends Controller
 {
   
 
