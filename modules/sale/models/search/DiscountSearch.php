@@ -12,6 +12,7 @@ use yii\data\ActiveDataProvider;
  */
 class DiscountSearch extends Discount
 {
+
     /**
      * @inheritdoc
      */
@@ -19,7 +20,7 @@ class DiscountSearch extends Discount
     {
         return [
             [['discount_id','customerAmount','value','code'], 'integer'],
-            [['name', 'referenced'], 'safe'],
+            [['name', 'referenced', 'from_date', 'to_date'], 'safe'],
             [['status'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
             /* [['from_date', 'to_date', 'lastname'], 'string'], */ // mejorar implementacion de esto
             [['lastname'], 'string'], 
@@ -89,7 +90,7 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-
+        
         // awesome query
         $query = Discount::find()
                 ->select('COUNT(*) AS customerAmount, d.*')
@@ -125,8 +126,8 @@ class DiscountSearch extends Discount
         // AND WHERE LIKE-s (pattern match)
         $query->andFilterWhere(['like', 'd.name', $this->name]);
         $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['like', 'd.from_date', $this->from_date]);
-        $query->andFilterWhere(['like', 'd.to_date', $this->to_date]);
+        $query->andFilterWhere(['>=', 'd.from_date', $this->from_date]);
+        $query->andFilterWhere(['<=', 'd.to_date', $this->to_date]);
         $query->andFilterWhere(['like', 'd.type', $this->type]);
         $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
        
