@@ -447,7 +447,7 @@ $items[] = [
         '<li class="divider"></li>',
         ['label' => Yii::t('app', 'Instructive Category'), 'url' => ['/instructive/instructive-category/index']],
         '<li class="divider"></li>',
-        ['label' => "Tutorial Navegación del Sistema", 'url' => ['/instructive/system-navigation/index']],
+        ['label' => "Navegación del Sistema", 'url' => ['/instructive/system-navigation/index']],
     ]
 ];
 
