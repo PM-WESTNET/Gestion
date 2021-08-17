@@ -1,9 +1,10 @@
 $(document).ready(function (evt) {
     var searchBar = $("#search");
+    var menuNavbar= $("ul.menu-layout-navbar");
     searchBar.on("keyup", function (event) {
         var inputValue = this.value;
-        //var srcStrHtml = $("ul#menu-layout-navbar").find("li:has(a[href^='/']),li.divider,li.dropdown-header");
-        var srcStrHtml = $("ul#menu-layout-navbar").children().add($("ul#menu-layout-navbar").find("a[href^='/'],li"));
+        //var srcStrHtml = menuNavbar.find("li:has(a[href^='/']),li.divider,li.dropdown-header");
+        var srcStrHtml = menuNavbar.children().add(menuNavbar.find("a[href^='/'],li"));
         
         //$("li").child("a")
         if (inputValue.length > 0) {
