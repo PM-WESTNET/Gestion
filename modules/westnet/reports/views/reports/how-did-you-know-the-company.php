@@ -63,8 +63,11 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-1">
                 <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
+            </div>
+            <div class="col-md-1">               
+                <a href= "how-did-you-know-the-company" class="btn btn-success"> Limpiar</a>
             </div>
         </div>
         <?php ActiveForm::end(); ?>
