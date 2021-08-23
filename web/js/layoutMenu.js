@@ -1,7 +1,4 @@
-
 $(document).ready(function() {
-    //alert('layoutMenu.js');
-
     var uLists = $("#main-menu").find("ul");
   
     var dividersSet = uLists.find("li.divider");
@@ -26,9 +23,9 @@ $(document).ready(function() {
             if($(this).children().first().is("li.divider")){
                 $(this).children().first().remove();
             }
-            console.log("-end-");
         });
     });
 
+    console.log('Menu navbar cleaned.');
     
 });
