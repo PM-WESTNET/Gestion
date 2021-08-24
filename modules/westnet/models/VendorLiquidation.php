@@ -23,6 +23,7 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
     const VENDOR_LIQUIDATION_PAYED = 'payed';
     const VENDOR_LIQUIDATION_CANCELLED = 'cancelled';
     const VENDOR_LIQUIDATION_BILLED = 'billed';
+    const VENDOR_LIQUIDATION_SUCCESS = 'success';
 
     public function init()
     {
@@ -404,7 +405,7 @@ class VendorLiquidation extends \app\components\db\ActiveRecord
 
     public static function ProgressStatusVendorLiquidation($id){
         return Yii::$app->db->createCommand(
-            'SELECT status, COUNT(status) as cantidad FROM gestion_westnet0108.vendor_liquidation WHERE vendor_liquidation_process_id = :id GROUP BY status'
+            'SELECT status, COUNT(status) as cantidad FROM vendor_liquidation WHERE vendor_liquidation_process_id = :id GROUP BY status'
         )
         ->bindValue('id',$id)
         ->queryAll();

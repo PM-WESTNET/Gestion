@@ -403,7 +403,7 @@ class VendorLiquidationController extends Controller
                 Yii::$app->session->addFlash('error', Yii::t('westnet', 'Provider is not set.'));
                 return $this->actionView($id);
             }
-            if($model->status != VendorLiquidation::VENDOR_LIQUIDATION_DRAFT) {
+            if($model->status != VendorLiquidation::VENDOR_LIQUIDATION_DRAFT && $model->status != VendorLiquidation::VENDOR_LIQUIDATION_SUCCESS) {
                 Yii::$app->session->addFlash('error', Yii::t('westnet', 'The liquidation status must be draft.'));
                 return $this->actionView($id);
             }
