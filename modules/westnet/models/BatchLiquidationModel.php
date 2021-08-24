@@ -91,4 +91,5 @@ class BatchLiquidationModel extends \yii\base\Model
     {
         return Yii::$app->formatter->asDate($this->period, 'MM-yyyy');
     }
+
 }

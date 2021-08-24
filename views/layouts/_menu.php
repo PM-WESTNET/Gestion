@@ -17,7 +17,9 @@ use app\modules\sale\models\BillType;
 use app\assets\UserManagementAsset;
 // implementation of menu scripts
 use app\assets\MenuAsset;
+
 MenuAsset::register($this);
+
 
 //Fix ancho de submenu NavX > DropdownX
 $this->registerCss('.dropdown-submenu .dropdown-menu { right: auto; }');
@@ -225,6 +227,7 @@ if (Yii::$app->getModule('reports')) {
             ['label' => ReportsModule::t('app', 'Change History company'), 'url' => ['/reports/customer/change-company-history']],
             ['label' => ReportsModule::t('app', 'Customer Registrations'), 'url' => ['/reports/reports/customer-registrations']],
             ['label' => ReportsModule::t('app', 'Intenciones de Pago'), 'url' => ['/reports/reports-company/payment-intention']],
+            ['label' => ReportsModule::t('app', '¿Cómo conoció la empresa?'), 'url' => ['/reports/reports-company/how-did-you-know-the-company']],
         ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],
         ['label' => ReportsModule::t('app', 'Customers Variation per month'), 'url' => ['/reports/reports/costumer-variation-per-month']],
@@ -445,7 +448,9 @@ $items[] = [
     'items' => [
         ['label' => Yii::t('app', 'Instructive'), 'url' => ['/instructive/instructive/index']],
         '<li class="divider"></li>',
-        ['label' => Yii::t('app', 'Instructive Category'), 'url' => ['/instructive/instructive-category/index']]
+        ['label' => Yii::t('app', 'Instructive Category'), 'url' => ['/instructive/instructive-category/index']],
+        '<li class="divider"></li>',
+        ['label' => "Navegación del Sistema", 'url' => ['/instructive/system-navigation/index']],
     ]
 ];
 
@@ -541,45 +546,42 @@ $notFilterable[] = [
 ?>
 
 
-<nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>">
+<nav id="main-menu" class="navbar navbar-inverse  <?= YII_ENV == 'test' ? '' : 'navbar-fixed-top' ?>" role="navigation">
+    <div class="container-fluid">
+            <!-- no tocar el codigo del boton que hace que el nav sea responsive -->
+            <div class="navbar-header navbar-header-custom-css" id="narrow-navbar">
+                <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
+                
+                <!-- searchbar -->
+                <div class="search-container">
+                    <div class="search-icon">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </div>
+                    <div class="input">
+                        <input type="text" autocomplete="off" id="search" name="search" class="search-bar" placeholder="Buscar.." />
+                    </div>
+                    <div class="close-icon">
+                        <span class="glyphicon glyphicon-plus"></span>
+                    </div>
+                </div>
 
-    <div class="container-fluid custom-navbar-flex custom-flex-start" >
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
 
-        <div class="navbar-header" id="narrow-navbar">
-            <button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#wide-navbar" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-
-
-            <a class="navbar-brand" href="<?= Yii::$app->homeUrl; ?>"><?php echo Yii::$app->params['web_title'] ?></a>
-
-
-        </div>
-        <!-- searchbar -->
-        <input type="text" id="search" name="search" class="glyphicon glyphicon-search search-bar" />
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="wide-navbar">
-
-            <?php
-            echo Nav::widget([
-                'options' => ['class' => 'navbar-nav navbar-left'],
-                'items' => array_merge($alwaysVisibleItems, $items),
-                'encodeLabels' => false,
-                'activateParents' => true
-            ]);
-            ?>
-        </div>
-        
-    </div>
-    
-    <div class="container-fluid custom-navbar-flex custom-flex-end" >
-        <div class="collapse navbar-collapse">
-
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="wide-navbar">
                 <?php
+                echo Nav::widget([
+                    'options' => ['class' => 'navbar-nav navbar-left menu-layout-navbar'],
+                    'items' => array_merge($alwaysVisibleItems, $items),
+                    'encodeLabels' => false,
+                    'activateParents' => true
+                ]);
                 echo Nav::widget([
                     'options' => ['class' => 'navbar-nav'],
                     'items' => $notFilterable,
@@ -587,14 +589,8 @@ $notFilterable[] = [
                     'activateParents' => true
                 ]);
                 ?>
-        </div>
+            </div>
+
+
     </div>
 </nav>
-
-
-<?php
-//Searchbar JS filter script
-$this->registerJsFile('web/js/searchFilter.js');
-//custom CSS for the NAVBAR element
-//$this->registerCSSFile('web/css/navbar.css');
-?>
