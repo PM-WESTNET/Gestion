@@ -891,15 +891,15 @@ class CustomerController extends Controller
         Yii::$app->mail->setTransport($transport->getConfigArray());
 
         $mailer = Yii::$app->mail;
-        $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton';
+        $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton [NEW]';
         $params = ['emailTransport' => $transport,
                     'subject' => $subject_email,
-                    'content' => "<div style='text-align:center'>".$content_email."<br><button style='background-color:orange;border-radius:0.5em;height:2.5em;transition-duration: 0.4s;'><a href=".$url_redirect_gestion. " style='color:black;text-decoration:none;'>Botón de Pago</a></button></div>"
+                    'content' => "<div style='text-align:center'>".$content_email."<br><a href=".$url_redirect_gestion. " style='background-color: #3E3BE2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>"
             ];
         Yii::$app->view->params['notification'] = $params; 
 
         $message = $mailer
-                ->compose('@app/modules/westnet/notifications/body/layouts/PaymentButton')
+                ->compose('@app/modules/westnet/notifications/body/layouts/PaymentButton [NEW]')
                 ->setFrom($transport->from_email)
                 ->setTo($email)
                 ->setSubject($subject_email);

@@ -37,13 +37,14 @@ $title = $notification['subject'];
             </table>
           </td>
         </tr>
+
         <!-- actual message content -->
         <tr>
           <td style="padding: 0;">
             <table width="100%" style="border-spacing: 0;">
               <tr>
-                <!-- content height -->
                 <td height="300" style="padding: 0;background-color: #EEEEEE;">
+                  <!-- logo -->
                   <table align="center" style="border-spacing: 0; padding: 15px 0;">
                     <tr>
                       <td style="background-color: #EEEEEE; text-align: center;">
@@ -53,12 +54,10 @@ $title = $notification['subject'];
                             ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
-
-
                       </td>
                     </tr>
-
                   </table>
+                  <!-- title plus message -->
                   <table class="email-content" align="center" style="width: auto;margin: 0;border-spacing: 0; padding: 0 20px;">
                     <tr>
                       <td width="15px" height="auto" style="padding: 0;background-color: #1C3AE2; border-radius: 25px 0 0 0;">
@@ -69,8 +68,7 @@ $title = $notification['subject'];
                           <tr>
                             <td style="padding: 0;text-align: center;color: #FFFFFF;">
                               <p style="font-weight: bold;font-size: 24px; letter-spacing: 1.6px;margin: 20px 0;">
-                                Su factura ya se encuentra disponible
-
+                              <?= $title ?>
                               </p>
                             </td>
                           </tr>
@@ -94,22 +92,7 @@ $title = $notification['subject'];
                                 <tr>
                                   <td style="padding: 0;">
                                     <p style="font-size:12px;margin: 20px 0;">
-                                      Estimado cliente @Nombre (cliente número
-                                      @CodigoDeCliente), Westnet le informa que ya
-                                      se encuentra emitida su factura
-                                      correspondiente al mes de Junio, y vence el
-                                      día 15/6/2021. Recuerde que puede
-                                      descargarla desde nuestra aplicación móvil.
-                                    </p>
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td style="padding: 0;">
-                                    <p style="font-size:16px; letter-spacing: .5px;font-size: 14px;margin: 20px 0;">
-                                      Total a pagar $@Saldo
-                                      <br>
-                                      Código de Pago Facil y Mercado Pago:
-                                      @PaymentCode
+                                      <?= $notification['content'] ?> 
                                     </p>
                                   </td>
                                 </tr>
