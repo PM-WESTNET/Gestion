@@ -68,7 +68,7 @@ $title = $notification['subject'];
                           <tr>
                             <td style="padding: 0;text-align: center;color: #FFFFFF;">
                               <p style="font-weight: bold;font-size: 24px; letter-spacing: 1.6px;margin: 20px 0;">
-                              <?= $title ?>
+                                <?= $title ?>
                               </p>
                             </td>
                           </tr>
@@ -88,11 +88,11 @@ $title = $notification['subject'];
 
                           <tr>
                             <td width="800px" style="text-align: center;">
-                              <table style="border-spacing: 0;font-size:9px;letter-spacing: 1.2px;">
+                              <table align="center" style="border-spacing: 0;font-size:9px;letter-spacing: 1.2px;">
                                 <tr>
                                   <td style="padding: 0;">
                                     <p style="font-size:12px;margin: 20px 0;">
-                                      <?= $notification->content ?>  
+                                      <?= $notification->content ?>
                                     </p>
                                   </td>
                                 </tr>
