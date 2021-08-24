@@ -22,10 +22,10 @@ $title = $notification['subject'];
   <?php $this->head() ?>
 </head>
 
-<body style="margin: 0;padding: 0;background-color: #f8fcf6;">
-  <center style="width: 100%;table-layout: fixed;background-color: #f8fcf6;padding-bottom: 40px;">
-    <div style="max-width: fit-content; background-color: #FFFFFF;">
-      <table align="center" style="font-family: 'Lato' ;border-spacing: 0;padding: 5px;margin: 0 auto;width: 100%;max-width: 900px;border-spacing: 0;color: #171717;">
+<body style="margin: 0;padding: 0;background-color: #FFFFFF;">
+  <center style="width: 100%;table-layout: fixed;background-color: #FFFFFF;padding: 20px 0;">
+    <div style="width: 550px;background-color: #FFFFFF;">
+      <table align="center" style="font-family: 'Lato' ;border-spacing: 0;padding: 5px;margin: 0;width: 100%;border-spacing: 0;color: #171717;">
         <tr>
           <td style="padding: 0;">
             <table width="100%" style="border-spacing: 0;border-spacing: 0;">
@@ -46,11 +46,11 @@ $title = $notification['subject'];
                 <td height="300" style="padding: 0;background-color: #EEEEEE;">
                   <table align="center" style="border-spacing: 0; padding: 25px 0;">
                     <tr>
-                      <td style="padding: 0;background-color: #EEEEEE; text-align: center;">
+                      <td style="padding: 15px;background-color: #EEEEEE; text-align: center;">
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/">
                           <?= Html::img(
                             Url::base(true) . '/images/logo-westnet.png',
-                            ['alt' => 'Logo', 'style' => 'border: 0;width: 145px;']
+                            ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
 
@@ -59,7 +59,7 @@ $title = $notification['subject'];
                     </tr>
 
                   </table>
-                  <table class="email-content" align="center" style="max-width: 550px;border-spacing: 0; padding: 0 20px;">
+                  <table class="email-content" align="center" style="width: auto;margin: 0 20px;border-spacing: 0; padding: 0 20px;">
                     <tr>
                       <td width="15px" height="auto" style="padding: 0;background-color: #1C3AE2; border-radius: 25px 0 0 0;">
                         &nbsp;
