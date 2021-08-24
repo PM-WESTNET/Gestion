@@ -18,6 +18,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
+        <?= UserA::a('Proceso Liquidación de Vendedores', ['vendor-liquidation-process'], ['class' => 'btn btn-primary']); ?>
+
         <?= UserA::a('Calcular comisiones', ['batch'], ['class' => 'btn btn-primary']); ?>
         
         <?= UserA::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [

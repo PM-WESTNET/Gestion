@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
         <?php
-        if($model->status == \app\modules\westnet\models\VendorLiquidation::VENDOR_LIQUIDATION_DRAFT) {
+        if($model->status == \app\modules\westnet\models\VendorLiquidation::VENDOR_LIQUIDATION_DRAFT || $model->status == \app\modules\westnet\models\VendorLiquidation::VENDOR_LIQUIDATION_SUCCESS) {
             echo Html::a("<span class='glyphicon glyphicon-list-alt'></span> " . Yii::t('app', 'Create Bill'), [
                 'create-bill',
                 'id' => $model->vendor_liquidation_id], [
