@@ -894,7 +894,7 @@ class CustomerController extends Controller
         $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton [NEW]';
         $params = ['emailTransport' => $transport,
                     'subject' => $subject_email,
-                    'content' => "<div style='text-align:center'>".$content_email."<br><a href=".$url_redirect_gestion. " style='background-color: #3E3BE2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>"
+                    'content' => "<div style='text-align:center'>".$content_email."<br><a href=".$url_redirect_gestion. " style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>"
             ];
         Yii::$app->view->params['notification'] = $params; 
 
