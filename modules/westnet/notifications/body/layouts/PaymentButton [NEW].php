@@ -68,7 +68,7 @@ $title = $notification['subject'];
                           <tr>
                             <td style="padding: 0;text-align: center;color: #FFFFFF;">
                               <p style="font-weight: bold;font-size: 24px; letter-spacing: 1.6px;margin: 20px 0;">
-                              <?= $title ?>
+                                <?= $title ?>
                               </p>
                             </td>
                           </tr>
@@ -92,28 +92,10 @@ $title = $notification['subject'];
                                 <tr>
                                   <td style="padding: 0;">
                                     <p style="font-size:12px;margin: 20px 0;">
-                                      <?= $notification['content'] ?> 
+                                      <?= $notification['content'] ?>
                                     </p>
                                   </td>
                                 </tr>
-                                <tr>
-                                  <td style="padding: 0;">
-                                    <p style="font-size:12px;margin: 20px 0;">
-                                      Consultá todos nuestros medios de pago
-                                      <br>
-                                      <br>
-                                      <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/medios-de-pago/">
-                                        <?= Html::img(
-                                          Url::base(true) . '/images/notifications/payment-methods-icon.png',
-                                          ['alt' => 'Payment-Methods', 'style' => 'border: 0;width: 50px;']
-                                        ) ?>
-                                      </a>
-                                      <br>
-                                      <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/medios-de-pago/" style="font-size: 12px;">https://westnet.com.ar/medios-de-pago/</a>
-                                    </p>
-                                  </td>
-                                </tr>
-
                               </table>
                             </td>
                           </tr>
