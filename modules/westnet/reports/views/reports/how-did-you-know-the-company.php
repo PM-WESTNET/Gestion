@@ -101,7 +101,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view}',
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a('<i class="glyphicon glyphicon-eye-open"></i>', ['reports-company/how-did-you-know-the-company-view-customer', 'publicity_shape' => $model->publicity_shape], ['data-pjax' => '0']);
+                        $from_date = null;
+                        $to_date = null;
+                        $company = null;
+                        if(isset(Yii::$app->request->post()['ReportSearch'])){
+                            $data = Yii::$app->request->post()['ReportSearch'];
+                            $from_date = $data['date_from'];
+                            $to_date = $data['date_to'];
+                            $company = $data['company_id'];
+                        }
+                        return Html::a('<i class="glyphicon glyphicon-eye-open"></i>', ['reports-company/how-did-you-know-the-company-view-customer', 'publicity_shape' => $model->publicity_shape, 'from_date' => $from_date, 'to_date' => $to_date, 'company' => $company], ['data-pjax' => '0']);
                     }
                 ]   
             ]

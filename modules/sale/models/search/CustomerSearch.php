@@ -1009,9 +1009,14 @@ class CustomerSearch extends Customer {
         return $dataProvider;
     }
 
-     public function searchCustomerByPublicityShape($params)
+     public function searchCustomerByPublicityShape($params,$from_date,$to_date,$company)
     {
         $query = Customer::find()->where(['LIKE','publicity_shape',$params['publicity_shape']]);
+
+        $query->andWhere(['>=', 'date_new', (new \DateTime( $from_date ))->format('Y-m-t')])
+            ->andWhere(['<=', 'date_new', (new \DateTime( $to_date ))->format('Y-m-t')])
+            ->andWhere(['company_id' => $company]);
+            
 
         // add conditions that should always apply here
 
@@ -1031,10 +1036,8 @@ class CustomerSearch extends Customer {
         /*$query->andFilterWhere([
             'publicity_shape_id' => $this->publicity_shape_id,
         ]);*/
-
         /*$query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'slug', $this->slug]);*/
-
         return $dataProvider;
     }
 }
