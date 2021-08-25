@@ -75,6 +75,7 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'c.lastname', $this->lastname]);
         $query->andFilterWhere(['like', 'c.code', $this->code]);
         $query->andFilterWhere(['like', 'chd.status', $this->status]);
+
         $query->andFilterWhere(['>=', 'chd.from_date', $this->customer_has_discount_from_date]);
         $query->andFilterWhere(['<=', 'chd.from_date', $this->customer_has_discount_to_date]);
 
