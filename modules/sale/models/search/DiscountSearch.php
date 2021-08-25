@@ -58,6 +58,7 @@ class DiscountSearch extends Discount
                 ->from('customer c')
                 ->leftJoin('customer_has_discount chd', 'c.customer_id = chd.customer_id' )
                 ->where(['chd.discount_id' => $params['discount_id']])
+		->orderBy(['chd.from_date' => SORT_ASC])
                 ;
 
         // creates the ActiveDataProvider instance
@@ -75,7 +76,7 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'c.code', $this->code]);
         $query->andFilterWhere(['like', 'chd.status', $this->status]);
         $query->andFilterWhere(['>=', 'chd.from_date', $this->customer_has_discount_from_date]);
-        $query->andFilterWhere(['<=', 'chd.to_date', $this->customer_has_discount_to_date]);
+        $query->andFilterWhere(['<=', 'chd.from_date', $this->customer_has_discount_to_date]);
 
         return $dataProvider;
     }
