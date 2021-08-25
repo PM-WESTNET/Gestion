@@ -513,4 +513,11 @@ class Connection extends ActiveRecord {
 //            ];
 //        }
     }
+
+    /**
+    * Return cantidad de conexiones activas
+    */
+    public static function FindConnectionsByNode($node_id){
+        return self::find()->where(['node_id' => $node_id, 'status' => 'enabled'])->all();
+    }
 }

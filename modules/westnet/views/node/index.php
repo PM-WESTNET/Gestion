@@ -1,6 +1,7 @@
 <?php
 
 use app\modules\westnet\models\search\NodeSearch;
+use app\modules\westnet\models\Connection;
 use app\modules\zone\models\Zone;
 use yii\bootstrap\Collapse;
 use yii\data\ActiveDataProvider;
@@ -119,6 +120,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'vlan',
+            ],
+            [
+                'label' => Yii::t('westnet', 'Conexiones'),
+                'value' => function($model){
+                    return COUNT(Connection::FindConnectionsByNode($model->node_id));
+                }
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',

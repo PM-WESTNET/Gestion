@@ -38,6 +38,10 @@ use yii\web\UploadedFile;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\westnet\models\PaymentExtensionHistory;
 
+use Da\QrCode\QrCode;
+use yii\helpers\Html;
+use yii\helpers\Url;
+
 class UserAppController extends Controller
 {
     public $modelClass= 'app\modules\mobileapp\v1\models\UserApp';
@@ -690,7 +694,7 @@ class UserAppController extends Controller
 
         $pointOfSale = $bill->getPointOfSale()->number;
 
-        $pdf = $this->actionPdf($id);
+        $pdf = $this->MakePdf($id);
 
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/".'Comprobante'.sprintf("%04d", $pointOfSale) . "-" . sprintf("%08d", $bill->number )."-".$bill->customer_id.".pdf";
@@ -704,7 +708,7 @@ class UserAppController extends Controller
         try{
             $sender->send( $email, "Envio de comprobante de: " . $bill->customer->parentCompany->name, [
                 'params'=>[
-                    'image'         => Yii::getAlias("@app/web/". $bill->customer->parentCompany->getLogoWebPath()),
+                    'image'         => Url::base().'/images/logo-westnet.png',
                     'comprobante'   =>$bill->billType->name . " " . sprintf("%04d", $pointOfSale) . "-" . sprintf("%08d", $bill->number )
                 ]],[], [],[$fileName]);
                 Yii::$app->response->format= Response::FORMAT_JSON;
@@ -1260,5 +1264,53 @@ class UserAppController extends Controller
                 ];
             }
         }
+    }
+
+public function MakePdf($id){
+        $model = Bill::findOne($id);
+        $companyData = $model->company;
+
+        $this->layout = '//pdf';
+
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $model->getBillDetails(),
+            'pagination' => false
+        ]);
+
+        $jsonCode = [
+           "ver" => 1,
+           "fecha" => $model->date,
+           "cuit" => str_replace("-","",$companyData->tax_identification),
+           "ptoVta" => $model->getPointOfSale()->number,
+           "tipoCmp" => $model->billType->code,
+           "nroCmp" => $model->number,
+           "importe" => $model->total,
+           "moneda" => "PES",
+           "ctz" => 1,
+           "tipoDocRec" => $model->customer->documentType->code,
+           "nroDocRec" => str_replace("-","",$model->customer->document_number),
+           "tipoCodAut" => "E",
+           "codAut" => $model->ein
+        ];
+        $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
+        ->setSize(500)
+        ->setMargin(5);
+
+        $view = $this->render('@app/modules/sale/views/bill/pdf', [
+            'model' => $model,
+            'dataProvider' => $dataProvider,
+            'qrCode' => $qrCode
+
+        ]);
+
+        $pdf = ' ';
+
+        try{
+            $pdf = \app\components\helpers\PDFService::makePdf($view);
+        } catch (\Exception $ex){
+            \Yii::trace($ex);
+        }
+
+        return $pdf;
     }
 }

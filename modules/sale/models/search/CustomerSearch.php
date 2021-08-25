@@ -633,7 +633,7 @@ class CustomerSearch extends Customer {
         $words = $searchHelper->getSearchWords('%{word}%');
         $operator = 'like';
         $query
-            ->where([$operator, "CONCAT(customer.code, ' - ', lastname, ' ', customer.name )",$words,false])
+            ->where([$operator, "CONCAT(customer.code, ' - ', lastname, ' ', customer.name, ' ', IFNULL(customer.description, ''))",$words,false])
             ->orderBy(['customer.code' => SORT_ASC, 'lastname'=>SORT_ASC, 'customer.name'=>SORT_ASC]);
 
         return $query;

@@ -504,7 +504,7 @@ class CustomerController extends Controller
 
             $data['results'] = $searchModel->searchByName($name)
                 ->select([((bool)$normal ? 'customer_id as id' : 'code as id'),
-                    "CONCAT(customer.code, ' - ', lastname, ' ', customer.name) as text"])
+                    "CONCAT(customer.code, ' - ', lastname, ' ', customer.name, ' ', IFNULL(customer.description, '')) as text"])
                 ->asArray()->all();
         } else if( $id > 0) {
             $data['results'] = ['id' => $id, 'text' => Customer::find($id)->name];
