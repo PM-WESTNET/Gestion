@@ -160,7 +160,7 @@ class NotificationHasCustomer extends \app\components\db\ActiveRecord
                 cu.payment_code, nhc.node, nhc.saldo, nhc.company_code, nhc.debt_bills,
                 cu.status, nhc.category 
                 FROM notification_has_customer nhc 
-                LEFT JOIN westnet_2.customer cu ON cu.customer_id = nhc.customer_id 
+                LEFT JOIN westnet2.customer cu ON cu.customer_id = nhc.customer_id 
                 WHERE 
                     nhc.notification_id=:notification_id 
                 AND nhc.status = "pending"')

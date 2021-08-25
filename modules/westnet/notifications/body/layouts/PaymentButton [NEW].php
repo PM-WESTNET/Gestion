@@ -227,7 +227,7 @@ $title = $notification['subject'];
                         <p style="margin: 45px 0 0;color: #EA345F; font-size:9px;font-weight:bold;">
                           Este email es enviado automáticamente
                           <br>
-                          Por favor, no lo responder a este correo
+                          Por favor, no responder a este correo
                         </p>
                       </td>
                     </tr>
