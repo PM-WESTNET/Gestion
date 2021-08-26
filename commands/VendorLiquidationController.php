@@ -22,10 +22,11 @@ class VendorLiquidationController extends Controller{
         $model->status = 'success';
         $model->save(false);
 
-        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id, 'status' => 'cancelled'])->all();
+        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
 
         foreach ($vendor_liquidations as $key => $value) {
-            $value->delete();
+	    if($value->status == "cancelled" || empty($value->total))
+            	$value->delete();
         }
     }
 
