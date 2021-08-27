@@ -37,5 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
     ]); ?>
-
+    <div class="form-group text-center">
+        <?=Html::a('<span class="fa fa-reply"></span> Volver', ['/reports/reports-company/how-did-you-know-the-company'], ['data-pjax' => '0', 'class' => 'btn btn-warning']);?>
+    </div>
 </div>

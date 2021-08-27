@@ -429,13 +429,18 @@ class ReportsCompanyController extends Controller
         $reportSearch = new ReportSearch();
         $searchModel = new CustomerSearch();
         $dataProvider = $searchModel->searchPublicityShape(Yii::$app->request->get(),(!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+
+        if(Yii::$app->request->isPost){
+            $reportSearch->date_from = Yii::$app->request->post()['ReportSearch']['date_from'];
+            $reportSearch->date_to = Yii::$app->request->post()['ReportSearch']['date_to'];
+        }
         
         return $this->render('/reports/how-did-you-know-the-company',['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'reportSearch' => $reportSearch]);
     }
 
-    public function actionHowDidYouKnowTheCompanyViewCustomer($publicity_shape){
+    public function actionHowDidYouKnowTheCompanyViewCustomer($publicity_shape,$from_date = null, $to_date = null, $company = null){
         $searchModel = new CustomerSearch();
-        $dataProvider = $searchModel->searchCustomerByPublicityShape(Yii::$app->request->get());
+        $dataProvider = $searchModel->searchCustomerByPublicityShape(Yii::$app->request->get(),$from_date,$to_date,$company);
 
         return $this->render('/reports/how-did-you-know-the-company-view-customer',['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
     }

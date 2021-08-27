@@ -63,8 +63,11 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-1">
                 <?= Html::submitButton(Yii::t('app', 'Search'), ['class' => 'btn btn-success']) ?>
+            </div>
+            <div class="col-md-1">               
+                <a href= "how-did-you-know-the-company" class="btn btn-success"> Limpiar</a>
             </div>
         </div>
         <?php ActiveForm::end(); ?>
@@ -98,7 +101,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view}',
                 'buttons' => [
                     'view' => function ($url, $model) {
-                        return Html::a('<i class="glyphicon glyphicon-eye-open"></i>', ['reports-company/how-did-you-know-the-company-view-customer', 'publicity_shape' => $model->publicity_shape], ['data-pjax' => '0']);
+                        $from_date = null;
+                        $to_date = null;
+                        $company = null;
+                        if(isset(Yii::$app->request->post()['ReportSearch'])){
+                            $data = Yii::$app->request->post()['ReportSearch'];
+                            $from_date = $data['date_from'];
+                            $to_date = $data['date_to'];
+                            $company = $data['company_id'];
+                        }
+                        return Html::a('<i class="glyphicon glyphicon-eye-open"></i>', ['reports-company/how-did-you-know-the-company-view-customer', 'publicity_shape' => $model->publicity_shape, 'from_date' => $from_date, 'to_date' => $to_date, 'company' => $company], ['data-pjax' => '0']);
                     }
                 ]   
             ]
