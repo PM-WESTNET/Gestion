@@ -1,4 +1,5 @@
 <?php
+use yii\helpers\Url;
 /**
  * Created by PhpStorm.
  * User: juan
@@ -22,7 +23,7 @@ $this->title = Yii::t('app','Customers By Node');
         </div>
     </div>
     <div>
-        <a href="/reports/reports/customers-by-node-export" class="btn btn-success">Exportar</a>
+        <a href="<?=Url::to(['reports/customers-by-node-export'])?>" class="btn btn-success">Exportar</a>
     </div>
     <?php echo \yii\grid\GridView::widget([
         'dataProvider' => $dataProvider,
