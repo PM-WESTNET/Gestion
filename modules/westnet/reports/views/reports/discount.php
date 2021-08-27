@@ -1,6 +1,9 @@
 <?php
 use yii\helpers\Html;
 use yii\grid\SerialColumn;
+use kartik\date\DatePicker;
+use kartik\grid\GridView;
+
 $this->title = Yii::t('app','Discounts');
 $this->params['breadcrumbs'][] = $this->title;
 
@@ -12,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <!--         <div class="col-md-6">
  -->            <div class="col-md-12">
 <!--                 <h1>Descuentos</h1>
- -->                <?php echo \yii\grid\GridView::widget([
+ -->                <?= GridView::widget([
                     'dataProvider' => $dataProvider,
                     'filterModel' => $discountSearch,
                     'columns' => [
@@ -25,7 +28,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return Html::a($model->name, 
                                             ['/sale/discount/view', 'id' => $model->discount_id], 
                                             ['class' => 'profile-link']);
-                            }
+                            },
+                            'filter' => $list_discount,
+                            'filterType' => GridView::FILTER_SELECT2,
+                            'filterWidgetOptions' => [
+                                'options' => ['prompt' => ''],
+                                'pluginOptions' => ['allowClear' => true],
+                            ],
                         ],
                         [
                             'attribute' => 'customerAmount',
@@ -53,14 +62,24 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                         ],
                         [
-                            'attribute' => 'from_date',
-                            'format' => 'text',
-                            'label' => 'Desde',
-                        ],
-                        [
-                            'attribute' => 'to_date',
-                            'format' => 'text',
-                            'label' => 'Hasta',
+                            'attribute'=>'date',
+                            'format' => 'raw',
+                            'value' => function($model) {
+                                return $model->from_date . ' - ' . $model->to_date;
+                            },
+                            'label' => Yii::t('app','Date'),
+                            'filter'=>DatePicker::widget([
+                                'model' => $discountSearch,
+                                'attribute' => 'from_date',
+                                'value' => '2014-01-01',
+                                'type' => DatePicker::TYPE_RANGE,
+                                'attribute2' => 'to_date',
+                                'value2' => '2016-01-01',
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'format' => 'yyyy-mm-dd'
+                                ]
+                            ]),  
                         ],
                         [
                             'class' => 'app\components\grid\ActionColumn',

@@ -7,7 +7,7 @@ $formatter = new \yii\i18n\Formatter();
     <!-- Header -->
     <tr >
         <td style="height:80px; width: 50%; padding-bottom: 20px; padding-top: 20px; border-bottom: 1px solid gray;">
-	<?= Html::img(Yii::$app->view->params['image'], ['alt' => 'Westnet', 'style' => 'margin: 0 auto; width: 140px;']) ?>
+            <img style="height: 100%; display: inline-block; float: left;"  src="<?php// echo $message->embed(Yii::$app->view->params['image'], ['contentType'=>'image/jpeg']) ?>" alt="Logo">
             <p style="text-align: right; display: inline; width: 80%; float: left; color: gray; font-size: 16px; font-family: Arial, sans-serif;">
                 <?= $formatter->asDate(new \DateTime("now"))?>
             </p>

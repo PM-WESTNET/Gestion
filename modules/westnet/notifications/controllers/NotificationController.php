@@ -120,7 +120,7 @@ class NotificationController extends Controller {
         $model->scenario = 'update';
 
         if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-
+            //var_dump($model);die();
             if ($model->save()) {
                 if($wizard){
                     return $this->redirect(['destinatary/create', 'notification_id' => $model->notification_id]);
