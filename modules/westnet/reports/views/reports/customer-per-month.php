@@ -79,9 +79,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'datasets' => [
                             [
                                 'label' => \Yii::t('app', 'Customers'),
-                                'backgroundColor' => "rgba(255, 99, 132, 0.2)",
-                                'borderColor' => "rgba(255, 99, 132, 0.2)",
-                                'pointStrokeColor' => "#fff",
+                                'backgroundColor' => "rgba(38, 14, 154, 0.2)",
+                                'pointRadius' => 6,
+                                'pointHitRadius' => 6,
+                                'pointHoverRadius' => 4,
+                                'pointBackgroundColor' => "rgba(38, 14, 154, 1)",
+                                'borderColor' => "rgba(38, 14, 154, 1)",
+                                'pointStrokeColor' => "rgba(38, 14, 154, 1)",
+                                'tension' => 0,
                                 'data' => $data
                             ],
                         ]
