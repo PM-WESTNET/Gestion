@@ -14,6 +14,8 @@ use yiier\chartjs\ChartJs;
 
 $this->title = ReportsModule::t('app', 'Low By Month');
 $this->params['breadcrumbs'][] = $this->title;
+$graphColor = "#25288F";
+
 ?>
     <div class="customer-index">
         <div class="title">
@@ -82,9 +84,13 @@ $this->params['breadcrumbs'][] = $this->title;
                         'datasets' => [
                             [
                                 'label' => \Yii::t('app', 'Percentage'),
-                                'backgroundColor' => "rgba(255, 99, 132, 0.2)",
-                                'borderColor' => "rgba(255, 99, 132, 0.2)",
-                                'pointStrokeColor' => "#fff",
+                                'fill' => "#fff",
+                                'pointRadius' => 6,
+                                'pointHitRadius' => 6,
+                                'pointBackgroundColor' => $graphColor,
+                                'borderColor' => $graphColor,
+                                'pointStrokeColor' => $graphColor,
+                                'tension' => 0,
                                 'data' => $data,
                             ],
                         ]
