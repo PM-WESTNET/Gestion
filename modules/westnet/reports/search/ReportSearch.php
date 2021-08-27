@@ -960,19 +960,18 @@ class ReportSearch extends Model
                 LEFT JOIN connection con ON con.contract_id = co.contract_id
                 LEFT JOIN node no ON no.node_id = con.node_id
                 WHERE co.status = "active" AND pr.status = "enabled" AND pr.type = "plan" ORDER BY cu.code ASC';
-
-     
+        $bind_values = [];
         if(!empty($this->code)  || !empty($this->fullname) || !empty($this->name_product) || !empty($this->speed) || !empty($this->node) || !empty($this->date)){
 
             if(!empty($this->code)){
-                $query_new = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('code','%'.$this->code.'%')->queryAll();
+                $query = str_replace('ORDER BY','AND cu.code LIKE :code ORDER BY',$query);
+                $bind_values[] = ['code','%'.$this->code.'%'];
                 
             }
 
             if (!empty($this->fullname)) {
-                $query_new = str_replace('ORDER BY','AND CONCAT_WS(" ",cu.name, cu.lastname) LIKE :fullname ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('fullname','%'.$this->fullname.'%')->queryAll();
+                $query = str_replace('ORDER BY','AND CONCAT_WS(" ",cu.name, cu.lastname) LIKE :fullname ORDER BY',$query);
+                $bind_values[] = ['fullname','%'.$this->fullname.'%'];
 
             }
             if (!empty($this->name_product)) {
@@ -983,36 +982,45 @@ class ReportSearch extends Model
                     $name_product = "WiFi";
                 }
         
-                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$name_product.'%')->queryAll();
+                $query = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $bind_values[] = ['name_product','%'.$name_product.'%'];
 
 
             }
             if (!empty($this->speed)) {
-                $query_new = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('name_product','%'.$this->speed.'%')->queryAll();
+                $query = str_replace('ORDER BY','AND pr.name LIKE :name_product ORDER BY',$query);
+                $bind_values[] = ['name_product','%'.$this->speed.'%'];
 
 
             }
             if(!empty($this->node)){
-                $query_new = str_replace('ORDER BY','AND no.name LIKE :node ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('node','%'.$this->node.'%')->queryAll();
+                $query = str_replace('ORDER BY','AND no.name LIKE :node ORDER BY',$query);
+                $bind_values[] = ['node','%'.$this->node.'%'];
                 
             }
-            if(!empty($this->date)){
-                $query_new = str_replace('ORDER BY','AND co.date >= :date ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('date',$this->date)->queryAll();
+            if(!empty($this->date) && empty($this->date2)){
+                $query = str_replace('ORDER BY','AND co.date >= :date ORDER BY',$query);
+                $bind_values[] = ['date',$this->date];
             }
             if(!empty($this->date) && !empty($this->date2)){
-                $query_new = str_replace('ORDER BY','AND co.date >= :date AND co.date <= :date2 ORDER BY',$query);
-                $result = Yii::$app->db->createCommand($query_new)->bindValue('date',$this->date)->bindValue('date2',$this->date2)->queryAll();
+                $query = str_replace('ORDER BY','AND co.date >= :date AND co.date <= :date2 ORDER BY',$query);
+                $bind_values[] = ['date',$this->date];
+                $bind_values[] = ['date2',$this->date2];
             }
-        }else{
-            $result = Yii::$app->db->createCommand($query)->queryAll();
+
         }
-      
+
+        $result = Yii::$app->db->createCommand($query);
+
+        if(!empty($bind_values)){
+            foreach ($bind_values as $key => $value) {
+                $result->bindValue($value[0],$value[1]);
+            }
+            
+        }
+
         $dataProvider = new ArrayDataProvider([
-            'allModels' => $result,
+            'allModels' => $result->queryAll(),
             'pagination' => [
                 'pageSize' => 15,
             ],
