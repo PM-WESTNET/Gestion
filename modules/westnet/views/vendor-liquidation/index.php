@@ -70,7 +70,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'status',
                 'value' => function($model){ return Yii::t('app', ucfirst($model->status)); },
-                'filter' => ['draft' => Yii::t('app', 'Draft'), 'payed' => Yii::t('app', 'Payed')]
+                'filter' => ['draft' => Yii::t('app', 'Draft'), 'payed' => Yii::t('app', 'Payed'),'success'=> Yii::t('app', 'Correcto')]
             ],
 
             [

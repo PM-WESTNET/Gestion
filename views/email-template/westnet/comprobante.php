@@ -1,4 +1,5 @@
 <?php
+use yii\helpers\Html;
 $formatter = new \yii\i18n\Formatter();
 ?>
 <table width="600">

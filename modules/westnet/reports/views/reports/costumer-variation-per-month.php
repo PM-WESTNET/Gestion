@@ -85,6 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'borderColor' => "rgba(50, 99, 132, 0.2)",
                                 'pointBorderColor' => $colors,
                                 'pointBackgroundColor' => $colors,
+                                'tension' => 0,
                                 'data' => $data,
                                 'fill'=> false,
                             ],

@@ -429,13 +429,28 @@ class ReportsCompanyController extends Controller
         $reportSearch = new ReportSearch();
         $searchModel = new CustomerSearch();
         $dataProvider = $searchModel->searchPublicityShape(Yii::$app->request->get(),(!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
+        
+        
+        $label = [];
+        $data = [];
+        foreach($searchModel->searchPublicityShapeRAWQUERY((!Yii::$app->request->isPost) ? null : Yii::$app->request->post()) as $value) {
+            $label[] = Yii::t('app', $value['publicity_shape']);
+            $data[] = $value['total_client'];
+        }
 
         if(Yii::$app->request->isPost){
             $reportSearch->date_from = Yii::$app->request->post()['ReportSearch']['date_from'];
             $reportSearch->date_to = Yii::$app->request->post()['ReportSearch']['date_to'];
         }
         
-        return $this->render('/reports/how-did-you-know-the-company',['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'reportSearch' => $reportSearch]);
+        return $this->render('/reports/how-did-you-know-the-company',
+        [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'reportSearch' => $reportSearch,
+            'label' => $label,
+            'data' => $data,
+        ]);
     }
 
     public function actionHowDidYouKnowTheCompanyViewCustomer($publicity_shape,$from_date = null, $to_date = null, $company = null){

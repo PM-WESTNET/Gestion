@@ -4,6 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\jui\DatePicker;
 use app\components\companies\CompanySelector;
+use yiier\chartjs\ChartJs;
 
 $this->title = '¿Cómo conoció la Empresa?';
 $this->params['breadcrumbs'][] = $this->title;
@@ -118,4 +119,69 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ]); ?>
 
+    <?php
+        $colorsArr = [];
+        foreach ($label as $item) {
+            foreach(array('r', 'g', 'b') as $color){
+                //Generate a random number between 0 and 255.
+                $rgbColor[$color] = mt_rand(0, 255);
+            }
+            $colorsArr[] = "rgb(".implode(",", $rgbColor).")";
+        }
+        /* var_dump($colorsArr);
+        die(); */
+    ?>
+<br>
+<br>
+<center>
+    <h1>GRAFICAS DE DATOS</h1>
+</center>
+<br>
+
+    <?php echo ChartJs::widget([
+                    'type' => 'bar',
+                    /* 'options' => [
+                        'scales' => [
+                            'yAxes' => new \yii\web\JsExpression('[
+                            {
+                                ticks: {
+                                    min: 1,
+                                    max : 100,
+                                }
+                            }
+                            ]'),
+                        ],
+                    ], */
+                    'data' => [
+                        'labels' => $label,
+                        'datasets' => [
+                            [
+                                'label' => "REPORTE DE BARRAS",
+                                'backgroundColor' => 'rgba(28, 54, 162, 0.5)',
+                                'borderColor' => 'rgba(28, 54, 162, 1)',
+                                'borderWidth' => 2,
+                                'data' => $data,
+                            ],
+                        ]
+                    ]
+                ]);?>
+<br>
+<br>
+    <?= ChartJs::widget([
+                    'type' => 'polarArea',
+                    'data' => [
+                        'labels' => $label,
+                        'datasets' => [
+                            [
+                                'label' => "POLAR REPORT",
+                                'backgroundColor' => 'rgba(28, 54, 162, 0.5)',
+                                'borderColor' => 'rgba(28, 54, 162, 1)',
+                                'borderWidth' => 2,
+                                'data' => $data,
+                            ],
+                        ]
+                    ],
+                    
+                    
+                ]);?>
 </div>

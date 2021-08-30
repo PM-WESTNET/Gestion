@@ -28,7 +28,6 @@ $this->registerJs("
                 
                 $('.progress-bar').css({'width':total_percentage+'%'});
                 if(total_percentage == 100){
-                    console.log(total_percentage == 100);
                     $('.progress-bar').removeClass('progress-bar-info').addClass('progress-bar-success');
 
                     $('').html('Finalizado...');
@@ -51,6 +50,7 @@ $this->registerJs("
     </div>
 
     <div class="alert alert-info" role="alert" id="status">En Proceso...</div>
+
      <span class="label label-info">Total: 
         <span id="totales">0</span>
     </span><br>
@@ -64,8 +64,6 @@ $this->registerJs("
         <span id="cancelados">0</span>
     </span> <br>
    
-   
-
     <div class="text-center">
         <button type="button" class="btn btn-warning" onclick="window.history.go(-1)"><i class="fa fa-reply"></i> Volver</button>
     </div>

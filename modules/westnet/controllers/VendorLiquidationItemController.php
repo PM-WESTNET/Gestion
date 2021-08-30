@@ -68,7 +68,7 @@ class VendorLiquidationItemController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
         
-        if($liquidation->status != 'draft'){
+        if($liquidation->status != 'draft' && $liquidation->status != 'success'){
             throw new Exception(Yii::t('westnet', 'This liquidation is closed and can not be updated.'));
         }
         
