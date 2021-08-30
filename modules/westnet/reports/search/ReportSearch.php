@@ -43,11 +43,11 @@ class ReportSearch extends Model
     public $date;
     public $date2;
 
-    public function init()
+    public function init($date_from = null, $date_to = null)
     {
         parent::init();
-        $this->date_from = (new \DateTime('first day of last year'))->format('01-01-Y');
-        $this->date_to = (new \DateTime('last day of this month'))->format('d-m-Y');
+        $this->date_from = $date_from;
+        $this->date_to = $date_to;
     }
 
 

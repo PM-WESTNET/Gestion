@@ -6,7 +6,8 @@ use yii\data\ActiveDataProvider;
 use yii\helpers\Html;
 use yii\web\View;
 use yii\widgets\ActiveForm;
-use yiier\chartjs\ChartJs;
+//use yiier\chartjs\ChartJs;
+use dosamigos\chartjs\ChartJs;
 
 /* @var $this View */
 /* @var $searchModel NodeSearch */
@@ -14,6 +15,7 @@ use yiier\chartjs\ChartJs;
 
 $this->title = ReportsModule::t('app', 'Low By Month');
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
     <div class="customer-index">
         <div class="title">
@@ -71,7 +73,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="col-md-12 text-center">
                 <?php
 
-                echo \dosamigos\chartjs\ChartJs::widget([
+                echo ChartJs::widget([
                     'type' => 'line',
                     'options' => [
                         'width' => 800,
@@ -82,9 +84,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         'datasets' => [
                             [
                                 'label' => \Yii::t('app', 'Percentage'),
-                                'backgroundColor' => "rgba(255, 99, 132, 0.2)",
-                                'borderColor' => "rgba(255, 99, 132, 0.2)",
-                                'pointStrokeColor' => "#fff",
+                                'backgroundColor' => "rgba(38, 14, 154, 0.2)",
+                                'pointRadius' => 6,
+                                'pointHitRadius' => 6,
+                                'pointHoverRadius' => 4,
+                                'pointBackgroundColor' => "rgba(38, 14, 154, 1)",
+                                'borderColor' => "rgba(38, 14, 154, 1)",
+                                'pointStrokeColor' => "rgba(38, 14, 154, 1)",
+                                'tension' => 0,
                                 'data' => $data,
                             ],
                         ]

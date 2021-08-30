@@ -78,7 +78,7 @@ class BatchInvoiceController  extends Controller
         if(isset(Yii::$app->request->getQueryParams()['ContractSearch']['period'])){
             $period = Yii::$app->request->getQueryParams()['ContractSearch']['period'];
             if(date('m',strtotime($period)) < date('m'))
-                \Yii::$app->session->setFlash('error', 'No se puede generar un lote de facturas de un periodo anterior al que se encuentra en curso.');
+                \Yii::$app->session->setFlash('error', 'No se puede generar un lote de facturas de un periodo anterior al que se encuentra en curso.');  
             else
                 $dataProvider = new ActiveDataProvider([
                     'query' => $searchModel->searchForInvoice(Yii::$app->request->getQueryParams()),

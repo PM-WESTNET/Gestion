@@ -82,8 +82,8 @@ class CustomerSearch extends Customer {
     public function rules()
     {
         return [
-            [['customer_id', 'document_type_id', 'debt_bills', 'plan_id', 'firstdata_status'], 'integer'],
-            [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to'], 'safe'],
+            [['customer_id', 'document_type_id', 'debt_bills', 'plan_id', 'firstdata_status','total_client'], 'integer'],
+            [['name', 'lastname', 'document_number', 'sex', 'email', 'phone',  'status', 'debt_bills', 'debt_bills_from','debt_bills_to', 'publicity_shape', 'customer'], 'safe'],
             [['payed_bills',  'payed_bills_from','payed_bills_to', 'total_bills', 'total_bills_from','total_bills_to',  'contract_status', 'not_contract_status'],'safe'],
             [['nodes', 'amount_due_to', 'geocode', 'search_text', 'toDate', 'fromDate', 'zone_id', 'customer_class_id', 'amount_due'],'safe'],
             [['customer_category_id', 'connection_status', 'node_id', 'company_id', 'customer_number', 'customer_status', 'amount_due_to'], 'safe'],
@@ -964,5 +964,106 @@ class CustomerSearch extends Customer {
     public function getTicketsCount()
     {
         return Ticket::find()->where(['customer_id' => 'contract.customer_id']);
+    }
+
+
+     public function searchPublicityShape($params,$params_post = null)
+    {
+        $query = Customer::find()
+        ->select(['publicity_shape','COUNT(customer_id) as total_client'])
+        ->groupBy(['publicity_shape']);
+
+        // add conditions that should always apply here
+
+        if(isset($params_post)){
+            //var_dump($params_post);die();
+            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t')])
+                  ->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t') ]);
+        }
+        //var_dump($query->all()[0]->getAttributes());
+        //die();
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+ 
+        if(isset($params_post)){
+            //$query->andFilterWhere(['>=', 'date_new', $params_post['ReportSearch']['date_from']])
+            //->andFilterWhere(['<=', 'date_new', $params_post['ReportSearch']['date_to']]);
+
+            if(!empty($params_post['ReportSearch']['company_id'])){
+                $query->andFilterWhere(['company_id' => $params_post['ReportSearch']['company_id']]);
+            }
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere(['LIKE','publicity_shape', $this->publicity_shape])
+              ->andFilterHaving(['LIKE','COUNT(customer_id)', $this->total_client]);
+        
+        return $dataProvider;
+    }
+
+    public function searchPublicityShapeRAWQUERY($params_post = null){
+        $sql = "SELECT publicity_shape, COUNT(customer_id) as total_client FROM customer ";
+
+        if(isset($params_post)){
+            $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t');
+            $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t');
+            $sql .= "WHERE date_new BETWEEN '$datefrom' AND '$dateto' ";
+        }
+
+        if(isset($params_post)){
+            if(!empty($params_post['ReportSearch']['company_id'])){
+                $companyid = $params_post['ReportSearch']['company_id'];
+                $sql .= "AND company_id = '$companyid' ";
+            }
+        }
+
+        $sql .= "GROUP BY publicity_shape ";
+        
+        $result = Yii::$app->db->createCommand($sql)->queryAll();
+
+        //var_dump($result,$sql);die();
+        return $result;
+
+    }
+
+     public function searchCustomerByPublicityShape($params,$from_date,$to_date,$company)
+    {
+        $query = Customer::find()->where(['LIKE','publicity_shape',$params['publicity_shape']]);
+
+        $query->andWhere(['>=', 'date_new', (new \DateTime( $from_date ))->format('Y-m-t')])
+            ->andWhere(['<=', 'date_new', (new \DateTime( $to_date ))->format('Y-m-t')])
+            ->andWhere(['company_id' => $company]);
+            
+
+        // add conditions that should always apply here
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+
+        // grid filtering conditions
+        /*$query->andFilterWhere([
+            'publicity_shape_id' => $this->publicity_shape_id,
+        ]);*/
+        /*$query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'slug', $this->slug]);*/
+        return $dataProvider;
     }
 }
