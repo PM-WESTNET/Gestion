@@ -1010,11 +1010,27 @@ class CustomerSearch extends Customer {
         return $dataProvider;
     }
 
-    public function searchPublicityShapeRAWQUERY(){
-        $sql = 'SELECT publicity_shape, COUNT(customer_id) as total_client
-        FROM customer
-        GROUP BY publicity_shape';
+    public function searchPublicityShapeRAWQUERY($params_post = null){
+        $sql = "SELECT publicity_shape, COUNT(customer_id) as total_client FROM customer ";
+
+        if(isset($params_post)){
+            $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t');
+            $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t');
+            $sql .= "WHERE date_new BETWEEN '$datefrom' AND '$dateto' ";
+        }
+
+        if(isset($params_post)){
+            if(!empty($params_post['ReportSearch']['company_id'])){
+                $companyid = $params_post['ReportSearch']['company_id'];
+                $sql .= "AND company_id = '$companyid' ";
+            }
+        }
+
+        $sql .= "GROUP BY publicity_shape ";
+        
         $result = Yii::$app->db->createCommand($sql)->queryAll();
+
+        //var_dump($result,$sql);die();
         return $result;
 
     }

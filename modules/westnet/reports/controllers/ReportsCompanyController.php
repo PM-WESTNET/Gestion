@@ -433,7 +433,7 @@ class ReportsCompanyController extends Controller
         
         $label = [];
         $data = [];
-        foreach($searchModel->searchPublicityShapeRAWQUERY() as $value) {
+        foreach($searchModel->searchPublicityShapeRAWQUERY((!Yii::$app->request->isPost) ? null : Yii::$app->request->post()) as $value) {
             $label[] = Yii::t('app', $value['publicity_shape']);
             $data[] = $value['total_client'];
         }
