@@ -12,6 +12,7 @@ use yii\data\ActiveDataProvider;
  */
 class DiscountSearch extends Discount
 {
+
     /**
      * @inheritdoc
      */
@@ -19,7 +20,7 @@ class DiscountSearch extends Discount
     {
         return [
             [['discount_id','customerAmount','value','code'], 'integer'],
-            [['name', 'referenced'], 'safe'],
+            [['name', 'referenced', 'from_date', 'to_date'], 'safe'],
             [['status'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
             /* [['from_date', 'to_date', 'lastname'], 'string'], */ // mejorar implementacion de esto
             [['lastname'], 'string'], 
@@ -55,6 +56,7 @@ class DiscountSearch extends Discount
                 ->from('customer c')
                 ->leftJoin('customer_has_discount chd', 'c.customer_id = chd.customer_id' )
                 ->where(['chd.discount_id' => $params['discount_id']])
+		->orderBy(['chd.from_date' => SORT_ASC])
                 ;
 
         // creates the ActiveDataProvider instance
@@ -72,7 +74,7 @@ class DiscountSearch extends Discount
         $query->andFilterWhere(['like', 'c.code', $this->code]);
         $query->andFilterWhere(['like', 'chd.status', $this->status]);
         $query->andFilterWhere(['like', 'chd.from_date', $this->from_date]);
-        $query->andFilterWhere(['like', 'chd.to_date', $this->to_date]);
+        $query->andFilterWhere(['like', 'chd.from_date', $this->to_date]);
 
         return $dataProvider;
     }
@@ -89,7 +91,7 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-
+        
         // awesome query
         $query = Discount::find()
                 ->select('COUNT(*) AS customerAmount, d.*')
@@ -97,6 +99,7 @@ class DiscountSearch extends Discount
                 ->leftJoin('customer_has_discount chd', 'd.discount_id = chd.discount_id' )
                 ->groupBy('d.discount_id')
                 ->filterHaving(['like', 'COUNT(*)', $this->customerAmount.'%', false])
+                ->orderBy(['d.from_date' => SORT_ASC])
                 ;
 
         // creates the ActiveDataProvider instance
@@ -125,8 +128,8 @@ class DiscountSearch extends Discount
         // AND WHERE LIKE-s (pattern match)
         $query->andFilterWhere(['like', 'd.name', $this->name]);
         $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['like', 'd.from_date', $this->from_date]);
-        $query->andFilterWhere(['like', 'd.to_date', $this->to_date]);
+        $query->andFilterWhere(['>=', 'd.from_date', $this->from_date]);
+        $query->andFilterWhere(['<=', 'd.from_date', $this->to_date]);
         $query->andFilterWhere(['like', 'd.type', $this->type]);
         $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
        

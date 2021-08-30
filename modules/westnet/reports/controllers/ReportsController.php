@@ -47,6 +47,8 @@ use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
 use yii\data\ArrayDataProvider;
 
+use yii\helpers\ArrayHelper;
+
 use PHPExcel_Style_NumberFormat;
 
 /**
@@ -97,12 +99,15 @@ class ReportsController extends Controller
  */
         $discountSearch = new DiscountSearch();
 
-        $dataProvider = $discountSearch->searchDiscounts(Yii::$app->request->get()); 
+        $dataProvider = $discountSearch->searchDiscounts(Yii::$app->request->get());
+
+        $list_discount = ArrayHelper::map(Discount::FindAllDiscounts(), 'name', 'name'); 
 
         return $this->render('discount',
                 [
                     'dataProvider' => $dataProvider,
                     'discountSearch' => $discountSearch,
+                    'list_discount' => $list_discount,
                 ]);
     }
     public function actionCustomerPerDiscount($discount_id){

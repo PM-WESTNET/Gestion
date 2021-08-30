@@ -229,4 +229,12 @@ class Discount extends \app\components\db\ActiveRecord
             return false;
         }
     }
+
+    /**
+     * Return all discounts
+     *
+     */
+    public static function FindAllDiscounts(){
+        return self::find()->all();
+    }
 }
