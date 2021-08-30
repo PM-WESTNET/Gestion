@@ -980,7 +980,8 @@ class CustomerSearch extends Customer {
             $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t')])
                   ->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t') ]);
         }
-
+        //var_dump($query->all()[0]->getAttributes());
+        //die();
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -1007,6 +1008,15 @@ class CustomerSearch extends Customer {
               ->andFilterHaving(['LIKE','COUNT(customer_id)', $this->total_client]);
         
         return $dataProvider;
+    }
+
+    public function searchPublicityShapeRAWQUERY(){
+        $sql = 'SELECT publicity_shape, COUNT(customer_id) as total_client
+        FROM customer
+        GROUP BY publicity_shape';
+        $result = Yii::$app->db->createCommand($sql)->queryAll();
+        return $result;
+
     }
 
      public function searchCustomerByPublicityShape($params,$from_date,$to_date,$company)
