@@ -50,7 +50,7 @@ $title = $notification['subject'];
                       <td style="background-color: #EEEEEE; text-align: center;">
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/">
                           <?= Html::img(
-                            Url::base(true) . '/images/logo-westnet.png',
+                            Url::base(true) . '/images/westnet-small-highres.png',
                             ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
