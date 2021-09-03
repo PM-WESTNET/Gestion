@@ -50,7 +50,7 @@ $title = $notification['subject'];
                       <td style="background-color: #EEEEEE; text-align: center;">
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/">
                           <?= Html::img(
-                            Url::base(true) . '/images/westnet-small-highres.png',
+                            Url::base() . '/images/westnet-small-highres.png',
                             ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
@@ -136,7 +136,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://play.google.com/store/apps/details?id=ar.com.westnet.customer.app">
                                 <?= Html::img(
-                                  Url::base(true) . '/images/notifications/android-icon.png',
+                                  Url::base() . '/images/notifications/android-icon.png',
                                   ['alt' => 'Android-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -145,7 +145,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://apps.apple.com/ar/app/westnet/id1491036341">
                                 <?= Html::img(
-                                  Url::base(true) . '/images/notifications/apple-icon.png',
+                                  Url::base() . '/images/notifications/apple-icon.png',
                                   ['alt' => 'iOS-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -173,7 +173,7 @@ $title = $notification['subject'];
                         </p>
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/atencion-al-cliente/">
                           <?= Html::img(
-                            Url::base(true) . '/images/notifications/chat-icon.png',
+                            Url::base() . '/images/notifications/chat-icon.png',
                             ['alt' => 'chat-icon', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                           ) ?>
 
@@ -196,7 +196,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://twitter.com/westnetoficial">
                                 <?= Html::img(
-                                  Url::base(true) . '/images/notifications/twitter-icon.png',
+                                  Url::base() . '/images/notifications/twitter-icon.png',
                                   ['alt' => 'twitter-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
 
@@ -205,7 +205,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.facebook.com/internet.westnet/">
                                 <?= Html::img(
-                                  Url::base(true) . '/images/notifications/facebook-icon.png',
+                                  Url::base() . '/images/notifications/facebook-icon.png',
                                   ['alt' => 'facebook-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
@@ -213,7 +213,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.instagram.com/westnet.internet/">
                                 <?= Html::img(
-                                  Url::base(true) . '/images/notifications/instagram-icon.png',
+                                  Url::base() . '/images/notifications/instagram-icon.png',
                                   ['alt' => 'instagram-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
