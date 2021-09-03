@@ -66,6 +66,8 @@ use yii\jui\DatePicker;
     <?= $form->field($model, 'status')->dropDownList([ 'enabled' => 'Enabled', 'disabled' => 'Disabled', ], ['prompt' => '']) ?>
 
     <?= $form->field($model, 'unit_id')->dropDownList( ArrayHelper::map( Unit::find()->all(), 'unit_id', 'name' ) ) ?>
+
+    <?= $form->field($model, 'quota')->textInput()->label(Yii::t('app', 'Cuota')) ?>
     
     <?= $form->field($model, 'categories')->checkboxList(yii\helpers\ArrayHelper::map(app\modules\sale\models\Category::getOrderedCategories(),'category_id','tabName'),['encode'=>false, 'separator'=>'<br/>'])?>
 

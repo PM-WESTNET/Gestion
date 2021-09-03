@@ -80,6 +80,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'unit_id',
                 'value'=>$model->unit->name
             ],
+            'quota'
         ],
     ]) ?>
 

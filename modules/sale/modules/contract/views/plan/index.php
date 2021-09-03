@@ -63,6 +63,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'finalPrice',
                 'format'=>['currency']
             ],
+            'quota',
             [
                 'class' => 'app\components\grid\ActionColumn',
                 'template' => '{price-history}&nbsp;&nbsp;{stock-history}',

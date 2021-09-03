@@ -23,6 +23,7 @@ use app\modules\config\models\Config;
  * @property string $productcol
  * @property integer $show_in_ads
  * @property string $ads_name;
+ * @property integer $quota;
  *
  * @property BillDetail[] $billDetails
  * @property Unit $unit
@@ -56,7 +57,7 @@ class Plan extends Product
             [['unit_id', 'show_in_ads'], 'integer'],
             [['taxes'], 'number'],
             [['taxRates'], 'safe'],
-            [['initial_stock'], 'number'],
+            [['initial_stock','quota'], 'number'],
             [['status'], 'in', 'range'=>['enabled','disabled']],
             [['name'], 'required'],
             [['name'], 'string', 'max' => 100],
@@ -94,6 +95,7 @@ class Plan extends Product
             'ads_name' => Yii::t('app', 'Ads Name'),
             'show_in_ads' => Yii::t('app', 'Show In Ads'),
             'futureFinalPrice' => Yii::t('app', 'Future final price'),
+            'quota' => Yii::t('app', 'Cuota'),
         ];
     }
 
