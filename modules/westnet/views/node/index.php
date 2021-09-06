@@ -129,7 +129,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',
-                'template'=>'{view} {update} {delete} {move}',
+                'template'=>'{view} {update} {delete} {move} {update-isp}',
                 'buttons'=>[
                     'move' => function ($url, $model, $key) {
                         return Html::a('<span class="glyphicon glyphicon-random"></span>', "#", [
@@ -138,6 +138,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             'data-node-id' => $model->node_id
                         ]);
                     },
+                    'update-isp' => function($url, $model, $key){
+                        return Html::a('<span class="glyphicon glyphicon-hourglass"></span>', ['sync-node', 'id' => $model->node_id], [
+                            'title' => Yii::t('westnet', 'Sincronizar Nodo'),
+                            'class' => 'btn btn-danger',
+                            'data-node-id' => $model->node_id
+                        ]);
+                    }
                 ]
             ],
         ],

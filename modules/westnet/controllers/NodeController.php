@@ -7,6 +7,7 @@ use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\NodeHasCompanies;
 use app\modules\westnet\models\search\ConnectionSearch;
 use app\modules\westnet\models\Server;
+use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use app\modules\westnet\models\Node;
 use app\modules\westnet\models\search\NodeSearch;
@@ -231,5 +232,19 @@ class NodeController extends Controller
             'qty'   => 0
         ]);
 
+    }
+
+    public function actionSyncNode($id){
+        $customers_by_node = Contract::findContractsByNode($id);
+
+        foreach ($customers_by_node as $key => $value) {
+            if ($contract->updateOnISP()) 
+                Yii::$app->session->addFlash('success', Yii::t('app','Contract updated on ISP successfull'));
+
+            else
+                Yii::$app->session->addFlash('error', Yii::t('app','Errors occurred at update contract on ISP'));  
+        }
+        
+        return $this->redirect('index');
     }
 }

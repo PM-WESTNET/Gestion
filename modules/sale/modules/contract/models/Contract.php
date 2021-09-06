@@ -634,4 +634,11 @@ class Contract extends ActiveRecord {
 
         return false;
     }
+
+    /**
+    * Return list contract by node_id
+    */
+    public static function findContractsByNode($node_id){
+        return self::find()->leftJoin('connection con', 'con.contract_id = contract.contract_id')->where(['con.node_id' => $node_id, 'contract.status' => 'active', 'con.status' => 'enabled'])->all();
+    }
 }
