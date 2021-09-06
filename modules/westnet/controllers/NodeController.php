@@ -238,7 +238,7 @@ class NodeController extends Controller
         $customers_by_node = Contract::findContractsByNode($id);
 
         foreach ($customers_by_node as $key => $value) {
-            if ($contract->updateOnISP()) 
+            if ($value->updateOnISP()) 
                 Yii::$app->session->addFlash('success', Yii::t('app','Contract updated on ISP successfull'));
 
             else
