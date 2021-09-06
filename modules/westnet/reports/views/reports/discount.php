@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use yii\grid\SerialColumn;
 use kartik\date\DatePicker;
 use kartik\grid\GridView;
+use kartik\daterange\DateRangePicker;
 
 $this->title = Yii::t('app','Discounts');
 $this->params['breadcrumbs'][] = $this->title;
@@ -67,17 +68,20 @@ $this->params['breadcrumbs'][] = $this->title;
                             'value' => function($model) {
                                 return $model->from_date . ' - ' . $model->to_date;
                             },
+                            'contentOptions' => ['style' => 'width:24%;'],
                             'label' => Yii::t('app','Date'),
-                            'filter'=>DatePicker::widget([
+                            'filter'=>DateRangePicker::widget([
+                                'name' => 'createTimeRange',
                                 'model' => $discountSearch,
                                 'attribute' => 'from_date',
-                                'value' => '2014-01-01',
-                                'type' => DatePicker::TYPE_RANGE,
-                                'attribute2' => 'to_date',
-                                'value2' => '2016-01-01',
+                                'convertFormat' => true,
+                                'presetDropdown' => true,
                                 'pluginOptions' => [
-                                    'autoclose'=>true,
-                                    'format' => 'yyyy-mm-dd'
+                                    'timePicker' => true,
+                                    'timePickerIncrement' => 1,
+                                    'locale' => [
+                                        'format' => 'Y-m-d'
+                                    ],
                                 ]
                             ]),  
                         ],

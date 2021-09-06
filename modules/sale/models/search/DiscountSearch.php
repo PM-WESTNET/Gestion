@@ -94,7 +94,8 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-        
+        $from_date = array('','');
+
         // awesome query
         $query = Discount::find()
                 ->select('COUNT(*) AS customerAmount, d.*')
@@ -127,12 +128,15 @@ class DiscountSearch extends Discount
         $query->andFilterWhere([
             'discount_id' => $this->discount_id,
         ]);
+        
+        if(!empty($this->from_date))
+            $from_date = explode(' - ', $this->from_date);
 
         // AND WHERE LIKE-s (pattern match)
         $query->andFilterWhere(['like', 'd.name', $this->name]);
         $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['>=', 'd.from_date', $this->from_date]);
-        $query->andFilterWhere(['<=', 'd.from_date', $this->to_date]);
+        $query->andFilterWhere(['>=', 'd.from_date', $from_date[0]]);
+        $query->andFilterWhere(['<=', 'd.from_date', $from_date[1]]);
         $query->andFilterWhere(['like', 'd.type', $this->type]);
         $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
        
