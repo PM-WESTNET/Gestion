@@ -430,7 +430,6 @@ class ReportsCompanyController extends Controller
         $searchModel = new CustomerSearch();
         $dataProvider = $searchModel->searchPublicityShape(Yii::$app->request->get(),(!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
         
-        
         $label = [];
         $data = [];
         foreach($searchModel->searchPublicityShapeRAWQUERY((!Yii::$app->request->isPost) ? null : Yii::$app->request->post()) as $value) {
@@ -439,10 +438,12 @@ class ReportsCompanyController extends Controller
         }
 
         if(Yii::$app->request->isPost){
-            $reportSearch->date_from = Yii::$app->request->post()['ReportSearch']['date_from'];
-            $reportSearch->date_to = Yii::$app->request->post()['ReportSearch']['date_to'];
+            if(isset(Yii::$app->request->post()['search'])){
+                $reportSearch->date_from = Yii::$app->request->post()['ReportSearch']['date_from'];
+                $reportSearch->date_to = Yii::$app->request->post()['ReportSearch']['date_to'];
+            }
+            
         }
-        
         return $this->render('/reports/how-did-you-know-the-company',
         [
             'searchModel' => $searchModel,
@@ -452,6 +453,21 @@ class ReportsCompanyController extends Controller
             'data' => $data,
         ]);
     }
+    public function actionHowDidYouKnowTheCompanyExcel($date_from, $date_to, $company_id){
+        //var_dump($date_from, $date_to, $company_id);die();
+        //$reportSearch = new ReportSearch();
+        $searchModel = new CustomerSearch();
+        $dataProvider = $searchModel->searchPublicityShapeExcel($date_from, $date_to, $company_id);
+        
+
+        return $this->renderPartial('/reports/how-did-you-know-the-company-excel',
+        [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+            
+    }
+    
 
     public function actionHowDidYouKnowTheCompanyViewCustomer($publicity_shape,$from_date = null, $to_date = null, $company = null){
         $searchModel = new CustomerSearch();

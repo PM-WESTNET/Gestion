@@ -966,7 +966,7 @@ class CustomerSearch extends Customer {
         return Ticket::find()->where(['customer_id' => 'contract.customer_id']);
     }
 
-
+    
      public function searchPublicityShape($params,$params_post = null)
     {
         $query = Customer::find()
@@ -1064,6 +1064,33 @@ class CustomerSearch extends Customer {
         ]);*/
         /*$query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'slug', $this->slug]);*/
+        return $dataProvider;
+    }
+    public function searchPublicityShapeExcel($date_from, $date_to, $company_id)
+    {
+        $query = Customer::find()
+        ->select(['publicity_shape','COUNT(customer_id) as total_client'])
+        ->groupBy(['publicity_shape']);
+
+        $query->where(['>=','date_new' , (new \DateTime( $date_from ))->format('Y-m-t')])
+              ->andWhere(['<=','date_new' , (new \DateTime( $date_to ))->format('Y-m-t') ]);
+        
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+ 
+        if(!empty($company_id)){
+            $query->andFilterWhere(['company_id' => $company_id]);
+        }
+        
+
         return $dataProvider;
     }
 }
