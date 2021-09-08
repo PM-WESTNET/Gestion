@@ -80,6 +80,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'unit_id',
                 'value'=>$model->unit->name
             ],
+            [
+                'attribute'=>'big_plan',
+                'value'=> ($model->big_plan) ? 'Si' : 'No'
+            ],
         ],
     ]) ?>
 
