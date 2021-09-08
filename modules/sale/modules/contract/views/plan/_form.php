@@ -69,6 +69,17 @@ use yii\jui\DatePicker;
     
     <?= $form->field($model, 'categories')->checkboxList(yii\helpers\ArrayHelper::map(app\modules\sale\models\Category::getOrderedCategories(),'category_id','tabName'),['encode'=>false, 'separator'=>'<br/>'])?>
 
+    <div class="row">
+        <div class="col-xs-12 noPadding" >
+            <label>Planes Especiales</label>
+        </div>
+        <div class="col-xs-12 noPadding">
+            <label><?= Html::activeCheckbox($model, 'big_plan', ['class' => 'agreement']) ?></label>
+        </div>
+        <hr>
+        <br>
+    </div>
+    
     <?php
         $plan_features_parent= PlanFeature::find()->where('parent_id IS NULL')->all();
         //$i=0;
@@ -146,11 +157,8 @@ use yii\jui\DatePicker;
                     <br>
                 </div>
             </div>
-            
-
         </div>
     </div>
-    
     
     <div class="form-group">
         <?= Html::submitButton($model->isNewRecord ? Yii::t('app', 'Create') : Yii::t('app', 'Update'), ['class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary']) ?>

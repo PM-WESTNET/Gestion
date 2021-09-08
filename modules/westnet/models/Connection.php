@@ -341,7 +341,17 @@ class Connection extends ActiveRecord {
         $node = $this->node;
         $ap = $this->accessPoint;
         $this->server_id = $node->server_id;
-        $this->ip4_1 = $node->getUsableIp($ap);
+
+        $plan = $this->FindPlanConnection($this->contract->contract_id);
+        if(!empty($plan) && $plan['big_plan']){
+            $node = Node::findNodeBySubnet(235);
+            $this->ip4_1 = $node->getUsableIp($ap);
+        }else{
+            $this->ip4_1 = $node->getUsableIp($ap);
+        }
+
+       
+        
     }
 
     /**
@@ -519,5 +529,20 @@ class Connection extends ActiveRecord {
     */
     public static function FindConnectionsByNode($node_id){
         return self::find()->where(['node_id' => $node_id, 'status' => 'enabled'])->all();
+    }
+
+
+    /**
+    * Return plan asociado al id del contrato
+    */
+    public static function FindPlanConnection($contract_id){
+
+        return Yii::$app->db->createCommand(
+                'SELECT * FROM contract_detail cd 
+                 LEFT JOIN product pr ON pr.product_id = cd.product_id
+                 WHERE pr.type = "plan" AND cd.contract_id = :contract_id;
+            ')
+            ->bindValue('contract_id',$contract_id)
+            ->queryOne();
     }
 }

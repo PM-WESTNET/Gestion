@@ -85,6 +85,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'value'=>function($model){return Yii::t('app',  ucfirst($model->status)); }
             ],
+            [
+                'attribute'=>'big_plan',
+                'value'=>function($model){
+                    return ($model->big_plan) ? 'Si' : 'No';
+                }
+            ],
 
 
             [
