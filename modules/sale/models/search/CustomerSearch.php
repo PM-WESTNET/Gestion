@@ -976,9 +976,15 @@ class CustomerSearch extends Customer {
         // add conditions that should always apply here
 
         if(isset($params_post)){
-            //var_dump($params_post);die();
-            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t')])
-                  ->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t') ]);
+            //$date_from = $params_post['ReportSearch']['date_from'];
+            //$date_to = $params_post['ReportSearch']['date_to'];
+            //if(!is_null($date_from)){
+            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t')]);
+            //} 
+            //if(!is_null($date_to)){
+            $query->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t') ]);
+            //}
+            
         }
         //var_dump($query->all()[0]->getAttributes());
         //die();
