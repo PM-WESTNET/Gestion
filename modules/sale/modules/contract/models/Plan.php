@@ -22,7 +22,8 @@ use app\modules\config\models\Config;
  * @property string $class
  * @property string $productcol
  * @property integer $show_in_ads
- * @property string $ads_name;
+ * @property string $ads_name
+ * @property integer $big_plan
  *
  * @property BillDetail[] $billDetails
  * @property Unit $unit
@@ -53,7 +54,7 @@ class Plan extends Product
     {
         return [
             [['description', 'ads_name'], 'string'],
-            [['unit_id', 'show_in_ads'], 'integer'],
+            [['unit_id', 'show_in_ads', 'big_plan'], 'integer'],
             [['taxes'], 'number'],
             [['taxRates'], 'safe'],
             [['initial_stock'], 'number'],
@@ -94,6 +95,7 @@ class Plan extends Product
             'ads_name' => Yii::t('app', 'Ads Name'),
             'show_in_ads' => Yii::t('app', 'Show In Ads'),
             'futureFinalPrice' => Yii::t('app', 'Future final price'),
+            'big_plan' => Yii::t('app', 'Plan Grande'),
         ];
     }
 

@@ -146,9 +146,15 @@ use yii\jui\DatePicker;
                     <br>
                 </div>
             </div>
-            
-
         </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <label><?= Html::activeCheckbox($model, 'big_plan', ['class' => 'agreement']) ?></label>
+        </div>
+        <hr>
+        <br>
     </div>
     
     

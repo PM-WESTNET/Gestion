@@ -323,4 +323,12 @@ class Node extends \app\components\db\ActiveRecord
     {
         return ArrayHelper::map(Node::find()->all(), 'node_id', 'name');
     }
+
+
+    /**
+    * Return node by subnet
+    */
+    public static function findNodeBySubnet($subnet){
+        return self::find()->where(['subnet' => $subnet])->one();
+    }
 }
