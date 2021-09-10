@@ -537,7 +537,7 @@ $notFilterable[] = [
         ['label' => Yii::t('modules/user-management/front', 'Login'), 'url' => ['/user-management/auth/login'], 'visible' => Yii::$app->user->isGuest],
         ['label' => Yii::t('modules/user-management/front', 'Logout'), 'url' => ['/user-management/auth/logout'], 'visible' => !Yii::$app->user->isGuest],
         ['label' => Yii::t('modules/user-management/front', 'Registration'), 'url' => ['/user-management/auth/registration'], 'visible' => Yii::$app->user->isGuest],
-        ['label' => Yii::t('modules/user-management/front', 'Change own password'), 'url' => ['/user-management/auth/change-own-password']],
+        ['label' => Yii::t('modules/user-management/front', 'Change own password'), 'url' => ['/user-management/auth/change-own-password'], 'visible' => !Yii::$app->user->isGuest],
         ['label' => Yii::t('modules/user-management/front', 'Password recovery'), 'url' => ['/user-management/auth/password-recovery']],
         ['label' => Yii::t('modules/user-management/front', 'E-mail confirmation'), 'url' => ['/user-management/auth/confirm-email']],
     ],
