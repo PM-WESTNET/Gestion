@@ -10,6 +10,7 @@ use app\modules\westnet\models\Server;
 use app\modules\sale\modules\contract\models\Contract;
 use Yii;
 use app\modules\westnet\models\Node;
+use app\modules\westnet\models\NatServer;
 use app\modules\westnet\models\search\NodeSearch;
 use app\components\web\Controller;
 use yii\data\ActiveDataProvider;
@@ -17,6 +18,7 @@ use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\westnet\models\IpRange;
+use yii\helpers\ArrayHelper;
 
 /**
  * NodeController implements the CRUD actions for Node model.
@@ -69,13 +71,14 @@ class NodeController extends Controller
     public function actionCreate()
     {
         $model = new Node();
-       
+        $list_nat_servers = ArrayHelper::map(NatServer::findNatServerAll(), 'nat_server_id', 'description' );
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->node_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
+                'list_nat_servers' => $list_nat_servers,
             ]);
         }
     }
@@ -89,11 +92,14 @@ class NodeController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $list_nat_servers = ArrayHelper::map(NatServer::findNatServerAll(), 'nat_server_id', 'description' );
+
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->node_id]);
         } else {
             return $this->render('update', [
                 'model' => $model,
+                'list_nat_servers' => $list_nat_servers,
             ]);
         }
     }

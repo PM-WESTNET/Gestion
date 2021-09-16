@@ -66,6 +66,13 @@ use kartik\widgets\Select2;
             ]
         ]);?>
     </br>
+    <?php echo $form->field($model, 'nat_server_id')->widget(Select2::class,[
+            'data' => $list_nat_servers,
+            'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+            'pluginOptions' => [
+                'allowClear' => true
+            ],
+        ])->label('Nat Server');?>
 
     <?= $form->field($model, 'vlan')->textInput(['maxlength' => 4]) ?>
 
