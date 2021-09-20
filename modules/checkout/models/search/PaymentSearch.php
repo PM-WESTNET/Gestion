@@ -217,7 +217,8 @@ class PaymentSearch extends Payment
     public function searchAccount($customer_id, $params)
     {
         $queryPayments = $this->searchPayment($params);
-        $this->load($params);
+        $queryPayments->andWhere(['!=','payment.status','cancelled']);
+	$this->load($params);
 
         $queryPayments->select([
             new Expression("'Payment' AS type"), "customer.customer_id", "concat(customer.lastname, ', ', customer.name) AS name",

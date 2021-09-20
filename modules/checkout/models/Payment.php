@@ -375,8 +375,8 @@ class Payment extends  ActiveRecord  implements CountableInterface
         $query = Payment::find()
             ->leftJoin('payment_item pi', 'payment.payment_id = pi.payment_id')
             ->where(['NOT IN', 'pi.payment_method_id'  , $qMethodPayment])
-            ->andWhere(['customer_id'=>$this->customer_id]);
-
+            ->andWhere(['customer_id'=>$this->customer_id])
+	    ->andWhere(['!=','status','cancelled']);
         if($only_closed) {
             $query->andWhere(['status' => Payment::PAYMENT_CLOSED]);
         }
