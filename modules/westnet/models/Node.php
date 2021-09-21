@@ -63,7 +63,7 @@ class Node extends \app\components\db\ActiveRecord
     {
 
         return [
-            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close', 'vlan'], 'integer'],
+            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close', 'vlan','nat_server_id'], 'integer'],
             [['zone', 'ecopagos', 'parentNode', 'companies', 'company_default', 'geocode'], 'safe'],
             [['zone_id', 'name', 'status', 'server_id'], 'required'],
             [['name'], 'string', 'max' => 100],

@@ -364,6 +364,7 @@ if (Yii::$app->getModule('westnet')) {
                 ['label' => Yii::t('partner', 'Liquidation'), 'url' => ['/partner/liquidation']],
                 ['label' => Yii::t('partner', 'Liquidations'), 'url' => ['/partner/liquidation/list-liquidation']],
             ]],
+            ['label' => Yii::t('westnet', 'Nat Server'), 'url' => ['/westnet/nat-server'], 'visible' => User::canRoute(['/westnet/nat-server/index'])],
             ['label' => Yii::t('westnet', 'Servers'), 'url' => ['/westnet/server'], 'visible' => User::canRoute(['/westnet/server/index'])],
             ['label' => Yii::t('westnet', 'Nodes'), 'url' => ['/westnet/node'], 'visible' => User::canRoute(['/westnet/node/index'])],
             ['label' => Yii::t('westnet', 'Vendors'), 'url' => ['/westnet/vendor'], 'visible' => User::canRoute(['/westnet/vendor/index'])],

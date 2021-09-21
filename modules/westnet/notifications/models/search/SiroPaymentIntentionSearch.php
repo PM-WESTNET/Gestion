@@ -45,6 +45,17 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
      */
     public function search($params)
     {   
+
+        $this->load($params);
+
+        if(!empty($params['SiroPaymentIntentionSearch']['from_date'])){
+            $date = explode(' - ', $params['SiroPaymentIntentionSearch']['from_date']);
+
+            $this->from_date = $date[0];
+            $this->to_date = $date[1];
+        }
+
+
         $query = SiroPaymentIntention::find()
         ->select(['spi.*'])
         ->from('siro_payment_intention spi')
@@ -63,7 +74,7 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
             'desc' => ['spi.status' => SORT_DESC],
         ];
 
-        $this->load($params);
+        
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -82,14 +93,14 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
               ->andFilterWhere(['like', 'payment_id', $this->payment_id]);
         
         
-        /*if($this->from_date){
+        if($this->from_date){
             $query->andFilterWhere(['>=','createdAt', $this->from_date]);
         }
 
         if($this->to_date){
             $query->andFilterWhere(['<=','createdAt', $this->to_date]);
-        }*/      
-
+        }      
+       
         return $dataProvider;
     }
 }
