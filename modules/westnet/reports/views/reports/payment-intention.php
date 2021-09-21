@@ -2,7 +2,7 @@
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\web\View;
-use kartik\date\DatePicker;
+use kartik\daterange\DateRangePicker;
 use yii\helpers\ArrayHelper;
 
 $this->title = 'Intenciones de Pago';
@@ -76,20 +76,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'attribute'=>'createdAt',
+                'attribute' => 'createdAt',
                 'label' => 'Fecha',
-                /*'filter'=>DatePicker::widget([
+                'filter' => DateRangePicker::widget([
+                    'name' => 'createTimeRange',
                     'model' => $searchModel,
                     'attribute' => 'from_date',
-                    'value' => '2014-01-01',
-                    'type' => DatePicker::TYPE_RANGE,
-                    'attribute2' => 'to_date',
-                    'value2' => '2016-01-01',
+                    'convertFormat' => true,
+                    'presetDropdown' => true,
                     'pluginOptions' => [
-                        'autoclose'=>true,
-                        'format' => 'yyyy-mm-dd'
+                        'timePicker' => true,
+                        'timePickerIncrement' => 1,
+                        'locale' => [
+                            'format' => 'Y-m-d'
+                        ],
                     ]
-                ])*/
+                ]),
             ], 
             [
                 'class' => 'yii\grid\ActionColumn',
