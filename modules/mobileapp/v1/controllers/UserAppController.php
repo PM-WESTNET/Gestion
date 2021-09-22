@@ -129,6 +129,7 @@ class UserAppController extends Controller
                 $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
                 $statistic_app->description = "Document number and customer code not correspond to an active customer";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->customer_code = $data['customer_code'];
                 $statistic_app->save(false);
 
                 return [
@@ -145,6 +146,7 @@ class UserAppController extends Controller
                     $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
                     $statistic_app->description = "Document number and customer code not correspond to a customer";
                     $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->customer_code = $data['customer_code'];
                     $statistic_app->save(false);
 
                     return [
@@ -162,6 +164,7 @@ class UserAppController extends Controller
                 $statistic_app->type = StatisticApp::TYPE_LOGIN;
                 $statistic_app->description = "Ingreso a la App";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->customer_code = $data['customer_code'];
                 $statistic_app->save(false);
 
                 return [
@@ -183,6 +186,7 @@ class UserAppController extends Controller
                     $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
                     $statistic_app->description = "Document number and customer code not correspond to a customer";
                     $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->customer_code = $data['customer_code'];
                     $statistic_app->save(false);
 
                     return [
@@ -198,6 +202,7 @@ class UserAppController extends Controller
                 $statistic_app->type = StatisticApp::TYPE_LOGIN;
                 $statistic_app->description = "Ingreso a la App";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->customer_code = $data['customer_code'];
                 $statistic_app->save(false);
 
                 return [
@@ -211,6 +216,7 @@ class UserAppController extends Controller
                 $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
                 $statistic_app->description = "Document number and customer code not correspond to a customer";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->customer_code = $data['customer_code'];
                 $statistic_app->save(false);
 
                 return  [
@@ -224,6 +230,7 @@ class UserAppController extends Controller
         $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
         $statistic_app->description = $model->getErrors();
         $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->customer_code = $data['customer_code'];
         $statistic_app->save(false);
 
         return  [
@@ -320,6 +327,7 @@ class UserAppController extends Controller
                     $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
                     $statistic_app->description = Yii::t('app','Validation code has been sended {email}', ['email' => $model->email]);
                     $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->customer_code = $data['customer_code'];
                     $statistic_app->save(false);
 
                     return [
@@ -333,6 +341,7 @@ class UserAppController extends Controller
                     $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
                     $statistic_app->description = Yii::t('app', 'Validation code has been sended to {phone}', ['phone' => $data['destinatary']]);
                     $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->customer_code = $data['customer_code'];
                     $statistic_app->save(false);
 
                     return [
@@ -349,6 +358,7 @@ class UserAppController extends Controller
         $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
         $statistic_app->description = "Cant send the validation code";
         $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->customer_code = $data['customer_code'];
         $statistic_app->save(false);
 
         return [
@@ -723,6 +733,7 @@ class UserAppController extends Controller
                 $statistic_app->type = StatisticApp::TYPE_UPDATE_CUSTOMER;
                 $statistic_app->description = "Customer Updated Successfully";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->customer_code = $data['code'];
                 $statistic_app->save(false);
 
                 return [
@@ -738,6 +749,7 @@ class UserAppController extends Controller
         $statistic_app->type = StatisticApp::TYPE_ERROR_CODE;
         $statistic_app->description = Yii::t('app','Customer not found');
         $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->customer_code = $data['code'];
         $statistic_app->save(false);
 
         return [
@@ -1117,6 +1129,7 @@ class UserAppController extends Controller
         }
 
         $contract = Contract::find()->andWhere(['contract_id' => $data['contract_id']])->one();
+        $customer = Customer::find()->andWhere(['customer_id' => $contract->customer_id])->one();
         $result = $this->createPaymentExtensionAndForce($data['contract_id'], false);
         if($result['status']){
             Yii::$app->response->setStatusCode(200);
@@ -1124,6 +1137,7 @@ class UserAppController extends Controller
             $statistic_app->type = StatisticApp::TYPE_CREATE_PAYMENT_EXTENSION;
             $statistic_app->description = Yii::t('app','Payment Extension created successfully');
             $statistic_app->created_at = date("Y-m-d H:m:s");
+            $statistic_app->customer_code = $customer->code;
             $statistic_app->save(false);
 
             return [
@@ -1138,6 +1152,7 @@ class UserAppController extends Controller
         $statistic_app->type = StatisticApp::TYPE_ERROR_CODE;
         $statistic_app->description = Yii::t('app','Can`t create payment extension');
         $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->customer_code = $customer->code;
         $statistic_app->save(false);
 
         return [
