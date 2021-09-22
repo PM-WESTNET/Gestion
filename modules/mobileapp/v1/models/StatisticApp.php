@@ -17,7 +17,7 @@ class StatisticApp extends \app\components\db\ActiveRecord
     const TYPE_LOGIN = 'Login';
     const TYPE_ERROR_LOGIN = 'Error Login';
     const TYPE_COMPROBANTS = 'Visualización de comprobantes';
-    const TYPE_CREATE_PAYMENT_EXTENSION = "Creación de Extensión de Pago"
+    const TYPE_CREATE_PAYMENT_EXTENSION = "Creación de Extensión de Pago";
     const TYPE_UPDATE_CUSTOMER = "Actualización de Clientes";
     const TYPE_ERROR_CODE = "Error";
 
