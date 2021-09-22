@@ -227,6 +227,7 @@ if (Yii::$app->getModule('reports')) {
             ['label' => ReportsModule::t('app', 'Change History company'), 'url' => ['/reports/customer/change-company-history']],
             ['label' => ReportsModule::t('app', 'Customer Registrations'), 'url' => ['/reports/reports/customer-registrations']],
             ['label' => ReportsModule::t('app', 'Intenciones de Pago'), 'url' => ['/reports/reports-company/payment-intention']],
+            ['label' => ReportsModule::t('app', 'Valoración Intenciones de Pago'), 'url' => ['/reports/reports-company/payment-intention-valoration']],
             ['label' => ReportsModule::t('app', '¿Cómo conoció la empresa?'), 'url' => ['/reports/reports-company/how-did-you-know-the-company']],
         ]],
         ['label' => ReportsModule::t('app', 'Active Customers per month'), 'url' => ['/reports/reports/customers-per-month']],

@@ -527,7 +527,7 @@ class NotificationController extends Controller {
                     if($result_create)
                         return $this->redirect($result_create['Url']);
                     else
-                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment"); //error created intention payment
+                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$result_search->siro_payment_intention_id"); //error created intention payment
 
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
@@ -543,10 +543,10 @@ class NotificationController extends Controller {
                             $result_search->save(false);
                             return $this->redirect($result_create['Url']);
                         }else
-                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment");
+                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$result_search->siro_payment_intention_id");
                     }          
                 }else{
-                    $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
+                    $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed/$result_search->siro_payment_intention_id");
                 }
             }else
                 $this->redirect("http://pago.westnet.com.ar:3000/portal/system-disabled");
@@ -605,15 +605,15 @@ class NotificationController extends Controller {
 
                 $transaction->commit();
 
-                $this->redirect("http://pago.westnet.com.ar:3000/portal/success");
+                $this->redirect("http://pago.westnet.com.ar:3000/portal/success/$paymentIntention->siro_payment_intention_id");
             } else {
                 $transaction->rollBack();
             }
         }else if($result_search['Estado'] == 'CANCELADA'){
 
-            $this->redirect("http://pago.westnet.com.ar:3000/portal/canceled-pay");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/canceled-pay/$paymentIntention->siro_payment_intention_id");
         }else{
-            $this->redirect("http://pago.westnet.com.ar:3000/portal/not-success");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/not-success/$paymentIntention->siro_payment_intention_id");
         }
 
         
