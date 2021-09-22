@@ -195,7 +195,7 @@ class UserAppController extends Controller
                 $model->updateAttributes(['player_id' => isset($data['player_id']) ? $data['player_id'] : null]);
                 $destinataries= $customer->getDestinataries();
 
-                $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                $statistic_app->type = StatisticApp::TYPE_LOGIN;
                 $statistic_app->description = "Ingreso a la App";
                 $statistic_app->created_at = date("Y-m-d H:m:s");
                 $statistic_app->save(false);

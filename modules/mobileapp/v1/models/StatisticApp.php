@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\westnet\notifications\models;
+namespace app\modules\mobileapp\v1\models;
 use Yii;
 
 /**
@@ -20,7 +20,7 @@ class StatisticApp extends \app\components\db\ActiveRecord
     const TYPE_CREATE_PAYMENT_EXTENSION = "Creación de Extensión de Pago";
     const TYPE_UPDATE_CUSTOMER = "Actualización de Clientes";
     const TYPE_ERROR_CODE = "Error";
-
+    const TYPE_SEND_VALIDATION_CODE = "Envio de codigo de validación";
     /**
      * @inheritdoc
      */
