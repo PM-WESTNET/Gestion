@@ -123,6 +123,12 @@ class UserAppController extends Controller
             if (empty($customer)){
                 //Si no encuentro un customer activo con la combinacion de documento y code devuelvo error
                 \Yii::$app->response->setStatusCode(400);
+
+                $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                $statistic_app->description = "Document number and customer code not correspond to an active customer";
+                $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->save();
+
                 return [
                     'status' => 'error',
                     'errors' => [
@@ -133,6 +139,12 @@ class UserAppController extends Controller
                 if($customer->company_id != $company->company_id && $customer->parent_company_id != $company->company_id){
                     //Si encuentro el customer activo, pero no pertenece a Westnet, devuelvo error
                     \Yii::$app->response->setStatusCode(400);
+
+                    $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                    $statistic_app->description = "Document number and customer code not correspond to a customer";
+                    $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->save();
+
                     return [
                         'status' => 'error',
                         'errors' => [
@@ -144,6 +156,12 @@ class UserAppController extends Controller
 
             if(!empty($customer) && $this->createNewUserApp($customer, $data, $model)){
                 $destinataries= $customer->getDestinataries();
+                
+                $statistic_app->type = StatisticApp::TYPE_LOGIN;
+                $statistic_app->description = "Ingreso a la App";
+                $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->save();
+
                 return [
                     'status' => 'success',
                     'user' => $model,
@@ -159,6 +177,12 @@ class UserAppController extends Controller
                 if($customer->company_id != $company->company_id && $customer->parent_company_id != $company->company_id){
                     //Si encuentro el customer activo, pero no pertenece a Westnet, devuelvo error
                     \Yii::$app->response->setStatusCode(400);
+
+                    $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                    $statistic_app->description = "Document number and customer code not correspond to a customer";
+                    $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->save();
+
                     return [
                         'status' => 'error',
                         'errors' => [
@@ -168,6 +192,12 @@ class UserAppController extends Controller
                 }
                 $model->updateAttributes(['player_id' => isset($data['player_id']) ? $data['player_id'] : null]);
                 $destinataries= $customer->getDestinataries();
+
+                $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                $statistic_app->description = "Ingreso a la App";
+                $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->save();
+
                 return [
                     'status' => 'success',
                     'user' => $model,
@@ -175,6 +205,12 @@ class UserAppController extends Controller
                 ];
             } else {
                 \Yii::$app->response->setStatusCode(400);
+
+                $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+                $statistic_app->description = "Document number and customer code not correspond to a customer";
+                $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->save();
+
                 return  [
                     'status' => 'error',
                     'errors' => Yii::t('app','Document number and customer code not correspond to a customer'),
@@ -182,6 +218,12 @@ class UserAppController extends Controller
             }
         }
         \Yii::$app->response->setStatusCode(400);
+
+        $statistic_app->type = StatisticApp::TYPE_ERROR_LOGIN;
+        $statistic_app->description = $model->getErrors();
+        $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->save();
+
         return  [
             'status' => 'error',
             'errors' => $model->getErrors(),
@@ -224,6 +266,7 @@ class UserAppController extends Controller
      */
     public function actionSendValidationCode(){
         $data= \Yii::$app->request->getBodyParams();
+        $statistic_app = new StatisticApp();
 
         if (empty($data['destinatary']) || empty($data['user_app_id']) ||empty($data['customer_code'])){
             throw new BadRequestHttpException('customer_code user_app_id and destinatary are required');
@@ -271,6 +314,12 @@ class UserAppController extends Controller
             $validationCode->save();
             if($isEmail) {
                 if ($validationCode->sendEmail()){
+
+                    $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
+                    $statistic_app->description = Yii::t('app','Validation code has been sended {email}', ['email' => $model->email]);
+                    $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->save();
+
                     return [
                         'status' => 'success',
                         'message' => Yii::t('app','Validation code has been sended {email}', ['email' => $model->email]),
@@ -278,6 +327,12 @@ class UserAppController extends Controller
                 }
             } else {
                 if ($validationCode->sendCodeSms($data['destinatary'])) {
+
+                    $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
+                    $statistic_app->description = Yii::t('app', 'Validation code has been sended to {phone}', ['phone' => $data['destinatary']]);
+                    $statistic_app->created_at = date("Y-m-d H:m:s");
+                    $statistic_app->save();
+
                     return [
                         'status' => 'success',
                         'message' => Yii::t('app', 'Validation code has been sended to {phone}', ['phone' => $data['destinatary']]),
@@ -288,6 +343,12 @@ class UserAppController extends Controller
         }
 
         \Yii::$app->response->setStatusCode(400);
+
+        $statistic_app->type = StatisticApp::TYPE_SEND_VALIDATION_CODE;
+        $statistic_app->description = "Cant send the validation code";
+        $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->save();
+
         return [
             'status' => 'error',
             'message' => 'Cant send the validation code',
@@ -637,6 +698,7 @@ class UserAppController extends Controller
      */
     public function actionUpdate(){
         $data= Yii::$app->request->getBodyParams();
+        $statistic_app = new StatisticApp();
 
         //seteo como user el user de la api, porque es usado para guardar el log de actualizaciones de campos
         //TODO: consultar a Carlitos si es necesario guardar el id de que cliente actualizó los datos
@@ -655,6 +717,12 @@ class UserAppController extends Controller
                     $userApp->email = $customer->email;
                     $userApp->updateAttributes(['email']);
                 }
+
+                $statistic_app->type = StatisticApp::TYPE_UPDATE_CUSTOMER;
+                $statistic_app->description = "Customer Updated Successfully";
+                $statistic_app->created_at = date("Y-m-d H:m:s");
+                $statistic_app->save();
+
                 return [
                     'status' => 'success',
                     'customer' => $customer,
@@ -664,6 +732,11 @@ class UserAppController extends Controller
         }
 
         Yii::$app->response->setStatusCode(400);
+
+        $statistic_app->type = StatisticApp::TYPE_ERROR_CODE;
+        $statistic_app->description = Yii::t('app','Customer not found');
+        $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->save();
 
         return [
             'status' => 'error',
@@ -1035,6 +1108,7 @@ class UserAppController extends Controller
      */
     public function actionForceConnection() {
         $data = Yii::$app->request->post();
+        $statistic_app = new StatisticApp();
 
         if (!isset($data['contract_id'])||!isset($data['reason'])){
             throw new BadRequestHttpException('Contract ID and Reason are required');
@@ -1044,6 +1118,12 @@ class UserAppController extends Controller
         $result = $this->createPaymentExtensionAndForce($data['contract_id'], false);
         if($result['status']){
             Yii::$app->response->setStatusCode(200);
+
+            $statistic_app->type = StatisticApp::TYPE_CREATE_PAYMENT_EXTENSION;
+            $statistic_app->description = Yii::t('app','Payment Extension created successfully');
+            $statistic_app->created_at = date("Y-m-d H:m:s");
+            $statistic_app->save();
+
             return [
                 'status' => 'success',
                 'title' => Yii::t('app','Payment Extension created successfully'),
@@ -1052,6 +1132,12 @@ class UserAppController extends Controller
         }
 
         Yii::$app->response->setStatusCode(400);
+
+        $statistic_app->type = StatisticApp::TYPE_ERROR_CODE;
+        $statistic_app->description = Yii::t('app','Can`t create payment extension');
+        $statistic_app->created_at = date("Y-m-d H:m:s");
+        $statistic_app->save();
+
         return [
             'status' => 'error',
             'error' => Yii::t('app','Can`t create payment extension'),
