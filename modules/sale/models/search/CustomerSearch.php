@@ -966,28 +966,17 @@ class CustomerSearch extends Customer {
         return Ticket::find()->where(['customer_id' => 'contract.customer_id']);
     }
 
-    
-     public function searchPublicityShape($params,$params_post = null)
+    public function searchPublicityShape($params,$params_post = null)
     {
         $query = Customer::find()
         ->select(['publicity_shape','COUNT(customer_id) as total_client'])
         ->groupBy(['publicity_shape']);
-
         // add conditions that should always apply here
-
         if(isset($params_post)){
-            //$date_from = $params_post['ReportSearch']['date_from'];
-            //$date_to = $params_post['ReportSearch']['date_to'];
-            //if(!is_null($date_from)){
-            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t')]);
-            //} 
-            //if(!is_null($date_to)){
-            $query->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t') ]);
-            //}
-            
+            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d')]);
+            $query->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d') ]);            
         }
-        //var_dump($query->all()[0]->getAttributes());
-        //die();
+        
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -995,15 +984,10 @@ class CustomerSearch extends Customer {
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
  
         if(isset($params_post)){
-            //$query->andFilterWhere(['>=', 'date_new', $params_post['ReportSearch']['date_from']])
-            //->andFilterWhere(['<=', 'date_new', $params_post['ReportSearch']['date_to']]);
-
             if(!empty($params_post['ReportSearch']['company_id'])){
                 $query->andFilterWhere(['company_id' => $params_post['ReportSearch']['company_id']]);
             }
@@ -1020,8 +1004,8 @@ class CustomerSearch extends Customer {
         $sql = "SELECT publicity_shape, COUNT(customer_id) as total_client FROM customer ";
 
         if(isset($params_post)){
-            $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-t');
-            $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-t');
+            $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d');
+            $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d');
             $sql .= "WHERE date_new BETWEEN '$datefrom' AND '$dateto' ";
         }
 
@@ -1036,17 +1020,17 @@ class CustomerSearch extends Customer {
         
         $result = Yii::$app->db->createCommand($sql)->queryAll();
 
-        //var_dump($result,$sql);die();
         return $result;
 
     }
 
-     public function searchCustomerByPublicityShape($params,$from_date,$to_date,$company)
+     
+    public function searchCustomerByPublicityShape($params,$from_date,$to_date,$company)
     {
         $query = Customer::find()->where(['LIKE','publicity_shape',$params['publicity_shape']]);
 
-        $query->andWhere(['>=', 'date_new', (new \DateTime( $from_date ))->format('Y-m-t')])
-            ->andWhere(['<=', 'date_new', (new \DateTime( $to_date ))->format('Y-m-t')])
+        $query->andWhere(['>=', 'date_new', (new \DateTime( $from_date ))->format('Y-m-d')])
+            ->andWhere(['<=', 'date_new', (new \DateTime( $to_date ))->format('Y-m-d')])
             ->andWhere(['company_id' => $company]);
             
 
@@ -1072,14 +1056,15 @@ class CustomerSearch extends Customer {
             ->andFilterWhere(['like', 'slug', $this->slug]);*/
         return $dataProvider;
     }
+
     public function searchPublicityShapeExcel($date_from, $date_to, $company_id)
     {
         $query = Customer::find()
         ->select(['publicity_shape','COUNT(customer_id) as total_client'])
         ->groupBy(['publicity_shape']);
 
-        $query->where(['>=','date_new' , (new \DateTime( $date_from ))->format('Y-m-t')])
-              ->andWhere(['<=','date_new' , (new \DateTime( $date_to ))->format('Y-m-t') ]);
+        $query->where(['>=','date_new' , (new \DateTime( $date_from ))->format('Y-m-d')])
+              ->andWhere(['<=','date_new' , (new \DateTime( $date_to ))->format('Y-m-d') ]);
         
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
