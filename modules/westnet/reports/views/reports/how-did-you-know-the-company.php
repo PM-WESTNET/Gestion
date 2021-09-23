@@ -32,7 +32,13 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]) ?>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <?= $form->field($searchModel, 'customer_status')->checkbox(array('label'=>'Solo Clientes Activos','value'=>false)); ?>                    
+                
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div class="form-group">
                     <?= Html::activeLabel($reportSearch, 'date_from'); ?>
                     <?= DatePicker::widget([
@@ -48,7 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     ?>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="form-group">
                     <?= Html::activeLabel($reportSearch, 'date_to'); ?>
                     <?= DatePicker::widget([
