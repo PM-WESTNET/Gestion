@@ -21,6 +21,9 @@ class StatisticApp extends \app\components\db\ActiveRecord
     const TYPE_UPDATE_CUSTOMER = "Actualización de Clientes";
     const TYPE_ERROR_CODE = "Error";
     const TYPE_SEND_VALIDATION_CODE = "Envio de codigo de validación";
+
+    public $total;
+
     /**
      * @inheritdoc
      */
@@ -66,7 +69,7 @@ class StatisticApp extends \app\components\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_at', 'description', 'type'], 'safe'],
+            [['created_at', 'description', 'type', 'total'], 'safe'],
             [['statistic_app_id'], 'number']
         ];
     }
@@ -81,6 +84,7 @@ class StatisticApp extends \app\components\db\ActiveRecord
             'type' => 'Tipo',
             'description' => 'Description',
             'created_at' => 'Fecha de Creación',
+            'total' => 'Total'
         ];
     }    
 

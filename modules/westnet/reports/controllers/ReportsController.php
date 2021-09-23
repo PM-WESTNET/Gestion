@@ -42,6 +42,7 @@ use app\modules\westnet\models\search\ConnectionForcedHistorialSearch;
 use app\modules\checkout\models\PaymentMethod;
 
 use app\modules\mobileapp\v1\models\search\UserAppActivitySearch;
+use app\modules\mobileapp\v1\models\search\StatisticAppSearch;
 
 use app\modules\firstdata\models\search\FirstdataAutomaticDebitSearch;
 
@@ -1200,5 +1201,13 @@ class ReportsController extends Controller
     public function actionNumberOfClients(){
         $reportSearch = new ReportSearch();
         return $reportSearch->findNumberOfClientsForConnection(Yii::$app->request->get())['count_clients'];
+    }
+
+    public function actionStatisticApp(){
+        $searchModel = new statisticAppSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->get());
+
+
+        return $this->render('statistic-app', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'colors' => self::COLORS, 'border_colors' => self::BORDER_COLORS,]);
     }
 }
