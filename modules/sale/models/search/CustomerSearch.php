@@ -971,12 +971,25 @@ class CustomerSearch extends Customer {
         $query = Customer::find()
         ->select(['publicity_shape','COUNT(customer_id) as total_client'])
         ->groupBy(['publicity_shape']);
-        // add conditions that should always apply here
+
         if(isset($params_post)){
-            $query->where(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d')]);
-            $query->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d') ]);            
+            $status = ($params_post['CustomerSearch']['customer_status']!='0')?'enabled':'disabled';
+            if($status == 'enabled')$query->Where(['=','status' , $status]);
+        }
+        else{
+            $query->Where(['=','status' , 'enabled' ]);            
+        }
+
+        if(isset($params_post)){
+            if($params_post['ReportSearch']['date_from']!=''){
+                $query->andWhere(['>=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d')]);
+            }
+            if($params_post['ReportSearch']['date_to']!=''){
+                $query->andWhere(['<=','date_new' , (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d') ]);           
+            }
         }
         
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
         ]);
@@ -1002,11 +1015,37 @@ class CustomerSearch extends Customer {
 
     public function searchPublicityShapeRAWQUERY($params_post = null){
         $sql = "SELECT publicity_shape, COUNT(customer_id) as total_client FROM customer ";
-
+        
         if(isset($params_post)){
-            $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d');
-            $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d');
-            $sql .= "WHERE date_new BETWEEN '$datefrom' AND '$dateto' ";
+            $status = ($params_post['CustomerSearch']['customer_status']!='0')?'enabled':'disabled';
+            if($status == 'enabled'){
+                $sql .= "WHERE customer.status = '$status' ";
+            }
+            else{
+                $sql .= "WHERE TRUE ";
+            }
+        }
+        else{
+            $sql .= "WHERE customer.status = 'enabled' ";           
+        }
+
+        //
+        if(isset($params_post)){
+            //date_from is empty
+            $date = $params_post['ReportSearch']['date_from'];
+            if($date!=''){
+                $datefrom = (new \DateTime( $params_post['ReportSearch']['date_from'] ))->format('Y-m-d');
+                $sql .= " AND customer.date_new >= '$datefrom' ";
+                
+            }
+            //date_to is empty
+            $date = $params_post['ReportSearch']['date_to'];
+            if($date!=''){
+                $dateto = (new \DateTime( $params_post['ReportSearch']['date_to'] ))->format('Y-m-d');
+                $sql .= " AND customer.date_new <= '$dateto' ";
+            }
+            
+
         }
 
         if(isset($params_post)){
@@ -1016,8 +1055,9 @@ class CustomerSearch extends Customer {
             }
         }
 
-        $sql .= "GROUP BY publicity_shape ";
-        
+        $sql .= " GROUP BY publicity_shape ";
+        //var_dump($sql);
+        //die();
         $result = Yii::$app->db->createCommand($sql)->queryAll();
 
         return $result;
