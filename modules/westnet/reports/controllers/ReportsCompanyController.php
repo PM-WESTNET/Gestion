@@ -17,6 +17,7 @@ use app\modules\sale\models\Customer;
 use app\modules\sale\models\search\CustomerSearch;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 use app\modules\westnet\notifications\models\search\SiroPaymentIntentionSearch;
+use app\modules\westnet\notifications\models\search\SiroPaymentIntentionValorationSearch;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentItem;
@@ -474,5 +475,12 @@ class ReportsCompanyController extends Controller
         $dataProvider = $searchModel->searchCustomerByPublicityShape(Yii::$app->request->get(),$from_date,$to_date,$company);
 
         return $this->render('/reports/how-did-you-know-the-company-view-customer',['searchModel' => $searchModel, 'dataProvider' => $dataProvider]);
+    }
+
+    public function actionPaymentIntentionValoration(){
+        $searchModel = new SiroPaymentIntentionValorationSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->get());
+
+        return $this->render('/reports/payment-intention-valoration',['dataProvider' => $dataProvider,'searchModel' => $searchModel]);
     }
 }

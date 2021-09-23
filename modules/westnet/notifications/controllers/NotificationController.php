@@ -521,13 +521,14 @@ class NotificationController extends Controller {
         if($customer){
             if(Config::getConfig('siro_communication_bank_roela')->item->description){
                 $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
-                
+                $siro_payment_intention_id = $result_search['siro_payment_intention_id'];
+
                 if(!$result_search && $customer->current_account_balance < 0){
                     $result_create = ApiSiro::CreatePaymentIntention($customer);
                     if($result_create)
                         return $this->redirect($result_create['Url']);
                     else
-                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment"); //error created intention payment
+                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id"); //error created intention payment
 
                 }else if($result_search['status'] == 'pending'){
                     $current_date = strtotime(date("d-m-Y H:i:00",time()));
@@ -543,9 +544,10 @@ class NotificationController extends Controller {
                             $result_search->save(false);
                             return $this->redirect($result_create['Url']);
                         }else
-                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment");
+                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id");
                     }          
                 }else{
+			//var_dump($result_search);die();
                     $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
                 }
             }else
@@ -560,7 +562,8 @@ class NotificationController extends Controller {
 
     public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
         $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $IdReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
-
+	$siro_payment_intention_id = $paymentIntention['siro_payment_intention_id'];
+	
         $result_search = ApiSiro::SearchPaymentIntention($IdReferenciaOperacion,$IdResultado);
 
         $paymentIntention->id_resultado = $IdResultado;
@@ -605,15 +608,15 @@ class NotificationController extends Controller {
 
                 $transaction->commit();
 
-                $this->redirect("http://pago.westnet.com.ar:3000/portal/success");
+                $this->redirect("http://pago.westnet.com.ar:3000/portal/success/$siro_payment_intention_id");
             } else {
                 $transaction->rollBack();
             }
         }else if($result_search['Estado'] == 'CANCELADA'){
 
-            $this->redirect("http://pago.westnet.com.ar:3000/portal/canceled-pay");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/canceled-pay/$siro_payment_intention_id");
         }else{
-            $this->redirect("http://pago.westnet.com.ar:3000/portal/not-success");
+            $this->redirect("http://pago.westnet.com.ar:3000/portal/not-success/$siro_payment_intention_id");
         }
 
         
