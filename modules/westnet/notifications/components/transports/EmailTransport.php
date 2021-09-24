@@ -92,7 +92,7 @@ class EmailTransport implements TransportInterface {
      * @return array
      */
     public function send($notification, $force_send = false){
-        log_email('Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
+        //log_email('Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
         
         $customers = NotificationHasCustomer::GetCustomerToCampaign($notification->notification_id);
 
@@ -126,7 +126,7 @@ class EmailTransport implements TransportInterface {
                         /** @var MailSender $mailSender */
                         $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
 
-                        log_email($customer);
+                        //log_email($customer);
                         $toName = $customer['name'].' '.$customer['lastname'];
                         $clone = clone $notification;
                         $clone->content = self::replaceText($notification->content, $customer);
@@ -146,7 +146,7 @@ class EmailTransport implements TransportInterface {
                                 NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
                         }else{
                             $error .= " $toName <$toMail>; ";
-                            log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+                            //log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
                             NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
                         }
 
@@ -165,7 +165,7 @@ class EmailTransport implements TransportInterface {
                         ];
                     }
                 }
-                log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
+                //log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
             }else{
                 $error = 'No hay mas destinatarios!';
             }
