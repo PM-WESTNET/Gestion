@@ -107,3 +107,4 @@ docker_sample/web-server/gestion.conf
 docker_gestion_*
 
 composer.lock
+composer.json

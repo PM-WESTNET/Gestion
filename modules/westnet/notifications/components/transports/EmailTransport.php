@@ -217,6 +217,7 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Estado', Yii::t('westnet', ucfirst($customer['status'])), $replaced_text);
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
         $replaced_text = str_replace('@BotonDePago', "  <a href='".$url_redirect_gestion."'". "style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>", $replaced_text);
+        $replaced_text = str_replace('@LogoSiro', "<img src='@app/web/images/logo-siro.png' alt='LogoSiro' style='border:0;width:80px;'>", $replaced_text);
         
         return $replaced_text;
 
