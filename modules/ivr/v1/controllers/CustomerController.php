@@ -1359,9 +1359,9 @@ class CustomerController extends Controller
             $customer->lastname = $data['apellido'];
             $customer->document_type_id = ($document_type !== null) ? $document_type->document_type_id : null;
             $customer->document_number = $data['nro_doc'];
-            $customer->phone = $data['telefono1'];
+            $customer->phone = $data['celular1'];
             $customer->phone2 = $data['telefono2'];
-            $customer->phone3 = $data['celular1'];
+            $customer->phone3 = $data['telefono1'];
             $customer->phone4 = $data['celular2'];
             $customer->user_napear = $data['usuario'];
 
@@ -1372,7 +1372,7 @@ class CustomerController extends Controller
             $customer->birthdate = '1990-01-01';
             $customer->publicity_shape = 'poster';
             $customer->has_debit_automatic = 'no';
-            $customer->company_id = 1;
+            $customer->company_id = 2;
             $customer->parent_company_id = 8;
             $customer->status = 'enabled';
             $customer->setCustomerClass(1);
