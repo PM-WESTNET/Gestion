@@ -1359,8 +1359,8 @@ class CustomerController extends Controller
             $customer->lastname = $data['apellido'];
             $customer->document_type_id = ($document_type !== null) ? $document_type->document_type_id : null;
             $customer->document_number = $data['nro_doc'];
-            $customer->phone = $data['celular1'];
-            $customer->phone2 = $data['telefono2'];
+            $customer->phone = $data['telefono2'];
+            $customer->phone2 = $data['celular1'];
             $customer->phone3 = $data['telefono1'];
             $customer->phone4 = $data['celular2'];
             $customer->user_napear = $data['usuario'];
