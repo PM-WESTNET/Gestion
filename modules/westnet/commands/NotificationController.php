@@ -126,7 +126,7 @@ class NotificationController extends Controller
             ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
             ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
             ->all();
-
+	
         foreach ($notifications as $notification) {
             if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
                 $notification->updateAttributes(['status' => 'in_process']);
@@ -160,7 +160,7 @@ class NotificationController extends Controller
             ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
             ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
             ->all();
-
+	
         foreach ($notifications as $notification) {
             if (\Yii::$app->mutex->acquire('send_mobile_push_'.$notification->notification_id)){
                 $notification->updateAttributes(['status' => 'in_process']);
