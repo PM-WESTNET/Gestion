@@ -1438,4 +1438,76 @@ class CustomerController extends Controller
             ];
         }
     }
+
+    public function actionTotalNotifyPayment(){
+        $data = Yii::$app->request->post();
+
+        $date_first_day = date('Y-m-01');
+        $date_last_day = date('Y-m-t');
+
+        if(!isset($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is required'
+            ];
+        }
+
+        if(empty($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is not empty'
+            ];
+        }
+
+        $result = Yii::$app->db->createCommand(
+            'SELECT * FROM notify_payment 
+            WHERE customer_id = :customer_id AND 
+            date BETWEEN :date_first_day AND :date_last_day'
+        )
+        ->bindValue('customer_id', $data['customer_id'])
+        ->bindValue('date_first_day', $date_first_day)
+        ->bindValue('date_last_day', $date_last_day)
+        ->queryAll();
+
+        return [
+            'error' => 'false',
+            'total' => count($result) 
+        ];
+    }
+
+    public function actionTotalExtensionPayment(){
+        $data = Yii::$app->request->post();
+
+        $date_first_day = date('Y-m-01');
+        $date_last_day = date('Y-m-t');
+
+        if(!isset($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is required'
+            ];
+        }
+
+        if(empty($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is not empty'
+            ];
+        }
+
+        $result = Yii::$app->db->createCommand(
+            'SELECT * FROM payment_extension_history 
+            WHERE customer_id = :customer_id AND 
+            date BETWEEN :date_first_day AND :date_last_day'
+        )
+        ->bindValue('customer_id', $data['customer_id'])
+        ->bindValue('date_first_day', $date_first_day)
+        ->bindValue('date_last_day', $date_last_day)
+        ->queryAll();
+
+        return [
+            'error' => 'false',
+            'total' => count($result) 
+        ];
+    }
 }
