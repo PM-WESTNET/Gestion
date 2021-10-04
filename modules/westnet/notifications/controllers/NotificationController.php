@@ -519,6 +519,7 @@ class NotificationController extends Controller {
         $customer = Customer::findOne(['hash_customer_id' => $id]);
 
         if($customer){
+	    if($customer->company_id == "2" || $customer->company_id == "7"){
             if(Config::getConfig('siro_communication_bank_roela')->item->description){
                 $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
                 $siro_payment_intention_id = $result_search['siro_payment_intention_id'];
@@ -552,7 +553,9 @@ class NotificationController extends Controller {
                 }
             }else
                 $this->redirect("http://pago.westnet.com.ar:3000/portal/system-disabled");
-            
+            }else{
+		$this->redirect("http://pago.westnet.com.ar:3000/portal/company-disabled");
+	    }
         }else{
             $this->redirect("http://pago.westnet.com.ar:3000/portal/error-bill-draft"); //Customer not find
         }
