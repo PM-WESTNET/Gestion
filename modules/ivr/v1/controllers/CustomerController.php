@@ -1510,4 +1510,29 @@ class CustomerController extends Controller
             'total' => count($result) 
         ];
     }
+
+    public function actionBillsDue(){
+        $data = Yii::$app->request->post();
+
+        if(!isset($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is required'
+            ];
+        }
+
+        if(empty($data['customer_id'])){
+            return [
+                'error' => 'true',
+                'message' => 'customer_id is not empty'
+            ];
+        }
+
+        $result = Customer::getOwedBills('61190');
+        
+        return [
+            'error' => 'false',
+            'total' => $result
+        ];
+    }
 }
