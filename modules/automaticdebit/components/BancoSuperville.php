@@ -106,7 +106,7 @@ class BancoSuperville implements BankInterface
         $customer_identification = str_pad($debit->customer_id,22,' ',STR_PAD_RIGHT);         // Identificación del cliente
 
 
-        $original_debit_due_date = str_pad('05'.date('mY'),8,0,STR_PAD_LEFT);
+        $original_debit_due_date = str_pad(date('dmY',strtotime($current_date . "+2 days")),8,0,STR_PAD_LEFT);
         $debit_reference = str_pad('FACTURA',15,' ',STR_PAD_RIGHT);
 
         $intamount = floor(round($totalImport, 2));
