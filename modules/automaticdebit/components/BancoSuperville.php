@@ -74,9 +74,9 @@ class BancoSuperville implements BankInterface
 
                 $resource = $this->addBody($resource, $debit, $export,$totalImport);
 
-                $bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
+                //$bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
 
-                $bhetd->save();
+                //$bhetd->save();
             }           
 
         }
@@ -94,18 +94,35 @@ class BancoSuperville implements BankInterface
 
 
     public function addBody($resource, $debit, $export, $totalImport){
+        $current_date = date('Y-m-08');
+
+        $due_date = null;
+        switch (date('D',strtotime($current_date . "+2 days"))) {
+            case 'Sat':
+                $due_date = str_pad(date('dmY',strtotime($current_date . "+4 days")),8,0,STR_PAD_LEFT);
+                break;
+
+            case 'Sun':
+                $due_date = str_pad(date('dmY',strtotime($current_date . "+3 days")),8,0,STR_PAD_LEFT);
+                break;
+            
+            default:
+                $due_date = str_pad(date('dmY',strtotime($current_date . "+2 days")),8,0,STR_PAD_LEFT);
+                break;
+        }
+        
         $type_of_newness = 'D';                                                             // Tipo de novedad
         $cuit_company = str_pad(str_replace('-','',$this->companyConfig->company->tax_identification), 11, '0', STR_PAD_LEFT); //CUIT Empresa Originante
         $sector = '001';                                                                    // Sector
-        $benefit = str_pad('INTERNET',10,' ',STR_PAD_RIGHT);                                  // Prestacion
-        $due_date1 = str_pad('05'.date('mY'),8,0,STR_PAD_LEFT);                             // Fecha de Vencimiento 1
+        $benefit = str_pad('CUOTA',10,' ',STR_PAD_RIGHT);                                  // Prestacion
+        $due_date1 = $due_date;                            // Fecha de Vencimiento 1
         $block_cbu_1 = str_pad(substr($debit->cbu, 0, 8),8,0,STR_PAD_LEFT);                 // Bloque 1 CBU
         $fixed_fields = '000';                                                              // Campos Fijos
         $block_cbu_2 = str_pad(substr($debit->cbu,8),14,0,STR_PAD_LEFT);                    // Bloque 2 CBU
         $customer_identification = str_pad($debit->customer_id,22,' ',STR_PAD_RIGHT);         // Identificación del cliente
 
 
-        $original_debit_due_date = str_pad('05'.date('mY'),8,0,STR_PAD_LEFT);
+        $original_debit_due_date = $due_date;
         $debit_reference = str_pad('FACTURA',15,' ',STR_PAD_RIGHT);
 
         $intamount = floor(round($totalImport, 2));
@@ -116,10 +133,10 @@ class BancoSuperville implements BankInterface
         }
         $import .= str_pad($import_decimal, 2, '0', STR_PAD_LEFT);
         $debit_currency = 80;
-        $due_date2 = str_pad('26'.date('mY'),8,0,STR_PAD_LEFT);
+        $due_date2 = str_pad('21'.date('mY'),8,0,STR_PAD_LEFT);
         $import2 = $import;
 
-        $due_date3 = str_pad('30'.date('mY'),8,0,STR_PAD_LEFT);
+        $due_date3 = str_pad('28'.date('mY'),8,0,STR_PAD_LEFT);
         $import3 = $import;
         $new_payer_identifier = str_pad('',22,' ',STR_PAD_RIGHT);
         $rejection_code = str_pad('',3,' ',STR_PAD_RIGHT);
