@@ -36,11 +36,18 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
     <div class="row">
 <?php if(Yii::$app->user->identity->hasRole('seller', false) || Yii::$app->user->identity->hasRole('seller-office', false)): ?>
     <div class="row">
+        <div class="col-sm-6 col-xs-6">
+
         <?php if (!$model->isNewRecord) { ?>
             <?= $form->field($model, 'parent_company_id')->hiddenInput()->label('') ?>
         <?php } else {?>
             <?= CompanySelector::widget(['model' => $model, 'attribute' => 'parent_company_id', 'showCompanies' => 'parent', 'conditions' => ['parent_id' => null, 'status'=>'enabled']]) ?>
         <?php } ?>
+        </div>
+
+        <div class="col-sm-6 col-xs-6">
+        <?= CompanySelector::widget(['model' => $model, 'attribute' => 'company_id', 'showCompanies' => 'children', 'inputOptions' => [ 'id' => 'company_id']]) ?>
+        </div>
     </div>
 <?php else: ?>
     <div class="row">
