@@ -94,7 +94,7 @@ class BancoSuperville implements BankInterface
 
 
     public function addBody($resource, $debit, $export, $totalImport){
-        $current_date = date('Y-m-08');
+        $current_date = date('Y-m-d');
 
         $due_date = null;
         switch (date('D',strtotime($current_date . "+2 days"))) {
