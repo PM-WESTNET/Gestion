@@ -158,6 +158,13 @@ $config = [
                         'log' => 'modules/log/messages/log.php'
                     ],
                 ],
+                'ivrapi' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'conquer/oauth2' => [
+                    'class' => '\yii\i18n\PhpMessageSource',
+                    'basePath' => '@conquer/oauth2/messages',
+                ],
             ],
         ],
         'formatter' => [
