@@ -8,7 +8,13 @@ use yii\base\Exception;
 use yii\filters\VerbFilter;
 use yii\web\BadRequestHttpException;
 use app\modules\sale\models\Customer;
+use app\modules\sale\modules\contract\models\Contract;
+use app\modules\sale\modules\contract\components\ContractToInvoice;
+use app\modules\westnet\models\Connection;
 use app\modules\westnet\models\EmptyAds;
+use app\modules\westnet\models\Node;
+use app\modules\ticket\models\Ticket;
+use DateTime;
 
 /**
  * ContractController implements the CRUD actions for Contract model.
@@ -104,52 +110,102 @@ class ContractController extends Controller
      */
     public function actionCreateContract()
     {
-        $post = Yii::$app->request->post();
-        $msg = "msg:: ";
+        $data = Yii::$app->request->post();
 
-        // if all post data is valid, activate a new contract
-        if (isset($post['node_id']) && isset($post['customer_id'])  && isset($post['ads_code'])) {
-            
-            $model = $this->findModel($id);
+        if (!isset($data['node_id']) || !isset($data['customer_id'])  || !isset($data['ads_code'])) 
+            return [
+                'error' => true,
+                'message' => 'the fields node_id, customer_id, ads_code is required'
+            ];
+        
 
-            $msg .= " node_id : ".$post['node_id'];
-            $msg .= " customer_id : ".$post['customer_id'];
-            $msg .= " ads_code : ".$post['ads_code'];
+        if (empty($data['node_id']) || empty($data['customer_id'])  || empty($data['ads_code'])) 
+            return [
+                'error' => true,
+                'message' => 'the fields node_id, customer_id, ads_code is not empty'
+            ];
+        
 
-            $code = $post['ads_code'];
-            $customer = Customer::findOne(['customer_id' => $model->customer_id]);
-            // search for empty ADS code number
-            $emptyAds = EmptyAds::findOne(['code' => $code , 'used' => false]);
-            
-            // if the ADS number is empty, update the customer data
+        $customer = Customer::findOne(['customer_id' => $data['customer_id']]);
+
+        $contract = Contract::find()->where(['customer_id' => $data['customer_id']])->andWhere(['!=','status','inactive'])->orderBy(['contract_id' => SORT_DESC])->one();
+
+        if(empty($contract))
+            return [
+                'error' => true,
+                'message' => 'The customer dont have contract'
+            ];
+        elseif ($contract->status == 'active') 
+            return [
+                'error' => true,
+                'message' => 'The last contract of customer is active'
+            ];
+        
+
+        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+        if (!$connection) 
+            $connection = new Connection();
+        
+            $ads_code = $data['ads_code'];
+
+            // Busco el ADS vacio
+            $emptyAds = EmptyAds::findOne(['code' => $ads_code , 'used' => false]);
+
+            // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
             if(!empty($emptyAds)) {
-               /*  $customer->code = $code;
+                $customer->code = $ads_code;
                 $customer->payment_code = $emptyAds->payment_code;
                 $customer->company_id = $emptyAds->company_id;
                 $customer->status = Customer::STATUS_ENABLED;
                 $emptyAds->used = true;
                 $customer->save(false);
-                $emptyAds->updateAttributes(['used']); */
-                
-                $msg .= " ADS is empty";
-
+                $emptyAds->updateAttributes(['used']);
             }
+        
+        $contract->from_date = Yii::$app->formatter->asDate(new DateTime());
+        $contract->setScenario('invoice');
+        if ($contract->validate()) {
+            $node = Node::findOne(['node_id' => $data['node_id']]);
+            
+            if(empty($node))
+                return [
+                    'error' => true,
+                    'message' => 'The node_id dont exists'
+                ];
+
+            $connection->node_id = $data['node_id'];
+            $connection->server_id = $node->server_id;
+            $connection->access_point_id = '';
+            $connection->mac_address = '';
+            $connection->ip4_public = 0;
+            $connection->contract_id = $contract->contract_id;
+            $connection->due_date = null;
+            $connection->status = 'enabled';
+            $connection->ip4_2 = 0;
 
 
-
+            // Si viene desde un vendedor, no va a tener empresa, por lo que hay que sacarla de del nodo.
+            //Si la coneccion se guarda
+            if ($connection->save(false) && $contract->save(false)) {
+                $cti = new ContractToInvoice();
+                if ($cti->createContract($contract, $connection)) {
+                    $contract->customer->sendMobileAppLinkSMSMessage();
+                    Ticket::createGestionADSTicket($contract->customer_id);
+                    $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
+                    
+                    return [
+                        'error' => false,
+                        'message' => 'the contract actived successfully'
+                    ];
+                }
+            }
+        }else{
+            return [
+                'error' => true,
+                'message' => 'This contract is invalid'
+            ];
         }
 
-
-        return array(
-            'status' => true,
-            'msg' => $msg,
-        );
-
-
-        $err = "Invalid data.";
-        return array(
-            'status' => false,
-            'error' => $err,
-        );
     }
 }
