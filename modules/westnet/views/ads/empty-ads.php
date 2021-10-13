@@ -63,7 +63,7 @@ $model = new Node();
                 $(document).off('click', '#generate').on('click', '#generate', function (e) {
                     e.preventDefault();
                     var cantidad = $("#node-count").val();
-                    var node = $("#node-node_id").val();
+                    var node = $("#node-node_id").val().length;
                     var company = $("#company_id").val();
 
                     if(!company){
@@ -77,10 +77,11 @@ $model = new Node();
                     }
 
 
-                    if(!node){
+                    if( node != 0){
                         alert('<?php echo Yii::t('westnet','The node can\'t be empty.')  ?>');
                         return;
                     }
+
                     var url = "<?= yii\helpers\Url::to(['/westnet/ads/print-empty-ads'])?>" +
                         "&company_id=" + company + "&node_id=" + node +  "&qty=" + cantidad;
 
