@@ -332,6 +332,9 @@ $config = [
         'employee' => [
             'class' => 'app\modules\employee\EmployeeModule',
         ],
+        'firstdata' => [
+            'class' => 'app\modules\firstdata\FirstDataModule'
+        ],
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
