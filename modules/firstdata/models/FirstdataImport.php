@@ -109,8 +109,12 @@ class FirstdataImport extends ActiveRecord
         }
         
         $filename = $filepath . '/'. $response->name . '.'. $response->extension;
-        
+        //$filename = $filepath . '/'. $response->name;
+
+        //var_dump($response->name);die();
+
         $response->saveAs($filename);
+        //$response->saveAs($filename, false);
         
         $this->response_file = $filename;
 

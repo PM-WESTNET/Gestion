@@ -14,40 +14,63 @@ class FirstdataImport
     public static function processFile($import)
     {
         $resource = fopen($import->response_file, 'r');
+        //var_dump($resource, $import->response_file);//die();
+
         $paymentMethod = PaymentMethod::findOne(['name' => 'Firstdata']);
 
         if (empty($paymentMethod)) {
             $paymentMethod = PaymentMethod::findOne(['name' => 'Débito Automático']);
         }
+        //var_dump($paymentMethod);die();
 
         while($line = fgets($resource)) {
             $type = substr($line, 2, 1);
+            //var_dump($line,$type, (integer)substr($line, 26, 12));die();
+            //var_dump($type,$line);
+
             switch ($type) {
                 case "1":
-                    $total = (double)(substr($line, 39, 10) . '.' . substr($line, 49, 2));
-                    $registers = (integer)substr($line, 32, 6);
+                        //var_dump($type,$line);
 
-                    $import->updateAttributes([
-                        'total' => $total,
-                        'registers' => $registers
-                    ]);
+                        $total = (double)(substr($line, 39, 10) . '.' . substr($line, 49, 2));
+                        $registers = (integer)substr($line, 32, 6);
+                        
+
+                        $import->updateAttributes([
+                            'total' => $total,
+                            'registers' => $registers
+                        ]);
                 break;
                 case "2":
+                        //var_dump($type,$line);
                         $customer_code = (integer)substr($line, 26, 12);
+                        
+
                         $customer = Customer::findOne(['code' => $customer_code]);
                         $amount = (double)(substr($line, 40, 9) . '.' . substr($line, 49, 2));
-                        $reject_code = substr($line, 58, 2);
+                        $reject_code = substr($line, 56, 2);
                         $period = substr($line, 60, 5);
 
                         Yii::trace($line);
-
                         if ($customer) {
                             self::createPayment($customer, $amount, $reject_code,$period, $import, $paymentMethod->payment_method_id);
                         } else {
+                            //var_dump($customer);die();
+
+                            //var_dump($line,$type);die();
+                            //var_dump("caso error",$type,$line, $amount, $customer_code, null, null, $reject_code);
+                            var_dump("caso error",$type,$line, $reject_code);//die();
+
                             self::createImportPayment($import, $amount, $customer_code, null, null, $reject_code);
                         }
                 break;
+                //default:
+                    //var_dump($line,$type);die();
+                //break;
+
             }
+        //die();
+
         }
     }
 
@@ -125,7 +148,7 @@ class FirstdataImport
             '92' => "Socio internacional p/cupón crédito",
             '100' => "Cliente Inválido"
         ];
-
+        //var_dump($code);die();
         return $errors[$code];
     }
 

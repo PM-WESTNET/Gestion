@@ -77,7 +77,7 @@ $model = new Node();
                     }
 
 
-                    if( node != 0){
+                    if( !node ){
                         alert('<?php echo Yii::t('westnet','The node can\'t be empty.')  ?>');
                         return;
                     }
