@@ -1,0 +1,237 @@
+#{
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+/*Start Coupon*/
+.container-main-coupon{
+	margin:0 auto;
+	border: 1px solid;
+	border-bottom: 0px solid;
+}
+
+.coupon-header{
+	text-align: center;
+	border-bottom:1px solid;
+}
+
+.coupon-header .coupon-header-logo{
+	margin: 0 auto;
+	width: 17%;
+	padding: 10px;
+}
+
+.coupon-data-client{
+	padding: 2%;
+	border-bottom: 1px solid;
+	overflow: hidden;
+
+}
+.coupon-data-client #col-1{
+	width: 65%;
+	font-size: 10px;
+}
+.coupon-data-client #col-2{
+	width: 30%;
+	margin-left: 5%;
+}
+.coupon-data-client .data-client{
+	float:left;
+}
+
+.coupon-table table{
+	width: 100%;
+	
+}
+
+.coupon-table  td{
+	font-size: 12px;
+}
+
+/*End Coupon*/
+
+/*Start Bill*/
+/*Begin header*/
+.container-main{
+	margin:0 auto;
+	border: 1px solid;
+}
+
+.header{
+	width: 100%;
+	overflow: hidden;
+	margin: 0 auto;
+	margin-top:3%;
+	border-bottom: 1px solid;
+}
+
+.logo-header{
+	width: 17%;
+	float: left;
+	margin-left: 10%;
+}
+
+.logo-header .logo{
+	padding: 10px
+}
+
+.subtitles-logo{
+	text-align: center;
+	font-size: 0.8rem;
+}
+
+.code-header{
+	float: left;
+	width: 7%;
+	margin-left: 10%;
+}
+.code-header .subcode-header{
+	border: 1px solid;
+	text-align: center;
+}
+.code-header p{
+	text-align: center;
+}
+
+.data-header{
+	width: 50%;
+	margin-left: 15%;
+	float: left;
+	font-size: 10px;
+}
+
+.data-header p{
+	font-size: 0.8rem;
+	text-transform: capitalize;
+}
+
+/*End header*/
+
+/*Begin sub-header*/
+.sub-header{
+	overflow: hidden;
+	border-bottom: 1px solid;
+	padding: 10px;
+	font-size: 0.8rem;
+}
+.sub-header .col-personal-data{
+	width: 48%;
+	float: left;
+}
+
+.sub-header .col-data-client{
+	width: 50%;
+	float: left;
+	margin-left: 10%;
+	font-size: 10px;
+}
+.sub-header .col-data-client .barcode-img{
+	width: 60%;
+	margin-top:2px;
+}
+
+.sub-header .col-data-client .barcode-img .text_payment_code{
+	font-size: 12px;
+}
+
+/*End sub-header*/
+
+
+/*Begin Content*/
+.content{
+	border-bottom: 1px solid;
+}
+
+.content .table-content table{
+	width: 100%;
+}
+
+.content .table-content table, th, td{
+	border-collapse: collapse;
+	padding: 5px;
+	font-size: 10px;
+}
+
+.content .table-content table th{
+	text-align: left;
+	background-color: lightgray;
+}
+
+.content .mind-content{
+	padding: 0% 2%;
+}
+.content .mind-content .total-amount .amount{
+	margin: 2%;
+	text-align: right;
+	font-size: 10px;
+}
+.content .mind-content .total-amount .amount span{
+	font-weight: bold;
+	font-size: 10px;
+
+}
+.content .mind-content .data-account{
+	font-size: 10px;
+}
+
+.content .barcode{
+	border-top: 1px solid;
+	overflow: hidden;
+	padding: 0% 1%;
+
+}
+
+.content .barcode-img{
+	width: 50%;
+	float: left;
+	padding-top: 2%;
+}
+
+.content .barcode-data{
+	width: 40%;
+	float: left;
+	margin-left: 5%;
+	margin-top: 1%;
+	font-size: 10px;
+	font-weight: bold;
+	text-align: center;
+}	
+/*End content*/
+
+/*Begin footer*/
+.footer{
+	margin-top: 1%;
+}
+
+.text_payment_code{
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.8rem;
+}
+
+.footer-barcode{
+	overflow: hidden;
+}
+
+#footer-col-1{
+	text-align: center;
+	width: 24%;
+	float: left;
+	margin-bottom: 5px;
+}
+
+#footer-col-2{
+	width: 26%;
+	float: left;
+}
+
+#footer-col-3{
+	padding-top: 3%;
+	width: 45%;
+	float: left;
+	text-align: right;
+	font-size: 12px;
+}
+
+
+/*End footer*/
+/*End Bill*/
