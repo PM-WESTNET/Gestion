@@ -63,7 +63,7 @@ $model = new Node();
                 $(document).off('click', '#generate').on('click', '#generate', function (e) {
                     e.preventDefault();
                     var cantidad = $("#node-count").val();
-                    var node = $("#node-node_id").val().length;
+                    var node = $("#node-node_id").val();
                     var company = $("#company_id").val();
 
                     if(!company){
