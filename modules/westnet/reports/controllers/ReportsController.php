@@ -755,8 +755,18 @@ class ReportsController extends Controller
     public function actionCustomersByNode()
     {
         $search = new CustomerSearch();
-
         $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
+
+        if(isset(Yii::$app->request->getQueryParams()['button']) && Yii::$app->request->getQueryParams()['button'] == 'btn-export' ){
+
+            if (User::hasRole('admin')) {
+                return $this->renderPartial('customer-by-node-excel',['dataProvider' => $dataProvider]);
+
+            }else{
+                Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
+                return $this->redirect('/reports/reports/customers-by-node');
+            }
+        }
 
         return $this->render('customer-by-node', ['dataProvider' => $dataProvider]);
     }
@@ -1156,19 +1166,6 @@ class ReportsController extends Controller
 
     }
 
-    public function actionCustomersByNodeExport(){
-
-        if (User::hasRole('admin')) {
-            $search = new CustomerSearch();
-            $dataProvider = $search->findByNode(Yii::$app->request->getQueryParams());
-
-            return $this->renderPartial('customer-by-node-excel',['dataProvider' => $dataProvider]);
-
-        }else{
-            Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
-            return $this->redirect('/reports/reports/customers-by-node');
-        }
-    }
 
     public function actionCustomersBySpeed(){
         $reportSearch = new ReportSearch();
