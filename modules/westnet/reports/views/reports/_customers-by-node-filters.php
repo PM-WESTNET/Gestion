@@ -97,8 +97,11 @@ $model->load(Yii::$app->request->getQueryParams())
         <div class="col-sm-1 ">
             <?=  Html::submitInput('Filtrar', ['class'=> 'btn btn-primary', 'id'=> 'filterButton'])?>
         </div>
-        <div class="col-sm-1">
+        <div class="col-sm-2">
             <?= Html::a('Borrar Filtros', Url::to(['customers-by-node']), ['class' => 'btn btn-default'])?>
+        </div>
+        <div class="col-sm-1 ">
+            <button type="submit" class="btn btn-success" value = "btn-export" name = "button">Exportar</button>
         </div>
     </div>
 

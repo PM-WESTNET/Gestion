@@ -1,5 +1,6 @@
 <?php
 use yii\helpers\Url;
+use yii\widgets\ActiveForm;
 /**
  * Created by PhpStorm.
  * User: juan
@@ -22,9 +23,7 @@ $this->title = Yii::t('app','Customers By Node');
             <?php echo $this->render('_customers-by-node-filters')?>
         </div>
     </div>
-    <div>
-        <a href="<?=Url::to(['reports/customers-by-node-export'])?>" class="btn btn-success">Exportar</a>
-    </div>
+    
     <?php echo \yii\grid\GridView::widget([
         'dataProvider' => $dataProvider,
         'columns' => [
