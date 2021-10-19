@@ -22,7 +22,12 @@ use Yii;
 use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+
 use app\components\pdf\PdfUtils;
+use Da\QrCode\QrCode;
+use kartik\mpdf\Pdf;
+use Picqer\Barcode\BarcodeGeneratorPNG;
+
 
 /**
  * IpRangeController implements the CRUD actions for IpRange model.
@@ -148,9 +153,7 @@ class AdsController extends Controller {
             }
         
             /*
-             *
              * At this point you can opt for a different PDF generation library
-             * 
             */
 
             // change the yii2 layout
@@ -243,6 +246,112 @@ class AdsController extends Controller {
             $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
             return PDFService::makePdf($view);
+
+            /**
+             * for this ADS we need:
+             * todays DATE
+             * customer code (ADS)
+             * Acomodatos? (onu, roseta, patchcore)
+             * tipo de conexion (hogar/empresa , fibra optica)
+             * velocidad (planes: 25,50,100,300)
+             * info harcoded: aceptacion del servicio, contactos
+             */
+
+            // todays DATE
+
+            // NEW customer code (ADS) based on $qty
+
+            // obtener acomodatos de instalacion
+
+            // 
+            
+            
+            // bigway copy from billcontroller
+
+           
+
+            $cupon_bill_types = explode(',', \app\modules\config\models\Config::getValue('cupon_bill_types'));
+            $is_cupon = (array_search($model->bill_type_id, $cupon_bill_types) !==false);
+            $payment = new Payment();
+            $payment->customer_id = $model->customer_id;
+            $debt = $payment->accountTotal();
+            $isConsumidorFinal = false;
+            $profile = $model->customer->getCustomerProfiles()->where(['name'=>'Consumidor Final'])->one();
+            $company = (isset($company) ? $company : $model->customer->parentCompany );
+            $companyData = $model->company;
+
+            //echo'<pre>'; var_dump( $companyData->name  ); die;
+
+            $cuit = str_replace('-', '', $model->company->tax_identification);
+            $code = $cuit . sprintf("%02d", $model->billType->code) . sprintf("%04d", $model->getPointOfSale()->number) . $model->ein . (new \DateTime($model->ein_expiration))->format("Ymd");
+
+            $barcode = new BarcodeGeneratorPNG();
+
+            $jsonCode = [
+                        "ver" => 1,
+                        "fecha" => $model->date,
+                        "cuit" => str_replace("-","",$companyData->tax_identification),
+                        "ptoVta" => $model->getPointOfSale()->number,
+                        "tipoCmp" => $model->billType->code,
+                        "nroCmp" => $model->number,
+                        "importe" => $model->total,
+                        "moneda" => "PES",
+                        "ctz" => 1,
+                        "tipoDocRec" => $model->customer->documentType->code,
+                        "nroDocRec" => str_replace("-","",$model->customer->document_number),
+                        "tipoCodAut" => "E",
+                        "codAut" => $model->ein
+                        ];
+            $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
+            ->setSize(500)
+            ->setMargin(5);
+            
+            $formatter = Yii::$app->formatter;
+
+            $content = $this->renderPartial('bigway-pdf.php',[
+                'model' => $model,
+                'dataProvider' => $dataProvider,
+                'formatter' => $formatter,
+                'cupon_bill_types' => $cupon_bill_types,
+                'is_cupon' => $is_cupon,
+                'payment' => $payment,
+                'debt' => $debt,
+                'isConsumidorFinal' => $isConsumidorFinal,
+                'profile' => $profile,
+                'company' => $company,
+                'companyData' => $companyData,
+                'barcode' => $barcode,
+                'code' => $code,
+                'qrCode' => $qrCode
+
+            ]);
+
+                
+            $pdf = new Pdf([
+                
+                'mode' => Pdf::MODE_UTF8, 
+                
+                'format' => Pdf::FORMAT_LEGAL, 
+            
+                'orientation' => Pdf::ORIENT_PORTRAIT, 
+                
+                'destination' => Pdf::DEST_BROWSER, 
+            
+                'content' => $content,  
+                'filename' => "documento.pdf",
+                'cssFile' => '@app/modules/sale/web/css/sale-bill-pdf.css',
+                
+                'options' => ['title' => ""],
+                
+                'methods' => [ 
+                    'SetTitle' => '',
+                    'SetFooter'=>['Página {PAGENO} de {nb}'],
+                ],
+                'marginTop' => 5,
+            ]);
+
+                
+            return $pdf->render();
     }
     /**
      *  Imprime un Ads en blanco ya generado
