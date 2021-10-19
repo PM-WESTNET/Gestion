@@ -1524,7 +1524,8 @@ class Bill extends ActiveRecord implements CountableInterface
     public function getNumberFromPointOfSale(){
         $number = $this->getPointOfSale()->number;
         $zero_qty = '';
-        for ($i = 0; $i < (4 -count($number)); $i++){
+
+        for ($i = 0; $i < (4 -$number); $i++){
             $zero_qty .= '0';
         }
         return $zero_qty.$number;
