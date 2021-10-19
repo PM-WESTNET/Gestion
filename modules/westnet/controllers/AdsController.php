@@ -92,16 +92,32 @@ class AdsController extends Controller {
     {
 
         if ($node_id !== null && $qty !== null && $company_id !== null) {
+            // decide which pdf library to use based on config. 
+            // #Also used on: modules/sale/controllers/BillController.php
+            $pdf_company = Config::getConfig('pdf_company')->description;
+            //var_dump($pdf_company);die(); // uncomment to see which option is currently enabled
+            if($pdf_company == "westnet") return $this->WestnetPdf($company_id, $node_id, $qty);
+            else if($pdf_company == "bigway") return $this->BigwayPdf($company_id, $node_id, $qty);
+            //...
 
-            
+        }else{
+            return $this->render('empty-ads');
+        }
+    }
+
+    private function WestnetPdf($company_id, $node_id, $qty){
+            // find node
             $node = Node::findOne(['node_id' => $node_id]);
+            // find company
             $company = Company::findOne(['company_id'=> $company_id]);
-
+            // generate payment code
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-
+            // generate new customer.code
             $init_value = Customer::getNewCode();
+            // define an array that will store an associative array of $payment_code and $init_value
             $codes = [];
 
+            
             for ($i = 0; $i < $qty; $i++) {
                 /**
                  * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
@@ -110,12 +126,15 @@ class AdsController extends Controller {
                 if ($company->code != '9999') {
                     $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
                 }
-
+                
+                // generate payment code *goes below barcode*
+                // pads with ceros the space between the company code and customer code. 
                 $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .
                     str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
-
                 $payment_code= $generator->generate($code);
                 $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
+
+                // define, instantiate and add data to a new 'Empty ADS' object. (Alta De Servicio)
                 $emptyAds= new EmptyAds();
                 $emptyAds->code = $init_value;
                 $emptyAds->payment_code= $payment_code;
@@ -123,9 +142,18 @@ class AdsController extends Controller {
                 $emptyAds->company_id= $company->company_id;
                 $emptyAds->used= false;
                 $emptyAds->save(false);
+
+                // generate new customer code for every loop
                 $init_value = Customer::getNewCode();
             }
+        
+            /*
+             *
+             * At this point you can opt for a different PDF generation library
+             * 
+            */
 
+            // change the yii2 layout
             $this->layout = '//pdf';
 
             $plans = $this->getPlans($company_id);
@@ -136,10 +164,6 @@ class AdsController extends Controller {
                 'company'   => $company,
                 'plans'     => $plans
             ]);
-            
-            //  here starts the pdf generation processes
-            /* $pdfUtils = new PdfUtils; 
-            $pdfUtils->actionPdf(1); */
 
             $response = Yii::$app->getResponse();
             $response->format = Response::FORMAT_RAW;
@@ -148,9 +172,77 @@ class AdsController extends Controller {
 
             return PDFService::makePdf($view);
             
-        }else{
-            return $this->render('empty-ads');
-        }
+    }
+
+    /**
+     * prints the PDF for EmptyAds for BigWay. which has a different layout.
+     */
+    private function BigwayPdf($company_id, $node_id, $qty){
+            // find node
+            $node = Node::findOne(['node_id' => $node_id]);
+            // find company
+            $company = Company::findOne(['company_id'=> $company_id]);
+            // generate payment code
+            $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+            // generate new customer.code
+            $init_value = Customer::getNewCode();
+            // define an array that will store an associative array of $payment_code and $init_value
+            $codes = [];
+
+            
+            for ($i = 0; $i < $qty; $i++) {
+                /**
+                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+                 */
+                $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                }
+                
+                // generate payment code *goes below barcode*
+                // pads with ceros the space between the company code and customer code. 
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete . str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+                $payment_code= $generator->generate($code);
+                $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
+
+                // define, instantiate and add data to a new 'Empty ADS' object. (Alta De Servicio)
+                $emptyAds= new EmptyAds();
+                $emptyAds->code = $init_value;
+                $emptyAds->payment_code= $payment_code;
+                $emptyAds->node_id= $node->node_id;
+                $emptyAds->company_id= $company->company_id;
+                $emptyAds->used= false;
+                $emptyAds->save(false);
+
+                // generate new customer code for every loop
+                $init_value = Customer::getNewCode();
+            }
+        
+            /*
+             *
+             * At this point you can opt for a different PDF generation library
+             * 
+            */
+
+            // change the yii2 layout
+            $this->layout = '//pdf';
+
+            $plans = $this->getPlans($company_id);
+
+            
+            $view = $this->render('pdf', [
+                'codes'     => $codes,
+                'node'      => $node,
+                'company'   => $company,
+                'plans'     => $plans
+            ]);
+
+            $response = Yii::$app->getResponse();
+            $response->format = Response::FORMAT_RAW;
+            $response->headers->set('Content-type: application/pdf');
+            $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+
+            return PDFService::makePdf($view);
     }
     /**
      *  Imprime un Ads en blanco ya generado
