@@ -63,8 +63,8 @@ class BancoSuperville implements BankInterface
             
             $bills = $this->getCustomerBills($debit->customer_id, $export->company_id, $this->periodFrom, $this->periodTo);
             if(!empty($bills)){
-                $totalImport = abs(Payment::totalCalculationForQuery($bills[0]->customer_id));
-                if ($totalImport == 0) {
+                $totalImport = Payment::totalCalculationForQuery($bills[0]->customer_id);
+                if ($totalImport >= 0) {
                     continue;
                 }
 
@@ -74,9 +74,9 @@ class BancoSuperville implements BankInterface
 
                 $resource = $this->addBody($resource, $debit, $export,$totalImport);
 
-                //$bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
+                $bhetd = new BillHasExportToDebit(['bill_id' => $bills[0]->bill_id, 'direct_debit_export_id' => $export->direct_debit_export_id]);
 
-                //$bhetd->save();
+                $bhetd->save();
             }           
 
         }
@@ -133,11 +133,11 @@ class BancoSuperville implements BankInterface
         }
         $import .= str_pad($import_decimal, 2, '0', STR_PAD_LEFT);
         $debit_currency = 80;
-        $due_date2 = str_pad('21'.date('mY'),8,0,STR_PAD_LEFT);
-        $import2 = $import;
+        $due_date2 = '00000000';
+        $import2 = '0000000000';
 
-        $due_date3 = str_pad('28'.date('mY'),8,0,STR_PAD_LEFT);
-        $import3 = $import;
+        $due_date3 = '00000000';
+        $import3 = '0000000000';
         $new_payer_identifier = str_pad('',22,' ',STR_PAD_RIGHT);
         $rejection_code = str_pad('',3,' ',STR_PAD_RIGHT);
 
