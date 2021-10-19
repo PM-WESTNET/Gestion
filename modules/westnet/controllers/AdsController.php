@@ -91,7 +91,7 @@ class AdsController extends Controller {
     {
 
         if ($node_id !== null && $qty !== null && $company_id !== null) {
-            $node = Node::findOne(['node_id' => $node_id]);
+            $node = Node::findOne(['node_id' => $node_id]); // doest contemplate finding a null object here
             $company = Company::findOne(['company_id'=> $company_id]);
 
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');

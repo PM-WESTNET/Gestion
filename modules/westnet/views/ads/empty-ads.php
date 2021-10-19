@@ -77,10 +77,11 @@ $model = new Node();
                     }
 
 
-                    if(!node){
+                    if( node.length == 0){
                         alert('<?php echo Yii::t('westnet','The node can\'t be empty.')  ?>');
                         return;
                     }
+
                     var url = "<?= yii\helpers\Url::to(['/westnet/ads/print-empty-ads'])?>" +
                         "&company_id=" + company + "&node_id=" + node +  "&qty=" + cantidad;
 

@@ -36,7 +36,7 @@
         "kartik-v/yii2-nav-x": "1.2.*",
         "yiisoft/yii2-httpclient": "2.0.*",
         "linslin/yii2-curl": "1.2.*",
-        "kartik-v/yii2-mpdf": "dev-master",
+        "kartik-v/yii2-mpdf": "*",
         "kartik-v/yii2-dialog": "1.0.*",
         "bower-asset/bootstrap": "3.3.*",
         "npm-asset/jquery": "2.2.*",
