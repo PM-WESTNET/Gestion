@@ -22,6 +22,7 @@ use Yii;
 use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use app\components\pdf\PdfUtils;
 
 /**
  * IpRangeController implements the CRUD actions for IpRange model.
@@ -91,7 +92,9 @@ class AdsController extends Controller {
     {
 
         if ($node_id !== null && $qty !== null && $company_id !== null) {
-            $node = Node::findOne(['node_id' => $node_id]); // doest contemplate finding a null object here
+
+            
+            $node = Node::findOne(['node_id' => $node_id]);
             $company = Company::findOne(['company_id'=> $company_id]);
 
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
@@ -133,6 +136,10 @@ class AdsController extends Controller {
                 'company'   => $company,
                 'plans'     => $plans
             ]);
+            
+            //  here starts the pdf generation processes
+            /* $pdfUtils = new PdfUtils; 
+            $pdfUtils->actionPdf(1); */
 
             $response = Yii::$app->getResponse();
             $response->format = Response::FORMAT_RAW;
