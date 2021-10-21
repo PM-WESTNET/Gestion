@@ -1,0 +1,52 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    background: #DFDFDF;
+}
+.sections-wrapper {
+    padding: 20px;
+}
+.section {
+    background: #ffffff;
+    width: 100%;
+    border-radius: 15px;
+    height: 180px;
+    margin-bottom: 20px;
+}
+.section .header{
+    width: 100%;
+    padding: 10px;
+}
+.w-50 {
+    width: 49%;
+}
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+.header .header-data-container{
+    background: rgb(188, 255, 182);
+}
+
+.barcode{
+    width: 98px;
+    height: 51px;
+    background: #f47dff;
+}
+
+.company-logo {
+    text-align: center;
+    display:inline-block; vertical-align:middle;
+    width: 255px;
+    height: 109px;
+    background: #f47dff;
+    border-radius: 15px;
+}
+
+
+.pill-container-vertical {
+    background: rgb(0, 255, 21);
+    border-radius: 15px;
+}

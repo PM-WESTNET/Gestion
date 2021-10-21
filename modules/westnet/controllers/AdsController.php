@@ -225,129 +225,70 @@ class AdsController extends Controller {
              *
              * At this point you can opt for a different PDF generation library
              * 
-            */
+            */       
+
+            //for this ADS we need:
+
+            //todays DATE
+
+            //customer code (ADS)
+
+            //Acomodatos? (onu, roseta, patchcore)
+
+            //tipo de conexion (hogar/empresa , fibra optica)
+
+            //velocidad (planes: 25,50,100,300)
+
+            //info harcoded: aceptacion del servicio, contactos
+
+            //barcode used for payment
+            //$barcode = new BarcodeGeneratorPNG();
+
 
             // change the yii2 layout
             $this->layout = '//pdf';
+            $plans = $this->getPlans($company_id);            
 
-            $plans = $this->getPlans($company_id);
-
-            
-            $view = $this->render('pdf', [
-                'codes'     => $codes,
-                'node'      => $node,
-                'company'   => $company,
-                'plans'     => $plans
-            ]);
-
-            $response = Yii::$app->getResponse();
-            $response->format = Response::FORMAT_RAW;
-            $response->headers->set('Content-type: application/pdf');
-            $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
-
-            return PDFService::makePdf($view);
-
-            /**
-             * for this ADS we need:
-             * todays DATE
-             * customer code (ADS)
-             * Acomodatos? (onu, roseta, patchcore)
-             * tipo de conexion (hogar/empresa , fibra optica)
-             * velocidad (planes: 25,50,100,300)
-             * info harcoded: aceptacion del servicio, contactos
-             */
-
-            // todays DATE
-
-            // NEW customer code (ADS) based on $qty
-
-            // obtener acomodatos de instalacion
-
-            // 
-            
-            
-            // bigway copy from billcontroller
-
-           
-
-            $cupon_bill_types = explode(',', \app\modules\config\models\Config::getValue('cupon_bill_types'));
-            $is_cupon = (array_search($model->bill_type_id, $cupon_bill_types) !==false);
-            $payment = new Payment();
-            $payment->customer_id = $model->customer_id;
-            $debt = $payment->accountTotal();
-            $isConsumidorFinal = false;
-            $profile = $model->customer->getCustomerProfiles()->where(['name'=>'Consumidor Final'])->one();
-            $company = (isset($company) ? $company : $model->customer->parentCompany );
-            $companyData = $model->company;
-
-            //echo'<pre>'; var_dump( $companyData->name  ); die;
-
-            $cuit = str_replace('-', '', $model->company->tax_identification);
-            $code = $cuit . sprintf("%02d", $model->billType->code) . sprintf("%04d", $model->getPointOfSale()->number) . $model->ein . (new \DateTime($model->ein_expiration))->format("Ymd");
-
-            $barcode = new BarcodeGeneratorPNG();
-
-            $jsonCode = [
-                        "ver" => 1,
-                        "fecha" => $model->date,
-                        "cuit" => str_replace("-","",$companyData->tax_identification),
-                        "ptoVta" => $model->getPointOfSale()->number,
-                        "tipoCmp" => $model->billType->code,
-                        "nroCmp" => $model->number,
-                        "importe" => $model->total,
-                        "moneda" => "PES",
-                        "ctz" => 1,
-                        "tipoDocRec" => $model->customer->documentType->code,
-                        "nroDocRec" => str_replace("-","",$model->customer->document_number),
-                        "tipoCodAut" => "E",
-                        "codAut" => $model->ein
-                        ];
-            $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
-            ->setSize(500)
-            ->setMargin(5);
-            
             $formatter = Yii::$app->formatter;
 
             $content = $this->renderPartial('bigway-pdf.php',[
-                'model' => $model,
-                'dataProvider' => $dataProvider,
                 'formatter' => $formatter,
-                'cupon_bill_types' => $cupon_bill_types,
-                'is_cupon' => $is_cupon,
-                'payment' => $payment,
-                'debt' => $debt,
-                'isConsumidorFinal' => $isConsumidorFinal,
-                'profile' => $profile,
-                'company' => $company,
-                'companyData' => $companyData,
-                'barcode' => $barcode,
-                'code' => $code,
-                'qrCode' => $qrCode
+//                'model' => $model,
+//                'dataProvider' => $dataProvider,
+//                'cupon_bill_types' => $cupon_bill_types,
+//                'is_cupon' => $is_cupon,
+//                'payment' => $payment,
+//                'debt' => $debt,
+//                'isConsumidorFinal' => $isConsumidorFinal,
+//                'profile' => $profile,
+//               'companyData' => $companyData,
+//                'qrCode' => $qrCode
 
+                //'barcode' => $barcode,
+                'company' => $company,
+                'code' => $code,
+                'date_now' => date('m/d/Y', time()),
             ]);
 
                 
             $pdf = new Pdf([
-                
                 'mode' => Pdf::MODE_UTF8, 
-                
-                'format' => Pdf::FORMAT_LEGAL, 
-            
-                'orientation' => Pdf::ORIENT_PORTRAIT, 
-                
-                'destination' => Pdf::DEST_BROWSER, 
-            
+                'format' => Pdf::FORMAT_A4, 
+                //'orientation' => Pdf::ORIENT_PORTRAIT, 
+                'destination' => Pdf::DEST_BROWSER,
                 'content' => $content,  
-                'filename' => "documento.pdf",
-                'cssFile' => '@app/modules/sale/web/css/sale-bill-pdf.css',
+                'filename' => strtolower($company->name."-".$node->name."-newcodes.pdf"), // lowercased company + node ..
+                'cssFile' => '@app/modules/westnet/web/css/empty-ads-pdf.css',
                 
                 'options' => ['title' => ""],
-                
                 'methods' => [ 
                     'SetTitle' => '',
                     'SetFooter'=>['Página {PAGENO} de {nb}'],
                 ],
-                'marginTop' => 5,
+                'marginTop' => 0,
+                'marginBottom' => 0,
+                'marginLeft' => 0,
+                'marginRight' => 0,
             ]);
 
                 
