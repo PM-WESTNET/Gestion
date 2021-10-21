@@ -13,53 +13,141 @@ AdminAsset::register($this);
 ?>
 <div class="body">
 	<div class="sections-wrapper">
-		<div class="section">
+		<div class="section bg-white">
 
 			<div class="header">
-				<div class="company-logo float-left w-50">
-					< logo img >
+				<div class="float-left w-50">
+					<?= Html::img(Yii::$app->params['path'] . '/' . 'logo-bigway.png', [
+						'alt' => 'Logo',
+						'class' => 'company-logo'
+					])
+					?>
+					<!-- 
+						Aspect Ratio:
+						width: 330px;
+						height: 141px;
+						box-shadow: 0px 0px 15px #8a8a8a;
+					-->
 				</div>
+
 				<div class="header-data-container float-right w-50">
-					<div class="barcode">
-						< codigo de barras >
+					<div class="barcode center-div">
+						< codigo de barras>
 					</div>
 					<div>
-						FICHA EMPRESA <?php echo $date_now ?>
+						<p class="text-center spaced-letters">
+							FICHA EMPRESA <?php echo $date_now ?>
+						</p>
 					</div>
-					<div>
-						FECHA
+					<div class="center-div pill-container-horizontal">
+						<div class="spaced-letters left float-left">
+							FECHA
+						</div>
 					</div>
-					<div>
-						CLIENTE
+					<div class="center-div pill-container-horizontal">
+						<div class="spaced-letters left float-left">
+							CLIENTE
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="section">
+		<div class="section bg-white">
 			<div class="pill-container-vertical">
-				CLIENTE
-			</div>
+				<div class="top spaced-letters">
+					CLIENTE
+				</div>
+				<div class="bottom">
+					<div class="float-left w-50">
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								NOMBRE
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								APELLIDO
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								TELEFONO
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								EMAIL
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								CUIT
+							</div>
+						</div>
+					</div>
+					<div class="float-right w-50">
+						<div class="center-div pill-container-vertical-child">
+							<div class="top spaced-letters">
+								DOMICILIO DE INSTALACION
+							</div>
+							<div class="bottom">
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								ZONA
+							</div>
+						</div>
+						<div class="center-div pill-container-horizontal">
+							<div class="spaced-letters left float-left">
+								C.P
+							</div>
+						</div>
+					</div>
 
-		</div>
-		<div class="section">
-			<div class="pill-container-vertical">
-				DATOS
-			</div>
-		</div>
-		<div class="section">
-			<div class="pill-container-vertical">
-				ACEPTACION DEL SERVICIO
-			</div>
-			<div class="pill-container-vertical">
-				CONTACTOS
+				</div>
 			</div>
 		</div>
 
-		<div class="section footer">
+		<div class="section bg-white">
 			<div class="pill-container-vertical">
-				FIRMA Y ACLARACION
+
+				<div class="top spaced-letters">
+					DATOS
+				</div>
+				<div class="bottom">
+					content
+				</div>
+			</div>
+		</div>
+		<div class="section">
+			<div class="pill-container-vertical bg-white float-left w-50">
+				<div class="top spaced-letters">
+					ACEPTACION DEL SERVICIO
+				</div>
+				<div class="bottom">
+					content
+				</div>
+			</div>
+			<div class="pill-container-vertical bg-white float-right w-50">
+				<div class="top spaced-letters">
+					CONTACTOS
+				</div>
+				<div class="bottom">
+					content
+				</div>
+			</div>
+		</div>
+
+		<div class="section footer bg-white">
+			<div class="pill-container-vertical">
+				<div class="top spaced-letters">
+					FIRMA Y ACLARACION
+				</div>
+				<div class="bottom">
+					content
+				</div>
 			</div>
 		</div>
 	</div>
-
 </div>

@@ -281,10 +281,6 @@ class AdsController extends Controller {
                 'cssFile' => '@app/modules/westnet/web/css/empty-ads-pdf.css',
                 
                 'options' => ['title' => ""],
-                'methods' => [ 
-                    'SetTitle' => '',
-                    'SetFooter'=>['Página {PAGENO} de {nb}'],
-                ],
                 'marginTop' => 0,
                 'marginBottom' => 0,
                 'marginLeft' => 0,

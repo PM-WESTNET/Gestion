@@ -2,20 +2,28 @@ body {
     margin: 0px;
     padding: 0px;
     background: #DFDFDF;
+    font-family: Arial, Helvetica, sans-serif;
 }
+
 .sections-wrapper {
     padding: 20px;
 }
 .section {
-    background: #ffffff;
     width: 100%;
     border-radius: 15px;
     height: 180px;
     margin-bottom: 20px;
 }
+.bg-white {
+    background: #ffffff;
+    border-radius: 15px;
+
+}
 .section .header{
     width: 100%;
-    padding: 10px;
+    height: auto;
+    padding: 20px;
+    padding-bottom: 0px;
 }
 .w-50 {
     width: 49%;
@@ -26,27 +34,80 @@ body {
 .float-right {
     float: right;
 }
-.header .header-data-container{
-    background: rgb(188, 255, 182);
+.text-center{
+    text-align: center;
 }
-
+.center-div{
+    margin: 0 auto;
+}
+.padding-top-bottom{
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.spaced-letters{
+    letter-spacing: 9%;
+    font-size: large;
+}
+.company-logo {
+    width: 330px;
+    height: 141px;
+}
+.header .header-data-container{
+    background: #ffffff;
+}
 .barcode{
     width: 98px;
     height: 51px;
     background: #f47dff;
 }
 
-.company-logo {
-    text-align: center;
-    display:inline-block; vertical-align:middle;
-    width: 255px;
-    height: 109px;
-    background: #f47dff;
-    border-radius: 15px;
-}
+
 
 
 .pill-container-vertical {
-    background: rgb(0, 255, 21);
+    height: 180px;
+}
+.pill-container-vertical .top{
+    background: #191919;
+    color: #fff;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    text-align: center;
+    border-radius: 15px 15px 0px 0px;
+}
+
+
+.pill-container-horizontal{
+    background: #DFDFDF;
+    height: auto;
+    width: 90%;
+    margin-top: 10px;
+    margin-bottom: 10px;
     border-radius: 15px;
+}
+.pill-container-horizontal .left{
+    background: #191919;
+    color: #fff;
+    border-radius: 15px 0px 0px 15px;
+    text-align: center;
+    width:33.33%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+.header-data-container .pill-container-horizontal{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.pill-container-vertical-child{
+    height: 96px;
+    width: 90%;
+
+    background: #191919;
+    color: #fff;
+    margin-top: 10px;
+    padding-bottom: 6px;
+    border-radius: 15px;
+
+    background: #DFDFDF;
 }
