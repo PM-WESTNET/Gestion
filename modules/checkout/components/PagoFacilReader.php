@@ -10,12 +10,25 @@ namespace app\modules\checkout\components;
 
 use app\modules\checkout\models\PagoFacilTransmitionFile;
 use app\modules\pagomiscuentas\models\PagomiscuentasFile;
+use app\modules\config\models\Config;
+use app\modules\sale\models\Customer;
 use Yii;
 
 class PagoFacilReader
 {
-    public static function parse(PagoFacilTransmitionFile $pagoFacilTransmitionFile)
+    public function parse(PagoFacilTransmitionFile $pagoFacilTransmitionFile)
     {
+        $company = Config::getConfig('pdf_company')->description;
+
+        if($company == 'westnet')
+            return $this->ReaderFileWestnet($pagoFacilTransmitionFile);
+
+        else
+            return $this->ReaderFileBigway($pagoFacilTransmitionFile);
+        
+    }
+
+    public function ReaderFileWestnet(PagoFacilTransmitionFile $pagoFacilTransmitionFile){
         $file = null;
         $datas = [];
         $total = 0;
@@ -85,5 +98,37 @@ class PagoFacilReader
             fclose($file);
         }
         return $datas;
+    }
+
+    public function ReaderFileBigway(PagoFacilTransmitionFile $pagoFacilTransmitionFile){
+        $file = null;
+        $datas = [];
+        
+        $file = fopen(Yii::getAlias('@webroot') ."/".$pagoFacilTransmitionFile->file_name, 'r');
+        while ($line = fgets($file)) {
+            $array_line = $line;
+
+            if($array_line[0] == '1') 
+                $array_line = fgets($file);
+
+            if($array_line[0] == '9')
+                break;
+
+            $data['date'] = substr($array_line, 5, 4) . '-' . substr($array_line, 3, 2) . '-' . substr($array_line, 1, 2);
+            $data['amount'] = (float) substr($array_line, 111, 4).'.'.substr($array_line, 115, 2);
+            $data['customer_id'] = (int) preg_replace('/^0+/', '', substr($array_line, 83, 8));
+            $data['payment_method'] = 'Pago Facil';
+            $data['payment_id'] = '';
+
+            $datas[] = $data;
+        }
+
+        if($file) {
+            fclose($file);
+        }
+
+        return $datas;
+
+        
     }
 }

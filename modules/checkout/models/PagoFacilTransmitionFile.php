@@ -200,7 +200,10 @@ class PagoFacilTransmitionFile extends ActiveRecord {
 
         $transaction = Yii::$app->db->beginTransaction(); // Inicia transaccion con la base de datos
         try {
-            $array_data = PagoFacilReader::parse($this);
+            
+            $pagoFacilReader = new PagoFacilReader();
+            $array_data = $pagoFacilReader->parse($this);
+
             $moneyBoxAccount = MoneyBoxAccount::findOne(['money_box_account_id' => $this->money_box_account_id]);
             $paymentMethod = PaymentMethod::find()->where("status='enabled' AND lower(name) = '".strtolower("Pago Facil")."'")->one();
 
