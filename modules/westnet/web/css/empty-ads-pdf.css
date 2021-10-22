@@ -86,9 +86,8 @@ p {
 }
 
 .barcode {
-    width: 98px;
+    width: 250px;
     height: 51px;
-    background: #f47dff;
 }
 
 .instalation-percentages {

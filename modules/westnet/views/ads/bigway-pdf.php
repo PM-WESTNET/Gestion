@@ -33,7 +33,7 @@ AdminAsset::register($this);
 				<div class="header-data-container float-right w-50">
 					<!--convert to variables and retrieve from db-->
 					<div class="barcode center-div">
-						< codigo de barras>
+						 <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($init_value, $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
 					</div>
 					<div>
 						<p class="text-center spaced-letters">
@@ -47,9 +47,13 @@ AdminAsset::register($this);
 					</div>
 					<div class="center-div pill-container-horizontal">
 						<!--convert to variables and retrieve from db-->
-						<div class="spaced-letters left float-left">
-							CLIENTE
+						<div class="" style="overflow: hidden;">
+							<div class="spaced-letters left float-left" style="float:left;">
+								CLIENTE
+							</div>
+							<div style="padding: 5px;margin-left: 60px;float:right;"><?= $init_value ?></div>
 						</div>
+						
 					</div>
 				</div>
 			</div>

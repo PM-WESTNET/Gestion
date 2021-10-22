@@ -190,7 +190,17 @@ class AdsController extends Controller {
             // generate new customer.code
             $init_value = Customer::getNewCode();
             // define an array that will store an associative array of $payment_code and $init_value
-            $codes = [];
+
+            $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                }
+
+            $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .
+                    str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+
+            $payment_code = $generator->generate($code);
+                    
 
             
             for ($i = 0; $i < $qty; $i++) {
@@ -251,6 +261,8 @@ class AdsController extends Controller {
 
             $formatter = Yii::$app->formatter;
 
+            $barcode = new BarcodeGeneratorPNG();
+
             $content = $this->renderPartial('bigway-pdf.php',[
                 'formatter' => $formatter,
 //                'model' => $model,
@@ -264,10 +276,12 @@ class AdsController extends Controller {
 //               'companyData' => $companyData,
 //                'qrCode' => $qrCode
 
-                //'barcode' => $barcode,
                 'company' => $company,
                 'code' => $code,
                 'date_now' => date('d/m/Y', time()),
+                'payment_code' => $payment_code,
+                'init_value' => $init_value,
+                'barcode' => $barcode
             ]);
 
                 
