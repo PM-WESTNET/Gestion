@@ -192,3 +192,10 @@ ol{
 li{
     margin-top: 4px;
 }
+.signature{
+    text-align: center;
+    border-top: 2px solid #454545;
+    width: 262px;
+    font-size: 14px;
+    margin-top: 80px;
+}

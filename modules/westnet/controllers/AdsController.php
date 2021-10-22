@@ -267,7 +267,7 @@ class AdsController extends Controller {
                 //'barcode' => $barcode,
                 'company' => $company,
                 'code' => $code,
-                'date_now' => date('m/d/Y', time()),
+                'date_now' => date('d/m/Y', time()),
             ]);
 
                 

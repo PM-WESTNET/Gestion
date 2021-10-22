@@ -235,7 +235,17 @@ AdminAsset::register($this);
 					FIRMA Y ACLARACION
 				</div>
 				<div class="bottom">
-					content
+					<div class="w-50 float-left">
+						<div class="center-div spaced-letters signature">
+							Cliente
+						</div>
+					</div>
+					<div class="w-50 float-left">
+						<div class="center-div spaced-letters signature">
+							Instalador
+						</div>
+					</div>
+
 				</div>
 			</div>
 		</div>
