@@ -5,83 +5,107 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.sections-wrapper {
-    padding: 20px;
+p {
+    margin-top: .3em;
+    margin-bottom: .3em;
 }
+
+.sections-wrapper {
+    padding: 10px;
+}
+
 .section {
     width: 100%;
     border-radius: 15px;
     height: 180px;
     margin-bottom: 20px;
 }
+
 .no-margin-bottom {
-    margin-bottom:0px;
+    margin-bottom: 0px;
 }
+
 .bg-white {
     background: #ffffff;
     border-radius: 15px;
 
 }
-.section .header{
+
+.section .header {
     width: 100%;
     height: auto;
     padding: 20px;
     padding-bottom: 0px;
 }
+
 .w-50 {
     width: 48.5%;
 }
-.m-r-5{
+
+.m-r-5 {
     margin-right: 5px;
 }
-.m-l-5{
+
+.m-l-5 {
     margin-left: 5px;
 }
+
 .float-left {
     float: left;
 }
+
 .float-right {
     float: right;
 }
-.text-center{
+
+.text-center {
     text-align: center;
 }
-.center-div{
+
+.center-div {
     margin: 0 auto;
 }
-.padding-top-bottom{
-    padding-top: 20px;
-    padding-bottom: 20px;
+
+.padding-top-bottom {
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
-.spaced-letters{
+
+.spaced-letters {
     letter-spacing: 9%;
     font-size: large;
 }
+
 .company-logo {
     width: 330px;
     height: 141px;
 }
-.header .header-data-container{
+
+.header .header-data-container {
     background: #ffffff;
 }
-.barcode{
+
+.barcode {
     width: 98px;
     height: 51px;
     background: #f47dff;
 }
-.instalation-percentages{
-    width:32%;
-    direction:rtl;
-    text-align:justify;
+
+.instalation-percentages {
+    width: 32%;
+    direction: rtl;
+    text-align: justify;
     font-size: 10px;
     padding-right: 8px;
 }
-.justify-right{
+
+.justify-right {
     width: 66%;
-    direction:rtl;
-    text-align:justify;
+    direction: rtl;
+    text-align: justify;
 }
-.red{
+
+.red {
     border: 2px solid rgb(255, 1, 1);
 }
 
@@ -91,7 +115,8 @@ body {
 .pill-container-vertical {
     height: 180px;
 }
-.pill-container-vertical .top{
+
+.pill-container-vertical .top {
     background: #191919;
     color: #fff;
     padding-top: 6px;
@@ -99,9 +124,7 @@ body {
     text-align: center;
     border-radius: 15px 15px 0px 0px;
 }
-
-
-.pill-container-horizontal{
+.pill-container-horizontal {
     background: #DFDFDF;
     height: auto;
     width: 90%;
@@ -109,21 +132,23 @@ body {
     margin-bottom: 10px;
     border-radius: 15px;
 }
-.pill-container-horizontal .left{
+
+.pill-container-horizontal .left {
     background: #191919;
     color: #fff;
     border-radius: 15px 0px 0px 15px;
     text-align: center;
-    width:33.33%;
+    width: 33.33%;
     padding-top: 2px;
     padding-bottom: 2px;
 }
-.header-data-container .pill-container-horizontal{
+
+.header-data-container .pill-container-horizontal {
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.pill-container-vertical-child{
+.pill-container-vertical-child {
     height: 96px;
     width: 90%;
 
@@ -134,4 +159,36 @@ body {
     border-radius: 15px;
 
     background: #DFDFDF;
+}
+
+.items-container {
+    width:28%;
+    margin-left: 25px;
+    border-radius: 15px;
+    background: #DFDFDF;
+    padding: 5px;
+}
+.h-custom{height:100px;}
+
+.items-container .title {
+    font-size: 15px;
+    padding: 6px;
+}
+
+.items {
+    padding-left:25px;
+}
+.checkbox{
+    margin-top: 4px;
+}
+.items .second-level{
+    padding-left:25px;
+}
+ul,
+ol{
+    margin-left:6px;
+    font-size: 13px;
+}
+li{
+    margin-top: 4px;
 }

@@ -31,6 +31,7 @@ AdminAsset::register($this);
 				</div>
 
 				<div class="header-data-container float-right w-50">
+					<!--convert to variables and retrieve from db-->
 					<div class="barcode center-div">
 						< codigo de barras>
 					</div>
@@ -45,6 +46,7 @@ AdminAsset::register($this);
 						</div>
 					</div>
 					<div class="center-div pill-container-horizontal">
+						<!--convert to variables and retrieve from db-->
 						<div class="spaced-letters left float-left">
 							CLIENTE
 						</div>
@@ -113,17 +115,82 @@ AdminAsset::register($this);
 			<div class="pill-container-vertical">
 
 				<div class="top spaced-letters">
-					<div class="justify-right float-left"> 
+					<div class="justify-right float-left">
 						DATOS DE INSTALACION
 					</div>
+					<!--convert to variables and retrieve from db-->
 					<div class="float-right instalation-percentages">
 						CIR 75%
 						<br>
 						DISPONIBILIDAD ANUAL 96%
 					</div>
 				</div>
-				<div class="bottom">
-					content
+				<div class="bottom padding-top-bottom">
+					<div class="items-container float-left">
+						<div class="title spaced-letters text-center">
+							ENTREGA EN COMODATO
+						</div>
+						<!-- php variable echoing -->
+						<div class="items">
+							<!-- php variable echoing -->
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>ONU</label>
+							</div>
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>Roseta</label>
+							</div>
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>Patchcord</label>
+							</div>
+						</div>
+					</div>
+					<div class="float-left items-container h-custom">
+						<div class="title spaced-letters text-center">
+							TIPO DE CONEXION
+						</div>
+						<div class="items">
+							<!-- php variable echoing -->
+							<div class="checkbox ">
+								<input type="checkbox">
+								<label>Fibra Óptica</label>
+							</div>
+							<div class="checkbox second-level">
+								<input type="checkbox">
+								<label>Hogar</label>
+							</div>
+							<div class="checkbox second-level">
+								<input type="checkbox">
+								<label>Empresa</label>
+							</div>
+						</div>
+					</div>
+					<div class="items-container float-left">
+						<div class="title spaced-letters text-center">
+							VELOCIDAD DEL PLAN
+						</div>
+						<div class="items">
+							<!-- php variable echoing -->
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>25MB</label>
+							</div>
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>50MB</label>
+							</div>
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>100MB</label>
+							</div>
+							<div class="checkbox">
+								<input type="checkbox">
+								<label>300MB</label>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -133,7 +200,13 @@ AdminAsset::register($this);
 					ACEPTACION DEL SERVICIO
 				</div>
 				<div class="bottom">
-					content
+
+					<ol>
+						<li>No se realizan periodos de prueba</li>
+						<li>Los equipos instalados son en comodato.</li>
+						<li>Firmando acepta la forma y estetica de la instalación, modificaciones posterioriores tendrán recargo adicional.</li>
+					</ol>
+
 				</div>
 			</div>
 			<div class="pill-container-vertical bg-white float-right w-50">
@@ -141,7 +214,17 @@ AdminAsset::register($this);
 					CONTACTOS
 				</div>
 				<div class="bottom">
-					content
+					<ul>
+						<li>Servicio técnico: 2613439030</li>
+						<li>Administración: 2615884223</li>
+						<li>Correo electrónico: administracion@bigway.com.ar</li>
+						<li>Horarios de atención:</li>
+						<ul>
+							<li>Lunes a Viernes de 8:30 a 17:00
+							</li>
+							<li>Sabados de 8:30 a 13:00hs</li>
+						</ul>
+					</ul>
 				</div>
 			</div>
 		</div>
