@@ -113,7 +113,14 @@ AdminAsset::register($this);
 			<div class="pill-container-vertical">
 
 				<div class="top spaced-letters">
-					DATOS
+					<div class="justify-right float-left"> 
+						DATOS DE INSTALACION
+					</div>
+					<div class="float-right instalation-percentages">
+						CIR 75%
+						<br>
+						DISPONIBILIDAD ANUAL 96%
+					</div>
 				</div>
 				<div class="bottom">
 					content
@@ -139,7 +146,7 @@ AdminAsset::register($this);
 			</div>
 		</div>
 
-		<div class="section footer bg-white">
+		<div class="section footer bg-white no-margin-bottom">
 			<div class="pill-container-vertical">
 				<div class="top spaced-letters">
 					FIRMA Y ACLARACION
