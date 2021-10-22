@@ -331,4 +331,8 @@ class Node extends \app\components\db\ActiveRecord
     public static function findNodeBySubnet($subnet){
         return self::find()->where(['subnet' => $subnet])->one();
     }
+
+    public static function FindNodeFieldsLatitudLongitud($node_id){
+        return explode(',', self::find()->where(['node_id' => $node_id])->one()->geocode);
+    }
 }

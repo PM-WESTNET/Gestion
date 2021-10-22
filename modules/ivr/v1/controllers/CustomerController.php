@@ -1536,4 +1536,92 @@ class CustomerController extends Controller
             'total' => $result
         ];
     }
+
+
+    public function actionGetDataCustomer(){
+        $data = Yii::$app->request->post();
+
+        if(!isset($data['document_number']))
+            return [
+                'error' => true,
+                'message' => 'The fields document_number is required'
+            ];
+
+        if(empty($data['document_number']))
+            return [
+                'error' => true,
+                'message' => 'The fields document_number isn´t empty'
+            ];
+
+        $customer = Customer::findOne(['customer_id' => 61190]);
+
+        $fulladdress = $customer->address->fulladdress;
+
+        $customer_data = [
+            'idcustomer' => $customer->customer_id,
+            'national_id' => $customer->document_number, //REVISAR CASO DE CUIT
+            'company_id' => $customer->taxCondition->name,
+            'name' => $customer->name,
+            'lastname' => $customer->lastname,
+            'city' => 'Mendoza',
+            'address' => $fulladdress,
+            'phone' => $customer->phone,
+            'phone_mobile' => $customer->phone2,
+            'email' => $customer->email
+        ];
+
+        $account_data = [
+            'a_status' => $customer->status,
+            'debt' => $customer->current_account_balance,
+            'duedebt' => '',
+            'noduedebt' => $customer->current_account_balance,
+            'duedate1' => '',
+            'duedate2' => '',
+            'payments_url' => 'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id,
+            'invoices' => '',
+            'invoices_qty' => Customer::getOwedBills($customer->customer_id),
+        ];
+
+        
+        $connections = [];
+
+        foreach ($customer->contracts as $key => $contract) {
+            $connection = $contract->connection;
+            $node = $connection->node;
+            $connections[] = [
+                'state' => 'Mendoza',
+                'city' => '',
+                'address' => $fulladdress,
+                'phone' => $customer->phone,
+                'phone_mobile' => $customer->phone2,
+                'email' => $customer->email,
+                'ip' => long2ip($connection->ip4_1),
+                'webpass' => '',
+                'webpassc' => '',
+                'lat' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[0],
+                'lng' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[1],
+                'node' => $node->name,
+                'access_point' => '',
+                's_status' => '',
+                'message' => '',
+                'extra_info' => ''
+            ];
+        }
+
+
+        $connection_data = [
+            'connections_qty' => count($customer->findContractsActiveByCustomerId($customer->customer_id)),
+            'connection' => $connections
+        ];        
+
+
+        return $result = [
+            'error' => false,
+            'data' => [
+                'customer_data' => $customer_data,
+                'account_data' => $account_data,
+                'connection_data' => $connection_data
+            ]
+        ];
+    }
 }

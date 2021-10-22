@@ -2258,4 +2258,8 @@ class Customer extends ActiveRecord {
     public function getCompany() {
         return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
     }
+
+    public static function findContractsActiveByCustomerId($customer_id){
+        return self::find()->where(['status' => 'active'])->all();
+    }
 }
