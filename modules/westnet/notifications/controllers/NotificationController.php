@@ -21,6 +21,7 @@ use yii\web\Response;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\config\models\Config;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use app\modules\westnet\notifications\models\RegisterRedirectionRoela;
 use yii\filters\AccessControl;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentItem;
@@ -564,6 +565,16 @@ class NotificationController extends Controller {
 
 
     public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
+
+        $register_redirection_roela = new RegisterRedirectionRoela();
+
+        $register_redirection_roela->resultado_id = $IdResultado;
+        $register_redirection_roela->referencia_operacion = $IdReferenciaOperacion;
+        $register_redirection_roela->description = "NO IMPACTADA";
+        $register_redirection_roela->created_at = date('Y-m-d h:m:s');
+        $register_redirection_roela->save(false);
+
+
         $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $IdReferenciaOperacion])->orderBy(['siro_payment_intention_id' => SORT_DESC])->one();
 	$siro_payment_intention_id = $paymentIntention['siro_payment_intention_id'];
 	
@@ -608,6 +619,9 @@ class NotificationController extends Controller {
                 $paymentIntention->save(false);
                 $payment_item->save(false);
                 $customer->save(false);
+
+                $register_redirection_roela->description = "IMPACTADA";
+                $register_redirection_roela->save();
 
                 $transaction->commit();
 
