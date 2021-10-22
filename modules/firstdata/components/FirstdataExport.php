@@ -21,8 +21,8 @@ class FirstdataExport {
         foreach($export->customers as $customer) {
 
             //Si el saldo es 0 o el cliente tiene credito, no lo agregamos al archivo
-            $totalImport = abs($payment->totalCalculationForQuery($customer->customer_id));
-            if ($totalImport == 0) {
+            $totalImport = $payment->totalCalculationForQuery($customer->customer_id);
+            if ($totalImport >= 0) {
                 continue;
             }
 
@@ -36,7 +36,7 @@ class FirstdataExport {
                 continue;
             }
 
-            fwrite($resource, self::detailLine($export, $customer, $totalImport) . PHP_EOL);
+            fwrite($resource, self::detailLine($export, $customer, abs($totalImport)) . PHP_EOL);
         }
         return $resource;
 

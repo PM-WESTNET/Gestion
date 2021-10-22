@@ -219,10 +219,20 @@ class TaxesBook extends \app\components\companies\ActiveRecord
 
 
     public function can($new_state)
-    {
+    {      
         $period = new \DateTime((new \DateTime($this->period))->format('Y-m-t'));
         $now = new \DateTime('now');
-        return (WithWorkflow::can($new_state)  && ($period->diff($now)->format('%R%a') >= 0) );
+        return ($this->canWithWorkflow($new_state)  && ($period->diff($now)->format('%R%a') >= 0) );
+    }
+
+    public function canWithWorkflow($new_state)
+    {
+        $possibles = $this->getWorkflowPossibleStates();
+        if (is_array($possibles)) {
+            return array_search($new_state, $possibles) !== false;
+        } else {
+            return ($new_state == $possibles);
+        }
     }
 
     /**

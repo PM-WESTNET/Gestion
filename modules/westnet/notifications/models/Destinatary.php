@@ -602,7 +602,7 @@ class Destinatary extends ActiveRecord {
                 ->where("n.status = 'enabled' AND im.status = 'pending' ");
 
         $query->from['b']->addSelect(['connection.ip4_1 as ipv4', 'customer.email', 'customer.email2', 'customer.email_status', 'customer.email2_status','customer.phone2',
-            'customer.phone3', 'customer.phone4', 'n.name as node', 'customer.payment_code', 'company.code as company_code',
+            'customer.phone3', 'customer.phone4','customer.current_account_balance', 'n.name as node', 'customer.payment_code', 'company.code as company_code',
             'connection.status_account as status', 'cc.name as category', 'customer.lastname', 'customer.has_debit_automatic']);
 
         $query->leftJoin(['n' => $subquery], 'b.customer_id = n.customer_integratech');

@@ -1529,7 +1529,7 @@ class CustomerController extends Controller
             ];
         }
 
-        $result = Customer::getOwedBills('61190');
+        $result = Customer::getOwedBills($data['customer_id]);
         
         return [
             'error' => 'false',

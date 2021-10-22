@@ -62,7 +62,7 @@ class FirstdataExportController extends Controller
 
         $customers = [];
         foreach($model->customers as $customer){
-            if(abs($payment->totalCalculationForQuery($customer->customer_id)) > 0){
+            if($payment->totalCalculationForQuery($customer->customer_id) < 0){
                 $customers[] = $customer;
             }   
         }

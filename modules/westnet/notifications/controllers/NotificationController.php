@@ -643,7 +643,7 @@ class NotificationController extends Controller {
             $notification_has_customer->createdAt = date('Y-m-d H:i');
             $notification_has_customer->updatedAt = date('Y-m-d H:i');
             $notification_has_customer->node = $customer['node'];
-            $notification_has_customer->saldo = $customer['saldo'];
+            $notification_has_customer->saldo = $customer['current_account_balance'];
             $notification_has_customer->company_code = $customer['company_code'];
             $notification_has_customer->debt_bills = $customer['debt_bills'];
             $notification_has_customer->category = $customer['category'];
