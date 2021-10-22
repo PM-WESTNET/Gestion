@@ -265,6 +265,8 @@ class AdsController extends Controller {
 //                'qrCode' => $qrCode
 
                 //'barcode' => $barcode,
+                'codes'     => $codes,
+                'qty' => $qty,
                 'company' => $company,
                 'code' => $code,
                 'date_now' => date('d/m/Y', time()),
