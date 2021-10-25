@@ -1529,7 +1529,7 @@ class CustomerController extends Controller
             ];
         }
 
-        $result = Customer::getOwedBills($data['customer_id]);
+        $result = Customer::getOwedBills($data['customer_id']);
         
         return [
             'error' => 'false',
@@ -1569,13 +1569,13 @@ class CustomerController extends Controller
             'phone_mobile' => $customer->phone2,
             'email' => $customer->email
         ];
-
+	
         $account_data = [
             'a_status' => $customer->status,
             'debt' => $customer->current_account_balance,
             'duedebt' => '',
             'noduedebt' => $customer->current_account_balance,
-            'duedate1' => '',
+            'duedate1' => date('15/m/Y'),
             'duedate2' => '',
             'payments_url' => 'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id,
             'invoices' => '',
