@@ -50,7 +50,7 @@ AdminAsset::register($this);
 					<div class="header-data-container float-right w-50">
 						<!--convert to variables and retrieve from db-->
 						<div class="barcode center-div">
-							<?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($init_value, $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
+							<?=($i==0)?'':'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($init_value, $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
 						</div>
 						<div>
 							<p class="text-center spaced-letters current-date">

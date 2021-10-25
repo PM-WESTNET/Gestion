@@ -89,6 +89,7 @@ p {
 }
 
 .barcode {
+    text-align: center;
     width: 250px;
     height: 51px;
 }
