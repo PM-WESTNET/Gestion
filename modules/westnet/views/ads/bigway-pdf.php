@@ -8,9 +8,17 @@ use app\modules\config\models\Config;
 use app\modules\sale\assets\AdminAsset;
 
 AdminAsset::register($this);
+//'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($init_value, $barcode::TYPE_CODABAR, 3, 60)) . '">'; //change before production
 
 //include('bigway-pdf.html');
 ?>
+<?php foreach ($codes as $key => $code){ ?>
+<?php
+	if($key!=0){
+		echo '<div style="page-break-after: always"></div>';
+	}
+?>
+
 <div class="body">
 	<div class="sections-wrapper">
 		<div class="section bg-white">
@@ -33,7 +41,6 @@ AdminAsset::register($this);
 				<div class="header-data-container float-right w-50">
 					<!--convert to variables and retrieve from db-->
 					<div class="barcode center-div">
-						 <?='<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($init_value, $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
 					</div>
 					<div>
 						<p class="text-center spaced-letters">
@@ -255,3 +262,5 @@ AdminAsset::register($this);
 		</div>
 	</div>
 </div>
+
+<?php } ?>

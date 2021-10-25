@@ -261,8 +261,10 @@ class AdsController extends Controller {
 
             $formatter = Yii::$app->formatter;
 
-            $barcode = new BarcodeGeneratorPNG();
-
+            //$barcode = new BarcodeGeneratorPNG(); //change before production
+            
+            /* var_dump($qty);
+            die(); */
             $content = $this->renderPartial('bigway-pdf.php',[
                 'formatter' => $formatter,
 //                'model' => $model,
@@ -276,12 +278,14 @@ class AdsController extends Controller {
 //               'companyData' => $companyData,
 //                'qrCode' => $qrCode
 
+                'qty' => $qty,
+                'codes' => $codes,
                 'company' => $company,
                 'code' => $code,
                 'date_now' => date('d/m/Y', time()),
                 'payment_code' => $payment_code,
                 'init_value' => $init_value,
-                'barcode' => $barcode
+                //'barcode' => $barcode //change before production
             ]);
 
                 
