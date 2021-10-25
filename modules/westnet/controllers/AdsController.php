@@ -231,40 +231,14 @@ class AdsController extends Controller {
                 $init_value = Customer::getNewCode();
             }
         
-            /*
-             *
-             * At this point you can opt for a different PDF generation library
-             * 
-            */       
-
-            //for this ADS we need:
-
-            //todays DATE
-
-            //customer code (ADS)
-
-            //Acomodatos? (onu, roseta, patchcore)
-
-            //tipo de conexion (hogar/empresa , fibra optica)
-
-            //velocidad (planes: 25,50,100,300)
-
-            //info harcoded: aceptacion del servicio, contactos
-
-            //barcode used for payment
-            //$barcode = new BarcodeGeneratorPNG();
-
-
             // change the yii2 layout
             $this->layout = '//pdf';
             $plans = $this->getPlans($company_id);            
 
             $formatter = Yii::$app->formatter;
 
-            //$barcode = new BarcodeGeneratorPNG(); //change before production
+            $barcode = new BarcodeGeneratorPNG();
             
-            /* var_dump($qty);
-            die(); */
             $content = $this->renderPartial('bigway-pdf.php',[
                 'formatter' => $formatter,
 //                'model' => $model,
@@ -281,11 +255,10 @@ class AdsController extends Controller {
                 'qty' => $qty,
                 'codes' => $codes,
                 'company' => $company,
-                'code' => $code,
                 'date_now' => date('d/m/Y', time()),
                 'payment_code' => $payment_code,
                 'init_value' => $init_value,
-                //'barcode' => $barcode //change before production
+                'barcode' => $barcode
             ]);
 
                 

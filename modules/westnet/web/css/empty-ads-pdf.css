@@ -9,6 +9,9 @@ p {
     margin-top: .3em;
     margin-bottom: .3em;
 }
+.current-date {
+    font-size: 14px;
+}
 
 .sections-wrapper {
     padding: 10px;
