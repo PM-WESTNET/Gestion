@@ -141,7 +141,6 @@ class ContractController extends Controller
                 'message' => 'The last contract of customer is active'
             ];
         
-
         $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
 
         if (!$connection) 
@@ -162,6 +161,14 @@ class ContractController extends Controller
                 $customer->save(false);
                 $emptyAds->updateAttributes(['used']);
             }
+            else{
+                return [
+                    'error' => true,
+                    'message' => 'The ADS specified does not exist.'
+                ];
+            }
+        // retornar error si el ADS no existe.
+
         
         $contract->from_date = Yii::$app->formatter->asDate(new DateTime());
         $contract->setScenario('invoice');

@@ -23,6 +23,12 @@ use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
+use app\components\pdf\PdfUtils;
+use Da\QrCode\QrCode;
+use kartik\mpdf\Pdf;
+use Picqer\Barcode\BarcodeGeneratorPNG;
+
+
 /**
  * IpRangeController implements the CRUD actions for IpRange model.
  */
@@ -91,14 +97,32 @@ class AdsController extends Controller {
     {
 
         if ($node_id !== null && $qty !== null && $company_id !== null) {
-            $node = Node::findOne(['node_id' => $node_id]); // doest contemplate finding a null object here
+            // decide which pdf library to use based on config. 
+            // #Also used on: modules/sale/controllers/BillController.php
+            $pdf_company = Config::getConfig('pdf_company')->description;
+            //var_dump($pdf_company);die(); // uncomment to see which option is currently enabled
+            if($pdf_company == "westnet") return $this->WestnetPdf($company_id, $node_id, $qty);
+            else if($pdf_company == "bigway") return $this->BigwayPdf($company_id, $node_id, $qty);
+            //...
+
+        }else{
+            return $this->render('empty-ads');
+        }
+    }
+
+    private function WestnetPdf($company_id, $node_id, $qty){
+            // find node
+            $node = Node::findOne(['node_id' => $node_id]);
+            // find company
             $company = Company::findOne(['company_id'=> $company_id]);
-
+            // generate payment code
             $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
-
+            // generate new customer.code
             $init_value = Customer::getNewCode();
+            // define an array that will store an associative array of $payment_code and $init_value
             $codes = [];
 
+            
             for ($i = 0; $i < $qty; $i++) {
                 /**
                  * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
@@ -107,12 +131,15 @@ class AdsController extends Controller {
                 if ($company->code != '9999') {
                     $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
                 }
-
+                
+                // generate payment code *goes below barcode*
+                // pads with ceros the space between the company code and customer code. 
                 $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .
                     str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
-
                 $payment_code= $generator->generate($code);
                 $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
+
+                // define, instantiate and add data to a new 'Empty ADS' object. (Alta De Servicio)
                 $emptyAds= new EmptyAds();
                 $emptyAds->code = $init_value;
                 $emptyAds->payment_code= $payment_code;
@@ -120,9 +147,16 @@ class AdsController extends Controller {
                 $emptyAds->company_id= $company->company_id;
                 $emptyAds->used= false;
                 $emptyAds->save(false);
+
+                // generate new customer code for every loop
                 $init_value = Customer::getNewCode();
             }
+        
+            /*
+             * At this point you can opt for a different PDF generation library
+            */
 
+            // change the yii2 layout
             $this->layout = '//pdf';
 
             $plans = $this->getPlans($company_id);
@@ -141,9 +175,111 @@ class AdsController extends Controller {
 
             return PDFService::makePdf($view);
             
-        }else{
-            return $this->render('empty-ads');
-        }
+    }
+
+    /**
+     * prints the PDF for EmptyAds for BigWay. which has a different layout.
+     */
+    private function BigwayPdf($company_id, $node_id, $qty){
+            // find node
+            $node = Node::findOne(['node_id' => $node_id]);
+            // find company
+            $company = Company::findOne(['company_id'=> $company_id]);
+            // generate payment code
+            $generator = CodeGeneratorFactory::getInstance()->getGenerator('PagoFacilCodeGenerator');
+            // generate new customer.code
+            $init_value = Customer::getNewCode();
+            // define an array that will store an associative array of $payment_code and $init_value
+
+            $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                }
+
+            $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .
+                    str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+
+            $payment_code = $generator->generate($code);
+                    
+
+            
+            for ($i = 0; $i < $qty; $i++) {
+                /**
+                 * El total del digitos del codigo de pago debe ser 14, por lo que la identificacion del cliente debe tener como maximo 8 digitos
+                 */
+                $complete = '';
+                if ($company->code != '9999') {
+                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                }
+                
+                // generate payment code *goes below barcode*
+                // pads with ceros the space between the company code and customer code. 
+                $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete . str_pad($init_value, 5, "0", STR_PAD_LEFT) ;
+                $payment_code= $generator->generate($code);
+                $codes[] = ['payment_code'=> $payment_code, 'code' => $init_value];
+
+                // define, instantiate and add data to a new 'Empty ADS' object. (Alta De Servicio)
+                $emptyAds= new EmptyAds();
+                $emptyAds->code = $init_value;
+                $emptyAds->payment_code= $payment_code;
+                $emptyAds->node_id= $node->node_id;
+                $emptyAds->company_id= $company->company_id;
+                $emptyAds->used= false;
+                $emptyAds->save(false);
+
+                // generate new customer code for every loop
+                $init_value = Customer::getNewCode();
+            }
+        
+            // change the yii2 layout
+            $this->layout = '//pdf';
+            $plans = $this->getPlans($company_id);            
+
+            $formatter = Yii::$app->formatter;
+
+            $barcode = new BarcodeGeneratorPNG();
+            
+            $content = $this->renderPartial('bigway-pdf.php',[
+                'formatter' => $formatter,
+//                'model' => $model,
+//                'dataProvider' => $dataProvider,
+//                'cupon_bill_types' => $cupon_bill_types,
+//                'is_cupon' => $is_cupon,
+//                'payment' => $payment,
+//                'debt' => $debt,
+//                'isConsumidorFinal' => $isConsumidorFinal,
+//                'profile' => $profile,
+//               'companyData' => $companyData,
+//                'qrCode' => $qrCode
+
+                'qty' => $qty,
+                'codes' => $codes,
+                'company' => $company,
+                'date_now' => date('d/m/Y', time()),
+                'payment_code' => $payment_code,
+                'init_value' => $init_value,
+                'barcode' => $barcode
+            ]);
+
+                
+            $pdf = new Pdf([
+                'mode' => Pdf::MODE_UTF8, 
+                'format' => Pdf::FORMAT_A4, 
+                //'orientation' => Pdf::ORIENT_PORTRAIT, 
+                'destination' => Pdf::DEST_BROWSER,
+                'content' => $content,  
+                'filename' => strtolower($company->name."-".$node->name."-newcodes.pdf"), // lowercased company + node ..
+                'cssFile' => '@app/modules/westnet/web/css/empty-ads-pdf.css',
+                
+                'options' => ['title' => ""],
+                'marginTop' => 0,
+                'marginBottom' => 0,
+                'marginLeft' => 0,
+                'marginRight' => 0,
+            ]);
+
+                
+            return $pdf->render();
     }
     /**
      *  Imprime un Ads en blanco ya generado
