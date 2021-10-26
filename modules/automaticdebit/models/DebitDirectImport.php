@@ -250,7 +250,7 @@ class DebitDirectImport extends \yii\db\ActiveRecord
             'error' => $error
         ]);
 
-        return $failed_payment->save();
+        return $failed_payment->save(false);
     }
 
     /**

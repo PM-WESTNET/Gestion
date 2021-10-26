@@ -88,10 +88,6 @@ class BancoSuperville implements BankInterface
         return true;
     }
 
-    public function import($resource, $import, $fileName){
-
-    }
-
 
     public function addBody($resource, $debit, $export, $totalImport){
         $current_date = date('Y-m-d');
@@ -254,6 +250,200 @@ class BancoSuperville implements BankInterface
             ->all();
 
         return $bills;
+    }
+
+
+    /**
+     * Debe importar el archivo con los pagos y crear los pagos correspondientes
+     * @return mixed
+     */
+    public function import($resource, $import, $fileName)
+    {
+
+        $coelsa_code = [
+            'ACE' => 'Aceptado',
+            'R02' => 'CUENTA CERRADA POR ORDEN JUDICIAL',
+            'R03' => 'CUENTA INEXISTENTE',
+            'R04' => 'DIGITO VERIFICADOR DE CBU INCORRECTO',
+            'R08' => 'STOP DEBIT',
+            'R10' => 'FALTA DE FONDOS',
+            'R13' => 'SUCURSAL/ENTIDAD DESTINO INEXISTENTE',
+            'R14' => 'CLIENTE INEXISTENTE',
+            'R15' => 'ADHERENTE DADO DE BAJA',
+            'R17' => 'ERROR DE FORMATO',
+            'R18' => 'FECHA DE COMPENSACION ERRONEA',
+            'R19' => 'IMPORTE ERRONEO',
+            'R20' => 'MONEDA DIFERENTE A LA DE LA CUENTA',
+            'R22' => 'DEVOLUCION POR SOLICITUD DEL BENEFICIARIO',
+            'R23' => 'SUCURSAL NO HABILITADA',
+            'R24' => 'TRANSACCION DUPLICADA',
+            'R25' => 'ERROR EN REGISTRO ADICIONAL',
+            'R26' => 'ERROR POR CAMPO MANDATARIO',
+            'R27' => 'ERROR EN CONTADOR DE REGISTRO',
+            'R29' => 'REVERSION YA EFECTUADA',
+            'R31' => 'VUELTA ATRAS DE CAMARA',
+            'R75' => 'FECHA INVALIDA',
+            'R76' => 'ERROR EN EL CUIT O DIGITO VERIFICADOR',
+            'R77' => 'ERROR EN CAMPO 4 REG.INDIVID.',
+            'R78' => 'ERROR EN CAMPO 5 REG.INDIVID.',
+            'R79' => 'ERROR EN REF.UNIVOCA TRANSFERENC.',
+            'R80' => 'ERROR CAMPO 3 REG.ADIC.(CONCEPTO)',
+            'R87' => 'MONEDA INVALIDA',
+            'R88' => 'ERROR EN CAMPO 2 REG.INDIVID.',
+            'R89' => 'ERRORES EN ADHESION',
+            'R90' => 'TRANSACC.NO CORRESP: NO EXSTE ORIGINAL',
+            'R91' => 'COD.ENTIDAD.INCOMPAT.CON MONEDA TXN',
+            'R93' => 'DIA NO LABORABLE',
+            'R98' => 'SOLICITUD ENTIDAD ORIGINANTE' 
+        ];
+
+        $companyConfig = null;
+        $proccess_timestamp = null;
+        $payments = [];
+        $failed_payment_register_created = 0;
+        $failed_payments = [];
+
+        while($line = fgets($resource)){
+            if(substr($line,0 , 1) == 'T'){
+                $companyConfig = BankCompanyConfig::findOne(['company_id' => $import->company_id]);
+                if (empty($companyConfig)) {
+                    Yii::$app->session->addFlash('error', Yii::t('app','Company not configured'));
+                    return false;
+                }
+                $process_timestamp = substr($line, 29, 4).'-'.substr($line, 27, 2).'-'.substr($line,25, 2);
+                break;
+            }
+        }
+        fseek($resource,0);
+
+        while ($line = fgets($resource)) {
+            if(substr($line,0,1) == "T")
+                break;
+
+            $customer_id = trim(substr($line, 58, 22));
+            $amount = (double) substr($line, 103, 10);
+            $cbu = substr($line, 33, 8);
+            $code = substr($line, 173, 3);
+            $code_description = $coelsa_code[$code];
+            $customer_code = Customer::findOne(['customer_id' => $customer_id])->code;
+
+            if($code == 'ACE'){
+                $payments[] = [
+                    'customer_code' => $customer_code,
+                    'amount' => $amount,
+                    'date' =>  $process_timestamp,
+                    'cbu' => $cbu,
+                ];
+                 
+            }else{
+                $failed_payment_register_created ++;
+                array_push($failed_payments, ['customer_code' => $customer_code, 'amount' => $amount, 'date' => $process_timestamp, 'cbu' => $cbu, 'description' => $code_description]);
+            }
+        }
+        
+        $import->process_timestamp = strtotime($process_timestamp);
+        $import->file = $fileName;
+        $import->save();
+        $this->createFailedPayments($failed_payments, $import->debit_direct_import_id);
+
+        $result = $this->createPayments($payments, $companyConfig->company, $import);
+
+        return [
+            'status' => true,
+            'errors' => 'Payment created; '.$result['payments_created'].'. Payment failed: '.$result['payments_failed'].' Rejected payment register created: '.$failed_payment_register_created,
+            'created_payments' => $result['payments_created'],
+            'failed_payments' => $result['payments_failed'],
+            'rejected_payment_register_created' => $failed_payment_register_created,
+        ];
+    }
+
+    /**
+     * @param $failed_payments
+     * @param $import_id
+     * Crea registros de pagos fallidos
+     */
+    public function createFailedPayments($failed_payments, $import_id)
+    {
+        foreach ($failed_payments as $failed_payment) {
+            DebitDirectImport::createFailedPayment($failed_payment['customer_code'], $failed_payment['amount'], $failed_payment['date'], $failed_payment['cbu'], $import_id, $failed_payment['description']);
+        }
+    }
+
+    /**
+     * @param $payments
+     * @param Company $company
+     * @param $import
+     * @return array
+     * @throws InvalidConfigException
+     * @throws \yii\db\Exception
+     * Crea los pagos y los relaciona al import, De no poder crearlos, registra el error como un nuevo DebitDirectImportFailedPayment model
+     */
+    private function createPayments($payments, Company $company, $import)
+    {
+        $payment_method = PaymentMethod::findOne(['name' => 'Débito Directo']);
+        $payments_created = 0;
+        $failed_payments = [];
+
+        foreach ($payments as $payment) {
+            $customer = Customer::findOne(['code' => $payment['customer_code']]);
+            $transaction = Yii::$app->db->beginTransaction();
+
+            if (!empty($customer)) {
+                $p = new Payment([
+                    'customer_id' => $customer->customer_id,
+                    'amount' => $payment['amount'],
+                    'partner_distribution_model_id' => $company->partner_distribution_model_id,
+                    'company_id' => $company->company_id,
+                    'date' => (new \DateTime('now'))->format('Y-m-d')
+                ]);
+
+                if ($p->save()) {
+                    $this->createItemAndRelation($payment['amount'], 'Debito Directo cta ' . $payment['cbu'], $payment_method->payment_method_id, $import->money_box_account_id, $p, $import);
+                    $payments_created ++;
+                    $transaction->commit();
+                } else {
+                    $transaction->rollBack();
+                    array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'], 'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Cant create payment. Customer code: ').$payment['customer_code']]);
+                }
+            } else {
+                $transaction->rollBack();
+                array_push($failed_payments, ['customer_code' => $payment['customer_code'], 'amount' => $payment['amount'] ,'date' => $payment['date'], $import->process_timestamp, 'cbu' => $payment['cbu'], 'import_id' => $import->debit_direct_import_id, 'description' => Yii::t('app', 'Customer not found'). ': '.$payment['customer_code']]);
+            }
+
+        }
+
+        //Creamos registros de todos los pagos que no se pudieron procesar
+        $this->createFailedPayments($failed_payments, $import->debit_direct_import_id);
+
+        return [
+            'success' => true,
+            'payments_created' => $payments_created,
+            'payments_failed' => count($failed_payments),
+        ];
+    }
+
+    /**
+     * @param $amount
+     * @param $description
+     * @param $payment_method_id
+     * @param $money_box_account_id
+     * @param Payment $payment
+     * @param $import
+     * @return mixed
+     * Crea el item de pago, lo asocia al pago y crea la relacion entre el pago y el import
+     */
+    private function createItemAndRelation($amount, $description, $payment_method_id, $money_box_account_id, Payment $payment, $import)
+    {
+        $payment_item = [
+            'amount'=> $amount,
+            'description'=> $description,
+            'payment_method_id'=> $payment_method_id,
+            'money_box_account_id'=> $money_box_account_id,
+            'payment_id' => $payment->payment_id,
+            'paycheck_id' => null
+        ];
+        $payment->addItem($payment_item);
+        return $import->createPaymentRelation($payment->payment_id);
     }
 
 }
