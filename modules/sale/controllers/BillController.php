@@ -843,10 +843,12 @@ class BillController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
     }
-
+    
+    // selects the PDF generation library based on the APP configuration items.
     public function actionPdf($id){
+        // gets conf item
         $pdf_company = Config::getConfig('pdf_company')->description;
-
+        
         if($pdf_company == "westnet")
             return $this->WestnetPdf($id);
         
