@@ -241,7 +241,7 @@ AdminAsset::register($this);
 					<div class="bottom">
 						<ul>
 							<li>Servicio técnico: 2613439030</li>
-							<li>Administración: 2615884223</li>
+							<li>Administración: 2616577260</li>
 							<li>Correo electrónico: administracion@bigway.com.ar</li>
 							<li>Horarios de atención:</li>
 							<ul>
