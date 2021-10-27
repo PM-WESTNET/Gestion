@@ -3,6 +3,7 @@
 namespace app\modules\sale\models\search;
 
 use app\components\db\BigDataProvider;
+use yii\data\ArrayDataProvider;
 use app\components\helpers\SearchStringHelper;
 use app\modules\checkout\models\Payment;
 use app\modules\sale\models\Bill;
@@ -433,6 +434,44 @@ class CustomerSearch extends Customer {
         return $dataProvider;
 
     }
+
+     /**
+     * Busqueda de deudores
+     * @param array $params
+     * @return BigDataProvider
+     */
+    public function searchDebtorsV2($params, $pageSize = 20)
+    {
+        if(array_key_exists('CustomerSearch', $params)===false) {
+            $params['CustomerSearch']['amount_due'] = 0;
+        }
+        $result = $this->buildDebtorsQueryV2($params);
+
+        /*if (isset(Yii::$app->session)) {
+            Yii::$app->session->set('totalDebtors', $result->sum('saldo'));
+        }*/
+
+        /*$dataProvider = new BigDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => $pageSize,
+                'page' => (isset($params['page']) ? $params['page'] -1 : 0 )
+            ],
+        ]);*/
+        
+        $provider = new ArrayDataProvider([
+            'allModels' => $result,
+            'sort' => [
+                'attributes' => ['code', 'name', 'currency'],
+            ],
+            'pagination' => [
+                'pageSize' => 10,
+            ],
+        ]);
+
+        return $provider;
+
+    }
     
     /**
      * Genera un query para buscar a los deudores
@@ -619,6 +658,27 @@ class CustomerSearch extends Customer {
 
         return $query;
         
+    }
+
+    /**
+     * Genera un query para buscar a los deudores
+     * @param array $params
+     * @return Query
+     */
+    public function buildDebtorsQueryV2($params)
+    {
+        $this->load($params);
+
+        return Yii::$app->db->createCommand("SELECT cu.customer_id, cu.code, 
+                CONCAT(' ', cu.name, cu.lastname) AS name,
+                cu.phone,
+                cu.current_account_balance AS currency, 
+                ((SELECT COUNT(bi.bill_id) FROM bill bi WHERE bi.customer_id = cu.customer_id) -
+                (SELECT COUNT(pay.customer_id) FROM payment pay WHERE pay.customer_id = cu.customer_id AND pay.status != 'cancelled')) AS debt_bills
+                FROM customer cu
+                INNER JOIN contract co ON co.customer_id = cu.customer_id
+                WHERE co.status IN ('active', 'low-process')"
+            )->queryAll();
     }
     
    

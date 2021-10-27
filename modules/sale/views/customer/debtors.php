@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $item = '<span class="glyphicon glyphicon-chevron-down"></span> ' . Yii::t('app', 'Filters');
 
-    echo Collapse::widget([
+     Collapse::widget([
         'items' => [
             [
                 'label' => $item,
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute'=>'phone',
         ],
         [
-            'attribute'=>'saldo',
+            'attribute'=>'currency',
             'format'=>'currency',
             'label'=>Yii::t('app', 'Amount due'),
         ],

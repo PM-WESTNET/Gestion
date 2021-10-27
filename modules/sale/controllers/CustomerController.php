@@ -394,10 +394,10 @@ class CustomerController extends Controller
     public function actionDebtors()
     {
         $searchModel = new CustomerSearch;
-        $dataProvider = $searchModel->searchDebtors(Yii::$app->request->getQueryParams());
+        $arrayDataProvider = $searchModel->searchDebtorsV2(Yii::$app->request->getQueryParams());
 
         return $this->render('debtors', [
-            'dataProvider' => $dataProvider,
+            'dataProvider' => $arrayDataProvider,
             'searchModel' => $searchModel,
         ]);
     }
@@ -408,17 +408,14 @@ class CustomerController extends Controller
     public function actionExportDebtors()
     {
         $searchModel= new CustomerSearch();
-        $debtors= $searchModel->buildDebtorsQuery(Yii::$app->request->getQueryParams())->all();
+        $debtors= $searchModel->buildDebtorsQueryV2(Yii::$app->request->getQueryParams());
         
         $excel= ExcelExporter::getInstance();
         $excel->create('Deudores', [
             'A' => ['code', Yii::t('app', 'Customer Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'D' => ['phone2', Yii::t('app', 'Phone 2'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'E' => ['phone3', Yii::t('app', 'Phone 3'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'F' => ['phone4', Yii::t('app', 'Phone 4'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'G' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
+            'G' => ['currency', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
             'H' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();
