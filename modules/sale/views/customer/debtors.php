@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     
 
-    <h2 class="text-danger"><?= Yii::t('app', 'Total Debt')?> : <?php $total= (double)Yii::$app->session->get('totalDebtors'); echo Yii::$app->formatter->asCurrency($total)?></h2>
+    <h2 class="text-danger"><?= Yii::t('app', 'Total Debt')?> : <?=Yii::$app->formatter->asCurrency($total_debtors)?></h2>
     <?php
     $columns = [
         ['class' => 'yii\grid\SerialColumn'],

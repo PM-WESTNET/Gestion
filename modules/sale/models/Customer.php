@@ -2262,4 +2262,14 @@ class Customer extends ActiveRecord {
     public static function findContractsActiveByCustomerId($customer_id){
         return self::find()->where(['status' => 'active'])->all();
     }
+
+    /**
+    * @Return total current_account_balance
+    */
+    public static function getTotalDebtorsCurrency(){
+        return Yii::$app->db->createCommand("SELECT SUM(current_account_balance) AS total_debtors FROM customer cu
+            INNER JOIN contract co ON co.customer_id = cu.customer_id
+            WHERE co.status IN ('active', 'low-process') ")
+            ->queryOne();
+    }
 }
