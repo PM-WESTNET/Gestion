@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use kartik\date\DatePicker;
+use kartik\daterange\DateRangePicker;
 
 $this->title = Yii::t('app', 'Customer Registrations');
 
@@ -78,23 +79,26 @@ $this->registerJs(
                     'label' => 'Nodo',
                 ],
                 [
-                    'attribute'=>'date',
+                    'attribute' => 'date',
                     'format' => 'raw',
                     'header' => '<a class="prueba">Fecha <i class="glyphicon glyphicon-exclamation-sign" id="number-clients"></i></a>',
-                    'value' =>'date',
-                    'filter'=>DatePicker::widget([
+                    'value' => 'date',
+
+                    'filter' => DateRangePicker::widget([
                         'model' => $reportSearch,
+                        'name' => 'createTimeRange',
+                        'convertFormat' => true,
+                        'presetDropdown' => true,
                         'attribute' => 'date',
                         'value' => '2014-01-01',
-                        'type' => DatePicker::TYPE_RANGE,
-                        'attribute2' => 'date2',
-                        'value2' => '2016-01-01',
+                        //'attribute2' => 'date2',
+                        //'value2' => '2016-01-01',
                         'pluginOptions' => [
-                            'autoclose'=>true,
+                            'autoclose' => true,
                             'format' => 'yyyy-mm-dd'
                         ]
-                    ]),  
-                ],  
+                    ]),
+                ],
             ]
         ]) ?>
     </form>
