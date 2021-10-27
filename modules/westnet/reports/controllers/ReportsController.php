@@ -1183,9 +1183,11 @@ class ReportsController extends Controller
         $reportSearch = new ReportSearch();
         $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
 
-        if(Yii::$app->request->get() && isset(Yii::$app->request->get()['export'])){
+        // had to change it because of pretty urlManager
+        /* if(Yii::$app->request->get() && isset(Yii::$app->request->get()['export'])){
+            //http://gestion_westnet.local:8100/index.php?r=reports%2Freports%2Fcustomer-registrations&export=export&ReportSearch%5Bcode%5D=&ReportSearch%5Bfullname%5D=&ReportSearch%5Bname_product%5D=&ReportSearch%5Bspeed%5D=&ReportSearch%5Bnode%5D=
             return $this->renderPartial("customer-registrations-excel",['list_customers' => $list_customer_by_plan]);
-        }
+        } */
 
         return $this->render('customer-registrations', ['dataProvider' => $list_customer_by_plan, 'reportSearch' => $reportSearch]);
 
@@ -1206,5 +1208,15 @@ class ReportsController extends Controller
 
 
         return $this->render('statistic-app', ['searchModel' => $searchModel, 'dataProvider' => $dataProvider, 'colors' => self::COLORS, 'border_colors' => self::BORDER_COLORS,]);
+    }
+
+    public function actionCustomerRegistrationsExcel(){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomerByPlan(Yii::$app->request->get());
+
+        return $this->renderPartial(
+            "customer-registrations-excel",
+            ['list_customers' => $list_customer_by_plan]
+        );   
     }
 }
