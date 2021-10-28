@@ -20,13 +20,11 @@ $(document).ready(function () {
 
         $("#search-in-child-permissions").on("change keyup", function () {
             var input = $(this);
-
             firstForm.find("label").each(function () {
                 var _t = $(this);
-                var labelText = _t[0].innerText;
-
-                if (_t.html().indexOf(input.val()) > -1) {
-                    //console.log(input.val());
+                var labelText = _t[0].innerText.toLowerCase();
+                //console.log("_t is :",_t[0].innerText.toLowerCase());
+                if (labelText.indexOf(input.val().toLowerCase()) > -1) {
                     _t.closest("label").show();
                     _t.closest("label").next().show();
                     _t.closest("label").next().next().show();
