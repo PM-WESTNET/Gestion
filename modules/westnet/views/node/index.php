@@ -122,6 +122,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'vlan',
             ],
             [
+                'attribute' => 'smartolt_olt_id',
+            ],
+            [
                 'label' => Yii::t('westnet', 'Conexiones'),
                 'value' => function($model){
                     return COUNT(Connection::FindConnectionsByNode($model->node_id));

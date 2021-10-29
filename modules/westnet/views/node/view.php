@@ -73,6 +73,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute'=>'vlan',
             ],
+            [
+                'attribute'=>'smartolt_olt_id',
+            ],
             
         ],
     ]) ?>

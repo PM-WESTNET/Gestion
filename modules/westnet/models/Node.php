@@ -24,6 +24,7 @@ use app\modules\westnet\components\ipStrategy\LegacyStrategy;
  * @property integer $parent_node_id
  * @property integer $has_ecopago_close
  * @property vlan
+ * @property smartolt_olt_id;
  *
  * @property IpRange[] $ipRanges
  * @property Zone $zone
@@ -63,7 +64,7 @@ class Node extends \app\components\db\ActiveRecord
     {
 
         return [
-            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close', 'vlan','nat_server_id'], 'integer'],
+            [['zone_id',  'server_id', 'parent_node_id', 'has_ecopago_close', 'vlan','nat_server_id', 'smartolt_olt_id'], 'integer'],
             [['zone', 'ecopagos', 'parentNode', 'companies', 'company_default', 'geocode'], 'safe'],
             [['zone_id', 'name', 'status', 'server_id'], 'required'],
             [['name'], 'string', 'max' => 100],
@@ -94,6 +95,7 @@ class Node extends \app\components\db\ActiveRecord
             'has_ecopago_close' => Yii::t('westnet', 'Has Ecopago Close'),
             'geocode' => Yii::t('westnet', 'Geocode'),
             'vlan' => Yii::t('westnet', 'VLAN'),
+            'smartolt_olt_id' => 'SmartOlt Olt ID'
         ];
     }
 
