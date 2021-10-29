@@ -669,16 +669,118 @@ class CustomerSearch extends Customer {
     {
         $this->load($params);
 
-        return Yii::$app->db->createCommand("SELECT cu.customer_id, cu.code, 
-                CONCAT(' ', cu.name, cu.lastname) AS name,
-                cu.phone,
-                cu.current_account_balance AS currency, 
-                ((SELECT COUNT(bi.bill_id) FROM bill bi WHERE bi.customer_id = cu.customer_id) -
-                (SELECT COUNT(pay.customer_id) FROM payment pay WHERE pay.customer_id = cu.customer_id AND pay.status != 'cancelled')) AS debt_bills
-                FROM customer cu
-                INNER JOIN contract co ON co.customer_id = cu.customer_id
-                WHERE co.status IN ('active', 'low-process')"
-            )->queryAll();
+        $data = [];
+        $aux = 0;
+
+        $desde = 0;
+        $hasta = 1000;
+
+        $range = Yii::$app->db->createCommand("SELECT COUNT(*) AS count FROM customer")->queryOne()['count'] / 1000;
+        do{
+            $select = "SELECT cu.customer_id, cu.code, 
+                    CONCAT(' ', cu.name, cu.lastname) AS name,
+                    cu.phone,
+                    cu.current_account_balance AS currency, ";
+            $select_bill = "((SELECT COUNT(bi.bill_id) FROM bill bi WHERE bi.customer_id = cu.customer_id) - ";
+            $select_payment = "(SELECT COUNT(pay.customer_id) FROM payment pay WHERE pay.customer_id = cu.customer_id AND pay.status != 'cancelled')) AS debt_bills ";
+            $from = "FROM customer cu ";
+            $inner_join_contract = "INNER JOIN contract co ON co.customer_id = cu.customer_id
+            INNER JOIN bill bi ON bi.customer_id = cu.customer_id
+            INNER JOIN payment pay ON pay.customer_id = cu.customer_id WHERE ";
+            $final_where = "co.status IN ('active', 'low-process') AND cu.customer_id BETWEEN $desde AND $hasta GROUP BY cu.customer_id LIMIT 1000";
+
+            $general_where = "";
+
+            if (!empty($this->activatedFrom)){
+                $activatedFrom = Yii::$app->getFormatter()->asDate($this->activatedFrom, 'yyyy-MM-dd');
+                $general_where .=  "co.from_date >= $activatedFrom AND ";
+            }
+
+            if(!empty($this->customer_number))
+                $general_where .= "cu.code = $this->customer_number AND ";
+
+            if(!empty($this->name))
+                $general_where .= "cu.name LIKE '%$this->name%' AND ";
+            
+            if(!empty($this->toDate)){
+                $toDate = Yii::$app->getFormatter()->asDate($this->toDate, 'yyyy-MM-dd');
+
+                $general_where .= "bi.date <= $toDate AND ";
+                $general_where .= "pay.date <= $toDate AND ";
+            }
+
+            if (!empty($this->fromDate)){
+                $fromDate = Yii::$app->getFormatter()->asDate($this->fromDate, 'yyyy-MM-dd');
+                $general_where .= "pay.date >= $fromDate AND ";
+            }
+
+            if(!empty($this->company_id)) 
+                $general_where .= "cu.company_id = $this->company_id AND ";
+
+
+            if (!empty($this->activatedFrom)){
+                $activatedFrom = Yii::$app->getFormatter()->asDate($this->activatedFrom, 'yyyy-MM-dd');
+                $general_where .= "co.from_date >= $activatedFrom AND ";
+            }
+
+            if($this->debt_bills > 0) 
+                $general_where .= "debt.bills = $this->debt_bills AND ";
+
+            if(!empty($this->amount_due)) {
+                $amount_due = (double)$this->amount_due;
+                $general_where .= "currency > $amount_due AND ";
+            }
+
+            if($this->debt_bills_from > 0){
+                $debt_bills_from = Yii::$app->getFormatter()->asDate($this->debt_bills_from, 'yyyy-MM-dd');
+                $general_where .= "debt_bills >= $debt_bills_from AND ";
+            }
+
+            if ($this->debt_bills_to > 0){
+                $debt_bills_to = Yii::$app->getFormatter()->asDate($this->debt_bills_to, 'yyyy-MM-dd');
+                $general_where .= "debt_bills <= $debt_bills_to AND ";
+            }
+
+            if ($this->payed_bills_from > 0){
+                $payed_bills_from = Yii::$app->getFormatter()->asDate($this->payed_bills_from, 'yyyy-MM-dd');
+                $general_where .= "payed_bills >= $payed_bills_from AND ";
+            }
+
+            if ($this->payed_bills_to > 0){
+                $payed_bills_to = Yii::$app->getFormatter()->asDate($this->payed_bills_to, 'yyyy-MM-dd');
+                $general_where .= "payed_bills <= $payed_bills_to AND ";
+            }
+
+            if ($this->total_bills_from > 0){
+                $total_bills_from = Yii::$app->getFormatter()->asDate($this->total_bills_from, 'yyyy-MM-dd');
+                $general_where .= "debt_bills >= $total_bills_from AND ";
+            }
+
+            if ($this->total_bills_to > 0){
+                $total_bills_to = Yii::$app->getFormatter()->asDate($this->total_bills_to, 'yyyy-MM-dd');
+                $general_where .= "debt_bills <= $total_bills_to AND ";
+            }
+
+            if($this->exclude_customers_with_one_bill)
+                $general_where .= "debt_bills > 1";
+
+            if(!empty($this->customer_status)){
+                $status = $this->customer_status[0];
+                $general_where .= "cu.status = '$status' AND ";
+            }
+
+            $result = Yii::$app->db->createCommand($select.$select_bill.$select_payment.$from.$inner_join_contract.$general_where.$final_where)->queryAll();
+
+            $data = array_merge($data, $result);
+
+            $desde = $hasta;
+            $hasta += 1000 ;
+            $aux++;
+        
+        }while($aux < $range);
+
+        return $data;
+
     }
     
    
