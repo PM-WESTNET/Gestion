@@ -74,10 +74,6 @@ $(window).on("load", function () {
     const focusSearchBar = () => {
         searchBar.focus();
     }
-
-    setTimeout(
-        animateSearchBar,
-        animationTime
-    );
+    
     console.log('Search-bar initialized.');
 });

@@ -62,31 +62,30 @@ main {
   --searchbar-width: 8rem;
   margin: 0 0.4rem;
   position: relative;
-  width: var(--width-and-height);
+  width: 1.8rem;
   height: var(--width-and-height);
   border-radius: 1rem;
   box-shadow: 0 0 0 0.07rem rgb(255, 255, 255);
-  transition: 0.2s;
+  transition: width 0.2s;
   overflow: hidden;
   background: #ffffff;
 }
 
 .search-container.active {
-  width: var(--searchbar-width);
+  width: 8rem;
 }
+
 .search-container .input {
   position: relative;
   width: var(--searchbar-width);
   height: auto;
-  left: 2.2rem;
+  margin-left: 2em;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .search-container .search-icon {
   position: absolute;
-  top: 0;
-  left: 0;
   width: var(--width-and-height);
   height: var(--width-and-height);
   background: var(--bootstrap-light);
@@ -106,7 +105,6 @@ main {
   color: #222222;
 }
 .search-container .close-icon {
-  position: relative;
   top: 0;
   right: 0;
   display: flex;
