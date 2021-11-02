@@ -320,8 +320,9 @@ class BancoSuperville implements BankInterface
             if(substr($line,0,1) == "T")
                 break;
 
+
             $customer_id = trim(substr($line, 58, 22));
-            $amount = (double) substr($line, 103, 10);
+            $amount = (double) substr($line, 103, 8).'.'.substr($line,111,2);
             $cbu = substr($line, 33, 8);
             $code = substr($line, 173, 3);
             $code_description = $coelsa_code[$code];
@@ -340,7 +341,7 @@ class BancoSuperville implements BankInterface
                 array_push($failed_payments, ['customer_code' => $customer_code, 'amount' => $amount, 'date' => $process_timestamp, 'cbu' => $cbu, 'description' => $code_description]);
             }
         }
-        
+
         $import->process_timestamp = strtotime($process_timestamp);
         $import->file = $fileName;
         $import->save();
