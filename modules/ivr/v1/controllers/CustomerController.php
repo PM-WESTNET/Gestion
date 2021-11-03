@@ -1565,6 +1565,7 @@ class CustomerController extends Controller
 
         $customer_data = [
             'idcustomer' => $customer->customer_id,
+	    'code' => $customer->code,
             'national_id' => $customer->document_number, //REVISAR CASO DE CUIT
             'company_id' => $customer->taxCondition->name,
             'name' => $customer->name,
