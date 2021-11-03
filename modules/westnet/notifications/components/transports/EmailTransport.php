@@ -18,6 +18,7 @@ use app\components\helpers\FileLog;
 use \yii\helpers\VarDumper;
 use yii\helpers\Url;
 
+
 /**
  * Description of EmailTransport
  *
@@ -129,14 +130,37 @@ class EmailTransport implements TransportInterface {
 
                         //log_email($customer);
                         $toName = $customer['name'].' '.$customer['lastname'];
+
+                        //generate PDF in case of "@PdfAdjuntoFactura" tag
+
+                        //detect string in content
+                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){
+                            //create PDF corresponding to users
+                            $pdfString = createLatestBillPDF($id, $from = 'index', $email = null, $customer_id);
+                        } else{
+                            //echo "tag not found!";
+                        }
+
+                        //clone content and replace all "@" commands
                         $clone = clone $notification;
                         $clone->content = self::replaceText($notification->content, $customer);
                         
                         if ($validator->validate($customer['email'], $err)) {
                             $result = $mailSender->prepareMessageAndSend(
-                                ['email'=>$customer['email'], 'name' => $toName],
+                                [
+                                    'email'=>$customer['email'], 
+                                    'name' => $toName
+                                ],
                                 $notification->subject,
-                                [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                                [ 
+                                    'view'=> $layout ,
+                                    'params' => [
+                                        'notification' => $clone
+                                        ]
+                                ],
+                                null,
+                                null,
+                                $pdfString,
                             );
                             
                             if($result){
@@ -219,9 +243,24 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
         $replaced_text = str_replace('@BotonDePago', "  <a href='".$url_redirect_gestion."'". "style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>", $replaced_text);
         $replaced_text = str_replace('@LogoSiro', "</br><img src=".Url::base().'/images/logo-siro.png'." alt='LogoSiro' style='border:0;width:80px;'>", $replaced_text);
+        $replaced_text = str_replace('@PdfAdjuntoFactura', "", $replaced_text);
 
         return $replaced_text;
+    }
 
+    /**
+     * Envía el recibo de pago por email al cliente.
+     */
+    //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
+    private function createLatestBillPDF($id, $from = 'index', $email = null, $customer_id){
+        $model = $this->findModel($id);
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
     }
 
 }
