@@ -22,6 +22,7 @@ use Yii;
  * @property double $value_applied
  * @property double $payment_plan_amount
  * @property integer $customer_id
+ * @property string $description
  *
  * @property Customer $customer
  * @property ProductToInvoice[] $productToInvoices
@@ -70,7 +71,7 @@ class PaymentPlan extends \app\components\db\ActiveRecord
     {
         return [
             [['from_date',  'fee', 'original_amount', 'final_amount', 'customer_id', 'payment_plan_amount'], 'required'],
-            [['from_date', 'customer', 'create_bill'], 'safe'],
+            [['from_date', 'customer', 'create_bill', 'description'], 'safe'],
             [['from_date'], 'date'],
             [['status'], 'string'],
             [['status'], 'in', 'range' => ['active', 'completed', 'canceled']],
@@ -102,6 +103,7 @@ class PaymentPlan extends \app\components\db\ActiveRecord
             'balance' => Yii::t('app', 'payment_plan_balance'),
             'created_at' => Yii::t('app', 'Creado'),
             'created_by' => Yii::t('app', 'Creado por'),
+            'description' => Yii::t('app', 'Description'),
         ];
     }    
 
