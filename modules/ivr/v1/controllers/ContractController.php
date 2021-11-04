@@ -143,30 +143,29 @@ class ContractController extends Controller
         
         $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
 
-        if (!$connection) 
-            $connection = new Connection();
+        if (!$connection)$connection = new Connection();
         
-            $ads_code = $data['ads_code'];
+        $ads_code = $data['ads_code'];
 
-            // Busco el ADS vacio
-            $emptyAds = EmptyAds::findOne(['code' => $ads_code , 'used' => false]);
+        // Busco el ADS vacio
+        $emptyAds = EmptyAds::findOne(['code' => $ads_code , 'used' => false]);
 
-            // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
-            if(!empty($emptyAds)) {
-                $customer->code = $ads_code;
-                $customer->payment_code = $emptyAds->payment_code;
-                $customer->company_id = $emptyAds->company_id;
-                $customer->status = Customer::STATUS_ENABLED;
-                $emptyAds->used = true;
-                $customer->save(false);
-                $emptyAds->updateAttributes(['used']);
-            }
-            else{
-                return [
-                    'error' => true,
-                    'message' => 'The ADS specified doesnt exist.'
-                ];
-            }
+        // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
+        if(!empty($emptyAds)){
+            $customer->code = $ads_code;
+            $customer->payment_code = $emptyAds->payment_code;
+            $customer->company_id = $emptyAds->company_id;
+            $customer->status = Customer::STATUS_ENABLED;
+            $emptyAds->used = true;
+            $customer->save(false);
+            $emptyAds->updateAttributes(['used']);
+        }
+        else{
+            return [
+                'error' => true,
+                'message' => 'The ADS specified doesnt exist.'
+            ];
+        }
         // retornar error si el ADS no existe.
 
         
@@ -185,25 +184,47 @@ class ContractController extends Controller
             $connection->server_id = $node->server_id;
             $connection->access_point_id = '';
             $connection->mac_address = '';
-            $connection->ip4_public = 0;
+            $connection->ip4_public = '0';
             $connection->contract_id = $contract->contract_id;
             $connection->due_date = null;
             $connection->status = 'enabled';
-            $connection->ip4_2 = 0;
+            $connection->ip4_2 = '0';
 
 
             // Si viene desde un vendedor, no va a tener empresa, por lo que hay que sacarla de del nodo.
             //Si la coneccion se guarda
-            if ($connection->save(false) && $contract->save(false)) {
+
+            /* if($connection->save()){ // if model saves correctly
+                var_dump('connection correctly saved');
+            }else{
+                var_dump("connection save failed"); // Its failing to save connection instance to db.
+                var_dump($connection->getErrors());
+            }
+            if($contract->save()){
+                var_dump('contract correctly saved');
+            }else{
+                var_dump("contract save failed");
+                var_dump($contract->getErrors());
+            }
+            die(); */
+            if ($connection->save() && $contract->save()) {
+                
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($contract, $connection)) {
                     $contract->customer->sendMobileAppLinkSMSMessage();
                     Ticket::createGestionADSTicket($contract->customer_id);
                     $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     
+                    // try to up the existing connection based on ID. 
+                
+                    //$connection->connection_id
+                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                    $connection->update(false);
+                    //$result = ($connection->status_account == Connection::STATUS_ACCOUNT_ENABLED);
+
                     return [
                         'error' => false,
-                        'message' => 'the contract was activated successfully'
+                        'message' => 'the contract and connection were activated successfully'
                     ];
                 }
             }else{
