@@ -129,21 +129,32 @@ class ContractController extends Controller
         $customer = Customer::findOne(['customer_id' => $data['customer_id']]);
 
         $contract = Contract::find()->where(['customer_id' => $data['customer_id']])->andWhere(['!=','status','inactive'])->orderBy(['contract_id' => SORT_DESC])->one();
+        
+        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+        if (!$connection){ // creates a new connection based on the existing contract when no connection exists already
+            $connection = new Connection();
+        }
 
         if(empty($contract))
             return [
                 'error' => true,
                 'message' => 'The customers contract is empty'
             ];
+        elseif ($contract->status == 'active' && $connection->status == 'disabled'){
+            $this->updateConnectionStatus($connection);
+            return [
+                'error' => true,
+                'message' => 'The last contract of customer is active. Updated connection status to active'
+            ];
+        }
         elseif ($contract->status == 'active') 
             return [
                 'error' => true,
                 'message' => 'The last contract of customer is active'
             ];
         
-        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
-
-        if (!$connection)$connection = new Connection();
+        
         
         $ads_code = $data['ads_code'];
 
@@ -179,6 +190,7 @@ class ContractController extends Controller
                     'error' => true,
                     'message' => 'The node_id doesnt exists'
                 ];
+            
 
             $connection->node_id = $data['node_id'];
             $connection->server_id = $node->server_id;
@@ -193,20 +205,6 @@ class ContractController extends Controller
 
             // Si viene desde un vendedor, no va a tener empresa, por lo que hay que sacarla de del nodo.
             //Si la coneccion se guarda
-
-            /* if($connection->save()){ // if model saves correctly
-                var_dump('connection correctly saved');
-            }else{
-                var_dump("connection save failed"); // Its failing to save connection instance to db.
-                var_dump($connection->getErrors());
-            }
-            if($contract->save()){
-                var_dump('contract correctly saved');
-            }else{
-                var_dump("contract save failed");
-                var_dump($contract->getErrors());
-            }
-            die(); */
             if ($connection->save() && $contract->save()) {
                 
                 $cti = new ContractToInvoice();
@@ -216,10 +214,7 @@ class ContractController extends Controller
                     $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     
                     // try to up the existing connection based on ID. 
-                
-                    //$connection->connection_id
-                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                    $connection->update(false);
+                    $this->updateConnectionStatus($connection);
                     //$result = ($connection->status_account == Connection::STATUS_ACCOUNT_ENABLED);
 
                     return [
@@ -241,5 +236,9 @@ class ContractController extends Controller
             ];
         }
 
+    }
+    private function updateConnectionStatus($connection){
+        $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+        $connection->update(false);
     }
 }
