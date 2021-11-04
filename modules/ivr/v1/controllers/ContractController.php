@@ -110,19 +110,21 @@ class ContractController extends Controller
      */
     public function actionCreateContract()
     {
+        var_dump(Yii::$app->request->post());die();
+
         $data = Yii::$app->request->post();
 
         if (!isset($data['node_id']) || !isset($data['customer_id'])  || !isset($data['ads_code'])) 
             return [
                 'error' => true,
-                'message' => 'the fields node_id, customer_id, ads_code is required'
+                'message' => 'the fields node_id, customer_id, ads_code are required'
             ];
         
 
         if (empty($data['node_id']) || empty($data['customer_id'])  || empty($data['ads_code'])) 
             return [
                 'error' => true,
-                'message' => 'the fields node_id, customer_id, ads_code is not empty'
+                'message' => 'the fields node_id, customer_id, ads_code are empty'
             ];
         
 
@@ -133,7 +135,7 @@ class ContractController extends Controller
         if(empty($contract))
             return [
                 'error' => true,
-                'message' => 'The customer dont have contract'
+                'message' => 'The customers contract is empty'
             ];
         elseif ($contract->status == 'active') 
             return [
@@ -164,7 +166,7 @@ class ContractController extends Controller
             else{
                 return [
                     'error' => true,
-                    'message' => 'The ADS specified does not exist.'
+                    'message' => 'The ADS specified doesnt exist.'
                 ];
             }
         // retornar error si el ADS no existe.
@@ -178,7 +180,7 @@ class ContractController extends Controller
             if(empty($node))
                 return [
                     'error' => true,
-                    'message' => 'The node_id dont exists'
+                    'message' => 'The node_id doesnt exists'
                 ];
 
             $connection->node_id = $data['node_id'];
@@ -203,10 +205,16 @@ class ContractController extends Controller
                     
                     return [
                         'error' => false,
-                        'message' => 'the contract actived successfully'
+                        'message' => 'the contract was activated successfully'
                     ];
                 }
+            }else{
+                return [
+                    'error' => false,
+                    'message' => 'Couldnt save new contract or connection instances to BD'
+                ];
             }
+
         }else{
             return [
                 'error' => true,
