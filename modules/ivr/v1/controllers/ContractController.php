@@ -110,8 +110,6 @@ class ContractController extends Controller
      */
     public function actionCreateContract()
     {
-        var_dump(Yii::$app->request->post());die();
-
         $data = Yii::$app->request->post();
 
         if (!isset($data['node_id']) || !isset($data['customer_id'])  || !isset($data['ads_code'])) 
