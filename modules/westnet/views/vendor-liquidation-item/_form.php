@@ -17,15 +17,15 @@ use kartik\widgets\Select2;
     <h3><?= $liquidation->vendor->fullName ?></h3>
     <h4><?= Yii::t('app', 'Period') .': '. $liquidation->periodMonth ?></h4>
 
-    <?= $form->field($model, 'amount')->textInput() ?>
+    <?= $form->field($model, 'amount')->textInput()->input('amount', ['placeholder' => "Introduzca un monto"])->hint('Agregar un menos (-) para importes negativos') ?>
 
     <?= $form->field($model, 'description')->textInput(['maxlength' => 255]) ?>
     
-    <?= $form->field($model, 'contract_detail_id')->widget(Select2::className(),[
+    <?= $form->field($model, 'contract_detail_id')->textInput()->label('Detalle de Contrato')->widget(Select2::className(),[
         'data' => app\modules\sale\modules\contract\models\ContractDetail::getForLiquidationSelect($liquidation->vendor_id),
-        'options' => ['placeholder' => Yii::t("app", "Select"), 'encode' => false],
+        'options' => ['placeholder' => 'Seleccionar un contrato activo', 'encode' => false],
         'pluginOptions' => [
-            'allowClear' => true
+            'allowClear' => true,
         ]
     ]);
     ?>
