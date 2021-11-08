@@ -9,6 +9,7 @@ use yii\helpers\Url;
 
 $notification = Yii::$app->view->params['notification'];
 $title = $notification['subject'];
+$use_https = false;
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -50,7 +51,7 @@ $title = $notification['subject'];
                       <td style="background-color: #EEEEEE; text-align: center;">
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/">
                           <?= Html::img(
-                            Url::base('https') . '/images/westnet-small-highres.png',
+                            Url::base(($use_https)?'https':false) . '/images/westnet-small-highres.png',
                             ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
@@ -104,7 +105,7 @@ $title = $notification['subject'];
                                       <br>
                                       <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/medios-de-pago/">
                                         <?= Html::img(
-                                          Url::base('https') . '/images/notifications/payment-methods-icon.png',
+                                          Url::base(($use_https)?'https':false) . '/images/notifications/payment-methods-icon.png',
                                           ['alt' => 'Payment-Methods', 'style' => 'border: 0;width: 50px;']
                                         ) ?>
                                       </a>
@@ -154,7 +155,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://play.google.com/store/apps/details?id=ar.com.westnet.customer.app">
                                 <?= Html::img(
-                                  Url::base('https') . '/images/notifications/android-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/android-icon.png',
                                   ['alt' => 'Android-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -163,7 +164,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://apps.apple.com/ar/app/westnet/id1491036341">
                                 <?= Html::img(
-                                  Url::base('https') . '/images/notifications/apple-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/apple-icon.png',
                                   ['alt' => 'iOS-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -191,7 +192,7 @@ $title = $notification['subject'];
                         </p>
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/atencion-al-cliente/">
                           <?= Html::img(
-                            Url::base('https') . '/images/notifications/chat-icon.png',
+                            Url::base(($use_https)?'https':false) . '/images/notifications/chat-icon.png',
                             ['alt' => 'chat-icon', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                           ) ?>
 
@@ -214,7 +215,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://twitter.com/westnetoficial">
                                 <?= Html::img(
-                                  Url::base('https') . '/images/notifications/twitter-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/twitter-icon.png',
                                   ['alt' => 'twitter-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
 
@@ -223,7 +224,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.facebook.com/internet.westnet/">
                                 <?= Html::img(
-                                  Url::base('https') . '/images/notifications/facebook-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/facebook-icon.png',
                                   ['alt' => 'facebook-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
@@ -231,7 +232,7 @@ $title = $notification['subject'];
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.instagram.com/westnet.internet/">
                                 <?= Html::img(
-                                  Url::base('https') . '/images/notifications/instagram-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/instagram-icon.png',
                                   ['alt' => 'instagram-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
