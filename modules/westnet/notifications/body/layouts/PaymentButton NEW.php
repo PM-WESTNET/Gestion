@@ -9,7 +9,8 @@ use yii\helpers\Url;
 
 $notification = Yii::$app->view->params['notification'];
 $title = $notification['subject'];
-$use_https = false; // used for setting the Yii:Base 'https' parameter for every image (except the one of SiroLogo?, stil..)
+
+$use_https = isset($notification['use_https']) ? $notification['use_https'] : false; // used for setting the Yii:Base 'https' parameter for every image (except the one of SiroLogo?, stil..)
 $urlBase = Url::base(($use_https)?'https':false);
 
 ?>
