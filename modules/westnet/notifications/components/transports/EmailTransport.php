@@ -17,6 +17,8 @@ use PHPExcel_IOFactory;
 use app\components\helpers\FileLog;
 use \yii\helpers\VarDumper;
 use yii\helpers\Url;
+use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\search\PaymentSearch;
 
 
 /**
@@ -136,7 +138,7 @@ class EmailTransport implements TransportInterface {
                         //detect string in content
                         if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){
                             //create PDF corresponding to users
-                            $pdfString = createLatestBillPDF($id, $from = 'index', $email = null, $customer_id);
+                            $pdfString = $this->createLatestBillPDF($customer['customer_id']);
                         } else{
                             //echo "tag not found!";
                         }
@@ -160,7 +162,7 @@ class EmailTransport implements TransportInterface {
                                 ],
                                 null,
                                 null,
-                                $pdfString,
+                                $pdfString
                             );
                             
                             if($result){
@@ -252,15 +254,19 @@ class EmailTransport implements TransportInterface {
      * Envía el recibo de pago por email al cliente.
      */
     //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
-    private function createLatestBillPDF($id, $from = 'index', $email = null, $customer_id){
-        $model = $this->findModel($id);
-
-        $pdf = $this->actionPdf($id);
+    function createLatestBillPDF($customerId){ // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
+        var_dump("createLastestBillPDF fire");die();
+        /* $searchModel = new PaymentSearch();
+        $searchModel->customer_id = $customerId;
+        $dataProvider = $searchModel->searchAccount($customerId, Yii::$app->request->queryParams); */
+        $model = Payment::findOne($paymentId);
+        $pdf = $model->actionPdf($paymentId);
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/" . 'Comprobante' . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
         $file = fopen($fileName, "w+");
         fwrite($file, $pdf);
         fclose($file);
+        return true;
     }
 
 }
