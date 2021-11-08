@@ -146,7 +146,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://apps.apple.com/ar/app/westnet/id1491036341">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':'') . '/images/notifications/apple-icon.png',
+                                  Url::base(($use_https)?'https':false) . '/images/notifications/apple-icon.png',
                                   ['alt' => 'iOS-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
