@@ -105,6 +105,11 @@ $total = abs($payment->accountTotal());
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                                <?= $form->field($model, 'description')->textarea(['rows' => '6']); ?>
+                        </div>
+                    </div>
                     <div class="form-group" id="saveButtons">
                         <a id="btnSave" class="btn btn btn-success"><?= Yii::t('app', 'Generate'); ?></a>
 

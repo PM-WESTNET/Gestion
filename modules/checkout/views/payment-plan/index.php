@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->created_at ? (new \DateTime('now'))->setTimestamp($model->created_at)->format('d-m-Y') : '';
                 }
             ],
+            'description',
             [
                 'attribute' => 'created_by',
                 'value' => function($model) {

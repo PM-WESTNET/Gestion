@@ -1541,24 +1541,31 @@ class CustomerController extends Controller
     public function actionGetDataCustomer(){
         $data = Yii::$app->request->post();
 
-        if(!isset($data['document_number']))
+        if(!isset($data['code']))
             return [
                 'error' => true,
                 'message' => 'The fields document_number is required'
             ];
 
-        if(empty($data['document_number']))
+        if(empty($data['code']))
             return [
                 'error' => true,
                 'message' => 'The fields document_number isn´t empty'
             ];
 
-        $customer = Customer::findOne(['customer_id' => 61190]);
+        $customer = Customer::findOne(['code' => $data['code']]);
+	
+	if(empty($customer))
+		return [
+			'error' => 'true',
+			'message' => 'Client not found'
+		];
 
-        $fulladdress = $customer->address->fulladdress;
+        $fulladdress = isset($customer->address)?$customer->address->fulladdress:'El cliente no posee dirección';
 
         $customer_data = [
             'idcustomer' => $customer->customer_id,
+	    'code' => $customer->code,
             'national_id' => $customer->document_number, //REVISAR CASO DE CUIT
             'company_id' => $customer->taxCondition->name,
             'name' => $customer->name,
@@ -1577,7 +1584,7 @@ class CustomerController extends Controller
             'noduedebt' => $customer->current_account_balance,
             'duedate1' => date('15/m/Y'),
             'duedate2' => '',
-            'payments_url' => 'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id,
+            'payments_url' => !empty($customer->hash_customer_id)?'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id:'',
             'invoices' => '',
             'invoices_qty' => Customer::getOwedBills($customer->customer_id),
         ];
@@ -1602,7 +1609,7 @@ class CustomerController extends Controller
                 'lng' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[1],
                 'node' => $node->name,
                 'access_point' => '',
-                's_status' => '',
+                's_status' => $connection->status_account,
                 'message' => '',
                 'extra_info' => ''
             ];

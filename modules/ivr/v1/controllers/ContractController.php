@@ -115,58 +115,68 @@ class ContractController extends Controller
         if (!isset($data['node_id']) || !isset($data['customer_id'])  || !isset($data['ads_code'])) 
             return [
                 'error' => true,
-                'message' => 'the fields node_id, customer_id, ads_code is required'
+                'message' => 'the fields node_id, customer_id, ads_code are required'
             ];
         
 
         if (empty($data['node_id']) || empty($data['customer_id'])  || empty($data['ads_code'])) 
             return [
                 'error' => true,
-                'message' => 'the fields node_id, customer_id, ads_code is not empty'
+                'message' => 'the fields node_id, customer_id, ads_code are empty'
             ];
         
 
         $customer = Customer::findOne(['customer_id' => $data['customer_id']]);
 
         $contract = Contract::find()->where(['customer_id' => $data['customer_id']])->andWhere(['!=','status','inactive'])->orderBy(['contract_id' => SORT_DESC])->one();
+        
+        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+
+        if (!$connection){ // creates a new connection based on the existing contract when no connection exists already
+            $connection = new Connection();
+        }
 
         if(empty($contract))
             return [
                 'error' => true,
-                'message' => 'The customer dont have contract'
+                'message' => 'The customers contract is empty'
             ];
+        elseif ($contract->status == 'active' && $connection->status == 'disabled'){
+            $this->updateConnectionStatus($connection);
+            return [
+                'error' => true,
+                'message' => 'The last contract of customer is active. Updated connection status to active'
+            ];
+        }
         elseif ($contract->status == 'active') 
             return [
                 'error' => true,
                 'message' => 'The last contract of customer is active'
             ];
         
-        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
-
-        if (!$connection) 
-            $connection = new Connection();
         
-            $ads_code = $data['ads_code'];
+        
+        $ads_code = $data['ads_code'];
 
-            // Busco el ADS vacio
-            $emptyAds = EmptyAds::findOne(['code' => $ads_code , 'used' => false]);
+        // Busco el ADS vacio
+        $emptyAds = EmptyAds::findOne(['code' => $ads_code , 'used' => false]);
 
-            // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
-            if(!empty($emptyAds)) {
-                $customer->code = $ads_code;
-                $customer->payment_code = $emptyAds->payment_code;
-                $customer->company_id = $emptyAds->company_id;
-                $customer->status = Customer::STATUS_ENABLED;
-                $emptyAds->used = true;
-                $customer->save(false);
-                $emptyAds->updateAttributes(['used']);
-            }
-            else{
-                return [
-                    'error' => true,
-                    'message' => 'The ADS specified does not exist.'
-                ];
-            }
+        // Si tiene ADS vacio, tengo que forzar la actualizacion del company en el cliente.
+        if(!empty($emptyAds)){
+            $customer->code = $ads_code;
+            $customer->payment_code = $emptyAds->payment_code;
+            $customer->company_id = $emptyAds->company_id;
+            $customer->status = Customer::STATUS_ENABLED;
+            $emptyAds->used = true;
+            $customer->save(false);
+            $emptyAds->updateAttributes(['used']);
+        }
+        else{
+            return [
+                'error' => true,
+                'message' => 'The ADS specified doesnt exist.'
+            ];
+        }
         // retornar error si el ADS no existe.
 
         
@@ -178,35 +188,47 @@ class ContractController extends Controller
             if(empty($node))
                 return [
                     'error' => true,
-                    'message' => 'The node_id dont exists'
+                    'message' => 'The node_id doesnt exists'
                 ];
+            
 
             $connection->node_id = $data['node_id'];
             $connection->server_id = $node->server_id;
             $connection->access_point_id = '';
             $connection->mac_address = '';
-            $connection->ip4_public = 0;
+            $connection->ip4_public = '0';
             $connection->contract_id = $contract->contract_id;
             $connection->due_date = null;
             $connection->status = 'enabled';
-            $connection->ip4_2 = 0;
+            $connection->ip4_2 = '0';
 
 
             // Si viene desde un vendedor, no va a tener empresa, por lo que hay que sacarla de del nodo.
             //Si la coneccion se guarda
-            if ($connection->save(false) && $contract->save(false)) {
+            if ($connection->save() && $contract->save()) {
+                
                 $cti = new ContractToInvoice();
                 if ($cti->createContract($contract, $connection)) {
                     $contract->customer->sendMobileAppLinkSMSMessage();
                     Ticket::createGestionADSTicket($contract->customer_id);
                     $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
                     
+                    // try to up the existing connection based on ID. 
+                    $this->updateConnectionStatus($connection);
+                    //$result = ($connection->status_account == Connection::STATUS_ACCOUNT_ENABLED);
+
                     return [
                         'error' => false,
-                        'message' => 'the contract actived successfully'
+                        'message' => 'the contract and connection were activated successfully'
                     ];
                 }
+            }else{
+                return [
+                    'error' => false,
+                    'message' => 'Couldnt save new contract or connection instances to BD'
+                ];
             }
+
         }else{
             return [
                 'error' => true,
@@ -214,5 +236,9 @@ class ContractController extends Controller
             ];
         }
 
+    }
+    private function updateConnectionStatus($connection){
+        $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+        $connection->update(false);
     }
 }
