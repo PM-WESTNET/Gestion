@@ -10,6 +10,8 @@ use yii\helpers\Url;
 $notification = Yii::$app->view->params['notification'];
 $title = $notification['subject'];
 $use_https = false; // used for setting the Yii:Base 'https' parameter for every image (except the one of SiroLogo?, stil..)
+$urlBase = Url::base(($use_https)?'https':false);
+
 ?>
 <?php $this->beginPage() ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -51,7 +53,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                       <td style="background-color: #EEEEEE; text-align: center;">
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/">
                           <?= Html::img(
-                            Url::base(($use_https)?'https':false) . '/images/westnet-small-highres.png',
+                            $urlBase . '/images/westnet-small-highres.png',
                             ['alt' => 'Logo', 'style' => 'border: 0;width: 160px;']
                           ) ?>
                         </a>
@@ -137,7 +139,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://play.google.com/store/apps/details?id=ar.com.westnet.customer.app">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':false) . '/images/notifications/android-icon.png',
+                                  $urlBase . '/images/notifications/android-icon.png',
                                   ['alt' => 'Android-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -146,7 +148,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://apps.apple.com/ar/app/westnet/id1491036341">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':false) . '/images/notifications/apple-icon.png',
+                                  $urlBase . '/images/notifications/apple-icon.png',
                                   ['alt' => 'iOS-App', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                                 ) ?>
 
@@ -174,7 +176,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                         </p>
                         <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://westnet.com.ar/atencion-al-cliente/">
                           <?= Html::img(
-                            Url::base(($use_https)?'https':false) . '/images/notifications/chat-icon.png',
+                            $urlBase . '/images/notifications/chat-icon.png',
                             ['alt' => 'chat-icon', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 25px;']
                           ) ?>
 
@@ -197,7 +199,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://twitter.com/westnetoficial">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':false) . '/images/notifications/twitter-icon.png',
+                                  $urlBase . '/images/notifications/twitter-icon.png',
                                   ['alt' => 'twitter-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
 
@@ -206,7 +208,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.facebook.com/internet.westnet/">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':false) . '/images/notifications/facebook-icon.png',
+                                  $urlBase . '/images/notifications/facebook-icon.png',
                                   ['alt' => 'facebook-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
@@ -214,7 +216,7 @@ $use_https = false; // used for setting the Yii:Base 'https' parameter for every
                             <td style="padding: 0;">
                               <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.instagram.com/westnet.internet/">
                                 <?= Html::img(
-                                  Url::base(($use_https)?'https':false) . '/images/notifications/instagram-icon.png',
+                                  $urlBase . '/images/notifications/instagram-icon.png',
                                   ['alt' => 'instagram-page', 'class' => 'footer-img', 'style' => 'border: 0;margin: 0 10px;width: 20px;']
                                 ) ?>
                               </a>
