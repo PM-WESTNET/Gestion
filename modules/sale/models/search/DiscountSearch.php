@@ -151,6 +151,7 @@ class DiscountSearch extends Discount
      */
     public function search($params)
     {
+
         $query = Discount::find();
 
         $dataProvider = new ActiveDataProvider([
