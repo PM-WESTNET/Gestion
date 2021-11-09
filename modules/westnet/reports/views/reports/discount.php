@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'attribute' => 'name',
                             'format' => 'html',
-                            'label' => 'Descripcion',
+                            'label' => 'Nombre/Descripción',
                             'value' => function($model){
                                 return Html::a($model->name, 
                                             ['/sale/discount/view', 'id' => $model->discount_id], 
@@ -33,14 +33,25 @@ $this->params['breadcrumbs'][] = $this->title;
                             'filter' => $list_discount,
                             'filterType' => GridView::FILTER_SELECT2,
                             'filterWidgetOptions' => [
-                                'options' => ['prompt' => ''],
-                                'pluginOptions' => ['allowClear' => true],
+                                'options' => [
+                                    'prompt' => '',
+                                    //'multiple' => true, //
+                                ],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                ],
+                                'toggleAllSettings' => [
+                                    'selectLabel' => '',
+                                    'unselectLabel' => '',
+                                ],
+                                
                             ],
+                            
                         ],
                         [
                             'attribute' => 'customerAmount',
                             'format' => 'text',
-                            'label' => 'Cant Clientes',
+                            'label' => 'Cant. Clientes',
                             'value' => function ($model) {
                                 return $model->customerAmount;
                             }
@@ -77,11 +88,12 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'convertFormat' => true,
                                 'presetDropdown' => true,
                                 'pluginOptions' => [
-                                    'timePicker' => true,
-                                    'timePickerIncrement' => 1,
+                                    'timePicker' => false,
+                                    //'timePickerIncrement' => 1,
                                     'locale' => [
-                                        'format' => 'Y-m-d'
+                                        'format' => 'd-m-Y'
                                     ],
+                                    //'pluginOptions' => ['allowClear' => true],
                                 ]
                             ]),  
                         ],
