@@ -74,13 +74,13 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                         ],
                         [
-                            'attribute'=>'date',
+                            'attribute'=>'from_date',
                             'format' => 'raw',
                             'value' => function($model) {
                                 return $model->from_date . ' - ' . $model->to_date;
                             },
                             'contentOptions' => ['style' => 'width:24%;'],
-                            'label' => Yii::t('app','Date'),
+                            'label' => 'Rango Vigencia (busca x fec.de comienzo)',
                             'filter'=>DateRangePicker::widget([
                                 'name' => 'createTimeRange',
                                 'model' => $discountSearch,
@@ -93,8 +93,10 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'locale' => [
                                         'format' => 'd-m-Y'
                                     ],
-                                    //'pluginOptions' => ['allowClear' => true],
-                                ]
+                                    'pluginOptions' => ['allowClear' => true],
+                                    
+                                ],
+                                
                             ]),  
                         ],
                         [

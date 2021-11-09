@@ -94,7 +94,7 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-        $from_date = array('','');
+        $validDateRange = array('','');
 
         // awesome query
         $query = Discount::find()
@@ -105,9 +105,28 @@ class DiscountSearch extends Discount
                 ->filterHaving(['like', 'COUNT(*)', $this->customerAmount.'%', false])
                 ;
 
+        // standard Where equals
+        $query->andFilterWhere([
+            'discount_id' => $this->discount_id,
+        ]);
+        
+        if(!empty($this->from_date))
+            $validDateRange = explode(' - ', $this->from_date);
+
+        foreach($validDateRange as $i => $date){
+            $validDateRange[$i] = date("Y-m-d", strtotime($validDateRange[$i])); // we need it to be Y-m-d for the DB query
+        }
+        
+        // AND WHERE LIKE-s (pattern match)
+        $query->andFilterWhere(['like', 'd.name', $this->name]);
+        $query->andFilterWhere(['like', 'd.status', $this->status]);
+        $query->andFilterWhere(['>=', 'd.from_date', $validDateRange[0]]);
+        $query->andFilterWhere(['<=', 'd.from_date', $validDateRange[1]]);
+        $query->andFilterWhere(['like', 'd.type', $this->type]);
+        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
         // creates the ActiveDataProvider instance
         $dataProvider = new ActiveDataProvider([
-            'query' => $query
+        'query' => $query
         ]);
 
         // Adds a custom attribute to the end of the attributes array
@@ -122,23 +141,8 @@ class DiscountSearch extends Discount
         if (!$this->validate()) {
             return $dataProvider;
         }
+        //die(var_dump($query));
 
-        // standard Where equals
-        $query->andFilterWhere([
-            'discount_id' => $this->discount_id,
-        ]);
-        
-        if(!empty($this->from_date))
-            $from_date = explode(' - ', $this->from_date);
-
-        // AND WHERE LIKE-s (pattern match)
-        $query->andFilterWhere(['like', 'd.name', $this->name]);
-        $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['>=', 'd.from_date', $from_date[0]]);
-        $query->andFilterWhere(['<=', 'd.from_date', $from_date[1]]);
-        $query->andFilterWhere(['like', 'd.type', $this->type]);
-        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
-       
         return $dataProvider;
     }
 
