@@ -103,7 +103,6 @@ class DiscountSearch extends Discount
                 ->leftJoin('customer_has_discount chd', 'd.discount_id = chd.discount_id' )
                 ->groupBy('d.discount_id')
                 ->filterHaving(['like', 'COUNT(*)', $this->customerAmount.'%', false])
-                ->orderBy(['d.from_date' => SORT_ASC])
                 ;
 
         // creates the ActiveDataProvider instance
@@ -143,7 +142,7 @@ class DiscountSearch extends Discount
         return $dataProvider;
     }
 
-/**
+    /**
      * Creates data provider instance with search query applied
      *
      * @param array $params
@@ -161,8 +160,6 @@ class DiscountSearch extends Discount
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 
