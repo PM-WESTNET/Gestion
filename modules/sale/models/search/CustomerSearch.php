@@ -674,16 +674,16 @@ class CustomerSearch extends Customer {
             $inner_join_contract = "INNER JOIN contract co ON co.customer_id = cu.customer_id
             INNER JOIN bill bi ON bi.customer_id = cu.customer_id
             INNER JOIN payment pay ON pay.customer_id = cu.customer_id WHERE ";
-            $final_where = "cu.customer_id BETWEEN $desde AND $hasta GROUP BY cu.customer_id LIMIT 1000";
+            $final_where = "cu.customer_id BETWEEN $desde AND $hasta GROUP BY cu.customer_id ORDER BY cu.customer_id ASC LIMIT 1000";
 
             $general_where = "";
 
 
             if($this->debt_bills_from > 0)
-                $general_where .= "cu.debt_bills >= $debt_bills_from AND ";
+                $general_where .= "cu.total_bills >= $this->debt_bills_from AND ";
 
             if ($this->debt_bills_to > 0)
-                $general_where .= "cu.debt_bills <= $debt_bills_to AND ";
+                $general_where .= "cu.total_bills <= $this->debt_bills_to AND ";
 
             if(!empty($this->contract_status))
                 $status = $this->contract_status[0];
