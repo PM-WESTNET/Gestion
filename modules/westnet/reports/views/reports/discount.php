@@ -24,23 +24,35 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'attribute' => 'name',
                             'format' => 'html',
-                            'label' => 'Descripcion',
+                            'label' => 'Nombre/Descripción',
                             'value' => function($model){
                                 return Html::a($model->name, 
                                             ['/sale/discount/view', 'id' => $model->discount_id], 
                                             ['class' => 'profile-link']);
                             },
+                            //'contentOptions' => ['style' => 'width:5%;'],
                             'filter' => $list_discount,
                             'filterType' => GridView::FILTER_SELECT2,
                             'filterWidgetOptions' => [
-                                'options' => ['prompt' => ''],
-                                'pluginOptions' => ['allowClear' => true],
+                                'options' => [
+                                    'prompt' => '',
+                                    //'multiple' => true, //
+                                ],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                ],
+                                'toggleAllSettings' => [
+                                    'selectLabel' => '',
+                                    'unselectLabel' => '',
+                                ],
+                                
                             ],
+                            
                         ],
                         [
                             'attribute' => 'customerAmount',
                             'format' => 'text',
-                            'label' => 'Cant Clientes',
+                            'label' => 'Cant. Clientes',
                             'value' => function ($model) {
                                 return $model->customerAmount;
                             }
@@ -63,26 +75,30 @@ $this->params['breadcrumbs'][] = $this->title;
                             },
                         ],
                         [
-                            'attribute'=>'date',
+                            'attribute'=>'from_date',
                             'format' => 'raw',
                             'value' => function($model) {
                                 return $model->from_date . ' - ' . $model->to_date;
                             },
                             'contentOptions' => ['style' => 'width:24%;'],
-                            'label' => Yii::t('app','Date'),
+                            'label' => 'Rango Vigencia (busca x fec.de comienzo)',
                             'filter'=>DateRangePicker::widget([
-                                'name' => 'createTimeRange',
                                 'model' => $discountSearch,
+                                'name' => 'createTimeRange',
                                 'attribute' => 'from_date',
+                                //'value'=>'2011-08-10 to 2020-08-10',
                                 'convertFormat' => true,
                                 'presetDropdown' => true,
                                 'pluginOptions' => [
-                                    'timePicker' => true,
-                                    'timePickerIncrement' => 1,
+                                    'timePicker' => false,
+                                    //'timePickerIncrement' => 1,
+                                    'autoclose' => true,
                                     'locale' => [
-                                        'format' => 'Y-m-d'
+                                        'format' => 'd-m-Y',
+                                        //'separator'=>' - ',
                                     ],
-                                ]
+                                    
+                                ]                                
                             ]),  
                         ],
                         [
