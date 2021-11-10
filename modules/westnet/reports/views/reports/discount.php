@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                             ['/sale/discount/view', 'id' => $model->discount_id], 
                                             ['class' => 'profile-link']);
                             },
+                            //'contentOptions' => ['style' => 'width:5%;'],
                             'filter' => $list_discount,
                             'filterType' => GridView::FILTER_SELECT2,
                             'filterWidgetOptions' => [
@@ -82,21 +83,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             'contentOptions' => ['style' => 'width:24%;'],
                             'label' => 'Rango Vigencia (busca x fec.de comienzo)',
                             'filter'=>DateRangePicker::widget([
-                                'name' => 'createTimeRange',
                                 'model' => $discountSearch,
+                                'name' => 'createTimeRange',
                                 'attribute' => 'from_date',
+                                //'value'=>'2011-08-10 to 2020-08-10',
                                 'convertFormat' => true,
                                 'presetDropdown' => true,
                                 'pluginOptions' => [
                                     'timePicker' => false,
                                     //'timePickerIncrement' => 1,
+                                    'autoclose' => true,
                                     'locale' => [
-                                        'format' => 'd-m-Y'
+                                        'format' => 'd-m-Y',
+                                        //'separator'=>' - ',
                                     ],
-                                    'pluginOptions' => ['allowClear' => true],
                                     
-                                ],
-                                
+                                ]                                
                             ]),  
                         ],
                         [

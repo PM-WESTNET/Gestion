@@ -94,7 +94,7 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-        $validDateRange = array('','');
+        $validDateRange = array('',''); // by default, date is empty, so that the query doesnt have any range constraints (and gets ALL discounts from the start)
 
         // awesome query
         $query = Discount::find()
@@ -110,11 +110,12 @@ class DiscountSearch extends Discount
             'discount_id' => $this->discount_id,
         ]);
         
-        if(!empty($this->from_date))
+        if(!empty($this->from_date)){
             $validDateRange = explode(' - ', $this->from_date);
 
-        foreach($validDateRange as $i => $date){
-            $validDateRange[$i] = date("Y-m-d", strtotime($validDateRange[$i])); // we need it to be Y-m-d for the DB query
+            foreach($validDateRange as $i => $date){
+                $validDateRange[$i] = date("Y-m-d", strtotime($validDateRange[$i])); // we need it to be Y-m-d for the DB query
+            }
         }
         
         // AND WHERE LIKE-s (pattern match)

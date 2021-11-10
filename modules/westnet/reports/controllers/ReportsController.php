@@ -99,10 +99,14 @@ class ReportsController extends Controller
     /*  $this->layout = '/fluid';
     */
         $discountSearch = new DiscountSearch();
+        
+        // when using DateRangePicker widget, the model dictates what initial values the range has. https://demos.krajee.com/date-range
+        //$discountSearch->from_date = date('01-01-Y').' - 01-01-2050'; // define a default date for the filter for the first time the view loads
 
         $dataProvider = $discountSearch->searchDiscounts(Yii::$app->request->get());
 
         $list_discount = ArrayHelper::map(Discount::FindAllDiscounts(), 'name', 'name'); 
+        
         return $this->render('discount',
                 [
                     'dataProvider' => $dataProvider,
