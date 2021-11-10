@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\SerialColumn;
-use kartik\date\DatePicker;
+use kartik\daterange\DateRangePicker;
 
 $this->title = Yii::t('app', 'Customers per discount');
 $this->params['breadcrumbs'][] = $this->title;
@@ -36,24 +36,24 @@ $this->params['breadcrumbs'][] = $this->title;
                     'filter'=>['enabled'=>Yii::t('app','Enabled'), 'disabled'=>Yii::t('app','Disabled')]
                 ],
                 [
-                    'attribute'=>'customer_has_discount_from_date',
+                    'attribute' => 'customer_has_discount_from_date',
                     'format' => 'raw',
+                    'header' => '<a class="prueba">Fecha <i class="glyphicon glyphicon-exclamation-sign" id="number-clients"></i></a>',
                     'value' => function($model) {
                         return $model->from_date . ' - ' . $model->to_date;
                     },
-                    'label' => Yii::t('app','Date'),
-                    'filter'=>DatePicker::widget([
+                    'filter' => DateRangePicker::widget([
                         'model' => $discountSearch,
+                        'name' => 'createTimeRange',
+                        'convertFormat' => true,
+                        'presetDropdown' => true,
                         'attribute' => 'customer_has_discount_from_date',
                         'value' => '2014-01-01',
-                        'type' => DatePicker::TYPE_RANGE,
-                        'attribute2' => 'customer_has_discount_to_date',
-                        'value2' => '2016-01-01',
                         'pluginOptions' => [
-                            'autoclose'=>true,
+                            'autoclose' => true,
                             'format' => 'yyyy-mm-dd'
                         ]
-                    ]),  
+                    ]),
                 ],
                 [
                     'class' => 'app\components\grid\ActionColumn',
