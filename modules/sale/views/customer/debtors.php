@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $item = '<span class="glyphicon glyphicon-chevron-down"></span> ' . Yii::t('app', 'Filters');
 
-     Collapse::widget([
+     echo Collapse::widget([
         'items' => [
             [
                 'label' => $item,
