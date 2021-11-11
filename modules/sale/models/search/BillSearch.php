@@ -669,6 +669,11 @@ class BillSearch extends Bill
         order by b.bill_id desc
         limit 15
         */
-        return $query;
+        $dataProvider = new ActiveDataProvider([
+                'query'	=> $query,
+        ]);
+
+       	return $dataProvider;
+
     }
 }

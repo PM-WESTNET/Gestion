@@ -258,14 +258,18 @@ class EmailTransport implements TransportInterface {
      */
     //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
     // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
-    function createLatestBillPDF($customer_id){ 
-        //var_dump("createLastestBillPDF fire");die();
-        //$searchModel = new BillSearch();
-        //$searchModel->customer_id = $customer_id;
-        //$dataProvider = $searchModel->searchAccount($customer_id, Yii::$app->request->queryParams);
-        $modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
+    public function createLatestBillPDF($customer_id){ 
+        //$modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
+        $bill_id_by_customer = Bill::find()
+            ->select(['b.bill_id'])
+            ->from(['bill b'])
+            ->leftJoin('customer c', 'c.customer_id = b.customer_id')
+            ->where('c.customer_id', $customer_id)
+            ->andWhere('b.status', 'closed')
+            ->orderBy(['b.date'=>SORT_DESC])
+            ->limit(1);
 
-        $model = Bill::findOne($modelBillSearch->bill_id);
+        $model = Bill::findOne($bill_id_by_customer);
 
         $pdf = $model->actionPdf($model->bill_id);
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
