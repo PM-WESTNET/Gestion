@@ -17,6 +17,10 @@ use PHPExcel_IOFactory;
 use app\components\helpers\FileLog;
 use \yii\helpers\VarDumper;
 use yii\helpers\Url;
+use app\modules\checkout\models\Payment;
+//use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\sale\models\search\BillSearch;
+use app\modules\sale\models\Bill;
 
 /**
  * Description of EmailTransport
@@ -129,14 +133,37 @@ class EmailTransport implements TransportInterface {
 
                         //log_email($customer);
                         $toName = $customer['name'].' '.$customer['lastname'];
+
+                        //generate PDF in case of "@PdfAdjuntoFactura" tag
+                        $pdfString = (object)[];
+                        //detect string in content
+                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){
+                            //create PDF corresponding to users
+                            $pdfString = $this->createLatestBillPDF($customer['customer_id']);
+                        } else{
+                            //echo "tag not found!";
+                        }
+
+                        //clone content and replace all "@" commands
                         $clone = clone $notification;
                         $clone->content = self::replaceText($notification->content, $customer);
                         
                         if ($validator->validate($customer['email'], $err)) {
                             $result = $mailSender->prepareMessageAndSend(
-                                ['email'=>$customer['email'], 'name' => $toName],
+                                [
+                                    'email'=>$customer['email'], 
+                                    'name' => $toName
+                                ],
                                 $notification->subject,
-                                [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                                [ 
+                                    'view'=> $layout ,
+                                    'params' => [
+                                        'notification' => $clone
+                                        ]
+                                ],
+                                null,
+                                null,
+                                $pdfString
                             );
                             
                             if($result){
@@ -219,9 +246,33 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
         $replaced_text = str_replace('@BotonDePago', "  <a href='".$url_redirect_gestion."'". "style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>", $replaced_text);
         $replaced_text = str_replace('@LogoSiro', "</br><img src=".Url::base().'/images/logo-siro.png'." alt='LogoSiro' style='border:0;width:80px;'>", $replaced_text);
+        $replaced_text = str_replace('@PdfAdjuntoFactura', "", $replaced_text);
 
         return $replaced_text;
+    }
 
+    /**
+     * Envía la ultima factura cerrada por email al cliente.
+     */
+    //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
+    // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
+    function createLatestBillPDF($customer_id){ 
+        //var_dump("createLastestBillPDF fire");die();
+        //$searchModel = new BillSearch();
+        //$searchModel->customer_id = $customer_id;
+        //$dataProvider = $searchModel->searchAccount($customer_id, Yii::$app->request->queryParams);
+        $modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
+
+        $model = Bill::findOne($modelBillSearch->bill_id);
+
+        $pdf = $model->actionPdf($model->bill_id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+        return $file;
     }
 
 }
