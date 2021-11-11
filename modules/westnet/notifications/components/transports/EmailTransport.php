@@ -21,7 +21,7 @@ use app\modules\checkout\models\Payment;
 //use app\modules\checkout\models\search\PaymentSearch;
 use app\modules\sale\models\search\BillSearch;
 use app\modules\sale\models\Bill;
-
+use app\modules\sale\controllers\BillController;
 /**
  * Description of EmailTransport
  *
@@ -258,25 +258,28 @@ class EmailTransport implements TransportInterface {
      */
     //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
     // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
-    public function createLatestBillPDF($customer_id){ 
+    public static function createLatestBillPDF($customer_id){ 
         //$modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
         $bill_id_by_customer = Bill::find()
-            ->select(['b.bill_id'])
+            ->select(['b.bill_id', 'b.class'])
             ->from(['bill b'])
             ->leftJoin('customer c', 'c.customer_id = b.customer_id')
-            ->where('c.customer_id', $customer_id)
-            ->andWhere('b.status', 'closed')
+            ->where(['c.customer_id' => $customer_id])
+            ->andWhere(['b.status' => 'closed'])
             ->orderBy(['b.date'=>SORT_DESC])
-            ->limit(1);
+            ->one();
+        
+        $model = Bill::findOne($bill_id_by_customer->bill_id);
 
-        $model = Bill::findOne($bill_id_by_customer);
+        $pdf = actionPdf($model->bill_id);
 
-        $pdf = $model->actionPdf($model->bill_id);
+        die(var_dump($pdf));
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
         $file = fopen($fileName, "w+");
         fwrite($file, $pdf);
         fclose($file);
+
 
         return $file;
     }
