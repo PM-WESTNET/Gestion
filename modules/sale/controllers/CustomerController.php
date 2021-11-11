@@ -396,8 +396,8 @@ class CustomerController extends Controller
         $searchModel = new CustomerSearch;
         $arrayDataProvider = $searchModel->searchDebtorsV2(Yii::$app->request->getQueryParams());
 
-        $total_debtors = abs(round(Customer::getTotalDebtorsCurrency(Yii::$app->request->getQueryParams())['total_debtors'],2),);
-
+        $total_debtors = abs(round(Customer::getTotalDebtorsCurrency(Yii::$app->request->getQueryParams())['total_debtors'],2));
+        die(var_dump($total_debtors));
         return $this->render('debtors', [
             'dataProvider' => $arrayDataProvider,
             'searchModel' => $searchModel,
