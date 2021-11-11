@@ -33,6 +33,7 @@ use app\modules\westnet\notifications\components\helpers\LayoutHelper;
         <span class="reference label label-info" data-ref="@Categoria" id="lbl-categoria">@Categoria</span>
         <span class="reference label label-success" data-ref="@BotonDePago" id="lbl-boton-de-pago">@BotonDePago</span>
         <span class="reference label label-success" data-ref="@LogoSiro" id="lbl-logo-siro">@LogoSiro</span>
+        <span class="reference label label-success" data-ref="@PdfAdjuntoFactura" id="lbl-pdf-ultima-factura">@PdfAdjuntoFactura</span>
     </div>
 </div>
 <hr/>

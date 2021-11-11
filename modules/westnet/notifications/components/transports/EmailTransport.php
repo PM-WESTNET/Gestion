@@ -134,11 +134,13 @@ class EmailTransport implements TransportInterface {
                         //log_email($customer);
                         $toName = $customer['name'].' '.$customer['lastname'];
 
-                        //generate PDF in case of "@PdfAdjuntoFactura" tag
+                        //generate PDF in case of "@PdfAdjuntoFactura" tag 
                         $pdfString = (object)[];
                         //detect string in content
-                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){
+                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){ // good news, this IF didnt break anything in production!!!
+                            
                             //create PDF corresponding to users
+                            //[FIX]: contemplate only ONE instance of pdf for every email sent
                             $pdfString = $this->createLatestBillPDF($customer['customer_id']);
                         } else{
                             //echo "tag not found!";
