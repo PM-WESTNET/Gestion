@@ -110,7 +110,7 @@ class EmailTransport implements TransportInterface {
         $ok = 0;
         $error = 'Error: ';
 
-        try {
+       /* try {*/
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
@@ -152,7 +152,9 @@ class EmailTransport implements TransportInterface {
                         $clone->content = self::replaceText($notification->content, $customer);
                         
                         if ($validator->validate($customer['email'], $err)) {
-                            $result = $mailSender->prepareMessageAndSend(
+                            $result = (strpos($notification->content, '@PdfAdjuntoFactura'))
+                                    ? $this->AttachmentPdf($customer['customer_id'],$customer['email'])
+                                    : $mailSender->prepareMessageAndSend(
                                 [
                                     'email'=>$customer['email'], 
                                     'name' => $toName
@@ -166,9 +168,7 @@ class EmailTransport implements TransportInterface {
                                 ],
                                 [],
                                 [],
-                                $pdfFileName = (strpos($notification->content, '@PdfAdjuntoFactura') !== false)
-                                    ? $this->createLatestBillPDF($customer['customer_id'])
-                                    : []                                
+                                []
                             );
                             
                             if($result){
@@ -202,7 +202,7 @@ class EmailTransport implements TransportInterface {
             }else{
                 $error = 'No hay mas destinatarios!';
             }
-        } catch(\Exception $ex) {
+/*       } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
@@ -211,7 +211,7 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-        }
+        }*/
 
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);
@@ -292,4 +292,45 @@ class EmailTransport implements TransportInterface {
         
     }
 
+   public function AttachmentPdf($customer_id, $email){
+	$bill = Bill::find()
+            ->select(['b.bill_id', 'b.class'])
+            ->from(['bill b'])
+            ->leftJoin('customer c', 'c.customer_id = b.customer_id')
+            ->where(['c.customer_id' => $customer_id])
+            ->andWhere(['b.status' => 'closed'])
+            ->orderBy(['b.date'=>SORT_DESC])
+            ->one()->bill_id;
+	$url ="https://gestion.westnet.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+	$ch = curl_init();
+        $options = array(
+                CURLOPT_URL             => $url,
+                CURLOPT_REFERER         => $url,
+                CURLOPT_FOLLOWLOCATION  => 1,
+                CURLOPT_RETURNTRANSFER  => 1,
+                CURLOPT_COOKIESESSION   => true,
+                CURLOPT_COOKIEJAR       => 'curl-cookie.txt',
+                CURLOPT_COOKIEFILE      => '/tmp',
+                CURLOPT_CONNECTTIMEOUT  => 120,
+                CURLOPT_TIMEOUT         => 120,
+                CURLOPT_MAXREDIRS       => 10,
+                CURLOPT_USERAGENT       => "Dark Secret Ninja/1.0",
+                CURLOPT_CUSTOMREQUEST   => 'GET',
+                CURLOPT_SSL_VERIFYPEER  => false,
+        );
+        curl_setopt_array( $ch, $options );
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);   //get status code
+
+        if ( $httpCode != 200 ){
+                 echo "Return code is {$httpCode} \n"
+                .curl_error($ch);
+        } else {
+                echo htmlspecialchars($response);
+        }
+        curl_close($ch);
+
+	return $response;
+   }
 }
