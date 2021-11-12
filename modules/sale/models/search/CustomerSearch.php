@@ -687,7 +687,7 @@ class CustomerSearch extends Customer {
 
             if(!empty($this->contract_status))
                 $status = $this->contract_status[0];
-                $general_where .= "co.status = 'active' AND ";
+                $general_where .= "co.status = '$status' AND ";
 
             $result = Yii::$app->db->createCommand($select.$from.$inner_join_contract.$general_where.$final_where)->queryAll();
 
