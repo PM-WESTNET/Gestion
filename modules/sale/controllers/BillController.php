@@ -845,7 +845,7 @@ class BillController extends Controller
     }
     
     // selects the PDF generation library based on the APP configuration items.
-    /* public function actionPdf($id){
+    public function actionPdf($id){
         // gets conf item
         $pdf_company = Config::getConfig('pdf_company')->description;
         
@@ -855,12 +855,13 @@ class BillController extends Controller
         else if($pdf_company == "bigway")
             return $this->BigwayPdf($id);
         
-    } */
+    }
 
     // selects the PDF generation library based on the APP configuration items.
-    public function actionPdf($id){
-        return $this->findModel($id)->makePdf($id);
-    }
+    //public function actionPdf($id){
+    //    return $this->findModel($id)->makePdf($id);
+    //}
+
     /**
      * Prints the pdf of a single Bill Westnet.
      * @param integer $id
@@ -899,6 +900,7 @@ class BillController extends Controller
            "tipoCodAut" => "E",
            "codAut" => $model->ein
         ];
+
         $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
         ->setSize(500)
         ->setMargin(5);
