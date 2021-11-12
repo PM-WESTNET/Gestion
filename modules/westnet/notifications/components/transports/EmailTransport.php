@@ -135,7 +135,8 @@ class EmailTransport implements TransportInterface {
                         $toName = $customer['name'].' '.$customer['lastname'];
 
                         //generate PDF in case of "@PdfAdjuntoFactura" tag 
-                        $pdfFileName = (object)[];
+                        
+                        /* $pdfFileName = (object)[];
                         //detect string in content
                         if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){ // good news, this IF didnt break anything in production!!!
                             
@@ -144,7 +145,7 @@ class EmailTransport implements TransportInterface {
                             $pdfFileName = $this->createLatestBillPDF($customer['customer_id']);
                         } else{
                             //echo "tag not found!";
-                        }
+                        } */
 
                         //clone content and replace all "@" commands
                         $clone = clone $notification;
@@ -165,7 +166,9 @@ class EmailTransport implements TransportInterface {
                                 ],
                                 [],
                                 [],
-                                [$pdfFileName]
+                                $pdfFileName = (strpos($notification->content, '@PdfAdjuntoFactura') !== false)
+                                    ? $this->createLatestBillPDF($customer['customer_id'])
+                                    : []                                
                             );
                             
                             if($result){
@@ -269,19 +272,24 @@ class EmailTransport implements TransportInterface {
             ->orderBy(['b.date'=>SORT_DESC])
             ->one();
         
-        $model = Bill::findOne($bill_id_by_customer->bill_id);
+        // some bill found for this user
+        if(!empty($bill_id_by_customer)){ 
+            $model = Bill::findOne($bill_id_by_customer->bill_id);
 
-        $pdf = $model->makePdf($model->bill_id);
+            $pdf = $model->makePdf($model->bill_id);
+    
+            $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+            $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+            $file = fopen($fileName, "w+");
+            fwrite($file, $pdf);
+            fclose($file);
 
-        //die(var_dump($pdf));
-        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
-        $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
-        $file = fopen($fileName, "w+");
-        fwrite($file, $pdf);
-        fclose($file);
+            return [$fileName];
+        }
 
-
-        return $fileName;
+        // no single bill found
+        return [];
+        
     }
 
 }
