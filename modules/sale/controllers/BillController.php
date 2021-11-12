@@ -845,7 +845,7 @@ class BillController extends Controller
     }
     
     // selects the PDF generation library based on the APP configuration items.
-    public function actionPdf($id){
+    /* public function actionPdf($id){
         // gets conf item
         $pdf_company = Config::getConfig('pdf_company')->description;
         
@@ -855,8 +855,12 @@ class BillController extends Controller
         else if($pdf_company == "bigway")
             return $this->BigwayPdf($id);
         
-    }
+    } */
 
+    // selects the PDF generation library based on the APP configuration items.
+    public function actionPdf($id){
+        return $this->findModel($id)->makePdf($id);
+    }
     /**
      * Prints the pdf of a single Bill Westnet.
      * @param integer $id

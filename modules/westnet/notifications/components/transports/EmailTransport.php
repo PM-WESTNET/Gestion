@@ -135,13 +135,13 @@ class EmailTransport implements TransportInterface {
                         $toName = $customer['name'].' '.$customer['lastname'];
 
                         //generate PDF in case of "@PdfAdjuntoFactura" tag 
-                        $pdfString = (object)[];
+                        $pdfFileName = (object)[];
                         //detect string in content
                         if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){ // good news, this IF didnt break anything in production!!!
                             
                             //create PDF corresponding to users
                             //[FIX]: contemplate only ONE instance of pdf for every email sent
-                            $pdfString = $this->createLatestBillPDF($customer['customer_id']);
+                            $pdfFileName = $this->createLatestBillPDF($customer['customer_id']);
                         } else{
                             //echo "tag not found!";
                         }
@@ -163,9 +163,9 @@ class EmailTransport implements TransportInterface {
                                         'notification' => $clone
                                         ]
                                 ],
-                                null,
-                                null,
-                                $pdfString
+                                [],
+                                [],
+                                [$pdfFileName]
                             );
                             
                             if($result){
@@ -258,7 +258,7 @@ class EmailTransport implements TransportInterface {
      */
     //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
     // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
-    public static function createLatestBillPDF($customer_id){ 
+    public  function createLatestBillPDF($customer_id){ 
         //$modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
         $bill_id_by_customer = Bill::find()
             ->select(['b.bill_id', 'b.class'])
@@ -271,9 +271,9 @@ class EmailTransport implements TransportInterface {
         
         $model = Bill::findOne($bill_id_by_customer->bill_id);
 
-        $pdf = actionPdf($model->bill_id);
+        $pdf = $model->makePdf($model->bill_id);
 
-        die(var_dump($pdf));
+        //die(var_dump($pdf));
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
         $file = fopen($fileName, "w+");
@@ -281,7 +281,7 @@ class EmailTransport implements TransportInterface {
         fclose($file);
 
 
-        return $file;
+        return $fileName;
     }
 
 }
