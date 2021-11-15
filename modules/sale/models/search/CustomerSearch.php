@@ -654,6 +654,7 @@ class CustomerSearch extends Customer {
      */
     public function buildDebtorsQueryV2($params)
     {
+
         $this->load($params);
 
         $data = [];
@@ -685,9 +686,11 @@ class CustomerSearch extends Customer {
             if ($this->debt_bills_to > 0)
                 $general_where .= "cu.total_bills <= $this->debt_bills_to AND ";
 
-            if(!empty($this->contract_status))
+            if(!empty($this->contract_status)){
                 $status = $this->contract_status[0];
                 $general_where .= "co.status = '$status' AND ";
+            }
+                
 
             $result = Yii::$app->db->createCommand($select.$from.$inner_join_contract.$general_where.$final_where)->queryAll();
 
