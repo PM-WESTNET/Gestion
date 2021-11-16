@@ -193,7 +193,7 @@ class AdsController extends Controller {
 
             $complete = '';
                 if ($company->code != '9999') {
-                    $complete = str_pad($complete, (8 - strlen($init_value)), '0', STR_PAD_LEFT);
+                    $complete = str_pad($complete, (6 - strlen($init_value)), '0', STR_PAD_LEFT);
                 }
 
             $code = str_pad($company->code, 4, "0", STR_PAD_LEFT) . $complete .

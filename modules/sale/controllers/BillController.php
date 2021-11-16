@@ -26,6 +26,7 @@ use app\modules\sale\models\TaxRate;
 use app\modules\config\models\Config;
 use yii\helpers\Url;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use yii\filters\AccessControl;
 
 /**
  * BillController implements the CRUD actions for Bill model.
@@ -44,7 +45,16 @@ class BillController extends Controller
 
     public function behaviors()
     {
-        return array_merge(parent::behaviors(), [
+        return array_merge(parent::behaviors(),['access' => [
+            'class' => AccessControl::class,
+            'only' => ['email-console'],
+            'rules' => [
+                [
+                    'allow' => true,
+                    'roles' => ['?'],
+                ],
+            ],
+        ],
         ]);
     }
 
@@ -845,6 +855,7 @@ class BillController extends Controller
     }
     
     // selects the PDF generation library based on the APP configuration items.
+    
     public function actionPdf($id){
         // gets conf item
         $pdf_company = Config::getConfig('pdf_company')->description;
@@ -856,6 +867,11 @@ class BillController extends Controller
             return $this->BigwayPdf($id);
         
     }
+
+    // selects the PDF generation library based on the APP configuration items.
+    //public function actionPdf($id){
+    //    return $this->findModel($id)->makePdf($id);
+    //}
 
     /**
      * Prints the pdf of a single Bill Westnet.
@@ -895,6 +911,7 @@ class BillController extends Controller
            "tipoCodAut" => "E",
            "codAut" => $model->ein
         ];
+
         $qrCode = (new QrCode("https://www.afip.gob.ar/fe/qr/?p=".base64_encode(json_encode($jsonCode))))
         ->setSize(500)
         ->setMargin(5);
@@ -1065,6 +1082,31 @@ class BillController extends Controller
             return $this->redirect(['/checkout/payment/current-account', 'customer' => $model->customer_id]);
         }
     }
+	
+    /**
+     * Envia el comprobante por email al correo del customer
+     * @param $id
+     */
+    public function actionEmailConsole($id, $from = 'all_bills', $email = null)
+    {
+        $model = $this->findModel($id);
+
+        $pdf = $this->actionPdf($id);
+        $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+        $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+        $file = fopen($fileName, "w+");
+        fwrite($file, $pdf);
+        fclose($file);
+
+
+        if ($model->sendEmail($fileName, $email)) {
+        	return true;
+        } else {
+            return false;
+        };
+
+    }
+
 
     public function actionInvoiceCustomer($customer_id = null)
     {

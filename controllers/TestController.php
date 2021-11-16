@@ -38,7 +38,7 @@ use app\modules\sale\modules\contract\models\Contract;
 use yii\web\UploadedFile;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\westnet\models\PaymentExtensionHistory;
-
+use app\modules\westnet\notifications\components\transports\EmailTransport;
 
 use Da\QrCode\QrCode;
 use yii\helpers\Html;
@@ -215,4 +215,8 @@ class TestController extends Controller {
         return $pdf;
     }
 
+    public function actionTestEmailTransport($customer_id){
+        if(EmailTransport::createLatestBillPDF($customer_id)==[])var_dump("works");
+        else var_dump("failed");
+    }
 }

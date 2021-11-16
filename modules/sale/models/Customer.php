@@ -71,6 +71,7 @@ use app\modules\automaticdebit\models\AutomaticDebit;
  * @property string $has_direct_debit
  * @property integer $hash_customer_id
  * @property string $description
+ * @property integer $total_bills
  *
  * @property Bill[] $bills
  * @property Profile[] $profiles
@@ -156,7 +157,7 @@ class Customer extends ActiveRecord {
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
-            [['document_type_id', 'address_id', 'needs_bill'], 'integer'],
+            [['document_type_id', 'address_id', 'needs_bill', 'total_bills'], 'integer'],
             [['phone','phone2', 'phone3','phone4'], 'integer' /**,'on' => 'insert'**/,  'max' => 9999999999 , 'message' => Yii::t('app', 'Only numbers. You must input the area code without 0 and in cell phone number case without 15.')],
             //[['phone','phone2', 'phone3', 'phone4'], 'string', 'on' => 'update'],
             [['sex'], 'string', 'max' => 10],
@@ -564,6 +565,7 @@ class Customer extends ActiveRecord {
 	        'hash_customer_id' => Yii::t('app', 'Hash Cliente ID'),
 	        'current_account_balance' => Yii::t('app','Current Account Balance'),
             'description' => Yii::t('app','Description'),
+            'total_bills' => 'Facturas Totales',
         ];
 
         //Labels adicionales definidos para los profiles
@@ -2266,10 +2268,13 @@ class Customer extends ActiveRecord {
     /**
     * @Return total current_account_balance
     */
-    public static function getTotalDebtorsCurrency(){
+    public static function getTotalDebtorsCurrency($params){
+
+        $contract_status = isset($params['CustomerSearch']['contract_status'][0])?$params['CustomerSearch']['contract_status'][0]:'active';
+
         return Yii::$app->db->createCommand("SELECT SUM(current_account_balance) AS total_debtors FROM customer cu
             INNER JOIN contract co ON co.customer_id = cu.customer_id
-            WHERE co.status IN ('active', 'low-process') ")
+            WHERE co.status = '$contract_status'")
             ->queryOne();
     }
 }

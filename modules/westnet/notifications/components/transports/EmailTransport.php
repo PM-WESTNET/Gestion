@@ -17,7 +17,11 @@ use PHPExcel_IOFactory;
 use app\components\helpers\FileLog;
 use \yii\helpers\VarDumper;
 use yii\helpers\Url;
-
+use app\modules\checkout\models\Payment;
+//use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\sale\models\search\BillSearch;
+use app\modules\sale\models\Bill;
+use app\modules\sale\controllers\BillController;
 /**
  * Description of EmailTransport
  *
@@ -106,7 +110,7 @@ class EmailTransport implements TransportInterface {
         $ok = 0;
         $error = 'Error: ';
 
-        try {
+       /* try {*/
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
@@ -129,14 +133,42 @@ class EmailTransport implements TransportInterface {
 
                         //log_email($customer);
                         $toName = $customer['name'].' '.$customer['lastname'];
+
+                        //generate PDF in case of "@PdfAdjuntoFactura" tag 
+                        
+                        /* $pdfFileName = (object)[];
+                        //detect string in content
+                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){ // good news, this IF didnt break anything in production!!!
+                            
+                            //create PDF corresponding to users
+                            //[FIX]: contemplate only ONE instance of pdf for every email sent
+                            $pdfFileName = $this->createLatestBillPDF($customer['customer_id']);
+                        } else{
+                            //echo "tag not found!";
+                        } */
+
+                        //clone content and replace all "@" commands
                         $clone = clone $notification;
                         $clone->content = self::replaceText($notification->content, $customer);
                         
                         if ($validator->validate($customer['email'], $err)) {
-                            $result = $mailSender->prepareMessageAndSend(
-                                ['email'=>$customer['email'], 'name' => $toName],
+                            $result = (strpos($notification->content, '@PdfAdjuntoFactura'))
+                                    ? $this->AttachmentPdf($customer['customer_id'],$customer['email'])
+                                    : $mailSender->prepareMessageAndSend(
+                                [
+                                    'email'=>$customer['email'], 
+                                    'name' => $toName
+                                ],
                                 $notification->subject,
-                                [ 'view'=> $layout ,'params' => ['notification' => $clone]]
+                                [ 
+                                    'view'=> $layout ,
+                                    'params' => [
+                                        'notification' => $clone
+                                        ]
+                                ],
+                                [],
+                                [],
+                                []
                             );
                             
                             if($result){
@@ -170,7 +202,7 @@ class EmailTransport implements TransportInterface {
             }else{
                 $error = 'No hay mas destinatarios!';
             }
-        } catch(\Exception $ex) {
+/*       } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
@@ -179,7 +211,7 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-        }
+        }*/
 
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);
@@ -219,9 +251,86 @@ class EmailTransport implements TransportInterface {
         $replaced_text = str_replace('@Categoria', substr($customer['category'], 0, $replace_max_string['@Categoria']), $replaced_text);
         $replaced_text = str_replace('@BotonDePago', "  <a href='".$url_redirect_gestion."'". "style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>", $replaced_text);
         $replaced_text = str_replace('@LogoSiro', "</br><img src=".Url::base().'/images/logo-siro.png'." alt='LogoSiro' style='border:0;width:80px;'>", $replaced_text);
+        $replaced_text = str_replace('@PdfAdjuntoFactura', "", $replaced_text);
 
         return $replaced_text;
-
     }
 
+    /**
+     * Envía la ultima factura cerrada por email al cliente.
+     */
+    //Url::toRoute(['/sale/bill/email', 'id' => $model['bill_id'], 'from' => 'account_current', 'email' => $email])
+    // changed original start from PAYMENT ID to a CUSTOMER ID. original function can be found in : modules/checkout/controllers/PaymentController.php
+    public  function createLatestBillPDF($customer_id){ 
+        //$modelBillSearch = BillSearch::searchLastBillByCustomerId($customer_id);
+        $bill_id_by_customer = Bill::find()
+            ->select(['b.bill_id', 'b.class'])
+            ->from(['bill b'])
+            ->leftJoin('customer c', 'c.customer_id = b.customer_id')
+            ->where(['c.customer_id' => $customer_id])
+            ->andWhere(['b.status' => 'closed'])
+            ->orderBy(['b.date'=>SORT_DESC])
+            ->one();
+        
+        // some bill found for this user
+        if(!empty($bill_id_by_customer)){ 
+            $model = Bill::findOne($bill_id_by_customer->bill_id);
+
+            $pdf = $model->makePdf($model->bill_id);
+    
+            $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
+            $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
+            $file = fopen($fileName, "w+");
+            fwrite($file, $pdf);
+            fclose($file);
+
+            return [$fileName];
+        }
+
+        // no single bill found
+        return [];
+        
+    }
+
+   public function AttachmentPdf($customer_id, $email){
+	$bill = Bill::find()
+            ->select(['b.bill_id', 'b.class'])
+            ->from(['bill b'])
+            ->leftJoin('customer c', 'c.customer_id = b.customer_id')
+            ->where(['c.customer_id' => $customer_id])
+            ->andWhere(['b.status' => 'closed'])
+            ->orderBy(['b.date'=>SORT_DESC])
+            ->one()->bill_id;
+	$url ="https://gestion.westnet.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+	$ch = curl_init();
+        $options = array(
+                CURLOPT_URL             => $url,
+                CURLOPT_REFERER         => $url,
+                CURLOPT_FOLLOWLOCATION  => 1,
+                CURLOPT_RETURNTRANSFER  => 1,
+                CURLOPT_COOKIESESSION   => true,
+                CURLOPT_COOKIEJAR       => 'curl-cookie.txt',
+                CURLOPT_COOKIEFILE      => '/tmp',
+                CURLOPT_CONNECTTIMEOUT  => 120,
+                CURLOPT_TIMEOUT         => 120,
+                CURLOPT_MAXREDIRS       => 10,
+                CURLOPT_USERAGENT       => "Dark Secret Ninja/1.0",
+                CURLOPT_CUSTOMREQUEST   => 'GET',
+                CURLOPT_SSL_VERIFYPEER  => false,
+        );
+        curl_setopt_array( $ch, $options );
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);   //get status code
+
+        if ( $httpCode != 200 ){
+                 echo "Return code is {$httpCode} \n"
+                .curl_error($ch);
+        } else {
+                echo htmlspecialchars($response);
+        }
+        curl_close($ch);
+
+	return $response;
+   }
 }

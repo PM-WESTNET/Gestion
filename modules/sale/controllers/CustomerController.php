@@ -396,7 +396,7 @@ class CustomerController extends Controller
         $searchModel = new CustomerSearch;
         $arrayDataProvider = $searchModel->searchDebtorsV2(Yii::$app->request->getQueryParams());
 
-        $total_debtors = abs(round(Customer::getTotalDebtorsCurrency()['total_debtors'],2));
+        $total_debtors = abs(round(Customer::getTotalDebtorsCurrency(Yii::$app->request->getQueryParams())['total_debtors'],2));
 
         return $this->render('debtors', [
             'dataProvider' => $arrayDataProvider,
@@ -418,8 +418,8 @@ class CustomerController extends Controller
             'A' => ['code', Yii::t('app', 'Customer Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
-            'G' => ['currency', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
-            'H' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            'D' => ['currency', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
+            'E' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();
         
@@ -876,7 +876,6 @@ class CustomerController extends Controller
 
     public function actionSendPaymentButtonEmail($email,$customer_id){
         Yii::$app->response->format = 'json';
-        
         $url_redirect_gestion = Config::getConfig('siro_url_redirect_gestion')->item->description;
         $customer = Customer::findOne(['customer_id' => $customer_id]);
         if($customer != null && $customer->hash_customer_id == null){
@@ -894,7 +893,8 @@ class CustomerController extends Controller
         $mailer->htmlLayout = '@app/modules/westnet/notifications/body/layouts/PaymentButton NEW';
         $params = ['emailTransport' => $transport,
                     'subject' => $subject_email,
-                    'content' => "<div style='text-align:center'>".$content_email."<br><a href=".$url_redirect_gestion. " style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>"
+                    'content' => "<div style='text-align:center'>".$content_email."<br><a href=".$url_redirect_gestion. " style='background-color: #1c3ae2; font-size: 20px; font-weight: bold; text-decoration: none; padding: 12px 18px;margin: 20px 0; color: #ffffff; border-radius: 10px; display: inline-block; mso-padding-alt: 0;'>Botón de Pago</a>",
+                    'use_https' => true,
             ];
         Yii::$app->view->params['notification'] = $params; 
 

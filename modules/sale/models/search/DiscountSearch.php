@@ -94,7 +94,7 @@ class DiscountSearch extends Discount
     {
         
         $this->load($params);
-        $from_date = array('','');
+        $validDateRange = array('',''); // by default, date is empty, so that the query doesnt have any range constraints (and gets ALL discounts from the start)
 
         // awesome query
         $query = Discount::find()
@@ -103,12 +103,31 @@ class DiscountSearch extends Discount
                 ->leftJoin('customer_has_discount chd', 'd.discount_id = chd.discount_id' )
                 ->groupBy('d.discount_id')
                 ->filterHaving(['like', 'COUNT(*)', $this->customerAmount.'%', false])
-                ->orderBy(['d.from_date' => SORT_ASC])
                 ;
 
+        // standard Where equals
+        $query->andFilterWhere([
+            'discount_id' => $this->discount_id,
+        ]);
+        
+        if(!empty($this->from_date)){
+            $validDateRange = explode(' - ', $this->from_date);
+
+            foreach($validDateRange as $i => $date){
+                $validDateRange[$i] = date("Y-m-d", strtotime($validDateRange[$i])); // we need it to be Y-m-d for the DB query
+            }
+        }
+        
+        // AND WHERE LIKE-s (pattern match)
+        $query->andFilterWhere(['like', 'd.name', $this->name]);
+        $query->andFilterWhere(['like', 'd.status', $this->status]);
+        $query->andFilterWhere(['>=', 'd.from_date', $validDateRange[0]]);
+        $query->andFilterWhere(['<=', 'd.from_date', $validDateRange[1]]);
+        $query->andFilterWhere(['like', 'd.type', $this->type]);
+        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
         // creates the ActiveDataProvider instance
         $dataProvider = new ActiveDataProvider([
-            'query' => $query
+        'query' => $query
         ]);
 
         // Adds a custom attribute to the end of the attributes array
@@ -123,27 +142,12 @@ class DiscountSearch extends Discount
         if (!$this->validate()) {
             return $dataProvider;
         }
+        //die(var_dump($query));
 
-        // standard Where equals
-        $query->andFilterWhere([
-            'discount_id' => $this->discount_id,
-        ]);
-        
-        if(!empty($this->from_date))
-            $from_date = explode(' - ', $this->from_date);
-
-        // AND WHERE LIKE-s (pattern match)
-        $query->andFilterWhere(['like', 'd.name', $this->name]);
-        $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['>=', 'd.from_date', $from_date[0]]);
-        $query->andFilterWhere(['<=', 'd.from_date', $from_date[1]]);
-        $query->andFilterWhere(['like', 'd.type', $this->type]);
-        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
-       
         return $dataProvider;
     }
 
-/**
+    /**
      * Creates data provider instance with search query applied
      *
      * @param array $params
@@ -152,6 +156,7 @@ class DiscountSearch extends Discount
      */
     public function search($params)
     {
+
         $query = Discount::find();
 
         $dataProvider = new ActiveDataProvider([
@@ -161,8 +166,6 @@ class DiscountSearch extends Discount
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to any records when validation fails
-            // $query->where('0=1');
             return $dataProvider;
         }
 

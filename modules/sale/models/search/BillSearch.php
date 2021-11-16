@@ -149,7 +149,7 @@ class BillSearch extends Bill
         ]);
 
         //Bills sin details no se muestran:
-//        $query->joinWith('billDetails', false, 'INNER JOIN');
+        //$query->joinWith('billDetails', false, 'INNER JOIN');
 
         $this->load($params);
         if (!$this->validate()) {
@@ -647,5 +647,33 @@ class BillSearch extends Bill
 
 
         return $query;
+    }
+
+    static public function searchLastBillByCustomerId($customerId){
+        $query  = self::find()
+            ->select('b1.bill_id, b1.date, b1.bill_type_id, b1.number, b1.customer_id, b1.company_id')
+            ->from('bill as b1')
+            ->leftJoin('customer as c', 'c.customer_id = b1.customer_id')
+            ->andWhere(['b1.status' => 'closed'])
+            ->andWhere('b1.number IS NOT NULL')
+            ->andWhere('b1.bill_type_id IS NOT NULL')
+            ->andWhere('c.customer_id IS NOT NULL');
+
+        /*
+        select *
+        from bill b
+        join customer c
+        on b.customer_id = c.customer_id
+        where c.customer_id = 61190
+        and b.status != 'draft'
+        order by b.bill_id desc
+        limit 15
+        */
+        $dataProvider = new ActiveDataProvider([
+                'query'	=> $query,
+        ]);
+
+       	return $dataProvider;
+
     }
 }

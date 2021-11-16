@@ -633,11 +633,15 @@ class Payment extends  ActiveRecord  implements CountableInterface
     public static function totalCalculationForQuery($customer_id){
         $payment_method_id = Yii::$app->db->createCommand('SELECT payment_method_id FROM payment_method WHERE type = "account"')->queryOne();
         $payment_method_id  = !$payment_method_id ? 0 : $payment_method_id;
-        $payed = Yii::$app->db->createCommand('SELECT sum(coalesce(pi.amount, payment.amount)) as payed FROM payment LEFT JOIN payment_item pi ON payment.payment_id = pi.payment_id WHERE pi.payment_method_id NOT IN (:payment_method_id) AND customer_id = :customer_id AND status != "cancelled"')->bindValue('payment_method_id',$payment_method_id)->bindValue('customer_id',$customer_id)->queryOne()['payed'];
 
-        $totalCredit = Yii::$app->db->createCommand('SELECT sum(bill.total * bill_type.multiplier) as total_credit FROM bill LEFT JOIN bill_type ON bill.bill_type_id = bill_type.bill_type_id WHERE customer_id = :customer_id')->bindValue('customer_id',$customer_id)->queryOne()['total_credit'];
+        $payment = Yii::$app->db->createCommand('SELECT sum(coalesce(pi.amount, payment.amount)) as payed FROM payment LEFT JOIN payment_item pi ON payment.payment_id = pi.payment_id WHERE pi.payment_method_id NOT IN (:payment_method_id) AND customer_id = :customer_id AND status != "cancelled"')->bindValue('payment_method_id',$payment_method_id)->bindValue('customer_id',$customer_id)->queryOne();
 
-        
+        $totalCredit = Yii::$app->db->createCommand('SELECT sum(bill.total * bill_type.multiplier) as total_credit, COUNT(bill.bill_id) AS total_bills FROM bill LEFT JOIN bill_type ON bill.bill_type_id = bill_type.bill_type_id WHERE customer_id = :customer_id')->bindValue('customer_id',$customer_id)->queryOne()['total_credit'];
+
+        Yii::$app->db->createCommand()->update('customer', ['total_bills' => Customer::getOwedBills($customer_id)], ['customer_id' => $customer_id])->execute();
+
+        $payed = $payment['payed'];
+
         $payed = abs($payed) > 0.0 ? $payed : 0.0;
         $totalCredit = abs($totalCredit) > 0.0 ? $totalCredit : 0.0;
 
