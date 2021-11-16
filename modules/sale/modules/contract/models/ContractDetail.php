@@ -443,12 +443,8 @@ class ContractDetail extends ActiveRecord
     {
         Yii::setLogger(new EmptyLogger());
         
-//        $items = ContractDetail::find()->with('contract', 'product')->join('natural left join', 'vendor_liquidation_item')->joinWith('contract')->where('vendor_liquidation_item.vendor_liquidation_id IS NULL')->andWhere('contract.customer_id>22000')->all();
-        //$items = ContractDetail::find()->with('contract', 'product')->join('natural left join', 'vendor_liquidation_item')->where('vendor_liquidation_item.vendor_liquidation_id IS NULL')->all();
-        //$items = ArrayHelper::map($items, 'contract_detail_id', function($item){ return $item->contract->customer->fullName. ' | $'.$item->product->name. ' | '.Yii::$app->formatter->asCurrency($item->product->finalPrice); });
-
         $query = (new Query())
-            ->select(['cd.contract_detail_id', 'CONCAT(cus.lastname,", ",cus.name," | ", p.name, " | ") as description'])
+            ->select(['cd.contract_detail_id', 'CONCAT(cus.lastname,", ",cus.name," | ", cus.code, " | ", p.name, " | ") as description']) //concat of the name shown in filter
             ->from('contract_detail cd')
             ->innerJoin('contract c', 'c.contract_id=cd.contract_id')
             ->innerJoin('customer cus', 'cus.customer_id=c.customer_id')
