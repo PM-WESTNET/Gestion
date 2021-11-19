@@ -370,7 +370,8 @@ class ReportsCompanyController extends Controller
 
     public function actionPaymentIntentionGeneratePay($id){
         $paymentIntention = SiroPaymentIntention::find()->where(['siro_payment_intention_id' => $id])->one();
-        $result_search = ApiSiro::SearchPaymentIntention($paymentIntention->reference,$paymentIntention->id_resultado);
+        $result_search = ApiSiro::SearchPaymentIntention($paymentIntention->reference, $paymentIntention->id_resultado); // sometimes id_resultado is null?
+        
         
         $paymentIntention->updatedAt = date('Y-m-d_H-i');
         $paymentIntention->status = ($result_search['PagoExitoso']) ? "payed" : (($result_search['Estado'] == 'CANCELADA')?'canceled':'pending');
@@ -378,9 +379,10 @@ class ReportsCompanyController extends Controller
         $paymentIntention->estado = $result_search['Estado'];
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
-        $paymentIntention->save(false);
+        $paymentIntention->save(false); // URLs should not have more than 70 chars -
 
-        if($result_search['PagoExitoso'] == 'payed'){
+        if($result_search['PagoExitoso'] == 'payed' or $result_search['PagoExitoso']){ // the PagoExitoso response is boolean, so I added an extra check.
+            
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
@@ -394,7 +396,7 @@ class ReportsCompanyController extends Controller
                 'status' => 'closed'
             ]);
                 
-            if ($payment->save(false)) {
+            if ($payment->save(true)) { // if it where to be false, it doesnt trigger the if statement  
                 $paymentIntention->payment_id = $payment['payment_id'];
     
                 $payment_item = new PaymentItem();
@@ -415,11 +417,15 @@ class ReportsCompanyController extends Controller
                 
             } else {
                 Yii::$app->session->setFlash('error', 'La creacion del pago no pudo ser generada.');
+                Yii::$app->session->setFlash('error', $payment->getErrorSummary(true));
                 $transaction->rollBack();
             }
-        }else if($result_search['Estado'] == 'CANCELADA'){
+        }
+        else if($result_search['Estado'] == 'CANCELADA'){
             Yii::$app->session->setFlash('error', 'La intención de pago se encuentra cancelada.');
-
+        }
+        else if ($result_search['PagoExitoso'] == false){
+            Yii::$app->session->setFlash('error', 'La intención de pago registra que el pago externo no fue exitoso.');
         }else{
             Yii::$app->session->setFlash('error', 'Ha habido un error con la intención de pago.');
         }
