@@ -21,6 +21,8 @@ use app\modules\sale\modules\contract\models\Contract;
 use app\modules\sale\models\DocumentType;
 use app\modules\westnet\models\NotifyPayment;
 use app\modules\westnet\models\PaymentExtensionHistory;
+use app\modules\sale\models\CustomerClass;
+use app\modules\sale\models\CustomerCategory;
 
 use Yii;
 use yii\base\Exception;
@@ -1426,22 +1428,45 @@ class CustomerController extends Controller
 	        $customer->_notifications_way = ['screen','sms','email'];
             $customer->_sms_fields_notifications = ['phone','phone2','phone3','phone4'];
             $customer->_email_fields_notifications = ['email','email2'];
-            $customer->tax_condition_id = $data['tipo_cli'];
-            // 1=>IVA Inscripto
-            // 2=>IVA No inscripto
-            // 3=>Consumidor Final
-            // 4=>Exento
-            // 5=>Monotributista
             $customer->birthdate = '1990-01-01';
             $customer->publicity_shape = 'poster';
             $customer->has_debit_automatic = 'no';
             $customer->company_id = 2;
             $customer->parent_company_id = 8;
             $customer->status = 'enabled';
-            $customer->setCustomerClass(1);
-            $customer->setCustomerCategory(1);
-            $customer->updatePaymentCode();
 
+            $customerClassModel = CustomerClass::findOne(['name' => $data['clase']]);
+            $customer->setCustomerClass(
+                    (empty($data['clase']) or !isset($data['clase']) // if empty string or not setted as a parameter defaults as 1
+                ) ? 1 : $customerClassModel->customer_class_id);
+            // 1=>Basico
+            // 2=>Free
+            // 3=>VIP
+            // 4=>Mantenimiento
+            // 5=>Sin categoría 
+
+            $customerCategoryModel = CustomerCategory::findOne(['name' => $data['rubro']]);
+            $customer->setCustomerCategory(
+                    (empty($data['rubro']) or !isset($data['rubro']) // if empty string or not setted as a parameter defaults as 1
+                ) ? 1 : $customerCategoryModel->customer_category_id);
+            // 1=>Familia
+            // 2=>Empresa
+            // 3=>Sin rubro
+            if($data['rubro'] == "Empresa" and $data['tipo_cli'] == "3"){ // Check that company isnt final consumer
+                return [ 
+                    'error' => 'true',
+                    'summary' => 'El rubro Empresa no puede ser Consumidor Final',
+                ];
+            }
+            $customer->tax_condition_id = $data['tipo_cli'];
+            // 1=>IVA Inscripto
+            // 2=>IVA No inscripto
+            // 3=>Consumidor Final
+            // 4=>Exento
+            // 5=>Monotributista
+
+            $customer->updatePaymentCode();
+            
             $address->street = $data['calle'];
             $address->number = $data['nro_calle'];
             $address->geocode = $data['geo'];
@@ -1466,8 +1491,7 @@ class CustomerController extends Controller
             Yii::$app->response->setStatusCode(400);
             return [
                 'error' => 'true',
-                'msg' => $ex->getMessage(),
-                'data' => $customer->getErrors() 
+                'msg' => $ex->getMessage()
             ];
         }
     }
