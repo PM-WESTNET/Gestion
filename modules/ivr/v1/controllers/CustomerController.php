@@ -1347,64 +1347,7 @@ class CustomerController extends Controller
     }
 
 
-    public function actionCreateCustomer(){
-        $data = Yii::$app->request->post();
-        try{
-            $customer = new Customer();
-            $address = new Address();
-            $customer->scenario= 'insert';
-            $address->scenario = 'insert';
-
-            $document_type = DocumentType::findOne(['name' => strtoupper($data['tipo_doc'])]);
-
-            $customer->name = $data['nombre'];
-            $customer->lastname = $data['apellido'];
-            $customer->document_type_id = ($document_type !== null) ? $document_type->document_type_id : null;
-            $customer->document_number = $data['nro_doc'];
-            $customer->phone = $data['telefono2'];
-            $customer->phone2 = $data['celular1'];
-            $customer->phone3 = $data['telefono1'];
-            $customer->phone4 = $data['celular2'];
-            $customer->user_napear = $data['usuario'];
-            $customer->email = (isset($data['email'])) ? $data['email'] : '';
-           
-	    $customer->_notifications_way = ['screen','sms','email'];
-            $customer->_sms_fields_notifications = ['phone','phone2','phone3','phone4'];
-            $customer->_email_fields_notifications = ['email','email2'];
-            $customer->tax_condition_id = 3;
-            $customer->birthdate = '1990-01-01';
-            $customer->publicity_shape = 'poster';
-            $customer->has_debit_automatic = 'no';
-            $customer->company_id = 2;
-            $customer->parent_company_id = 8;
-            $customer->status = 'enabled';
-            $customer->setCustomerClass(1);
-            $customer->setCustomerCategory(1);
-            $customer->updatePaymentCode();
-
-            $address->street = $data['calle'];
-            $address->number = $data['nro_calle'];
-            $address->geocode = $data['geo'];
-            $address->save(false);
-
-            $customer->setAddress($address);
-            $customer->save(false);
-            
-            return [
-                'error' => 'false',
-                'customer_id' => $customer->customer_id,
-            ];
-            
-        } catch (Exception $ex) {
-            Yii::$app->response->setStatusCode(400);
-            return [
-                'error' => 'true',
-                'msg' => $ex->getMessage(),
-                'data' => $customer->getErrors() 
-            ];
-        }
-    }
-    public function actionCreateCustomerTest(){ // new temporal API for testing creating COMPANIES with CUIT number that arent Consumidor Final
+    public function actionCreateCustomer(){ // new temporal API for testing creating COMPANIES with CUIT number that arent Consumidor Final
         $data = Yii::$app->request->post();        
         try{
             $customer = new Customer();
