@@ -2271,10 +2271,20 @@ class Customer extends ActiveRecord {
     public static function getTotalDebtorsCurrency($params){
 
         $contract_status = isset($params['CustomerSearch']['contract_status'][0])?$params['CustomerSearch']['contract_status'][0]:'active';
+        $debt_bills_from = isset($params['CustomerSearch']['debt_bills_from'])?(Int)$params['CustomerSearch']['debt_bills_from']:null;
+        $debt_bills_to = isset($params['CustomerSearch']['debt_bills_to'])?(Int)$params['CustomerSearch']['debt_bills_to']:null;
+
+        $conditions = "WHERE co.status = '$contract_status'";
+
+        if($debt_bills_from)
+            $conditions .= " AND cu.total_bills >= $debt_bills_from";
+
+        if($debt_bills_to)
+            $conditions .= " AND cu.total_bills <= $debt_bills_to";
 
         return Yii::$app->db->createCommand("SELECT SUM(current_account_balance) AS total_debtors FROM customer cu
             INNER JOIN contract co ON co.customer_id = cu.customer_id
-            WHERE co.status = '$contract_status'")
+            $conditions")
             ->queryOne();
     }
 }
