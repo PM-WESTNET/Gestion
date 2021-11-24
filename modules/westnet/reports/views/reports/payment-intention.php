@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'status',
-                'label' => Yii::t('app','Status'),
+                'label' => 'Estado Interno',
                 'format' => 'raw',
                 'filter'=>[
                     'payed'=>Yii::t('app','Pagado'),
@@ -52,7 +52,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         return '<span class="label label-danger">Error <i class="glyphicon glyphicon-remove"></i></span>';
                 }
             ],
-            'estado',
+            [
+                'attribute' => 'estado',
+                'label' => 'Estado Externo',
+            ],
             [
                 'attribute' => 'company',
                 'label' => Yii::t('app','Company'),
