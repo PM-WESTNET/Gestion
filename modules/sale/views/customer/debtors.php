@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $item = '<span class="glyphicon glyphicon-chevron-down"></span> ' . Yii::t('app', 'Filters');
 
-     echo Collapse::widget([
+    echo Collapse::widget([
         'items' => [
             [
                 'label' => $item,
@@ -72,7 +72,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     
 
-    <h2 class="text-danger"><?= Yii::t('app', 'Total Debt')?> : <?=Yii::$app->formatter->asCurrency($total_debtors)?></h2>
+    <h2 class="text-danger"><?= Yii::t('app', 'Total Debt')?> : <?php $total= (double)Yii::$app->session->get('totalDebtors'); echo Yii::$app->formatter->asCurrency($total)?></h2>
     <?php
     $columns = [
         ['class' => 'yii\grid\SerialColumn'],
@@ -89,7 +89,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute'=>'phone',
         ],
         [
-            'attribute'=>'currency',
+            'attribute'=>'saldo',
             'format'=>'currency',
             'label'=>Yii::t('app', 'Amount due'),
         ],
