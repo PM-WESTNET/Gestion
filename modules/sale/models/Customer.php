@@ -690,9 +690,9 @@ class Customer extends ActiveRecord {
 
                 foreach ($changedAttributes as $attr => $oldValue) {
                     if ($this->$attr != $oldValue) {
-//                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
-                            $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
-//                        }
+    //                        if($attr == 'document_number' || $attr == 'email' || $attr == 'email2' || $attr == 'phone'  || $attr == 'phone2' || $attr == 'phone3' || $attr == 'phone4' || $attr == 'hourRanges') {
+                                $this->updateAttributes(['last_update' => (new \DateTime('now'))->format('Y-m-d')]);
+    //                        }
 
                         if ($attr === 'email') {
                             $this->updateAttributes(['email_status' => 'invalid']);
@@ -1854,17 +1854,16 @@ class Customer extends ActiveRecord {
         $lastForced = $this->getLastForced();
         $timeBetween = (int)Config::getValue('time_between_payment_extension');
 
-        if ($lastForced && ($lastForced->create_timestamp > (time() - ($timeBetween * 60)))) {
+        if ($lastForced && ($lastForced->create_timestamp > (time() - ($timeBetween * 60)))) { 
             return false;
         }
-
-
+        
         $max_date_can_request_payment_extension = $this->getMaxDateNoticePaymentExtension();
         $today = (new \DateTime('now'))->getTimestamp();
 
         //Verifico que la fecha de hoy no sea mayor a la fecha máxima en la cual se puede solicitar la extension de pago
         if($today > $max_date_can_request_payment_extension) {
-            $this->detailed_error = Yii::t('app', "Today's date exceeds the maximun date");
+            $this->detailed_error = "La fecha actual excede la fecha máxima para realizar una extensión de pago";
             return false;
         }
 
@@ -1948,7 +1947,6 @@ class Customer extends ActiveRecord {
         $payment_extension_days_qty = Config::getValue('payment_extension_duration_days');
 
         $day_of_the_month = $expiration_bill_days_qty + $payment_extension_days_qty;
-
         return (new \DateTime('first day of this month'))->modify("+$day_of_the_month days")->getTimestamp();
     }
 

@@ -351,6 +351,7 @@ class CustomerController extends Controller
         }
 
         $customer = Customer::findOne(['code' => $data['code'], 'status' => Customer::STATUS_ENABLED]);
+        
 
         if (empty($customer)) {
             \Yii::$app->response->setStatusCode(400);
@@ -386,14 +387,14 @@ class CustomerController extends Controller
             ];
         }
 
-        if (!$contract->customer->canRequestPaymentExtension() && $customer->code !== 27237) {
+        if (!$contract->customer->canRequestPaymentExtension()) {
             \Yii::$app->response->setStatusCode(400);
-
+            // aca falla porque devuelve mensaje por defecto en la funcion canrequestpaymentextension
             return [
                 'error' => 'true',
                 'deudor' => $contract->customer->debtor ? 'true' : 'false',
                 'nuevo' => $contract->customer->isNew ? 'true' : 'false',
-                'msg' => $customer->detailed_error ? $customer->detailed_error : $default_message
+                'msg' => $contract->customer->detailed_error ? $contract->customer->detailed_error : $default_message
             ];
         }
 
@@ -654,10 +655,10 @@ class CustomerController extends Controller
     public function actionPdf($model)
     {
 
-//        $response = Yii::$app->getResponse();
-//        $response->format = \yii\web\Response::FORMAT_RAW;
-//        $response->headers->set('Content-type: application/pdf');
-//        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+        //        $response = Yii::$app->getResponse();
+        //        $response->format = \yii\web\Response::FORMAT_RAW;
+        //        $response->headers->set('Content-type: application/pdf');
+        //        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
 
         $this->layout = '//pdf';
@@ -682,7 +683,6 @@ class CustomerController extends Controller
 
         return $pdf;
     }
-
 
     /**
      * @SWG\Post(path="/customer/get-customer",
@@ -1514,8 +1514,8 @@ class CustomerController extends Controller
     public function actionTotalExtensionPayment(){
         $data = Yii::$app->request->post();
 
-        $date_first_day = date('Y-m-01');
-        $date_last_day = date('Y-m-t');
+        $date_first_day = date('Y-m-01'); // 01 = first day of the month
+        $date_last_day = date('Y-m-t'); // t = number of days of the given month
 
         if(!isset($data['customer_id'])){
             return [
@@ -1541,10 +1541,17 @@ class CustomerController extends Controller
         ->bindValue('date_last_day', $date_last_day)
         ->queryAll();
 
+        if ($result == null){ // if no payment extensions found in the actual month
+            return [
+                'error' => 'false',
+                'total' => count($result) 
+            ];
+        }
         return [
-            'error' => 'false',
-            'total' => count($result) 
+            'error' => 'true',
+            'total' => 'payment extensions found in the month' 
         ];
+        
     }
 
     public function actionBillsDue(){
