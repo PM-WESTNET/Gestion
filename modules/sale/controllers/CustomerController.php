@@ -408,18 +408,22 @@ class CustomerController extends Controller
     public function actionExportDebtors()
     {
         $searchModel= new CustomerSearch();
-        $debtors= $searchModel->buildDebtorsQuery(Yii::$app->request->getQueryParams());
+        // this two methods dont return the same type. beware
+        $debtors= $searchModel->buildDebtorsQuery(Yii::$app->request->getQueryParams())->all(); // added ->all() to excecute
+        //$debtors= $searchModel->buildDebtorsQueryV2(Yii::$app->request->getQueryParams());
+        
         
         $excel= ExcelExporter::getInstance();
         $excel->create('Deudores', [
             'A' => ['code', Yii::t('app', 'Customer Number'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'B' => ['name', Yii::t('app', 'Customer'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             'C' => ['phone', Yii::t('app', 'Phone'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
+            //'D' => ['currency', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00], // currency is defined for V2 func
             'D' => ['saldo', Yii::t('app', 'Amount due'), PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00],
             'E' => ['debt_bills', Yii::t('app', 'Debt Bills'), PHPExcel_Style_NumberFormat::FORMAT_TEXT],
             
         ])->createHeader();
-        
+
         $excel->writeData($debtors);
         
         $excel->download('Deudores.xls');
