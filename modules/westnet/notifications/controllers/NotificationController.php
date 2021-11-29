@@ -517,53 +517,59 @@ class NotificationController extends Controller {
 
 
     public function actionRedirectBankRoela($id){
-        $customer = Customer::findOne(['hash_customer_id' => $id]);
+        try {
+            $customer = Customer::findOne(['hash_customer_id' => $id]);
 
-        if($customer){
-	    if($customer->company_id == "2" || $customer->company_id == "7"){
-            if(Config::getConfig('siro_communication_bank_roela')->item->description){
-                $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
-                $siro_payment_intention_id = $result_search['siro_payment_intention_id'];
+            if($customer){
+        	    if($customer->company_id == "2" || $customer->company_id == "7"){
+                    if(Config::getConfig('siro_communication_bank_roela')->item->description){
+                        $result_search = SiroPaymentIntention::find()->where(['customer_id' => $customer->customer_id,'status' => 'pending'])->one();
+                        $siro_payment_intention_id = $result_search['siro_payment_intention_id'] ?? null;
 
-                if(!$result_search && $customer->current_account_balance < 0){
-                    $result_create = ApiSiro::CreatePaymentIntention($customer);
-                    if($result_create)
-                        return $this->redirect($result_create['Url']);
-                    else
-                        $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id/form"); //error created intention payment
+                        if(!$result_search && $customer->current_account_balance < 0){
+                            $result_create = ApiSiro::CreatePaymentIntention($customer);
+                            if($result_create)
+                                return $this->redirect($result_create['Url']);
+                            else
+                                $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id"); //error created intention payment
 
-                }else if($result_search['status'] == 'pending'){
-                    $current_date = strtotime(date("d-m-Y H:i:00",time()));
-                    $payment_date = strtotime($result_search->createdAt);
-                    $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
+                        }else if($result_search['status'] == 'pending'){
+                            $current_date = strtotime(date("d-m-Y H:i:00",time()));
+                            $payment_date = strtotime($result_search->createdAt);
+                            $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60;
 
-                    if($current_date < ($payment_date + $expiry_time))
-                        $this->redirect($result_search['url']);
-                    else{
-                        $result_create = ApiSiro::CreatePaymentIntention($customer);
-                        if($result_create){
-                            $result_search->status = "canceled";
-                            $result_search->save(false);
-                            return $this->redirect($result_create['Url']);
-                        }else
-                            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id/form");
-                    }          
-                }else{
-                    $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
-                }
-            }else
-                $this->redirect("http://pago.westnet.com.ar:3000/portal/system-disabled");
+                            if($current_date < ($payment_date + $expiry_time))
+                                $this->redirect($result_search['url']);
+                            else{
+                                $result_create = ApiSiro::CreatePaymentIntention($customer);
+                                if($result_create){
+                                    $result_search->status = "canceled";
+                                    $result_search->save(false);
+                                    return $this->redirect($result_create['Url']);
+                                }else
+                                    $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id");
+                            }          
+                        }else{
+                            $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
+                        }
+                    }else
+                        $this->redirect("http://pago.westnet.com.ar:3000/portal/system-disabled");
+                    }else{
+        		$this->redirect("http://pago.westnet.com.ar:3000/portal/company-disabled");
+        	    }
             }else{
-		$this->redirect("http://pago.westnet.com.ar:3000/portal/company-disabled");
-	    }
-        }else{
-            $this->redirect("http://pago.westnet.com.ar:3000/portal/error-bill-draft"); //Customer not find
+                $this->redirect("http://pago.westnet.com.ar:3000/portal/error-bill-draft");
+            }
+        } catch (Exception $e) {
+            log_siro_payment_intention($e);
         }
         
     }
-
+                                       
 
     public function actionSuccessBankRoela($IdResultado, $IdReferenciaOperacion){
+        log_siro_payment_intention($IdResultado);
+        log_siro_payment_intention($IdReferenciaOperacion);
 
         $register_redirection_roela = new RegisterRedirectionRoela();
 
