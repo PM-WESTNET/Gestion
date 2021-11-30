@@ -14,7 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <hr>
     </div>
     <div">
-        <a class="btn btn-success" href="<?=\yii\helpers\UrlUrl::toRoute(['/westnet/siro/checker-of-payments'])?>" >Contrastador de Pagos</a>
+        <a class="btn btn-success" href="<?=\yii\helpers\Url::toRoute(['/westnet/siro/checker-of-payments'])?>" >Contrastador de Pagos</a>
     </div>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
