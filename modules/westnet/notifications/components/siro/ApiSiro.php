@@ -74,7 +74,7 @@ class ApiSiro extends Component{
 		$authorization = "Authorization: Bearer ".$token['access_token'];
         $conexion = curl_init();
 
-        curl_setopt($conexion, CURLOPT_URL,$url->item->description.'/'.$data['hash'].'/'.$data['id_resultado']);
+        curl_setopt($conexion, CURLOPT_URL,$url->item->description.'/'.$data['hash']);
         curl_setopt($conexion, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
 
         curl_setopt($conexion, CURLOPT_RETURNTRANSFER, true);
@@ -150,7 +150,7 @@ class ApiSiro extends Component{
         $paymentIntention = SiroPaymentIntention::find()->where(['reference' => $reference])->one();
         if($paymentIntention){
             $token = ApiSiro::GetTokenApi($paymentIntention->company_id);
-            return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado));
+            return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash));
         }
 
     	return false;

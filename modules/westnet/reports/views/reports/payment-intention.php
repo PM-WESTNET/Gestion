@@ -13,7 +13,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <h1><?= Html::encode($this->title) ?></h1>
         <hr>
     </div>
-    
+    <div">
+        <a class="btn btn-success" href="/westnet/siro/checker-of-payments">Contrastador de Pagos</a>
+    </div>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
