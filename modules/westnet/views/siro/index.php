@@ -31,4 +31,31 @@ use yii\helpers\Html;
 	    <input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
 	</div>
 
+	<?php if(isset($dataProvider)): ?>
+		<?=  GridView::widget([
+		        'dataProvider' => $dataProvider,
+		        'columns' => [
+		            ['class' => 'yii\grid\SerialColumn'],
+		            'PagoExitoso',
+		            'MensajeResultado', 
+		            'FechaOperacion',
+		            'FechaRegistro',
+		            'IdOperacion',
+		            'Estado',
+		            'idReferenciaOperacion',
+		            'siro_payment_intention_id',
+		            'customer_id',
+		            'hash',
+		            'reference',
+		            'url',
+		            'createdAt',
+		            'updatedAt',
+		            'status',
+		            'estado',
+		            'payment_id'
+		            ],
+		    ]
+		]); ?>
+	<?php endif; ?>
+
 <?= Html::endForm() ?>
