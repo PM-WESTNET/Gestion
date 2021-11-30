@@ -34,18 +34,28 @@ class SiroController extends Controller
                                               ->queryAll();
 
             $token = ApiSiro::GetTokenApi($request['company_id']);
-        
+            $list_of_payments_to_process = [];
             foreach ($payment_intentions as $key => $value) {
-                if(isset($value['hash']))
+                if(isset($value['hash'])){
                     $search_payment_intention = ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $value['hash']));
 
-                var_dump($search_payment_intention);die();
+                    if(!isset($search_payment_intention['Message']) || isset($search_payment_intention['PagoExitoso']))
+                        if($search_payment_intention['PagoExitoso'])
+                            $list_of_payments_to_process[] = $search_payment_intention + $value;
+                }
             }
-        }
-        
 
-        //$token = ApiSiro::GetTokenApi($paymentIntention->company_id);
-        //return ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $paymentIntention->hash, 'id_resultado' => $id_resultado))
+            if(!empty($list_of_payments_to_process)){
+                $dataProvider = new ArrayDataProvider([
+                    'allModels' => $result,
+                    'pagination' => [
+                        'pageSize' => 15,
+                    ],
+                ]);
+                return $this->render('index', ['dataProvider' => $dataProvider]);
+            }else
+                Yii::$app->session->setFlash("success", "No se han encontrado intenciones de pago que se encuentren procesadas.");
+        }
 
         return $this->render('index');
     }
