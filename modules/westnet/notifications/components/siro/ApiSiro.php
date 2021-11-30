@@ -121,7 +121,9 @@ class ApiSiro extends Component{
 
             $token = ApiSiro::GetTokenApi($customer->company_id);
             $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
-            
+        	
+	    log_siro_payment_intention_without_error($result);    
+	
             if(!isset($result['Message']) || isset($result['Url'])){
     	        $paymentIntention->customer_id = $customer->customer_id;
     	        $paymentIntention->hash = $result['Hash'];
