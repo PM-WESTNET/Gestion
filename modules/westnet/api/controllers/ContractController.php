@@ -224,9 +224,9 @@ class ContractController extends RestController
             ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
             ->andWhere(['in', 'con.status_account', ['defaulter','clipped']])
+            ->andWhere(['in', 'contract.status', ['active','low-process']])
             ->andWhere([
                 'cus.status' => Customer::STATUS_ENABLED,
-                'contract.status' => Contract::STATUS_ACTIVE,
                 'con.status' => Connection::STATUS_ENABLED
             ])
         ;
@@ -236,6 +236,8 @@ class ContractController extends RestController
         } else {
             $query->leftJoin('company c', 'c.company_id = cus.company_id');
         }
+
+        //var_dump(count($query->all()));die();
         $contracts = $query->all();
 
         $searchModel = new PaymentSearch();
