@@ -225,10 +225,10 @@ class ContractController extends RestController
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
             ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']])
             ->andWhere(['in', 'contract.status', ['active','low-process']])
-            /* ->andWhere([ // an error was encountered that was relationed with the portal cautivo that warned customers. some customers where missing due to this extra filters
+            ->andWhere([ // an error was encountered that was relationed with the portal cautivo that warned customers. some customers where missing due to this extra filters
                 'cus.status' => Customer::STATUS_ENABLED,
                 'con.status' => Connection::STATUS_ENABLED
-            ]) */
+            ])
         ;
 
         if($multiple) {
