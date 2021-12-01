@@ -38,15 +38,15 @@ class BackupMysqlController extends \yii\console\Controller
 
             $backup->finish_timestamp = (new \DateTime('now'))->format('d-m-Y H:i:s');
 
-//            $fileLog= file($log);
-//
-//            $description = '';
-//
-////            for ($i = $init_log; $i === (count($fileLog)-1); $i++){
-////               $description .= $fileLog[$i]. PHP_EOL;
-////            }
-////
-////            $backup->description = $description;
+            //            $fileLog= file($log);
+            //
+            //            $description = '';
+            //
+            ////            for ($i = $init_log; $i === (count($fileLog)-1); $i++){
+            ////               $description .= $fileLog[$i]. PHP_EOL;
+            ////            }
+            ////
+            ////            $backup->description = $description;
 
             $backup->save();
 
