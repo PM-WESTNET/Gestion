@@ -354,7 +354,11 @@ class Payment extends  ActiveRecord  implements CountableInterface
      */
     public function accountTotal($fromDate = null, $toDate = null, $only_closed = true){
 
-        return $this->accountPayed($fromDate, $toDate, $only_closed) - $this->accountTotalCredit($fromDate, $toDate, $only_closed);
+        return (
+            $this->accountPayed($fromDate, $toDate, $only_closed) 
+            - 
+            $this->accountTotalCredit($fromDate, $toDate, $only_closed)
+        );
 
     }
 

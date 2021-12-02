@@ -223,10 +223,10 @@ class ContractController extends RestController
             ->from('contract')
             ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
-            ->andWhere(['in', 'con.status_account', ['defaulter','clipped']])
-            ->andWhere([
+            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']])
+            ->andWhere(['in', 'contract.status', ['active','low-process']])
+            ->andWhere([ // an error was encountered that was relationed with the portal cautivo that warned customers. some customers where missing due to this extra filters
                 'cus.status' => Customer::STATUS_ENABLED,
-                'contract.status' => Contract::STATUS_ACTIVE,
                 'con.status' => Connection::STATUS_ENABLED
             ])
         ;
@@ -236,18 +236,72 @@ class ContractController extends RestController
         } else {
             $query->leftJoin('company c', 'c.company_id = cus.company_id');
         }
+
+        //var_dump($query->all());die();
         $contracts = $query->all();
 
         $searchModel = new PaymentSearch();
         foreach($contracts as $contract) {
             $searchModel->customer_id = $contract['customer_id'];
-            unset($contract['customer_id']);
+            unset($contract['customer_id']); // the Customer ID is searched in the query beforehand just to calculate its accountTotal *amount. Then is unsetted
             $response[] = array_merge($contract, [
                 'due' => $searchModel->accountTotal()
             ]);
         }
-
+        
         return $response;
+    }
+
+    /**
+     * Lista los contratos que tienen aviso de mora o corte con aviso. MODIFICADO POR EMI PARA QUE NO FALLE CUANDO HAY MUCHOS REGISTROS EN EL FOREACH
+     * @return array
+     */
+    public function actionMoraV2()
+    {
+        $response = [];
+
+        $multiple = (property_exists(Customer::className(), 'parent_company_id'));
+
+        $query = (new Query())
+            ->select([
+                'contract.contract_id','contract.customer_id',
+                'cus.name', 'cus.code as customer_code', 'cus.payment_code',
+                'con.contract_id', new Expression('inet_ntoa(con.ip4_1) as ip'),
+                new Expression('inet_ntoa(con.ip4_2) as ip_2'),
+                'con.status_account as account_status', 'c.company_id', 'c.name as company_name',
+                'cus.current_account_balance as due'
+            ])
+            ->from('contract')
+            ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
+            ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
+            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']])
+            ->andWhere(['in', 'contract.status', ['active','low-process']])
+            ->andWhere([ // an error was encountered that was relationed with the portal cautivo that warned customers. some customers where missing due to this extra filters
+                'cus.status' => Customer::STATUS_ENABLED,
+                //'con.status' => Connection::STATUS_ENABLED
+            ])
+        ;
+
+        if($multiple) {
+            $query->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
+        } else {
+            $query->leftJoin('company c', 'c.company_id = cus.company_id');
+        }
+
+        $contracts = $query->all();
+
+        // old API (better for real time due balance of customer's account)
+        /* $searchModel = new PaymentSearch();
+        foreach($contracts as $contract) {
+            $searchModel->customer_id = $contract['customer_id'];
+            unset($contract['customer_id']); // the Customer ID is searched in the query beforehand just to calculate its accountTotal *amount. Then is unsetted
+            $response[] = array_merge($contract, [
+                'due' => $searchModel->accountTotal()
+            ]);
+        } */
+        
+        return $contracts;
+        //return $response;
     }
 
     /**
