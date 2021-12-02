@@ -18,7 +18,6 @@ $this->title = Yii::t('app', 'Customer Debts');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="customer-index">
-
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>        
     </div>
@@ -111,6 +110,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'id'=>'grid',
         'options' => ['class' => 'table-responsive'],                
         'columns' => $columns,
+        'rowOptions'=>function ($model){
+            $style = ($model['saldo'] == 0) ? ['style' => 'display:none'] : null;
+            return $style;
+        },
     ]); ?>
 
     <?php $grid->end(); ?>
