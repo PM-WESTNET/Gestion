@@ -1636,25 +1636,28 @@ class CustomerController extends Controller
 
         foreach ($customer->contracts as $key => $contract) {
             $connection = $contract->connection;
-            $node = $connection->node;
-            $connections[] = [
-                'state' => 'Mendoza',
-                'city' => '',
-                'address' => $fulladdress,
-                'phone' => $customer->phone,
-                'phone_mobile' => $customer->phone2,
-                'email' => $customer->email,
-                'ip' => long2ip($connection->ip4_1),
-                'webpass' => '',
-                'webpassc' => '',
-                'lat' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[0],
-                'lng' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[1],
-                'node' => $node->name,
-                'access_point' => '',
-                's_status' => $connection->status_account,
-                'message' => '',
-                'extra_info' => ''
-            ];
+	    
+	    if($connection){
+            	$node = $connection->node;
+            	$connections[] = [
+                	'state' => 'Mendoza',
+                	'city' => '',
+	                'address' => $fulladdress,
+        	        'phone' => $customer->phone,
+                	'phone_mobile' => $customer->phone2,
+	                'email' => $customer->email,
+        	        'ip' => long2ip($connection->ip4_1),
+               	        'webpass' => '',
+	                'webpassc' => '',
+	                'lat' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[0],
+        	        'lng' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[1],
+	              	'node' => $node->name,
+	                'access_point' => '',
+	                's_status' => $connection->status_account,
+	                'message' => '',
+	                'extra_info' => ''
+           	 ];
+	     }
         }
 
 
