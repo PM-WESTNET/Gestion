@@ -266,20 +266,19 @@ class ContractController extends RestController
             ->select([
                 'contract.contract_id','contract.customer_id',
                 'cus.name', 'cus.code as customer_code', 'cus.payment_code',
-                'con.contract_id', new Expression('inet_ntoa(con.ip4_1) as ip'),
+                'con.contract_id', 
+                new Expression('inet_ntoa(con.ip4_1) as ip'), // inet_ntoa transforms int into IP format (0.0.0.0)
                 new Expression('inet_ntoa(con.ip4_2) as ip_2'),
                 'con.status_account as account_status', 'c.company_id', 'c.name as company_name',
-                'cus.current_account_balance as due'
+                'IFNULL(cus.current_account_balance,0) AS due' // IFNULL saves us time converting  NULL values into 0.
             ])
             ->from('contract')
             ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
-            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']])
-            ->andWhere(['in', 'contract.status', ['active','low-process']])
-            ->andWhere([ // an error was encountered that was relationed with the portal cautivo that warned customers. some customers where missing due to this extra filters
-                'cus.status' => Customer::STATUS_ENABLED,
-                //'con.status' => Connection::STATUS_ENABLED
-            ])
+
+            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']]) // combinatory of "Estado de Conexion"
+            ->andWhere(['in', 'contract.status', ['active','low-process','low']]) // combinatory of "Estados de Contrato"
+            ->andWhere(['!=','con.ip4_1','0']) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
         ;
 
         if($multiple) {
@@ -289,19 +288,8 @@ class ContractController extends RestController
         }
 
         $contracts = $query->all();
-
-        // old API (better for real time due balance of customer's account)
-        /* $searchModel = new PaymentSearch();
-        foreach($contracts as $contract) {
-            $searchModel->customer_id = $contract['customer_id'];
-            unset($contract['customer_id']); // the Customer ID is searched in the query beforehand just to calculate its accountTotal *amount. Then is unsetted
-            $response[] = array_merge($contract, [
-                'due' => $searchModel->accountTotal()
-            ]);
-        } */
         
         return $contracts;
-        //return $response;
     }
 
     /**
