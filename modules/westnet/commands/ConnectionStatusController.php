@@ -48,8 +48,8 @@ class ConnectionStatusController extends Controller
      */
     public function actionUpdate($save = false) // when activating the cron you can pass a parameter (like 1 for TRUE)
     {
-        $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
+            $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
             $this->updateConnections($save);
         }
     }
@@ -472,19 +472,19 @@ class ConnectionStatusController extends Controller
 
 
         if ($debug) { //1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression('customer_id in (102031,1403,1533,2303)'));
+            $queryCustomer->andWhere(new Expression('customer_id in (100244,102031,1403,1533,2303)'));
         }
         //$queryCustomer->orderBy(['customer_id' => SORT_DESC]);
         $customers = $queryCustomer->all();
-        $this->stdout("\ncustomers query runned\n");
+        $this->stdout("\ncustomers query runned");
         
-        //$this->stdout(var_dump($customers));
+        $this->stdout("\nquerying ".count($customers)." customers (with status:enabled)"); // debug: uncomment to see the customers total number queried (regardless of Contract Status).
 
         $subprice = (new Query())
             ->select(['product_id', new Expression('max(date) maxdate')])
             ->from('product_price')
             ->groupBy(['product_id']);
-        $this->stdout("\nsubprice query runned\n");
+        //$this->stdout("\nsubprice query created\n");
 
 
         $query_plan = (new Query())
@@ -507,12 +507,19 @@ class ConnectionStatusController extends Controller
             foreach ($customers as $customer) {
                 //$this->stdout("\n".$customer->customer_id." processing customer");
 
-                /* if($customer->customer_id == 102031){ // debug customer ID, uncomment to see in the log file if a particular customer was processed
-                    $this->stdout("\n\n\n ".$customer->customer_id." is being processed------------------------------\n\n\n");
+                /* if($customer->customer_id == 100244){ // debug customer ID, uncomment to see in the log file if a particular customer was processed
+                    $this->stdout("\n\n\n ".$customer->customer_id." is being processed----------DEBUG----------\n\n\n");
                 } */
 
                 /** @var CustomerClass $customerClass */
                 $customerClass = $customer->getCustomerClass()->one();
+
+                if(!isset($customerClass) or empty($customerClass)){ // if the previous query doesnt return anything, its probably a case of a customer created for testing. so we set a default value for it.
+                    $this->stdout("\n".$customer->customer_id." (id) didn't had any CustomerClass - Setting it a new one.");
+                    //break;
+                    $customer->setCustomerClass(5);
+                    $customerClass = $customer->getCustomerClass(); // get it again.
+                }
 
                 $aviso_date = clone $due_date;
                 $cortado_date = clone $due_date;
@@ -697,8 +704,10 @@ class ConnectionStatusController extends Controller
             echo $ex->getMessage();
             echo $ex->getLine();
             echo $ex->getTraceAsString();
+            $this->stdout("\nProcess finished unexpectedly.");
         }
-
+        
+        $this->stdout("\n----Summary----");
         foreach ($estados as $key => $value) {
             $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
         }
