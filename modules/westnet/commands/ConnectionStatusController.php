@@ -48,7 +48,7 @@ class ConnectionStatusController extends Controller
      */
     public function actionUpdate($save = false) // when activating the cron you can pass a parameter (like 1 for TRUE)
     {
-        $this->stdout("inicio proceso actionupdate");
+        $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
             $this->updateConnections($save);
         }
@@ -430,7 +430,7 @@ class ConnectionStatusController extends Controller
      */
     private function updateConnections($save = false)
     {
-        $debug = true; // change to debug specific customers
+        $debug = false; // change to debug specific customers
 
         $due_day = Config::getValue('bill_due_day');
         if (!$due_day) {
@@ -472,9 +472,11 @@ class ConnectionStatusController extends Controller
 
 
         if ($debug) { //1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression('customer_id in (102275)'));
+            $queryCustomer->andWhere(new Expression('customer_id in (102031,1403,1533,2303)'));
         }
+        //$queryCustomer->orderBy(['customer_id' => SORT_DESC]);
         $customers = $queryCustomer->all();
+        $this->stdout("\ncustomers query runned\n");
         
         //$this->stdout(var_dump($customers));
 
@@ -482,6 +484,7 @@ class ConnectionStatusController extends Controller
             ->select(['product_id', new Expression('max(date) maxdate')])
             ->from('product_price')
             ->groupBy(['product_id']);
+        $this->stdout("\nsubprice query runned\n");
 
 
         $query_plan = (new Query())
@@ -493,6 +496,7 @@ class ConnectionStatusController extends Controller
             ->innerJoin(['ppppim' => $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
             ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
             ->orderBy(['pp.date' => SORT_DESC]);
+        $this->stdout("\nquery_plan query runned\n");
 
         $this->stdout("Westnet - Proceso de actualizacion de conexiones - " . (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
         $r = 0;
@@ -501,6 +505,12 @@ class ConnectionStatusController extends Controller
             error_log("customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$");
 
             foreach ($customers as $customer) {
+                //$this->stdout("\n".$customer->customer_id." processing customer");
+
+                /* if($customer->customer_id == 102031){ // debug customer ID, uncomment to see in the log file if a particular customer was processed
+                    $this->stdout("\n\n\n ".$customer->customer_id." is being processed------------------------------\n\n\n");
+                } */
+
                 /** @var CustomerClass $customerClass */
                 $customerClass = $customer->getCustomerClass()->one();
 
