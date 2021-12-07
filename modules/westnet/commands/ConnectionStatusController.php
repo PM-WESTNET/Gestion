@@ -48,6 +48,7 @@ class ConnectionStatusController extends Controller
      */
     public function actionUpdate($save = false) // when activating the cron you can pass a parameter (like 1 for TRUE)
     {
+        $this->stdout("inicio proceso actionupdate");
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
             $this->updateConnections($save);
         }
@@ -429,7 +430,8 @@ class ConnectionStatusController extends Controller
      */
     private function updateConnections($save = false)
     {
-        $debug = false;
+        $debug = true; // change to debug specific customers
+
         $due_day = Config::getValue('bill_due_day');
         if (!$due_day) {
             $due_day = 15;
@@ -470,9 +472,11 @@ class ConnectionStatusController extends Controller
 
 
         if ($debug) { //1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression('customer_id in (12748)'));
+            $queryCustomer->andWhere(new Expression('customer_id in (102275)'));
         }
         $customers = $queryCustomer->all();
+        
+        //$this->stdout(var_dump($customers));
 
         $subprice = (new Query())
             ->select(['product_id', new Expression('max(date) maxdate')])
@@ -678,6 +682,7 @@ class ConnectionStatusController extends Controller
                     }
                 }
             }
+            //$this->stdout(var_dump($estadosAnteriores,$estados)); // only for debugging
         } catch (\Exception $ex) {
             echo $ex->getMessage();
             echo $ex->getLine();
