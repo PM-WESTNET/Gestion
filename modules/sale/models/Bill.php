@@ -586,11 +586,17 @@ class Bill extends ActiveRecord implements CountableInterface
         if($this->status != 'draft') return false;
 
         if($this->status == 'completed') return true;
+        var_dump("passed ".date("Y-m-d H:i:s"));
 
         //Calculos:
         $this->amount = $this->calculateAmount();
+        var_dump($this->amount);
+        
         $this->total = $this->calculateTotal();
+        var_dump($this->total);
+
         $this->taxes = $this->calculateTaxes();
+        var_dump($this->taxes);
 
         $this->status = 'completed';
 
@@ -606,7 +612,7 @@ class Bill extends ActiveRecord implements CountableInterface
             $this->date = $date->format('Y-m-d');
             $this->time = $date->format('H:i');
         }
-
+        die("611");
         if($this->save()){
             return true;
         }else{
@@ -625,23 +631,25 @@ class Bill extends ActiveRecord implements CountableInterface
     {	
         \Yii::info("2) Entre en modules/sale/models/bill/function_close", 'duplicados-afip');
         $transaction = $this->db->beginTransaction();
-
         try{
             if($this->status == null){
                 $this->status = 'draft';
             }
+            
 
             if($this->number){
                 $this->updateAttributes(['number' => $this->number]);
             }
-
+            var_dump("before complete ".date("Y-m-d H:i:s"));
             //Si el estado es 'draft' primero debemos completar la factura
             if($this->status == 'draft'){
                 if(!$this->complete()){
+                    var_dump("completed ".date("Y-m-d H:i:s"));
                     return false;
                 }
+                var_dump("failed to complete ".date("Y-m-d H:i:s"));
             }
-
+            die();
             if($this->status == 'completed'){
 
                 \app\modules\sale\components\BillExpert::manageStock($this);

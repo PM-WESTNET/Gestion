@@ -219,4 +219,11 @@ class TestController extends Controller {
         if(EmailTransport::createLatestBillPDF($customer_id)==[])var_dump("works");
         else var_dump("failed");
     }
+
+    public function actionTestBillClosing(){
+        $bill = Bill::findOne(2214082);
+        //return var_dump($bill);
+        return $bill->close()?"funciona":"no funciona";
+    }
+
 }

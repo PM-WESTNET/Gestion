@@ -47,18 +47,22 @@ class InvoiceProcessController extends Controller
      */
     public function actionControlCloseInvoiceProcess()
     {
+        $this->stdout("\ninvoice-process/control-close-invoice-process was called\n");
         $pending_close_invoice_process = InvoiceProcess::getPendingInvoiceProcess(InvoiceProcess::TYPE_CLOSE_BILLS);
 
         if($pending_close_invoice_process) {
             try {
                 if(Yii::$app->mutex->acquire('mutex_close_bills')) {
                     Yii::$app->cache->set('_invoice_close_errors' ,[]);
+                    $this->stdout("Pending bills where found. Starting process.. ".date("h:i:sa")."\n");
                     $this->closePendingBills($pending_close_invoice_process);
                 }
             } catch (\Exception $ex) {
                 echo "ERROR__________". $ex->getMessage() ."\n" . $ex->getTraceAsString();
                 \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-cerrado');
             }
+        }else {
+            //$this->stdout("No pending bills where found. ".date("h:i:sa")."\n");
         }
     }
 
@@ -102,6 +106,7 @@ class InvoiceProcessController extends Controller
     {
         $i = 0;
         $searchModel = new BillSearch();
+        // search the BILLS related to the $invoice_process that was submitted to the func. (which was all status:PENDING and type:CLOSE_BILLS)
         $query = $searchModel->searchPendingToClose([
             'BillSearch' => [
                 'company_id' => $invoice_process->company_id,
@@ -149,13 +154,15 @@ class InvoiceProcessController extends Controller
                 }else{
                     echo $bill->customer_id . " cliente duplicado. \n";
                     $list_client[] = [$bill->customer_id,'cliente duplicado'];
-                    \Yii::info('---------------------------------------------------------------------------------------------'.
+                    $info ='---------------------------------------------------------------------------------------------'.
                         "ID Factura: " . $bill->bill_id . "\n" .
                         "Codigo cliente: " . $bill->customer_id . "\n" .
                         "Estado: " . $bill->status . "\n" . 
                         "Pagado: " . $bill->payed . "\n" .
                         "Número: " . $bill->number . "\n" . 
-                        "Cliente duplicado. \n", 'duplicados-afip');
+                        "Cliente duplicado. \n";
+                    \Yii::info($info, 'duplicados-afip');
+                    $this->stdout($info);
                 }
             }
         }
