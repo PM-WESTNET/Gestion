@@ -1366,21 +1366,22 @@ class Customer extends ActiveRecord {
                 return false;
             }
         }else{
-            if (User::hasPermission('actualizar-clientes')) { // there is a lot of redundancy in this statement in general
-                return true;
-            }
-            elseif (!User::hasRole('seller-office')) {
+            if (!User::hasRole('seller-office')) {
                 $contracts = Contract::findAll(['customer_id' => $this->customer_id]);
                 foreach ($contracts as $contract) {
                     if ($contract->status !== Contract::STATUS_DRAFT) {
                         return false;
                     }                  
                 }
+                
                 return true;
                 
+            }elseif (User::hasPermission('actualizar-clientes')) {
+                return true;
+            }else{
+                return false;
             }
         }
-        return false;
     }
     
     public function canView(){
@@ -1390,11 +1391,8 @@ class Customer extends ActiveRecord {
             }else{
                 return false;
             }
-        }else{ // if current user IS Seller, then..
-            if (User::hasPermission('customer-index')) { // there is a lot of redundancy in this statement in general, it seems (doing reverse engineering)
-                return true;
-            }
-            elseif (!User::hasRole('seller-office')) {
+        }else{
+            if (!User::hasRole('seller-office')) {
                 $can= false;
                 $contracts = Contract::findAll(['customer_id' => $this->customer_id]);
                 $vendor= Vendor::findOne(['user_id' => User::getCurrentUser()->id]);
@@ -1405,9 +1403,13 @@ class Customer extends ActiveRecord {
                 }
                 
                 return $can;
+                
+            }elseif (User::hasPermission('customer-index')) {
+                return true;
+            }else{
+                return false;
             }
         }
-        return false;
     }
 
     public static function getNewCode(){
