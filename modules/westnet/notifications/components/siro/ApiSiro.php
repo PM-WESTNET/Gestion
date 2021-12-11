@@ -36,7 +36,6 @@ class ApiSiro extends Component{
         curl_setopt($conexion, CURLOPT_CUSTOMREQUEST, 'POST'); 
 
         $respuesta=curl_exec($conexion);
-
         curl_close($conexion);
 
         return json_decode($respuesta,true);
@@ -120,6 +119,8 @@ class ApiSiro extends Component{
             );
 
             $token = ApiSiro::GetTokenApi($customer->company_id);
+		if(isset($token['Message']))
+			return false;
             $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
         	
 	    log_siro_payment_intention_without_error($result);    
