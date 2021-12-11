@@ -1396,6 +1396,8 @@ class Customer extends ActiveRecord {
                 $can= false;
                 $contracts = Contract::findAll(['customer_id' => $this->customer_id]);
                 $vendor= Vendor::findOne(['user_id' => User::getCurrentUser()->id]);
+		if(!isset($vendor))
+		    return false;
                 foreach ($contracts as $contract) {
                     if ($contract->vendor_id === $vendor->vendor_id) {
                         $can= true;
