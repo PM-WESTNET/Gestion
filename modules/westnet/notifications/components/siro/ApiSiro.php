@@ -7,6 +7,7 @@ use app\modules\config\models\Config;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use app\modules\checkout\models\Payment;
 
 class ApiSiro extends Component{
     /**
@@ -103,14 +104,14 @@ class ApiSiro extends Component{
 
             $referenciaOperacion = md5($paymentIntention->siro_payment_intention_id.'-'.$customer->customer_id.'-'.$customer->code);
 
-            $invoice_concept = str_replace('@Cliente',$customer->code . ' ' . $customer->lastname,$invoice_concept);
+            $invoice_concept = str_replace('@Cliente',$customer->code . ' ' . str_replace('ñ','n',$customer->lastname),$invoice_concept);
             $invoice_concept = str_replace('(','',str_replace(')','',$invoice_concept));
 
             $data = array(
                 "nro_cliente_empresa" => str_pad($customer->customer_id.$company_client_number, 19, '0', STR_PAD_LEFT),
                 "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
                 "Concepto" => (strlen($invoice_concept) > 40) ? substr($invoice_concept, 0, 40) : $invoice_concept,
-                "Importe" => abs($customer->current_account_balance),
+                "Importe" => abs(Payment::totalCalculationForQuery($customer->customer_id)),
                 "URL_OK" => $url_ok,
                 "URL_ERROR" => $url_error,
                 "IdReferenciaOperacion" => $referenciaOperacion,
@@ -124,7 +125,7 @@ class ApiSiro extends Component{
             $result = ApiSiro::CreatePaymentIntentionApi($token, $data);
         	
 	    log_siro_payment_intention_without_error($result);    
-	
+
             if(!isset($result['Message']) || isset($result['Url'])){
     	        $paymentIntention->customer_id = $customer->customer_id;
     	        $paymentIntention->hash = $result['Hash'];

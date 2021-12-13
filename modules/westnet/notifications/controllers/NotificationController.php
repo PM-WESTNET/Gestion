@@ -531,7 +531,7 @@ class NotificationController extends Controller {
                             if($result_create)
                                 return $this->redirect($result_create['Url']);
                             else
-                                $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id"); //error created intention payment
+                                $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/form"); //error created intention payment
 
                         }else if($result_search['status'] == 'pending'){
                             $current_date = strtotime(date("d-m-Y H:i:00",time()));
@@ -547,7 +547,7 @@ class NotificationController extends Controller {
                                     $result_search->save(false);
                                     return $this->redirect($result_create['Url']);
                                 }else
-                                    $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/$siro_payment_intention_id");
+                                    $this->redirect("http://pago.westnet.com.ar:3000/portal/error-intention-payment/form");
                             }          
                         }else{
                             $this->redirect("http://pago.westnet.com.ar:3000/portal/bill-payed");
@@ -593,9 +593,9 @@ class NotificationController extends Controller {
         $paymentIntention->fecha_operacion = $result_search['FechaOperacion'];
         $paymentIntention->fecha_registro = $result_search['FechaRegistro'];
         $paymentIntention->save(false);
+	
 
-
-        if($result_search['PagoExitoso'] == 'payed' && empty($paymentIntention->payment_id)){
+        if($result_search['PagoExitoso'] && empty($paymentIntention->payment_id)){
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
