@@ -335,19 +335,19 @@ class Bill extends ActiveRecord implements CountableInterface
         $discount = 0;
         $cantDiscount = 0;
         $cantItems = 0;
-        foreach ($this->billDetails as $detail){
-            if($detail->discount) {
+        foreach ($this->billDetails as $detail){ // loops for each bill detail and applies discount in each case
+            if($detail->discount) { // if it has a discount associated with it
                 if( $detail->discount->value_from == Discount::VALUE_FROM_TOTAL &&
-                    $detail->discount->type  == Discount::TYPE_FIXED){
+                    $detail->discount->type  == Discount::TYPE_FIXED){ //if the discount is TOTAL and FIXED (example. discount id=327)
 
                     // Le descuento el iva
                     if($detail->product) {
                         $taxes = 0;
                         $taxRates = $detail->product->taxRates;
                         foreach($taxRates as $rate){
-                            $taxes += ( $detail->unit_net_discount / (1+($withTax ? $rate->pct : 0 )));
+                            $taxes += ( $detail->unit_net_discount / (1+($withTax ? $rate->pct : 0 ))); // pct is percentage (aka. IVA %)
                         }
-
+                        
                         $discount += $taxes;
                     } else {
                         $taxRate = TaxRate::findOne(['code' => Config::getValue('default_tax_rate_code')]);
