@@ -220,8 +220,8 @@ class TestController extends Controller {
         else var_dump("failed");
     }
 
-    public function actionTestBillClosing(){
-        $bill = Bill::findOne(2214082);
+    public function actionTestBillClosing($bill_id){
+        $bill = Bill::findOne($bill_id);
         //return var_dump($bill);
         return $bill->close()?"funciona":"no funciona";
     }

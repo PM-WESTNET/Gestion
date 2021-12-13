@@ -473,8 +473,13 @@ class Bill extends ActiveRecord implements CountableInterface
     public function calculateTaxes()
     {
 
+        // ROUNDS the 'total amount' MINUS the 'total amount with VAT discount' WITH 2 decimal digit precision
+        // Then, returns the absolute value
+        
+        /* var_dump("calculateTotal()",$this->calculateTotal());
+        var_dump("calculateAmount()",$this->calculateAmount());
+        var_dump("calculateTaxes()",abs(round( $this->calculateTotal() - $this->calculateAmount(), 2))); */        
         return abs(round( $this->calculateTotal() - $this->calculateAmount(), 2));
-
     }
 
     public function totalDiscount()
@@ -587,12 +592,12 @@ class Bill extends ActiveRecord implements CountableInterface
 
         if($this->status == 'completed') return true;
         //var_dump("passed ".date("Y-m-d H:i:s"));
-
+        
         //Calculos:
-        $this->amount = $this->calculateAmount();
+        $this->amount = $this->calculateAmount(); // returns the total amount of the bill
         //var_dump($this->amount);
         
-        $this->total = $this->calculateTotal();
+        $this->total = $this->calculateTotal(); // returns the total amount of the bill with VAT discount (IVA)
         //var_dump($this->total);
 
         $this->taxes = $this->calculateTaxes();
@@ -648,7 +653,7 @@ class Bill extends ActiveRecord implements CountableInterface
                 }
                 //var_dump("failed to complete ".date("Y-m-d H:i:s"));
             }
-            die();
+            //die('closed '.date("Y-m-d H:i:s"));
             if($this->status == 'completed'){
 
                 \app\modules\sale\components\BillExpert::manageStock($this);
