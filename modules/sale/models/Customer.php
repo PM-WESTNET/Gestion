@@ -1396,12 +1396,16 @@ class Customer extends ActiveRecord {
                 $can= false;
                 $contracts = Contract::findAll(['customer_id' => $this->customer_id]);
                 $vendor= Vendor::findOne(['user_id' => User::getCurrentUser()->id]);
+	
                 foreach ($contracts as $contract) {
                     if ($contract->vendor_id === $vendor->vendor_id) {
                         $can= true;
                     }                  
                 }
-                
+
+		if(empty($contracts))
+		   $can = true;
+
                 return $can;
                 
             }elseif (User::hasPermission('customer-index')) {
