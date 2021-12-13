@@ -7,6 +7,7 @@ use app\modules\config\models\Config;
 use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use app\modules\checkout\models\Payment;
 
 class ApiSiro extends Component{
     /**
@@ -110,7 +111,7 @@ class ApiSiro extends Component{
                 "nro_cliente_empresa" => str_pad($customer->customer_id.$company_client_number, 19, '0', STR_PAD_LEFT),
                 "nro_comprobante" => str_pad($paymentIntention->siro_payment_intention_id.$customer->code, 20, '0', STR_PAD_LEFT),
                 "Concepto" => (strlen($invoice_concept) > 40) ? substr($invoice_concept, 0, 40) : $invoice_concept,
-                "Importe" => abs($customer->current_account_balance),
+                "Importe" => abs(Payment::totalCalculationForQuery($customer->customer_id)),
                 "URL_OK" => $url_ok,
                 "URL_ERROR" => $url_error,
                 "IdReferenciaOperacion" => $referenciaOperacion,
