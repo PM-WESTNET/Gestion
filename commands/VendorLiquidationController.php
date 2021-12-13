@@ -16,17 +16,26 @@ use app\modules\checkout\models\search\PaymentSearch;
 class VendorLiquidationController extends Controller{
 
     public function actionLiquidationByLot(){
+        // todo: implement MUTEX library for this controller. So as to run only if no other liquidation is running ...
+
+        $this->stdout("\nLiquidation By Lot initiated.\n"); // you can catch this output by using >> as an extra parameter via command line interface
+        
         $model = VendorLiquidationProcess::find()->where(['status' => 'pending'])->one();
         $this->LiquidationProcess($model);
 
         $model->status = 'success';
+        // todo: dont force the saving. so as not to break anything in the future that might rely on 'perfect' data structures
         $model->save(false);
-
+        /* if($model->save()){
+            do ...
+        } else {
+            error catch and summary() ...
+        } */
+        
         $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
 
         foreach ($vendor_liquidations as $key => $value) {
-	    if($value->status == "cancelled" || empty($value->total))
-            	$value->delete();
+	        if($value->status == "cancelled" || empty($value->total)) $value->delete();
         }
     }
 
@@ -42,14 +51,13 @@ class VendorLiquidationController extends Controller{
         foreach ($vendor_liquidations as $liquidation) {
             $contractDetails = $model->findContractsDetailsSQL($liquidation['vendor_id']);
             echo "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n"; 
-
+            $state = 'cancelled'; // default state is 'cancelled'
             if ($contractDetails) {
-                $this->liquidateVendorItems($liquidation, $contractDetails);
-                VendorLiquidation::UpdateStatusVendorLiquidation('success', $liquidation['vendor_liquidation_id']);
+                $this->liquidateVendorItems($liquidation, $contractDetails); // liquidation of vendor items
 
-            }else{
-                VendorLiquidation::UpdateStatusVendorLiquidation('cancelled', $liquidation['vendor_liquidation_id']);
+                $state = 'success'; // change state to 'success'
             }
+            VendorLiquidation::UpdateStatusVendorLiquidation($state, $liquidation['vendor_liquidation_id']);
         }
     }
 
