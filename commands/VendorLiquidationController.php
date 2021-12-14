@@ -16,13 +16,12 @@ use app\modules\checkout\models\search\PaymentSearch;
 class VendorLiquidationController extends Controller{
 
     public function actionLiquidationByLot(){
-        $this->stdout("\nLiquidation By Lot initiated.\n"); // you can catch this output by using >> as an extra parameter via command line interface
-        
         $model = VendorLiquidationProcess::find()->where(['status' => 'pending'])->one();
 
         if($model) { // if liquidation ANY 'pending' vendor liquidation is found ...
             try {
                 if(Yii::$app->mutex->acquire('mutex_liquidate_vendors')) { // only one liquidation can be active at a time
+                    $this->stdout("\nLiquidation By Lot initiated.\n"); // you can catch this output by using >> as an extra parameter via command line interface
                     $this->stdout("Vendor Liquidation Process ID: ".$model->vendor_liquidation_process_id."\n");
 
                     $this->LiquidationProcess($model);
@@ -62,7 +61,7 @@ class VendorLiquidationController extends Controller{
 
         foreach ($vendor_liquidations as $liquidation) {
             $contractDetails = $model->findContractsDetailsSQL($liquidation['vendor_id']);
-            echo "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n"; 
+            $this->stdout( "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n" ); 
             $state = 'cancelled'; // default state is 'cancelled'
             if ($contractDetails) {
                 $this->liquidateVendorItems($liquidation, $contractDetails); // liquidation of vendor items
