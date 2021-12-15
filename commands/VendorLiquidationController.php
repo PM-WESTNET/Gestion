@@ -49,7 +49,7 @@ class VendorLiquidationController extends Controller{
                 //\Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
             }
         }else{
-            //$this->stdout("\nNo Liquidation Found\n.");
+            //$this->stdout("\nNo Liquidation Found.\n");
         }
     }
 

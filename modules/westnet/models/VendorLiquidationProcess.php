@@ -20,6 +20,7 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
     const VENDOR_LIQUIDATION_PROCESS_PENDING = 'pending';
     const VENDOR_LIQUIDATION_PROCESS_CANCELLED = 'cancelled';
     const VENDOR_LIQUIDATION_PROCESS_SUCCESS = 'success';
+    const VENDOR_LIQUIDATION_PROCESS_DRAFT = 'draft';
 
     public function init()
     {
@@ -60,8 +61,9 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
         return [
             [['timestamp'], 'integer'],
             [['date', 'period'], 'safe'],
-            [['date', 'period'], 'date'],
-            [['status'], 'in', 'range' => ['pending','cancelled', 'success']]
+            [['date'], 'date'],
+            [['period'], 'datetime', 'format' => 'php:Y-m-d'],
+            [['status'], 'in', 'range' => ['pending','cancelled', 'success', 'draft']],
         ];
     }
 
