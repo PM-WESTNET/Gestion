@@ -1,10 +1,12 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $this->title = Yii::t('westnet', 'Proceso de Liquidación de Vendedores');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('westnet', 'Vendor Liquidation Process'), 'url' => ['vendor-liquidation-process']];
 $this->params['breadcrumbs'][] = $this->title;
+$urlcontroller= Url::to(['status-vendor-liquidation-process']);
 
 $this->registerJs("
     $(document).ready(function() {
@@ -13,11 +15,12 @@ $this->registerJs("
 
     function ProgressStatus() { 
         $.ajax({
-            url:'status-vendor-liquidation-process',
+            url:'$urlcontroller',
             data: { id: $model->vendor_liquidation_process_id },
             type: 'post',
             success: function(data){
                 data = JSON.parse(data);
+                console.log(data);
                 let total = (data.pending?parseInt(data.pending):0) +  (data.cancelled?parseInt(data.cancelled):0) + (data.success?parseInt(data.success):0);
                 let total_percentage = (((parseInt(data.cancelled) + parseInt(data.success))/total)*100);
 

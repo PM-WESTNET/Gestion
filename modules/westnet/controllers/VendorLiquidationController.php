@@ -22,13 +22,12 @@ use yii\data\ArrayDataProvider;
 use app\modules\westnet\models\VendorLiquidationItem;
 use app\modules\checkout\models\search\PaymentSearch;
 use yii\helpers\ArrayHelper;
-
+use yii\helpers\Url;
 /**
  * VendorLiquidationController implements the CRUD actions for VendorLiquidation model.
  */
 class VendorLiquidationController extends Controller
 {
-
     /**
      * Lists all VendorLiquidation models.
      * @return mixed
@@ -141,9 +140,10 @@ class VendorLiquidationController extends Controller
         set_time_limit(0);
 
         $model = new BatchLiquidationModel();
-        
+
+
         if($model->load(Yii::$app->request->post()) && $model->validate()){
-            
+
             //Query para buscar vendedores
             $query = $model->findVendors();
             
@@ -151,27 +151,38 @@ class VendorLiquidationController extends Controller
             $contractDetailsQuery = $model->findContractsDetails();
             
             $transaction = Yii::$app->db->beginTransaction();
+            
             try{
                 //Por cada vendedor
                 foreach($query->batch() as $vendors){
+                    //var_dump(count($vendors)." vendors");
+                    //var_dump(microtime(true) - $_SERVER["REQUEST_TIME_FLOAT"]."s batchin'\n");
                     foreach ($vendors as $vendor) {
+                        //var_dump("vendor ". $vendor->name);
+                        //$start = microtime(true);
                         $liq = VendorLiquidation::create($vendor, $model->period);
+                        //var_dump(microtime(true) - $start."s to create model vl\n");
 
                         //Clonamos la query para agregar vendor_id a la condicion de busqueda
                         $cdq = clone($contractDetailsQuery);
                         $cdq->andWhere(['vendor_id' => $vendor->vendor_id]);
 
                         $details = $cdq->all();
+                        //var_dump(microtime(true) - $start."s time taken to run details query clone\n");
 
                         if ($details) {
                             $this->liquidateVendorItems($liq, $details);
+                            //var_dump(microtime(true) - $start."s time taken to liquidate vendor items\n");
                         }
 
                         //Si el total es 0, lo borramos
                         if (!($liq->total > 0)) {
                             $liq->delete();
                         }
+                        //var_dump(microtime(true) - $start."s time taken to run $vendor->name\n");
+                        //die();
                     }
+                    //break;
                 }
                 $transaction->commit();
                 
@@ -194,12 +205,15 @@ class VendorLiquidationController extends Controller
      */
     private function liquidateVendorItems($liq, $details)
     {
+        //$start = microtime(true);
         $vendor_liquidation_items = [];
 
         foreach($details as $detail){
-            $price = $detail->product->getPriceFromDate($detail->date)->one();
             
+            $price = $detail->product->getPriceFromDate($detail->date)->one();
+            //var_dump(microtime(true) - $start."s time taken to run getpricefromdate\n");
             //Si el precio del producto es mayor a 0
+            //var_dump($price->finalPrice);
             if($price->finalPrice > 0){
                 $contract = $detail->contract;
                 $customer = $contract->customer;
@@ -213,13 +227,13 @@ class VendorLiquidationController extends Controller
                     //Si es un plan, la comision se calcula por vendedor (VendorCommission
                     if($product->type == 'plan'){
                         $amount = $liq->vendor->commission->calculateCommission($price->finalPrice);
-
                     //Si es un producto, la comision se calcula por producto (solo si el producto tiene asociada una comision)
                     }else{
                         if($product->commission){
                             $amount = $product->commission->calculateCommission($price->finalPrice);
                         }
                     }
+                    //var_dump(microtime(true) - $start."s time taken to run calculate commission\n");
 
                     $liqItem = [
                         'contract_detail_id' => $detail->contract_detail_id,
@@ -234,6 +248,8 @@ class VendorLiquidationController extends Controller
         }
 
         VendorLiquidation::batchInsertLiquidationItems($vendor_liquidation_items);
+        //var_dump(microtime(true) - $start."s time taken to run batchinsertliquidationitems\n");
+
     }
     
     
@@ -424,10 +440,10 @@ class VendorLiquidationController extends Controller
         }
     }
 
-     /**
-     * Liquidacion por lotes
-     * @return mixed
-     */
+    /**
+    * Liquidacion por lotes
+    * @return mixed
+    **/
     public function actionBatchVendorLiquidationProcess()
     {
         Yii::setLogger(new EmptyLogger());
@@ -435,15 +451,15 @@ class VendorLiquidationController extends Controller
 
         if($model->load(Yii::$app->request->post())){
             $model->period = (new \DateTime($model->period))->format('Y-m-d'); 
-            $model->save(false);
+            $model->save(false); // todo: dont force saving
+            
 
             $vendors = $model->findVendorsSQL();
-
             foreach ($vendors as $vendor) {
                VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
             }
 
-            $this->redirect('vendor-liquidation-process'); 
+            return $this->redirect(Url::to(['vendor-liquidation-process'])); // relative redirect to view (works regardless of pretty url)
         }
         return $this->render('batch', ['model' => $model]);
     }
@@ -456,9 +472,13 @@ class VendorLiquidationController extends Controller
     public function actionVendorLiquidationProcess()
     {
         Yii::setLogger(new EmptyLogger());
-        
+
         $dataProvider = new ArrayDataProvider([
-            'allModels' => VendorLiquidationProcess::find()->all(),
+            'allModels' => VendorLiquidationProcess::find()
+                ->orderBy([
+                    'vendor_liquidation_process_id' => SORT_DESC // added sort to give first the newer processes
+                ])
+                ->all(),
             'pagination' => [
                 'pageSize' => 10,
             ],
@@ -481,8 +501,7 @@ class VendorLiquidationController extends Controller
         foreach ($vendor_liquidations as $value) {
             VendorLiquidation::UpdateStatusVendorLiquidation('pending',$value->vendor_liquidation_id);
         }
-
-        $this->redirect('index'); 
+        $this->redirect(Url::to(['index'])); 
     }
 
     public function actionRemoveVendorLiquidationProcess($id){
@@ -510,7 +529,8 @@ class VendorLiquidationController extends Controller
         $cant_status = [
             'pending' => isset($data['pending']) ? $data['pending'] : 0, 
             'success' => isset($data['success']) ? $data['success'] : 0, 
-            'cancelled' => isset($data['cancelled']) ? $data['cancelled'] : 0];
+            'cancelled' => isset($data['cancelled']) ? $data['cancelled'] : 0
+        ];
 
         return json_encode($data);
     }
