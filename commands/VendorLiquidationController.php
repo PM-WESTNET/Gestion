@@ -41,6 +41,7 @@ class VendorLiquidationController extends Controller{
                     foreach ($vendor_liquidations as $key => $value) {
                         if($value->status == "cancelled" || empty($value->total)) $value->delete();
                     }
+                    $this->stdout("Vendor Liquidation Finished\n");
                 }
             } catch (\Exception $ex) {
                 $err_msg="ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";

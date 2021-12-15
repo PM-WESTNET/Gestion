@@ -28,7 +28,6 @@ use yii\helpers\Url;
  */
 class VendorLiquidationController extends Controller
 {
-
     /**
      * Lists all VendorLiquidation models.
      * @return mixed
@@ -530,7 +529,8 @@ class VendorLiquidationController extends Controller
         $cant_status = [
             'pending' => isset($data['pending']) ? $data['pending'] : 0, 
             'success' => isset($data['success']) ? $data['success'] : 0, 
-            'cancelled' => isset($data['cancelled']) ? $data['cancelled'] : 0];
+            'cancelled' => isset($data['cancelled']) ? $data['cancelled'] : 0
+        ];
 
         return json_encode($data);
     }
