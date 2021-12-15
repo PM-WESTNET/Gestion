@@ -1883,8 +1883,8 @@ class Customer extends ActiveRecord {
         }
 
         //Verifico que el cliente no sea nuevo
-        if($this->isNewCustomer()) {
-            $this->detailed_error = Yii::t('app', 'The customer is new');
+        if($this->isNewContract()) {
+            $this->detailed_error = 'No puede realizar una extensión de pago porque tiene su primer factura pendiente';
             $this->isNew = true;
         }
 
@@ -1993,6 +1993,25 @@ class Customer extends ActiveRecord {
             if (strtotime(Yii::$app->formatter->asDate($contract->from_date, 'yyyy-MM-dd')) > (strtotime(date('Y-m-d')) - (86400 * (int)Config::getValue('new_contracts_days')))) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * Determina si el cliente es nuevo en base de la fecha de validez del contrato.
+     */
+    public function isNewContract()
+    {
+
+        $contract = Contract::find()->where(['customer_id' => $this->customer_id])->orderBy(['contract_id' => SORT_DESC])->limit(1)->one();
+
+        if (empty($contract->from_date) || $contract->from_date === Yii::t('app', 'Undetermined time')){
+            return true;
+        }
+
+        if (strtotime(Yii::$app->formatter->asDate($contract->from_date, 'yyyy-MM-dd')) > (strtotime(date('Y-m-d')) - (86400 * (int)Config::getValue('new_contracts_days')))) {
+            return true;
         }
 
         return false;
