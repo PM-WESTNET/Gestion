@@ -4,6 +4,7 @@ namespace app\modules\westnet\models;
 
 use app\modules\zone\models\Zone;
 use app\modules\westnet\models\IpRange;
+use app\modules\westnet\models\NatServer;
 use app\modules\sale\models\Company;
 use app\modules\westnet\components\ipStrategy\AccessPointStrategy;
 use Yii;
@@ -163,6 +164,14 @@ class Node extends \app\components\db\ActiveRecord
     public function getAccessPoints()
     {
         return $this->hasMany(AccessPoint::class, ['node_id' => 'node_id']);
+    }
+    
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNatServer()
+    {
+        return $this->hasOne(NatServer::class, ['nat_server_id' => 'nat_server_id']);
     }
 
     public function setEcopagos($ecopagos)
