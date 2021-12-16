@@ -4,6 +4,7 @@ namespace app\modules\westnet\models;
 
 use Yii;
 use app\modules\sale\modules\contract\models\ContractDetail;
+use yii\db\Expression;
 
 /**
  * This is the model class for table "vendor_liquidation_process".
@@ -45,10 +46,11 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
         return [
             '' => [
                 'class' => 'yii\behaviors\TimestampBehavior',
-                'attributes' => [
-                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['date'],
-                ],
-                'value' => function(){return date('Y-m-d');},
+
+                'createdAtAttribute' => 'date',
+                'updatedAtAttribute' => false,
+                'value' => new Expression('NOW()')
+                
             ],
         ];
     }
@@ -61,11 +63,12 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
         return [
             [['timestamp'], 'integer'],
             [['date', 'period'], 'safe'],
-            [['date'], 'date'],
-            [['period'], 'datetime', 'format' => 'php:Y-m-d'],
+            [['date','start_time','finish_time'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            [['period'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['status'], 'in', 'range' => ['pending','cancelled', 'success', 'draft']],
         ];
     }
+
 
     /**
      * @inheritdoc
@@ -123,4 +126,29 @@ class VendorLiquidationProcess extends \app\components\db\ActiveRecord
 
     }    
 
+    /**
+     * Saves the time at which the process was activated via cron job liquidation process
+     * @return boolean
+     */
+    public function setProcessStartTime(){
+        $this->start_time = date('Y-m-d H:i:s');
+        return true;
+    }
+
+    /**
+     * Saves the time at which the process ended
+     * @return boolean
+     */
+    public function setProcessFinishTime(){
+        $this->finish_time = date('Y-m-d H:i:s');
+        return true;
+    }
+
+    /**
+     * Calculates time spent in the process ONCE IT FINISHES
+     */
+    public function setTimeSpent(){
+        $this->time_spent = strtotime($this->finish_time)-strtotime( $this->start_time );
+        return true;
+    }
 }

@@ -23,25 +23,29 @@ class VendorLiquidationController extends Controller{
                 if(Yii::$app->mutex->acquire('mutex_liquidate_vendors')) { // only one liquidation can be active at a time
                     $this->stdout("\nLiquidation By Lot initiated.\n"); // you can catch this output by using >> as an extra parameter via command line interface
                     $this->stdout("Vendor Liquidation Process ID: ".$model->vendor_liquidation_process_id."\n");
-
-                    $this->LiquidationProcess($model);
-                    $model->status = 'success';
                     
-                    // todo: dont force the saving. so as not to break anything in the future that might rely on 'perfect' data structures
-                    $model->save(false);
+                    $model->setProcessStartTime(); // sets the time at which the liquidation was started
 
-                    /* if($model->save()){
-                        do ...
-                    } else {
-                        error catch and summary() ...
-                    } */
+                    $this->LiquidationProcess($model); // liquidates all pending items related to the process
+                    $model->status = 'success'; // update status
+                    $model->setProcessFinishTime(); // sets the time at which the liquidation was started
+                    $model->setTimeSpent(); // calculates and sets the time spent on the process
                     
-                    $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
+                    if($model->save()){
+                        $this->stdout("Process model saved succesfully.\n");
+                        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
             
-                    foreach ($vendor_liquidations as $key => $value) {
-                        if($value->status == "cancelled" || empty($value->total)) $value->delete();
+                        foreach ($vendor_liquidations as $key => $value) {
+                            if($value->status == "cancelled" || empty($value->total)) $value->delete();
+                        }
+                        $this->stdout("Vendor Liquidation Finished\n");
+                    }else{
+                        $this->stdout("Err. couldnt save model.\n");
+                        $this->stdout("Error summary: \n");
+                        $this->stdout(var_dump($model->getErrorSummary(true)));
+                        $this->stdout(var_dump($model->period,$model->finish_time,$model->start_time));
                     }
-                    $this->stdout("Vendor Liquidation Finished\n");
+                    
                 }
             } catch (\Exception $ex) {
                 $err_msg="ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";

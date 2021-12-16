@@ -35,7 +35,14 @@ $this->params['breadcrumbs'][] = $this->title;
             'date',
             'start_time',
             'finish_time',
-            'time_spent',
+            [
+                'label' => 'time_spent',
+                'value' => function($model){
+                    $timeSpent = gmdate("H:i:s", $model->time_spent);
+                    
+                    return $timeSpent;
+                }
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{change-status} {remove-process} {view}',

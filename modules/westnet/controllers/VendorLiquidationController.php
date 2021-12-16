@@ -450,7 +450,7 @@ class VendorLiquidationController extends Controller
 
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->period = (new \DateTime($model->period))->format('Y-m-d');
+            $model->period = (new \DateTime($model->period))->format('Y-m-d H:i:s');
             $model->status = 'draft';
 
             if ($model->save()) {
@@ -464,8 +464,8 @@ class VendorLiquidationController extends Controller
                     VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
                 }
             } else {
-                //var_dump($model->getErrorSummary(true));
-                //die();
+                /* var_dump($model->getErrorSummary(true));
+                die(); */
                 \Yii::$app->session->setFlash(
                     'error',
                     "Process failed to save"
