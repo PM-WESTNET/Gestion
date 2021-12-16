@@ -31,8 +31,18 @@ $this->params['breadcrumbs'][] = $this->title;
             'vendor_liquidation_process_id',
             'status',
             'period',
-            'timestamp',
+            /* 'timestamp', */
             'date',
+            'start_time',
+            'finish_time',
+            [
+                'label' => 'time_spent',
+                'value' => function($model){
+                    $timeSpent = gmdate("H:i:s", $model->time_spent);
+                    
+                    return $timeSpent;
+                }
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{change-status} {remove-process} {view}',

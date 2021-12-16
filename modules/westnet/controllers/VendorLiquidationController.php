@@ -126,8 +126,7 @@ class VendorLiquidationController extends Controller
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
-
-        return $this->redirect(['index']);
+        return $this->redirect(Url::to(['index'])); 
     }
     
     /**
@@ -449,16 +448,29 @@ class VendorLiquidationController extends Controller
         Yii::setLogger(new EmptyLogger());
         $model = new VendorLiquidationProcess();
 
-        if($model->load(Yii::$app->request->post())){
-            $model->period = (new \DateTime($model->period))->format('Y-m-d'); 
-            $model->save(false); // todo: dont force saving
-            
 
-            $vendors = $model->findVendorsSQL();
-            foreach ($vendors as $vendor) {
-               VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->period = (new \DateTime($model->period))->format('Y-m-d H:i:s');
+            $model->status = 'draft';
+
+            if ($model->save()) {
+                \Yii::$app->session->setFlash(
+                    'success',
+                    "Process created successfully\n"
+                );
+
+                $vendors = $model->findVendorsSQL();
+                foreach ($vendors as $vendor) {
+                    VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
+                }
+            } else {
+                /* var_dump($model->getErrorSummary(true));
+                die(); */
+                \Yii::$app->session->setFlash(
+                    'error',
+                    "Process failed to save"
+                );
             }
-
             return $this->redirect(Url::to(['vendor-liquidation-process'])); // relative redirect to view (works regardless of pretty url)
         }
         return $this->render('batch', ['model' => $model]);
@@ -501,7 +513,7 @@ class VendorLiquidationController extends Controller
         foreach ($vendor_liquidations as $value) {
             VendorLiquidation::UpdateStatusVendorLiquidation('pending',$value->vendor_liquidation_id);
         }
-        $this->redirect(Url::to(['index'])); 
+        $this->redirect(Url::to(['vendor-liquidation-process'])); 
     }
 
     public function actionRemoveVendorLiquidationProcess($id){
@@ -515,7 +527,7 @@ class VendorLiquidationController extends Controller
 
         $model->delete();
 
-        $this->redirect('vendor-liquidation-process'); 
+        $this->redirect(Url::to(['vendor-liquidation-process'])); 
     }
 
     public function actionViewVendorLiquidationProcess($id){
