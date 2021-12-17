@@ -68,7 +68,7 @@ class BillSearch extends Bill
 
     public function rules()
     {
-        $statuses = ['draft', 'completed', 'closed'];
+        $statuses = ['draft', 'completed', 'closed', 'error'];
 
         return [
             [['bill_id', 'number', 'customer_id', 'currency_id', 'bill_type_id', 'company_id', 'user_id'], 'integer'],
@@ -153,6 +153,7 @@ class BillSearch extends Bill
 
         $this->load($params);
         if (!$this->validate()) {
+            // is this a Quoma meme of some sort?
             $query->where('1=2');
             return $dataProvider;
         }
