@@ -53,6 +53,7 @@ class Bill extends ActiveRecord implements CountableInterface
     const STATUS_DRAFT = 'draft';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CLOSED = 'closed';
+    const STATUS_ERROR = 'error';
 
     public $fillNumber = true;
 
@@ -719,6 +720,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             $retValue = true;
                         } else {
                             $retValue = false;
+		            $this->updateAttributes(['status' => 'error']);
                             $this->addErrorToCacheOrSession(['An error occurred while the Invoice is processed.'. ' - Bill_id: '. $this->bill_id, ]);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
                             if(!Yii::$app instanceof Yii\console\Application) {
@@ -762,6 +764,7 @@ class Bill extends ActiveRecord implements CountableInterface
 
                     return ($retValue && empty($result['errors']));
                 } catch (\Exception $ex) {
+		    $this->updateAttributes(['status' => 'error']);
                     \Yii::info($ex, 'facturacion');
                     $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                     return false;

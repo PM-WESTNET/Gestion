@@ -17,16 +17,43 @@ class VendorLiquidationController extends Controller{
 
     public function actionLiquidationByLot(){
         $model = VendorLiquidationProcess::find()->where(['status' => 'pending'])->one();
-        $this->LiquidationProcess($model);
 
-        $model->status = 'success';
-        $model->save(false);
+        if($model) { // if liquidation ANY 'pending' vendor liquidation is found ...
+            try {
+                if(Yii::$app->mutex->acquire('mutex_liquidate_vendors')) { // only one liquidation can be active at a time
+                    $this->stdout("\nLiquidation By Lot initiated.\n"); // you can catch this output by using >> as an extra parameter via command line interface
+                    $this->stdout("Vendor Liquidation Process ID: ".$model->vendor_liquidation_process_id."\n");
+                    
+                    $model->setProcessStartTime(); // sets the time at which the liquidation was started
 
-        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
-
-        foreach ($vendor_liquidations as $key => $value) {
-	    if($value->status == "cancelled" || empty($value->total))
-            	$value->delete();
+                    $this->LiquidationProcess($model); // liquidates all pending items related to the process
+                    $model->status = 'success'; // update status
+                    $model->setProcessFinishTime(); // sets the time at which the liquidation was started
+                    $model->setTimeSpent(); // calculates and sets the time spent on the process
+                    
+                    if($model->save()){
+                        $this->stdout("Process model saved succesfully.\n");
+                        $vendor_liquidations = VendorLiquidation::find()->where(['vendor_liquidation_process_id' => $model->vendor_liquidation_process_id])->all();
+            
+                        foreach ($vendor_liquidations as $key => $value) {
+                            if($value->status == "cancelled" || empty($value->total)) $value->delete();
+                        }
+                        $this->stdout("Vendor Liquidation Finished\n");
+                    }else{
+                        $this->stdout("Err. couldnt save model.\n");
+                        $this->stdout("Error summary: \n");
+                        $this->stdout(var_dump($model->getErrorSummary(true)));
+                        $this->stdout(var_dump($model->period,$model->finish_time,$model->start_time));
+                    }
+                    
+                }
+            } catch (\Exception $ex) {
+                $err_msg="ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";
+                $this->stdout($err_msg);
+                //\Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
+            }
+        }else{
+            //$this->stdout("\nNo Liquidation Found.\n");
         }
     }
 
@@ -41,15 +68,14 @@ class VendorLiquidationController extends Controller{
 
         foreach ($vendor_liquidations as $liquidation) {
             $contractDetails = $model->findContractsDetailsSQL($liquidation['vendor_id']);
-            echo "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n"; 
-
+            $this->stdout( "Liquidation " . $liquidation['vendor_liquidation_id'] . "\n" ); 
+            $state = 'cancelled'; // default state is 'cancelled'
             if ($contractDetails) {
-                $this->liquidateVendorItems($liquidation, $contractDetails);
-                VendorLiquidation::UpdateStatusVendorLiquidation('success', $liquidation['vendor_liquidation_id']);
+                $this->liquidateVendorItems($liquidation, $contractDetails); // liquidation of vendor items
 
-            }else{
-                VendorLiquidation::UpdateStatusVendorLiquidation('cancelled', $liquidation['vendor_liquidation_id']);
+                $state = 'success'; // change state to 'success'
             }
+            VendorLiquidation::UpdateStatusVendorLiquidation($state, $liquidation['vendor_liquidation_id']);
         }
     }
 

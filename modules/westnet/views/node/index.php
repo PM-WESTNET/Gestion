@@ -70,6 +70,12 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->server->name;
                 }
             ],
+	    [
+                'label'=> 'NatServer',
+                'value' => function ($model){
+                    return ($model->natServer) ? $model->natServer->description : null;
+                }
+            ],
             [
                 'label' => Yii::t('westnet', 'Parent Node'),
                 'attribute' => 'n2.name',
