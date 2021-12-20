@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= UserA::a('Proceso Liquidación de Vendedores', ['vendor-liquidation-process'], ['class' => 'btn btn-primary']); ?>
+        <?= UserA::a('Liquidación de Vendedores [nuevo]', ['vendor-liquidation-process'], ['class' => 'btn btn-primary']); ?>
 
         <?= UserA::a('Calcular comisiones', ['batch'], ['class' => 'btn btn-primary']); ?>
         

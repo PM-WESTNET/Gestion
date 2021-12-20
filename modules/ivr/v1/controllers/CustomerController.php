@@ -1616,17 +1616,18 @@ class CustomerController extends Controller
             'address' => $fulladdress,
             'phone' => $customer->phone,
             'phone_mobile' => $customer->phone2,
-            'email' => $customer->email
+            'email' => $customer->email,
+	    'payment_code' => $customer->payment_code
         ];
 	
         $account_data = [
             'a_status' => $customer->status,
-            'debt' => $customer->current_account_balance,
+            'debt' => $customer->current_account_balance*-1,
             'duedebt' => '',
-            'noduedebt' => $customer->current_account_balance,
+            'noduedebt' => $customer->current_account_balance*-1,
             'duedate1' => date('15/m/Y'),
             'duedate2' => '',
-            'payments_url' => !empty($customer->hash_customer_id)?'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id:'',
+            'payments_url' => (!empty($customer->hash_customer_id)) && ($customer->company_id == 2 || $customer->company_id == 7) ?'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id:'Actualmente no pueden pagar por ese medio de pago.',
             'invoices' => '',
             'invoices_qty' => Customer::getOwedBills($customer->customer_id),
         ];
@@ -1636,9 +1637,9 @@ class CustomerController extends Controller
 
         foreach ($customer->contracts as $key => $contract) {
             $connection = $contract->connection;
-	    
 	    if($connection){
             	$node = $connection->node;
+		$geo = $node->FindNodeFieldsLatitudLongitud($node->node_id);
             	$connections[] = [
                 	'state' => 'Mendoza',
                 	'city' => '',
@@ -1649,8 +1650,8 @@ class CustomerController extends Controller
         	        'ip' => long2ip($connection->ip4_1),
                	        'webpass' => '',
 	                'webpassc' => '',
-	                'lat' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[0],
-        	        'lng' => $node->FindNodeFieldsLatitudLongitud($node->node_id)[1],
+	                'lat' => (!empty($geo) && isset($geo[0])) ? $geo[0] : 'El nodo no posee geolocalizacion',
+        	        'lng' => (!empty($geo) && isset($geo[1])) ? $geo[1] : 'El nodo no posee geolocalizacion',
 	              	'node' => $node->name,
 	                'access_point' => '',
 	                's_status' => $connection->status_account,

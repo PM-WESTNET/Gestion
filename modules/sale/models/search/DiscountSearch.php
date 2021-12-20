@@ -118,13 +118,22 @@ class DiscountSearch extends Discount
             }
         }
         
-        // AND WHERE LIKE-s (pattern match)
-        $query->andFilterWhere(['like', 'd.name', $this->name]);
-        $query->andFilterWhere(['like', 'd.status', $this->status]);
-        $query->andFilterWhere(['>=', 'd.from_date', $validDateRange[0]]);
+        // Where's
+        $query->andFilterWhere(['like', 'd.name', $this->name]); // by name
+        $query->andFilterWhere(['like', 'd.status', $this->status]); // by status
+        $query->andFilterWhere(['like', 'd.type', $this->type]); // by type
+        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]); // by value
+        
+        // NEW DATE FILTER METHOD: https://stackoverflow.com/questions/325933/determine-whether-two-date-ranges-overlap/
+        // need to implement this logic rule for filtering (StartA <= EndB) and (EndA >= StartB) 
+        // $validDateRange[0] = StartA
+        // $validDateRange[1] = EndA
+        // d.from_date = StartB
+        // d.to_date = EndB
+        $query->andFilterWhere(['>=', 'd.to_date', $validDateRange[0]]);
         $query->andFilterWhere(['<=', 'd.from_date', $validDateRange[1]]);
-        $query->andFilterWhere(['like', 'd.type', $this->type]);
-        $query->andFilterWhere(['like', 'd.value', $this->value.'%', false]);
+
+
         // creates the ActiveDataProvider instance
         $dataProvider = new ActiveDataProvider([
         'query' => $query
