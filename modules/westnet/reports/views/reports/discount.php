@@ -94,7 +94,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     //'timePickerIncrement' => 1,
                                     'autoclose' => true,
                                     'locale' => [
-                                        'format' => 'd-m-Y',
+                                        'format' => 'Y-m-d',
                                         //'separator'=>' - ',
                                     ],
                                     
