@@ -1,6 +1,6 @@
 <?php
 
-namespace app\modules\westnet\controllers;
+namespace app\modules\westnet\notifications\controllers;
 
 use Yii;
 use yii\filters\VerbFilter;
@@ -54,7 +54,7 @@ class SiroController extends Controller
     /**
      * Search intention payment created in BD of Siro
      */
-    private function ObtainPaymentSurrenderApi($token,$date_from, $date_to, $cuit_administrator, $company_id){
+    private function ObtainPaymentAccountabilityApi($token,$date_from, $date_to, $cuit_administrator, $company_id){
         $url = 'https://apisiro.bancoroela.com.ar:49220/siro/Listados/Proceso';
         $authorization = "Authorization: Bearer ".$token['access_token'];
 
@@ -90,55 +90,96 @@ class SiroController extends Controller
             $cuit_administrator = str_replace('-', '', $company->tax_identification);
 
             $token = $this->GetTokenApi($request['company_id']);
+            $accountability = $this->ObtainPaymentAccountabilityApi($token, $request['date_from'], $request['date_to'], $cuit_administrator, $request['company_id']);
+
+            $codes_collection_channel = [
+                'PF' => 'Pago Fácil',
+                'RP' => 'Rapipago',
+                'PP' => 'Provincia Pagos',
+                'CJ' => 'Cajeros',
+                'CE' => 'Cobro Express',
+                'BM' => 'Banco Municipal',
+                'BR' => 'Banco de Córdoba',
+                'ASJ' => 'Plus Pagos',
+                'LK' => 'Link Pagos',
+                'PC' => 'Pago Mis Cuentas',
+                'MC' => 'Mastercard',
+                'VS' => 'Visa',
+                'MCR' => 'Mastercard Rechazado',
+                'VSR' => 'Visa Rechazado',
+                'DD+' => 'Débito Directo',
+                'DD-' => 'Reversión Débito',
+                'DDR' => 'Rechazo Débito Directo',
+                'BPD' => 'Botón de Pagos Débito',
+                'BPC' => 'Botón de Pagos Crédito',
+                'BOC' => 'Botón Otros Crédito',
+                'BPR' => 'Botón de Pagos Rechazado',
+                'CEF' => 'Cobro Express sin Factura',
+                'RSF' => 'Rapipago sin Factura',
+                'FSF' => 'Pago Fácil sin Factura',
+                'ASF' => 'Plus Pagos sin Factura',
+                'PSP' => 'Bapro sin Factura',
+                'PCO' => 'PC Online',
+                'LKO' => 'LK Online',
+                'PCA' => 'Deuda Vencida PCO',
+                'LKA' => 'Deuda Vencida LKO',
+                'SNP' => 'Transferencia Inmediata.',
+                'LNK' => 'Transferencia Inmediata',
+                'IBK' => 'Transferencia Inmediata'
+            ];
+
+            $transaction = Yii::$app->db->beginTransaction();
+            try {
             
+                foreach ($accountability as $value) {
+                    $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
+                    $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
+                    $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
+                    $customer_id = ltrim(substr($value, 35, 8), '0');
+                    $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+                     ->bindValue('customer_id', $customer_id)
+                     ->queryOne();
+                    $payment_method = substr($value, 44, 4);
+                    $siro_payment_intention_id = str_replace($customer['code'], '', ltrim(substr($value, 103, 20), '0'));
+                    $collection_channel= substr($value, 123, 3);
+                    $rejection_code = substr($value, 126, 3);
+                    
+                    if($total_amount > 0){
+                        $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+                        ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+                        ->queryOne();
 
-            $session = Yii::$app->session;
-            $session->open();
-            if(!$session->has('rendicion')){
-                $surrender = $this->ObtainPaymentSurrenderApi($token, $request['date_from'], $request['date_to'], $cuit_administrator, $request['company_id']);
-                $session['rendicion'] = $surrender;
-            }
+                        $payment_intention_accountability = Yii::$app->db->createCommand('SELECT pia.payment_intention_accountability_id FROM payment_intentions_accountability pia WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+                        ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+                        ->queryOne();
 
-            $array_payments_to_process = [];
-            foreach ($session['rendicion'] as $value) {
-                $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
-                $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
-                $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
-                $customer_id = ltrim(substr($value, 35, 8), '0');
-                $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
-                 ->bindValue('customer_id', $customer_id)
-                 ->queryOne();
-                $payment_method = substr($value, 44, 4);
-                $siro_payment_intention_id = str_replace($customer['code'], '', ltrim(substr($value, 103, 20), '0'));
-                $collection_channel= substr($value, 123, 3);
-                $rejection_code = substr($value, 126, 3);
-                
-                if($total_amount > 0){
-                    $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
-                    ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-                    ->queryOne();
+                        if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
+                            $model = new PaymentIntentionAccountability();
+                            $model->payment_date = $payment_method;
+                            $model->accreditation_date =  $accreditation_date;
+                            $model->total_amount =  $total_amount;
+                            $model->customer_id = $customer_id;
+                            $model->payment_method = $payment_method;
+                            $model->status = 'draft';
+                            $model->siro_payment_intention_id = $siro_payment_intention_id;
+                            $model->collection_channel_description = $codes_collection_channel[$collection_channel];
+                            $model->collection_channel = $collection_channel;
+                            $model->rejection_code = $rejection_code;
+                            $model->save();
 
-                    if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA")
-                        $array_payments_to_process[] = [
-                            'payment_date' => $payment_method,
-                            'accreditation_date' =>  $accreditation_date,
-                            'total_amount' =>  $total_amount,
-                            'customer_id' => $customer_id,
-                            'payment_method' => $payment_method,
-                            'siro_payment_intention_id' => $siro_payment_intention_id,
-                            'collection_channel' => $collection_channel,
-                            'rejection_code' => $rejection_code
+                        }
 
-                        ];
+                    }
+
                 }
 
+                $transaction->commit();
 
+            } catch (Exception $e) {
+                $transaction->rollBack();
             }
-            var_dump($array_payments_to_process);die();
-
-            $session->close();
-
             
+  
         }
 
         /*if(Yii::$app->request->isPost){

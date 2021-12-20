@@ -54,8 +54,7 @@ use yii\helpers\Html;
 		            'estado',
 		            'payment_id'
 		            ],
-		    ]
-		]); ?>
+		    ]); ?>
 	<?php endif; ?>
 
 <?= Html::endForm() ?>
