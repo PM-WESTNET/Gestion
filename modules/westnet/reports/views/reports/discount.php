@@ -81,7 +81,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return $model->from_date . ' - ' . $model->to_date;
                             },
                             'contentOptions' => ['style' => 'width:24%;'],
-                            'label' => 'Rango Vigencia (busca x fec.de comienzo)',
+                            'label' => 'Fechas Desde-Hasta',
                             'filter'=>DateRangePicker::widget([
                                 'model' => $discountSearch,
                                 'name' => 'createTimeRange',
