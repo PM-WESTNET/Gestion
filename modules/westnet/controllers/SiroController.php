@@ -105,16 +105,20 @@ class SiroController extends Controller
                 $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
                 $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
                 $customer_id = ltrim(substr($value, 35, 8), '0');
-                $customer = Customer::findOne(['customer_id' => $customer_id]);
+                $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+                 ->bindValue('customer_id', $customer_id)
+                 ->queryOne();
                 $payment_method = substr($value, 44, 4);
-                $siro_payment_intention_id = str_replace($customer->code, '', ltrim(substr($value, 103, 20), '0'));
+                $siro_payment_intention_id = str_replace($customer['code'], '', ltrim(substr($value, 103, 20), '0'));
                 $collection_channel= substr($value, 123, 3);
                 $rejection_code = substr($value, 126, 3);
                 
                 if($total_amount > 0){
-                    $siro_payment_intention = SiroPaymentIntention::findOne(['siro_payment_intention_id' => $siro_payment_intention_id]);
+                    $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+                    ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+                    ->queryOne();
 
-                    if(isset($siro_payment_intention->estado) && $siro_payment_intention->estado != "PROCESADA")
+                    if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA")
                         $array_payments_to_process[] = [
                             'payment_date' => $payment_method,
                             'accreditation_date' =>  $accreditation_date,
