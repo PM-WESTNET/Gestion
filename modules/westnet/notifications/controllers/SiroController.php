@@ -165,8 +165,9 @@ class SiroController extends Controller
                             $model->collection_channel_description = $codes_collection_channel[$collection_channel];
                             $model->collection_channel = $collection_channel;
                             $model->rejection_code = $rejection_code;
+                            $model->created_at = date('Y-m-d');
+                            $model->updated_at = date('Y-m-d');
                             $model->save();
-
                         }
 
                     }
