@@ -9,6 +9,7 @@ use yii\data\ActiveDataProvider;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
+use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\config\models\Config;
