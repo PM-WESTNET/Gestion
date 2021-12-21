@@ -3,16 +3,20 @@
 namespace app\modules\westnet\notifications\controllers;
 
 use Yii;
-use yii\filters\VerbFilter;
+use yii\helpers\Url;
 use yii\helpers\ArrayHelper;
-use yii\data\ActiveDataProvider;
+use yii\filters\VerbFilter;
+use yii\data\ArrayDataProvider;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\config\models\Config;
-use app\modules\westnet\notifications\models\SiroPaymentIntention;
+use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
+use app\modules\checkout\models\Payment;
+use app\modules\checkout\models\PaymentItem;
+use app\modules\checkout\models\PaymentMethod;
 /**
  * AccessPointController implements the CRUD actions for AccessPoint model.
  */
@@ -86,6 +90,10 @@ class SiroController extends Controller
         if(Yii::$app->request->isPost){
             $request = Yii::$app->request->post();
 
+            if(isset($request['cierre_masivo']))
+                return $this->MassiveClosure();
+
+
             $company = Company::find()->where(['company_id' => $request['company_id']])->one();
             $cuit_administrator = str_replace('-', '', $company->tax_identification);
 
@@ -155,7 +163,7 @@ class SiroController extends Controller
 
                         if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
                             $model = new PaymentIntentionAccountability();
-                            $model->payment_date = $payment_method;
+                            $model->payment_date = $payment_date;
                             $model->accreditation_date =  $accreditation_date;
                             $model->total_amount =  $total_amount;
                             $model->customer_id = $customer_id;
@@ -173,7 +181,6 @@ class SiroController extends Controller
                     }
 
                 }
-
                 $transaction->commit();
 
             } catch (Exception $e) {
@@ -183,47 +190,116 @@ class SiroController extends Controller
   
         }
 
-        /*if(Yii::$app->request->isPost){
-            $request = Yii::$app->request->post();
-            $payment_intentions = Yii::$app->db->createCommand(
-                                               'SELECT * FROM siro_payment_intention WHERE 
-                                                status != "payed" AND 
-                                                createdAt >= :date_from AND 
-                                                createdAt <= :date_to AND
-                                                payment_id IS NULL AND
-                                                company_id = :company_id
-                                            ')
-                                              ->bindValue('date_from', $request['date_from'])
-                                              ->bindValue('date_to', $request['date_to'])
-                                              ->bindValue('company_id', $request['company_id'])
-                                              ->queryAll();
-
-            $token = ApiSiro::GetTokenApi($request['company_id']);
-            $list_of_payments_to_process = [];
-            foreach ($payment_intentions as $key => $value) {
-                if(isset($value['hash'])){
-                    $search_payment_intention = ApiSiro::SearchPaymentIntentionApi($token, array("hash" => $value['hash']));
-
-                    if(!isset($search_payment_intention['Message']) || isset($search_payment_intention['PagoExitoso']))
-                        if($search_payment_intention['PagoExitoso'])
-                            $list_of_payments_to_process[] = $search_payment_intention + $value;
-                }
-            }
-
-            if(!empty($list_of_payments_to_process)){
+        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()->all();
+        if(!empty($list_payment_intentions_accountability)){
                 $dataProvider = new ArrayDataProvider([
-                    'allModels' => $result,
+                    'allModels' => $list_payment_intentions_accountability,
                     'pagination' => [
                         'pageSize' => 15,
                     ],
                 ]);
-                return $this->render('index', ['dataProvider' => $dataProvider]);
-            }else
-                Yii::$app->session->setFlash("success", "No se han encontrado intenciones de pago que se encuentren procesadas.");
-        }*/
-        //die("fin");
+            return $this->render('index', ['dataProvider' => $dataProvider]);
+        }
+
+
         return $this->render('index');
     }
 
+    public function actionCancel($id){
+        $model = PaymentIntentionAccountability::find()->where(['payment_intention_accountability_id' => $id])->one();
+        $model->status = 'cancelled';
+        $model->save();
+
+        return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+    }
+
+    public function actionConfirm($id){
+        $transaction = Yii::$app->db->beginTransaction();
+        $model = PaymentIntentionAccountability::find()->where(['payment_intention_accountability_id' => $id])->one();
+        $customer = Customer::findOne(['customer_id' => $model->customer_id]);
+        $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
+
+        $payment = new Payment([
+            'customer_id' => $customer->customer_id,
+            'amount' => $model->total_amount,
+            'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
+            'company_id' => $customer->company_id,
+            'date' => (new \DateTime('now'))->format('Y-m-d'),
+            'status' => 'closed'
+        ]);
+
+        if ($payment->save(false)) {
+            $payment_item = new PaymentItem();
+            $payment_item->amount = $payment->amount;
+            $payment_item->description = 'Intención de Pago (Banco Roela) ' . $model->siro_payment_intention_id;
+            $payment_item->payment_method_id = $payment_method->payment_method_id;
+            $payment_item->payment_id = $payment->payment_id;
+            $payment_item->paycheck_id = null;
+            
+            $customer->current_account_balance -= $model->total_amount;
+
+            $model->payment_id = $payment->payment_id;
+            $model->status = 'payed';
+            $model->save();
+
+            $payment_item->save(false);
+            $customer->save(false);
+
+            $transaction->commit();
+            Yii::$app->session->setFlash("success", "Se ha creado el pago correctamente.");
+
+        } else {
+            $transaction->rollBack();
+            Yii::$app->session->setFlash("danger", "No se ha podido crear el pago.");
+        }
+
+        return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+    }
+
+
+    public function MassiveClosure(){
+        $transaction = Yii::$app->db->beginTransaction();
+        $models = PaymentIntentionAccountability::find()->where(['status' => 'draft', 'payment_id' => null])->all();
+        $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
+        try {
+            foreach ($models as $key => $model) {
+                $customer = Customer::findOne(['customer_id' => $model->customer_id]);
+                $payment = new Payment([
+                    'customer_id' => $customer->customer_id,
+                    'amount' => $model->total_amount,
+                    'partner_distribution_model_id' => $customer->company->partner_distribution_model_id,
+                    'company_id' => $customer->company_id,
+                    'date' => (new \DateTime('now'))->format('Y-m-d'),
+                    'status' => 'closed'
+                ]);
+
+                if ($payment->save(false)) {
+                    $payment_item = new PaymentItem();
+                    $payment_item->amount = $payment->amount;
+                    $payment_item->description = 'Intención de Pago (Banco Roela) ' . $model->siro_payment_intention_id;
+                    $payment_item->payment_method_id = $payment_method->payment_method_id;
+                    $payment_item->payment_id = $payment->payment_id;
+                    $payment_item->paycheck_id = null;
+                    
+                    $customer->current_account_balance -= $model->total_amount;
+
+                    $model->payment_id = $payment->payment_id;
+                    $model->status = 'payed';
+                    $model->save();
+
+                    $payment_item->save(false);
+                    $customer->save(false);
+                }
+            }
+            Yii::$app->session->setFlash("success", "Se han creado los pagos correctamente.");
+            $transaction->commit();
+
+        } catch (Exception $e) {
+            $transaction->rollBack();
+            Yii::$app->session->setFlash("danger", "No se han podido crear los pagos.");
+        }
+
+        return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));  
+    }
 
 }

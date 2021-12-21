@@ -51,10 +51,10 @@ class PaymentIntentionAccountability extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'payment_intention_accountability_id' => 'ID Intención de Pago por Rendición de Cuenta',
+            'payment_intention_accountability_id' => 'ID',
             'customer_id' => 'ID Cliente',
             'siro_payment_intention_id' => 'ID Intención de Pago',
-            'total_amount' => 'Monto Total'
+            'total_amount' => 'Monto Total',
             'payment_method' => 'Método de Pago',
             'status' => 'Estado',
             'collection_channel' => 'Canal de Cobro',
