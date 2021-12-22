@@ -138,7 +138,6 @@ class SiroController extends Controller
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
-            
                 foreach ($accountability as $value) {
                     $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
                     $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
@@ -148,12 +147,12 @@ class SiroController extends Controller
                      ->bindValue('customer_id', $customer_id)
                      ->queryOne();
                     $payment_method = substr($value, 44, 4);
-                    $siro_payment_intention_id = str_replace($customer['code'], '', ltrim(substr($value, 103, 20), '0'));
+                    $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
                     $collection_channel= substr($value, 123, 3);
                     $rejection_code = substr($value, 126, 3);
-                    
+
                     if($total_amount > 0){
-                        $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+                        $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
                         ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                         ->queryOne();
 
@@ -162,25 +161,35 @@ class SiroController extends Controller
                         ->queryOne();
 
                         if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
+
                             $model = new PaymentIntentionAccountability();
                             $model->payment_date = $payment_date;
                             $model->accreditation_date =  $accreditation_date;
                             $model->total_amount =  $total_amount;
                             $model->customer_id = $customer_id;
                             $model->payment_method = $payment_method;
-                            $model->status = 'draft';
                             $model->siro_payment_intention_id = $siro_payment_intention_id;
                             $model->collection_channel_description = $codes_collection_channel[$collection_channel];
                             $model->collection_channel = $collection_channel;
                             $model->rejection_code = $rejection_code;
                             $model->created_at = date('Y-m-d');
                             $model->updated_at = date('Y-m-d');
+                            
+                            if(empty($siro_payment_intention['payment_id'])){
+                                $model->status = 'draft';
+                                
+                            }else{
+                                $model->payment_id = $siro_payment_intention['payment_id'];
+                                $model->status = 'payed';
+                            }
+
                             $model->save();
                         }
 
                     }
 
                 }
+                die();
                 $transaction->commit();
 
             } catch (Exception $e) {
