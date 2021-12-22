@@ -20,6 +20,7 @@ class PaymentExtensionHistory extends \yii\db\ActiveRecord
 {
     const FROM_APP = 'app';
     const FROM_IVR = 'ivr';
+    const FROM_MANUALLY = 'manually';
 
     /**
      * {@inheritdoc}
