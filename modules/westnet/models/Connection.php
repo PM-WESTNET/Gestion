@@ -418,10 +418,6 @@ class Connection extends ActiveRecord {
         if ($this->save(true)) {
             $this->createForcedHistorial();
             if ($create_product){
-                // here should be the product id for payment extension products (96) but right now i dont know how to do it dynamically in case the whole company changes DB
-                if($product_id=='96'){ // TODO: Change this for a dynamic get for the product id that represents recargo-por-extension-de-pago
-                    PaymentExtensionHistory::createPaymentExtensionHistory($this->contract->customer_id, PaymentExtensionHistory::FROM_MANUALLY);
-                }
                 
                 if (!$this->createExtendPaymentCD($product_id, $vendor_id)){
                     Debug::debug('O no crea CD o lo crea y sale por falso');

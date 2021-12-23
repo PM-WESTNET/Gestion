@@ -10,6 +10,8 @@ use app\modules\westnet\models\search\IpRangeSearch;
 use app\components\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\modules\config\models\Config;
+use app\modules\westnet\models\PaymentExtensionHistory;
 
 /**
  * Class ConnectionController
@@ -75,11 +77,16 @@ class ConnectionController extends Controller
         if(Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
             $create_pti= $data['create_product'] === 'true' ? 1 : 0;
-            if($model->canForce()){
+            if ($model->canForce()) {
                 if ($model->force($data['due_date'], $data['product_id'], $data['vendor_id'], $create_pti)) {
-                   return [
+                    // had this piece of code inside the ->force() function before, but was triggering cause of APP and IVR when forcing connections from other scripts--
+                    $payment_extension_product = Config::getValue('extend_payment_product_id'); // this dynamically gets the product ID from DB
+                    if ($data['product_id'] == $payment_extension_product) { // in case the product is payment-extension
+                        PaymentExtensionHistory::createPaymentExtensionHistory($model->contract->customer_id, PaymentExtensionHistory::FROM_MANUALLY); // it creates an entry for PaymentExtensionHistory (correlated to the product detail created inside ->force())
+                    }
+                    return [
                         'status' => 'success'
-                   ];
+                    ];
                 }
             }else{
                 return [
