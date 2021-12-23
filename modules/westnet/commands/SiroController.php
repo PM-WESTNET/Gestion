@@ -1,8 +1,12 @@
 <?php
+
 namespace app\modules\westnet\commands;
+
 use yii\console\Controller;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
-
+use app\modules\config\models\Config;
+use app\modules\westnet\notifications\components\siro\ApiSiro;
+use app\modules\sale\models\Customer;
 
 /**
  * Class SiroController
@@ -15,35 +19,47 @@ class SiroController extends Controller
      */
     public function actionClosePaymentIntention()
     {
-        $this->stdout("\nactionClosePaymentIntention() start\n");
-        $unclosedPaymentIntentions = SiroPaymentIntention::find()
-                                    ->where(['status' => 'pending']) // get all STILL pending
-                                    ->limit(5) // limit as not to overload the server (very unlikely)
-                                    ->all(); // get all records
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $this->stdout("\nactionClosePaymentIntention() start\n");
+            $unclosedPaymentIntentions = SiroPaymentIntention::find()
+                ->where(['status' => 'pending']) // get all STILL pending
+                ->orderBy(['siro_payment_intention_id' => SORT_ASC]) //gets the first records first
+                //->limit(1000) // limit as not to overload the server (very unlikely)
+                ->all(); // get all records
 
-        $this->stdout("\nQuery hit count: ".count($unclosedPaymentIntentions)."\n");
+            $this->stdout("\nQuery hit count: " . count($unclosedPaymentIntentions) . "\n");
 
-        foreach ($unclosedPaymentIntentions as $paymentIntention){
-            $this->stdout("payment id: $paymentIntention->siro_payment_intention_id \n");
-            $this->stdout("$paymentIntention->createdAt\n");
-            $minutes_to_add = 15;
-            $payIntentionDate = new \DateTime($paymentIntention->createdAt); //
-            $lifespanLimit = $payIntentionDate->add(new \DateInterval('PT' . $minutes_to_add . 'M')); // we are providing PT15M (or 15 minutes) to the DateInterval constructor.
-            //$lifespanLimit=$paymentIntention->createdAt->add(strtotime('+15 minutes'));
-            $this->stdout("lifespanLimit??".$lifespanLimit->format('Y-m-d H:i:s')."\n"); // TODO: save lifespan to db actually, because this doesnt make any sense
+            foreach ($unclosedPaymentIntentions as $paymentIntention) {
+                $this->stdout("\npayment id: $paymentIntention->siro_payment_intention_id \n");
 
-            // TODO: check if payment intention is past its lifespan of 15 minutes
-            
-            // TODO: send payment intention to cancelled if it past
+                $current_date = strtotime(date("d-m-Y H:i:00", time()));
+                $payment_date = strtotime($paymentIntention->createdAt);
+                $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60; // small calc to get the minute integer
 
-            // TODO: do nothing if not.
+                $this->stdout("created at: \t\t" . date('d-m-Y H:i:00', $payment_date) . "\n");
+                $this->stdout("lifespan limit: \t" . date('d-m-Y H:i:00', ($payment_date + $expiry_time)) . "\n");
 
+                if ($current_date > ($payment_date + $expiry_time)) { // if the current date is smaller than the lifespan limit
+                    $this->stdout("Must close this payment intention\n");
+                    $paymentIntention->status = 'canceled';
+                    if ($paymentIntention->save(true, ['status'])) {
+                        $this->stdout("payment intent saved\n");
+                    } else {
+                        $this->stdout("payment intent didnt save\n");
+                        $this->stdout(var_export($paymentIntention->getErrorSummary(true)) . "\n");
+                    }
+                } else {
+                    $this->stdout("This payment intention is still valid\n");
+                }
+                $this->stdout("\n");
+            }
+            $this->stdout("Finished switching state for siro payment intentions\n");
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollBack();
+            $this->stdout("Errors..\n");
+            $this->stdout(var_export($ex, true));
         }
-        $date = date('Y-m-d H:i:s', strtotime('now +15 minutes'));
-        $this->stdout("\n$date\n");
-        //$this->stdout(strtotime('now +15 minutes')."\n");
-        //$this->stdout(var_export($unclosedPaymentIntentions, true));
-        
     }
-
 }
