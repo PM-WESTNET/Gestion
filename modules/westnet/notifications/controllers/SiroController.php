@@ -138,6 +138,10 @@ class SiroController extends Controller
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
+		if(empty($accountability)){
+			Yii::$app->session->setFlash("danger", "No hay registros para crear.");
+			return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+		}
                 foreach ($accountability as $value) {
                     $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
                     $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
@@ -189,7 +193,6 @@ class SiroController extends Controller
                     }
 
                 }
-                die();
                 $transaction->commit();
 
             } catch (Exception $e) {
