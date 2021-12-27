@@ -139,4 +139,19 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
     public static function FindPaymentIntentionByID($id){
         return self::findOne(['siro_payment_intention_id' => $id]);
     }
+
+    /**
+     * Added this method to save all previous payment states in case of an error.
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if(!$insert){
+            $previous_state = $changedAttributes['status'];
+            //do something here with the old email value
+        }
+        $this->previous_state = $previous_state;
+        $this->updateAttributes(['previous_state']);
+
+    }
 }
