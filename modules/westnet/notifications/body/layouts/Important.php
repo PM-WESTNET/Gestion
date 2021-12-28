@@ -25,7 +25,7 @@ $title = $notification->subject;
         <thead>
           <tr>
             <th colspan="9">
-            <?= Html::img(Url::base(true).'/images/logo-westnet.png', ['alt' => 'Westnet', 'style' => 'margin: 0 auto; width: 140px;']) ?>
+            <?= Html::img(Url::base().'/images/logo-westnet.png', ['alt' => 'Westnet', 'style' => 'margin: 0 auto; width: 140px;']) ?>
             </th>
           </tr>
         </thead>

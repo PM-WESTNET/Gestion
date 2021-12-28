@@ -33,4 +33,14 @@ class QuotaController extends Controller
     	];
     }
 
+   public function actionGetCustomerCode($code){
+        $nodes = Yii::$app->db->createCommand('SELECT * FROM customer WHERE code = :code')->bindValue('code',$code)->queryAll();
+
+        return [
+                'error' => false,
+                'data' => $nodes
+        ];
+    }
+
+
 }

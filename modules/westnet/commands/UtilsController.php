@@ -391,7 +391,7 @@ class UtilsController extends Controller
 
                     $contract_id = Yii::$app->db->createCommand('SELECT LAST_INSERT_ID() AS contract_id')->query()->read();
                     $contract_id = $contract_id['contract_id'];
-                    var_dump($contract_id);
+                   //var_dump($contract_id);
                     Yii::$app->db->createCommand( sprintf($sqlContractDetail,
                         $contract_id, $date, $date, $date
                     ) )->execute();

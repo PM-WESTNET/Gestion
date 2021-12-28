@@ -120,7 +120,7 @@ class DivisionController extends \yii\console\Controller
         $accountMovementItem->status = 'closed';
 
         $accountMovementItem->save();
-        var_dump($movement->account_movement_id);
+        //var_dump($movement->account_movement_id);
     }
 
     /**
@@ -299,7 +299,7 @@ class DivisionController extends \yii\console\Controller
         $bill->status = 'closed';
         $bill->save(false);
 
-        var_dump('customer_id '.$customer->customer_id .' - '.$amount);
+       // var_dump('customer_id '.$customer->customer_id .' - '.$amount);
     }
 
     public function createProviderBill($bill_type_id, $provider, $amount, $company)
@@ -323,7 +323,7 @@ class DivisionController extends \yii\console\Controller
             'description'=> ($amount < 0 ? 'Credito inicial.' : 'Debito inicial.' ),
         ]);
 
-        var_dump('provider_bill_id: '. $bill->provider_bill_id . ' - ' . $amount);
+        //var_dump('provider_bill_id: '. $bill->provider_bill_id . ' - ' . $amount);
         $bill->close();
     }
 

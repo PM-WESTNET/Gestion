@@ -137,7 +137,8 @@ class UserApp extends ActiveRecord
                     'customer_payment_code' => $customer->payment_code,
                     'customer_name' => $customer->fullName,
                     'balance' => $customer->current_account_balance ? ($customer->current_account_balance > 0 ? 0 : round($customer->current_account_balance) ): 0,
-                    'can_notify_payment' => $customer->canNotifyPayment()
+                    'can_notify_payment' => $customer->canNotifyPayment(),
+		    'hash_customer_id' => (isset($customer->hash_customer_id)?$customer->hash_customer_id:'0')
                 ];
             }
         }

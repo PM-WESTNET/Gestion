@@ -132,7 +132,7 @@ class IspController extends Controller
                 }
 
             } catch(\Exception $ex) {
-                var_dump($client->id);
+                //var_dump($client->id);
                 $cSinContrato++;
             }
 

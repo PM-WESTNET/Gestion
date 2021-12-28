@@ -344,7 +344,7 @@ class MobilePush extends ActiveRecord
                     'notification_content' => MobilePush::replaceText($this->content, $customer_data),
                     'resume' => MobilePush::replaceText($this->resume, $customer_data)
                 ]);
-                    
+          
                 if(!$mphua->save()){
                     Yii::info($mphua->getErrors());
                 }

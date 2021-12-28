@@ -176,7 +176,7 @@ class MailSender
             $layout = (array_key_exists('layout', $content) !== false ? ($content['layout']!='' ? $content['layout'] : $this->email_transport->layout ) : $this->email_transport->layout );
             $params = (array_key_exists('params', $content) ?  $content['params'] : [] );
             $mailer = Yii::$app->mail;
-            $mailer->htmlLayout = $layout;
+            $mailer->htmlLayout = $view;
             Yii::$app->view->params = $params;
 
             /** @var Message $message */

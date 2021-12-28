@@ -89,7 +89,7 @@ class StockExpert extends \yii\base\Component{
                 
             } catch (\Exception $e) {
                 $transaction->rollBack();
-                var_dump($e);die;
+                //var_dump($e);die;
                 throw $e;
             }
         

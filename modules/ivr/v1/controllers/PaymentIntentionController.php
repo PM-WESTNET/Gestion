@@ -40,15 +40,19 @@ class PaymentIntentionController extends Controller
 
     public function actionCreateValoration(){
         $data = Yii::$app->request->post();
-        $model = new SiroPaymentIntentionValoration();
+        $payment_intention_valoration = SiroPaymentIntentionValoration::findModel($data['siro_payment_intention_id']);
 
-        $model->name = $data['name'];
-        $model->email = $data['email'];
-        $model->description = $data['description'];
-        $model->siro_payment_intention_id = $data['siro_payment_intention_id'];
-        $model->created_at = date('Y-m-d H:m:s');
-        
-        return $model->save(false);
+        if(empty($payment_intention_valoration)){
+                $model = new SiroPaymentIntentionValoration();
+
+                $model->description = $data['description'];
+                $model->siro_payment_intention_id = $data['siro_payment_intention_id'];
+                $model->created_at = date('Y-m-d H:m:s');
+
+                return $model->save(false);
+        }else{
+                return false;
+        }
     }
 
 }

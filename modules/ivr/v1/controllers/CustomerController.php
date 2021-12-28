@@ -338,7 +338,7 @@ class CustomerController extends Controller
     public function actionForceConnection()
     {
         $data = Yii::$app->request->post();
-        $default_message = \Yii::t('ivrapi','The customer exceeded the payment extension limit');
+        $default_message = "Su extensión de pago no pudo ser realizada, ya que solicitó una este mes";
 
         if (!isset($data['code'])){
             Yii::$app->response->setStatusCode(400);

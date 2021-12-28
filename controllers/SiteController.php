@@ -229,7 +229,7 @@ class SiteController extends Controller
                 $newContractsFromDate = clone $from_date;
                 $newContractsFromDate->modify('+' . $newContractsDays . " days");
 
-                if ($debug) {
+                /*if ($debug) {
                     var_dump(": " . $contract->customer_id . " " .
                         " - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
                         " - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
@@ -241,7 +241,7 @@ class SiteController extends Controller
                         " - debtLastBill: " . $debtLastBill .
                         " - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
                     );
-                }
+                }*/
 
                 // Si no esta en proceso de baja
                 if ($contract->status != Contract::STATUS_LOW_PROCESS &&
@@ -265,7 +265,7 @@ class SiteController extends Controller
                     $last_closed_bill_date = $last_closed_bill ? (new \DateTime($last_closed_bill->date)) : false;
                     $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
 
-                    var_dump('$debtLastBill: '.$debtLastBill."<br>");
+                   /* var_dump('$debtLastBill: '.$debtLastBill."<br>");
                     var_dump('$tiene_deuda: '.$tiene_deuda."<br>");
                     var_dump('$tiene_deuda_sobre_tolerante: '.$tiene_deuda_sobre_tolerante."<br>");
                     var_dump('$es_nueva_instalacion: '.$es_nueva_instalacion."<br>");
@@ -278,7 +278,7 @@ class SiteController extends Controller
                     var_dump('-------($last_closed_bill_date): '.($last_closed_bill_date ? $last_closed_bill_date->format('Y-m-d') : $last_closed_bill_date)."<br>");
 
 
-                    var_dump("-----------<br>");
+                    var_dump("-----------<br>");*/
 
 
                     if ($debug) {
@@ -293,26 +293,26 @@ class SiteController extends Controller
 
 
                     if (strtolower($customerClass->name) == 'free') {
-                        var_dump("IF FREE<br>");
+                        //var_dump("IF FREE<br>");
                         $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                     } else if ($es_nueva_instalacion) {
-                        var_dump("IF $es_nueva_instalacion<br>");
+                        //var_dump("IF $es_nueva_instalacion<br>");
                         $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                     } else if ($es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante) {
-                        var_dump('IF $es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante'."<br>");
+                        //var_dump('IF $es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante'."<br>");
                         $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
                         //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
                         //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
 
                     } else if ($connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED) {
-                        var_dump('IF Connection::STATUS_ACCOUNT_CLIPPED'."<br>");
+                        //var_dump('IF Connection::STATUS_ACCOUNT_CLIPPED'."<br>");
 //                        $dateLastBill = new \DateTime($this->getLastBill($customer->customer_id));
                         /**
                          * Habilito si:
                          *  - solo debe la factura del mes actual y la fecha es menor a la de corte
                          */
                         if (!$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || ($lastBillItsFromActualMonth && $date < $cortado_date)) {
-                            var_dump("Entra a if 1\n");
+                           // var_dump("Entra a if 1\n");
                             $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                         }
                     } else if (
@@ -321,7 +321,7 @@ class SiteController extends Controller
                         ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && $lastBillItsFromActualMonth && !$corta && !$avisa)
                     )
                     ) {
-                        var_dump('IF  (!$tiene_deuda ||
+                         /*var_dump('IF  (!$tiene_deuda ||
                         ($tiene_deuda && !$tiene_deuda_sobre_tolerante) ||
                         ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && $lastBillItsFromActualMonth && !$corta && !$avisa)'."<br>");
                         var_dump('---!$tiene_deuda: '.(!$tiene_deuda)."<br>");
@@ -330,7 +330,7 @@ class SiteController extends Controller
                         var_dump('-----($debtLastBill <= 1): '.($debtLastBill <= 1)."<br>");
                         var_dump('-----($lastBillItsFromActualMonth): '.($lastBillItsFromActualMonth )."<br>");
                         var_dump('-------($last_closed_bill_date): '.($last_closed_bill_date ? $last_closed_bill_date->format('Y-m-d') : $last_closed_bill_date)."<br>");
-
+			*/
 
                         $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
 
@@ -362,7 +362,7 @@ class SiteController extends Controller
                     }
                 }
 
-                var_dump($connection->status_account);
+                //var_dump($connection->status_account);
 
             }
         }

@@ -219,4 +219,10 @@ class TestController extends Controller {
         if(EmailTransport::createLatestBillPDF($customer_id)==[])var_dump("works");
         else var_dump("failed");
     }
+    
+    public function actionPruebaLog(){
+    	log_siro_payment_intention("Probando Logs");
+	log_siro_payment_intention_without_error("Probando Logs");
+    }
+
 }
