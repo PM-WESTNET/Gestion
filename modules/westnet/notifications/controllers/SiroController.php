@@ -139,9 +139,10 @@ class SiroController extends Controller
             $transaction = Yii::$app->db->beginTransaction();
             try {
 		if(empty($accountability)){
-			Yii::$app->session->setFlash("danger", "No hay registros para crear.");
+			Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
 			return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
 		}
+		
                 foreach ($accountability as $value) {
                     $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
                     $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
@@ -154,8 +155,8 @@ class SiroController extends Controller
                     $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
                     $collection_channel= substr($value, 123, 3);
                     $rejection_code = substr($value, 126, 3);
-
-                    if($total_amount > 0){
+			
+                   if($total_amount > 0){
                         $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
                         ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                         ->queryOne();
@@ -164,7 +165,7 @@ class SiroController extends Controller
                         ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                         ->queryOne();
 
-                        if(isset($siro_payment_intention['estado']) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
+                        if(isset($siro_payment_intention) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
 
                             $model = new PaymentIntentionAccountability();
                             $model->payment_date = $payment_date;
