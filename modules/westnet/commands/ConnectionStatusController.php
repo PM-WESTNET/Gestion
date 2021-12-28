@@ -585,16 +585,16 @@ class ConnectionStatusController extends Controller
 
                         if ($debug) {
                             error_log(
-                                ": " . $contract->customer_id . " " .
-                                    " - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
-                                    " - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
-                                    " - aviso_date: " . $aviso_date->format('Y-m-d') .
-                                    " - cortado_date: " . $cortado_date->format('Y-m-d') .
-                                    " - due_date: " . $due_date->format('Y-m-d') .
-                                    " - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
-                                    " - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
-                                    " - debtLastBill: " . $debtLastBill .
-                                    " - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
+                                "\n - customer_id " . $contract->customer_id . " " .
+                                "\n - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
+                                "\n - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
+                                "\n - aviso_date: " . $aviso_date->format('Y-m-d') .
+                                "\n - cortado_date: " . $cortado_date->format('Y-m-d') .
+                                "\n - due_date: " . $due_date->format('Y-m-d') .
+                                "\n - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
+                                "\n - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
+                                "\n - debtLastBill: " . $debtLastBill .
+                                "\n - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
                             );
                         }
 
@@ -622,12 +622,14 @@ class ConnectionStatusController extends Controller
                             $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
 
                             if ($debug) {
-                                error_log('tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') . " - " . ' tiene_deuda: ' . ($tiene_deuda ? 's' : 'n')
-                                    . ' - es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n')
-                                    . ' - avisa: ' . ($avisa ? 's' : 'n')
-                                    . ' - corta: ' . ($corta ? 's' : 'n')
-                                    . ' - es_nuevo: ' . ($es_nuevo ? 's' : 'n')
-                                    . ' - last_bill_date: ' . $last_bill_date->format('Y-m-d'));
+                                error_log(
+                                    "\n - " . 'tiene_deuda: ' . ($tiene_deuda ? 's' : 'n') .
+                                    "\n - " . 'tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') . 
+                                    "\n - " . 'es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n') .
+                                    "\n - " . 'avisa: ' . ($avisa ? 's' : 'n') .
+                                    "\n - " . 'corta: ' . ($corta ? 's' : 'n') .
+                                    "\n - " . 'es_nuevo: ' . ($es_nuevo ? 's' : 'n') .
+                                    "\n - " . 'last_bill_date: ' . $last_bill_date->format('Y-m-d'));
                             }
 
 
@@ -707,7 +709,7 @@ class ConnectionStatusController extends Controller
             $this->stdout("\nProcess finished unexpectedly.");
         }
         
-        $this->stdout("\n----Summary----");
+        $this->stdout("\n----Summary----\n");
         foreach ($estados as $key => $value) {
             $this->stdout("Westnet - procesados:" . $key . " - de: " . $estadosAnteriores[$key] . " a " . $value . "\n", Console::BOLD, Console::FG_BLUE);
         }
