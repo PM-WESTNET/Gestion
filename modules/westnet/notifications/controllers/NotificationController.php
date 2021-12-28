@@ -595,7 +595,7 @@ class NotificationController extends Controller {
         $paymentIntention->save(false);
 	
 
-        if($result_search['PagoExitoso'] && empty($paymentIntention->payment_id)){
+        if($result_search['Estado'] == "PROCESADA" && empty($paymentIntention->payment_id)){
             $transaction = Yii::$app->db->beginTransaction();
             $customer = Customer::findOne(['customer_id' => $paymentIntention->customer_id]);
             $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
