@@ -474,7 +474,8 @@ class ConnectionStatusController extends Controller
         if ($debug) { //1403,1533,2303, 25372
             $queryCustomer->andWhere(new Expression('customer_id in (100244,102031,1403,1533,2303)'));
         }
-        //$queryCustomer->orderBy(['customer_id' => SORT_DESC]);
+        //$queryCustomer->orderBy(['customer_id' => SORT_DESC]); //debugging comment to sort customers differently
+        //$customers = $queryCustomer->limit(1000)->all(); //debugging comment to limit customer amount
         $customers = $queryCustomer->all();
         $this->stdout("\ncustomers query runned");
         
@@ -610,8 +611,8 @@ class ConnectionStatusController extends Controller
                              *  - Tiene deuda menor al porcentaje de tolerancia y hoy es menor a la fecha de corte y menor a la fecha de corte por nuevo y debe una o menos facturas
                              *
                              */
-                            $tiene_deuda = ($amount <= 0);
-                            $tiene_deuda_sobre_tolerante = (round(abs($amount)) >= $customerClass->percentage_tolerance_debt);
+                            $tiene_deuda = ($amount < 0); // amount (account balance) is calculated in runtime (resource extensive)
+                            $tiene_deuda_sobre_tolerante = (round(abs($amount)) >= $customerClass->percentage_tolerance_debt); // BEWARE, even if 'percentage' is written, here is using the integer value. not a percentage
                             $es_nueva_instalacion = ($date->diff($from_date)->days <= $newContractsDays);
                             $avisa = ($date >= $aviso_date && $date < $cortado_date);
                             $corta = ($date >= $cortado_date);
