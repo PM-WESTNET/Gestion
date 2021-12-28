@@ -138,10 +138,10 @@ class SiroController extends Controller
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
-		if(empty($accountability)){
-			Yii::$app->session->setFlash("danger", "No hay registros para crear.");
-			return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
-		}
+                if(empty($accountability)){
+                    Yii::$app->session->setFlash("danger", "No hay registros para crear.");
+                    return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+                }
                 foreach ($accountability as $value) {
                     $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
                     $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
@@ -195,7 +195,7 @@ class SiroController extends Controller
                 }
                 $transaction->commit();
 
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $transaction->rollBack();
             }
             
@@ -268,7 +268,10 @@ class SiroController extends Controller
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
     }
 
-
+    /**
+     * Closes all the Payment Intentions found
+     *
+     */
     public function MassiveClosure(){
         $transaction = Yii::$app->db->beginTransaction();
         $models = PaymentIntentionAccountability::find()->where(['status' => 'draft', 'payment_id' => null])->all();
@@ -306,7 +309,7 @@ class SiroController extends Controller
             Yii::$app->session->setFlash("success", "Se han creado los pagos correctamente.");
             $transaction->commit();
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $transaction->rollBack();
             Yii::$app->session->setFlash("danger", "No se han podido crear los pagos.");
         }

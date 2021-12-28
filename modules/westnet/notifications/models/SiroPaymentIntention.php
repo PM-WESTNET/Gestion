@@ -148,10 +148,9 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
         parent::afterSave($insert, $changedAttributes);
         if(!$insert){
             $previous_state = $changedAttributes['status'];
-            //do something here with the old email value
+            $this->previous_state = $previous_state;
+            $this->updateAttributes(['previous_state']);
         }
-        $this->previous_state = $previous_state;
-        $this->updateAttributes(['previous_state']);
 
     }
 }

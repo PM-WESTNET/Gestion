@@ -23,10 +23,12 @@ use yii\grid\GridView;
 			]); ?>
 		</div>
 		<div class="col-lg-4">
-		    <input type="date" class="form-control" id="date_from" name="date_from">
+			Desde
+		    <input type="date" class="form-control" id="date_from" name="date_from" placeholder="Desde">
 		</div>
 		<div class="col-lg-4">
-			<input type="date" class="form-control" id="date_to" name="date_to">
+			Hasta
+			<input type="date" class="form-control" id="date_to" name="date_to" placeholder="Hasta">
 		</div>
 	</div>
 	<br>
