@@ -87,6 +87,7 @@ class SiroController extends Controller
 
     public function actionCheckerOfPayments()
     {
+        $this->layout= '/fluid';
         if(Yii::$app->request->isPost){
             $request = Yii::$app->request->post();
 
@@ -99,7 +100,7 @@ class SiroController extends Controller
 
             $token = $this->GetTokenApi($request['company_id']);
             $accountability = $this->ObtainPaymentAccountabilityApi($token, $request['date_from'], $request['date_to'], $cuit_administrator, $request['company_id']);
-
+            //var_dump($accountability);die();
             $codes_collection_channel = [
                 'PF' => 'Pago Fácil',
                 'RP' => 'Rapipago',
@@ -202,7 +203,23 @@ class SiroController extends Controller
   
         }
 
-        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()->all();
+        //$list_payment_intentions_accountability = PaymentIntentionAccountability::find()
+        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()
+                                        ->select('*')
+                                        ->leftJoin('customer cus', 'payment_intentions_accountability.customer_id = cus.customer_id')
+                                        ->all();
+        //var_dump($list_payment_intentions_accountability);die();
+        /* ry_plan = (new Query())
+            ->select(['(net_price + taxes) as price'])
+            ->from(['contract c'])
+            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+            ->leftJoin('product p', 'cd.product_id = p.product_id')
+            ->leftJoin('product_price pp', 'p.product_id = pp.product_id')
+            ->innerJoin(['ppppim'=> $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
+            ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
+            ->orderBy(['pp.date'=>SORT_DESC]) */
+
+
         if(!empty($list_payment_intentions_accountability)){
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $list_payment_intentions_accountability,
