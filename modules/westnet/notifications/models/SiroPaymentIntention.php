@@ -143,7 +143,7 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
     /**
      * Added this method to save all previous payment states in case of an error.
      */
-    public function afterSave($insert, $changedAttributes)
+    /* public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
         if(!$insert){
@@ -152,5 +152,5 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
             $this->updateAttributes(['previous_state']);
         }
 
-    }
+    } */
 }
