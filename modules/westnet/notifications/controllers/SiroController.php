@@ -87,6 +87,7 @@ class SiroController extends Controller
 
     public function actionCheckerOfPayments()
     {
+        $this->layout = '/fluid';
         if(Yii::$app->request->isPost){
             $request = Yii::$app->request->post();
 

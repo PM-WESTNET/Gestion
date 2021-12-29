@@ -14,6 +14,7 @@ use yii\grid\GridView;
 	<hr>
 	<div class="row">
 		<div class="col-lg-4">
+			Empresa
 			<?=Select2::widget([
 			    'name' => 'company_id',
 			    'data' => ['2' => 'Redes del Oeste', '7' => 'Servicargas'],
@@ -43,6 +44,7 @@ use yii\grid\GridView;
 	        'dataProvider' => $dataProvider,
 	        'columns' => [
 	            'payment_intention_accountability_id',
+				'Customer.name',
 	            [
                     'attribute' => 'customer_id',
                     'format' => 'raw',
@@ -57,7 +59,13 @@ use yii\grid\GridView;
                         return Html::a($model->siro_payment_intention_id, Url::toRoute(['/reports/reports-company/payment-intention-view', 'id' => $model->siro_payment_intention_id]));
                     }
                 ],
-	            'total_amount',
+				[
+					'attribute' => 'total_amount',
+					'format' => 'currency',
+					'value' => function($model) {
+						return $model->total_amount;
+					}
+				],
 	            'payment_method',
 	            'status',
 	            'collection_channel_description',
