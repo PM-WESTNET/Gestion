@@ -35,7 +35,7 @@ use yii\grid\GridView;
 	<br>
 	<div class="">
 	    <input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
-	    <input type="submit" class="btn btn-danger" name="cierre_masivo" value="Cierre Masivo">
+	    <input type="submit" class="btn btn-danger" name="cierre_masivo" value="Cierre Masivo" onclick="return confirm('Confirmar envio de formulario?\nEsta accion no puede revertirse.');">
 	</div>
 <?= Html::endForm() ?>
 
