@@ -59,6 +59,13 @@ use yii\grid\GridView;
                         return Html::a($model->customer_id, Url::toRoute(['/checkout/payment/current-account', 'customer'=>$model->customer_id]));
                     }
                 ],
+				[
+					'label' => 'Empresa',
+					'format' => 'raw',
+					'value' => function($model) {
+						return $model->customer->company->name;
+					}
+				],
                 [
                     'attribute' => 'siro_payment_intention_id',
                     'format' => 'raw',
