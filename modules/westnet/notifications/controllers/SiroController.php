@@ -87,7 +87,7 @@ class SiroController extends Controller
 
     public function actionCheckerOfPayments()
     {
-        $this->layout = '/fluid';
+        $this->layout = '/fluid'; // sets no margin for this view
         if(Yii::$app->request->isPost){
             $request = Yii::$app->request->post();
 
@@ -139,10 +139,10 @@ class SiroController extends Controller
 
             $transaction = Yii::$app->db->beginTransaction();
             try {
-		if(empty($accountability)){
-			Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
-			return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
-		}
+                if(empty($accountability)){
+                    Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
+                    return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+                }
 	
                 foreach ($accountability as $value) {
                     $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
@@ -204,7 +204,12 @@ class SiroController extends Controller
   
         }
 
-        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()->all();
+        //$list_payment_intentions_accountability = PaymentIntentionAccountability::find()->all();
+        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()
+                        ->with('customer') // hasOne relation to Customer model
+                        ->orderBy(['payment_intention_accountability_id' => SORT_DESC]) // to show recent payments first
+                        ->all();
+
         if(!empty($list_payment_intentions_accountability)){
                 $dataProvider = new ArrayDataProvider([
                     'allModels' => $list_payment_intentions_accountability,

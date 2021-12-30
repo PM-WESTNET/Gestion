@@ -44,7 +44,14 @@ use yii\grid\GridView;
 	        'dataProvider' => $dataProvider,
 	        'columns' => [
 	            'payment_intention_accountability_id',
-				'Customer.name',
+				[
+					//'attribute' => 'name',
+					'label' => 'Nombre - Apellido - Codigo',
+					'format' => 'text',
+					'value' => function($model) {
+						return $model->customer->name.", ".$model->customer->lastname." - ".$model->customer->code;
+					}
+				],
 	            [
                     'attribute' => 'customer_id',
                     'format' => 'raw',
@@ -63,12 +70,20 @@ use yii\grid\GridView;
 					'attribute' => 'total_amount',
 					'format' => 'currency',
 					'value' => function($model) {
+						$canBeError = ($model->total_amount <= 0)?true:false; // if total amount is lower than 0
 						return $model->total_amount;
 					}
 				],
 	            'payment_method',
 	            'status',
-	            'collection_channel_description',
+				[
+					'attribute' => 'collection_channel_description',
+					'label' => 'CANAL',
+					'format' => 'raw',
+					'value' => function($model) {
+						return $model->collection_channel_description;
+					}
+				],
 	            'rejection_code',
 	            'payment_date',
 	            'accreditation_date',
