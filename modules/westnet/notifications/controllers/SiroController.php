@@ -94,6 +94,9 @@ class SiroController extends Controller
             if(isset($request['cierre_masivo']))
                 return $this->MassiveClosure();
 
+             if(isset($request['buscar_pagos_duplicados']))
+                return $this->BuscarPagosDuplicados($request['company_id'], $request['date_from'], $request['date_to']);
+
 
             $company = Company::find()->where(['company_id' => $request['company_id']])->one();
             $cuit_administrator = str_replace('-', '', $company->tax_identification);
@@ -317,6 +320,133 @@ class SiroController extends Controller
         }
 
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));  
+    }
+
+    public function BuscarPagosDuplicados($company_id, $date_from, $date_to){
+        $company = Company::find()->where(['company_id' => $company_id])->one();
+        $cuit_administrator = str_replace('-', '', $company->tax_identification);
+
+        $token = $this->GetTokenApi($company_id);
+        $accountability = $this->ObtainPaymentAccountabilityApi($token, $date_from, $date_to, $cuit_administrator, $company_id);
+
+        $codes_collection_channel = [
+            'PF' => 'Pago Fácil',
+            'RP' => 'Rapipago',
+            'PP' => 'Provincia Pagos',
+            'CJ' => 'Cajeros',
+            'CE' => 'Cobro Express',
+            'BM' => 'Banco Municipal',
+            'BR' => 'Banco de Córdoba',
+            'ASJ' => 'Plus Pagos',
+            'LK' => 'Link Pagos',
+            'PC' => 'Pago Mis Cuentas',
+            'MC' => 'Mastercard',
+            'VS' => 'Visa',
+            'MCR' => 'Mastercard Rechazado',
+            'VSR' => 'Visa Rechazado',
+            'DD+' => 'Débito Directo',
+            'DD-' => 'Reversión Débito',
+            'DDR' => 'Rechazo Débito Directo',
+            'BPD' => 'Botón de Pagos Débito',
+            'BPC' => 'Botón de Pagos Crédito',
+            'BOC' => 'Botón Otros Crédito',
+            'BPR' => 'Botón de Pagos Rechazado',
+            'CEF' => 'Cobro Express sin Factura',
+            'RSF' => 'Rapipago sin Factura',
+            'FSF' => 'Pago Fácil sin Factura',
+            'ASF' => 'Plus Pagos sin Factura',
+            'PSP' => 'Bapro sin Factura',
+            'PCO' => 'PC Online',
+            'LKO' => 'LK Online',
+            'PCA' => 'Deuda Vencida PCO',
+            'LKA' => 'Deuda Vencida LKO',
+            'SNP' => 'Transferencia Inmediata.',
+            'LNK' => 'Transferencia Inmediata',
+            'IBK' => 'Transferencia Inmediata'
+        ];
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+
+            if(empty($accountability)){
+                Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
+                return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
+            }
+            
+
+            $list_payment_intentions_accountability = [];
+            foreach ($accountability as $value) {
+                $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
+                $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
+                $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
+                $customer_id = ltrim(substr($value, 35, 8), '0');
+                $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+                 ->bindValue('customer_id', $customer_id)
+                 ->queryOne();
+                $payment_method = substr($value, 44, 4);
+                $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
+                $collection_channel= substr($value, 123, 3);
+                $rejection_code = substr($value, 126, 3);
+        
+               if($total_amount > 0){
+                    $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+                    ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+                    ->queryOne();
+
+                    $payment_intention_accountability = Yii::$app->db->createCommand('SELECT pia.payment_intention_accountability_id FROM payment_intentions_accountability pia WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+                    ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+                    ->queryOne();
+
+                    if(isset($siro_payment_intention) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
+                        $list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
+                    }
+
+                }
+
+            }
+
+            foreach ($list_payment_intentions_accountability as $key => $payment_intentions_accountability) {
+                if(count($payment_intentions_accountability) > 1){
+                    foreach ($payment_intentions_accountability as $value) {
+                        $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
+                        $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
+                        $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
+                        $customer_id = ltrim(substr($value, 35, 8), '0');
+                        $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+                         ->bindValue('customer_id', $customer_id)
+                         ->queryOne();
+                        $payment_method = substr($value, 44, 4);
+                        $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
+                        $collection_channel= substr($value, 123, 3);
+                        $rejection_code = substr($value, 126, 3);
+
+
+                        $model = new PaymentIntentionAccountability();
+                        $model->payment_date = $payment_date;
+                        $model->accreditation_date =  $accreditation_date;
+                        $model->total_amount =  $total_amount;
+                        $model->customer_id = $customer_id;
+                        $model->payment_method = $payment_method;
+                        $model->siro_payment_intention_id = $siro_payment_intention_id;
+                        $model->collection_channel_description = $codes_collection_channel[$collection_channel];
+                        $model->collection_channel = $collection_channel;
+                        $model->rejection_code = $rejection_code;
+                        $model->created_at = date('Y-m-d');
+                        $model->updated_at = date('Y-m-d');
+                        $model->status = 'draft';
+                        $model->save();
+                        
+                    }
+                
+                }else
+                    unset($list_payment_intentions_accountability[$key]);
+            }
+            $transaction->commit();
+
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+        }
+
+        return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
     }
 
 }

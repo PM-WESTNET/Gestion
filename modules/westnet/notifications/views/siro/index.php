@@ -35,7 +35,9 @@ use yii\grid\GridView;
 	<br>
 	<div class="">
 	    <input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
+	    <input type="submit" class="btn btn-info" name="buscar_pagos_duplicados" value="Buscar Pagos Duplicados">
 	    <input type="submit" class="btn btn-danger" name="cierre_masivo" value="Cierre Masivo">
+
 	</div>
 <?= Html::endForm() ?>
 
@@ -44,7 +46,6 @@ use yii\grid\GridView;
 	        'dataProvider' => $dataProvider,
 	        'columns' => [
 	            'payment_intention_accountability_id',
-				'Customer.name',
 	            [
                     'attribute' => 'customer_id',
                     'format' => 'raw',
