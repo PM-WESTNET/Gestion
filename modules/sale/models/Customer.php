@@ -2308,4 +2308,10 @@ class Customer extends ActiveRecord {
             $conditions")
             ->queryOne();
     }
+
+   
+    public static function getLastContract($customer_id){
+    	return Contract::find()->where(['customer_id' => $customer_id])->orderBy(['contract_id' => SORT_DESC])->limit(1)->one();
+    }
+
 }

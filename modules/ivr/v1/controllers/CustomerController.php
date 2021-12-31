@@ -1633,14 +1633,13 @@ class CustomerController extends Controller
         ];
 
         
-        $connections = [];
-
-        foreach ($customer->contracts as $key => $contract) {
+            $connections = null;
+	    $contract = $customer->getLastContract($customer->customer_id);
             $connection = $contract->connection;
 	    if($connection){
             	$node = $connection->node;
 		$geo = $node->FindNodeFieldsLatitudLongitud($node->node_id);
-            	$connections[] = [
+            	$connections = [
                 	'state' => 'Mendoza',
                 	'city' => '',
 	                'address' => $fulladdress,
@@ -1659,7 +1658,6 @@ class CustomerController extends Controller
 	                'extra_info' => ''
            	 ];
 	     }
-        }
 
 
         $connection_data = [
