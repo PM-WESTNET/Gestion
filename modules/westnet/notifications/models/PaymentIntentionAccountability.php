@@ -2,6 +2,8 @@
 
 namespace app\modules\westnet\notifications\models;
 use app\components\db\ActiveRecord;
+use app\modules\sale\models\Customer;
+
 
 use Yii;
 
@@ -68,4 +70,11 @@ class PaymentIntentionAccountability extends ActiveRecord
         ];
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCustomer()
+    {
+        return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
+    }
 }

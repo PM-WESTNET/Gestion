@@ -35,9 +35,9 @@ use yii\grid\GridView;
 	<br>
 	<div class="">
 	    <input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
-	    <input type="submit" class="btn btn-info" name="buscar_pagos_duplicados" value="Buscar Pagos Duplicados">
-	    <input type="submit" class="btn btn-danger" name="cierre_masivo" value="Cierre Masivo">
 
+	    <input type="submit" class="btn btn-info" name="buscar_pagos_duplicados" value="Buscar Pagos Duplicados">
+	    <input type="submit" class="btn btn-danger" name="cierre_masivo" value="Cierre Masivo" onclick="return confirm('Confirmar envio de formulario?\nEsta accion no puede revertirse.');">
 	</div>
 <?= Html::endForm() ?>
 
@@ -46,6 +46,15 @@ use yii\grid\GridView;
 	        'dataProvider' => $dataProvider,
 	        'columns' => [
 	            'payment_intention_accountability_id',
+				[
+					//'attribute' => 'name',
+					'label' => 'Nombre - Apellido - Codigo',
+					'format' => 'text',
+					'value' => function($model) {
+						return $model->customer->name.", ".$model->customer->lastname." - ".$model->customer->code;
+					}
+				],
+
 	            [
                     'attribute' => 'customer_id',
                     'format' => 'raw',
@@ -53,6 +62,13 @@ use yii\grid\GridView;
                         return Html::a($model->customer_id, Url::toRoute(['/checkout/payment/current-account', 'customer'=>$model->customer_id]));
                     }
                 ],
+				[
+					'label' => 'Empresa',
+					'format' => 'raw',
+					'value' => function($model) {
+						return $model->customer->company->name;
+					}
+				],
                 [
                     'attribute' => 'siro_payment_intention_id',
                     'format' => 'raw',
@@ -64,12 +80,20 @@ use yii\grid\GridView;
 					'attribute' => 'total_amount',
 					'format' => 'currency',
 					'value' => function($model) {
+						$canBeError = ($model->total_amount <= 0)?true:false; // if total amount is lower than 0
 						return $model->total_amount;
 					}
 				],
 	            'payment_method',
 	            'status',
-	            'collection_channel_description',
+				[
+					'attribute' => 'collection_channel_description',
+					'label' => 'CANAL',
+					'format' => 'raw',
+					'value' => function($model) {
+						return $model->collection_channel_description;
+					}
+				],
 	            'rejection_code',
 	            'payment_date',
 	            'accreditation_date',
