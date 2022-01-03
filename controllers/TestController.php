@@ -39,6 +39,7 @@ use yii\web\UploadedFile;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\notifications\components\transports\EmailTransport;
+use app\modules\westnet\api\controllers\ContractController;
 
 use Da\QrCode\QrCode;
 use yii\helpers\Html;
@@ -220,9 +221,59 @@ class TestController extends Controller {
         else var_dump("failed");
     }
     
-    public function actionPruebaLog(){
-    	log_siro_payment_intention("Probando Logs");
-	log_siro_payment_intention_without_error("Probando Logs");
+    public function actionTestActionMoraV2(){
+        $result = ContractController::actionMoraV2();
+        //$result = ContractController::actionGetBrowserNotificationCustomers();
+        
+        //var_dump($result);die();
+        return false;
     }
+
+    public function actionTestGetAllCustomersByState(){
+       
+        $statuses = array(
+            array('enabled','disabled','blocked'), // customer
+            array('draft','active','inactive','canceled','low-process','low','no-want','negative-survey'), // contract
+            array('enabled','disabled','forced','low'), // connection:status
+            array('enabled','disabled','forced','defaulter','clipped','low'), //connection:status_account
+        );
+
+        var_dump($statuses);
+
+        var_dump("Orden de estados:");
+        var_dump("EstadoCliente-EstadoContrato-EstadoConexion-EstadoCuentaConexion:");
+
+        foreach ($statuses[0] as $customerStatus) {
+
+            foreach ($statuses[1] as $contractStatus) {
+
+                foreach ($statuses[2] as $connectionStatus) {
+
+                    foreach ($statuses[3] as $connectionStatusAccount) {
+                        $combination = $customerStatus.'-'.$contractStatus.'-'.$connectionStatus.'-'.$connectionStatusAccount.':';
+
+                        $customers = Yii::$app->db->createCommand('select * from customer cus
+                                                left join contract cont on cont.customer_id = cus.customer_id
+                                                left join connection conn on conn.contract_id = cont.contract_id
+                                                where cus.status = :customer_status
+                                                and cont.status = :contract_status
+                                                and conn.status = :connection_status
+                                                and conn.status_account = :connection_status_account
+                                                group by cus.customer_id')
+                                    ->bindValue('customer_status', $customerStatus)
+                                    ->bindValue('contract_status', $contractStatus)
+                                    ->bindValue('connection_status', $connectionStatus)
+                                    ->bindValue('connection_status_account', $connectionStatusAccount)
+                                    ->queryAll();
+                        $combination .= count($customers);
+                        var_dump($combination);
+                    }
+                }
+            }
+        }
+        exit;
+        return false;
+    }
+
 
 }

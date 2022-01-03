@@ -276,8 +276,8 @@ class ContractController extends RestController
             ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
             ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
 
-            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']]) // combinatory of "Estado de Conexion"
-            ->andWhere(['in', 'contract.status', ['active','low-process','low']]) // combinatory of "Estados de Contrato"
+            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled']]) // combinatorial of "Estado de Conexion"
+            ->andWhere(['in', 'contract.status', ['active','low-process','low']]) // combinatorial of "Estados de Contrato"
             ->andWhere(['!=','con.ip4_1','0']) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
         ;
 
