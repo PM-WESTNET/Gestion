@@ -40,6 +40,7 @@ use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\notifications\components\transports\EmailTransport;
 use app\modules\westnet\api\controllers\ContractController;
+use yii\data\ArrayDataProvider;
 
 use Da\QrCode\QrCode;
 use yii\helpers\Html;
@@ -238,11 +239,9 @@ class TestController extends Controller {
             array('enabled','disabled','forced','defaulter','clipped','low'), //connection:status_account
         );
 
-        var_dump($statuses);
+        //var_dump("EstadoCliente-EstadoContrato-EstadoConexion-EstadoCuentaConexion:");
 
-        var_dump("Orden de estados:");
-        var_dump("EstadoCliente-EstadoContrato-EstadoConexion-EstadoCuentaConexion:");
-
+        $result = array();
         foreach ($statuses[0] as $customerStatus) {
 
             foreach ($statuses[1] as $contractStatus) {
@@ -250,7 +249,7 @@ class TestController extends Controller {
                 foreach ($statuses[2] as $connectionStatus) {
 
                     foreach ($statuses[3] as $connectionStatusAccount) {
-                        $combination = $customerStatus.'-'.$contractStatus.'-'.$connectionStatus.'-'.$connectionStatusAccount.':';
+                        $combination = $customerStatus.'-'.$contractStatus.'-'.$connectionStatus.'-'.$connectionStatusAccount;
 
                         $customers = Yii::$app->db->createCommand('select * from customer cus
                                                 left join contract cont on cont.customer_id = cus.customer_id
@@ -265,15 +264,25 @@ class TestController extends Controller {
                                     ->bindValue('connection_status', $connectionStatus)
                                     ->bindValue('connection_status_account', $connectionStatusAccount)
                                     ->queryAll();
-                        $combination .= count($customers);
-                        var_dump($combination);
+                        $quantity = count($customers);
+                        array_push($result, ['combination' => $combination, 'quantity' => $quantity]);
                     }
                 }
             }
         }
-        exit;
-        return false;
-    }
 
+        $provider = new ArrayDataProvider([
+            'allModels' => $result,
+            'pagination' => false,
+            'sort' => [
+                'attributes' => ['combination', 'quantity'],
+            ],
+        ]);
+
+
+        return $this->renderPartial('@app/views/test/all-states-export-excel', [
+            'dataProvider' => $provider,
+        ]);
+    }
 
 }
