@@ -17,6 +17,8 @@ use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentItem;
 use app\modules\checkout\models\PaymentMethod;
+use app\modules\westnet\notifications\models\search\PaymentIntentionAccountabilitySearch;
+
 /**
  * AccessPointController implements the CRUD actions for AccessPoint model.
  */
@@ -212,15 +214,24 @@ class SiroController extends Controller
                         ->with('customer') // hasOne relation to Customer model
                         ->orderBy(['payment_intention_accountability_id' => SORT_DESC]) // to show recent payments first
                         ->all();
+        $searchModel = New PaymentIntentionAccountabilitySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
-        if(!empty($list_payment_intentions_accountability)){
-                $dataProvider = new ArrayDataProvider([
-                    'allModels' => $list_payment_intentions_accountability,
-                    'pagination' => [
-                        'pageSize' => 15,
-                    ],
-                ]);
-            return $this->render('index', ['dataProvider' => $dataProvider]);
+
+        if (!empty($list_payment_intentions_accountability)) {
+            /* $dataProvider = new ArrayDataProvider([
+                'allModels' => $list_payment_intentions_accountability,
+                'pagination' => [
+                    'pageSize' => 15,
+                ],
+            ]); */
+            return $this->render(
+                    'index',
+                    [
+                        'dataProvider' => $dataProvider,
+                        'searchModel' => $searchModel
+                    ]
+                );
         }
 
 

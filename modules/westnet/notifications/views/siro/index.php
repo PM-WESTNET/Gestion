@@ -44,6 +44,7 @@ use yii\grid\GridView;
 <?php if(isset($dataProvider)): ?>
 	<?=  GridView::widget([
 	        'dataProvider' => $dataProvider,
+			'filterModel' => $searchModel,
 	        'columns' => [
 	            'payment_intention_accountability_id',
 				[
@@ -92,7 +93,8 @@ use yii\grid\GridView;
 					'format' => 'raw',
 					'value' => function($model) {
 						return $model->collection_channel_description;
-					}
+					},
+					//'filter'=>  yii\helpers\ArrayHelper::map($searchModel->getColletionChannelDescriptions(), 'collection_channel_description', 'collection_channel_description')
 				],
 	            'rejection_code',
 	            'payment_date',

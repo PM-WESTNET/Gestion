@@ -77,4 +77,9 @@ class PaymentIntentionAccountability extends ActiveRecord
     {
         return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
+
+    public function getColletionChannelDescriptions(){
+        $channelArray = $this->find()->select('collection_channel_description')->distinct()->all();
+        return $channelArray;
+    }
 }
