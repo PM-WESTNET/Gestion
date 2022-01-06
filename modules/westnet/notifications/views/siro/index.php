@@ -48,7 +48,7 @@ use yii\grid\GridView;
 	        'columns' => [
 	            'payment_intention_accountability_id',
 				[
-					//'attribute' => 'name',
+					'attribute' => 'customer_name',
 					'label' => 'Nombre - Apellido - Codigo',
 					'format' => 'text',
 					'value' => function($model) {
@@ -64,8 +64,10 @@ use yii\grid\GridView;
                     }
                 ],
 				[
+                    'attribute' => 'company_name',
 					'label' => 'Empresa',
 					'format' => 'raw',
+					'filter'=>$companyNamesArr,
 					'value' => function($model) {
 						return $model->customer->company->name;
 					}
@@ -85,16 +87,23 @@ use yii\grid\GridView;
 						return $model->total_amount;
 					}
 				],
-	            'payment_method',
-	            'status',
+				[
+					'attribute' => 'payment_method',
+					'format' => 'raw',
+					'filter' => $paymentMethodArr,
+				],
+	            [
+					'attribute' => 'status',
+					'format' => 'raw',
+					'filter' => $statusArr,
+				],
 				[
 					'attribute' => 'collection_channel_description',
-					'label' => 'CANAL',
 					'format' => 'raw',
+					'filter' => $collectionChannelNamesArr,
 					'value' => function($model) {
 						return $model->collection_channel_description;
 					},
-					//'filter'=>  yii\helpers\ArrayHelper::map($searchModel->getColletionChannelDescriptions(), 'collection_channel_description', 'collection_channel_description')
 				],
 	            'rejection_code',
 	            'payment_date',

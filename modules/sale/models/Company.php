@@ -377,4 +377,13 @@ class Company extends \app\components\db\ActiveRecord
     public static function FindCompanyByID($company_id){
         return self::find()->where(['company_id' => $company_id])->one();
     }
+
+    /**
+     * Gives back a plain array of distinct values of all company names
+     */
+    public static function getArrCompanyNames(){
+        // this query uses indexBy to return the exact same index as DB for a stronger relation when filtering on a search model
+        $arr = self::find()->select('name')->distinct()->asArray()->indexBy('name')->column(); 
+        return $arr;
+    }
 }

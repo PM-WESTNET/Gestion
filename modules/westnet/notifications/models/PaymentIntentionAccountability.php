@@ -3,6 +3,7 @@
 namespace app\modules\westnet\notifications\models;
 use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
+use app\modules\sale\models\Company;
 
 
 use Yii;
@@ -27,6 +28,8 @@ use Yii;
  */
 class PaymentIntentionAccountability extends ActiveRecord
 {
+    public $customer_name;
+    public $company_name;
 
     /**
      * {@inheritdoc}
@@ -42,7 +45,7 @@ class PaymentIntentionAccountability extends ActiveRecord
     public function rules()
     {
         return [
-            [['payment_intention_accountability_id', 'customer_id', 'siro_payment_intention_id', 'total_amount', 'payment_method', 'status', 'collection_channel', 'rejection_code', 'payment_date', 'accreditation_date', 'created_at', 'updated_at', 'payment_id'], 'safe'],
+            [['collection_channel_description','customer_name','company_name','payment_intention_accountability_id', 'customer_id', 'siro_payment_intention_id', 'total_amount', 'payment_method', 'status', 'collection_channel', 'rejection_code', 'payment_date', 'accreditation_date', 'created_at', 'updated_at', 'payment_id'], 'safe'],
         ];
     }
 
@@ -77,9 +80,24 @@ class PaymentIntentionAccountability extends ActiveRecord
     {
         return $this->hasOne(Customer::class, ['customer_id' => 'customer_id']);
     }
+    /**
+     * Gives back an array of distinct values of CollectionChannelDescription from the models table
+     */
+    public function getArrColletionChannelDescriptions(){
+        $arr = $this->find()->select('collection_channel_description')->distinct()->asArray()->indexBy('collection_channel_description')->column(); //this one indexes by its own name, simplyfing the process of filtering later  
+        return $arr;
+    }
 
-    public function getColletionChannelDescriptions(){
-        $channelArray = $this->find()->select('collection_channel_description')->distinct()->all();
-        return $channelArray;
+    /**
+     * Gives back an array of distinct values of Status from this models table
+     */
+    public function getArrStatus(){
+        $arr = $this->find()->select('status')->distinct()->asArray()->indexBy('status')->column(); //this one indexes by its own name, simplyfing the process of filtering later  
+        return $arr;
+    }
+
+    public function getArrPaymentMethod(){
+        $arr = $this->find()->select('payment_method')->distinct()->asArray()->indexBy('payment_method')->column(); //this one indexes by its own name, simplyfing the process of filtering later  
+        return $arr;
     }
 }

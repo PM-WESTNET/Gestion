@@ -209,27 +209,24 @@ class SiroController extends Controller
   
         }
 
-        //$list_payment_intentions_accountability = PaymentIntentionAccountability::find()->all();
-        $list_payment_intentions_accountability = PaymentIntentionAccountability::find()
-                        ->with('customer') // hasOne relation to Customer model
-                        ->orderBy(['payment_intention_accountability_id' => SORT_DESC]) // to show recent payments first
-                        ->all();
         $searchModel = New PaymentIntentionAccountabilitySearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $collectionChannelNamesArr = $searchModel->getArrColletionChannelDescriptions();
+        $companyNamesArr = Company::getArrCompanyNames();
+        $statusArr = $searchModel->getArrStatus();
+        $paymentMethodArr = $searchModel->getArrPaymentMethod();
+        //var_dump($statusArr);die();
 
-
-        if (!empty($list_payment_intentions_accountability)) {
-            /* $dataProvider = new ArrayDataProvider([
-                'allModels' => $list_payment_intentions_accountability,
-                'pagination' => [
-                    'pageSize' => 15,
-                ],
-            ]); */
+        if (!empty($dataProvider)) {
             return $this->render(
                     'index',
                     [
                         'dataProvider' => $dataProvider,
-                        'searchModel' => $searchModel
+                        'searchModel' => $searchModel,
+                        'companyNamesArr' => $companyNamesArr,
+                        'collectionChannelNamesArr' => $collectionChannelNamesArr,
+                        'statusArr' => $statusArr,
+                        'paymentMethodArr' => $paymentMethodArr,
                     ]
                 );
         }
