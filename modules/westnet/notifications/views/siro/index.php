@@ -4,8 +4,10 @@ use kartik\daterange\DateRangePicker;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\GridView;
-
+$this->title = 'Contrastador de Pagos';
+$this->params['breadcrumbs'][] = $this->title;
 ?>
+
 
 <?= Html::beginForm(['siro/checker-of-payments'], 'post', ['enctype' => 'multipart/form-data']) ?>
 	<div>
@@ -20,18 +22,24 @@ use yii\grid\GridView;
 			    'data' => ['2' => 'Redes del Oeste', '7' => 'Servicargas'],
 			    'options' => [
 			        'placeholder' => 'Seleccionar empresa...',
+					'required' => true
 			    ],
 			]); ?>
 		</div>
 		<div class="col-lg-4">
-			Desde
-		    <input type="date" class="form-control" id="date_from" name="date_from" placeholder="Desde">
+			Desde 
+		    <input type="date" class="form-control" id="date_from" name="date_from" placeholder="Desde" required>
 		</div>
 		<div class="col-lg-4">
 			Hasta
-			<input type="date" class="form-control" id="date_to" name="date_to" placeholder="Hasta">
+			<input type="date" class="form-control" id="date_to" name="date_to" placeholder="Hasta" required>
 		</div>
 	</div>
+	<br>
+	*No puede superar los 3 meses entre fecha de inicio y fin para recuperar una rendicion
+	<br>
+	*Se debe seleccionar la empresa para buscar pagos nuevos en linea
+	<br>
 	<br>
 	<div class="">
 	    <input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
