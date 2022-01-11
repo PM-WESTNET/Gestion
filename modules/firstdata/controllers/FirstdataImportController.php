@@ -124,28 +124,26 @@ class FirstdataImportController extends Controller
      */
     public function actionDelete($id)
     {
-        if($this->findModel($id)->delete()){
-            // do nothing.
-        }else{ // for some reason failed, probably is a constraint of DB FKs
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                Yii::$app
-                    ->db
-                    ->createCommand()
-                    ->delete('firstdata_import_payment', ['firstdata_import_id' => $id])
-                    ->execute();
-                
-                Yii::$app
-                    ->db
-                    ->createCommand()
-                    ->delete('firstdata_import', ['firstdata_import_id' => $id])
-                    ->execute();
-    
-                $transaction->commit();
-            } catch (\Exception $e) {
-                $transaction->rollBack();
-            }
+
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('firstdata_import_payment', ['firstdata_import_id' => $id])
+                ->execute();
+
+            Yii::$app
+                ->db
+                ->createCommand()
+                ->delete('firstdata_import', ['firstdata_import_id' => $id])
+                ->execute();
+
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
         }
+        
         return $this->redirect(['index']);
     }
 
