@@ -345,8 +345,10 @@ class Connection extends ActiveRecord {
         $plan = $this->FindPlanConnection($this->contract->contract_id);
         if(!empty($plan) && $plan['big_plan']){
             $node = Node::findNodeBySubnet(235);
+            $this->ip4_1_old = $this->ip4_1;
             $this->ip4_1 = $node->getUsableIp($ap);
         }else{
+            $this->ip4_1_old = $this->ip4_1;
             $this->ip4_1 = $node->getUsableIp($ap);
         }
 
