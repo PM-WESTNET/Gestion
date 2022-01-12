@@ -330,6 +330,11 @@ class TestController extends Controller {
                                 ->bindValue('ip4_1_old', ip2long($customer_log['new_value']))
                                 ->bindValue('connection_id',$connection['connection_id'])
                                 ->execute();
+                    }else{
+                        Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
+                                ->bindValue('ip4_1_old', null)
+                                ->bindValue('connection_id',$connection['connection_id'])
+                                ->execute();
                     }
                     
                     
