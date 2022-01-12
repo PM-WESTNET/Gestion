@@ -40,6 +40,7 @@ use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\notifications\components\transports\EmailTransport;
 use app\modules\westnet\api\controllers\ContractController;
+use app\modules\westnet\models\Connection;
 use yii\data\ArrayDataProvider;
 
 use Da\QrCode\QrCode;
@@ -223,10 +224,10 @@ class TestController extends Controller {
     }
     
     public function actionTestActionMoraV2(){
-        $result = ContractController::actionMoraV2();
+        $result = ContractController::actionMoraV3();
         //$result = ContractController::actionGetBrowserNotificationCustomers();
         
-        //var_dump($result);die();
+        var_dump($result);die();
         return false;
     }
 
@@ -283,6 +284,52 @@ class TestController extends Controller {
         return $this->renderPartial('@app/views/test/all-states-export-excel', [
             'dataProvider' => $provider,
         ]);
+    }
+
+    public function actionPotentialCustomers(){
+        $customer_logs = Yii::$app->db->createCommand("SELECT (
+                                                        SELECT cl.customer_log_id FROM customer_log cl
+                                                        WHERE cl.customer_id = cus_log.customer_id AND 
+                                                        cl.action = 'Actualizacion de Datos de Conexion: Ip4 1'
+                                                        ORDER BY cl.customer_log_id DESC
+                                                        LIMIT 1
+                                                        ) as customer_log_id
+                                                    FROM customer_log cus_log WHERE customer_log_id IS NOT NULL 
+                                                    GROUP BY cus_log.customer_id")
+                                                    ->queryAll();
+        foreach ($customer_logs as $log_id) {
+            if(!empty($log_id)){
+                $customer_log = Yii::$app->db->createCommand("select cl.customer_id, cl.new_value 
+                                                from customer_log cl
+                                                where cl.customer_log_id = :customer_log_id")
+                                                ->bindValue('customer_log_id',$log_id['customer_log_id'])
+                                                ->queryOne();
+
+                $contract = Yii::$app->db->createCommand("select cont.contract_id from contract cont
+                                                where cont.customer_id = :customer_id
+                                                order by cont.contract_id desc
+                                                limit 1")
+                                                ->bindValue('customer_id',$customer_log['customer_id'])
+                                                ->queryOne();
+                
+                if(!empty($contract)){
+                    $connection = Yii::$app->db->createCommand("select conn.connection_id from connection conn
+                                                where conn.contract_id = :contract_id")
+                                                ->bindValue('contract_id',$contract['contract_id'])
+                                                ->queryOne();
+
+                    Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
+                                                ->bindValue('ip4_1_old',$customer_log['new_value'])
+                                                ->bindValue('connection_id',$connection['connection_id'])
+                                                ->execute();
+                    
+                }
+                
+            }
+
+        }
+                                    
+        return false;
     }
 
 }
