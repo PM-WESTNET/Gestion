@@ -96,6 +96,17 @@ $this->params['breadcrumbs'][] = $this->title;
 					}
 				],
 				[
+					'attribute' => 'is_duplicate',
+					'label' => 'ES DUPLICADO?',
+					'format' => 'raw',
+					'value' => function($model) {
+                        $si = '<span class="label label-success">SI <i class="glyphicon glyphicon-ok"></i></span>';
+                        $no = '<span class="label label-danger">NO <i class="glyphicon glyphicon-remove"></i></span>';
+
+						return ($model->is_duplicate)?$si:$no;
+					}
+				],
+				[
 					'attribute' => 'payment_method',
 					'format' => 'raw',
 					'filter' => $paymentMethodArr,
