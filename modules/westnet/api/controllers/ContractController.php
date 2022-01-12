@@ -293,6 +293,48 @@ class ContractController extends RestController
     }
 
     /**
+     * Lista los contratos que tienen aviso de mora o corte con aviso. MODIFICADO POR EMI PARA QUE NO FALLE CUANDO HAY MUCHOS REGISTROS EN EL FOREACH
+     * @return array
+     */
+    public function actionMoraV3()
+    {
+        $response = [];
+
+        $multiple = (property_exists(Customer::className(), 'parent_company_id'));
+
+        $query = (new Query())
+            ->select([
+                'contract.contract_id','contract.customer_id',
+                'cus.name', 'cus.code as customer_code', 'cus.payment_code',
+                'con.contract_id', 
+                new Expression('inet_ntoa(con.ip4_1) as ip'), // inet_ntoa transforms int into IP format (0.0.0.0)
+                new Expression('inet_ntoa(con.ip4_2) as ip_2'),
+                'con.status_account as account_status', 'c.company_id', 'c.name as company_name',
+                'IFNULL(cus.current_account_balance,0) AS due', // IFNULL saves us time converting  NULL values into 0.
+                new Expression('inet_ntoa(con.ip4_1_old) as ip_4_old'),
+            ])
+            ->from('contract')
+            ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
+            ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
+
+            //enum('enabled','disabled','forced','defaulter','clipped','low')
+            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled','low']]) // combinatorial of "Estado de Conexion"
+            ->andWhere(['!=', 'contract.status', 'active']) // combinatorial of "Estados de Contrato"
+            //->andWhere(['!=','con.ip4_1','0']) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
+            ;
+
+        if($multiple) {
+            $query->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
+        } else {
+            $query->leftJoin('company c', 'c.company_id = cus.company_id');
+        }
+
+        $contracts = $query->all();
+        
+        return $contracts;
+    }
+
+    /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
      *
      * @return array

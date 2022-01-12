@@ -132,6 +132,10 @@ $customer = $model->customer;
                         'value' => long2ip($connection->ip4_1),
                     ],
                     [
+                        'label' => 'Ip4_1 vieja',
+                        'value' => long2ip($connection->ip4_1_old),
+                    ],
+                    [
                         'label' => Yii::t('westnet', 'ip4_2'),
                         'format' => 'raw',
                         'value' => '<span id="bridge" data-toogle="tooltip" title="IP Secundaria">' . long2ip($connection->ip4_2) . '</span>',

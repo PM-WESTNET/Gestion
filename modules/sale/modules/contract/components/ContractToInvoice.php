@@ -281,12 +281,13 @@ class ContractToInvoice
             
 
             $connection = Connection::findOne(['contract_id'=>$contract->contract_id]);
+            $connection->ip4_1_old = $connection->ip4_1;
             $connection->ip4_1 = 0;
             $connection->ip4_2 = 0;
             $connection->status= Connection::STATUS_LOW;
             $connection->status_account= Connection::STATUS_ACCOUNT_LOW;
-            $connection->updateAttributes(['ip4_1', 'ip4_2', 'status', 'status_account']);
-
+            $connection->updateAttributes(['ip4_1_old', 'ip4_1', 'ip4_2', 'status', 'status_account']);
+                        
             //Elimino el contrato del servidor ISP que sea
             // Como existe la conexion, creo los request
             $api = IspFactory::getInstance()->getIsp($connection->server);
