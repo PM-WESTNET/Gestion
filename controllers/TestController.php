@@ -318,10 +318,20 @@ class TestController extends Controller {
                                                 ->bindValue('contract_id',$contract['contract_id'])
                                                 ->queryOne();
 
-                    Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
-                                                ->bindValue('ip4_1_old',$customer_log['new_value'])
+                    $ipRepeats = Yii::$app->db->createCommand("select conn.connection_id from connection conn
+                                                where conn.connection_id != :connection_id
+                                                and conn.ip4_1 = :ip4_1_old")
                                                 ->bindValue('connection_id',$connection['connection_id'])
-                                                ->execute();
+                                                ->bindValue('ip4_1_old',$customer_log['new_value'])
+                                                ->queryAll();
+
+                    if(empty($ipRepeats)){
+                        Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
+                                ->bindValue('ip4_1_old', ip2long($customer_log['new_value']))
+                                ->bindValue('connection_id',$connection['connection_id'])
+                                ->execute();
+                    }
+                    
                     
                 }
                 
