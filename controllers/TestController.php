@@ -286,65 +286,6 @@ class TestController extends Controller {
         ]);
     }
 
-    public function actionPotentialCustomers(){
-        $customer_logs = Yii::$app->db->createCommand("SELECT (
-                                                        SELECT cl.customer_log_id FROM customer_log cl
-                                                        WHERE cl.customer_id = cus_log.customer_id AND 
-                                                        cl.action = 'Actualizacion de Datos de Conexion: Ip4 1'
-                                                        ORDER BY cl.customer_log_id DESC
-                                                        LIMIT 1
-                                                        ) as customer_log_id
-                                                    FROM customer_log cus_log WHERE customer_log_id IS NOT NULL 
-                                                    GROUP BY cus_log.customer_id")
-                                                    ->queryAll();
-        foreach ($customer_logs as $log_id) {
-            if(!empty($log_id)){
-                $customer_log = Yii::$app->db->createCommand("select cl.customer_id, cl.new_value 
-                                                from customer_log cl
-                                                where cl.customer_log_id = :customer_log_id")
-                                                ->bindValue('customer_log_id',$log_id['customer_log_id'])
-                                                ->queryOne();
-
-                $contract = Yii::$app->db->createCommand("select cont.contract_id from contract cont
-                                                where cont.customer_id = :customer_id
-                                                order by cont.contract_id desc
-                                                limit 1")
-                                                ->bindValue('customer_id',$customer_log['customer_id'])
-                                                ->queryOne();
-                
-                if(!empty($contract)){
-                    $connection = Yii::$app->db->createCommand("select conn.connection_id from connection conn
-                                                where conn.contract_id = :contract_id")
-                                                ->bindValue('contract_id',$contract['contract_id'])
-                                                ->queryOne();
-
-                    $ipRepeats = Yii::$app->db->createCommand("select conn.connection_id from connection conn
-                                                where conn.connection_id != :connection_id
-                                                and conn.ip4_1 = :ip4_1_old")
-                                                ->bindValue('connection_id',$connection['connection_id'])
-                                                ->bindValue('ip4_1_old',ip2long($customer_log['new_value']))
-                                                ->queryAll();
-
-                    if(empty($ipRepeats)){
-                        Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
-                                ->bindValue('ip4_1_old', ip2long($customer_log['new_value']))
-                                ->bindValue('connection_id',$connection['connection_id'])
-                                ->execute();
-                    }else{
-                        Yii::$app->db->createCommand("UPDATE connection SET ip4_1_old = :ip4_1_old WHERE connection_id = :connection_id")
-                                ->bindValue('ip4_1_old', null)
-                                ->bindValue('connection_id',$connection['connection_id'])
-                                ->execute();
-                    }
-                    
-                    
-                }
-                
-            }
-
-        }
-                                    
-        return false;
-    }
+    
 
 }
