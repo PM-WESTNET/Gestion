@@ -79,7 +79,8 @@ class FirstdataImportController extends Controller
     public function actionCreate()
     {
         $model = new FirstdataImport();
-
+        //var_dump($model->uploadFiles());die();
+        
         if ($model->load(Yii::$app->request->post()) && $model->uploadFiles() && $model->save()) {
             return $this->redirect(['view', 'id' => $model->firstdata_import_id]);
         }
@@ -127,12 +128,44 @@ class FirstdataImportController extends Controller
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
+
+            //TODO: eliminar los pagos primero asociados a first_data_import($id)
+
+            $payment_ids = Yii::$app
+                ->db
+                ->createCommand('select fip.payment_id from firstdata_import_payment fip
+                where fip.firstdata_import_id = :import_id')
+                ->bindValue('import_id',$id)
+                ->queryAll();
+            
+            // third we delete the payment pivot table
             Yii::$app
                 ->db
                 ->createCommand()
                 ->delete('firstdata_import_payment', ['firstdata_import_id' => $id])
                 ->execute();
+            
+            foreach ($payment_ids as $payment_id){
+                // first we delete the payment items
+                Yii::$app
+                    ->db
+                    ->createCommand('delete from payment_item
+                    where payment_item.payment_id = :payment_id')
+                    ->bindValue('payment_id',$payment_id['payment_id'])
+                    ->execute();
 
+                // then we delete the payments
+                Yii::$app
+                    ->db
+                    ->createCommand('delete from payment
+                    where payment.payment_id = :payment_id')
+                    ->bindValue('payment_id',$payment_id['payment_id'])
+                    ->execute();
+            }
+
+            
+
+            // and last, we delete the firstdata import
             Yii::$app
                 ->db
                 ->createCommand()
@@ -142,6 +175,7 @@ class FirstdataImportController extends Controller
             $transaction->commit();
         } catch (\Exception $e) {
             $transaction->rollBack();
+            var_dump($e);die();
         }
         
         return $this->redirect(['index']);
