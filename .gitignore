@@ -108,3 +108,10 @@ docker_gestion_*
 
 composer.lock
 composer.json
+
+
+# firstdata *con redundancia extra
+web/firstdata_exports/
+web/firstdata_imports/
+.*
+
