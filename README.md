@@ -9,7 +9,7 @@
 [//]: # (Setups for common operating systems)
 
 
-## Ubuntu 20.04 (or windows)
+## Ubuntu 20.04 (and some notes for windows installation w/Docker)
 -----------------
 
 #### *Requirements*
@@ -70,9 +70,9 @@ From the console, run this commands (Adapt to fit the containers names):
 
 
 #### Go to the project's base folder and run this commands
-*you can copy-paste this commands*
 
-Create copies of config files, web files and docker files. (extremely important)
+Create copies of config files, web files and docker files. 
+Make sure you read the file names all as not to miss any.
 
     cp config/db.sample.php config/db.php;
     cp config/web.sample.php config/web.php;
@@ -142,6 +142,20 @@ por:
 #### Rebuild docker.
 
         $   sudo docker-compose build
+
+#### Extra notes for docker and windows intallations:
+
+* In windows 10 the docker .yml was working fine with minor tweaks, some comments in the build file and changing the volume for data and version of the mariaDB server to a newer one (10.4).
+
+* Remember to copy the "Dockerfile-sample" file as Dockerfile so the command docker-compose build reads it.
+
+* Some libraries inside the Dockerfile(s) may fail. An example can be "barcode gz". If your docker fails at this, it probably means the library is not used anymore and the line can be commented in the build file.
+
+* Useful: the command "docker-compose build --no-cache" rebuilds the images without reading the cached builds.
+
+* You may have to disable prettyUrl property inside the app's config.php file for the routing to work.
+
+* some companies may have different versions of some files. This files are saved in the "environments" folder. You may have to copy the params.php file inside the config folder of the app for it to work.
 
 ## >>At this point you should be able to see Gestion working.
 
