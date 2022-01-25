@@ -118,6 +118,7 @@ class ContractController extends RestController
                             'payment_code' => $customer->payment_code,
                             'customer_name' => $customer->name,
                             'customer_lastname' => $customer->lastname,
+                            'customer_description' => $customer->description,
                             'due' => $searchModel->accountTotal(),
                             'company'           => [
                                 'company_id'    => ($customer->parentCompany ? $customer->parentCompany->company_id : $customer->company_id ),
