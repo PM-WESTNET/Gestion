@@ -450,27 +450,35 @@ class VendorLiquidationController extends Controller
 
 
         if ($model->load(Yii::$app->request->post())) {
+            $transaction = Yii::$app->db->beginTransaction();
+
             $model->period = (new \DateTime($model->period))->format('Y-m-d H:i:s');
             $model->status = 'draft';
-
-            if ($model->save()) {
-                \Yii::$app->session->setFlash(
-                    'success',
-                    "Process created successfully\n"
-                );
-
-                $vendors = $model->findVendorsSQL();
-                foreach ($vendors as $vendor) {
-                    VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
+            try{
+                if ($model->save()) {
+                    \Yii::$app->session->setFlash(
+                        'success',
+                        "Process created successfully\n"
+                    );
+    
+                    $vendors = $model->findVendorsSQL();
+                    foreach ($vendors as $vendor) {
+                        VendorLiquidation::createVendorLiquidationSQL($vendor['vendor_id'], $model->period, $model->vendor_liquidation_process_id);
+                    }
+                    
+                } else {
+                    /* var_dump($model->getErrorSummary(true));
+                    die(); */
+                    \Yii::$app->session->setFlash(
+                        'error',
+                        "Process failed to save"
+                    );
                 }
-            } else {
-                /* var_dump($model->getErrorSummary(true));
-                die(); */
-                \Yii::$app->session->setFlash(
-                    'error',
-                    "Process failed to save"
-                );
+                $transaction->commit();
+            }catch ( \Exception $e){
+                $transaction->rollBack();
             }
+
             return $this->redirect(Url::to(['vendor-liquidation-process'])); // relative redirect to view (works regardless of pretty url)
         }
         return $this->render('batch', ['model' => $model]);
