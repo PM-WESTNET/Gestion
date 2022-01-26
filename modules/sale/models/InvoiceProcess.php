@@ -7,6 +7,7 @@ use app\modules\sale\modules\invoice\components\Invoice;
 use Yii;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Company;
+use yii\db\Query;
 
 /**
  * This is the model class for table "invoice_process".
@@ -137,7 +138,7 @@ class InvoiceProcess extends \yii\db\ActiveRecord
                 'to_date' => $to_date
             ]);
 
-//            return
+            //            return
                 $a = $model->save();
             \Yii::trace($model->getErrors());
             return $a;
@@ -245,4 +246,13 @@ class InvoiceProcess extends \yii\db\ActiveRecord
     {
         return 'Proceso de facturación Nº ' . $this->invoice_process_id .' del '.$this->period;
     }
+
+    /**
+     * Get all 
+     */
+    public function getAllInvoiceProcess(){
+        return InvoiceProcess::find()->with(['company','billType']);
+    }
+
+    
 }

@@ -64,6 +64,7 @@ $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice'), 'url' => ['/sale/batch-invoice/index']];
 $billItems[] = ['label' => Yii::t('app', 'Batch Invoice with filters'), 'url' => ['/sale/batch-invoice/index-with-filters']];
 $billItems[] = ['label' => Yii::t('app', 'Close Pending Batch Invoices'), 'url' => ['/sale/batch-invoice/close-invoices-index']];
+$billItems[] = ['label' => 'Historial facturacion por lotes', 'url' => ['/sale/batch-invoice/view-history']];
 $billItems[] = '<li class="divider"></li>';
 $billItems[] = ['label' => Yii::t('app', 'Customer Invoice'), 'url' => ['/sale/bill/invoice-customer']];
 
