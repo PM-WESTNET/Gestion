@@ -584,10 +584,10 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function complete()
     {
-        if($this->status != 'draft' and $this->status != 'error') return false;
+        if($this->status != 'draft') return false;
 
         if($this->status == 'completed') return true;
-        
+
         //Calculos:
         $this->amount = $this->calculateAmount();
         $this->total = $this->calculateTotal();
@@ -624,12 +624,11 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function close()
     {	
-
         \Yii::info("2) Entre en modules/sale/models/bill/function_close", 'duplicados-afip');
         $transaction = $this->db->beginTransaction();
 
         try{
-            if($this->status == null){
+            if($this->status == null or $this->status == 'error'){
                 $this->status = 'draft';
             }
 
@@ -638,13 +637,14 @@ class Bill extends ActiveRecord implements CountableInterface
             }
 
             //Si el estado es 'draft' primero debemos completar la factura
-            if($this->status == 'draft' or $this->status == 'error'){
+            if($this->status == 'draft'){
                 if(!$this->complete()){
                     return false;
                 }
             }
 
             if($this->status == 'completed'){
+
                 \app\modules\sale\components\BillExpert::manageStock($this);
 
                 //Factura electronica
