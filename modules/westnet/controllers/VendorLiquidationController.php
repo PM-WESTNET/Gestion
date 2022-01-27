@@ -72,6 +72,7 @@ class VendorLiquidationController extends Controller
      */
     public function actionCreate()
     {
+        set_time_limit(600); // 10 minutes of wait time for response
         $model = new VendorLiquidation();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
