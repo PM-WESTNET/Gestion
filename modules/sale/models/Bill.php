@@ -628,7 +628,7 @@ class Bill extends ActiveRecord implements CountableInterface
         $transaction = $this->db->beginTransaction();
 
         try{
-            if($this->status == null or $this->status == 'error'){
+            if($this->status == null){
                 $this->status = 'draft';
             }
 
