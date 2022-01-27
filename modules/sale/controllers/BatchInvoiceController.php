@@ -432,4 +432,20 @@ class BatchInvoiceController  extends Controller
             return ['status' => "finished"];
         }
     }
+
+    /**
+     * Historial de facturación por lotes, con la idea de poder ver todos los procesos iniciados y sus tiempos totales de demora
+     */
+    public function actionViewHistory(){
+        $searchModel = new InvoiceProcess();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $searchModel->getAllInvoiceProcess()->orderBy(['invoice_process_id'=> SORT_DESC]),
+        ]);
+
+        return $this->render('view-history', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+        ]);
+    }
 }
