@@ -272,8 +272,8 @@ class BillController extends Controller
 
         $productSearch = new \app\modules\sale\models\search\ProductSearch();
 
-        if ($model->status != 'draft') {
-            throw new \yii\web\HttpException(500, Yii::t('app', 'The bill is not a draft and could not be updated.'));
+        if (!in_array($model->status, ['draft', 'error'])) {
+            throw new \yii\web\HttpException(500, Yii::t('app', 'The bill is not a draft or error and could not be updated.'));
         }
 
         //Detalles
