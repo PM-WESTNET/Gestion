@@ -250,11 +250,12 @@ class BillController extends Controller
             }
             $model->save();
             if(isset(Yii::$app->request->post()['close-bill'])){
-                if($model->total > 0)
+                if($model->total > 0){
                     $this->close($id);      
-                else
-                    Yii::$app->session->setFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
-                    
+                }
+                else{
+                    Yii::$app->session->addFlash('error','No pueden cerrarse facturas con un monto igual a $0.');
+                }
             }
             //Si la clase cambio:
             if ($previousClass != $model->class) {
@@ -527,13 +528,14 @@ class BillController extends Controller
 
         if (!empty($model->billDetails) && $model->status != 'closed') {
             if (!$model->close()) {
+                Yii::$app->session->addFlash('error','No pudo cerrarse la factura.');
                 $keys = Bill::getConcatedKeyErrors($model);
                 if ($keys) {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false, 'errors' => $keys]);
                 } else {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false]);
                 }
-            }
+            }//else: the bill was closed without errors.
         }
 
         if (!$ajax) {
