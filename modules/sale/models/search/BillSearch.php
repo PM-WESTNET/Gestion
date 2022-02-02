@@ -54,6 +54,9 @@ class BillSearch extends Bill
     //Para searchWithDebt
     public $amountApplied;
 
+    //Para Bills en general que han fallado por algun motivo
+    // public $had_error;
+
     /**
      * Instancia un nuevo objeto de acuerdo al tipo. El objeto puede ser:
      *  Order.
@@ -82,7 +85,8 @@ class BillSearch extends Bill
             [['payed', 'expired'], 'boolean'],
             ['bill_types', 'each', 'rule' => ['integer']],
             ['payment_methods', 'each', 'rule' => ['integer']],
-            ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]]
+            ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
+            // [['had_error'], 'boolean'], //'string', 'max' => 255]
         ];
     }
 
@@ -101,6 +105,7 @@ class BillSearch extends Bill
             'granularity' => Yii::t('app', 'Granularity'),
             'payment_method' => Yii::t('app', 'Payment Method'),
             'customer_id' => Yii::t('app', 'Customer'),
+            'had_error' => "Tuvo Error",
 
         ]);
     }
@@ -153,7 +158,6 @@ class BillSearch extends Bill
 
         $this->load($params);
         if (!$this->validate()) {
-            // is this a Quoma meme of some sort?
             $query->where('1=2');
             return $dataProvider;
         }
@@ -186,9 +190,11 @@ class BillSearch extends Bill
         //Montos
         $query->andFilterWhere(['>=', 'bill.total', $this->fromAmount]);
         $query->andFilterWhere(['<=', 'bill.total', $this->toAmount]);
-
         //Estado/s de factura
         $this->filterStatus($query);
+        
+        //Tuvo error
+        if (!empty($params['BillSearch']['had_error'])) $query->andFilterWhere(['bill.had_error' => true]);
 
         //Tipo/s de factura
         $this->filterType($query);
@@ -223,7 +229,6 @@ class BillSearch extends Bill
     {
 
         if (!empty($this->statuses)) {
-
             $query->andFilterWhere([
                 'bill.status' => $this->statuses,
             ]);

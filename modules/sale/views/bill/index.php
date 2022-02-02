@@ -260,6 +260,14 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                 'attribute' => 'status',
                 'value' => function($model){ return Yii::t('app', ucfirst($model->status)); }
             ],
+            'had_error',
+            [
+                'attribute'=>'had_error',
+                'value' => function($model){ 
+                    // var_dump($model);die();
+                    return ($model->had_error==true)?'Si':'No';
+                }
+            ],
             [
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>'{view} {update} {pdf} {open} {resend} {delete}'.(Yii::$app->params['enable_send_bill_email'] ? "{email}" : "" ),

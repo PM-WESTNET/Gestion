@@ -37,6 +37,9 @@ use app\modules\sale\models\Currency;
                 'closed' => Yii::t('app', 'Closed'),
                 'error' => Yii::t('app', 'Error')
             ], ['separator' => '<br>']) ?>
+            <?= $form->field($model, 'had_error')->checkboxList([
+                'had_error' => 'Error'
+            ], ['separator' => '<br>']) ?>
 
             <?php //$form->field($model, 'payment_methods')->checkboxList(ArrayHelper::map(PaymentMethod::find()->all(), 'payment_method_id', 'name'), ['separator' => '<br>']) ?>
 

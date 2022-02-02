@@ -528,8 +528,11 @@ class BillController extends Controller
 
         if (!empty($model->billDetails) && $model->status != 'closed') {
             if (!$model->close()) {
+                //post transaction error management code
                 Yii::$app->session->addFlash('error','No pudo cerrarse la factura.');
                 $keys = Bill::getConcatedKeyErrors($model);
+                $model->updateAttributes(['had_error' => true]);
+
                 if ($keys) {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false, 'errors' => $keys]);
                 } else {

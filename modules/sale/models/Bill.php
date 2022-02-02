@@ -584,7 +584,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function complete()
     {
-        if($this->status != 'draft' and $this->status != 'error') return false;
+        if($this->status != 'draft') return false;
 
         if($this->status == 'completed') return true;
 
@@ -637,7 +637,7 @@ class Bill extends ActiveRecord implements CountableInterface
             }
 
             //Si el estado es 'draft' primero debemos completar la factura
-            if($this->status == 'draft' or $this->status == 'error'){
+            if($this->status == 'draft'){
                 if(!$this->complete()){
                     return false;
                 }
@@ -646,7 +646,7 @@ class Bill extends ActiveRecord implements CountableInterface
             if($this->status == 'completed'){
 
                 \app\modules\sale\components\BillExpert::manageStock($this);
-
+                
                 //Factura electronica
                 $succeed = $this->invoice();
 
@@ -678,7 +678,7 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function invoice()
     {
-
+        $had_error = false;
         $invoiceClass = $this->billType->invoiceClass;
         $retValue = false;
         //retValue is the return Boolean to check if invoice was OK
@@ -709,7 +709,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             //The else cases are errors. for example 'R' (which can be successful but still not a valid invoice)
                             //...
                             $retValue = false;
-		                    $this->updateAttributes(['status' => 'error']);
+		                    $had_error = true;
                             $backToDraft = true; // send it to draft (with status=error)
                             $this->addErrorToCacheOrSession(['An error occurred while the Invoice is processed.'. ' - Bill_id: '. $this->bill_id, ]);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
@@ -723,7 +723,7 @@ class Bill extends ActiveRecord implements CountableInterface
                     $this->save();
                     if ($backToDraft) {
                         $this->payed = false;
-                        $this->status = ($this->status=='error') ? 'error' : 'draft';
+                        $this->status = 'draft';
 
                         $payments = BillHasPayment::find()
                                         ->where(['bill_id' => $this->bill_id])->all();
@@ -752,9 +752,9 @@ class Bill extends ActiveRecord implements CountableInterface
                         \Yii::info('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id, 'facturacion');
                     }
  
-                    return ($retValue && empty($result['errors']));
+                    return ($retValue && empty($result['errors']) && !$had_error);
                 } catch (\Exception $ex) {
-                    $this->updateAttributes(['status' => 'error']);
+                    $had_error = true;
                     \Yii::info($ex, 'facturacion');
                     $this->addErrorToCacheOrSession('Codigo: ' . $msg['code'] . ' - ' . $msg['message'].' - Bill_id: '.$this->bill_id);
                     return false;
