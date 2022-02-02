@@ -260,11 +260,9 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                 'attribute' => 'status',
                 'value' => function($model){ return Yii::t('app', ucfirst($model->status)); }
             ],
-            'had_error',
             [
                 'attribute'=>'had_error',
                 'value' => function($model){ 
-                    // var_dump($model);die();
                     return ($model->had_error==true)?'Si':'No';
                 }
             ],
