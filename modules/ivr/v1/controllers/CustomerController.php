@@ -1141,6 +1141,11 @@ class CustomerController extends Controller
      * )
      *
      */
+
+    /**
+     * Returns a data array with information about the customer, contract, and geo data
+     * 
+     */
     public function actionGetCustomerMin()
     {
         try {
@@ -1170,6 +1175,7 @@ class CustomerController extends Controller
                 cu.lastname,
                 cu.description,
                 cu.code,
+                pl.name as plan,
                 cu.document_number,
                 ad.geocode,
                 CONCAT_WS(' ',ad.street,ad.number,zo.name) AS address ,
@@ -1191,6 +1197,8 @@ class CustomerController extends Controller
                 cu.phone4
                 FROM customer cu 
                 LEFT JOIN contract co ON co.customer_id = cu.customer_id
+                left join contract_detail cd on co.contract_id = cd.contract_id
+                inner join planes pl on pl.product_id = cd.product_id
                 LEFT JOIN address ad ON co.address_id = ad.address_id
                 LEFT JOIN zone zo ON zo.zone_id = ad.zone_id 
                 WHERE cu.customer_id = :customer_id ORDER BY cu.customer_id

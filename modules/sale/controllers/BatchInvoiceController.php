@@ -437,6 +437,7 @@ class BatchInvoiceController  extends Controller
      * Historial de facturación por lotes, con la idea de poder ver todos los procesos iniciados y sus tiempos totales de demora
      */
     public function actionViewHistory(){
+        $this->layout = '//fluid';
         $searchModel = new InvoiceProcess();
 
         $dataProvider = new ActiveDataProvider([

@@ -40,6 +40,16 @@ echo GridView::widget([
             'value' => function ($model){
                 return ($model->end_datetime)?date("Y-m-d H:i:s", $model->end_datetime):null;
             }
+        ],
+        [
+            'label' => 'Tiempo',
+            'value' => function ($model){
+                if(empty($model->start_datetime) or empty($model->end_datetime)) return null;
+                $datetime_start = date_create(date("Y-m-d H:i:s", $model->start_datetime));
+                $datetime_end = date_create(date("Y-m-d H:i:s", $model->end_datetime));
+                $interval = date_diff($datetime_start, $datetime_end);
+                return $interval->format('%h Horas %i Minutos %s Segundos');              
+            }
         ]
     ],
 ])
