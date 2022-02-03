@@ -663,9 +663,12 @@ class Bill extends ActiveRecord implements CountableInterface
             \Yii::info('ERROR ________________ ' .$e->getTraceAsString(), 'facturacion-cerrado');
             $transaction->rollback();
         }
-
+        
         //En caso de llegar a este punto, retornamos false
         $transaction->rollback();
+        //se agrega cambio de estado para conservar que hubo un error sin importar de donde se intente cerrar la factura (postROLLBACK)
+        // $keys = Bill::getConcatedKeyErrors($this);
+        $this->updateAttributes(['had_error' => true]);
         return false;
 
     }
