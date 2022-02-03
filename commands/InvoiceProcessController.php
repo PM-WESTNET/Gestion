@@ -143,6 +143,7 @@ class InvoiceProcessController extends Controller
                             echo $bill->customer_id . " cliente facturado correctamente. \n";
                         }else{
                             echo "The invoice could not be closed\n";
+                            $bill->updateAttributes(['had_error' => true]);
                             return null;  
                         }
                     }
