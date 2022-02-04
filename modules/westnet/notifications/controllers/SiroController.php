@@ -457,21 +457,22 @@ class SiroController extends Controller
                         }
                         // commented a possible third case of error:
                         // case 3: first payment WASNT processed correctly and still made duplicates after taking the money *SIRO BUG
-                        // else if (($siro_payment_intention['estado'] != "PROCESADA") && // if its already processed
-                        //         ($hitCount > 1) && // there are more than 1 duplicates
-                        //         ($AccInstancesCounter['counter'] < ($hitCount-1))) { 
+                        else if (($siro_payment_intention['estado'] != "PROCESADA") && // if its already processed
+                                ($hitCount > 1) && // there are more than 1 duplicates
+                                ($AccInstancesCounter['counter'] < ($hitCount-1))) { 
                                 
-                        //     var_dump(
-                        //         $payment_date,
-                        //         $accreditation_date,
-                        //         $total_amount,
-                        //         $customer_id,
-                        //         $siro_payment_intention_id,
-                        //         $hitCount,
-                        //         $key
-                        //     );
-                        //     $list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
-                        // }
+                            // var_dump(
+                            //     $payment_date,
+                            //     $accreditation_date,
+                            //     $total_amount,
+                            //     $customer_id,
+                            //     $siro_payment_intention_id,
+                            //     $hitCount,
+                            //     $key
+                            // );
+                            
+                            $list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
+                        }
                     }
                 }
             }
