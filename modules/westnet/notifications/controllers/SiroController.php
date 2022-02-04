@@ -340,7 +340,6 @@ class SiroController extends Controller
 
         $token = $this->GetTokenApi($company_id);
         $accountability = $this->ObtainPaymentAccountabilityApi($token, $date_from, $date_to, $cuit_administrator, $company_id);
-        
         $codes_collection_channel = [
             'PF' => 'Pago Fácil',
             'RP' => 'Rapipago',
@@ -392,6 +391,12 @@ class SiroController extends Controller
             $paymentFrequency = array_count_values($arrOfPaymentIDs);
             
             $list_payment_intentions_accountability = [];
+            $debug = true;
+
+            $data_assoc_array = $this->filterAccData($accountability);
+            var_dump(count($data_assoc_array),$data_assoc_array);
+            die();
+
             foreach ($accountability as $key => $value) {
                 
                 $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
@@ -407,12 +412,23 @@ class SiroController extends Controller
                 $rejection_code = substr($value, 126, 3);
 
 
-                
-
                 // filtering successful payments based on amount *more than 0
                 if($total_amount > 0){
                     $hitCount = intval($paymentFrequency[$siro_payment_intention_id]); // the keys of this array are payment intention ids like ['84976']  
                     
+                    //DEBUG: echo all the valid payments of a customer ID
+                    if($debug && $customer_id == '89385'){ 
+                        var_dump(
+                            $payment_date,
+                            $accreditation_date,
+                            $total_amount,
+                            $customer_id,
+                            $siro_payment_intention_id,
+                            $hitCount,
+                            $key
+                        );
+                    }
+
                     $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id 
                         FROM siro_payment_intention spi 
                         WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
@@ -457,25 +473,25 @@ class SiroController extends Controller
                         }
                         // commented a possible third case of error:
                         // case 3: first payment WASNT processed correctly and still made duplicates after taking the money *SIRO BUG
-                        // else if (($siro_payment_intention['estado'] != "PROCESADA") && // if its already processed
-                        //         ($hitCount > 1) && // there are more than 1 duplicates
-                        //         ($AccInstancesCounter['counter'] < ($hitCount-1))) { 
+                        else if (($siro_payment_intention['estado'] != "PROCESADA") && // if its already processed
+                                ($hitCount > 1) && // there are more than 1 duplicates
+                                ($AccInstancesCounter['counter'] < ($hitCount-1))) { 
                                 
-                        //     var_dump(
-                        //         $payment_date,
-                        //         $accreditation_date,
-                        //         $total_amount,
-                        //         $customer_id,
-                        //         $siro_payment_intention_id,
-                        //         $hitCount,
-                        //         $key
-                        //     );
-                        //     $list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
-                        // }
+                            var_dump(
+                                $payment_date,
+                                $accreditation_date,
+                                $total_amount,
+                                $customer_id,
+                                $siro_payment_intention_id,
+                                $hitCount,
+                                $key
+                            );
+                            $list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
+                        }
                     }
                 }
             }
-            
+            die();
             foreach ($list_payment_intentions_accountability as $key => $payment_intentions_accountability) {
                 $skipFirst = 0; // starts at 0 and skips the first payment creation if the payment duplicate is already PROCESADA
                 $cantDuplicados = count($payment_intentions_accountability); 
@@ -548,10 +564,47 @@ class SiroController extends Controller
                 ->bindValue('customer_id', $customer_id)
                 ->queryOne();
             $siro_payment_intention_id = preg_replace('/' . $customer['code'] . '/', '', ltrim(substr($payment, 103, 20), '0'), 1);
+            
             // only return if the payment is a valid amount
             if ($total_amount > 0) array_push($arrOfPaymentIDs,$siro_payment_intention_id);
         }
         return $arrOfPaymentIDs;
+    }
+
+    /**
+     * Return all data filtered from dataccountability retrieved from SiroBank
+     * 
+     */
+    private function filterAccData($rendition_data){
+        $filtered_data = array();
+        // get the values from the rendition data
+        foreach($rendition_data as $value){
+            $customer_id = ltrim(substr($value, 35, 8), '0');
+            // $customer_code = Customer::find()->select('code')->where(['customer_id'=>$customer_id])->one(); // innefficient
+            // $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
+            // $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
+            // $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
+            // $payment_method = substr($value, 44, 4);
+            // $collection_channel= substr($value, 123, 3);
+            // $rejection_code = substr($value, 126, 3);
+            $string = ltrim(substr($value, 103, 20), '0');
+            var_dump($string);die();
+        }
+        //get the dependent variables of customer_id
+        foreach ($filtered_data as $customer) {
+            // $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+            //     ->bindValue('customer_id', $customer_id)
+            //     ->queryOne();
+            $pattern = '/'.$customer['code'].'/';
+            $string = ltrim(substr($value, 103, 20), '0');
+            var_dump($string);die();
+            $siro_payment_intention_id = preg_replace($pattern, '', $string, 1);
+        }
+
+        // var_dump($customer_id,$customer_code);
+
+        die('testingfilterfunc');
+        return $filtered_data;
     }
 
     // private function createPaymentAccountability($valueStruct){
