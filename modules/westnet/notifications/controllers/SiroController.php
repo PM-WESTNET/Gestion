@@ -340,6 +340,7 @@ class SiroController extends Controller
 
         $token = $this->GetTokenApi($company_id);
         $accountability = $this->ObtainPaymentAccountabilityApi($token, $date_from, $date_to, $cuit_administrator, $company_id);
+        
         $codes_collection_channel = [
             'PF' => 'Pago Fácil',
             'RP' => 'Rapipago',
@@ -377,26 +378,29 @@ class SiroController extends Controller
         ];
         $transaction = Yii::$app->db->beginTransaction();
         try {
-
             if(empty($accountability)){
                 Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
                 return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
             }
+            $data_assoc_array = $this->filterAccData($accountability);
+            var_dump(count($accountability));
+            var_dump("accountability",count($accountability),
+            "data_assoc_array",count($data_assoc_array));
+            var_dump($data_assoc_array);
             
-            $arrOfPaymentIDs = $this->filterPaymentIds($accountability); 
+            //$arrOfPaymentIDs = $this->filterPaymentIds($accountability); 
             // array mapping of the times an item repeats on an array
             //   84976 => int 1
             //   84956 => int 2
             // used for knowing how many times a siro_payment_intention_id is repeated (usually no more than 2 times *SIRO BUG)
-            $paymentFrequency = array_count_values($arrOfPaymentIDs);
+            // $paymentFrequency = array_count_values($arrOfPaymentIDs);
+            // var_dump("arrayOfPaymentIDs",$arrOfPaymentIDs);
             
+            $paymentFrequency = array_count_values($data_assoc_array);
+
             $list_payment_intentions_accountability = [];
+
             $debug = true;
-
-            $data_assoc_array = $this->filterAccData($accountability);
-            var_dump(count($data_assoc_array),$data_assoc_array);
-            die();
-
             foreach ($accountability as $key => $value) {
                 
                 $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
@@ -578,32 +582,43 @@ class SiroController extends Controller
     private function filterAccData($rendition_data){
         $filtered_data = array();
         // get the values from the rendition data
+        // get all data for rendition and transform it into array data. 
+        // this is done to avoid overuse of ORM query impact
         foreach($rendition_data as $value){
             $customer_id = ltrim(substr($value, 35, 8), '0');
-            // $customer_code = Customer::find()->select('code')->where(['customer_id'=>$customer_id])->one(); // innefficient
-            // $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
-            // $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
-            // $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
-            // $payment_method = substr($value, 44, 4);
-            // $collection_channel= substr($value, 123, 3);
-            // $rejection_code = substr($value, 126, 3);
-            $string = ltrim(substr($value, 103, 20), '0');
-            var_dump($string);die();
-        }
-        //get the dependent variables of customer_id
-        foreach ($filtered_data as $customer) {
-            // $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
-            //     ->bindValue('customer_id', $customer_id)
-            //     ->queryOne();
+            var_dump($value);die();
+            $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
+            die('e');
+            $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
+            $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
+            $payment_method = substr($value, 44, 4);
+            $collection_channel= substr($value, 123, 3);
+            $rejection_code = substr($value, 126, 3);
+
+            $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
+                ->bindValue('customer_id', $customer_id)
+                ->queryOne();
+            $payment_method = substr($value, 44, 4);
             $pattern = '/'.$customer['code'].'/';
             $string = ltrim(substr($value, 103, 20), '0');
-            var_dump($string);die();
-            $siro_payment_intention_id = preg_replace($pattern, '', $string, 1);
+            $siro_payment_intention_id = preg_replace($pattern, '', $string,1);
+
+
+            $data =  array(
+                $payment_date,
+                $accreditation_date,
+                $total_amount,
+                $payment_method,
+                $collection_channel,
+                $rejection_code,
+                $siro_payment_intention_id
+            );
+            if(!isset($filtered_data[$customer_id])) {
+                $filtered_data[$customer_id] = array();
+            }
+            // if ($total_amount > 0) array_push($arrOfPaymentIDs,$siro_payment_intention_id);
+            array_push($filtered_data[$customer_id],$data);
         }
-
-        // var_dump($customer_id,$customer_code);
-
-        die('testingfilterfunc');
         return $filtered_data;
     }
 
