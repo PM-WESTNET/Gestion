@@ -16,6 +16,7 @@ use app\modules\sale\models\Customer;
 use app\modules\sale\models\InvoiceProcess;
 use app\modules\sale\models\PointOfSale;
 use app\modules\sale\models\search\BillSearch;
+use app\modules\sale\models\Bill;
 use app\modules\sale\models\TaxCondition;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use app\modules\sale\modules\contract\models\Contract;
@@ -188,9 +189,15 @@ class BatchInvoiceController  extends Controller
             ]
         ]);
 
+        //get bills not closed from prevous Close Invoices Processes and return them as $bills
+        $bills = new Bill();
+        $errorUnclosedBills = $bills->getErrorAndUnclosedBillsQuery();
+        $billCount = $errorUnclosedBills->count();
+        
         return $this->render('close-invoices', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'billCount' => $billCount,
         ]);
     }
 

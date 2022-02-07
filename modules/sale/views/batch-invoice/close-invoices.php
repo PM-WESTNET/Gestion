@@ -17,6 +17,16 @@ use app\modules\sale\models\InvoiceProcess;
 
 $this->title = Yii::t('app', 'Close Pending Batch Invoices');
 $this->params['breadcrumbs'][] = $this->title;
+// Error message for unclosed bills inside the Comprobantes : Tuvo Error module
+// Alert users and warn the user before starting another Close Invoice Process 
+// IF: there are open invoices from the previous close process
+// $billCount is calculated in the controller
+if($billCount!=0){
+    $errMsg = "Existen $billCount facturas sin cerrar de procesos de facturacion pasados en la sección Comprobantes.";
+    Yii::$app->session->setFlash('error', $errMsg);
+}
+
+
 ?>
 <div class="alert alert-dismissible" role="alert" id="div-message" style="display: none;">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>

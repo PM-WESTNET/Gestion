@@ -1848,4 +1848,16 @@ class Bill extends ActiveRecord implements CountableInterface
         return $pdf->render();   
     }
 
+    /**
+     * Get all bills where "Tuvo Error" is true and status is != from "closed"
+     */
+    public function getErrorAndUnclosedBillsQuery() {
+        $billsWithErrors = self::find()
+                ->alias('b')
+                ->where(['!=', 'b.status','closed'])
+                ->andWhere(['b.had_error' => true])
+                ;
+        return $billsWithErrors;
+    }
+
 }
