@@ -62,4 +62,10 @@ class SiroController extends Controller
             $this->stdout(var_export($ex, true));
         }
     }
+
+    /**
+     * TODO:
+     * Create a function that searches the rendition from siro and checks all error cases
+     * Should contact siro to set the time interval between new rendition searches (days? hours? weeks?)
+     */
 }
