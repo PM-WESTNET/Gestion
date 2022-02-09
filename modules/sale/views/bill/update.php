@@ -7,6 +7,21 @@ use yii\helpers\Html;
  * @var app\modules\sale\models\Bill $model
  */
 
+// This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
+$flashes = yii::$app->session->getAllFlashes(); // get flashes
+yii::$app->session->removeAllFlashes(); // remove all flashes from SESSION
+if(!empty($flashes)){
+    foreach ($flashes as $key => $flashType){ // get flash type: error/danger/etc
+        if(is_array($flashType)){ // if the flash is array
+            foreach ($flashType as $flashMsg){ // re-create the flash message
+                Yii::$app->session->addFlash($key, $flashMsg);
+            }   
+        }else{ // if the flash is only a string
+            Yii::$app->session->addFlash($key, $flashType);
+        }
+    }
+}
+
 $this->title = Yii::t('app', '{modelClass}: ', [
   'modelClass' => $model->typeName,
 ]) . $model->bill_id;
