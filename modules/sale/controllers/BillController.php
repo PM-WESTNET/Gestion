@@ -533,6 +533,9 @@ class BillController extends Controller
                 $keys = Bill::getConcatedKeyErrors($model);
                 $model->updateAttributes(['had_error' => true]);
 
+                // add flashes before redirect deletes the session variable
+                yii::$app->session->set('customFlashes', yii::$app->session->getAllFlashes());
+
                 if ($keys) {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false, 'errors' => $keys]);
                 } else {

@@ -1,15 +1,13 @@
 <?php
 
 use yii\helpers\Html;
-
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Bill $model
  */
-
 // This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
-$flashes = yii::$app->session->getAllFlashes(); // get flashes
-yii::$app->session->removeAllFlashes(); // remove all flashes from SESSION
+$flashes=yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
+
 if(!empty($flashes)){
     foreach ($flashes as $key => $flashType){ // get flash type: error/danger/etc
         if(is_array($flashType)){ // if the flash is array
@@ -20,6 +18,8 @@ if(!empty($flashes)){
             Yii::$app->session->addFlash($key, $flashType);
         }
     }
+}else{
+    Yii::$app->session->addFlash('info','No flashes found');
 }
 
 $this->title = Yii::t('app', '{modelClass}: ', [
