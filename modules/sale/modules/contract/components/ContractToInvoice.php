@@ -341,7 +341,7 @@ class ContractToInvoice
         ]);
 
         // Creo notificacion para la app. Es una notificacion para todos los clientes que se facturen
-//        $mobilepush = $this->createMobilePush();
+        // $mobilepush = $this->createMobilePush();
 
         $afip_error = false;
 
@@ -379,9 +379,9 @@ class ContractToInvoice
                         $customers[] = $item['customer_id'];
 
                         // Agrego al cliente a la notificacion, para que se le notifique
-    //                    $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
+                        // $this->addCustomerToMobilePush($mobilepush, $item['customer_id']);
 
-    //                    Yii::$app->session->close();
+                        // Yii::$app->session->close();
                         $i++;
                         $transaction->commit();
                     //}
@@ -397,7 +397,7 @@ class ContractToInvoice
         InvoiceProcess::endProcess(InvoiceProcess::TYPE_CREATE_BILLS);
 
         // Envio la notificacion a los clientes facturados
-//        $mobilepush->send();
+        // $mobilepush->send();
 
     }
 
