@@ -29,6 +29,31 @@ echo GridView::widget([
                 }
             ],**/
             [
+                'label'=>'Descuento',
+                'format' => 'html',
+                'value'=>function($model){
+                    $labelType = '';
+                    $bool = '';
+                    $message = '';
+                    if($model->discount){
+                        $labelType = "success";
+                        $bool = "Sí";
+                        $message = ($model->discount->type == 'fixed')?"$".$model->discount->value:"%".$model->discount->value;
+                    }else{
+                        $labelType = "danger";
+                        $bool = "No";
+                    }
+                    return "<div class='text-center'><span class='label label-$labelType'>$bool</span><br><span>$message</span></div>";
+                }
+            ],
+            [
+                'label'=>'Nombre Descuento',
+                'format' => 'text',
+                'value'=>function($model){
+                    return ($model->discount)?$model->discount->name:null;
+                }
+            ],
+            [
                 'class' => 'app\components\grid\ActionColumn',
                 'template'=>'{delete-detail}',
                 'buttons'=>[
