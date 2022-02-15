@@ -225,9 +225,15 @@ class TestController extends Controller {
     
     public function actionTestActionMora(){
         $result = ContractController::actionMoraV3();
-        //$result = ContractController::actionGetBrowserNotificationCustomers();
-        
-        var_dump($result);die();
+
+        // check if any ip is going through as 0.0.0.0 to portal captivo
+        foreach($result as $contract){
+            if($contract['ip'] == '0.0.0.0'){
+                die('and go to hell');
+            }
+        }
+
+        die('mora trace end');
         return false;
     }
 

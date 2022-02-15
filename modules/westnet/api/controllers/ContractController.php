@@ -348,7 +348,7 @@ class ContractController extends RestController
                 $repeats = array_search($contract['ip_4_old'], $knownIPs);
                 if($repeats){
                     // do nothing..
-                    var_dump("repeats on key=",$repeats);
+                    // var_dump("repeats on key=",$repeats);
                 }else{
                     // clone contract and copy its ip_4_old to the ip value
                     $contractSwitch = $contract;
