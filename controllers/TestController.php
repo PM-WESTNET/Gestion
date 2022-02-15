@@ -223,7 +223,7 @@ class TestController extends Controller {
         else var_dump("failed");
     }
     
-    public function actionTestActionMoraV2(){
+    public function actionTestActionMora(){
         $result = ContractController::actionMoraV3();
         //$result = ContractController::actionGetBrowserNotificationCustomers();
         

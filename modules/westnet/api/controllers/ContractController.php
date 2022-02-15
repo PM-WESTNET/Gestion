@@ -299,8 +299,6 @@ class ContractController extends RestController
      */
     public function actionMoraV3()
     {
-        $response = [];
-
         $multiple = (property_exists(Customer::className(), 'parent_company_id'));
 
         $query = (new Query())
@@ -332,7 +330,41 @@ class ContractController extends RestController
 
         $contracts = $query->all();
         
-        return $contracts;
+        //
+        // once we got the contracts, we make a new array for this specific Ver that filters an array of truly valid IPs to clip off
+        $IPsToClipOff = array();
+        $knownIPs = array();
+        // make an array of known IPs to clip //4847
+        foreach($contracts as $contract){
+            if($contract['ip'] != '0.0.0.0') array_push($knownIPs, $contract);
+        }
+
+        $potentialIPs = array();
+        // filter the potential IPs of customers to clip off       
+        foreach($contracts as $contract){
+            // filtering the ip == '0.0.0.0' and ip_4_old != null
+            if($contract['ip'] == '0.0.0.0' && !is_null($contract['ip_4_old'])){
+                // checking that none repeat on knownIPs array
+                $repeats = array_search($contract['ip_4_old'], $knownIPs);
+                if($repeats){
+                    // do nothing..
+                    var_dump("repeats on key=",$repeats);
+                }else{
+                    // clone contract and copy its ip_4_old to the ip value
+                    $contractSwitch = $contract;
+
+                    // this is only to not make changes in portal captivo logic. 
+                    // Because we return everything in the ip field as before, just a little more ips to clip.
+                    $contractSwitch['ip'] = $contractSwitch['ip_4_old'];
+
+                    // push to array of potential IPs
+                    array_push($potentialIPs,$contractSwitch);
+                }   
+            }
+        }
+        // merge arrays of known and potential IPs
+        $IPsToClipOff = array_merge($knownIPs,$potentialIPs);
+        return $IPsToClipOff;
     }
 
     /**
