@@ -364,77 +364,9 @@ class ContractController extends RestController
                 ;
 
         // RUN QUERY AND GET CONTRACTS
-        $contracts = $query->all(); //testing. 18408 reg
+        $contractsArr = $query->all(); //testing. 18408 reg
 
         return $contractsArr;
-
-
-        $multiple = (property_exists(Customer::className(), 'parent_company_id'));
-
-        $query = (new Query())
-            ->select([
-                'contract.contract_id','contract.customer_id',
-                'cus.name', 'cus.code as customer_code', 'cus.payment_code',
-                'con.contract_id', 
-                new Expression('inet_ntoa(con.ip4_1) as ip'), // inet_ntoa transforms int into IP format (0.0.0.0)
-                new Expression('inet_ntoa(con.ip4_2) as ip_2'),
-                'con.status_account as account_status', 'c.company_id', 'c.name as company_name',
-                'IFNULL(cus.current_account_balance,0) AS due', // IFNULL saves us time converting  NULL values into 0.
-                new Expression('inet_ntoa(con.ip4_1_old) as ip_4_old'),
-            ])
-            ->from('contract')
-            ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
-            ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
-
-            //enum('enabled','disabled','forced','defaulter','clipped','low')
-            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled','low']]) // combinatorial of "Estado de Conexion"
-            ->andWhere(['!=', 'contract.status', 'active']) // combinatorial of "Estados de Contrato"
-            //->andWhere(['!=','con.ip4_1','0']) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
-            ;
-
-        if($multiple) {
-            $query->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
-        } else {
-            $query->leftJoin('company c', 'c.company_id = cus.company_id');
-        }
-
-        $contracts = $query->all();
-        
-        //
-        // once we got the contracts, we make a new array for this specific Ver that filters an array of truly valid IPs to clip off
-        $IPsToClipOff = array();
-        $knownIPs = array();
-        // make an array of known IPs to clip //4847
-        foreach($contracts as $contract){
-            if($contract['ip'] != '0.0.0.0') array_push($knownIPs, $contract);
-        }
-
-        $potentialIPs = array();
-        // filter the potential IPs of customers to clip off       
-        foreach($contracts as $contract){
-            // filtering the ip == '0.0.0.0' and ip_4_old != null
-            if($contract['ip'] == '0.0.0.0' && !is_null($contract['ip_4_old'])){
-                // checking that none repeat on knownIPs array
-                $repeats = array_search($contract['ip_4_old'], $knownIPs);
-                if($repeats){
-                    // do nothing..
-                    // var_dump("repeats on key=",$repeats);
-                }else{
-                    // clone contract and copy its ip_4_old to the ip value
-                    $contractSwitch = $contract;
-
-                    // this is only to not make changes in portal captivo logic. 
-                    // Because we return everything in the ip field as before, just a little more ips to clip.
-                    $contractSwitch['ip'] = $contractSwitch['ip_4_old'];
-
-                    // push to array of potential IPs
-                    array_push($potentialIPs,$contractSwitch);
-                }   
-            }
-        }
-        // merge arrays of known and potential IPs
-        $IPsToClipOff = array_merge($knownIPs,$potentialIPs);
-        return $IPsToClipOff;
     }
     /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
