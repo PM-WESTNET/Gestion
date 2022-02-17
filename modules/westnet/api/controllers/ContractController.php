@@ -366,7 +366,6 @@ class ContractController extends RestController
         // RUN QUERY AND GET CONTRACTS
         $contractsArr = $query->all(); //testing. 18408 reg
 
-
         // we need to substract all IPs from valid contracts from the previous main query.
         // this is because it can be the case that an old IP repeats itself on the Active Ips
 
@@ -413,11 +412,11 @@ class ContractController extends RestController
                 // var_dump("contract IP repeated on an active client: ",$contract);
 
                 // unset the repeated contract/s (even though they are probably 1 or 2 cases..)
-                unset($contractsArr[$key]);
+                unset($contractsArr[$key]); // bug?: for some reason unset() makes the array return as associative, which differs from V2
             }
         }
-
-        return $contractsArr;
+        $contracts = array_values($contractsArr); // this solves the ""BUG"" commented before
+        return $contracts;
     }
     /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
