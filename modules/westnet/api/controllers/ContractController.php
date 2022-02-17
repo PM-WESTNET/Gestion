@@ -366,6 +366,57 @@ class ContractController extends RestController
         // RUN QUERY AND GET CONTRACTS
         $contractsArr = $query->all(); //testing. 18408 reg
 
+
+        // we need to substract all IPs from valid contracts from the previous main query.
+        // this is because it can be the case that an old IP repeats itself on the Active Ips
+
+        // Build a new query with the active contracts which also have forced or enabled status_account
+        $validContractQuery = (new Query())
+            // SELECT ATTRIBUTES
+            ->select($selectArr)
+            ->from('contract co')
+            // DEFAULT JOINS
+            ->leftJoin('customer cus', 'cus.customer_id = co.customer_id')
+            ->leftJoin('connection as con', 'co.contract_id = con.contract_id')
+            // WHERE CONDITIONS
+            ->where(['and',
+                ['in', 'con.status_account', ['forced','enabled']],
+                ['in','co.status',['active']]
+            ])
+            ;
+
+        // CONDITIONAL JOINS
+        if($multiple) {
+            $validContractQuery->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
+        } else {
+            $validContractQuery->leftJoin('company c', 'c.company_id = cus.company_id');
+        }
+
+        // RUN QUERY AND GET CONTRACTS
+        $validContracts = $validContractQuery->all();
+
+        // make a search array for IPs
+        $validIPs = array_column($validContracts, 'ip'); // *valid IPs are the same when flipped, cause the assignation algorithm cannot repeat them.
+        $potentialIPs = array_column($contractsArr, 'ip');
+
+        // Flipping 
+        $at = array_flip($validIPs);
+        $bt = array_flip($potentialIPs); 
+        // checking
+        $d = array_diff_key($bt, $at);
+        $noConnectionIPs = array_keys($d);
+
+        // foreach check
+        foreach($contractsArr as $key => $contract) {
+            // is the ip if this contract in the array that we are going to send to clip off connections? (then we invert the truth)
+            if(!in_array($contract['ip'],$noConnectionIPs)){
+                // var_dump("contract IP repeated on an active client: ",$contract);
+
+                // unset the repeated contract/s (even though they are probably 1 or 2 cases..)
+                unset($contractsArr[$key]);
+            }
+        }
+
         return $contractsArr;
     }
     /**
