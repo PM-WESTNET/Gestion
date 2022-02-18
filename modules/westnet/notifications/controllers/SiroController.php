@@ -418,23 +418,26 @@ class SiroController extends Controller
                 return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
             }
 
+            // todo: WIP refactoring for a more efficient approach
             $data_assoc_array = $this->filterAccData($accountability);
+            $paymentFrequency = array_count_values($data_assoc_array);
             var_dump(count($accountability));
             var_dump("accountability",count($accountability),
             "data_assoc_array",count($data_assoc_array));
             var_dump($data_assoc_array);
             die('end');
             
-            //$arrOfPaymentIDs = $this->filterPaymentIds($accountability); 
-            // array mapping of the times an item repeats on an array
-            //   84976 => int 1
-            //   84956 => int 2
-            // used for knowing how many times a siro_payment_intention_id is repeated (usually no more than 2 times *SIRO BUG)
+            // $arrOfPaymentIDs = $this->filterPaymentIds($accountability); 
+            // // array mapping of the times an item repeats on an array
+            // //   84976 => int 1
+            // //   84956 => int 2
+            // // used for knowing how many times a siro_payment_intention_id is repeated (usually no more than 2 times *SIRO BUG)
             // $paymentFrequency = array_count_values($arrOfPaymentIDs);
-            // var_dump("arrayOfPaymentIDs",$arrOfPaymentIDs);
+            // // var_dump("paymentFrequency",$paymentFrequency);
+            var_dump(substr(($accountability[5]), 103, 20));
+            var_dump("accountability",$accountability);
             
-            $paymentFrequency = array_count_values($data_assoc_array);
-
+            die('true');
             $list_payment_intentions_accountability = [];
 
             foreach ($accountability as $key => $value) {
@@ -616,48 +619,35 @@ class SiroController extends Controller
      * 
      */
     private function filterAccData($rendition_data){
-        $cus_ids_array = array();
-        $values_array = array();
+        $filtered_data = array(); // return array of objects based on every value of the rendition data
+
+        $cus_ids_array = array(); // arr of IDs of Customers. Same length as the rendition data array
 
         // generate a list of ids
         foreach($rendition_data as $key => $value){
             $customer_id = ltrim(substr($value, 35, 8), '0');
             array_push($cus_ids_array,$customer_id);
-            array_push($values_array,$value);
-            // echo $value;
-            // echo "</>";
         }
         //array to string conversion *comma separated
         $ids_string = implode(',',$cus_ids_array);
 
         $customerQuery = (new Query)
-            ->select(['cu.code','cu.customer_id'])
+            ->select(['cu.code','cu.customer_id','cu.name'])
             ->from('customer cu')
             ->where(new \yii\db\Expression('FIND_IN_SET(customer_id, :cus_ids)'))
             ->addParams([':cus_ids' => $ids_string])
             ;
 
         $customer = $customerQuery->all();
-
-        var_dump('query',count($rendition_data),count($customer),$customer,$values_array);die();
-
-        //TODO: WIP continue with the refactoring of the code
-
-        // make another array for all the codes that are going to be used to get the payment_intention_id
-        // $code_id_arr = array_column($customer, 'customer_id', 'code');
-        foreach($cus_ids_array as $key => $id){
-            var_dump($id,$values_array[$key]);
-            var_dump('qryCus',$customer[$key]['customer_id']);
+        $customer = array_column($customer,'code','customer_id'); // $key:customer_id, $value:code
 
 
-            if($key==1)die('///');
-        }
+            // note: this two arrays have the same KEYS
+            // var_dump($cus_ids_array[$key]); 
+            // var_dump($rendition_data[$key]); 
 
-        die('///');
-
-        $filtered_data = array();
         foreach($rendition_data as $key => $value){
-
+            // set every variable of the object
             $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
             $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
             $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
@@ -665,30 +655,35 @@ class SiroController extends Controller
             $collection_channel= substr($value, 123, 3);
             $rejection_code = substr($value, 126, 3);
 
-            // $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
-            //     ->bindValue('customer_id', $customer_id)
-            //     ->queryOne();
-            $payment_method = substr($value, 44, 4);
-            $pattern = '/'.$customer['code'].'/';
-            $string = ltrim(substr($value, 103, 20), '0');
-            $siro_payment_intention_id = preg_replace($pattern, '', $string,1);
+            // both rendition_data and cus_ids_array have the same length, so we use the $key instead of trimming it again.
+            $customer_id = $cus_ids_array[$key]; 
 
+            // get the code from the previous query, using the array customer ID as an array KEY 
+            $customer_code = $customer[$customer_id]; //* this fixes the issue that the previous code was querying the database all the time, slowing the API down
 
-            $data =  array(
-                $payment_date,
-                $accreditation_date,
-                $total_amount,
-                $payment_method,
-                $collection_channel,
-                $rejection_code,
-                $siro_payment_intention_id
+            // calculate code of the object based on indexes of the previous arrays
+            $pattern = '/'.$customer_code.'/'; // replace with the customer code
+            $string = ltrim(substr($value, 103, 20), '0'); // remove zeros from the string that should have the Siro Payment Intention ID and Code of the customer
+            $siro_payment_intention_id = preg_replace($pattern, '', $string,1); // trim out the customer code and get only the payment intent ID
+
+            // create object to be pushed
+            $dataFromValue =  array(
+                'payment_date' => $payment_date,
+                'accreditation_date' => $accreditation_date,
+                'total_amount' => $total_amount,
+                'payment_method' => $payment_method,
+                'collection_channel' => $collection_channel,
+                'rejection_code' => $rejection_code,
+                'siro_payment_intention_id' => $siro_payment_intention_id,
+                'customer_id' => $customer_id,
+                'customer_code' => $customer_code
             );
-            if(!isset($filtered_data[$customer_id])) {
-                $filtered_data[$customer_id] = array();
-            }
-            array_push($filtered_data[$customer_id],$data);
+            // push into filtered data array of objects
+            // array_push($filtered_data,)
+            array_push($filtered_data,$dataFromValue);
         }
-        return $filtered_data;
+
+        return $filtered_data; // return filtered data objects
     }
 
     // private function createPaymentAccountability($valueStruct){
