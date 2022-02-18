@@ -531,7 +531,7 @@ class SiroController extends Controller
                     }
                 }
             }
-            die();
+            die('trace end');
             foreach ($list_payment_intentions_accountability as $key => $payment_intentions_accountability) {
                 $skipFirst = 0; // starts at 0 and skips the first payment creation if the payment duplicate is already PROCESADA
                 $cantDuplicados = count($payment_intentions_accountability); 
@@ -618,30 +618,30 @@ class SiroController extends Controller
     private function filterAccData($rendition_data){
         $cus_ids_array = array();
         $values_array = array();
+
         // generate a list of ids
-        foreach($rendition_data as $value){
+        foreach($rendition_data as $key => $value){
             $customer_id = ltrim(substr($value, 35, 8), '0');
             array_push($cus_ids_array,$customer_id);
             array_push($values_array,$value);
+            // echo $value;
+            // echo "</>";
         }
         //array to string conversion *comma separated
         $ids_string = implode(',',$cus_ids_array);
-        // var_dump('example',$cus_ids_array[0],$values_array[0]); // relate them by index of array (because they are ordered arrays)
 
-        // $customer = Yii::$app->db->createCommand('SELECT cu.code, cu.customer_id
-        //             FROM customer cu 
-        //             WHERE FIND_IN_SET(customer_id, :cus_ids)')
-        //             ->bindValue('cus_ids', $ids_string)
-        //             ->queryAll();
-        $customer = (new Query)
+        $customerQuery = (new Query)
             ->select(['cu.code','cu.customer_id'])
             ->from('customer cu')
             ->where(new \yii\db\Expression('FIND_IN_SET(customer_id, :cus_ids)'))
             ->addParams([':cus_ids' => $ids_string])
-            ->all()
             ;
 
-        var_dump('query',count($customer));die();
+        $customer = $customerQuery->all();
+
+        var_dump('query',count($rendition_data),count($customer),$customer,$values_array);die();
+
+        //TODO: WIP continue with the refactoring of the code
 
         // make another array for all the codes that are going to be used to get the payment_intention_id
         // $code_id_arr = array_column($customer, 'customer_id', 'code');
