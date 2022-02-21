@@ -419,8 +419,6 @@ class SiroController extends Controller
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
-            // todo: WIP refactoring for a more efficient approach
-
             // transform data rendition lines into objects with the data of the payment
             $renditionObjects = $this->filterAccData($accountability);
 
@@ -432,31 +430,12 @@ class SiroController extends Controller
             // count how many times they repeat each
             $paymentFrequency = array_count_values($this->filterPaymentIdsV2($renditionObjects,1)); // 1:skip payments with amount less than zero.
 
-            // // generate a clean array to do the main querying outside of the loop
-            // $arrOfPaymentIDs = $this->filterPaymentIdsV2($renditionObjects); 
+            // $customer_id_DEBUG = '40298'; //* DEBUG
 
-
-            // $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id 
-            // FROM siro_payment_intention spi 
-            // WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
-            //     ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-            //     ->queryOne();
-
-            // this shows you the list of payments that are VALID and DUPLICATED ID (2 or more payment intention IDs of the same number). *usually really low number of duplicates
-            if($this->debug){
-                var_dump(count($accountability),count($renditionObjects));//check if they have the same lenght still
-                foreach ($renditionObjects as $key => $value){
-                    if($value['total_amount'] > 0){
-                        $hitCount = intval($paymentFrequency[$value['siro_payment_intention_id']]); // the keys of this array are payment intention ids like ['84976']  
-                        if($hitCount>1)var_dump($hitCount,$value);
-                    }
-                        
-                }
-            }
-            
             $list_payment_intentions_accountability = [];
             foreach ($renditionObjects as $key => $paymentObj) {
-                
+                $pushPaymentToCreate = false;   // boolean to check if the current payment should be created. resets to false every iteration.
+
                 $payment_date = $paymentObj['payment_date'];
                 $accreditation_date = $paymentObj['accreditation_date'];
                 $total_amount = $paymentObj['total_amount'];
@@ -466,26 +445,20 @@ class SiroController extends Controller
                 $collection_channel= $paymentObj['collection_channel'];
                 $rejection_code = $paymentObj['rejection_code'];
 
-                //if($total_amount > 0){
                 // filtering successful payments based on amount *more than 0
-                if($total_amount > 0 && $customer_id == '89385'){ //*DEBUG
-                    $hitCount = intval($paymentFrequency[$siro_payment_intention_id]); // the keys of this array are payment intention ids like ['84976']  
+                // if($total_amount > 0 && $customer_id == $customer_id_DEBUG){ //* DEBUG to check a single customer's payments
+                if($total_amount > 0 AND $key<700){
+                    // get how many times the current payment ID is repeated on the payments rendition (to check for duplicates)
+                    $hitCount = intval($paymentFrequency[$siro_payment_intention_id]); 
                     
-                    // var_dump($paymentObj);
-                    if($key == 1000)die('paymentObj implementation');
-
-                    //DEBUG: echo all the valid payments of a customer ID
-                    if($this->debug && $customer_id == '89385'){ //* note: they seem not to be the same payment intention id.
-                        var_dump($paymentObj,$key,$hitCount);
-                        var_dump('//');
-                    }
-
+                    // check that the payment intention id exists in our database
                     $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id 
                         FROM siro_payment_intention spi 
                         WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
                             ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                             ->queryOne();
 
+                    // check that the payment isnt already created in the checkers registries
                     $payment_intention_accountability = Yii::$app->db->createCommand('SELECT pia.payment_intention_accountability_id 
                         FROM payment_intentions_accountability pia 
                         WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
@@ -500,51 +473,60 @@ class SiroController extends Controller
                             ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                             ->queryOne();
                     
+                    
+                    //* DEBUG: echo all the valid payments of a customer ID
+                    // if($this->debug && $customer_id == $customer_id_DEBUG){
+                    //     var_dump('//DEBUG//');
+                    //     var_dump(
+                    //         $paymentObj,
+                    //         $key,
+                    //         $siro_payment_intention,
+                    //         $payment_intention_accountability,
+                    //         $AccInstancesCounter,
+                    //         $hitCount
+                    //     );
+                    // }
 
+                    // if the intention exists on our database
                     if (isset($siro_payment_intention)) {
-                        $totalAmountToCreate = ($siro_payment_intention['estado'] == "PROCESADA") ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
-                        // case 1: single payment
-                        if ($siro_payment_intention['estado'] != "PROCESADA" && 
-                            empty($payment_intention_accountability)) {
-                                
-                            //$list_payment_intentions_accountability[$siro_payment_intention_id][] = $value;
+                        $isProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
+                        $totalAmountToCreate = $isProcessed ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
+                        $isDuplicate = ($hitCount > 1);
+                        // if the intention isnt already contrasted
+                        if(empty($payment_intention_accountability)){
+                            // divide the cases in two: either they are already processed OR they dont.
+                            if(!$isProcessed){
+                                // A possible third case of error:
+                                // case 3: first payment WASNT processed correctly and still made duplicates after taking the money *SIRO BUG?
+                                // is duplicated AND the current amount of payments checked are less than the total that should be created
+                                if ($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)) { 
+                                    $pushPaymentToCreate = true;
+                                }
+                                // case 1: single payment   *this is the most common case.
+                                else{
+                                    $pushPaymentToCreate = true;
+                                }
+                            }else{
+                                // case 2: double or more payments with first intention with status PROCESADA
+                                // is duplicated AND the current amount of payments checked are less than the total that should be created
+                                if($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)){
+                                    $pushPaymentToCreate = true;
+                                }
+                            }
                         }
-                        // case 2: double or more payments with first intention with status PROCESADA
-                        else if (($siro_payment_intention['estado'] == "PROCESADA") && // if its already processed
-                                ($hitCount > 1) && // there are more than 1 duplicates
-                                ($AccInstancesCounter['counter'] < $totalAmountToCreate)) {
-                            
-                            $list_payment_intentions_accountability[$siro_payment_intention_id][] = $accountability[$key];
-                            // structure for duplicates:
-                            // 82740 => 
-                            //     array (size=2)
-                            //     0 => string '20220105...
-                            //     1 => string '20220105...
 
-                        }
-                        // commented a possible third case of error:
-                        // case 3: first payment WASNT processed correctly and still made duplicates after taking the money *SIRO BUG
-                        else if (($siro_payment_intention['estado'] != "PROCESADA") && // if its already processed
-                                ($hitCount > 1) && // there are more than 1 duplicates
-                                ($AccInstancesCounter['counter'] < ($hitCount-1))) { 
-                                
-                            var_dump(
-                                $payment_date,
-                                $accreditation_date,
-                                $total_amount,
-                                $customer_id,
-                                $siro_payment_intention_id,
-                                $hitCount,
-                                $key
-                            );
+                        // push into array to create and reflect payment
+                        if($pushPaymentToCreate) {
                             $list_payment_intentions_accountability[$siro_payment_intention_id][] = $accountability[$key];
+                            var_dump("pushed customer $customer_id on key $key");
                         }
                     }
                 }else{
-                    // if the payment has amount 0 goes to here and does nothing
+                    //* if the payment has amount 0 goes to here and does nothing!..
                 }
             }
-            die('trace end');
+            //todo: fix second part of the cheker, make it work with the new struct
+            var_dump($list_payment_intentions_accountability);
             foreach ($list_payment_intentions_accountability as $key => $payment_intentions_accountability) {
                 $skipFirst = 0; // starts at 0 and skips the first payment creation if the payment duplicate is already PROCESADA
                 $cantDuplicados = count($payment_intentions_accountability); 
@@ -568,12 +550,24 @@ class SiroController extends Controller
                                     ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                                     ->queryOne();
 
+                        $payment_date = $paymentObj['payment_date'];
+                        $accreditation_date = $paymentObj['accreditation_date'];
+                        $total_amount = $paymentObj['total_amount'];
+                        $customer_id = $paymentObj['customer_id'];
+                        $payment_method = $paymentObj['payment_method'];
+                        $siro_payment_intention_id = $paymentObj['siro_payment_intention_id'];
+                        $collection_channel= $paymentObj['collection_channel'];
+                        $rejection_code = $paymentObj['rejection_code'];
+
                         $isProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
                         if($isProcessed && ($skipFirst == 0)){
                             // yes => skip the first one. *cause "PROCESADA" means the first payment of the intention was created and OK
                             $skipFirst++;
                         }else{
                             // create accountability instances for the payments found
+                            $model = $this->createPaymentAccountability($paymentObj);
+                            $model->save();
+
                             $model = new PaymentIntentionAccountability();
                             $model->payment_date = $payment_date;
                             $model->accreditation_date =  $accreditation_date;
@@ -595,6 +589,7 @@ class SiroController extends Controller
                     unset($list_payment_intentions_accountability[$key]);
                 }
             }
+            die('trace end');
             $transaction->commit();
 
         } catch (\Exception $e) {
