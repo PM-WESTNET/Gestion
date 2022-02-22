@@ -45,9 +45,9 @@ $this->params['breadcrumbs'][] = $this->title;
 <br>
 <br>
 <div class="">
-	<input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
+	<!-- <input type="submit" class="btn btn-success" name="enviar" value="Confirmar"> -->
 
-	<input type="submit" class="btn btn-info" name="buscar_pagos_duplicados" value="Buscar Pagos Duplicados">
+	<input type="submit" class="btn btn-info" name="check_missing_payments" value="Buscar Pagos Faltantes">
 </div>
 <?= Html::endForm() ?>
 <?= Html::beginForm(['siro/checker-of-payments'], 'post', ['enctype' => 'multipart/form-data']) ?>

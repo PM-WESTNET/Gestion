@@ -27,6 +27,43 @@ class SiroController extends Controller
 {
     private $debug = true; // debug variable used to not spam the API from siro (*they have a limited amount of requests availible)
     private $filePath = __DIR__ . '/rendition.txt'; // the file name and path to use for debugging purposes. Delete it manually to get new info from Siro.
+    private $codes_collection_channel = [
+        'PF' => 'Pago Fácil',
+        'RP' => 'Rapipago',
+        'PP' => 'Provincia Pagos',
+        'CJ' => 'Cajeros',
+        'CE' => 'Cobro Express',
+        'BM' => 'Banco Municipal',
+        'BR' => 'Banco de Córdoba',
+        'ASJ' => 'Plus Pagos',
+        'LK' => 'Link Pagos',
+        'PC' => 'Pago Mis Cuentas',
+        'MC' => 'Mastercard',
+        'VS' => 'Visa',
+        'MCR' => 'Mastercard Rechazado',
+        'VSR' => 'Visa Rechazado',
+        'DD+' => 'Débito Directo',
+        'DD-' => 'Reversión Débito',
+        'DDR' => 'Rechazo Débito Directo',
+        'BPD' => 'Botón de Pagos Débito',
+        'BPC' => 'Botón de Pagos Crédito',
+        'BOC' => 'Botón Otros Crédito',
+        'BPR' => 'Botón de Pagos Rechazado',
+        'CEF' => 'Cobro Express sin Factura',
+        'RSF' => 'Rapipago sin Factura',
+        'FSF' => 'Pago Fácil sin Factura',
+        'ASF' => 'Plus Pagos sin Factura',
+        'PSP' => 'Bapro sin Factura',
+        'PCO' => 'PC Online',
+        'LKO' => 'LK Online',
+        'PCA' => 'Deuda Vencida PCO',
+        'LKA' => 'Deuda Vencida LKO',
+        'SNP' => 'Transferencia Inmediata.',
+        'LNK' => 'Transferencia Inmediata',
+        'IBK' => 'Transferencia Inmediata'
+    ];
+    
+    
     /**
      * Return token access api
      */
@@ -116,120 +153,14 @@ class SiroController extends Controller
         if(Yii::$app->request->isPost){
             $request = Yii::$app->request->post();
 
-            if(isset($request['cierre_masivo']))
-                return $this->MassiveClosure();
+            if(isset($request['cierre_masivo'])) return $this->MassiveClosure();
 
-             if(isset($request['buscar_pagos_duplicados']))
-                return $this->BuscarPagosDuplicados($request['company_id'], $request['date_from'], $request['date_to']);
-
-
-            $company = Company::find()->where(['company_id' => $request['company_id']])->one();
-            $cuit_administrator = str_replace('-', '', $company->tax_identification);
-
-            $token = $this->GetTokenApi($request['company_id']);
-            $accountability = $this->ObtainPaymentAccountabilityApi($token, $request['date_from'], $request['date_to'], $cuit_administrator, $request['company_id']);
-
-            $codes_collection_channel = [
-                'PF' => 'Pago Fácil',
-                'RP' => 'Rapipago',
-                'PP' => 'Provincia Pagos',
-                'CJ' => 'Cajeros',
-                'CE' => 'Cobro Express',
-                'BM' => 'Banco Municipal',
-                'BR' => 'Banco de Córdoba',
-                'ASJ' => 'Plus Pagos',
-                'LK' => 'Link Pagos',
-                'PC' => 'Pago Mis Cuentas',
-                'MC' => 'Mastercard',
-                'VS' => 'Visa',
-                'MCR' => 'Mastercard Rechazado',
-                'VSR' => 'Visa Rechazado',
-                'DD+' => 'Débito Directo',
-                'DD-' => 'Reversión Débito',
-                'DDR' => 'Rechazo Débito Directo',
-                'BPD' => 'Botón de Pagos Débito',
-                'BPC' => 'Botón de Pagos Crédito',
-                'BOC' => 'Botón Otros Crédito',
-                'BPR' => 'Botón de Pagos Rechazado',
-                'CEF' => 'Cobro Express sin Factura',
-                'RSF' => 'Rapipago sin Factura',
-                'FSF' => 'Pago Fácil sin Factura',
-                'ASF' => 'Plus Pagos sin Factura',
-                'PSP' => 'Bapro sin Factura',
-                'PCO' => 'PC Online',
-                'LKO' => 'LK Online',
-                'PCA' => 'Deuda Vencida PCO',
-                'LKA' => 'Deuda Vencida LKO',
-                'SNP' => 'Transferencia Inmediata.',
-                'LNK' => 'Transferencia Inmediata',
-                'IBK' => 'Transferencia Inmediata'
-            ];
-
-            $transaction = Yii::$app->db->beginTransaction();
-            try {
-                if(empty($accountability)){
-                    Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
-                    return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
-                }
-	
-                foreach ($accountability as $value) {
-                    $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
-                    $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
-                    $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
-                    $customer_id = ltrim(substr($value, 35, 8), '0');
-                    $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
-                     ->bindValue('customer_id', $customer_id)
-                     ->queryOne();
-                    $payment_method = substr($value, 44, 4);
-                    $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
-                    $collection_channel= substr($value, 123, 3);
-                    $rejection_code = substr($value, 126, 3);
-			
-                   if($total_amount > 0){
-                        $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
-                        ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-                        ->queryOne();
-
-                        $payment_intention_accountability = Yii::$app->db->createCommand('SELECT pia.payment_intention_accountability_id FROM payment_intentions_accountability pia WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
-                        ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-                        ->queryOne();
-
-                        if(isset($siro_payment_intention) && $siro_payment_intention['estado'] != "PROCESADA" && empty($payment_intention_accountability)){
-
-                            $model = new PaymentIntentionAccountability();
-                            $model->payment_date = $payment_date;
-                            $model->accreditation_date =  $accreditation_date;
-                            $model->total_amount =  $total_amount;
-                            $model->customer_id = $customer_id;
-                            $model->payment_method = $payment_method;
-                            $model->siro_payment_intention_id = $siro_payment_intention_id;
-                            $model->collection_channel_description = $codes_collection_channel[$collection_channel];
-                            $model->collection_channel = $collection_channel;
-                            $model->rejection_code = $rejection_code;
-                            $model->created_at = date('Y-m-d');
-                            $model->updated_at = date('Y-m-d');
-                            
-                            if(empty($siro_payment_intention['payment_id'])){
-                                $model->status = 'draft';
-                                
-                            }else{
-                                $model->payment_id = $siro_payment_intention['payment_id'];
-                                $model->status = 'payed';
-                            }
-
-                            $model->save();
-                        }
-
-                    }
-
-                }
-                $transaction->commit();
-
-            } catch (\Exception $e) {
-                $transaction->rollBack();
-            }
-            
-  
+            if(isset($request['check_missing_payments']))
+                return $this->CheckMissingPayments(
+                        $request['company_id'],
+                        $request['date_from'],
+                        $request['date_to']
+                        );  
         }
 
         $searchModel = New PaymentIntentionAccountabilitySearch();
@@ -360,62 +291,16 @@ class SiroController extends Controller
     /**
      * Searches for duplicated payment items based on logic between statuses and positive payment amounts
      */
-    public function BuscarPagosDuplicados($company_id, $date_from, $date_to){
-        $company = Company::find()->where(['company_id' => $company_id])->one();
-        $cuit_administrator = str_replace('-', '', $company->tax_identification);
+    public function CheckMissingPayments($company_id, $date_from, $date_to){
 
         //* DEBUG: variables to save api response times being so slow...
-        $accountability = []; // null definition for rendition data based on if the file already exists *debugging* or not.
-        if($this->debug && file_exists($this->filePath)){
-            // Debug enabled AND file EXISTS...
-            $accountability = json_decode(fgets(fopen($this->filePath,'r')),true); // open. get data. json_decode the data as an Assoc Array.
-        }else{
-            // get a new file with real data from siro api..
-            $token = $this->GetTokenApi($company_id);
-            $accountability = $this->ObtainPaymentAccountabilityApi($token, $date_from, $date_to, $cuit_administrator, $company_id);
-        }
+        $accountability = $this->getAccFromAPIorFile($company_id, $date_from, $date_to);
 
         // redirect to main view in case the rendition didnt came as expected
         if(empty($accountability)){
             Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
             return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
         }
-
-        $codes_collection_channel = [
-            'PF' => 'Pago Fácil',
-            'RP' => 'Rapipago',
-            'PP' => 'Provincia Pagos',
-            'CJ' => 'Cajeros',
-            'CE' => 'Cobro Express',
-            'BM' => 'Banco Municipal',
-            'BR' => 'Banco de Córdoba',
-            'ASJ' => 'Plus Pagos',
-            'LK' => 'Link Pagos',
-            'PC' => 'Pago Mis Cuentas',
-            'MC' => 'Mastercard',
-            'VS' => 'Visa',
-            'MCR' => 'Mastercard Rechazado',
-            'VSR' => 'Visa Rechazado',
-            'DD+' => 'Débito Directo',
-            'DD-' => 'Reversión Débito',
-            'DDR' => 'Rechazo Débito Directo',
-            'BPD' => 'Botón de Pagos Débito',
-            'BPC' => 'Botón de Pagos Crédito',
-            'BOC' => 'Botón Otros Crédito',
-            'BPR' => 'Botón de Pagos Rechazado',
-            'CEF' => 'Cobro Express sin Factura',
-            'RSF' => 'Rapipago sin Factura',
-            'FSF' => 'Pago Fácil sin Factura',
-            'ASF' => 'Plus Pagos sin Factura',
-            'PSP' => 'Bapro sin Factura',
-            'PCO' => 'PC Online',
-            'LKO' => 'LK Online',
-            'PCA' => 'Deuda Vencida PCO',
-            'LKA' => 'Deuda Vencida LKO',
-            'SNP' => 'Transferencia Inmediata.',
-            'LNK' => 'Transferencia Inmediata',
-            'IBK' => 'Transferencia Inmediata'
-        ];
 
         $transaction = Yii::$app->db->beginTransaction();
         try {
@@ -430,24 +315,24 @@ class SiroController extends Controller
             // count how many times they repeat each
             $paymentFrequency = array_count_values($this->filterPaymentIdsV2($renditionObjects,1)); // 1:skip payments with amount less than zero.
 
-            // $customer_id_DEBUG = '40298'; //* DEBUG
+            // $customer_id_DEBUG = '89385'; //* DEBUG
 
-            $list_payment_intentions_accountability = [];
+            $list_payment_intentions_accountability2 = [];
             foreach ($renditionObjects as $key => $paymentObj) {
-                $pushPaymentToCreate = false;   // boolean to check if the current payment should be created. resets to false every iteration.
 
                 $payment_date = $paymentObj['payment_date'];
                 $accreditation_date = $paymentObj['accreditation_date'];
                 $total_amount = $paymentObj['total_amount'];
-                $customer_id = $paymentObj['customer_id'];
                 $payment_method = $paymentObj['payment_method'];
-                $siro_payment_intention_id = $paymentObj['siro_payment_intention_id'];
                 $collection_channel= $paymentObj['collection_channel'];
                 $rejection_code = $paymentObj['rejection_code'];
+                $siro_payment_intention_id = $paymentObj['siro_payment_intention_id'];
+                $customer_id = $paymentObj['customer_id'];
 
                 // filtering successful payments based on amount *more than 0
                 // if($total_amount > 0 && $customer_id == $customer_id_DEBUG){ //* DEBUG to check a single customer's payments
-                if($total_amount > 0 AND $key<700){
+                if($total_amount > 0){
+
                     // get how many times the current payment ID is repeated on the payments rendition (to check for duplicates)
                     $hitCount = intval($paymentFrequency[$siro_payment_intention_id]); 
                     
@@ -488,12 +373,17 @@ class SiroController extends Controller
                     // }
 
                     // if the intention exists on our database
-                    if (isset($siro_payment_intention)) {
+                    if (isset($siro_payment_intention) && $siro_payment_intention) {
+
                         $isProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
-                        $totalAmountToCreate = $isProcessed ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
                         $isDuplicate = ($hitCount > 1);
+                        $totalAmountToCreate = $isProcessed ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
+                        $pushPaymentToCreate = false;   // boolean to check if the current payment should be created. resets to false every iteration.
+                        
                         // if the intention isnt already contrasted
-                        if(empty($payment_intention_accountability)){
+                        if(isset($payment_intention_accountability) && empty($payment_intention_accountability)){
+
+
                             // divide the cases in two: either they are already processed OR they dont.
                             if(!$isProcessed){
                                 // A possible third case of error:
@@ -501,16 +391,22 @@ class SiroController extends Controller
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
                                 if ($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)) { 
                                     $pushPaymentToCreate = true;
+                                    echo " case 3";
                                 }
                                 // case 1: single payment   *this is the most common case.
                                 else{
                                     $pushPaymentToCreate = true;
+                                    echo " case 1";
                                 }
                             }else{
                                 // case 2: double or more payments with first intention with status PROCESADA
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
                                 if($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)){
                                     $pushPaymentToCreate = true;
+                                    echo " case 2";
+                                }else{
+                                    //* if the payment IS processed correctly and is SINGLE then its the default case for a correctly processed payment and should be ignored.
+                                    echo " case no worries </br>";
                                 }
                             }
                         }
@@ -518,78 +414,28 @@ class SiroController extends Controller
                         // push into array to create and reflect payment
                         if($pushPaymentToCreate) {
                             $list_payment_intentions_accountability[$siro_payment_intention_id][] = $accountability[$key];
-                            var_dump("pushed customer $customer_id on key $key");
+                            $paymentObj['isDuplicate'] = $isDuplicate;
+                            array_push($list_payment_intentions_accountability2, $paymentObj);
+                            // var_dump($siro_payment_intention_id,isset($siro_payment_intention));
+                            // var_dump("pushed $total_amount customer $customer_id on key $key");
                         }
                     }
                 }else{
                     //* if the payment has amount 0 goes to here and does nothing!..
                 }
             }
-            //todo: fix second part of the cheker, make it work with the new struct
-            var_dump($list_payment_intentions_accountability);
-            foreach ($list_payment_intentions_accountability as $key => $payment_intentions_accountability) {
-                $skipFirst = 0; // starts at 0 and skips the first payment creation if the payment duplicate is already PROCESADA
-                $cantDuplicados = count($payment_intentions_accountability); 
-                if($cantDuplicados > 1){ // this is the key to filter duplicated payments
-                    foreach ($payment_intentions_accountability as $value) {
-                        $payment_date = (new \DateTime(substr($value, 0, 8)))->format('Y-m-d');
-                        $accreditation_date = (new \DateTime(substr($value, 8, 8)))->format('Y-m-d');
-                        $total_amount = (double) (substr($value, 24, 9) .'.'. substr($value, 33, 2));
-                        $customer_id = ltrim(substr($value, 35, 8), '0');
-                        $customer = Yii::$app->db->createCommand('SELECT cu.code FROM customer cu WHERE cu.customer_id = :customer_id')
-                         ->bindValue('customer_id', $customer_id)
-                         ->queryOne();
-                        $payment_method = substr($value, 44, 4);
-                        $siro_payment_intention_id = preg_replace('/'.$customer['code'].'/', '', ltrim(substr($value, 103, 20), '0'),1);
-                        $collection_channel= substr($value, 123, 3);
-                        $rejection_code = substr($value, 126, 3);
+            // var_dump($list_payment_intentions_accountability2);
+            foreach ($list_payment_intentions_accountability2 as $key => $paymentObj){
+                $response = $this->createPaymentAccountability($paymentObj);
+                if(!$response){
+                    // var_dump("payment obj got an error.");
+                    // var_dump($paymentObj);
 
-                        $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id 
-                                FROM siro_payment_intention spi 
-                                WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
-                                    ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-                                    ->queryOne();
-
-                        $payment_date = $paymentObj['payment_date'];
-                        $accreditation_date = $paymentObj['accreditation_date'];
-                        $total_amount = $paymentObj['total_amount'];
-                        $customer_id = $paymentObj['customer_id'];
-                        $payment_method = $paymentObj['payment_method'];
-                        $siro_payment_intention_id = $paymentObj['siro_payment_intention_id'];
-                        $collection_channel= $paymentObj['collection_channel'];
-                        $rejection_code = $paymentObj['rejection_code'];
-
-                        $isProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
-                        if($isProcessed && ($skipFirst == 0)){
-                            // yes => skip the first one. *cause "PROCESADA" means the first payment of the intention was created and OK
-                            $skipFirst++;
-                        }else{
-                            // create accountability instances for the payments found
-                            $model = $this->createPaymentAccountability($paymentObj);
-                            $model->save();
-
-                            $model = new PaymentIntentionAccountability();
-                            $model->payment_date = $payment_date;
-                            $model->accreditation_date =  $accreditation_date;
-                            $model->total_amount =  $total_amount;
-                            $model->customer_id = $customer_id;
-                            $model->payment_method = $payment_method;
-                            $model->siro_payment_intention_id = $siro_payment_intention_id;
-                            $model->collection_channel_description = $codes_collection_channel[$collection_channel];
-                            $model->collection_channel = $collection_channel;
-                            $model->rejection_code = $rejection_code;
-                            $model->created_at = date('Y-m-d');
-                            $model->updated_at = date('Y-m-d');
-                            $model->status = 'draft';
-                            $model->is_duplicate = 1; // cause this creation process was if ($cantDuplicados > 1)
-                            $model->save();
-                        }
-                    }
                 }else{
-                    unset($list_payment_intentions_accountability[$key]);
+                    // var_dump("payment created for obj:");
+                    // var_dump($paymentObj);
                 }
             }
-            die('trace end');
             $transaction->commit();
 
         } catch (\Exception $e) {
@@ -597,7 +443,6 @@ class SiroController extends Controller
             var_dump($e);
             die();
         }
-
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
     }
     /**
@@ -618,7 +463,21 @@ class SiroController extends Controller
         }
         return $arrOfPaymentIDs;
     }
+    private function getAccFromAPIorFile($company_id, $date_from, $date_to){
+        $company = Company::find()->where(['company_id' => $company_id])->one();
+        $cuit_administrator = str_replace('-', '', $company->tax_identification);
 
+        $accountability = []; // null definition for rendition data based on if the file already exists *debugging* or not.
+        if($this->debug && file_exists($this->filePath)){
+            // Debug enabled AND file EXISTS...
+            $accountability = json_decode(fgets(fopen($this->filePath,'r')),true); // open. get data. json_decode the data as an Assoc Array.
+        }else{
+            // get a new file with real data from siro api..
+            $token = $this->GetTokenApi($company_id);
+            $accountability = $this->ObtainPaymentAccountabilityApi($token, $date_from, $date_to, $cuit_administrator, $company_id);
+        }
+        return $accountability;
+    }
     /**
      * Return all data filtered from dataccountability retrieved from the online bank rendition
      */
@@ -713,21 +572,24 @@ class SiroController extends Controller
         return $arrOfPaymentIDs;
     }
 
-    // private function createPaymentAccountability($valueStruct){
-    //     $model = new PaymentIntentionAccountability();
-    //     $model->payment_date = $payment_date;
-    //     $model->accreditation_date =  $accreditation_date;
-    //     $model->total_amount =  $total_amount;
-    //     $model->customer_id = $customer_id;
-    //     $model->payment_method = $payment_method;
-    //     $model->siro_payment_intention_id = $siro_payment_intention_id;
-    //     $model->collection_channel_description = $codes_collection_channel[$collection_channel];
-    //     $model->collection_channel = $collection_channel;
-    //     $model->rejection_code = $rejection_code;
-    //     $model->created_at = date('Y-m-d');
-    //     $model->updated_at = date('Y-m-d');
-    //     $model->status = 'draft';
-    //     return $model->save();
-    // }
+    private function createPaymentAccountability($paymentObj){
+
+        $model = new PaymentIntentionAccountability();
+        $model->payment_date = $paymentObj['payment_date'];
+        $model->accreditation_date =  $paymentObj['accreditation_date'];
+        $model->total_amount =  $paymentObj['total_amount'];
+        $model->customer_id = $paymentObj['customer_id'];
+        $model->payment_method = $paymentObj['payment_method'];
+        $model->siro_payment_intention_id = $paymentObj['siro_payment_intention_id'];
+        $model->collection_channel_description = $this->codes_collection_channel[$paymentObj['collection_channel']];
+        $model->collection_channel = $paymentObj['collection_channel'];
+        $model->rejection_code = $paymentObj['rejection_code'];
+        $model->is_duplicate = $paymentObj['isDuplicate']; // added this condition to then see if it was a case 2 or 3.
+        $model->created_at = date('Y-m-d');
+        $model->updated_at = date('Y-m-d');
+        $model->status = 'draft';
+
+        return ($model->save());
+    }
 
 }
