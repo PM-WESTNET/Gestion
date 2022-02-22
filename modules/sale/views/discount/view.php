@@ -58,7 +58,10 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'label' => Yii::t('app', 'Producto'),
-                'value' => ($model->value_from==\app\modules\sale\models\Discount::VALUE_FROM_PRODUCT ? $model->product->name : Yii::t('app', 'No apply')),
+                'value' => function ($model){
+                    $productName = (isset($model->product)) ? $model->product->name : "No tiene producto asociado*"; // check if product exist
+                    return ($model->value_from==\app\modules\sale\models\Discount::VALUE_FROM_PRODUCT) ? $productName : Yii::t('app', 'No apply');
+                }
             ],
 
         ],

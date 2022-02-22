@@ -223,11 +223,19 @@ class TestController extends Controller {
         else var_dump("failed");
     }
     
-    public function actionTestActionMoraV2(){
+    public function actionTestActionMora(){
         $result = ContractController::actionMoraV3();
-        //$result = ContractController::actionGetBrowserNotificationCustomers();
-        
-        var_dump($result);die();
+        // $result2 = ContractController::actionMoraV2();
+
+        // check if any ip is going through as 0.0.0.0 to portal captivo
+        $testArr = array_column($result,'ip');
+        foreach($testArr as $ip){
+            if($ip == '0.0.0.0' or $ip == null or $ip == '0' or $ip == 0){
+                die('and go to hell');
+            }
+        }
+
+        die('mora trace end');
         return false;
     }
 

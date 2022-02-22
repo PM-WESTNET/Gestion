@@ -358,7 +358,7 @@ if (User::hasRole('admin')) {
 //Westnet
 if (Yii::$app->getModule('westnet')) {
     $items[] = [
-        'label' => 'Westnet',
+        'label' => 'Empresa',
         'items' => [
             ['label' => Yii::t('partner', 'Partner'), 'items' => [
                 ['label' => Yii::t('partner', 'Partner'), 'url' => ['/partner/partner']],

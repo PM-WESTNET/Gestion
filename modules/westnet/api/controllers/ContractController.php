@@ -254,7 +254,8 @@ class ContractController extends RestController
     }
 
     /**
-     * Lista los contratos que tienen aviso de mora o corte con aviso. MODIFICADO POR EMI PARA QUE NO FALLE CUANDO HAY MUCHOS REGISTROS EN EL FOREACH
+     * Lista los contratos que tienen aviso de mora o corte con aviso. 
+     * Modified to skip the foreach loop, which gives a more performant api. The DUE field is updated by a cronjob , making it really innefective.
      * @return array
      */
     public function actionMoraV2()
@@ -294,47 +295,129 @@ class ContractController extends RestController
     }
 
     /**
-     * Lista los contratos que tienen aviso de mora o corte con aviso. MODIFICADO POR EMI PARA QUE NO FALLE CUANDO HAY MUCHOS REGISTROS EN EL FOREACH
+     * Makes an array of contracts that are defaulters or should be clipped.
+     * Also changed the data that is returned from database to all contracts !='active' 
+     * and found that it does not suffice because we also need some internal groups of Active 
+     * contracts to be defaulter/clipped off.
      * @return array
      */
     public function actionMoraV3()
     {
-        $response = [];
+        $contractsArr = array(); // this is the array of contracts that should be returned. Portal captivo uses it to determine clipped and defaulters
+        
+        // SELECT ATTRIBUTES FOR THE SUBQUERY
+        $selectArr = [
+            'co.contract_id',
+            'co.customer_id',
+            'UPPER(TRIM(cus.name)) AS name',
+            'UPPER(TRIM(cus.lastname)) AS lastname',
+            'cus.code AS customer_code',
+            'cus.payment_code',
+            'inet_ntoa(con.ip4_1)',
+            'inet_ntoa(con.ip4_1_old)',
+            'CASE
+                WHEN (
+                    con.ip4_1 IS NULL
+                    OR con.ip4_1 = 0
+                ) THEN inet_ntoa(con.ip4_1_old)
+                ELSE inet_ntoa(con.ip4_1)
+            END AS ip',
+            'inet_ntoa(con.ip4_2) AS ip_2',
+            'con.status_account AS account_status',
+            'c.company_id',
+            'c.name AS company_name',
+            'IFNULL(cus.current_account_balance, 0) AS due'
+        ];
 
-        $multiple = (property_exists(Customer::className(), 'parent_company_id'));
-
-        $query = (new Query())
-            ->select([
-                'contract.contract_id','contract.customer_id',
-                'cus.name', 'cus.code as customer_code', 'cus.payment_code',
-                'con.contract_id', 
-                new Expression('inet_ntoa(con.ip4_1) as ip'), // inet_ntoa transforms int into IP format (0.0.0.0)
-                new Expression('inet_ntoa(con.ip4_2) as ip_2'),
-                'con.status_account as account_status', 'c.company_id', 'c.name as company_name',
-                'IFNULL(cus.current_account_balance,0) AS due', // IFNULL saves us time converting  NULL values into 0.
-                new Expression('inet_ntoa(con.ip4_1_old) as ip_4_old'),
+        $subQuery = (new Query())
+            // SELECT ATTRIBUTES
+            ->select($selectArr)
+            ->from('contract co')
+            // DEFAULT JOINS
+            ->leftJoin('customer cus', 'cus.customer_id = co.customer_id')
+            ->leftJoin('connection as con', 'co.contract_id = con.contract_id')
+            // WHERE CONDITIONS
+            ->where(['and',
+                ['in', 'con.status_account', ['defaulter','clipped','disabled','low']],
+                ['in','co.status',['active']]
             ])
-            ->from('contract')
-            ->leftJoin('customer cus', 'cus.customer_id = contract.customer_id')
-            ->leftJoin('connection as con', 'contract.contract_id = con.contract_id')
-
-            //enum('enabled','disabled','forced','defaulter','clipped','low')
-            ->andWhere(['in', 'con.status_account', ['defaulter','clipped','disabled','low']]) // combinatorial of "Estado de Conexion"
-            ->andWhere(['!=', 'contract.status', 'active']) // combinatorial of "Estados de Contrato"
-            //->andWhere(['!=','con.ip4_1','0']) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
+            ->orWhere(
+                ['not in','co.status',['active']]
+            )
             ;
 
+        // CONDITIONAL JOINS
+        $multiple = (property_exists(Customer::className(), 'parent_company_id'));
         if($multiple) {
-            $query->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
+            $subQuery->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
         } else {
-            $query->leftJoin('company c', 'c.company_id = cus.company_id');
+            $subQuery->leftJoin('company c', 'c.company_id = cus.company_id');
+        }
+        // at this point we have the subquery built, but we have to remove all IPs which are zero //testing. 54213 reg
+        
+        // BUILD MAIN QUERY
+        $query = (new Query())
+                ->select(['ip.*'])
+                ->from(['ip'=>$subQuery])
+                ->where(['!=','ip.ip',0]) // when this value is between quotes, it gives more values
+                ->andWhere(['is not','ip',null]) // added not to give IP values that are 0. So as not to break anything when consuming the endpoint
+                ;
+
+        // RUN QUERY AND GET CONTRACTS
+        $contractsArr = $query->all(); //testing. 18408 reg
+
+        // we need to substract all IPs from valid contracts from the previous main query.
+        // this is because it can be the case that an old IP repeats itself on the Active Ips
+
+        // Build a new query with the active contracts which also have forced or enabled status_account
+        $validContractQuery = (new Query())
+            // SELECT ATTRIBUTES
+            ->select($selectArr)
+            ->from('contract co')
+            // DEFAULT JOINS
+            ->leftJoin('customer cus', 'cus.customer_id = co.customer_id')
+            ->leftJoin('connection as con', 'co.contract_id = con.contract_id')
+            // WHERE CONDITIONS
+            ->where(['and',
+                ['in', 'con.status_account', ['forced','enabled']],
+                ['in','co.status',['active']]
+            ])
+            ;
+
+        // CONDITIONAL JOINS
+        if($multiple) {
+            $validContractQuery->leftJoin('company c', 'c.company_id = coalesce(cus.parent_company_id, cus.company_id)');
+        } else {
+            $validContractQuery->leftJoin('company c', 'c.company_id = cus.company_id');
         }
 
-        $contracts = $query->all();
-        
+        // RUN QUERY AND GET CONTRACTS
+        $validContracts = $validContractQuery->all();
+
+        // make a search array for IPs
+        $validIPs = array_column($validContracts, 'ip'); // *valid IPs are the same when flipped, cause the assignation algorithm cannot repeat them.
+        $potentialIPs = array_column($contractsArr, 'ip');
+
+        // Flipping 
+        $at = array_flip($validIPs);
+        $bt = array_flip($potentialIPs); 
+        // checking
+        $d = array_diff_key($bt, $at);
+        $noConnectionIPs = array_keys($d);
+
+        // foreach check
+        foreach($contractsArr as $key => $contract) {
+            // is the ip if this contract in the array that we are going to send to clip off connections? (then we invert the truth)
+            if(!in_array($contract['ip'],$noConnectionIPs)){
+                // var_dump("contract IP repeated on an active client: ",$contract);
+
+                // unset the repeated contract/s (even though they are probably 1 or 2 cases..)
+                unset($contractsArr[$key]); // bug?: for some reason unset() makes the array return as associative, which differs from V2
+            }
+        }
+        $contracts = array_values($contractsArr); // this solves the ""BUG"" commented before
         return $contracts;
     }
-
     /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
      *

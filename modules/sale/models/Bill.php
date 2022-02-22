@@ -361,13 +361,16 @@ class Bill extends ActiveRecord implements CountableInterface
 
                     $cantDiscount++;
                 }
-            } else {
+            }
+            // had to separate the condition for having a discount because some details where both ITEM and had DISCOUNT id associated
+            if ($detail->product) { // if the detail has a product_id, then its an ITEM.
                 $cantItems++;
             }
-        }
+        }   
 
         if($perDetail){
-            return($cantDiscount ? ($discount / ($cantItems)) : 0);
+            // $cantItems = ($cantItems == 0) ? 1 : $cantItems;
+            return ($cantDiscount ? ($discount / $cantItems) : 0);
         }
         return ($cantDiscount ? $discount : 0);
     }
@@ -1846,6 +1849,18 @@ class Bill extends ActiveRecord implements CountableInterface
 
             
         return $pdf->render();   
+    }
+
+    /**
+     * Get all bills where "Tuvo Error" is true and status is != from "closed"
+     */
+    public function getErrorAndUnclosedBillsQuery() {
+        $billsWithErrors = self::find()
+                ->alias('b')
+                ->where(['!=', 'b.status','closed'])
+                ->andWhere(['b.had_error' => true])
+                ;
+        return $billsWithErrors;
     }
 
 }

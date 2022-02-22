@@ -391,29 +391,28 @@ class SiroController extends Controller
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
                                 if ($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)) { 
                                     $pushPaymentToCreate = true;
-                                    echo " case 3";
+                                    // echo " case 3";
                                 }
                                 // case 1: single payment   *this is the most common case.
                                 else{
                                     $pushPaymentToCreate = true;
-                                    echo " case 1";
+                                    // echo " case 1";
                                 }
                             }else{
                                 // case 2: double or more payments with first intention with status PROCESADA
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
                                 if($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)){
                                     $pushPaymentToCreate = true;
-                                    echo " case 2";
+                                    // echo " case 2";
                                 }else{
                                     //* if the payment IS processed correctly and is SINGLE then its the default case for a correctly processed payment and should be ignored.
-                                    echo " case no worries </br>";
+                                    // echo " case no worries </br>";
                                 }
                             }
                         }
 
                         // push into array to create and reflect payment
                         if($pushPaymentToCreate) {
-                            $list_payment_intentions_accountability[$siro_payment_intention_id][] = $accountability[$key];
                             $paymentObj['isDuplicate'] = $isDuplicate;
                             array_push($list_payment_intentions_accountability2, $paymentObj);
                             // var_dump($siro_payment_intention_id,isset($siro_payment_intention));

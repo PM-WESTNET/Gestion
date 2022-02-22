@@ -26,6 +26,7 @@ try {
             </td>
             <td style="width:286px; text-align: center;">
                 <img  width="143px" height="50px" src="<?= Url::to(['/westnet/ads/barcode', 'code'=>$code['code'], 'mode'=>(isset($model) ? 0 : 1)], true)?>">
+                <h2>SOLICITUD DE SERVICIO</h2>
             </td>
             <td style="width:286px; text-align: center;">
                 <table>

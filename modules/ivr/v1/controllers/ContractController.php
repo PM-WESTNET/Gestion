@@ -145,13 +145,15 @@ class ContractController extends Controller
             $this->updateConnectionStatus($connection);
             return [
                 'error' => true,
-                'message' => 'The last contract of customer is active. Updated connection status to active'
+                'message' => 'The last contract of customer is active. Updated connection status to active',
+                'code' => 206
             ];
         }
         elseif ($contract->status == 'active') 
             return [
                 'error' => true,
-                'message' => 'The last contract of customer is active'
+                'message' => 'The last contract of customer is active',
+                'code' => 206
             ];
         
         
