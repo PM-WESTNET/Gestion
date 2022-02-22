@@ -25,7 +25,7 @@ use yii\db\Query;
  */
 class SiroController extends Controller
 {
-    private $debug = false; // debug variable used to not spam the API from siro (*they have a limited amount of requests availible)
+    private $debug = true; // debug variable used to not spam the API from siro (*they have a limited amount of requests availible)
     private $filePath = __DIR__ . '/rendition.txt'; // the file name and path to use for debugging purposes. Delete it manually to get new info from Siro.
     private $codes_collection_channel = [
         'PF' => 'Pago Fácil',
@@ -292,13 +292,18 @@ class SiroController extends Controller
      * Searches for duplicated payment items based on logic between statuses and positive payment amounts
      */
     public function CheckMissingPayments($company_id, $date_from, $date_to){
-
+        set_time_limit(0);
         //* DEBUG: variables to save api response times being so slow...
         $accountability = $this->getAccFromAPIorFile($company_id, $date_from, $date_to);
+        // die(); // uncomment this if you want to download a new rendition.txt and not loop through anything
 
         // redirect to main view in case the rendition didnt came as expected
-        if(empty($accountability)){
+        if(empty($accountability) or isset($accountability['Message'])){
             Yii::$app->session->setFlash("danger", "Ha ocurrido un error en el servidor de Roela.");
+            if(isset($accountability['Message'])){
+                $msg = $accountability['Message'];
+                Yii::$app->session->addFlash("danger", "$msg");
+            }
             return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
         }
 
@@ -315,9 +320,9 @@ class SiroController extends Controller
             // count how many times they repeat each
             $paymentFrequency = array_count_values($this->filterPaymentIdsV2($renditionObjects,1)); // 1:skip payments with amount less than zero.
 
-            // $customer_id_DEBUG = '89385'; //* DEBUG
+            // $customer_id_DEBUG = '40298'; //* DEBUG
 
-            $list_payment_intentions_accountability2 = [];
+            $paymentsToCreate = [];
             foreach ($renditionObjects as $key => $paymentObj) {
 
                 $payment_date = $paymentObj['payment_date'];
@@ -344,20 +349,14 @@ class SiroController extends Controller
                             ->queryOne();
 
                     // check that the payment isnt already created in the checkers registries
-                    $payment_intention_accountability = Yii::$app->db->createCommand('SELECT pia.payment_intention_accountability_id 
+                    //* added count for the number of payments done by the payment checker. this only necessary in the extreme case of MORE THAN 2 errors of duplicated payments
+                    $payment_intention_accountability = Yii::$app->db->createCommand(
+                        'SELECT pia.payment_intention_accountability_id, 
+                                count(*) as counter
                         FROM payment_intentions_accountability pia 
                         WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
                             ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
                             ->queryOne();
-
-                    // added this new query to count the number of payments done by the payment checker
-                    // generally speaking, this only necessary in the extreme case of MORE THAN 2 errors of duplicated payments
-                    $AccInstancesCounter = Yii::$app->db->createCommand('SELECT count(*) as counter 
-                        FROM payment_intentions_accountability pia 
-                        WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
-                            ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
-                            ->queryOne();
-                    
                     
                     //* DEBUG: echo all the valid payments of a customer ID
                     // if($this->debug && $customer_id == $customer_id_DEBUG){
@@ -367,7 +366,6 @@ class SiroController extends Controller
                     //         $key,
                     //         $siro_payment_intention,
                     //         $payment_intention_accountability,
-                    //         $AccInstancesCounter,
                     //         $hitCount
                     //     );
                     // }
@@ -375,9 +373,9 @@ class SiroController extends Controller
                     // if the intention exists on our database
                     if (isset($siro_payment_intention) && $siro_payment_intention) {
 
-                        $isProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
+                        $wasProcessed = ($siro_payment_intention['estado'] == "PROCESADA");
                         $isDuplicate = ($hitCount > 1);
-                        $totalAmountToCreate = $isProcessed ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
+                        $totalAmountToCreate = $wasProcessed ? ($hitCount-1) : $hitCount; // minus 1 IF the payment is already 'processed'
                         $pushPaymentToCreate = false;   // boolean to check if the current payment should be created. resets to false every iteration.
                         
                         // if the intention isnt already contrasted
@@ -385,11 +383,11 @@ class SiroController extends Controller
 
 
                             // divide the cases in two: either they are already processed OR they dont.
-                            if(!$isProcessed){
+                            if(!$wasProcessed){
                                 // A possible third case of error:
                                 // case 3: first payment WASNT processed correctly and still made duplicates after taking the money *SIRO BUG?
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
-                                if ($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)) { 
+                                if ($isDuplicate && ($payment_intention_accountability['counter'] < $totalAmountToCreate)) { 
                                     $pushPaymentToCreate = true;
                                     // echo " case 3";
                                 }
@@ -401,7 +399,7 @@ class SiroController extends Controller
                             }else{
                                 // case 2: double or more payments with first intention with status PROCESADA
                                 // is duplicated AND the current amount of payments checked are less than the total that should be created
-                                if($isDuplicate && ($AccInstancesCounter['counter'] < $totalAmountToCreate)){
+                                if($isDuplicate && ($payment_intention_accountability['counter'] < $totalAmountToCreate)){
                                     $pushPaymentToCreate = true;
                                     // echo " case 2";
                                 }else{
@@ -414,7 +412,9 @@ class SiroController extends Controller
                         // push into array to create and reflect payment
                         if($pushPaymentToCreate) {
                             $paymentObj['isDuplicate'] = $isDuplicate;
-                            array_push($list_payment_intentions_accountability2, $paymentObj);
+                            $paymentObj['wasProcessed'] = $wasProcessed;
+                            $paymentsToCreate[$siro_payment_intention_id][]=$paymentObj;
+
                             // var_dump($siro_payment_intention_id,isset($siro_payment_intention));
                             // var_dump("pushed $total_amount customer $customer_id on key $key");
                         }
@@ -423,24 +423,32 @@ class SiroController extends Controller
                     //* if the payment has amount 0 goes to here and does nothing!..
                 }
             }
-            // var_dump($list_payment_intentions_accountability2);
-            foreach ($list_payment_intentions_accountability2 as $key => $paymentObj){
-                $response = $this->createPaymentAccountability($paymentObj);
-                if(!$response){
-                    // var_dump("payment obj got an error.");
-                    // var_dump($paymentObj);
+            // var_dump($paymentsToCreate);
+            foreach ($paymentsToCreate as $currentPayIntID => $paymentsArr){
+                $skipFirst = 0; // starts at 0 and skips the first payment creation if the payment duplicate is already PROCESADA
 
-                }else{
-                    // var_dump("payment created for obj:");
-                    // var_dump($paymentObj);
+                foreach ($paymentsArr as $paymentObj){
+                    if(($paymentObj['wasProcessed']) && ($skipFirst == 0)){
+                        // yes => skip the first one. *cause "PROCESADA" means the first payment of the intention was created and OK
+                        $skipFirst++;
+                    }else{
+                        // create accountability instances for the payments found -1 if the payment is processed.
+                        $response = $this->createPaymentAccountability($paymentObj);
+                        if(!$response){
+                            // var_dump("payment obj got an error. $currentPayIntID");
+        
+                        }else{
+                            // var_dump("payment created for obj: $currentPayIntID");
+                        }
+                    }
                 }
             }
+            // die();
             $transaction->commit();
 
         } catch (\Exception $e) {
             $transaction->rollBack();
-            var_dump($e);
-            die();
+            return $e;
         }
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
     }
@@ -587,7 +595,7 @@ class SiroController extends Controller
         $model->created_at = date('Y-m-d');
         $model->updated_at = date('Y-m-d');
         $model->status = 'draft';
-
+        
         return ($model->save());
     }
 
