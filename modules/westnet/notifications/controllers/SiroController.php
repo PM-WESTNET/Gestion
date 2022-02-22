@@ -25,7 +25,7 @@ use yii\db\Query;
  */
 class SiroController extends Controller
 {
-    private $debug = true; // debug variable used to not spam the API from siro (*they have a limited amount of requests availible)
+    private $debug = false; // debug variable used to not spam the API from siro (*they have a limited amount of requests availible)
     private $filePath = __DIR__ . '/rendition.txt'; // the file name and path to use for debugging purposes. Delete it manually to get new info from Siro.
     private $codes_collection_channel = [
         'PF' => 'Pago Fácil',
