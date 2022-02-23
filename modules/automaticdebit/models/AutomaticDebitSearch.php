@@ -69,7 +69,7 @@ class AutomaticDebitSearch extends AutomaticDebit
             'automatic_debit_id' => $this->automatic_debit_id,
             'automatic_debit.customer_id' => $this->customer_id,
             'bank_id' => $this->bank_id,
-            'status' => $this->status,
+            'automatic_debit.status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ])  ->andFilterWhere(['like', 'cbu', $this->cbu])
