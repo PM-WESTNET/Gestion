@@ -11,12 +11,11 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">
     
-    <h1>Filtrar Por Descuentos</h1>
+    <h1>Descuentos</h1>
     <div class="row">
-<!--         <div class="col-md-6">
- -->            <div class="col-md-12">
-<!--                 <h1>Descuentos</h1>
- -->                <?= GridView::widget([
+             <!-- <div class="col-md-12"> -->
+                 <!-- <h1>Descuentos</h1> -->
+                 <?= GridView::widget([
                     'dataProvider' => $dataProvider,
                     'filterModel' => $discountSearch,
                     'columns' => [
@@ -52,13 +51,40 @@ $this->params['breadcrumbs'][] = $this->title;
                         [
                             'attribute' => 'customerAmount',
                             'format' => 'text',
-                            'label' => 'Cant. Clientes',
+                            'label' => 'Total Clientes Actual',
                             'value' => function ($model) {
                                 return $model->customerAmount;
                             }
                         ],
                         [
+                            'attribute'=>'customerFilterRange',
+                            'format' => 'raw',
+                            'label' => 'Clientes Adheridos Entre Fechas',
+                            'filter'=> DateRangePicker::widget([
+                                'model' => $discountSearch,
+                                'name' => 'createTimeRange',
+                                'attribute' => 'customerFilterRange',
+                                //'value'=>'2011-08-10 to 2020-08-10',
+                                'convertFormat' => true,
+                                'presetDropdown' => true,
+                                'pluginOptions' => [
+                                    'timePicker' => false,
+                                    //'timePickerIncrement' => 1,
+                                    'autoclose' => true,
+                                    'locale' => [
+                                        'format' => 'Y-m-d',
+                                        //'separator'=>' - ',
+                                    ],
+                                    
+                                ]                                
+                            ]),
+                            'value' => function ($model) {
+                                return ($model->customersInsideRange)?$model->customersInsideRange:0;
+                            }, 
+                        ],
+                        [
                             'attribute' => 'status',
+                            'label' => 'Estado del Descuento',
                             'format' => 'html',
                             'value' => function ($model) {
                                 $labelType = ($model->status == "enabled")? "success" : "danger";
@@ -81,7 +107,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                 return $model->from_date . ' - ' . $model->to_date;
                             },
                             'contentOptions' => ['style' => 'width:24%;'],
-                            'label' => 'Rango Vigencia (busca x fec.de comienzo)',
+                            'label' => 'Rango Vigencia Descuento',
                             'filter'=>DateRangePicker::widget([
                                 'model' => $discountSearch,
                                 'name' => 'createTimeRange',
@@ -116,18 +142,8 @@ $this->params['breadcrumbs'][] = $this->title;
                         ],
                     ]
                 ])?>        
-            </div>
+            <!-- </div> -->
         </div>
-        <!-- <div class="col-md-6">
-            <div class="col-md-12">
-            
-                <h1>Clientes</h1>
-                
-
-            </div>
-
-        </div> -->
-
     </div>
 </div>
 

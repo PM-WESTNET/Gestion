@@ -96,8 +96,8 @@ class ReportsController extends Controller
      * view controller for discounts view
      */
     public function actionDiscount(){
-    /*  $this->layout = '/fluid';
-    */
+        $this->layout = '/fluid';
+    
         $discountSearch = new DiscountSearch();
         
         // when using DateRangePicker widget, the model dictates what initial values the range has. https://demos.krajee.com/date-range

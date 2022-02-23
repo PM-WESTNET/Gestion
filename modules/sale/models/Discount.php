@@ -32,6 +32,7 @@ class Discount extends \app\components\db\ActiveRecord
     public $code;
 
     public $customerAmount;
+    public $customersInsideRange;
 
     const STATUS_ENABLED = 'enabled';
     const STATUS_DISABLED = 'disabled';
