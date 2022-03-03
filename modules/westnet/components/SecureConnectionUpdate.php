@@ -22,6 +22,7 @@ use app\modules\westnet\models\Node;
 use app\modules\config\models\Config;
 use app\modules\westnet\models\Server;
 use Yii;
+use app\modules\westnet\controllers\MikrotikController;
 
 class SecureConnectionUpdate
 {
@@ -157,6 +158,8 @@ class SecureConnectionUpdate
                     if($contractOrig) {
                         Profiler::profile('contract-udpate');
                         $rta = $contractRequest->update($contractRest);
+                        // add queues update for mikrotik load balanced customer connections
+                        $response = MikrotikController::updateQueues($connection);
                         Profiler::profile('contract-udpate');
                     } else {
                         $contract->external_id = null;

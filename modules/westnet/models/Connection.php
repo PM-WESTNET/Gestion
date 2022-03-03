@@ -16,6 +16,7 @@ use Yii;
 use yii\console\Exception;
 use yii\db\ActiveQuery;
 use yii\db\Query;
+use app\modules\westnet\controllers\MikrotikController;
 
 /**
  * This is the model class for table "connection".
@@ -220,7 +221,8 @@ class Connection extends ActiveRecord {
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-
+        // add queues update for mikrotik load balanced customer connections
+        $response = MikrotikController::updateQueues($this);
         try {
             if (!YII_ENV_TEST && $insert) {
                 $log = new CustomerLog();
