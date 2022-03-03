@@ -41,7 +41,9 @@ class Server extends \app\components\db\ActiveRecord implements ServerInterface
             [['name', 'url'], 'required'],
             [['status'], 'string'],
             [['name'], 'string', 'max' => 45],
-            [['url', 'token', 'user', 'password', 'class'], 'string', 'max' => 255]
+            [['url', 'token', 'user', 'password', 'class'], 'string', 'max' => 255],
+            [['load_balancer_type','ip_of_load_balancer'], 'required'],
+            [['load_balancer_type','ip_of_load_balancer'], 'string'] //load balancer is MIKROTIK or WISPRO. IP is text() type and should be manipulated with the ip2long() and long2ip() php functions
         ];
     }
 
@@ -103,6 +105,13 @@ class Server extends \app\components\db\ActiveRecord implements ServerInterface
         } else {
             return false;
         }
+    }
+
+    public function beforeSave($insert) {
+        // custom code here...
+        $this->ip_of_load_balancer = ip2long($this->ip_of_load_balancer); // change ip to long just to keep consistent with the Connection model
+
+        return parent::beforeSave($insert);
     }
 
     public function moveCustomersTo($server_id)

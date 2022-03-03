@@ -80,6 +80,7 @@ class ServerController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->server_id]);
         } else {
+            Yii::$app->session->addFlash('error', 'No se logró actualizar el servidor');
             return $this->render('update', [
                 'model' => $model,
             ]);

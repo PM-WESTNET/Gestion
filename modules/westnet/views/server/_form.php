@@ -35,6 +35,8 @@ $clases = array_combine($clases, $clases)
         ]
     ]);
     ?>
+    <?= $form->field($model, 'load_balancer_type')->dropDownList([ 'Wispro' => 'Wispro', 'Mikrotik' => 'Mikrotik']) ?>
+    <?= $form->field($model, 'ip_of_load_balancer')->textInput(['maxlength' => 255]) ?>
 
 
     <div class="form-group">

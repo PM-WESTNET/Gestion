@@ -35,6 +35,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value'=> Yii::t('app', ucfirst($model->status))
             ],
             'url',
+            'load_balancer_type',
+            [
+                'attribute' => 'ip_of_load_balancer',
+                'value' => function ($model){
+                    return long2ip($model->ip_of_load_balancer);
+                }
+            ],
             'token',
             'user',
             'class'
