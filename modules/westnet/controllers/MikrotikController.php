@@ -14,55 +14,71 @@ use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\config\models\Config;
 use yii\db\Expression;
 use yii\db\Query;
+
 /**
  * AccessPointController implements the CRUD actions for AccessPoint model.
  */
 class MikrotikController extends Controller
 {
     /**
-     * Return token access api
+     * Returns a string response or false in case of any errors.
+     * also adds a flash to display the data in case of string response success.
      */
-    public static function updateQueues($connection){
-        // die('updateQueues');
-        $url = Config::getConfig('mikrotik_url_create_queues');
+    public static function updateQueues($connection, $old_ip4_1 = null)
+    {
+        // return false if no server is associated OR of it isnt a mikrotik type server connection
+        if (!isset($connection->server) or !($connection->server->load_balancer_type == 'Mikrotik')) return false;
 
         $mikrotikIP = long2ip($connection->server->ip_of_load_balancer);
         $contractDetailConnectionData = self::getContractDetailPlanesData($connection);
         $mikrotikConnectionStatus = self::getMikrotikConnectionStatus($connection);
 
-        $data = array(
-            "ip" => $mikrotikIP, // mikrotik ip
-            "clientes" => array(array(
-                "cliente_ip"=>long2ip($connection->ip4_1), //connection->ip
-                "download"=>$contractDetailConnectionData['download'], //planes->download
-                "upload"=>$contractDetailConnectionData['upload'], // planes->upload
-                "estado"=>$mikrotikConnectionStatus // connection->status
-            ))
+        // delete previous queue if old ip is found
+        if (!is_null($old_ip4_1)) {
+            $dataDel = array(
+                "ip" => $mikrotikIP, // mikrotik ip
+                "clientes" => array(
+                    array(
+                        "cliente_ip" => long2ip($old_ip4_1) // old ip queue to delete
+                    )
+                ) //* you can add multiple queues to update here
+            );
+            // create/update Queue from queuesAPI
+            $responseInfo = self::setUpdatedQueues(json_encode($dataDel), 'DELETE');
+            if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
+            var_dump('delete response: ', $responseInfo);
+        }
+
+        // A queue to create in a mikrotik server
+        $queueAdd = array(
+            "cliente_ip" => long2ip($connection->ip4_1), //connection->ip
+            "download" => $contractDetailConnectionData['download'], //planes->download
+            "upload" => $contractDetailConnectionData['upload'], // planes->upload
+            "estado" => $mikrotikConnectionStatus // connection->status
         );
-        $dataJSON = json_encode($data);
-        var_dump($dataJSON);
 
-        $conexion = curl_init();
-        curl_setopt($conexion, CURLOPT_URL,$url->item->description);
-        curl_setopt($conexion, CURLOPT_POSTFIELDS, $dataJSON);
-        curl_setopt($conexion, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($conexion, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($conexion, CURLOPT_CUSTOMREQUEST, 'POST'); 
+        $dataAdd = array(
+            "ip" => $mikrotikIP, // mikrotik ip
+            "clientes" => array($queueAdd) //* you can add multiple queues to update here
+        );
+        // create/update Queue from queuesAPI
+        $responseInfo = self::setUpdatedQueues(json_encode($dataAdd), 'POST');
+        if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
+        var_dump('post response: ', $responseInfo);
 
-        $respuesta=curl_exec($conexion);
-
-        curl_close($conexion);
-        
-        Yii::$app->session->addFlash('info', $respuesta);
-        return $respuesta;
+        return $responseInfo; // returns false if error
     }
 
-    private function getContractDetailPlanesData($connection){
+    /**
+     * joins the connection model (w contract_id) to the planes view to get info about the current plan's download, upload, name, etc.
+     */
+    private function getContractDetailPlanesData($connection)
+    {
         // select , from , join
         $query = (new Query())
-                ->select(['*'])
-                ->from('contract_detail cd')
-                ->leftJoin('planes p', 'cd.product_id = p.product_id');
+            ->select(['*'])
+            ->from('contract_detail cd')
+            ->leftJoin('planes p', 'cd.product_id = p.product_id');
         //where
         $query->andWhere(['=', 'cd.contract_id', $connection->contract_id]);
         //exec
@@ -70,12 +86,16 @@ class MikrotikController extends Controller
         return $qResults;
     }
 
-    private function getMikrotikConnectionStatus($connection){
-        $mtikPossibleStatuses = ['inactivo','activo'];
-        $connectionEnumPossible = ['enabled','disabled','forced','low'];
+    /**
+     * returns 'inactivo' or 'activo' based on the current connection status.
+     */
+    private function getMikrotikConnectionStatus($connection)
+    {
+        $mtikPossibleStatuses = ['inactivo', 'activo'];
+        $connectionEnumPossible = ['enabled', 'disabled', 'forced', 'low'];
         //['enabled','disabled','forced','low'];
         $mikrotikConnectionStatus = false;
-        switch ($connection->status){
+        switch ($connection->status) {
             case $connectionEnumPossible[0]:
                 $mikrotikConnectionStatus = true;
                 break;
@@ -89,6 +109,44 @@ class MikrotikController extends Controller
                 $mikrotikConnectionStatus = false;
                 break;
         }
-        return (!$mikrotikConnectionStatus)?$mtikPossibleStatuses[0]:$mtikPossibleStatuses[1];
+        return (!$mikrotikConnectionStatus) ? $mtikPossibleStatuses[0] : $mtikPossibleStatuses[1];
+    }
+
+    /**
+     * creates a connection with the queues API
+     * tries to update (create if none, update if exists) a queue info.
+     * returns false in case of error
+     */
+    private function setUpdatedQueues($data, $httpMethod)
+    {
+        // get info from configuration
+        $url = Config::getConfig('mikrotik_url_create_queues')->item->description;
+        $accessToken = Config::getConfig('mikrotik_access_token_queues')->item->description;
+        if (!(isset($url) && isset($accessToken))) return false; // if the config variables arent set , return false
+
+        // curl setup
+        $conexion = curl_init();
+        curl_setopt($conexion, CURLOPT_URL, $url);
+        curl_setopt($conexion, CURLOPT_POSTFIELDS, $data);
+        curl_setopt(
+            $conexion,
+            CURLOPT_HTTPHEADER,
+            array(
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $accessToken
+            )
+        );
+        curl_setopt($conexion, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($conexion, CURLOPT_CUSTOMREQUEST, $httpMethod);
+        $respuesta = '';
+        $respuesta = curl_exec($conexion);
+        $HTTP_CODE_RESPONSE = curl_getinfo($conexion, CURLINFO_HTTP_CODE); // get http response code : 200,401,500...
+        curl_close($conexion); // connection close
+
+        // format response
+        if (is_array($respuesta)) $respuesta = implode('. ', $respuesta); // if is array, transform into string for response
+        $responseString = ($respuesta . ' HTTP_CODE: ' . $HTTP_CODE_RESPONSE);
+
+        return $responseString; //string or false
     }
 }

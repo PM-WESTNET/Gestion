@@ -121,6 +121,7 @@ class Connection extends ActiveRecord {
             'status_account' => Yii::t('app', 'Status Account'),
             'clean' => Yii::t('app', 'Clean'),
             'access_point_id' => Yii::t('app', 'Access Point'),
+            'ip4_1_old' => 'Ip4 1 Anterior',
         ];
     }
 
@@ -221,8 +222,18 @@ class Connection extends ActiveRecord {
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
-        // add queues update for mikrotik load balanced customer connections
-        $response = MikrotikController::updateQueues($this);
+        var_dump('aftersave');
+        // if the IP4_1 changed, then the previous queue should be deleted.
+        if(isset($changedAttributes['ip4_1'])){
+            var_dump('ip changed');
+            // queues update for mikrotik load balanced customer connections
+            var_dump('new:',long2ip($this['ip4_1']),'old:',long2ip($changedAttributes['ip4_1']));
+            $response = MikrotikController::updateQueues($this,$changedAttributes['ip4_1']);
+        }else{
+            var_dump('ip stayed the same');
+            $response = MikrotikController::updateQueues($this);
+        }
+        
         try {
             if (!YII_ENV_TEST && $insert) {
                 $log = new CustomerLog();
