@@ -30,12 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             'name',
             [
-                'attribute'=>'status',
-                'value'=>function($model){
-                    return Yii::t('app',  ucfirst($model->status));
-                }
-            ],
-            [
                 'attribute'=>'type',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->type));
@@ -66,11 +60,33 @@ $this->params['breadcrumbs'][] = $this->title;
                 }
             ],
             [
-                'label'=>Yii::t('app', 'Product'),
-                'value'=>function($model){
-                    $productName = (isset($model->product)) ? $model->product->name : "No tiene producto asociado*"; // check if product exist
-                    return ($model->value_from==\app\modules\sale\models\Discount::VALUE_FROM_PRODUCT ? $productName : Yii::t('app', 'No apply') );
+                'label' => Yii::t('app', 'Product'),
+                'format' => 'html',
+                'value' => function ($model) {
+                    // $productName = 
+                    $ret = '';
+                    if ($model->value_from == \app\modules\sale\models\Discount::VALUE_FROM_PRODUCT) {
+                        if (isset($model->product)) { // check if product exist
+                            $ret = $model->product->name;
+                        } else {
+                            // $ret = "No tiene producto asociado*";
+                            $ret = "<span class='label label-danger'>No tiene producto asociado</span>";
+                        }
+                    } else {
+                        $ret = Yii::t('app', 'No apply');
+                    }
+                    return $ret;
                 }
+            ],
+            [
+                'attribute' => 'status',
+                'label' => 'Estado del Descuento',
+                'format' => 'html',
+                'value' => function ($model) {
+                    $labelType = ($model->status == "enabled")? "success" : "danger";
+                    return "<span class='label label-$labelType'>$model->status</span>";
+                },
+                'filter'=>['enabled'=>Yii::t('app','Enabled'), 'disabled'=>Yii::t('app','Disabled')],
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',

@@ -24,6 +24,7 @@ class DiscountController extends Controller
      */
     public function actionIndex()
     {
+        $this->layout = '//fluid';
         $dataProvider = new ActiveDataProvider([
             'query' => Discount::find(),
         ]);
