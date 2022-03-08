@@ -117,7 +117,19 @@ $customer = $model->customer;
                 'attributes' => [
                     [
                         'label' => Yii::t('westnet', 'Server'),
-                        'value' => ($connection->server ? $connection->server->name : "" ),
+                        'format' => 'html',
+                        'value' => function($model){
+
+                            $retHTML = ($model->server ? $model->server->name : "" );
+                            if(isset($model->server->load_balancer_type)){ // is mikrotik server, then
+                                if($model->server->load_balancer_type == 'Mikrotik'){
+                                    return  Html::a('<span class="label label-success">Actualizar IP Principal en '.$retHTML.'</span>', 
+                                    ['update-on-mikrotik', 'connection_id' => $model->connection_id], 
+                                    ['class' => 'profile-link']);   
+                                }
+                            }
+                            return $retHTML;
+                        },
                     ],
                     [
                         'label' => Yii::t('westnet', 'Node'),

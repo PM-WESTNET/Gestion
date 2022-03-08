@@ -15,6 +15,7 @@ use app\modules\config\models\Config;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\db\Expression;
 use yii\db\Query;
+use app\modules\westnet\models\Node;
 
 /**
  * AccessPointController implements the CRUD actions for AccessPoint model.
@@ -25,7 +26,7 @@ class MikrotikController extends Controller
      * Returns a string response or false in case of any errors.
      * also adds a flash to display the data in case of string response success.
      */
-    public static function updateQueues($connection, $old_ip4_1 = null)
+    public static function updateQueues($connection, $old_ip4_1 = null, $old_node_id = null)
     {
         // return false if no server is associated OR of it isnt a mikrotik type server connection
         if (!isset($connection->server,$connection->server->load_balancer_type) or !($connection->server->load_balancer_type == 'Mikrotik')) return false;
@@ -34,14 +35,27 @@ class MikrotikController extends Controller
 
         // create queue on mikrotik server
         $queueCreated = self::createMikrotikQueue($connection, $mikrotikIP);
-        var_dump($queueCreated);
+        if (is_string($queueCreated)) Yii::$app->session->addFlash('info', $queueCreated.' on server: '.$connection->server->name);
+        if (is_bool($queueCreated)) Yii::$app->session->addFlash('error', 'Failed to create Queue on Mikrotik server'.$connection->server->name);
+
         // delete queue in mikrotik server
         if (!is_null($old_ip4_1)) {
-            $queueDeleted = self::deleteMikrotikQueue($connection,$mikrotikIP,$old_ip4_1);
-            var_dump($queueDeleted);
+            $mikrotikIPDelete = $mikrotikIP;
+
+            // delete the queue of the server where it was left off last time (could be a different mikrotik server)
+            if (!is_null($old_node_id)) {
+                // var_dump('$old_node_id',$old_node_id);
+                $oldNode = Node::findOne($old_node_id); // in case the node changed, we search for it and its server's IP number
+                $mikrotikIPDelete = long2ip($oldNode->server->ip_of_load_balancer);
+                // var_dump('$mikrotikIPDelete',$mikrotikIPDelete);
+            }
+
+            $queueDeleted = self::deleteMikrotikQueue($connection,$mikrotikIPDelete,$old_ip4_1);
+            if (is_string($queueDeleted)) Yii::$app->session->addFlash('info', $queueDeleted.' on server: '.$connection->server->name);
+            if (is_bool($queueDeleted)) Yii::$app->session->addFlash('error', 'Failed to delete Queue on Mikrotik server'.$connection->server->name);
         }
-        // var_dump($queueCreated,$queueDeleted);
-        return $responseInfo; // returns false if error
+
+        return $queueCreated;
     }
 
     /**
@@ -65,8 +79,6 @@ class MikrotikController extends Controller
         );
         // create/update Queue from queuesAPI
         $responseInfo = self::setUpdatedQueues(json_encode($dataAdd), 'POST');
-        if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
-
         return $responseInfo;
     }
 
@@ -85,8 +97,6 @@ class MikrotikController extends Controller
         );
         // create/update Queue from queuesAPI
         $responseInfo = self::setUpdatedQueues(json_encode($dataDel), 'DELETE');
-        if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
-
         return $responseInfo;
     }
 

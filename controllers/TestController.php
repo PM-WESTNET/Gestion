@@ -299,6 +299,7 @@ class TestController extends Controller {
         // $start = microtime(true);
         $conn = Connection::findOne($connection_id);
         // var_dump('query runned found connection TIME',(microtime(true)-$start));
+        $conn->node_id = '90'; // comment if needed
         $conn->updateIp(); // comment if you dont want to update the IP (also triggers SecureConnectionUpdate->update() func)
         // var_dump('ip updated TIME',(microtime(true)-$start));
         $savedBool = $conn->save();

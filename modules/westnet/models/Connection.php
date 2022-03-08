@@ -222,10 +222,15 @@ class Connection extends ActiveRecord {
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
+        // var_dump($changedAttributes);
+        // var_dump($this->ip4_1,$this->node_id);
 
+        // if node changed, then queues behaviour changes a little
+        if(isset($changedAttributes['node_id'])){
+            $response = MikrotikController::updateQueues($this,$changedAttributes['ip4_1'],$changedAttributes['node_id']);
+        }
         // if the IP4_1 changed, then the previous queue should be deleted.
-        if(isset($changedAttributes['ip4_1'])){
-            // var_dump('new:',long2ip($this['ip4_1']),'old:',long2ip($changedAttributes['ip4_1']));
+        else if(isset($changedAttributes['ip4_1'])){
             $response = MikrotikController::updateQueues($this,$changedAttributes['ip4_1']);
         }else{
             $response = MikrotikController::updateQueues($this);
