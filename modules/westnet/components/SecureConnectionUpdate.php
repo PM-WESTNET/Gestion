@@ -159,7 +159,7 @@ class SecureConnectionUpdate
                         Profiler::profile('contract-udpate');
                         $rta = $contractRequest->update($contractRest);
                         // add queues update for mikrotik load balanced customer connections
-                        $response = MikrotikController::updateQueues($connection);
+                        // $response = MikrotikController::updateQueues($connection);
                         Profiler::profile('contract-udpate');
                     } else {
                         $contract->external_id = null;

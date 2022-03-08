@@ -12,6 +12,7 @@ use yii\web\NotFoundHttpException;
 use app\modules\sale\models\Customer;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\config\models\Config;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -27,28 +28,29 @@ class MikrotikController extends Controller
     public static function updateQueues($connection, $old_ip4_1 = null)
     {
         // return false if no server is associated OR of it isnt a mikrotik type server connection
-        if (!isset($connection->server) or !($connection->server->load_balancer_type == 'Mikrotik')) return false;
-
+        if (!isset($connection->server,$connection->server->load_balancer_type) or !($connection->server->load_balancer_type == 'Mikrotik')) return false;
         $mikrotikIP = long2ip($connection->server->ip_of_load_balancer);
+        $responseInfo = false; // defaults as false
+
+        // create queue on mikrotik server
+        $queueCreated = self::createMikrotikQueue($connection, $mikrotikIP);
+        var_dump($queueCreated);
+        // delete queue in mikrotik server
+        if (!is_null($old_ip4_1)) {
+            $queueDeleted = self::deleteMikrotikQueue($connection,$mikrotikIP,$old_ip4_1);
+            var_dump($queueDeleted);
+        }
+        // var_dump($queueCreated,$queueDeleted);
+        return $responseInfo; // returns false if error
+    }
+
+    /**
+     * creates a queue on a Mikrotik server based on its IP and the current connections data.
+     */
+    private function createMikrotikQueue($connection, $mikrotikIP)
+    {
         $contractDetailConnectionData = self::getContractDetailPlanesData($connection);
         $mikrotikConnectionStatus = self::getMikrotikConnectionStatus($connection);
-
-        // delete previous queue if old ip is found
-        if (!is_null($old_ip4_1)) {
-            $dataDel = array(
-                "ip" => $mikrotikIP, // mikrotik ip
-                "clientes" => array(
-                    array(
-                        "cliente_ip" => long2ip($old_ip4_1) // old ip queue to delete
-                    )
-                ) //* you can add multiple queues to update here
-            );
-            // create/update Queue from queuesAPI
-            $responseInfo = self::setUpdatedQueues(json_encode($dataDel), 'DELETE');
-            if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
-            var_dump('delete response: ', $responseInfo);
-        }
-
         // A queue to create in a mikrotik server
         $queueAdd = array(
             "cliente_ip" => long2ip($connection->ip4_1), //connection->ip
@@ -64,9 +66,28 @@ class MikrotikController extends Controller
         // create/update Queue from queuesAPI
         $responseInfo = self::setUpdatedQueues(json_encode($dataAdd), 'POST');
         if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
-        var_dump('post response: ', $responseInfo);
 
-        return $responseInfo; // returns false if error
+        return $responseInfo;
+    }
+
+    /**
+     * deletes a queue on a Mikrotik server based on its IP and the current connections data.
+     */
+    private function deleteMikrotikQueue($connection,$mikrotikIP,$old_ip4_1)
+    {
+        $dataDel = array(
+            "ip" => $mikrotikIP, // mikrotik ip
+            "clientes" => array(
+                array(
+                    "cliente_ip" => long2ip($old_ip4_1) // old ip queue to delete
+                )
+            ) //* you can add multiple queues to update here
+        );
+        // create/update Queue from queuesAPI
+        $responseInfo = self::setUpdatedQueues(json_encode($dataDel), 'DELETE');
+        if (is_string($responseInfo)) Yii::$app->session->addFlash('info', $responseInfo);
+
+        return $responseInfo;
     }
 
     /**
@@ -119,6 +140,9 @@ class MikrotikController extends Controller
      */
     private function setUpdatedQueues($data, $httpMethod)
     {
+        if(!isset(Config::getConfig('mikrotik_url_create_queues')->item->description)) return 'Configuration item mikrotik_url_create_queues not setted.';
+        if(!isset(Config::getConfig('mikrotik_access_token_queues')->item->description)) return 'Configuration item mikrotik_access_token_queues not setted.';
+        
         // get info from configuration
         $url = Config::getConfig('mikrotik_url_create_queues')->item->description;
         $accessToken = Config::getConfig('mikrotik_access_token_queues')->item->description;

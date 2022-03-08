@@ -42,8 +42,9 @@ use app\modules\westnet\notifications\components\transports\EmailTransport;
 use app\modules\westnet\api\controllers\ContractController;
 use app\modules\westnet\models\Connection;
 use yii\data\ArrayDataProvider;
-
+ 
 use Da\QrCode\QrCode;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
@@ -294,6 +295,15 @@ class TestController extends Controller {
         ]);
     }
 
-    
+    public function actionTestQueues($connection_id){
+        // $start = microtime(true);
+        $conn = Connection::findOne($connection_id);
+        // var_dump('query runned found connection TIME',(microtime(true)-$start));
+        $conn->updateIp(); // comment if you dont want to update the IP (also triggers SecureConnectionUpdate->update() func)
+        // var_dump('ip updated TIME',(microtime(true)-$start));
+        $savedBool = $conn->save();
+        // var_dump('after save TIME',(microtime(true)-$start));
+        die('//');
+    }
 
 }
