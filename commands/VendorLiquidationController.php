@@ -91,7 +91,9 @@ class VendorLiquidationController extends Controller{
 
         foreach($details as $detail){
             $price = Product::findOne(['product_id' => $detail['product_id']])->getPriceFromDate($detail['date'])->one();
-
+            if(!isset($price->finalPrice)){
+                $this->stdout( "Product ID: " .$detail['product_id']. "\n" ); 
+            }
             //Si el precio del producto es mayor a 0
             if($price->finalPrice > 0){
                 $contract = Contract::findOne(['contract_id' => $detail['contract_id']]);
