@@ -29,7 +29,8 @@ class MikrotikController extends Controller
     public static function updateQueues($connection, $old_ip4_1 = null, $old_node_id = null)
     {
         // return false if no server is associated OR of it isnt a mikrotik type server connection
-        if (!isset($connection->server,$connection->server->load_balancer_type) or !($connection->server->load_balancer_type == 'Mikrotik')) return false;
+        if (!isset($connection->server,$connection->server->load_balancer_type,$connection->server->ip_of_load_balancer) or 
+        !($connection->server->load_balancer_type == 'Mikrotik')) return false;
         $mikrotikIP = long2ip($connection->server->ip_of_load_balancer);
         $responseInfo = false; // defaults as false
 
