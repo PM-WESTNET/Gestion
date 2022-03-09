@@ -79,7 +79,7 @@ class MikrotikController extends Controller
             "clientes" => array($queueAdd) //* you can add multiple queues to update here
         );
         // create/update Queue from queuesAPI
-        $responseInfo = self::setUpdatedQueues(json_encode($dataAdd), 'POST');
+        $responseInfo = self::setUpdatedQueues(json_encode($dataAdd), 'PUT');
         return $responseInfo;
     }
 
