@@ -23,13 +23,13 @@ class DiscountSearch extends Discount
     public function rules()
     {
         return [
-            [['discount_id','customerAmount','customersInsideRange','value','code'], 'integer'],
+            [['discount_id','customerAmount','customersInsideRange','value','code','periods'], 'integer'],
             [['name', 'referenced', 'from_date', 'to_date','customer_has_discount_from_date','customer_has_discount_to_date'], 'safe'],
-            [['status'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
+            [['status','type'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
             [['customerFilterRange'], 'string'], // recordar que status existe en dos tablas con el mismo nombre
             /* [['from_date', 'to_date', 'lastname'], 'string'], */ // mejorar implementacion de esto
-            [['lastname'], 'string'], 
-            [['referenced'], 'boolean'],
+            [['lastname','apply_to','value_from'], 'string'], 
+            [['referenced','persistent'], 'boolean'],
         ];
     }
 
@@ -203,11 +203,17 @@ class DiscountSearch extends Discount
         $query->andFilterWhere([
             'discount_id' => $this->discount_id,
             'status' => $this->status,
-            'value' => $this->value,
-            'type' => $this->type
+            'persistent' => $this->persistent,
+            'referenced' => $this->referenced,
+            'periods' => $this->periods,
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name]);
+        $query->andFilterWhere(['like', 'type', $this->type]);
+        $query->andFilterWhere(['like', 'value', $this->value."%",false]);
+        $query->andFilterWhere(['like', 'apply_to', $this->apply_to]);
+        $query->andFilterWhere(['like', 'value_from', $this->value_from]);
+        // $query->andFilterWhere(['like', 'apply_to', $this->apply_to]);
 
         return $dataProvider;
     }

@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -21,8 +22,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'btn btn-success'])
             ;?>
         </p>
+        <p>
+            <?= Html::a("<span class='glyphicon glyphicon-signal'></span> " . 'REPORTES DESCUENTOS',
+            ['/reports/reports/discount'],
+            ['class' => 'btn btn-info'])
+            ;?>
+        </p>
     </div>
-    
+    <!-- Url::to(['/reports/reports/discount']) -->
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -35,15 +42,16 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Yii::t('app',  ucfirst($model->type));
                 }
             ],
-            [
-                'attribute'=>'refrenced',
-                'label' => Yii::t('app', 'Referenced' ),
-                'value' => function($model){
-                    return Yii::t('app',  ($model->referenced ? 'Yes' : 'No' ));
-                }
-            ],
+            'referenced:boolean',
             'persistent:boolean',
-            'value',
+            [
+                'attribute' => 'value',
+                'format' => 'text',
+                'label' => 'Valor',
+                'value' => function ($model) {
+                    return ($model->type == "fixed")? "$".$model->value : $model->value."%";
+                },
+            ],
             'from_date:date',
             'to_date:date',
             'periods',
@@ -51,13 +59,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'apply_to',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->apply_to));
-                }
+                },
+                'filter' => $apply_toArr, // defined on the controller
             ],
             [
                 'attribute'=>'value_from',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->value_from));
-                }
+                },
+                'filter' => $value_fromArr, // defined on the controller
             ],
             [
                 'label' => Yii::t('app', 'Product'),
@@ -86,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     $labelType = ($model->status == "enabled")? "success" : "danger";
                     return "<span class='label label-$labelType'>$model->status</span>";
                 },
-                'filter'=>['enabled'=>Yii::t('app','Enabled'), 'disabled'=>Yii::t('app','Disabled')],
+                'filter'=> $statusArr,
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',

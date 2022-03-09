@@ -47,6 +47,22 @@ class Discount extends \app\components\db\ActiveRecord
     const APPLY_TO_CUSTOMER = 'customer';
     const APPLY_TO_PRODUCT = 'product';
 
+    const APPLY_TO_ENUM = array(
+        self::APPLY_TO_CUSTOMER => 'Cliente',
+        self::APPLY_TO_PRODUCT => 'Producto'
+    );
+
+    const VALUE_FROM_ENUM = array(
+        self::VALUE_FROM_TOTAL => 'Total',
+        self::VALUE_FROM_PRODUCT => 'Producto',
+        self::VALUE_FROM_PLAN => 'Plan',
+    );
+
+    const STATUS_ENUM = array(
+        self::STATUS_ENABLED => 'Disponible',
+        self::STATUS_DISABLED => 'Inactivo'
+    );
+
     /**
      * @inheritdoc
      */

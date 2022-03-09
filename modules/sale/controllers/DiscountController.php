@@ -31,10 +31,15 @@ class DiscountController extends Controller
 
         $searchModel = new DiscountSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-
+        $apply_toArr = Discount::APPLY_TO_ENUM;
+        $value_fromArr = Discount::VALUE_FROM_ENUM;
+        $statusArr = Discount::STATUS_ENUM;
         return $this->render('index', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
+            'apply_toArr' => $apply_toArr,
+            'value_fromArr' => $value_fromArr,
+            'statusArr' => $statusArr,
         ]);
     }
 
