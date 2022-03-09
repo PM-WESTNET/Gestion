@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -21,8 +22,14 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'btn btn-success'])
             ;?>
         </p>
+        <p>
+            <?= Html::a("<span class='glyphicon glyphicon-signal'></span> " . 'REPORTES DESCUENTOS',
+            ['/reports/reports/discount'],
+            ['class' => 'btn btn-info'])
+            ;?>
+        </p>
     </div>
-    
+    <!-- Url::to(['/reports/reports/discount']) -->
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -30,26 +37,21 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             'name',
             [
-                'attribute'=>'status',
-                'value'=>function($model){
-                    return Yii::t('app',  ucfirst($model->status));
-                }
-            ],
-            [
                 'attribute'=>'type',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->type));
                 }
             ],
-            [
-                'attribute'=>'refrenced',
-                'label' => Yii::t('app', 'Referenced' ),
-                'value' => function($model){
-                    return Yii::t('app',  ($model->referenced ? 'Yes' : 'No' ));
-                }
-            ],
+            'referenced:boolean',
             'persistent:boolean',
-            'value',
+            [
+                'attribute' => 'value',
+                'format' => 'text',
+                'label' => 'Valor',
+                'value' => function ($model) {
+                    return ($model->type == "fixed")? "$".$model->value : $model->value."%";
+                },
+            ],
             'from_date:date',
             'to_date:date',
             'periods',
@@ -57,20 +59,44 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute'=>'apply_to',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->apply_to));
-                }
+                },
+                'filter' => $apply_toArr, // defined on the controller
             ],
             [
                 'attribute'=>'value_from',
                 'value'=>function($model){
                     return Yii::t('app',  ucfirst($model->value_from));
+                },
+                'filter' => $value_fromArr, // defined on the controller
+            ],
+            [
+                'label' => Yii::t('app', 'Product'),
+                'format' => 'html',
+                'value' => function ($model) {
+                    // $productName = 
+                    $ret = '';
+                    if ($model->value_from == \app\modules\sale\models\Discount::VALUE_FROM_PRODUCT) {
+                        if (isset($model->product)) { // check if product exist
+                            $ret = $model->product->name;
+                        } else {
+                            // $ret = "No tiene producto asociado*";
+                            $ret = "<span class='label label-danger'>No tiene producto asociado</span>";
+                        }
+                    } else {
+                        $ret = Yii::t('app', 'No apply');
+                    }
+                    return $ret;
                 }
             ],
             [
-                'label'=>Yii::t('app', 'Product'),
-                'value'=>function($model){
-                    $productName = (isset($model->product)) ? $model->product->name : "No tiene producto asociado*"; // check if product exist
-                    return ($model->value_from==\app\modules\sale\models\Discount::VALUE_FROM_PRODUCT ? $productName : Yii::t('app', 'No apply') );
-                }
+                'attribute' => 'status',
+                'label' => 'Estado del Descuento',
+                'format' => 'html',
+                'value' => function ($model) {
+                    $labelType = ($model->status == "enabled")? "success" : "danger";
+                    return "<span class='label label-$labelType'>$model->status</span>";
+                },
+                'filter'=> $statusArr,
             ],
             [
                 'class' => 'app\components\grid\ActionColumn',

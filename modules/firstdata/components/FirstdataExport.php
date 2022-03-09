@@ -74,6 +74,7 @@ class FirstdataExport {
         }
 
         $filler = str_pad('', 90);
+        //* 24590100,1,070322,0002013,0,000005139593,32                                                                                          
         return $commerce.$register.$date.$regiter_count.$signo.$import1.$import2.$filler;
 
     }
@@ -109,7 +110,7 @@ class FirstdataExport {
         $aux = str_pad(' ', 40, ' ');
         $filler2 = str_pad('', 20);
 
-
+        //* 24590100,2,4593540002636645000000133424,001,999,01,000002299,00,Mar22 070322
         return $commerce.$register.$card.$reference.$quote.$plan_quotes.$frecuency.$import1.$import2
             .$period.$filler1.$vto.$aux.$filler2;
 
