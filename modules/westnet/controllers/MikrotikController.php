@@ -28,8 +28,6 @@ class MikrotikController extends Controller
      */
     public static function updateQueues($connection, $old_ip4_1 = null, $old_node_id = null)
     {
-        if(!isset(Yii::$app->session)) return false; // return false when accessing from the console (cronjobs)
-        
         // return false if no server is associated OR of it isnt a mikrotik type server connection
         if (!isset($connection->server,$connection->server->load_balancer_type,$connection->server->ip_of_load_balancer) or 
         !($connection->server->load_balancer_type == 'Mikrotik')) return false;
@@ -38,8 +36,8 @@ class MikrotikController extends Controller
 
         // create queue on mikrotik server
         $queueCreated = self::createMikrotikQueue($connection, $mikrotikIP);
-        if (is_string($queueCreated)) Yii::$app->session->addFlash('info', $queueCreated.' on server: '.$connection->server->name);
-        if (is_bool($queueCreated)) Yii::$app->session->addFlash('error', 'Failed to create Queue on Mikrotik server'.$connection->server->name);
+        if (is_string($queueCreated) && isset(Yii::$app->session)) Yii::$app->session->addFlash('info', $queueCreated.' on server: '.$connection->server->name);
+        if (is_bool($queueCreated) && isset(Yii::$app->session)) Yii::$app->session->addFlash('error', 'Failed to create Queue on Mikrotik server'.$connection->server->name);
 
         // delete queue in mikrotik server
         if (!is_null($old_ip4_1)) {
@@ -54,8 +52,8 @@ class MikrotikController extends Controller
             }
 
             $queueDeleted = self::deleteMikrotikQueue($connection,$mikrotikIPDelete,$old_ip4_1);
-            if (is_string($queueDeleted)) Yii::$app->session->addFlash('info', $queueDeleted.' on server: '.$connection->server->name);
-            if (is_bool($queueDeleted)) Yii::$app->session->addFlash('error', 'Failed to delete Queue on Mikrotik server'.$connection->server->name);
+            if (is_string($queueDeleted) && isset(Yii::$app->session)) Yii::$app->session->addFlash('info', $queueDeleted.' on server: '.$connection->server->name);
+            if (is_bool($queueDeleted) && isset(Yii::$app->session)) Yii::$app->session->addFlash('error', 'Failed to delete Queue on Mikrotik server'.$connection->server->name);
         }
 
         return $queueCreated;
