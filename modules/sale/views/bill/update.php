@@ -9,8 +9,7 @@ use yii\helpers\Html;
 // This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
 $flashes=yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
 
-if(!empty($flashes))recursiveAddFlashes($flashes,0);
-function recursiveAddFlashes($flashes,$depthLvl = null){
+function recursiveAddFlashes($flashes,$depthLvl = 0){
     foreach($flashes as $key => $flashMsg){
         // array logic
         if(is_array($flashMsg)){
@@ -18,11 +17,11 @@ function recursiveAddFlashes($flashes,$depthLvl = null){
         }
         // string logic
         else{
-            // var_dump("nivel:",$depthLvl);
-            Yii::$app->session->addFlash($key, $flashMsg);
+            Yii::$app->session->addFlash('error', $flashMsg);
         }
     }
 }
+if(!empty($flashes))recursiveAddFlashes($flashes);
 
 $this->title = Yii::t('app', '{modelClass}: ', [
   'modelClass' => $model->typeName,
