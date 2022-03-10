@@ -1,5 +1,6 @@
 <?php
 
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\helpers\Html;
 /**
  * @var yii\web\View $this
@@ -8,18 +9,19 @@ use yii\helpers\Html;
 // This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
 $flashes=yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
 
-if(!empty($flashes)){
-    foreach ($flashes as $key => $flashType){ // get flash type: error/danger/etc
-        if(is_array($flashType)){ // if the flash is array
-            foreach ($flashType as $flashMsg){ // re-create the flash message
-                Yii::$app->session->addFlash($key, $flashMsg);
-            }   
-        }else{ // if the flash is only a string
-            Yii::$app->session->addFlash($key, $flashType);
+if(!empty($flashes))recursiveAddFlashes($flashes,0);
+function recursiveAddFlashes($flashes,$depthLvl = null){
+    foreach($flashes as $key => $flashMsg){
+        // array logic
+        if(is_array($flashMsg)){
+            recursiveAddFlashes($flashMsg,$depthLvl+1);
+        }
+        // string logic
+        else{
+            // var_dump("nivel:",$depthLvl);
+            Yii::$app->session->addFlash($key, $flashMsg);
         }
     }
-}else{
-    Yii::$app->session->addFlash('info','No flashes found');
 }
 
 $this->title = Yii::t('app', '{modelClass}: ', [
