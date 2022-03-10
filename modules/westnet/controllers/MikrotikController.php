@@ -28,6 +28,8 @@ class MikrotikController extends Controller
      */
     public static function updateQueues($connection, $old_ip4_1 = null, $old_node_id = null)
     {
+        if(!isset(Yii::$app->session)) return false; // return false when accessing from the console (cronjobs)
+        
         // return false if no server is associated OR of it isnt a mikrotik type server connection
         if (!isset($connection->server,$connection->server->load_balancer_type,$connection->server->ip_of_load_balancer) or 
         !($connection->server->load_balancer_type == 'Mikrotik')) return false;
