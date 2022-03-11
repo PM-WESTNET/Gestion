@@ -41,6 +41,14 @@ return [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
                 ],
+                // [
+                //     'class' => 'yii\log\FileTarget',
+                //     'levels' => ['info'],
+                //     'categories' => ['notificationcampaign'],
+                //     'logVars' => [],
+                //     'exportInterval' => 1,
+                //     'logFile' => '@runtime/logs/notificationcampaign.log'
+                // ],
             ],
         ],
         'db' => $db['db'],

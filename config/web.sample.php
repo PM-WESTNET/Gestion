@@ -39,6 +39,12 @@ $config = [
         'assetManager' => [
             'linkAssets' => true,
         ],
+        // 'urlManager' => [
+        //     'enablePrettyUrl' => false, // true
+        //     'showScriptName' => false,
+        //     'rules' => [
+        //     ],
+        // ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
@@ -94,6 +100,14 @@ $config = [
                     'logFile' => '@runtime/logs/browser-notification-customers.log'
 
                 ],
+                // [
+                //     'class' => 'yii\log\FileTarget',
+                //     'levels' => ['info'],
+                //     'categories' => ['emails'],
+                //     'logVars' => [],
+                //     'exportInterval' => 1,
+                //     'logFile' => '@runtime/logs/emails.txt'
+                // ],
             ],
         ],
         'db' => $db['db'],
