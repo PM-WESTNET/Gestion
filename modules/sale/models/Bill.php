@@ -717,7 +717,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             $retValue = false;
 		                    $had_error = true;
                             $backToDraft = true; // send it to draft (with status=error)
-                            $this->addErrorToCacheOrSession(['An error occurred while the Invoice is processed.'. ' - Bill_id: '. $this->bill_id, ]);
+                            $this->addErrorToCacheOrSession('An error occurred while the Invoice is processed.'. ' - Bill_id: '.$this->bill_id);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
                             if(!Yii::$app instanceof Yii\console\Application) {
                                 Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
@@ -807,7 +807,7 @@ class Bill extends ActiveRecord implements CountableInterface
         // todo: isnt $key = null causing errors??
         if(Yii::$app instanceof Yii\console\Application) {
             $old_errors = Yii::$app->cache->get('_invoice_close_errors');
-            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300);
+            Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300); // this casts any string into an array to store in memory
         } else {
             Yii::$app->session->addFlash($key, $error);
         }
