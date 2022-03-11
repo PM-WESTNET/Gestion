@@ -527,15 +527,20 @@ class BillController extends Controller
 
 
         if (!empty($model->billDetails) && $model->status != 'closed') {
+            // try to close bill
             if (!$model->close()) {
-                //post transaction error management code
-                Yii::$app->session->addFlash('error','No pudo cerrarse la factura.');
+                // error management code..
+
                 $keys = Bill::getConcatedKeyErrors($model);
                 $model->updateAttributes(['had_error' => true]);
 
-                // add flashes before redirect deletes the session variable
-                yii::$app->session->set('customFlashes', yii::$app->session->getAllFlashes());
-
+                if(isset(Yii::$app->session)){
+                    // add flashes before redirect deletes the session variable
+                    if(yii::$app->session->has(''))yii::$app->session->remove(''); // unset this buggy variable
+                    if(yii::$app->session->has('error'))yii::$app->session->remove('error'); // unset this buggy variable
+                    $flashes = yii::$app->session->getAllFlashes();
+                    yii::$app->session->set('customFlashes', $flashes); // adds a custom _SESSION[] variable called 'customFlashes'
+                }
                 if ($keys) {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false, 'errors' => $keys]);
                 } else {

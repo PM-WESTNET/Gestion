@@ -7,21 +7,24 @@ use yii\helpers\Html;
  * @var app\modules\sale\models\Bill $model
  */
 // This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
-$flashes=yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
+if(yii::$app->session->has('customFlashes')) {
 
-function recursiveAddFlashes($flashes,$depthLvl = 0){
-    foreach($flashes as $key => $flashMsg){
-        // array logic
-        if(is_array($flashMsg)){
-            recursiveAddFlashes($flashMsg,$depthLvl+1);
-        }
-        // string logic
-        else{
-            Yii::$app->session->addFlash('error', $flashMsg);
+    $flashes = yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
+    yii::$app->session->remove('customFlashes'); // unset
+
+    function recursiveAddFlashes($flashes,$depthLvl = 0){
+        foreach($flashes as $key => $flashMsg){
+            // array logic
+            if(is_array($flashMsg)){
+                recursiveAddFlashes($flashMsg,$depthLvl+1);
+            }
+            // string logic
+            else{
+                Yii::$app->session->addFlash('error', $flashMsg);
+            }
         }
     }
 }
-if(!empty($flashes))recursiveAddFlashes($flashes);
 
 $this->title = Yii::t('app', '{modelClass}: ', [
   'modelClass' => $model->typeName,

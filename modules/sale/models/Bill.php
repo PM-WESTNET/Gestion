@@ -804,6 +804,7 @@ class Bill extends ActiveRecord implements CountableInterface
      * Examina si es una instacia de consola o no, y agrega los mensajes de error a cache o a session según corresponda.
      */
     public function addErrorToCacheOrSession($error, $key = null){
+        // todo: isnt $key = null causing errors??
         if(Yii::$app instanceof Yii\console\Application) {
             $old_errors = Yii::$app->cache->get('_invoice_close_errors');
             Yii::$app->cache->set('_invoice_close_errors', array_merge($old_errors, [$error]), 300);
