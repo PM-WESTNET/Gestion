@@ -717,7 +717,7 @@ class Bill extends ActiveRecord implements CountableInterface
                             $retValue = false;
 		                    $had_error = true;
                             $backToDraft = true; // send it to draft (with status=error)
-                            $this->addErrorToCacheOrSession('An error occurred while the Invoice is processed.'. ' - Bill_id: '.$this->bill_id);
+                            // $this->addErrorToCacheOrSession('An error occurred while the Invoice is processed.'. ' - Bill_id: '.$this->bill_id);
                             \Yii::info(Yii::t('app', 'An error occurred while the Invoice is processed.') . ' - Bill_id: '. $this->bill_id, 'facturacion');
                             if(!Yii::$app instanceof Yii\console\Application) {
                                 Yii::$app->session->addFlash('error', Yii::t('app', 'An error occurred while the Invoice is processed.'));
@@ -728,6 +728,7 @@ class Bill extends ActiveRecord implements CountableInterface
                     }
                     $this->save();
                     if ($backToDraft) {
+                        $this->addErrorToCacheOrSession('An error occurred while the Invoice is processed and was sent back to drafts.'. ' - Bill_id: '.$this->bill_id);
                         $this->payed = false;
                         $this->status = 'draft';
 

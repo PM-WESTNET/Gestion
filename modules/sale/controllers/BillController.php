@@ -530,16 +530,14 @@ class BillController extends Controller
             // try to close bill
             if (!$model->close()) {
                 // error management code..
-
                 $keys = Bill::getConcatedKeyErrors($model);
                 $model->updateAttributes(['had_error' => true]);
-
-                if(isset(Yii::$app->session)){
+                if(isset(Yii::$app->session)){ //* extremelly important bcause redirect() deletes session flashes. USED ON UPDATE.php VIEW
                     // add flashes before redirect deletes the session variable
-                    if(yii::$app->session->has(''))yii::$app->session->remove(''); // unset this buggy variable
-                    if(yii::$app->session->has('error'))yii::$app->session->remove('error'); // unset this buggy variable
                     $flashes = yii::$app->session->getAllFlashes();
+                    yii::$app->session->removeAllFlashes();
                     yii::$app->session->set('customFlashes', $flashes); // adds a custom _SESSION[] variable called 'customFlashes'
+                    
                 }
                 if ($keys) {
                     return $this->redirect(['update', 'id' => $model->bill_id, 'embed' => false, 'errors' => $keys]);

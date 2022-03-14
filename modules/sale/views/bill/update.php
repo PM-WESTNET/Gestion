@@ -2,30 +2,31 @@
 
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\helpers\Html;
+use yii\bootstrap\Alert;
 /**
  * @var yii\web\View $this
  * @var app\modules\sale\models\Bill $model
  */
-// This is done to show to the user all the flashes that were displayed before the redirect and lost after it.
-if(yii::$app->session->has('customFlashes')) {
 
-    $flashes = yii::$app->session['customFlashes']; //Previously saved on the controller before the redirect
-    yii::$app->session->remove('customFlashes'); // unset
+if(yii::$app->session->has('customFlashes')){
+    $customFlashes = yii::$app->session->get('customFlashes');
+    // var_dump($customFlashes);
+    recursiveAddFlashes($customFlashes);
+}
 
-    function recursiveAddFlashes($flashes,$depthLvl = 0){
-        foreach($flashes as $key => $flashMsg){
-            // array logic
-            if(is_array($flashMsg)){
-                recursiveAddFlashes($flashMsg,$depthLvl+1);
-            }
-            // string logic
-            else{
-                Yii::$app->session->addFlash('error', $flashMsg);
-            }
+function recursiveAddFlashes($flashes,$depthLvl = 0){
+    foreach($flashes as $key => $flashMsg){
+        // array logic
+        if(is_array($flashMsg)){
+            recursiveAddFlashes($flashMsg,$depthLvl+1);
+        }
+        // string logic
+        else{
+            Yii::$app->session->addFlash('error', $flashMsg);
+            // var_dump($flashMsg);
         }
     }
 }
-
 $this->title = Yii::t('app', '{modelClass}: ', [
   'modelClass' => $model->typeName,
 ]) . $model->bill_id;
