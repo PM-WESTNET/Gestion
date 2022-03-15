@@ -268,11 +268,15 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
             ?>
         </div>
         <div class="col-sm-6 col-xs-12">
-            <?php
+
+            <?php 
             if(Yii::$app->params['category_customer_required']){
-                echo $form->field($model, 'customerCategory')->label(Yii::t('app', 'Customer Category'))->dropDownList( ArrayHelper::map(CustomerCategory::find()->where(['status' => 'enabled'])->all(), 'customer_category_id', 'name' ));
+                echo $form->field($model, 'customerCategory')->label(Yii::t('app', 'Customer Category'))->dropDownList( 
+                    ArrayHelper::map(CustomerCategory::find()->where(['status' => 'enabled'])->all(), 'customer_category_id', 'name' ),
+                    ['prompt' => 'Seleccione una opción', '' => 'customer_category_id']);
             }
             ?>
+            
         </div>
     </div>
 
