@@ -366,6 +366,10 @@ class Bill extends ActiveRecord implements CountableInterface
             if ($detail->product) { // if the detail has a product_id, then its an ITEM.
                 $cantItems++;
             }
+            // added this condition to contemplate PLANES DE PAGO EN CUOTAS, which didnt have product_id nor discount_id
+            else if(!$detail->product and !$detail->discount and $detail->line_total > 0){ 
+                $cantItems++;
+            }
         }   
 
         if($perDetail){
