@@ -607,20 +607,43 @@ class Bill extends ActiveRecord implements CountableInterface
             $this->payed = true;
         }*/
 
+        //*AFIP has some limitations, you cannot close a bill if there are already dates from newer ones closed. Ex.you cannot close 03-14 if 03-15 is already closed
+        $newerBills = false;
+        if(isset($this->date,$this->company_id)){
+            // search if any NEWER bills are already 'closed'. In this case, we should change the date of the bill to today's 
+            $newerBillsQuery = Bill::find()
+                                ->where(['>','date',$this->date])
+                                ->andWhere(['status'=>'closed'])
+                                ->andWhere(['is not','ein',null])
+                                ->andWhere(['is not','number',null])
+                                ->andWhere(['is not','customer_id',null])
+                                ->andWhere(['>','amount',0])
+                                ->andWhere(['company_id'=>$this->company_id]);
+
+            $newerBills = $newerBillsQuery->all(); // search for at least 1
+        }
+
         //Fecha y hora
         //Conservar hora anterior en caso de que haya sido seteada de forma manual
-        if(!$this->date || $this->date == '0000-00-00'){
+        if(!$this->date || $this->date == '0000-00-00' || $newerBills){
+            $oldDate = $this->date;
+
+            // change date to TODAY
             $date = new \DateTime();
             $this->date = $date->format('Y-m-d');
             $this->time = $date->format('H:i');
-        }
 
+            $this->addErrorToCacheOrSession("Changed Bill's date from ".$oldDate.' to '.$this->date.' - Bill_id: '.$this->bill_id);
+        }
+        // else: use the current bill date.
+
+
+        //* BEWARE: the save() method triggers a $date change in beforeSave() that can affect invoicing
         if($this->save()){
             return true;
         }else{
             return false;
         }
-
     }
 
     /**
