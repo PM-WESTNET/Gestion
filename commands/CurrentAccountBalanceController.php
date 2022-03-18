@@ -12,6 +12,7 @@ use app\modules\sale\models\Bill;
 use app\modules\sale\models\Customer;
 use yii\console\Controller;
 use app\modules\checkout\models\search\PaymentSearch;
+use Yii;
 
 class CurrentAccountBalanceController extends Controller
 {
@@ -22,27 +23,39 @@ class CurrentAccountBalanceController extends Controller
      */
     public function actionUpdateCurrentAccountBalance()
     {
-        $today = time();
+        try {
+            if(Yii::$app->mutex->acquire('mutex_update_current_account_balance')) {
+                echo "INICIO: ". date('Y-m-d h:i:s'). "\n";
+                $today = time();
 
-        $customers_to_update = Customer::find()
-            ->leftJoin('contract con', 'con.customer_id = customer.customer_id')
-            ->leftJoin('connection conn', 'conn.contract_id = con.contract_id')
-            ->where(['con.status' => 'active'])
-            ->where(['in','conn.status', ['enabled', 'forced']])
-            ->andWhere(['or',['<','customer.last_balance', $today], ['customer.last_balance' => null]])
-            ->all();
+                $customers_to_update = Customer::find()
+                    ->leftJoin('contract con', 'con.customer_id = customer.customer_id')
+                    ->leftJoin('connection conn', 'conn.contract_id = con.contract_id')
+                    ->where(['con.status' => 'active'])
+                    ->where(['in','conn.status', ['enabled', 'forced']])
+                    ->andWhere(['or',['<','customer.last_balance', $today], ['customer.last_balance' => null]])
+                    ->all();
 
-        echo "Clientes con conexiones activas que no han sido actualizados hoy: ". count($customers_to_update) ."\n";
+                echo "Clientes con conexiones activas que no han sido actualizados hoy: ". count($customers_to_update) ."\n";
 
-        foreach ($customers_to_update as $customer) {
-            $searchModel = new PaymentSearch();
-            $searchModel->customer_id = $customer->customer_id;
-            
-            $total = $searchModel->totalCalculationForQuery($customer->customer_id);
+                foreach ($customers_to_update as $customer) {
+                    $searchModel = new PaymentSearch();
+                    $searchModel->customer_id = $customer->customer_id;
+                    
+                    $total = $searchModel->totalCalculationForQuery($customer->customer_id);
 
-            echo "Customer_ID: " . $customer->customer_id . "\n" . "Update Total: " . round($total,2) . "\n";
+                    echo "Customer_ID: " . $customer->customer_id . "\n" . "Update Total: " . round($total,2) . "\n";
 
-            $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
+                    $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
+                }
+                \Yii::$app->mutex->release('mutex_update_current_account_balance');
+                echo "FIN: ". date('Y-m-d h:i:s'). "\n";
+            }else{
+                echo "Ya hay un proceso corriendo \n";
+            }
+        } catch (\Exception $ex) {
+            echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
         }
+
     }
 }
