@@ -34,7 +34,6 @@ class CurrentAccountBalanceController extends Controller
                     ->leftJoin('contract con', 'con.customer_id = customer.customer_id')
                     ->leftJoin('connection conn', 'conn.contract_id = con.contract_id')
                     ->where(['con.status' => 'active'])
-                    ->where(['in','conn.status', ['enabled', 'forced']])
                     ->andWhere(['or',['<','customer.last_balance', $today], ['customer.last_balance' => null]])
                     ->all();
 
