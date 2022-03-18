@@ -23,7 +23,7 @@ class CurrentAccountBalanceController extends Controller
      */
     public function actionUpdateCurrentAccountBalance()
     {
-        $transaction = Yii::$app->db->beginTransaction();
+
 
         try {
             if(Yii::$app->mutex->acquire('mutex_update_current_account_balance')) {
@@ -52,11 +52,11 @@ class CurrentAccountBalanceController extends Controller
                 \Yii::$app->mutex->release('mutex_update_current_account_balance');
                 echo "FIN: ". date('Y-m-d h:i:s'). "\n\n";
             }else{
-                echo "Ya hay un proceso corriendo \n";
+                //echo "Ya hay un proceso corriendo \n";
             }
-            $transaction->commit();
+
         } catch (\Exception $ex) {
-            $transaction->rollBack();
+
             echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
         }
 
