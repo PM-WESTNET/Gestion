@@ -941,66 +941,71 @@ class ReportsController extends Controller
 
         $data = $search->searchNotifyPayments((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
         $dataLineal = $search->searchNotifyPaymentsByDate((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
-
-        $first_date = array_key_exists(0, $dataLineal) ? $dataLineal[0] : $search->date_from ;
-        $last_date = end($dataLineal) ? end($dataLineal) : $search->date_to;
-
-        $graph  = new GraphData([
-            'fromdate' => $dataLineal[0]['date'],
-            'todate' => end($dataLineal)['date'],
-        ]);
-
-        $colslineal = $graph->getSteps();
-
-
-        //Columnas del grafico de torta
-        foreach ($data as $item) {
-            $cols[] = $item['name'];
-            $datas[] = $item['qty'];
-        }
-
         $data_app = [];
         $data_ivr = [];
+        // added this safe check for when there is no data inside the notify table in DB
+        if(!empty($data) and !empty($dataLineal)){
+                
+            $first_date = array_key_exists(0, $dataLineal) ? $dataLineal[0] : $search->date_from ;
+            $last_date = end($dataLineal) ? end($dataLineal) : $search->date_to;
 
-        $before_app= 0;
-        $before_ivr = 0;
+            $graph  = new GraphData([
+                'fromdate' => $dataLineal[0]['date'],
+                'todate' => end($dataLineal)['date'],
+            ]);
 
-        //Completo los array con las fechas que comprenden el período
-        foreach ($colslineal as $item) {
-            $from_app = false;
-            $from_ivr = false;
+            $colslineal = $graph->getSteps();
 
-            foreach ($dataLineal as $datal) {
-                if($datal['from'] == NotifyPayment::FROM_APP) {
-                    if($datal['date'] == $item) {
-                        $before_app += (int)$datal['qty'];
-                        array_push($data_app, $before_app);
-                        $from_app = true;
-                    }
-                }
 
-                if($datal['from'] == NotifyPayment::FROM_IVR) {
-                    if($datal['date'] == $item) {
-                        $before_ivr += (int)$datal['qty'];
-                        array_push($data_ivr, $before_ivr);
-                        $from_ivr = true;
-                    }
-                }
+            //Columnas del grafico de torta
+            foreach ($data as $item) {
+                $cols[] = $item['name'];
+                $datas[] = $item['qty'];
             }
 
-            //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
-            if(!$from_app ) {
-                array_push($data_app, $before_app);
+            $data_app = [];
+            $data_ivr = [];
+
+            $before_app= 0;
+            $before_ivr = 0;
+
+            //Completo los array con las fechas que comprenden el período
+            foreach ($colslineal as $item) {
                 $from_app = false;
-            }
-
-            if(!$from_ivr ) {
-                array_push($data_ivr, $before_ivr);
                 $from_ivr = false;
+
+                foreach ($dataLineal as $datal) {
+                    if($datal['from'] == NotifyPayment::FROM_APP) {
+                        if($datal['date'] == $item) {
+                            $before_app += (int)$datal['qty'];
+                            array_push($data_app, $before_app);
+                            $from_app = true;
+                        }
+                    }
+
+                    if($datal['from'] == NotifyPayment::FROM_IVR) {
+                        if($datal['date'] == $item) {
+                            $before_ivr += (int)$datal['qty'];
+                            array_push($data_ivr, $before_ivr);
+                            $from_ivr = true;
+                        }
+                    }
+                }
+
+                //Si el valor no está ni en la linea de la app o ivr se agrega 0 para esa fecha
+                if(!$from_app ) {
+                    array_push($data_app, $before_app);
+                    $from_app = false;
+                }
+
+                if(!$from_ivr ) {
+                    array_push($data_ivr, $before_ivr);
+                    $from_ivr = false;
+                }
             }
+        }else{
+            if(Yii::$app->session->isActive) Yii::$app->session->addFlash("error",'No data available inside notify_payment table');
         }
-
-
         return $this->render('notify-payments',[
             'model' => $search,
             'cols' => $cols,

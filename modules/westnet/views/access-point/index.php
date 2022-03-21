@@ -41,9 +41,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'node_id',
                 'value' => function($model) {
+                    $ret = 'N/A';
                     if($model->node_id) {
-                        return $model->node->name;
+                        if(!empty($model->node->name)) {
+                            $ret = $model->node->name;
+                        }
                     }
+                    return $ret;
                 },
                 'filter' => Select2::widget([
                     'name' => 'AccessPointSearch[node_id]',

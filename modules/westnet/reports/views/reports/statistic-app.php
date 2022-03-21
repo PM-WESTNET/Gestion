@@ -27,12 +27,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
     ]); ?>
     <hr>
-
     <?php
-       foreach ($dataProvider->getModels() as $key => $value) {
-           $rows[] = $value->total;
-           $cols[] = $value->type;
-       }
+        $statisticAppRegs = $dataProvider->getModels();
+        if(!empty($statisticAppRegs)):
+            foreach ($statisticAppRegs as $key => $value) {
+                $rows[] = $value->total;
+                $cols[] = $value->type;
+            }
     ?>
 
     <div class="row">
@@ -136,5 +137,5 @@ $this->params['breadcrumbs'][] = $this->title;
                 ?>
             </div>
         </div>
-
+    <?php endif; ?>
 </div>

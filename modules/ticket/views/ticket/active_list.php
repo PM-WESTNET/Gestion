@@ -25,6 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php
             $customer = app\modules\sale\models\Customer::findOne($customerInfo['customer_id']);
+            if($customer):
             $ticketCount = $customerInfo['count'];
             $tickets = app\modules\ticket\models\Ticket::find()->where([
                         'customer_id' => $customer->customer_id,
@@ -95,7 +96,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <!-- end Customer panel -->
 
-        <?php endforeach; ?>
+        <?php endif; endforeach; ?>
 
     <?php else : ?>
 

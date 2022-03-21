@@ -26,6 +26,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'label' => Yii::t('app', 'Customer'),
                 'value' => function($model){
+                    if(empty($model->customer)) return 'n/a';
                     return Html::a($model->customer->lastname . ' ' . $model->customer->name . ' (' .$model->customer->code . ')', 
                                 ['/sale/customer/view', 'id' => $model->customer->customer_id], 
                                 ['class' => 'profile-link']);
@@ -63,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app','Company'),
                 'format' => 'raw',
                 'value' => function($model){
+                    if(empty($model->company)) return 'n/a';
                     if(!$model->company_id)
                         return null;
                     return $model->company->name;

@@ -442,7 +442,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
 
     }
 
-    public function createLog()
+    public function paycheckCreateLog()
     {
         $log = new PaycheckLog();
         $log->paycheck_id = $this->paycheck_id;
@@ -463,7 +463,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
             ->orderBy('paycheck_log_id', SORT_DESC)
             ->one();
         if ($lastState) {
-            $this->createLog();
+            $this->paycheckCreateLog();
             $this->status = $lastState->status;
             $this->description = $lastState->description;
             $this->timestamp = $lastState->timestamp;
@@ -474,7 +474,7 @@ class Paycheck extends \app\components\db\ActiveRecord implements CountableInter
 
     public function changeState($state)
     {
-        $this->createLog();
+        $this->paycheckCreateLog();
         $this->status = $state;
         return $this->save(false);
     }
