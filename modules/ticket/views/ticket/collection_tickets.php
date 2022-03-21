@@ -122,7 +122,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 $assignations = $model->assignations;
                 $assignation_string = '';
                 foreach ($assignations as $assignation) {
-                    $assignation_string .= $assignation->user->username .', ';
+                    $username = ($assignation->user) ? $assignation->user->username : 'n/a';
+                    $assignation_string .= $username .', ';
                 }
                 return $assignation_string;
             },

@@ -592,14 +592,15 @@ class Task extends ActiveRecord {
         //Completed status
         $status_complete_id = Status::find()->
                         where(['slug' => Status::STATUS_COMPLETED])
-                        ->one()
-                ->status_id;
+                        ->one();
+        $status_complete_id = (!empty($status_complete_id)) ? $status_complete_id->status_id : null;
 
+        
         //Global type
         $type_global_id = TaskType::find()->
                         where(['slug' => \app\modules\agenda\models\TaskType::TYPE_GLOBAL])
-                        ->one()
-                ->task_type_id;
+                        ->one();
+        $type_global_id = (!empty($type_global_id)) ? $type_global_id->task_type_id : null;
 
         $tasks = self::find()
                 ->joinWith('notifications', false)
