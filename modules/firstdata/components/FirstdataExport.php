@@ -18,8 +18,8 @@ class FirstdataExport {
         fwrite($resource, self::headerLine($export) . PHP_EOL);
 
         foreach($export->customers as $customer) {
-            $totalImport = self::shouldContinue($customer); // return value is the TOTALIMPORT ($) for the line in case it DIDNT FAIL. Returns TRUE if failed.
-            if($totalImport == true){
+            $totalImport = self::shouldContinue($customer); // return value is the TOTALIMPORT ($) for the line in case it DIDNT FAIL. Returns false if failed.
+            if(!$totalImport){
                 continue; // skips
             }
             fwrite($resource, self::detailLine($export, $customer, abs($totalImport)) . PHP_EOL);
@@ -32,7 +32,7 @@ class FirstdataExport {
         //Si el saldo es 0 o el cliente tiene credito, no lo agregamos al archivo
         $totalImport = $payment->totalCalculationForQuery($customer->customer_id);
         // if import is less than 0
-        if ($totalImport >= 0) return true;
+        if ($totalImport >= 0) return false;
 
         $card = CustomerDataHelper::getCustomerCreditCard($customer->code);
         // if card is not valid
@@ -40,9 +40,8 @@ class FirstdataExport {
             if (Yii::$app instanceof Application) {
                 Yii::$app->session->addFlash('error', Yii::t('app','Customer data not found . Customer : {code}', ['code' => $customer->code]));
             }
-            return true;
+            return false;
         }
-
         // if no error, returns amount value
         return $totalImport;
     }
@@ -56,8 +55,8 @@ class FirstdataExport {
         $totalImport = 0;
         $cantidad = 0;
         foreach($export->customers as $customer) {
-            $import = self::shouldContinue($customer); // return value is the TOTALIMPORT ($) for the line in case it DIDNT FAIL. Returns TRUE if failed.
-            if($import == true){
+            $import = self::shouldContinue($customer); // return value is the TOTALIMPORT ($) for the line in case it DIDNT FAIL. Returns false if failed.
+            if(!$import){
                 continue; // skips
             }
 
