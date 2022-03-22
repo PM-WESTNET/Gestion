@@ -60,7 +60,7 @@ class FirstdataExport {
                 continue; // skips
             }
 
-            $totalImport += $import;
+            $totalImport += abs($import);
             $cantidad++;
             
         }
