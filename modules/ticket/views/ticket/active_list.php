@@ -51,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                             <?php
                             $bgColor = new ColorHelper($ticket->color->color);
-                            $bgColorLighten = $bgColor->lighten("15%");
+                            $bgColorLighten = $bgColor->lighten("15");
                             ?>
 
                             <!-- Customer ticket -->
