@@ -113,10 +113,10 @@ use app\modules\ticket\TicketModule;
                                 <?= $obs->description; ?>
                             </div>
                             <div class="panel-footer">
-                                <small class="text-muted">
+                                <p class="text-muted">
                                     <?= TicketModule::t('app', 'Created on'); ?> <?= Yii::$app->formatter->asDatetime($obs->datetime); ?>
-                                    <?= TicketModule::t('app', 'by'); ?> <?= $obs->user->username; ?>
-                                </small>
+                                    <?= TicketModule::t('app', 'by'); ?> <?= ($obs->user)?$obs->user->username:'<span class="label label-danger">n/a</span>'; ?>
+                                </p>
                             </div>
                         </div>
 
