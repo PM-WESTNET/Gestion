@@ -8,7 +8,12 @@ use yii\helpers\Html;
     <?= Html::label(Yii::t('paycheck','Paycheck')) ?>
 
     <div class="toggle-paycheck">
-        <input type="hidden" value="<?=(!$model->paycheck ? "" : $model->paycheck->paycheck_id )?>" id="paycheck_id" name="<?=end(explode('\\', get_class($model)))?>[paycheck_id]"/>
+        <?php 
+            $paycheckClass = get_class($model);
+            $paycheckName = explode('\\', $paycheckClass);
+            $paycheckEnd = end($paycheckName);
+        ?>
+        <input type="hidden" value="<?=(!$model->paycheck ? "" : $model->paycheck->paycheck_id )?>" id="paycheck_id" name="<?=$paycheckEnd?>[paycheck_id]"/>
 
         <div id="div-inputs" class="search" style="<?=(!$model->paycheck ? "" : "display: none;" )?>">
             <div class="input-group">
