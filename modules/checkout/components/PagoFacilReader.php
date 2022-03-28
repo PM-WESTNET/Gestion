@@ -115,7 +115,7 @@ class PagoFacilReader
                 break;
 
             $data['date'] = substr($array_line, 5, 4) . '-' . substr($array_line, 3, 2) . '-' . substr($array_line, 1, 2);
-            $data['amount'] = (float) substr($array_line, 111, 4).'.'.substr($array_line, 115, 2);
+            $data['amount'] = (float) substr($array_line, 107, 8).'.'.substr($array_line, 115, 2);
             $data['customer_id'] = (int) preg_replace('/^0+/', '', substr($array_line, 83, 8));
             $data['payment_method'] = 'Pago Facil';
             $data['payment_id'] = '';
