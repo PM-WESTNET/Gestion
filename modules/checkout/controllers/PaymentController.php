@@ -20,6 +20,7 @@ use app\modules\checkout\models\PagoFacilTransmitionFile;
 use \app\modules\accounting\models\search\AccountMovementSearch;
 use app\modules\sale\models\Product;
 use app\modules\westnet\models\Vendor;
+use yii\helpers\Url;
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -272,11 +273,14 @@ class PaymentController extends Controller {
     public function actionDelete($id, $return = "") {
         $model = $this->findModel($id);
         $model->delete();
-
         if (empty($return)) {
             return $this->redirect(['index']);
         } else {
             if ($return == "account") {
+                return $this->redirect(['payment/current-account', 'customer' => $model->customer_id]);
+            }
+            // if not empty and return has a route, then redirect to it
+            else{
                 return $this->redirect(['payment/current-account', 'customer' => $model->customer_id]);
             }
         }
