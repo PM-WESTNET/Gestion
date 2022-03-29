@@ -322,7 +322,11 @@ if (Yii::$app->getModule('accounting')) {
     }
 }
 
+
+// Aplicacion
 $appMenu = [];
+$configFull = [];
+
 if (User::canRoute('/log/index')) {
     $appMenu = [
         ['label' => Yii::t('app', 'Logs'), 'url' => ['/log/log/index']]
@@ -333,14 +337,18 @@ if (User::canRoute('/backup/backup/index')) {
 }
 $appMenu[] = ['label' => Yii::t('app', 'Companies'), 'url' => ['/sale/company']];
 $appMenu[] = ['label' => Yii::t('app', 'Points of Sale'), 'url' => ['/sale/point-of-sale']];
+//DropDown Configuración
+$configMega = [];
+$configMega = array_merge(\app\modules\config\components\Menu::items());
+$appMenu[] = ['label' => "Configuración", 'items' => $configMega];
+
 $appMenu[] = ['label' => Yii::t('app', 'Billing Config'), 'url' => ['/sale/company-has-billing']];
-
-$appMenu[] = '<li class="divider"></li>';
 $appMenu[] = ['label' => Yii::t('app', 'Mailing Configuration'), 'url' => ['/mailing/email-transport/index']];
-$appMenu[] = '<li class="dropdown-header">' . Yii::t('app', 'Configuration') . '</li>';
 
 
-$config = array_merge($appMenu, \app\modules\config\components\Menu::items());
+
+
+$config = array_merge($appMenu);
 
 if (Yii::$app->user->isSuperadmin) {
     $config[] = '<li class="divider"></li>';
@@ -349,11 +357,10 @@ if (Yii::$app->user->isSuperadmin) {
 }
 
 //App
+
 if (User::hasRole('admin')) {
     $items[] = ['label' => Yii::t('app', 'Application'), 'items' => $config];
 }
-
-
 
 //Westnet
 if (Yii::$app->getModule('westnet')) {
@@ -388,26 +395,34 @@ if (Yii::$app->getModule('westnet')) {
                 'label' => Yii::t('app', 'Ecopagos'),
                 'visible' => Yii::$app->user->isSuperadmin
             ],
-            [
+            ['label' => Yii::t('app', 'Ecopagos'), 'items' => [
+                [
                 'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/westnet/ecopagos/ecopago'], 'visible' => User::canRoute(['/westnet/ecopagos/ecopago/index'])
-            ],
-            [
-                'label' => Yii::t('app', 'Cashiers'), 'url' => ['/westnet/ecopagos/cashier'], 'visible' => User::canRoute(['/westnet/ecopagos/cashier/index'])
-            ],
-            [
-                'label' => Yii::t('app', 'Collectors'), 'url' => ['/westnet/ecopagos/collector'], 'visible' => User::canRoute(['/westnet/ecopagos/collector/index'])
-            ],
-            '<li class="divider"></li>',
-            [
-                'label' => Yii::t('app', 'Payouts in Ecopagos'), 'url' => ['/westnet/ecopagos/payout'], 'visible' => User::canRoute(['/westnet/ecopagos/payout'])
-            ],
+                ],
+                [
+                    'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/westnet/ecopagos/ecopago'], 'visible' => User::canRoute(['/westnet/ecopagos/ecopago/index'])
+                ],
+                [
+                    'label' => Yii::t('app', 'Cashiers'), 'url' => ['/westnet/ecopagos/cashier'], 'visible' => User::canRoute(['/westnet/ecopagos/cashier/index'])
+                ],
+                [
+                    'label' => Yii::t('app', 'Collectors'), 'url' => ['/westnet/ecopagos/collector'], 'visible' => User::canRoute(['/westnet/ecopagos/collector/index'])
+                ],
+                '<li class="divider"></li>',
+                [
+                    'label' => Yii::t('app', 'Payouts in Ecopagos'), 'url' => ['/westnet/ecopagos/payout'], 'visible' => User::canRoute(['/westnet/ecopagos/payout'])
+                ],
+                [
+                    'label' => Yii::t('app', 'Batch closures'), 'url' => ['/westnet/ecopagos/batch-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/batch-closure'])
+                ],
+                [
+                    'label' => Yii::t('app', 'Daily closures'), 'url' => ['/westnet/ecopagos/daily-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/daily-closure'])
+                ],
+            ]],
+            
+            
             //'<li class="divider"></li>',
-            [
-                'label' => Yii::t('app', 'Batch closures'), 'url' => ['/westnet/ecopagos/batch-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/batch-closure'])
-            ],
-            [
-                'label' => Yii::t('app', 'Daily closures'), 'url' => ['/westnet/ecopagos/daily-closure'], 'visible' => User::canRoute(['/westnet/ecopagos/daily-closure'])
-            ],
+            
             '<li class="divider"></li>',
             [
                 'label' => Yii::t('app', 'Mobile App failed registers'), 'url' => ['/mobileapp/v1/app-failed-register/index'], 'visible' => true
@@ -438,11 +453,18 @@ if (Yii::$app->getModule('westnet')) {
             [
                 'label' => Yii::t('app', 'Infobip received sms'), 'url' => ['/westnet/notifications/infobip/default/index'], 'visible' => Yii::$app->user->isSuperadmin
             ],
+
             '<li class="divider"></li>',
+
             ['label' => Yii::t('app', 'Batch Process'), 'visible' => Yii::$app->user->isSuperadmin],
-            ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
-            ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
-            ['label' => Yii::t('westnet', 'Assign Company to Customers'), 'url' => ['/westnet/batch/company-to-customer']],
+
+            ['label' => Yii::t('app', 'Procesos por lote'), 'items' => [
+                ['label' => Yii::t('westnet', 'Assign Discount to Customers'), 'url' => ['/westnet/batch/discount-to-customer']],
+                ['label' => Yii::t('westnet', 'Assign Plan to Customers'), 'url' => ['/westnet/batch/plans-to-customer']],
+                ['label' => Yii::t('westnet', 'Assign Company to Customers'), 'url' => ['/westnet/batch/company-to-customer']],
+            ]],
+
+            
         ],
     ];
 }
