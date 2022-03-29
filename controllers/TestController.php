@@ -47,6 +47,8 @@ use Da\QrCode\QrCode;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use DateTime;
+use yii\db\Transaction;
 
 
 class TestController extends Controller {
@@ -305,6 +307,38 @@ class TestController extends Controller {
         $savedBool = $conn->save();
         // var_dump('after save TIME',(microtime(true)-$start));
         die('//');
+    }
+
+    public function actionTestDeleteContract($contract_id){
+        // /index.php?r=test/test-delete-contract&contract_id=935
+        $transaction = Yii::$app->db->beginTransaction();
+
+        $model = Contract::findOne($contract_id);
+        $model->status = Contract::STATUS_LOW_PROCESS; //testing
+        var_dump($model->status);
+        // die();
+        $model->setScenario('cancel');
+        $model->to_date = (new DateTime())->format('d-m-Y');
+        if ($model->save(true)) {               
+            
+            $cti = new ContractToInvoice();
+            
+            if ($cti->cancelContract($model)) {
+                $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+                var_dump(Yii::t('app', 'Contract canceled successful'));
+            }else{
+                var_dump('failed to save contract to invoice');
+                var_dump(Yii::t('app', 'Can\`t cancel this contract'));
+            }
+        }else{
+            var_dump('failed to save contract');
+            var_dump(Yii::t('app', 'Can\`t cancel this contract'));
+        }
+        
+        $transaction->rollback();
+        die('work');
+
+        return false;
     }
 
 }

@@ -1021,11 +1021,7 @@ class Customer extends ActiveRecord {
      * @return string
      */
     public function getFullName($template = '{lastname}, {name} {description}') {
-
-            return str_replace(['{lastname}','{name}', '{description}'], [$this->lastname, $this->name, '('.$this->description.')'], $template);
-        
-
-       
+        return str_replace(['{lastname}','{name}', '{description}'], [$this->lastname, $this->name, '('.$this->description.')'], $template);
     }
 
     /**
