@@ -301,8 +301,21 @@ class VendorLiquidationController extends Controller
                     $contract = $detail->contract;
                     $customer = $contract->customer;
                     
-                    //Por problemas con datos migrados, agregamos esta cond de customer_id > 22200
-                    if($customer->customer_id > 22200 && $this->hasPayedFirstBill($customer, $detail, $model)){
+                    // jumps all customers below ID:22200 when the company is westnet.
+                    $currentCompanyOwner = isset(Yii::$app->params['gestion_owner_company']) ? Yii::$app->params['gestion_owner_company'] : null;
+                    if($currentCompanyOwner == 'westnet'){
+                        if(!($customer->customer_id > 22200)) continue; 
+                        /**
+                         * context: this was the previous condition. 
+                         * i didnt want to remove it so i negated it and made the configuration item for current company name,
+                         * so as not to conflict with other companies that arent Westnet.
+                         * 
+                         * "Por problemas con datos migrados, agregamos esta cond de customer_id > 22200"
+                         * "if($customer->customer_id > 22200 && $this->hasPayedFirstBill($customer, $detail, $model)){"
+                         */
+                    }
+
+                    if($this->hasPayedFirstBill($customer, $detail, $model)){
 
                         $liqItem = new \app\modules\westnet\models\VendorLiquidationItem();
                         $liqItem->contract_detail_id = $detail->contract_detail_id;
