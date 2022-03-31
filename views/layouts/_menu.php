@@ -400,9 +400,6 @@ if (Yii::$app->getModule('westnet')) {
                 'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/westnet/ecopagos/ecopago'], 'visible' => User::canRoute(['/westnet/ecopagos/ecopago/index'])
                 ],
                 [
-                    'label' => Yii::t('app', 'Ecopagos'), 'url' => ['/westnet/ecopagos/ecopago'], 'visible' => User::canRoute(['/westnet/ecopagos/ecopago/index'])
-                ],
-                [
                     'label' => Yii::t('app', 'Cashiers'), 'url' => ['/westnet/ecopagos/cashier'], 'visible' => User::canRoute(['/westnet/ecopagos/cashier/index'])
                 ],
                 [
