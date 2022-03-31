@@ -2305,9 +2305,33 @@ class Customer extends ActiveRecord {
             ->queryOne();
     }
 
-   
-    public static function getLastContract($customer_id){
-    	return Contract::find()->where(['customer_id' => $customer_id])->orderBy(['contract_id' => SORT_DESC])->limit(1)->one();
+    /**
+     * Returns one instance of a customer's contract.
+     * Can prioritize an older contract if IT is ACTIVE. (optional). Else: it returns the latest contract even if it is disabled.
+     */
+    public static function getLastContract($customer_id,$prioritizeActiveContract = true){
+        $contractModel = null;
+
+        // check if an Active contract exists. (when priorizing them)
+        if($prioritizeActiveContract){
+            $contractModel = Contract::find()
+                                ->where(['customer_id' => $customer_id])
+                                ->andWhere(['status' => Contract::STATUS_ACTIVE])
+                                ->orderBy(['contract_id' => SORT_DESC])
+                                ->limit(1)
+                                ->one();
+        }
+        
+        // when we want the LATEST contract OR when no active contract was found while prioritizing it, return the 
+        if(!$prioritizeActiveContract or empty($contractModel)){
+            $contractModel = Contract::find()
+                                ->where(['customer_id' => $customer_id])
+                                ->orderBy(['contract_id' => SORT_DESC])
+                                ->limit(1)
+                                ->one();
+        }
+
+    	return $contractModel; // if prioritizing active ones, this can return null in case a customer has only one contract and its disabled.
     }
 
 }

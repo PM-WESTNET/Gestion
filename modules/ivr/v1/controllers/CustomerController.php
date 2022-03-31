@@ -1591,31 +1591,31 @@ class CustomerController extends Controller
     public function actionGetDataCustomer(){
         $data = Yii::$app->request->post();
 
-        if(!isset($data['code']))
-            return [
-                'error' => true,
-                'message' => 'The fields document_number is required'
-            ];
+        if (!isset($data['code']))
+        return [
+            'error' => true,
+            'message' => 'The fields document_number is required'
+        ];
 
-        if(empty($data['code']))
-            return [
-                'error' => true,
-                'message' => 'The fields document_number isn´t empty'
-            ];
+        if (empty($data['code']))
+        return [
+            'error' => true,
+            'message' => 'The fields document_number isn´t empty'
+        ];
 
         $customer = Customer::findOne(['code' => $data['code']]);
-	
-	if(empty($customer))
-		return [
-			'error' => 'true',
-			'message' => 'Client not found'
-		];
 
-        $fulladdress = isset($customer->address)?$customer->address->fulladdress:'El cliente no posee dirección';
+        if (empty($customer))
+        return [
+            'error' => 'true',
+            'message' => 'Client not found'
+        ];
+
+        $fulladdress = isset($customer->address) ? $customer->address->fulladdress : 'El cliente no posee dirección';
 
         $customer_data = [
             'idcustomer' => $customer->customer_id,
-	    'code' => $customer->code,
+            'code' => $customer->code,
             'national_id' => $customer->document_number, //REVISAR CASO DE CUIT
             'company_id' => $customer->taxCondition->name,
             'name' => $customer->name,
@@ -1625,53 +1625,57 @@ class CustomerController extends Controller
             'phone' => $customer->phone,
             'phone_mobile' => $customer->phone2,
             'email' => $customer->email,
-	    'payment_code' => $customer->payment_code
+            'payment_code' => $customer->payment_code
         ];
-	
+
         $account_data = [
             'a_status' => $customer->status,
-            'debt' => $customer->current_account_balance*-1,
+            'debt' => $customer->current_account_balance * -1,
             'duedebt' => '',
-            'noduedebt' => $customer->current_account_balance*-1,
+            'noduedebt' => $customer->current_account_balance * -1,
             'duedate1' => date('15/m/Y'),
             'duedate2' => '',
-            'payments_url' => (!empty($customer->hash_customer_id)) && ($customer->company_id == 2 || $customer->company_id == 7) ?'http://pago.westnet.com.ar:3000/portal/payment-intention/'.$customer->hash_customer_id:'Actualmente no pueden pagar por ese medio de pago.',
+            'payments_url' => (!empty($customer->hash_customer_id)) && ($customer->company_id == 2 || $customer->company_id == 7) ? 'http://pago.westnet.com.ar:3000/portal/payment-intention/' . $customer->hash_customer_id : 'Actualmente no pueden pagar por ese medio de pago.',
             'invoices' => '',
             'invoices_qty' => Customer::getOwedBills($customer->customer_id),
         ];
 
+
+        $connections = null;
+        $contract = $customer->getLastContract($customer->customer_id, $prioritizeActiveContract = true);
+        $connection = $contract->connection;
         
-            $connections = null;
-	    $contract = $customer->getLastContract($customer->customer_id);
-            $connection = $contract->connection;
-	    if($connection){
-            	$node = $connection->node;
-		$geo = $node->FindNodeFieldsLatitudLongitud($node->node_id);
-            	$connections = [
-                	'state' => 'Mendoza',
-                	'city' => '',
-	                'address' => $fulladdress,
-        	        'phone' => $customer->phone,
-                	'phone_mobile' => $customer->phone2,
-	                'email' => $customer->email,
-        	        'ip' => long2ip($connection->ip4_1),
-               	        'webpass' => '',
-	                'webpassc' => '',
-	                'lat' => (!empty($geo) && isset($geo[0])) ? $geo[0] : 'El nodo no posee geolocalizacion',
-        	        'lng' => (!empty($geo) && isset($geo[1])) ? $geo[1] : 'El nodo no posee geolocalizacion',
-	              	'node' => $node->name,
-	                'access_point' => '',
-	                's_status' => $connection->status_account,
-	                'message' => '',
-	                'extra_info' => ''
-           	 ];
-	     }
+        if ($connection) {
+            
+            $node = $connection->node;
+            // get the geo of the node only IF there is one.
+            $geo = (!empty($node)) ? $node->FindNodeFieldsLatitudLongitud($node->node_id) : null; // the connection while the node doesnt (ex: Low Contract)
+            
+            $connections = [
+                'state' => 'Mendoza',
+                'city' => '',
+                'address' => $fulladdress,
+                'phone' => $customer->phone,
+                'phone_mobile' => $customer->phone2,
+                'email' => $customer->email,
+                'ip' => long2ip($connection->ip4_1),
+                'webpass' => '',
+                'webpassc' => '',
+                'lat' => (!empty($geo) && isset($geo[0])) ? $geo[0] : 'El nodo no posee geolocalizacion',
+                'lng' => (!empty($geo) && isset($geo[1])) ? $geo[1] : 'El nodo no posee geolocalizacion',
+                'node' => (!empty($node)) ? $node->name : 'La conexion no tiene un nodo asociado',
+                'access_point' => '',
+                's_status' => $connection->status_account,
+                'message' => '',
+                'extra_info' => ''
+            ];
+        }
 
 
         $connection_data = [
             'connections_qty' => count($customer->findContractsActiveByCustomerId($customer->customer_id)),
             'connection' => $connections
-        ];        
+        ];
 
 
         return $result = [
