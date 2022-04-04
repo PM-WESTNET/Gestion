@@ -208,6 +208,11 @@ class VendorLiquidationController extends Controller
         //$start = microtime(true);
         $vendor_liquidation_items = [];
 
+        $currentCompanyOwner = isset(Yii::$app->params['gestion_owner_company']) ? Yii::$app->params['gestion_owner_company'] : null;
+        if(is_null($currentCompanyOwner)){
+            Yii::$app->session->addFlash('error', 'Company owner is not setted in the Params file.');
+        }
+
         foreach($details as $detail){
             
             $price = $detail->product->getPriceFromDate($detail->date)->one();
@@ -219,7 +224,21 @@ class VendorLiquidationController extends Controller
                 $customer = $contract->customer;
                 
                 //Por problemas con datos migrados, agregamos esta cond de customer_id > 22200
-                if($customer->customer_id > 22200 && $contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
+                if($contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
+
+                        /**
+                         * context: this was the previous condition. 
+                         * i didnt want to remove it so i negated it and made the configuration item for current company name,
+                         * so as not to conflict with other companies that werent Westnet.
+                         * 
+                         * "Por problemas con datos migrados, agregamos esta cond de customer_id > 22200"
+                         * "if($customer->customer_id > 22200 && $this->hasPayedFirstBill($customer, $detail, $model)){"
+                         */
+
+                    // jumps all customers below ID:22200 when the company is westnet.
+                    if($currentCompanyOwner == 'westnet'){
+                        if(!($customer->customer_id > 22200)) continue;
+                    }
 
                     $product = $detail->product;
                     $amount = 0.0;
@@ -289,7 +308,12 @@ class VendorLiquidationController extends Controller
             $customers = [];
                         
             $items = [];
-            
+
+            $currentCompanyOwner = isset(Yii::$app->params['gestion_owner_company']) ? Yii::$app->params['gestion_owner_company'] : null;
+            if(is_null($currentCompanyOwner)){
+                Yii::$app->session->addFlash('error', 'Company owner is not setted in the Params file.');
+            }
+
             //Por cada vendedor
             foreach($details as $detail){
 
@@ -301,18 +325,18 @@ class VendorLiquidationController extends Controller
                     $contract = $detail->contract;
                     $customer = $contract->customer;
                     
-                    // jumps all customers below ID:22200 when the company is westnet.
-                    $currentCompanyOwner = isset(Yii::$app->params['gestion_owner_company']) ? Yii::$app->params['gestion_owner_company'] : null;
-                    if($currentCompanyOwner == 'westnet'){
-                        if(!($customer->customer_id > 22200)) continue; 
                         /**
                          * context: this was the previous condition. 
                          * i didnt want to remove it so i negated it and made the configuration item for current company name,
-                         * so as not to conflict with other companies that arent Westnet.
+                         * so as not to conflict with other companies that werent Westnet.
                          * 
                          * "Por problemas con datos migrados, agregamos esta cond de customer_id > 22200"
                          * "if($customer->customer_id > 22200 && $this->hasPayedFirstBill($customer, $detail, $model)){"
                          */
+
+                    // jumps all customers below ID:22200 when the company is westnet.
+                    if($currentCompanyOwner == 'westnet'){
+                        if(!($customer->customer_id > 22200)) continue;
                     }
 
                     if($this->hasPayedFirstBill($customer, $detail, $model)){

@@ -88,6 +88,12 @@ class VendorLiquidationController extends Controller{
     private function liquidateVendorItems($liq, $details)
     {
         $vendor_liquidation_items = [];
+        
+        // get current company name value
+        $currentCompanyOwner = isset(Yii::$app->params['gestion_owner_company']) ? Yii::$app->params['gestion_owner_company'] : null;
+        if(is_null($currentCompanyOwner)){
+            $this->stdout('Company owner is not setted in the Params file.');
+        }
 
         foreach($details as $detail){
             $price = Product::findOne(['product_id' => $detail['product_id']])->getPriceFromDate($detail['date'])->one();
@@ -100,7 +106,12 @@ class VendorLiquidationController extends Controller{
                 $customer = $contract->customer;
 
                 //Por problemas con datos migrados, agregamos esta cond de customer_id > 22200
-                if($customer->customer_id > 22200 && $contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
+                if($contract->status == 'active' && $this->hasPayedFirstBill($customer, $detail, $liq)){
+                    
+                    // jumps all customers below ID:22200 when the company is westnet.
+                    if($currentCompanyOwner == 'westnet'){
+                        if(!($customer->customer_id > 22200)) continue;
+                    }
 
                     $product = Product::findOne(['product_id' => $detail['product_id']]);
                     $amount = 0.0;
