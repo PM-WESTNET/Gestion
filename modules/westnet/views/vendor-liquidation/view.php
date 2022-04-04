@@ -68,6 +68,13 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'total',
                 'format' => 'currency',
+            ],
+            [
+                'label' => 'Porcentaje de las comisiones',
+                'value' => function($model){
+                    $percentage = $model->vendor->commission->percentage;
+                    return $percentage." %";
+                }
             ]
         ],
     ]) ?>
@@ -100,18 +107,25 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $itemsDataProvider,
         'filterModel' => false,
         'columns' => [
-            'description',
             [
                 'label' => Yii::t('app','Customer'),
                 'value' => function($model){
-                    return $model->contractDetail ? UserA::a($model->contractDetail->contract->customer->fullName,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
+                    $htmlTextValue = $model->contractDetail->contract->customer->fullName." - ".$model->contractDetail->contract->customer->code;
+                    return $model->contractDetail ? UserA::a($htmlTextValue,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
                 },
                 'format' => 'html'
             ],
+            // [
+            //     'label' => Yii::t('app','Customer Number'),
+            //     'value' => function($model){
+            //         return $model->contractDetail ? UserA::a($model->contractDetail->contract->customer->code,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
+            //     },
+            //     'format' => 'html'
+            // ],
             [
-                'label' => Yii::t('app','Customer Number'),
+                'label' => 'Descripcion',
                 'value' => function($model){
-                    return $model->contractDetail ? UserA::a($model->contractDetail->contract->customer->code,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
+                    return UserA::a($model->description,['/sale/contract/plan/view', 'id' => $model->contractDetail->product_id]);
                 },
                 'format' => 'html'
             ],
@@ -122,7 +136,28 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'html'
             ],
-            'amount:currency',
+            [
+                'label' => 'Fecha de venta',
+                'value' => function($model){
+                    $detailDate = $model->contractDetail->date;
+                    return $detailDate;
+                }
+            ],
+            [
+                'label' => 'Importe a la fecha de venta',
+                'value' => function($model){
+                    $detail = $model->contractDetail;
+                    $product = \app\modules\sale\models\Product::findOne($detail->product_id);
+                    $price = $product->getPriceFromDate($detail->date)->one();
+                    return $price->finalPrice;
+                },
+                'format' => 'currency'
+            ],
+            [
+                'attribute' => 'amount',
+                'label' => 'Importe Final',
+                'format' => 'currency'
+            ],
             [
                 'class' => 'app\components\grid\ActionColumn',
                 'controller' => 'vendor-liquidation-item',
