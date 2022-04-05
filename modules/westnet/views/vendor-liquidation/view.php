@@ -134,7 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app','Contract'),
                 'value' => function($model){
-                    if(!isset($model->contractDetail)) return $model->contractDetail->contract_id;
+                    if(!isset($model->contractDetail)) return 'n/a';
                     return $model->contractDetail ? UserA::a($model->contractDetail->contract_id, ['/sale/contract/contract/view', 'id' => $model->contractDetail->contract_id]) : NULL;
                 },
                 'format' => 'html'
