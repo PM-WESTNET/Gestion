@@ -110,6 +110,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app','Customer'),
                 'value' => function($model){
+                    if(!isset($model->contractDetail)) return 'n/a';
                     $htmlTextValue = $model->contractDetail->contract->customer->fullName." - ".$model->contractDetail->contract->customer->code;
                     return $model->contractDetail ? UserA::a($htmlTextValue,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
                 },
@@ -125,6 +126,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Descripcion',
                 'value' => function($model){
+                    if(!isset($model->contractDetail)) return $model->description;
                     return UserA::a($model->description,['/sale/contract/plan/view', 'id' => $model->contractDetail->product_id]);
                 },
                 'format' => 'html'
@@ -132,6 +134,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => Yii::t('app','Contract'),
                 'value' => function($model){
+                    if(!isset($model->contractDetail)) return $model->contractDetail->contract_id;
                     return $model->contractDetail ? UserA::a($model->contractDetail->contract_id, ['/sale/contract/contract/view', 'id' => $model->contractDetail->contract_id]) : NULL;
                 },
                 'format' => 'html'
@@ -139,6 +142,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Fecha de venta',
                 'value' => function($model){
+                    if(!isset($model->contractDetail)) return 'n/a';
                     $detailDate = $model->contractDetail->date;
                     return $detailDate;
                 }
@@ -146,6 +150,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Importe a la fecha de venta',
                 'value' => function($model){
+                    if(!isset($model->contractDetail)) return 'n/a';
                     $detail = $model->contractDetail;
                     $product = \app\modules\sale\models\Product::findOne($detail->product_id);
                     $price = $product->getPriceFromDate($detail->date)->one();
