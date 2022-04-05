@@ -51,10 +51,9 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
         if(!empty($params['SiroPaymentIntentionSearch']['from_date'])){
             $date = explode(' - ', $params['SiroPaymentIntentionSearch']['from_date']);
 
-            $this->from_date = $date[0];
-            $this->to_date = $date[1];
+            $this->from_date = isset($date[0]) ? $date[0] : null;
+            $this->to_date = isset($date[1]) ? $date[1] : null;
         }
-
 
         $query = SiroPaymentIntention::find()
         ->select(['spi.*'])
@@ -92,7 +91,7 @@ class SiroPaymentIntentionSearch extends SiroPaymentIntention
               ->andFilterWhere(['like', 'com.name', $this->company])
               ->andFilterWhere(['like', 'payment_id', $this->payment_id]);
         
-        
+        // if any date is null, the if statement returns false and doesnt filter it.
         if($this->from_date){
             $query->andFilterWhere(['>=','createdAt', $this->from_date]);
         }
