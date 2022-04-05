@@ -206,7 +206,7 @@ class ContractSearch extends Contract {
             (new Expression('date_format(cd.from_date, \'%Y%m\')<=date_format(current_date(), \'%Y%m\')')),
             ['cc.is_invoiced' => true],
             ['con.status' => 'active'],
-            ['c.status' => 'enabled'],
+            // ['c.status' => 'enabled'], // commented this line because the previous line (active contracts) is really all that we need to know to bill a customer
             ['c.company_id' => $this->company_id],
             /*
                Se solicita desde administracion que los iva inscripto solo puedan facturar Facturas A, y evitar el caso de que pueden ser ambas, ya que les permitia emitir a estos Facturas B

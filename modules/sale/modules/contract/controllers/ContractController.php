@@ -930,7 +930,12 @@ class ContractController extends Controller {
                     //$connection->status= Connection::STATUS_DISABLED;
                     //$connection->update(false);
                     
-                    $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+                    // search for other contracts
+                    $otherContracts = $model->getAllContractsStatusesFromCurrentCustomer(); 
+                    // check that no other contract is active, then disable the customer.
+                    if(!in_array(Contract::STATUS_ACTIVE,$otherContracts)){
+                        $model->customer->updateAttributes(['status' => Customer::STATUS_DISABLED]);
+                    }
 
                     Yii::$app->session->setFlash('success', Yii::t('app', 'Contract canceled successful'));
                     return ['status' => 'success'];

@@ -297,6 +297,7 @@ class ContractToInvoice
             $transaction->commit();
             return true;
         } catch (Exception $ex) {
+            var_dump($ex->getMessage());
             $transaction->rollBack();
             error_log($ex->getMessage());
         }
