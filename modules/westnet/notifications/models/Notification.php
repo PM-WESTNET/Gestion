@@ -216,6 +216,7 @@ class Notification extends ActiveRecord {
             static::STATUS_PENDING => NotificationsModule::t('app', 'Pending'),
             static::STATUS_IN_PROCESS => NotificationsModule::t('app', 'In Process'),
             static::STATUS_PAUSED => NotificationsModule::t('app', 'Paused'),
+            static::STATUS_CANCELLED => NotificationsModule::t('app', 'Canceled'),
         ];
     }
 
