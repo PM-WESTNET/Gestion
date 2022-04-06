@@ -19,6 +19,7 @@ use app\models\LoginForm;
 use app\models\ContactForm;
 use app\modules\sale\models\search\CustomerSearch;
 use IPv4\SubnetCalculator;
+use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
 
 class SiteController extends Controller
 {
@@ -43,6 +44,7 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
+
         //Si posee el rol, el  index debe ser la vista de agenda
         if(!Yii::$app->user->isGuest){
             if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
@@ -53,6 +55,15 @@ class SiteController extends Controller
             if(Yii::$app->user->identity->hasRole('User-alert-new-no-verified-tranferences', false) && NotifyPayment::transferenceNotifyPaymentsNotVerifiedExists()) {
                 Yii::$app->session->addFlash('info', Yii::t('app', 'Theres one or more notify payments by transference not verified'));
             }
+
+            if(Yii::$app->user->identity->hasRole('user-alert-non-verified-siro-payments', false))
+            {
+                $payment_intention_accountability = PaymentIntentionAccountability::find()->where(['status' => 'draft'])->all();
+
+                return $this->render('index', ['payment_intention_accountability' => $payment_intention_accountability]);
+            }
+
+            
         }
         return $this->render('index');
     }

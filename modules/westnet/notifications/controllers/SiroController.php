@@ -536,9 +536,14 @@ class SiroController extends Controller
             $transaction->commit();
 
         } catch (\Exception $e) {
-            $transaction->rollBack();
-            var_dump($e);
-            die();
+            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_pagos_duplicados.txt'),
+                "Ha Ocurrido un error: \n" .
+                "Hora: " . date('Y-m-d H:m:s') . "\n" .
+                "Respuesta de Siro: " . json_encode($accountability) . "\n" .
+                "Error: " . json_encode($e) .
+                "-----------------------------------------------------------------------------\n",
+                FILE_APPEND);
+                $transaction->rollBack();
         }
 
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));
