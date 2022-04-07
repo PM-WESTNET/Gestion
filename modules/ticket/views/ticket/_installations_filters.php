@@ -25,13 +25,19 @@ $form= ActiveForm::begin(['method' => 'GET']);
     </div>
     <div class="row">
 
+        <!-- FILTRO CLIENTE -->
+
         <div class="col-sm-3">
             <?= $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form' => $form, 'model' => $model, 'attribute' => 'customer_id']) ?>
         </div>
 
+        <!-- FILTRO ESTADOD DE TICKET -->
+
         <div class="col-sm-3">
             <?=$form->field($model, 'status_id')->dropDownList(ArrayHelper::map(SchemaInstalaciones::getSchemaStatuses(), 'status_id', 'name'), ['prompt' => Yii::t('app', 'All')])?>
         </div>
+
+        <!-- FILTRO FECHA INSTALACION -->
 
         <div class="col-sm-3">
             <?= $form->field($model, 'start_date_from')->widget(DatePicker::class, [
@@ -41,7 +47,7 @@ $form= ActiveForm::begin(['method' => 'GET']);
                     'options' => [
                             'class' => 'form-control'
                     ]
-            ])?>
+            ])->label('Fecha de instalacion desde')?>
         </div>
 
         <div class="col-sm-3">
@@ -52,10 +58,12 @@ $form= ActiveForm::begin(['method' => 'GET']);
                 'options' => [
                     'class' => 'form-control'
                 ]
-            ])?>
+            ])->label('Fecha de instalacion hasta')?>
         </div>
     </div>
     <div class="row">
+
+        <!--   FILTRO FECHA CONTRATO -->
 
         <div class="col-sm-3">
             <?= $form->field($model, 'date_from_start_contract')->widget(DatePicker::class, [
@@ -75,10 +83,33 @@ $form= ActiveForm::begin(['method' => 'GET']);
             ])?>
         </div>
 
+        <!-- FILTRO FECHA TAREA -->
+
+        <div class="col-sm-3">
+            <?= $form->field($model, 'date_from_start_task')->widget(DatePicker::class, [
+                    'dateFormat' => 'yyyy-MM-dd',
+                    'options' => [
+                            'class' => 'form-control'
+                    ]
+            ])->label('Fecha de tarea desde')?>
+        </div>
+
+        <div class="col-sm-3">
+            <?= $form->field($model, 'date_to_start_task')->widget(DatePicker::class, [
+                'dateFormat' => 'yyyy-MM-dd',
+                'options' => [
+                    'class' => 'form-control'
+                ]
+            ])->label('Fecha de tarea hasta')?>
+        </div>
+
+        <!-- FILTRO CANTIDAD DE GESTIONES -->
+
         <div class="col-sm-3">
             <?= $form->field($model, 'ticket_management_qty')->textInput() ?>
         </div>
 
+        <!-- FILTRO DESCONTADO -->
 
         <div class="col-sm-3">
             <?=$form->field($model, 'discounted')->dropDownList( [
