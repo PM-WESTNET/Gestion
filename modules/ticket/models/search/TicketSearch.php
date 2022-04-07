@@ -109,7 +109,7 @@ class TicketSearch extends Ticket {
         
         $query->innerJoin( DbHelper::getDbName(Yii::$app->db) . '.contract c', 'c.customer_id = customer.customer_id');
 
-        $query->innerJoin( DbHelper::getDbName(Yii::$app->dbagenda) . '.task t', 't.task_id = ticket.task_id');
+        $query->leftJoin( DbHelper::getDbName(Yii::$app->dbagenda) . '.task task', 'task.task_id = ticket.task_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -168,7 +168,7 @@ class TicketSearch extends Ticket {
         ]);
 
         if($this->category) {
-            $query->andFilterWhere(['category_id' => $this->category_id]);
+            $query->andFilterWhere(['ticket.category_id' => $this->category_id]);
         }
 
         if($this->categories) {
@@ -193,11 +193,11 @@ class TicketSearch extends Ticket {
         $query->andFilterWhere(['<=', 'c.from_date', $this->date_to_start_contract]);
 
         if($this->date_from_start_task){
-            $query->andFilterWhere(['>=', 't.date', $this->date_from_start_task]);
+            $query->andFilterWhere(['>=', 'task.date', $this->date_from_start_task]);
         }
 
         if($this->date_to_start_task){
-            $query->andFilterWhere(['<=', 't.date', $this->date_to_start_task]);
+            $query->andFilterWhere(['<=', 'task.date', $this->date_to_start_task]);
         }
 
         if (!empty($this->discounted)){
