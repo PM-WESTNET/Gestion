@@ -159,12 +159,14 @@ class Connection extends ActiveRecord {
             $this->formatDatesBeforeSave();
 
             // Pongo el estado en base al estado de cuenta.
-            $this->status = ( $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ?
-                            Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
+            //$this->status = ( $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ?
+            //                Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
 
-            /* $this->status = ( ( $this->status_account == Connection::STATUS_ACCOUNT_CLIPPED ||
-              $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ) ?
-              Connection::STATUS_DISABLED : Connection::STATUS_ENABLED ); */
+            $this->status = ( 
+                ( 
+                    $this->status_account == Connection::STATUS_ACCOUNT_CLIPPED ||
+                    $this->status_account == Connection::STATUS_ACCOUNT_DISABLED 
+                ) ? Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
 
             // Pongo en formato long las ips que no son obligatorias
             $this->ip4_public = ($this->has_public_ip ? ip2long($this->ip4_public) : 0 );
