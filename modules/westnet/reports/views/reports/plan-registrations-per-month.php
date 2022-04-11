@@ -37,11 +37,7 @@ $this->title = 'Altas de Planes por Mes';
                                 '/reports/reports/customers-per-plan-per-month', 
                                 'product_id' => $model['product_id'], 
                                 'year_month' => $model['groupDate']
-                            ]),
-                            // [
-                            //     'title' => Yii::t('yii', 'Cancel'),
-                            //     'class' => 'updateItem btn btn-warning'
-                            // ]
+                            ])
                         );
                         
                     },

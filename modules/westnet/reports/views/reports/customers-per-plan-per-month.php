@@ -41,7 +41,7 @@ $this->title = 'Clientes Plan: '.$planName.' del Mes: '.$monthOfAnalisis;
                             yii\helpers\Url::toRoute([
                                 '/sale/contract/contract/view', 
                                 'id' => $model['contract_id'], 
-                            ]),
+                            ])
                         );
                         
                     },
