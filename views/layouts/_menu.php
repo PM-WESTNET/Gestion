@@ -257,6 +257,8 @@ if (Yii::$app->getModule('reports')) {
         '<li class="divider"></li>',
         ['label' => "Descuentos", 'url' => ['/reports/reports/discount']],
         ['label' => "Estadística Uso de la App", 'url' => ['/reports/reports/statistic-app']],
+        '<li class="divider"></li>',
+        ['label' => ReportsModule::t('app', 'Plan Registrations per month'), 'url' => ['/reports/reports/plans-per-month']],
     ]];
 }
 

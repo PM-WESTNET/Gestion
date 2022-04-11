@@ -61,7 +61,7 @@ class TicketRequest  extends RestRequest
                 'error' => $result['error']]);
             return null;
         } else {
-            return $result['ticket_id'];
+           return $result['ticket_id'];
         }
     }
 
