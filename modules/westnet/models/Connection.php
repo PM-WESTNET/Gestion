@@ -165,7 +165,8 @@ class Connection extends ActiveRecord {
             $this->status = ( 
                 ( 
                     $this->status_account == Connection::STATUS_ACCOUNT_CLIPPED ||
-                    $this->status_account == Connection::STATUS_ACCOUNT_DISABLED 
+                    $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ||
+                    $this->status_account == Connection::STATUS_ACCOUNT_LOW 
                 ) ? Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
 
             // Pongo en formato long las ips que no son obligatorias
