@@ -34,6 +34,9 @@ class TicketSearch extends Ticket {
     public $close_to_date;
     public $date_from_start_contract;
     public $date_to_start_contract;
+    public $date_from_start_task;
+    public $date_to_start_task;
+
     
     public $categories;
     public $start_date_from;
@@ -50,10 +53,10 @@ class TicketSearch extends Ticket {
             [['show_all'], 'boolean'],
             [['discounted'], 'string'],
             [['title', 'start_date', 'start_date', 'finish_date', 'status_id', 'customer_id', 'color_id', 'category_id', 'number', 'customer', 'document',
-                    'assignations', 'customer_number','date_from_start_contract', 'date_to_start_contract' , 'discounted'], 
+                    'assignations', 'customer_number','date_from_start_contract', 'date_to_start_contract' ,'date_from_start_task','date_to_start_task', 'discounted'], 
                 'safe', 'on' => 'wideSearch'
             ],
-            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number', 'date_from_start_contract', 'date_to_start_contract', 'discounted' ], 
+            [['title', 'start_date', 'customer_id', 'color_id', 'number', 'customer_number', 'date_from_start_contract', 'date_to_start_contract', 'date_from_start_task','date_to_start_task', 'discounted' ], 
                 'safe', 'on' => 'activeSearch'],
             [['search_text', 'ticket_management_qty', 'close_from_date', 'close_to_date', 'category_id', 'categories', 'customer_id', 'created_by', 'start_date_from', 'start_date_to', 'status_id', 'assignations', 'show_all'], 'safe'],
         ];
@@ -70,6 +73,9 @@ class TicketSearch extends Ticket {
             'start_date_to' => Yii::t('app', 'Start ticket date to'),
             'date_from_start_contract' => Yii::t('app', 'Start contract date from'),
             'date_to_start_contract' => Yii::t('app', 'Start contract date to'),
+            'date_from_start_task' => Yii::t('app', 'Start task date from'),
+            'date_to_start_task' => Yii::t('app', 'Start task date to'),
+
             'show_all' => Yii::t('app','Show All')
         ]);
     }
@@ -85,7 +91,10 @@ class TicketSearch extends Ticket {
      * @return ActiveDataProvider
      */
     public function search($params) {    
-            
+        
+        // var_dump($params);
+        // die();
+
         $query = Ticket::find();
 
         $query->joinWith([
@@ -99,6 +108,8 @@ class TicketSearch extends Ticket {
         ]);
         
         $query->innerJoin( DbHelper::getDbName(Yii::$app->db) . '.contract c', 'c.customer_id = customer.customer_id');
+
+        $query->leftJoin( DbHelper::getDbName(Yii::$app->dbagenda) . '.task task', 'task.task_id = ticket.task_id');
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -151,24 +162,24 @@ class TicketSearch extends Ticket {
 
         $query->andFilterWhere([
             'ticket_id' => $this->ticket_id,
-            'status_id' => $this->status_id,
+            'ticket.status_id' => $this->status_id,
             'color_id' => $this->color_id,
             'ticket.customer_id' => $this->customer_id,
         ]);
 
         if($this->category) {
-            $query->andFilterWhere(['category_id' => $this->category_id]);
+            $query->andFilterWhere(['ticket.category_id' => $this->category_id]);
         }
 
         if($this->categories) {
-            $query->andFilterWhere(['in','category_id', $this->categories]);
+            $query->andFilterWhere(['in','ticket.category_id', $this->categories]);
         }
 
         // Si no filtramos por ninguna categoria en especifico me fijo si hay categorias definidas para mostrar en el
         // panel de tickets y filtro por ellas
         if($this->scenario === self::SCENARIO_WIDE_SEARCH && empty($this->category) && empty($this->categories)){
             if (isset(Yii::$app->params['tickets_categories_showed']) && !empty(Yii::$app->params['tickets_categories_showed'])) {
-                $query->andWhere(['IN', 'category_id', Yii::$app->params['tickets_categories_showed']]);
+                $query->andWhere(['IN', 'ticket.category_id', Yii::$app->params['tickets_categories_showed']]);
             }
         }
 
@@ -180,6 +191,14 @@ class TicketSearch extends Ticket {
 
         $query->andFilterWhere(['>=', 'c.from_date', $this->date_from_start_contract]);
         $query->andFilterWhere(['<=', 'c.from_date', $this->date_to_start_contract]);
+
+        if($this->date_from_start_task){
+            $query->andFilterWhere(['>=', 'task.date', $this->date_from_start_task]);
+        }
+
+        if($this->date_to_start_task){
+            $query->andFilterWhere(['<=', 'task.date', $this->date_to_start_task]);
+        }
 
         if (!empty($this->discounted)){
             Yii::info($this->discounted);
@@ -215,7 +234,7 @@ class TicketSearch extends Ticket {
         $err_status = Status::findOne(['name' => 'Cerrado por sistema']);
 
         if ($err_status) {
-            $query->andWhere(['<>','status_id', $err_status->status_id]);
+            $query->andWhere(['<>','ticket.status_id', $err_status->status_id]);
         }
 
         $query->distinct();
@@ -347,7 +366,7 @@ class TicketSearch extends Ticket {
 
         $this->load($params);
 
-        $query->innerJoin('status st', 'st.status_id=ticket.status_id');
+        $query->innerJoin('status st', 'st.status_id = ticket.status_id');
 
         $query->andWhere(['st.is_open' => 1]);
 

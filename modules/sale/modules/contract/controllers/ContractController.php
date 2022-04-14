@@ -1292,10 +1292,8 @@ class ContractController extends Controller {
 
     public function actionUpdateOnMikrotik($connection_id){
         $conn = Connection::findOne($connection_id);
-        // $conn->node_id = '90'; // comment if needed
-        // $conn->updateIp(); // comment if you dont want to update the IP (also triggers SecureConnectionUpdate->update() func)
         $savedBool = $conn->save(); //triggers aftersave
-        // die();
-        return $this->actionView($conn->contract_id);
+        return $this->redirect(['/sale/contract/contract/view', 'id' => $conn->contract_id]);
+        //return $this->actionView($conn->contract_id);
     }
 }

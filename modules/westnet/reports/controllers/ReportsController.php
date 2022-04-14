@@ -24,6 +24,8 @@ use webvimark\modules\UserManagement\models\User;
 use app\modules\sale\models\PublicityShape;
 use app\modules\sale\models\search\DiscountSearch;
 use app\modules\sale\models\Discount;
+use app\modules\sale\models\Product;
+
 
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\westnet\reports\models\ReportData;
@@ -1226,5 +1228,72 @@ class ReportsController extends Controller
             "customer-registrations-excel",
             ['list_customers' => $list_customer_by_plan]
         );   
+    }
+
+    /**
+    * Lists all new customers and its INITIAL internet plan type
+    * grouped by plan count on every month.
+    *@return mixed
+    */
+    public function actionPlansPerMonth(){
+        // get if the render should be exported to xlsl format via renderpartial()
+        $exportBool = Yii::$app->request->get('excel-export');
+
+        // get GridView variables and search model
+        $reportSearch = new ReportSearch();
+        $result = $reportSearch->findCustomerContractDetailsAndPlans(Yii::$app->request->get());
+        $dataProvider = new ArrayDataProvider([
+            'allModels' => $result->queryAll(),
+            // 'pagination' => false,
+            'pagination' => [
+                'pageSize' => ($exportBool == '1') ? false : 15,
+            ],
+        ]);
+        
+        // get an array of plans name for a filter inside the view
+        $plansArray = ArrayHelper::map(Product::findAllPlans(), 'name', 'name');
+
+        // render excel
+        if($exportBool == '1'){
+            return $this->renderPartial(
+                "plans-per-month-excel",
+                [
+                    'dataProvider' => $dataProvider, 
+                    'reportSearch' => $reportSearch,
+                    'plansArray' => $plansArray,
+                ]
+            );   
+        }
+
+        // render standard view
+        return $this->render(
+            'plans-per-month',
+            [
+                'dataProvider' => $dataProvider, 
+                'reportSearch' => $reportSearch,
+                'plansArray' => $plansArray,
+            ]
+        );
+
+    }
+    
+
+    public function actionCustomersPerPlanPerMonth($product_id,$year_month){
+        $reportSearch = new ReportSearch();
+        $list_customer_by_plan = $reportSearch->findCustomersPerPlanPerMonth(Yii::$app->request->get());
+
+        $plan = Product::findOne($product_id);
+        // $planName = $plan->name.' - '.$plan->description;
+        $planName = $plan->name;
+
+        return $this->render('customers-per-plan-per-month',
+                                [
+                                    'dataProvider' => $list_customer_by_plan, 
+                                    'reportSearch' => $reportSearch,
+                                    'monthOfAnalisis' => $year_month,
+                                    'planName' => $planName
+                                ]
+                            );
+
     }
 }

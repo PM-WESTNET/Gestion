@@ -144,7 +144,7 @@ $customer = $model->customer;
                         'value' => long2ip($connection->ip4_1),
                     ],
                     [
-                        'label' => 'Ip4_1 vieja',
+                        'label' => 'Ip4_1 Anterior',
                         'value' => long2ip($connection->ip4_1_old),
                     ],
                     [
@@ -157,7 +157,7 @@ $customer = $model->customer;
                         'value' => long2ip($connection->ip4_public),
                     ],
                     [
-                        'label' => Yii::t('app', 'Status'),
+                        'label' => 'Estado de Conexión',
                         'value' => Yii::t('westnet', ucfirst($connection->status)),
                     ],
                     [

@@ -29,7 +29,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php if (User::hasRole('collection_manager')){
                 echo Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', Yii::t('app','Close Tickets by Period')),
                     '#', ['class' => 'btn btn-warning', 'id' => 'close-all-btn']);
-             } ?>
+            } ?>
 
             <?= Html::a("<span class='glyphicon glyphicon-plus'></span> " . Yii::t('app', 'Create {modelClass}', [
                         'modelClass' => 'Ticket',
@@ -86,9 +86,9 @@ $this->params['breadcrumbs'][] = $this->title;
                         ArrayHelper::map($model->category->schema->statuses, 'status_id', 'name')
                     ],
                     'afterInput' => function($form, $widget) {
-                         echo '<div class="task_date_div hidden">';
-                             $widget->model->task_date = (new \DateTime('now'))->format('Y-m-d');
-                             echo $form->field($widget->model, 'task_date')->widget(DatePicker::class, [
+                        echo '<div class="task_date_div hidden">';
+                            $widget->model->task_date = (new \DateTime('now'))->format('Y-m-d');
+                            echo $form->field($widget->model, 'task_date')->widget(DatePicker::class, [
                                 'options'=>['placeholder'=>'To date', 'id' => 'task-date-'.$widget->model->ticket_id],
                                 'pluginOptions' => [
                                     'autoclose'=>true,
@@ -103,7 +103,7 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'attribute' => 'task_date',
-            'value' => function($model) {
+            'value' => function($model){    
                 return $model->task_id ? $model->task->date : '';
             }
         ],
@@ -128,11 +128,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'buttons' => [
                 'observations' => function ($url, $model) {
                     return Html::a('<span class="glyphicon glyphicon-zoom-in"></span>', '#', [
-                       'class' => 'btn btn-info btn-obs',
-                       'title' => Yii::t('app', 'Create observation'),
-                       'data' => [
+                        'class' => 'btn btn-info btn-obs',
+                        'title' => Yii::t('app', 'Create observation'),
+                        'data' => [
                             'ticket' => $model->ticket_id
-                       ]
+                        ]
                     ]);
                 },
                 'current-account' => function ($url, $model) {

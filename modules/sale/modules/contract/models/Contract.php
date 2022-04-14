@@ -459,6 +459,9 @@ class Contract extends ActiveRecord {
             }
         }else{
             if (!User::hasRole('seller-office')) {
+                if (User::hasPermission('contract-view')) {
+                    return true;
+                }
                 $can = false;
                 $vendor = Vendor::findOne(['user_id' => User::getCurrentUser()->id]);
                 if(!$vendor) {
