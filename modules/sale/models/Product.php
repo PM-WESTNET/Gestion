@@ -1133,4 +1133,8 @@ class Product extends ActiveRecord
         return false;
     }
 
+    public static function findAllPlans(){
+        return self::find()->where(['type'=>'plan'])->all();
+    }
+
 }

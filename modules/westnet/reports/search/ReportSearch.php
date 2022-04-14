@@ -43,6 +43,9 @@ class ReportSearch extends Model
     public $date;
     public $date2;
 
+    public $groupDate;
+    public $pName;
+
     public function init($date_from = null, $date_to = null)
     {
         parent::init();
@@ -59,7 +62,9 @@ class ReportSearch extends Model
         return [
             [['date_from', 'date_to','name','lastname','name_product','fullname','node', 'speed'], 'string'],
             [['date_from', 'date_to', 'company_id', 'from', 'publicity_shape','date','date2'], 'safe'],
-            [['code'],'number']
+            [['code'],'number'],
+            [['groupDate'], 'required'],
+            [['pName'],'string'],
         ];
     }
 
@@ -1052,7 +1057,23 @@ class ReportSearch extends Model
     }
 
     public function findCustomerContractDetailsAndPlans($params){
+        $this->load($params);
 
+        // filtering of the customers per date range of adherence
+        $dateRange = array('','');
+        $filterDateRange = '';
+        if(!empty($this->groupDate)){
+            $dateRange = explode(' - ', str_replace('/','-',$this->groupDate));
+            $dateRange[0] = date("Y-m-d", strtotime($dateRange[0]));
+            $dateRange[1] = date("Y-m-d", strtotime($dateRange[1]));
+
+            $filterDateRange = " and (contract_detail.date between '".$dateRange[0]."' and '".$dateRange[1]."') ";
+        }
+        $filterPlan = '';
+        if(!empty($this->pName)){
+            $filterPlan = " and product.name = '".$this->pName."' ";
+        }
+        // var_dump($filterDateRange);
         $firstPlanOfEveryCustomerSubQuery = "select(
                                                 select 
                                                     contract_detail.contract_detail_id
@@ -1063,6 +1084,8 @@ class ReportSearch extends Model
 
                                                 where contract.customer_id = customer.customer_id
                                                 and product.type = 'plan'
+                                                ".$filterDateRange."
+                                                ".$filterPlan."
                                                 order by contract_detail.date asc
                                                 limit 1
                                             ) as contract_detail_ids
@@ -1071,10 +1094,14 @@ class ReportSearch extends Model
                                 customer.customer_id,
                                 customer.name,
                                 customer.lastname,
+
                                 contract.status as contractStatus,
-                                contract_detail.*,
-                                product.name as pName,
-                                product.product_id as planProductId
+
+                                contract_detail.contract_detail_id,
+                                contract_detail.date,
+                                contract_detail.product_id,
+                                
+                                product.name as pName
                             from customer
                             left join contract on customer.customer_id = contract.customer_id
                             left join contract_detail on contract_detail.contract_id = contract.contract_id
@@ -1084,7 +1111,7 @@ class ReportSearch extends Model
                     concat_ws('-', year(C.date), month(C.date)) as groupDate,
                     C.pName,
                     count(C.product_id) as cantAltasPorMes,
-                    C.planProductId as product_id
+                    C.product_id as product_id
 
                 from(".$firstPlanOfEveryCustomerSubQuery.") as B
                 join (".$infoJoinSubQuery.") as C 
@@ -1096,17 +1123,13 @@ class ReportSearch extends Model
                 C.product_id
                 order by
                 groupDate desc,
-                cantAltasPorMes desc";
+                cantAltasPorMes desc
+                ";
             //  where C.contractStatus = 'active'
 
         $result = Yii::$app->db->createCommand($query);
-
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $result->queryAll(),
-            'pagination' => false,
-        ]);
             
-        return $dataProvider;       
+        return $result;       
     }
 
     public function findCustomersPerPlanPerMonth($params){

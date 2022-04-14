@@ -1,8 +1,15 @@
 <?php
+// $data = yii\helpers\Json::htmlEncode($dataProvider->getModels());
+// var_dump($data);
+// die();
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 use kartik\date\DatePicker;
 use kartik\daterange\DateRangePicker;
+use yii\web\View;
+use yii\widgets\Pjax;
+use \yii\grid\GridView;
 
 $this->title = 'Altas de Planes por Mes';
 
@@ -12,19 +19,38 @@ $this->title = 'Altas de Planes por Mes';
 
     <h1><?php echo $this->title ?></h1>
     <form action="customer-registrations" method="GET">
-        <?php echo \yii\grid\GridView::widget([
+        <?= Html::a(
+                'exportar a excel',
+                [
+                    '/reports/reports/plans-per-month','excel-export'=>true
+                ],
+                [
+                    'class' => 'btn btn-info',
+                    'target' => '_blank'
+                ]
+            )
+        ?>
+        <?php 
+            Pjax::begin(); 
+        ?>
+        <?php echo GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $reportSearch,
             'columns' => [
                 [
                     'attribute' => 'groupDate',
-                    'format' => 'text',
                     'label' => 'Año y Mes (Agrupado x plan)',
+                    'filter'=>DateRangePicker::widget([
+                        'model' => $reportSearch,
+                        'attribute' => 'groupDate',
+                        'presetDropdown' => true
+                    ]),
                 ],
                 [
                     'attribute' => 'pName',
                     'format' => 'text',
                     'label' => 'Nombre del plan completo',
+                    'filter' => $plansArray, // mapped from ReportsController
                 ],
                 [
                     'attribute' => 'cantAltasPorMes',
@@ -44,7 +70,11 @@ $this->title = 'Altas de Planes por Mes';
                 ],
             ]
         ]) ?>
+        <?php 
+            Pjax::end(); 
+        ?>
     </form>
 
 
 </div>
+
