@@ -123,7 +123,7 @@ class SiroController extends Controller{
                         $model->customer_id = $customer_id;
                         $model->payment_method = $payment_method;
                         $model->siro_payment_intention_id = $siro_payment_intention_id;
-                        $model->collection_channel_description = $codes_collection_channel[$collection_channel] ?? 'No se reconoce el código: ' . $collection_channel;
+                        $model->collection_channel_description = isset($codes_collection_channel[$collection_channel]) ? $codes_collection_channel[$collection_channel] : 'No se reconoce el código: ' . $collection_channel;
                         $model->collection_channel = $collection_channel;
                         $model->rejection_code = $rejection_code;
                         $model->created_at = date('Y-m-d');
@@ -359,7 +359,7 @@ class SiroController extends Controller{
                             $model->customer_id = $customer_id;
                             $model->payment_method = $payment_method;
                             $model->siro_payment_intention_id = $siro_payment_intention_id;
-                            $model->collection_channel_description = $codes_collection_channel[$collection_channel] ?? 'No se reconoce el código: ' . $collection_channel;
+                            $model->collection_channel_description = isset($codes_collection_channel[$collection_channel]) ? $codes_collection_channel[$collection_channel] : 'No se reconoce el código: ' . $collection_channel;
                             $model->collection_channel = $collection_channel;
                             $model->rejection_code = $rejection_code;
                             $model->created_at = date('Y-m-d');
