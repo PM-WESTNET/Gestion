@@ -587,8 +587,13 @@ class Connection extends ActiveRecord {
 
         // get the contract object related to the connection
         $contract = $this->contract;
-        // build a datetime based on contracts from_date attribute
-        $from_date = new \DateTime(($contract->from_date ? $contract->from_date : $contract->date));
+        // build a datetime based on contracts from_date attribute which can sometimes be TIEMPO INDETERMINADO when the contract is just created
+        $from_date = null;
+        if($contract->from_date == Yii::t('app', 'Undetermined time')){
+            $from_date = new \DateTime($contract->date);
+        }else{
+            $from_date = new \DateTime(($contract->from_date ? $contract->from_date : $contract->date));
+        }
 
         // get now datetime object
         $date = new \DateTime('now');
