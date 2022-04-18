@@ -21,11 +21,12 @@ class SiroController extends Controller{
     	 * Redes del Oeste ID : 2
     	 * Servicargas ID : 7
     	 */
+        $this->stdout("\n----SIRO SINGLE PAYMENT CHECKER INITIATED---- ".date("Y-m-d H:i:s")."\n");
     	$companies = Company::find()->where(['in', 'company_id', [2,7]])->all();
-
     	foreach ($companies as $key => $company) {
     		$this->SearchCheckerOfPayments($company);
     	}
+        $this->stdout("\n----END---- ".date("Y-m-d H:i:s")."\n");
 	     
     }
 
@@ -34,11 +35,13 @@ class SiroController extends Controller{
     	 * Redes del Oeste ID : 2
     	 * Servicargas ID : 7
     	 */
+        $this->stdout("\n----SIRO DUPLICATE PAYMENT CHECKER INITIATED---- ".date("Y-m-d H:i:s")."\n");
     	$companies = Company::find()->where(['in', 'company_id', [2,7]])->all();
 
     	foreach ($companies as $key => $company) {
     		$this->BuscarPagosDuplicados($company);
     	}
+        $this->stdout("\n----END---- ".date("Y-m-d H:i:s")."\n");
     }
 
     private function SearchCheckerOfPayments($company){
@@ -49,10 +52,13 @@ class SiroController extends Controller{
 
         $token = $this->GetTokenApi($company->company_id);
 
-        $yesterday = date('Y-m-d', strtotime("-7 days"));
+        $from_date = date('Y-m-d', strtotime("-7 days"));
         $today = date('Y-m-d');
+        $this->stdout("INFO\n");
+        $this->stdout("Company: ".$company->name."\n");
+        $this->stdout("Date range from: $from_date to: $today\n");
 
-        $accountability = $this->ObtainPaymentAccountabilityApi($token, $yesterday, $today, $cuit_administrator, $company->company_id);
+        $accountability = $this->ObtainPaymentAccountabilityApi($token, $from_date, $today, $cuit_administrator, $company->company_id);
 
         $codes_collection_channel = [
             'PF' => 'Pago Fácil',
@@ -146,12 +152,14 @@ class SiroController extends Controller{
             $transaction->commit();
 
         } catch (\Exception $e) {
-            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_cron.txt'),
-            "Ha Ocurrido un error: \n" .
+            $errorMsg = "Ha Ocurrido un error: \n" .
             "Hora: " . date('Y-m-d H:m:s') . "\n" .
             "Respuesta de Siro: " . json_encode($accountability) . "\n" .
             "Error: " . json_encode($e) .
-            "-----------------------------------------------------------------------------\n",
+            "-----------------------------------------------------------------------------\n";
+            $this->stdout($errorMsg);
+            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_cron.txt'),
+            $errorMsg,
             FILE_APPEND);
             $transaction->rollBack();
         }
@@ -226,10 +234,13 @@ class SiroController extends Controller{
 
         $token = $this->GetTokenApi($company->company_id);
 
-        $yesterday = date('Y-m-d', strtotime("-7 days"));
+        $from_date = date('Y-m-d', strtotime("-7 days"));
         $today = date('Y-m-d');
-
-        $accountability = $this->ObtainPaymentAccountabilityApi($token, $yesterday, $today, $cuit_administrator, $company->company_id);
+        $this->stdout("INFO\n");
+        $this->stdout("Company: ".$company->name."\n");
+        $this->stdout("Date range from: $from_date to: $today\n");
+        
+        $accountability = $this->ObtainPaymentAccountabilityApi($token, $from_date, $today, $cuit_administrator, $company->company_id);
         
         $codes_collection_channel = [
             'PF' => 'Pago Fácil',
@@ -376,12 +387,14 @@ class SiroController extends Controller{
             $transaction->commit();
 
         } catch (\Exception $e) {
-            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_pagos_duplicados_cron.txt'),
-            "Ha Ocurrido un error: \n" .
+            $errorMsg = "Ha Ocurrido un error: \n" .
             "Hora: " . date('Y-m-d H:m:s') . "\n" .
             "Respuesta de Siro: " . json_encode($accountability) . "\n" .
             "Error: " . json_encode($e) .
-            "-----------------------------------------------------------------------------\n",
+            "-----------------------------------------------------------------------------\n";
+            $this->stdout($errorMsg);
+            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_cron.txt'),
+            $errorMsg,
             FILE_APPEND);
             $transaction->rollBack();
         }
