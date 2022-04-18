@@ -166,7 +166,7 @@ class Connection extends ActiveRecord {
             //                Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
 
             //todo: check status of monetary account to see if it has any debt and update it status
-            // $this->status_account = $this->updatedStatusAccount();
+            $this->status_account = $this->updatedStatusAccount();
 
             $this->status = ( 
                 ( 
@@ -235,7 +235,7 @@ class Connection extends ActiveRecord {
         // var_dump($this->ip4_1,$this->node_id);
 
         // if node changed, then queues behaviour changes a little
-        if(isset($changedAttributes['node_id'])){
+        if(isset($changedAttributes['ip4_1']) && isset($changedAttributes['node_id'])){
             $response = MikrotikController::updateQueues($this,$changedAttributes['ip4_1'],$changedAttributes['node_id']);
         }
         // if the IP4_1 changed, then the previous queue should be deleted.
@@ -751,8 +751,8 @@ class Connection extends ActiveRecord {
         // var_dump('after',$this->status_account);
         // var_dump('after',$connection->status_account);
         return $connection->status_account;
-    
     }
+
     private function debtLastBill($customer_id)
     {
         $cs = new CustomerSearch();
