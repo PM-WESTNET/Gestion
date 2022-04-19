@@ -67,7 +67,7 @@ class ConnectionForcedHistorialSearch extends ConnectionForcedHistorial
         ]);
 
         $query->andFilterWhere(['like', 'reason', $this->reason]);
-        $query->orderBy(['date'=> 'ASC']);
+        $query->orderBy(['create_timestamp'=> 'DESC']);
 
         return $dataProvider;
     }

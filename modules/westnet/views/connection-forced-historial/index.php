@@ -29,8 +29,13 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app', 'Contract Number').':
         'dataProvider' => $dataProvider,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'date',
+            [
+                'label'=> 'Fecha',
+                'value'=> function($model){
+                    return date("d-m-Y H:i:s", $model->create_timestamp);
+                }   
+            ],
+            // 'date',
             'reason',
             [
                 'label'=> Yii::t('app', 'User'),
