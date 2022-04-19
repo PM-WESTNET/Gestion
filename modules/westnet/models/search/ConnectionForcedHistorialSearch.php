@@ -48,7 +48,7 @@ class ConnectionForcedHistorialSearch extends ConnectionForcedHistorial
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['date' => SORT_DESC]
+                'defaultOrder' => ['create_timestamp' => SORT_DESC]
             ]
         ]);
 
