@@ -341,4 +341,55 @@ class TestController extends Controller {
         return false;
     }
 
+    public function actionUpdateContractConnection($contract_id){
+        // /index.php?r=test/update-contract-connection&contract_id=68975
+        $transaction = Yii::$app->db->beginTransaction();
+        $model = Contract::findOne($contract_id);
+        $connection = Connection::findOne(['contract_id' => $model->contract_id]);
+        echo "<pre>";
+        var_dump($model->status);
+        var_dump($connection->status);
+        var_dump($connection->status_account);
+        var_dump($model->customer_id);
+        // $connection->status_account = 'enabled';
+
+        if ($connection->validate()) {
+                if($connection->save()){
+
+
+                        echo "\nworked\n";
+                }
+                else{
+                     	echo "\ndidnt work\n";
+                }
+
+        }
+
+	    var_dump($model->status);
+        var_dump($connection->status);
+        var_dump($connection->status_account);
+        var_dump($model->customer_id);
+        echo "</pre>";
+
+        $transaction->rollback();
+        die('end--');
+
+        return false;
+    }
+
+    public function actionTestBill($id){
+        $bill = Bill::findOne($id);
+        var_dump($bill->bill_id);
+        if($bill){
+            $taxes = $bill->getTaxesApplied();
+            var_dump('$taxes',$taxes);
+            var_dump('///');
+            $amount = round($bill->calculateTotal(),2);
+            var_dump($amount);
+        }
+
+        die('end');
+        return true;
+    }
+
 }
