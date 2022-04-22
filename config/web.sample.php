@@ -39,17 +39,27 @@ $config = [
         'assetManager' => [
             'linkAssets' => true,
         ],
-        // 'urlManager' => [
-        //     'enablePrettyUrl' => false, // true
-        //     'showScriptName' => false,
-        //     'rules' => [
-        //     ],
-        // ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => 'yii\redis\Cache',
+            'redis' => 'redis' // id of the connection application component
+        ],
+        'redis' => [
+            'class' => 'yii\redis\Connection',
+            'hostname' => 'localhost',
+            'port' => 6379,
+            'database' => 0,
+        ],
+	'session' => [
+            'class' => 'yii\redis\Session',
+            'redis' => [
+                'hostname' => 'localhost',
+                'port' => 6379,
+                'database' => 0,
+            ]
         ],
         'user' => [
             'class' => 'webvimark\modules\UserManagement\components\UserConfig',
+            'identityClass' => 'app\components\user\User',
             // Comment this if you don't want to record user logins
             'on afterLogin' => function($event) {      
                 if(app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()){
@@ -64,23 +74,24 @@ $config = [
         ],
         'mail' => [
             'class' => 'yii\swiftmailer\Mailer',
-            'useFileTransport' => true,
+           // 'useFileTransport' => true,
+             'transport' => [
+                     'class' => 'Swift_SmtpTransport',
+                     'host' => '200.16.144.254',
+                     'username' => 'west1@westnet.com.ar',
+                     'password' => '1605mendoza',
+                     'port' => '587',
+                     'encryption' => '',
+              ],
         ],
         'log' => [
-            'flushInterval' => 1,
-            'traceLevel' => YII_DEBUG ? 3 : 0,
+//           'flushInterval' => 1,
+            'traceLevel' => YII_DEBUG ? 3 : 1,
             'targets' => [
+
                 [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['error', 'warning'],
-                ],
-                [
-                    'class' => 'yii\log\FileTarget',
-                    'levels' => ['info'],
-                    'categories' => ['facturacion'],
-                    'logVars' => [],
-                    'exportInterval' => 1,
-                    'logFile' => '@runtime/logs/app_facturacion.log'
                 ],
                 [
                     'class' => 'yii\log\FileTarget',
@@ -100,17 +111,61 @@ $config = [
                     'logFile' => '@runtime/logs/browser-notification-customers.log'
 
                 ],
-                // [
-                //     'class' => 'yii\log\FileTarget',
-                //     'levels' => ['info'],
-                //     'categories' => ['emails'],
-                //     'logVars' => [],
-                //     'exportInterval' => 1,
-                //     'logFile' => '@runtime/logs/emails.txt'
-                // ],
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['account-movement'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/account_movement.log'
+                ],
+                //Log exclusivo para el registro de errores en la facturación
+                [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['facturacion-cerrado'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/facturacion_cerrado.log'
+
+                ],
+		[
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['emails'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/emails.txt'
+                ],
+		[
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['mobile_push'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/mobile_push.log'
+                ],
+             [
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['facturacion'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/app_facturacion.log'
+               ],
+		[
+                    'class' => 'yii\log\FileTarget',
+                    'levels' => ['info'],
+                    'categories' => ['duplicados-afip'],
+                    'logVars' => [],
+                    'exportInterval' => 1,
+                    'logFile' => '@runtime/logs/duplicados_afip.log'
+
+                ],
             ],
         ],
         'db' => $db['db'],
+#        'dbmo' => $db['dbmo'],
         'dbafip' => $db['dbafip'],
         'dbconfig' => $db['dbconfig'],
         'dbagenda' => $db['dbagenda'],
@@ -119,6 +174,7 @@ $config = [
         'dbnotifications' => $db['dbnotifications'],
         'dblog' => $db['dblog'],
         'dbmedia' => $db['dbmedia'],
+	'dbbackups' => $db['dbbackups'],
         'i18n' => [
             'translations' => [
                 'app' => [
@@ -154,6 +210,28 @@ $config = [
                 'pagomiscuentas' => [
                     'class' => 'yii\i18n\PhpMessageSource',
                 ],
+                'mailing' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'checkout' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'agenda' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'sale' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'zone' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                ],
+                'log' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'fileMap' => [
+                        'app' => 'modules/log/messages/app.php',
+                        'log' => 'modules/log/messages/log.php'
+                    ],
+                ],
                 'notifications' => [
                     'class' => 'yii\i18n\PhpMessageSource',
                 ],
@@ -165,18 +243,11 @@ $config = [
                         'modules/user-management/front' => 'modules/user-management/front.php',
                     ],
                 ],
-                'log' => [
-                    'class' => 'yii\i18n\PhpMessageSource',
-                    'fileMap' => [
-                        'app' => 'modules/log/messages/app.php',
-                        'log' => 'modules/log/messages/log.php'
-                    ],
-                ],
-                'ivrapi' => [
+		'ivrapi' => [
                     'class' => 'yii\i18n\PhpMessageSource',
                 ],
-                'conquer/oauth2' => [
-                    'class' => '\yii\i18n\PhpMessageSource',
+		'conquer/oauth2' => [
+                    'class' => \yii\i18n\PhpMessageSource::class,
                     'basePath' => '@conquer/oauth2/messages',
                 ],
             ],
@@ -214,19 +285,6 @@ $config = [
                 'page-size' => 'A4',
                 'load-error-handling' => 'ignore',
                 'load-media-error-handling' => 'ignore'
-            ],
-        ],
-        'authClientCollection' => [
-            'class' => 'yii\authclient\Collection',
-            'clients' => [
-                'ivr' => [
-                    'class' => 'yii\authclient\OAuth2',
-                    'clientId' => 'ivr_user',
-                    'clientSecret' => '4kjaw4a0d0ks09sdfi9ersj23i4l2309aid09qe',
-                    'tokenUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/token',
-                    'authUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/auth/login',
-                    'apiBaseUrl' => 'https://gestion.westnet.com.ar/index.php?r=ivr/v1/',
-                ],
             ],
         ],
     ],
@@ -304,49 +362,42 @@ $config = [
         'ticket' => [
             'class' => 'app\modules\ticket\TicketModule',
         ],
-        'mobileapp' => [
-            'class' => 'app\modules\mobileapp\MobileAppApiModule',
-            'modules' => [
-                'v1' => [
-                    'class' => 'app\modules\mobileapp\v1\V1Module',
-                ],
-            ],
-        ],
         'mailing' => [
-            'class' => 'quoma\modules\mailing\MailingModule',
+            'class' => 'app\modules\mailing\MailingModule',
         ],
         'pagomiscuentas' => [
             'class' => 'app\modules\pagomiscuentas\PagomiscuentasModule',
         ],
-        'notifications' => [
-            'class' => 'app\modules\westnet\NotificationsModule',
+        'mobileapp' => [
+           'class' => 'app\modules\mobileapp\MobileAppApiModule',
             'modules' => [
                 'v1' => [
-                    'class' => 'app\modules\westnet\notifications\integratech\v1\V1Module',
+                    'class' => 'app\modules\mobileapp\v1\V1Module',
                 ],
             ]
         ],
-        'automaticdebit' => [
-            'class' => 'app\modules\automaticdebit\AutomaticDebitModule'
+        'notifications' => [
+            'class' => 'app\modules\westnet\notifications\NotificationsModule',
         ],
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
-        'automatic_debit' => [
-            'class' => 'app\module\automatic_debit\AutomaticDebit',
+	'automaticdebit' => [
+            'class' => 'app\modules\automaticdebit\AutomaticDebitModule'
         ],
-        'ivr' =>  [
+	'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',
             'modules' => [
                 'v1' => [
-                    'class' => 'app\modules\ivr\v1\V1Module'
+                    'class' => 'app\modules\ivr\v1\V1Module',
+
                 ]
             ]
         ],
-        'employee' => [
+	'employee' => [
             'class' => 'app\modules\employee\EmployeeModule',
         ],
-        'firstdata' => [
+	'firstdata' => [
             'class' => 'app\modules\firstdata\FirstDataModule'
         ],
     ],
@@ -356,6 +407,12 @@ $config = [
     ],
     'params' => $params,
 ];
+
+$config['bootstrap'][] = 'debug';
+    $config['modules']['debug'] = [
+        'class' => 'yii\debug\Module',
+        'allowedIPs' => ['77.111.246.40'],
+    ];
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
@@ -368,7 +425,7 @@ if (YII_ENV_DEV) {
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
-        'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['*'],
         'controllerNamespace' => 'app\templates\controllers',
         'controllerMap' => [
             'default' => 'app\templates\controllers\QiiController'
@@ -388,30 +445,43 @@ if (YII_ENV_DEV) {
             ],
         ]
     ];
+/*    
+      // configuration adjustments for 'dev' environment
+      $config['bootstrap'][] = 'debug';
+      $config['modules']['debug'] = 'yii\debug\Module';
+	$config['modules']['debug'] = [
+		'class' => 'yii\debug\Module',
+		'allowedIps => ['168.227.99.11', '190.113.159.60', '201.190.245.57']
+	]
 
-    // configuration adjustments for 'dev' environment
-    $config['bootstrap'][] = 'debug';
-    $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
-        'allowedIPs' => ['*']
-    ];
-    
-    $config['bootstrap'][] = 'gii';
-    $config['modules']['gii'] = [
-        'class' => 'yii\gii\Module',
-        'allowedIPs' => ['127.0.0.1', '::1'],
-        'generators' => [
-            'crud'   => [
-                'class'     => 'yii\gii\generators\crud\Generator',
-                'templates' => ['arya-crud' => '@app/templates/generators/crud/default']
-            ]
-        ]
-    ];
-//    $config['modules']['gii'] = [
-//        'class' => 'yii\gii\Module',
-//        'allowedIPs' => ['127.0.0.1', '::1'],
-//    ];
-
+      $config['bootstrap'][] = 'gii';
+      $config['modules']['gii'] = [
+      'class' => 'yii\gii\Module',
+      'allowedIPs' => ['127.0.0.1', '::1'],
+      'generators' => [
+      'crud'   => [
+      'class'     => 'yii\gii\generators\crud\Generator',
+      'templates' => ['arya-crud' => '@app/templates/generators/crud/default']
+      ]
+      ]
+      ];
+      //    $config['modules']['gii'] = [
+      //        'class' => 'yii\gii\Module',
+      //        'allowedIPs' => ['127.0.0.1', '::1'],
+      //    ];
+     */
 }
+
+use \yii\helpers\VarDumper;
+function log_siro_payment_intention($var){
+    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log',VarDumper::dumpAsString($var),FILE_APPEND);
+    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log',"\n---------------------------------------------------------------------------------\n",FILE_APPEND);
+}
+
+function log_siro_payment_intention_without_error($var){
+    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log',VarDumper::dumpAsString($var),FILE_APPEND);
+    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log',"\n---------------------------------------------------------------------------------\n",FILE_APPEND);
+}
+
 
 return $config;
