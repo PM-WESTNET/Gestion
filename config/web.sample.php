@@ -49,7 +49,7 @@ $config = [
             'port' => 6379,
             'database' => 0,
         ],
-	'session' => [
+        'session' => [
             'class' => 'yii\redis\Session',
             'redis' => [
                 'hostname' => 'localhost',
@@ -61,9 +61,9 @@ $config = [
             'class' => 'webvimark\modules\UserManagement\components\UserConfig',
             'identityClass' => 'app\components\user\User',
             // Comment this if you don't want to record user logins
-            'on afterLogin' => function($event) {      
-                if(app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()){
-                    header('Location: '. \yii\helpers\Url::to(['/westnet/ecopagos/frontend/site/index', true]));
+            'on afterLogin' => function ($event) {
+                if (app\modules\westnet\ecopagos\frontend\helpers\UserHelper::isCashier()) {
+                    header('Location: ' . \yii\helpers\Url::to(['/westnet/ecopagos/frontend/site/index', true]));
                     die();
                 }
                 \webvimark\modules\UserManagement\models\UserVisitLog::newVisitor($event->identity->id);
@@ -74,18 +74,18 @@ $config = [
         ],
         'mail' => [
             'class' => 'yii\swiftmailer\Mailer',
-           // 'useFileTransport' => true,
-             'transport' => [
-                     'class' => 'Swift_SmtpTransport',
-                     'host' => '200.16.144.254',
-                     'username' => 'west1@westnet.com.ar',
-                     'password' => '1605mendoza',
-                     'port' => '587',
-                     'encryption' => '',
-              ],
+            // 'useFileTransport' => true,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '200.16.144.254',
+                'username' => 'west1@westnet.com.ar',
+                'password' => '1605mendoza',
+                'port' => '587',
+                'encryption' => '',
+            ],
         ],
         'log' => [
-//           'flushInterval' => 1,
+            //           'flushInterval' => 1,
             'traceLevel' => YII_DEBUG ? 3 : 1,
             'targets' => [
 
@@ -129,7 +129,7 @@ $config = [
                     'logFile' => '@runtime/logs/facturacion_cerrado.log'
 
                 ],
-		[
+                [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['info'],
                     'categories' => ['emails'],
@@ -137,7 +137,7 @@ $config = [
                     'exportInterval' => 1,
                     'logFile' => '@runtime/logs/emails.txt'
                 ],
-		[
+                [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['info'],
                     'categories' => ['mobile_push'],
@@ -145,15 +145,15 @@ $config = [
                     'exportInterval' => 1,
                     'logFile' => '@runtime/logs/mobile_push.log'
                 ],
-             [
+                [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['info'],
                     'categories' => ['facturacion'],
                     'logVars' => [],
                     'exportInterval' => 1,
                     'logFile' => '@runtime/logs/app_facturacion.log'
-               ],
-		[
+                ],
+                [
                     'class' => 'yii\log\FileTarget',
                     'levels' => ['info'],
                     'categories' => ['duplicados-afip'],
@@ -165,7 +165,7 @@ $config = [
             ],
         ],
         'db' => $db['db'],
-#        'dbmo' => $db['dbmo'],
+        #        'dbmo' => $db['dbmo'],
         'dbafip' => $db['dbafip'],
         'dbconfig' => $db['dbconfig'],
         'dbagenda' => $db['dbagenda'],
@@ -174,7 +174,7 @@ $config = [
         'dbnotifications' => $db['dbnotifications'],
         'dblog' => $db['dblog'],
         'dbmedia' => $db['dbmedia'],
-	'dbbackups' => $db['dbbackups'],
+        'dbbackups' => $db['dbbackups'],
         'i18n' => [
             'translations' => [
                 'app' => [
@@ -243,10 +243,10 @@ $config = [
                         'modules/user-management/front' => 'modules/user-management/front.php',
                     ],
                 ],
-		'ivrapi' => [
+                'ivrapi' => [
                     'class' => 'yii\i18n\PhpMessageSource',
                 ],
-		'conquer/oauth2' => [
+                'conquer/oauth2' => [
                     'class' => \yii\i18n\PhpMessageSource::class,
                     'basePath' => '@conquer/oauth2/messages',
                 ],
@@ -344,7 +344,7 @@ $config = [
             'class' => 'webvimark\modules\UserManagement\UserManagementModule',
             // Here you can set your handler to change layout for any controller or action
             // Tip: you can use this event in any module
-            'on beforeAction' => function(yii\base\ActionEvent $event) {
+            'on beforeAction' => function (yii\base\ActionEvent $event) {
                 if ($event->action->uniqueId == 'user-management/auth/login') {
                     $event->action->controller->layout = '/login';
                 };
@@ -369,7 +369,7 @@ $config = [
             'class' => 'app\modules\pagomiscuentas\PagomiscuentasModule',
         ],
         'mobileapp' => [
-           'class' => 'app\modules\mobileapp\MobileAppApiModule',
+            'class' => 'app\modules\mobileapp\MobileAppApiModule',
             'modules' => [
                 'v1' => [
                     'class' => 'app\modules\mobileapp\v1\V1Module',
@@ -382,10 +382,10 @@ $config = [
         'instructive' => [
             'class' => 'app\modules\instructive\InstructiveModule',
         ],
-	'automaticdebit' => [
+        'automaticdebit' => [
             'class' => 'app\modules\automaticdebit\AutomaticDebitModule'
         ],
-	'ivr' =>  [
+        'ivr' =>  [
             'class' => 'app\modules\ivr\IvrModule',
             'modules' => [
                 'v1' => [
@@ -394,10 +394,10 @@ $config = [
                 ]
             ]
         ],
-	'employee' => [
+        'employee' => [
             'class' => 'app\modules\employee\EmployeeModule',
         ],
-	'firstdata' => [
+        'firstdata' => [
             'class' => 'app\modules\firstdata\FirstDataModule'
         ],
     ],
@@ -409,10 +409,10 @@ $config = [
 ];
 
 $config['bootstrap'][] = 'debug';
-    $config['modules']['debug'] = [
-        'class' => 'yii\debug\Module',
-        'allowedIPs' => ['77.111.246.40'],
-    ];
+$config['modules']['debug'] = [
+    'class' => 'yii\debug\Module',
+    'allowedIPs' => ['77.111.246.40'],
+];
 
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
@@ -445,7 +445,7 @@ if (YII_ENV_DEV) {
             ],
         ]
     ];
-/*    
+    /*    
       // configuration adjustments for 'dev' environment
       $config['bootstrap'][] = 'debug';
       $config['modules']['debug'] = 'yii\debug\Module';
@@ -473,14 +473,17 @@ if (YII_ENV_DEV) {
 }
 
 use \yii\helpers\VarDumper;
-function log_siro_payment_intention($var){
-    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log',VarDumper::dumpAsString($var),FILE_APPEND);
-    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log',"\n---------------------------------------------------------------------------------\n",FILE_APPEND);
+
+function log_siro_payment_intention($var)
+{
+    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log', VarDumper::dumpAsString($var), FILE_APPEND);
+    file_put_contents('/var/www/arya2/runtime/logs/error_siro_payment_intention.log', "\n---------------------------------------------------------------------------------\n", FILE_APPEND);
 }
 
-function log_siro_payment_intention_without_error($var){
-    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log',VarDumper::dumpAsString($var),FILE_APPEND);
-    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log',"\n---------------------------------------------------------------------------------\n",FILE_APPEND);
+function log_siro_payment_intention_without_error($var)
+{
+    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log', VarDumper::dumpAsString($var), FILE_APPEND);
+    file_put_contents('/var/www/arya2/runtime/logs/without_error_siro_payment_intention.log', "\n---------------------------------------------------------------------------------\n", FILE_APPEND);
 }
 
 
