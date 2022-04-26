@@ -111,18 +111,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'label' => Yii::t('app','Customer'),
                 'value' => function($model){
                     if(!isset($model->contractDetail)) return 'n/a';
-                    $htmlTextValue = $model->contractDetail->contract->customer->fullName." - ".$model->contractDetail->contract->customer->code;
+                    $htmlTextValue = $model->contractDetail->contract->customer->fullName;
                     return $model->contractDetail ? UserA::a($htmlTextValue,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
                 },
                 'format' => 'html'
             ],
-            // [
-            //     'label' => Yii::t('app','Customer Number'),
-            //     'value' => function($model){
-            //         return $model->contractDetail ? UserA::a($model->contractDetail->contract->customer->code,['/sale/customer/view', 'id' => $model->contractDetail->contract->customer->customer_id]) : NULL;
-            //     },
-            //     'format' => 'html'
-            // ],
+            [
+                'label' => Yii::t('app','Customer Number'),
+                'value' => function($model){
+                    if(!isset($model->contractDetail)) return 'n/a';
+                    return $model->contractDetail->contract->customer->code;
+                },
+                'format' => 'text'
+            ],
             [
                 'label' => 'Descripcion',
                 'value' => function($model){
