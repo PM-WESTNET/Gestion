@@ -209,7 +209,7 @@ class AdsController extends Controller {
                  */
                 $complete = '';
                 if ($company->code != '9999') {
-                    $complete = str_pad($complete, (6 - strlen($init_value)), '0', STR_PAD_LEFT);
+                    $complete = str_pad($complete, (7 - strlen($init_value)), '0', STR_PAD_LEFT);
                 }
                 
                 // generate payment code *goes below barcode*
