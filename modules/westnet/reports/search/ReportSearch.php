@@ -1058,6 +1058,8 @@ class ReportSearch extends Model
 
     public function findCustomerContractDetailsAndPlans($params){
         $this->load($params);
+        $groupByDownload = ' C.download ';
+        $groupByTechnology = ' C.technology ';
 
         // filtering of the customers per date range of adherence
         $dateRange = array('','');
@@ -1101,17 +1103,32 @@ class ReportSearch extends Model
                                 contract_detail.date,
                                 contract_detail.product_id,
                                 
-                                product.name as pName
+                                product.name as pName,
+
+                                planes.download,
+                                planes.upload,
+
+                                category.name as technology
+
                             from customer
                             left join contract on customer.customer_id = contract.customer_id
                             left join contract_detail on contract_detail.contract_id = contract.contract_id
-                            left join product on product.product_id = contract_detail.product_id";
+                            left join product on product.product_id = contract_detail.product_id
+                            left join planes on product.product_id = planes.product_id
+                            left join product_has_category on product.product_id = product_has_category.product_id
+                            left join category on product_has_category.category_id = category.category_id
+
+                            where category.category_id in('16','17')
+                            ";
         $query = 
                 "select
                     concat_ws('-', year(C.date), month(C.date)) as groupDate,
                     C.pName,
                     count(C.product_id) as cantAltasPorMes,
-                    C.product_id as product_id
+                    C.product_id as product_id,
+                    C.download as download,
+                    C.upload as upload,
+                    C.technology as technology
 
                 from(".$firstPlanOfEveryCustomerSubQuery.") as B
                 join (".$infoJoinSubQuery.") as C 
@@ -1120,12 +1137,14 @@ class ReportSearch extends Model
                 group by
                 month(C.date),
                 year(C.date),
-                C.product_id
+                ".$groupByDownload.",
+                ".$groupByTechnology."
                 order by
                 groupDate desc,
                 cantAltasPorMes desc
                 ";
-            //  where C.contractStatus = 'active'
+            //  where C.contractStatus = 'active' // to get only active customers
+            // order by C.product_id // to divide by plan product
 
         $result = Yii::$app->db->createCommand($query);
             
@@ -1160,11 +1179,22 @@ class ReportSearch extends Model
                                 contract.status as contractStatus,
                                 contract_detail.*,
                                 product.name as pName,
-                                product.product_id as planProductId
+                                product.product_id as planProductId,
+
+                                planes.download,
+                                planes.upload,
+                                category.name as technology
+
                             from customer
                             left join contract on customer.customer_id = contract.customer_id
                             left join contract_detail on contract_detail.contract_id = contract.contract_id
-                            left join product on product.product_id = contract_detail.product_id";
+                            left join product on product.product_id = contract_detail.product_id
+                            left join planes on product.product_id = planes.product_id
+                            left join product_has_category on product.product_id = product_has_category.product_id
+                            left join category on product_has_category.category_id = category.category_id
+
+                            where category.category_id in('16','17')
+                            ";
         $query = 
                 "select
                     CONCAT_WS(' - ', CONCAT_WS(' ', C.name, C.lastname), C.code) as fullName,
@@ -1177,12 +1207,15 @@ class ReportSearch extends Model
                     C.lastname, 
                     C.code,
                     C.customer_id,
-                    C.contract_id
+                    C.contract_id,
+                    C.download,
+                    C.technology
 
                 from(".$firstPlanOfEveryCustomerSubQuery.") as B
                 join (".$infoJoinSubQuery.") as C 
                     on contract_detail_ids = C.contract_detail_id
-                where C.product_id = ".$params['product_id']."
+                where C.download = '".$params['download']."'
+                and C.technology = '".$params['technology']."'
                 and YEAR(C.date) = YEAR('".$completeDate."')
                 and MONTH(C.date) = MONTH('".$completeDate."')
                 ";
@@ -1193,7 +1226,7 @@ class ReportSearch extends Model
         $dataProvider = new ArrayDataProvider([
             'allModels' => $result->queryAll(),
             'pagination' => [
-                'pageSize' => 10,
+                'pageSize' => false,
             ],
         ]);
             

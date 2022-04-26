@@ -4,8 +4,8 @@ use yii\helpers\Html;
 use kartik\date\DatePicker;
 use kartik\daterange\DateRangePicker;
 $monthOfAnalisis = (isset($monthOfAnalisis))?$monthOfAnalisis:'n/a';
-$planName = (isset($planName))?$planName:'n/a';
-$this->title = 'Clientes Plan: '.$planName.' del Mes: '.$monthOfAnalisis;
+$download = (isset($download))?$download:'n/a';
+$this->title = 'Clientes Plan: '.$download.' kbps ('.($download/1024).' mbps) del Mes: '.$monthOfAnalisis;
 
 ?>
 
@@ -47,9 +47,21 @@ $this->title = 'Clientes Plan: '.$planName.' del Mes: '.$monthOfAnalisis;
                     },
                     'format' => 'html'
                 ],
-                'detailDate', 
-                'detailStatus',
-                'contractStatus',
+                [
+                    'attribute' => 'pName',
+                    'format' => 'text',
+                    'label' => 'Nombre del plan completo',
+                    // 'filter' => $plansArray, // mapped from ReportsController
+                ],
+                [
+                    'attribute' => 'detailDate',
+                    'label' => 'Detalle de contrato fecha',
+                ],
+                // 'detailStatus',
+                [
+                    'attribute' => 'contractStatus',
+                    'label' => 'Estado de contrato actual',
+                ],
 
 
             ]

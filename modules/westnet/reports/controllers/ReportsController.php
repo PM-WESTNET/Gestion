@@ -1239,6 +1239,9 @@ class ReportsController extends Controller
         // get if the render should be exported to xlsl format via renderpartial()
         $exportBool = Yii::$app->request->get('excel-export');
 
+        // pagination number or value
+        $paginationVal = false;
+        
         // get GridView variables and search model
         $reportSearch = new ReportSearch();
         $result = $reportSearch->findCustomerContractDetailsAndPlans(Yii::$app->request->get());
@@ -1246,12 +1249,12 @@ class ReportsController extends Controller
             'allModels' => $result->queryAll(),
             // 'pagination' => false,
             'pagination' => [
-                'pageSize' => ($exportBool == '1') ? false : 15,
+                'pageSize' => ($exportBool == '1') ? false : $paginationVal,
             ],
         ]);
         
         // get an array of plans name for a filter inside the view
-        $plansArray = ArrayHelper::map(Product::findAllPlans(), 'name', 'name');
+        // $plansArray = ArrayHelper::map(Product::findAllPlans(), 'name', 'name');
 
         // render excel
         if($exportBool == '1'){
@@ -1260,7 +1263,7 @@ class ReportsController extends Controller
                 [
                     'dataProvider' => $dataProvider, 
                     'reportSearch' => $reportSearch,
-                    'plansArray' => $plansArray,
+                    // 'plansArray' => $plansArray,
                 ]
             );   
         }
@@ -1271,27 +1274,26 @@ class ReportsController extends Controller
             [
                 'dataProvider' => $dataProvider, 
                 'reportSearch' => $reportSearch,
-                'plansArray' => $plansArray,
+                // 'plansArray' => $plansArray,
             ]
         );
 
     }
     
 
-    public function actionCustomersPerPlanPerMonth($product_id,$year_month){
+    public function actionCustomersPerPlanPerMonth($download, $technology, $year_month){
         $reportSearch = new ReportSearch();
         $list_customer_by_plan = $reportSearch->findCustomersPerPlanPerMonth(Yii::$app->request->get());
-
-        $plan = Product::findOne($product_id);
-        // $planName = $plan->name.' - '.$plan->description;
-        $planName = $plan->name;
+        // get an array of plans name for a filter inside the view
+        $plansArray = ArrayHelper::map(Product::findAllPlans(), 'name', 'name');
 
         return $this->render('customers-per-plan-per-month',
                                 [
                                     'dataProvider' => $list_customer_by_plan, 
                                     'reportSearch' => $reportSearch,
                                     'monthOfAnalisis' => $year_month,
-                                    'planName' => $planName
+                                    'download' => $download,
+                                    'plansArray' => $plansArray,
                                 ]
                             );
 

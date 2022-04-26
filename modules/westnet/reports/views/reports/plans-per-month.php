@@ -26,7 +26,8 @@ $this->title = 'Altas de Planes por Mes';
                 ],
                 [
                     'class' => 'btn btn-info',
-                    'target' => '_blank'
+                    'target' => '_blank',
+                    // 'style' => 'display: none;' // todo: display button when the controller to export is working correctly
                 ]
             )
         ?>
@@ -36,37 +37,58 @@ $this->title = 'Altas de Planes por Mes';
         <?php echo GridView::widget([
             'dataProvider' => $dataProvider,
             'filterModel' => $reportSearch,
+            'options' => [ 'style' => 'table-layout:fixed;' ],
             'columns' => [
                 [
-                    'attribute' => 'groupDate',
-                    'label' => 'Año y Mes (Agrupado x plan)',
-                    'filter'=>DateRangePicker::widget([
-                        'model' => $reportSearch,
-                        'attribute' => 'groupDate',
-                        'presetDropdown' => true
-                    ]),
+                    'label' => 'bajada',
+                    'value' => function($model){
+                        if(!isset($model['download'])) return 'n/a';
+                        $mb = ($model['download']/1024);
+                        return $mb." mbps";
+                    }
+                ],                
+                [
+                    'label' => 'subida',
+                    'value' => function($model){
+                        if(!isset($model['upload'])) return 'n/a';
+                        $mb = ($model['upload']/1024);
+                        return $mb." mbps";
+                    }
                 ],
                 [
-                    'attribute' => 'pName',
-                    'format' => 'text',
-                    'label' => 'Nombre del plan completo',
-                    'filter' => $plansArray, // mapped from ReportsController
+                    'label' => 'tecnologia',
+                    'attribute' => 'technology',
                 ],
                 [
                     'attribute' => 'cantAltasPorMes',
                     'format' => 'html',
-                    'label' => 'Altas de Plan por Mes',
+                    'label' => 'Altas por Mes',
                     'value' => function ($model) {
                         return Html::a(
                             $model['cantAltasPorMes'],
                             yii\helpers\Url::toRoute([
                                 '/reports/reports/customers-per-plan-per-month', 
-                                'product_id' => $model['product_id'], 
+                                'download' => $model['download'], 
+                                'technology' => $model['technology'], 
                                 'year_month' => $model['groupDate']
                             ])
                         );
                         
                     },
+                ],
+                [
+                    'attribute' => 'groupDate',
+                    'contentOptions' => [ 'style' => 'width: 25%;' ],
+                    // 'headerOptions' => ['style' => 'width:20%'],
+                    'label' => 'Año y Mes (Agrupado x plan)',
+                    'filter'=>DateRangePicker::widget([
+                        'model' => $reportSearch,
+                        'attribute' => 'groupDate',
+                        'options' => ['placeholder' => 'Select range...'],
+                        'presetDropdown' => true,
+                        'includeDaysFilter' => false,
+                        'includeMonthsFilter' => false,
+                    ]),
                 ],
             ]
         ]) ?>
