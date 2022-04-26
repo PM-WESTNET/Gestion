@@ -350,7 +350,7 @@ class Payment extends  ActiveRecord  implements CountableInterface
      *
      * @param type $customer
      * @param type $method
-     * @return type
+     * @return float
      */
     public function accountTotal($fromDate = null, $toDate = null, $only_closed = true){
 

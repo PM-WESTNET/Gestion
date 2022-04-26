@@ -57,9 +57,11 @@ class ContractController extends RestController
             if($id) {
                 $contracts = Contract::findAll(['contract_id'=>$id]);
             } elseif($customer_id) {
+                // here it enters when creating a ticket inside mesa when body is smt like: "customer_id" : "28211" (example)
                 $contracts = Contract::find()
                     ->leftJoin('customer', 'contract.customer_id = customer.customer_id')
                     ->andWhere(['customer.code'=>$customer_id])
+                    ->orderBy(['contract.status'=>SORT_ASC]) // added this sort that helps all ACTIVE contracts to be above the disabled ones.
                     ->all();
             } elseif($customer_name){
                 $searchHelper = new \app\components\helpers\SearchStringHelper();

@@ -119,4 +119,14 @@ class ConnectionController extends Controller
         }
     }
 
+    public function actionUpdateOnMikrotik($connection_id){
+        $conn = Connection::findOne($connection_id);
+        //triggers the aftersave of Connection model which has mikrotik connection update.
+        if($conn->save()){
+            //saved
+        }else{
+            //failed to save
+        }
+        return $this->redirect(['/sale/contract/contract/view', 'id' => $conn->contract_id]);
+    }
 }

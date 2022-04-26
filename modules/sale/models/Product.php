@@ -477,7 +477,9 @@ class Product extends ActiveRecord
     public function calculateTaxAmount($slug, $net)
     {
         $rate = $this->getTaxRates()->joinWith('tax')->where(['tax.slug'=>$slug])->one();
-        
+        // var_dump('$net',$net);
+        // var_dump('$pct',$rate->pct);
+        // var_dump('$calculate($net)',$rate->calculate($net));
         //0 o error?
         if(!$rate){
             return 0;

@@ -151,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Importe a la fecha de venta',
                 'value' => function($model){
-                    if(!isset($model->contractDetail)) return 'n/a';
+                    if(!isset($model->contractDetail)) return 0;
                     $detail = $model->contractDetail;
                     $product = \app\modules\sale\models\Product::findOne($detail->product_id);
                     $price = $product->getPriceFromDate($detail->date)->one();

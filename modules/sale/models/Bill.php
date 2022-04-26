@@ -456,6 +456,7 @@ class Bill extends ActiveRecord implements CountableInterface
     {
         $discountFixedDetail = $this->getFixedDiscountPerDetail(false, false);
         $discountPercentDetail = $this->getPercentageDiscountPerDetail(false);
+        // var_dump('$discountPercentDetail',$discountPercentDetail);
         $total = 0.0;
         foreach ($this->billDetails as $detail){
             //La segunda parte de esta condicion es para resolver un problema con los detalles migrados del sistema anterior
@@ -1022,13 +1023,23 @@ class Bill extends ActiveRecord implements CountableInterface
     public function getTaxesApplied()
     {
         $taxesApplied = [];
-        $discount = $this->getFixedDiscountPerDetail() ;
-        $fixedDiscount = $discount ? $discount : 0;
+        $fixedDiscount = $this->getFixedDiscountPerDetail() ;
+        $fixedDiscount = $fixedDiscount ? $fixedDiscount : 0; // validation of variable and default value set 1
+
+        // important not to calculate taxes included , or at least have the same params as $bill->calculateTotal() function.
+        $percentDiscount = $this->getPercentageDiscountPerDetail(false); 
+        $percentDiscount = $percentDiscount ? $percentDiscount : 1; // validation of variable and default value set 1
+
+        // var_dump(
+        //     '$fixedDiscount,$percentDiscount',
+        //     $fixedDiscount,
+        //     $percentDiscount
+        // );
 
         foreach ($this->billDetails as $detail) {
             if (isset($detail->product)) {
 
-                $this->getProductTaxes($taxesApplied, $detail, $fixedDiscount);
+                $this->getProductTaxes($taxesApplied, $detail, $fixedDiscount, $percentDiscount);
 
             } else {
                 if($detail->unit_net_discount != 0 ) {
@@ -1045,16 +1056,17 @@ class Bill extends ActiveRecord implements CountableInterface
         return $taxesApplied;
     }
 
-    private function getProductTaxes(&$taxesApplied, $detail, $fixedDiscount)
+    private function getProductTaxes(&$taxesApplied, $detail, $fixedDiscount, $percentDiscount = 1)
     {
         foreach ($detail->product->taxRates as $taxRate) {
             $amount = array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['amount'] : 0;
             $base = array_key_exists($taxRate->tax_rate_id, $taxesApplied) !== false ? $taxesApplied[$taxRate->tax_rate_id]['base'] : 0;
+            $net = (($detail->line_subtotal - $fixedDiscount) * $percentDiscount);
 
             $taxesApplied[$taxRate->tax_rate_id] = [
                 'tax_id' => $taxRate->tax_rate_id,
-                'amount' => round($amount + ($detail->product->calculateTaxAmount('iva', ($detail->line_subtotal - $fixedDiscount) )), 2),
-                'base' => round($base + ($detail->line_subtotal - $fixedDiscount) , 2)
+                'amount' => round($amount + ($detail->product->calculateTaxAmount('iva', $net )), 2),
+                'base' => round($base + $net , 2)
             ];
         }
     }

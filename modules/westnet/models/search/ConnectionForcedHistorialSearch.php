@@ -48,7 +48,7 @@ class ConnectionForcedHistorialSearch extends ConnectionForcedHistorial
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
-                'defaultOrder' => ['date' => SORT_DESC]
+                'defaultOrder' => ['create_timestamp' => SORT_DESC]
             ]
         ]);
 
@@ -67,7 +67,7 @@ class ConnectionForcedHistorialSearch extends ConnectionForcedHistorial
         ]);
 
         $query->andFilterWhere(['like', 'reason', $this->reason]);
-        $query->orderBy(['date'=> 'ASC']);
+        $query->orderBy(['create_timestamp'=> 'DESC']);
 
         return $dataProvider;
     }

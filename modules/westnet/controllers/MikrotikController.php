@@ -110,9 +110,11 @@ class MikrotikController extends Controller
         $query = (new Query())
             ->select(['*'])
             ->from('contract_detail cd')
-            ->leftJoin('planes p', 'cd.product_id = p.product_id');
+            ->leftJoin('product prod', 'cd.product_id = prod.product_id')
+            ->leftJoin('planes p', 'prod.product_id = p.product_id');
         //where
         $query->andWhere(['=', 'cd.contract_id', $connection->contract_id]);
+        $query->andWhere(['prod.type' => 'plan']);
         //exec
         $qResults = $query->one();
         return $qResults;

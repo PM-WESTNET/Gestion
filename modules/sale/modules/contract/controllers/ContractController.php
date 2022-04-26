@@ -1290,10 +1290,4 @@ class ContractController extends Controller {
         echo Json::encode(['output'=>'', 'selected'=>'']);
     }
 
-    public function actionUpdateOnMikrotik($connection_id){
-        $conn = Connection::findOne($connection_id);
-        $savedBool = $conn->save(); //triggers aftersave
-        return $this->redirect(['/sale/contract/contract/view', 'id' => $conn->contract_id]);
-        //return $this->actionView($conn->contract_id);
-    }
 }

@@ -180,7 +180,7 @@ class SiroController extends Controller
                             $model->customer_id = $customer_id;
                             $model->payment_method = $payment_method;
                             $model->siro_payment_intention_id = $siro_payment_intention_id;
-                            $model->collection_channel_description = $codes_collection_channel[$collection_channel];
+                            $model->collection_channel_description = isset($codes_collection_channel[$collection_channel]) ? $codes_collection_channel[$collection_channel] : 'No se reconoce el código: ' . $collection_channel;
                             $model->collection_channel = $collection_channel;
                             $model->rejection_code = $rejection_code;
                             $model->created_at = date('Y-m-d');
@@ -203,6 +203,13 @@ class SiroController extends Controller
                 $transaction->commit();
 
             } catch (\Exception $e) {
+                file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador.txt'),
+                "Ha Ocurrido un error: \n" .
+                "Hora: " . date('Y-m-d H:m:s') . "\n" .
+                "Respuesta de Siro: " . json_encode($accountability) . "\n" .
+                "Error: " . json_encode($e) .
+                "-----------------------------------------------------------------------------\n",
+                FILE_APPEND);
                 $transaction->rollBack();
             }
             
@@ -512,7 +519,7 @@ class SiroController extends Controller
                             $model->customer_id = $customer_id;
                             $model->payment_method = $payment_method;
                             $model->siro_payment_intention_id = $siro_payment_intention_id;
-                            $model->collection_channel_description = $codes_collection_channel[$collection_channel];
+                            $model->collection_channel_description = isset($codes_collection_channel[$collection_channel]) ? $codes_collection_channel[$collection_channel] : 'No se reconoce el código: ' . $collection_channel;
                             $model->collection_channel = $collection_channel;
                             $model->rejection_code = $rejection_code;
                             $model->created_at = date('Y-m-d');
@@ -529,9 +536,14 @@ class SiroController extends Controller
             $transaction->commit();
 
         } catch (\Exception $e) {
-            $transaction->rollBack();
-            var_dump($e);
-            die();
+            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_pagos_duplicados.txt'),
+                "Ha Ocurrido un error: \n" .
+                "Hora: " . date('Y-m-d H:m:s') . "\n" .
+                "Respuesta de Siro: " . json_encode($accountability) . "\n" .
+                "Error: " . json_encode($e) .
+                "-----------------------------------------------------------------------------\n",
+                FILE_APPEND);
+                $transaction->rollBack();
         }
 
         return $this->redirect(Url::toRoute(['/westnet/notifications/siro/checker-of-payments']));

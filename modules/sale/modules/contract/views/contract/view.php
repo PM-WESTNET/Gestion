@@ -124,7 +124,7 @@ $customer = $model->customer;
                             if(isset($model->server->load_balancer_type)){ // is mikrotik server, then
                                 if($model->server->load_balancer_type == 'Mikrotik'){
                                     return  Html::a('<span class="label label-success">Actualizar IP Principal en '.$retHTML.'</span>', 
-                                    ['update-on-mikrotik', 'connection_id' => $model->connection_id], 
+                                    ['/westnet/connection/update-on-mikrotik', 'connection_id' => $model->connection_id], 
                                     ['class' => 'profile-link']);   
                                 }
                             }
