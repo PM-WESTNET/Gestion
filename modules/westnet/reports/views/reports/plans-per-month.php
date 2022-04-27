@@ -87,8 +87,8 @@ $this->title = 'Altas de Planes por Mes';
                         'attribute' => 'groupDate',
                         'options' => ['placeholder' => 'Select range...'],
                         'presetDropdown' => true,
-                        'includeDaysFilter' => false,
-                        'includeMonthsFilter' => false,
+                        // 'includeDaysFilter' => false,
+                        // 'includeMonthsFilter' => false,
                     ]),
                 ],
             ]
