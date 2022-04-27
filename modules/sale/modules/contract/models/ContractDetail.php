@@ -212,6 +212,23 @@ class ContractDetail extends ActiveRecord
         }
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        // if plan changes, update connection so that it impacts on the Mikrotik servers and all other stuff.
+        if(isset($changedAttributes['product_id'])){
+            $conn = $this->contract->connection;
+            if($conn->save()){
+                Yii::$app->session->addFlash('success', 'Conexion actualizada con exito al cambiar de plan');
+            }else{
+                Yii::$app->session->addFlash('error', 'No se pudo actualizar la conexion correctamente al cambiar de plan');
+            }
+        }
+    }
+
 
     /**
      * @inheritdoc
