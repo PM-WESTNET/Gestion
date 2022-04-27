@@ -71,11 +71,11 @@ class ContractLowService
                         return true;
                     } else {
                         $transaction->rollBack();
-                        throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
+                        throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.')." ".'No se pudo actualizar el Estado de Cuenta del cliente.');
                     }
                 } else {
                     $transaction->rollBack();
-                    throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
+                    throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.')." ".'No se pudo actualizar el Contrato del cliente.');
                 }
             }
         } else {

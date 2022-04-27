@@ -1060,6 +1060,7 @@ class ReportSearch extends Model
         $this->load($params);
         $groupByDownload = ' C.download ';
         $groupByTechnology = ' C.technology ';
+        $groupByUpload = ' C.upload ';
 
         // filtering of the customers per date range of adherence
         $dateRange = array('','');
@@ -1138,7 +1139,8 @@ class ReportSearch extends Model
                 month(C.date),
                 year(C.date),
                 ".$groupByDownload.",
-                ".$groupByTechnology."
+                ".$groupByTechnology.",
+                ".$groupByUpload."
                 order by
                 groupDate desc,
                 cantAltasPorMes desc
@@ -1215,6 +1217,7 @@ class ReportSearch extends Model
                 join (".$infoJoinSubQuery.") as C 
                     on contract_detail_ids = C.contract_detail_id
                 where C.download = '".$params['download']."'
+                and C.upload = '".$params['upload']."'
                 and C.technology = '".$params['technology']."'
                 and YEAR(C.date) = YEAR('".$completeDate."')
                 and MONTH(C.date) = MONTH('".$completeDate."')
