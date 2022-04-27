@@ -69,6 +69,7 @@ $this->title = 'Altas de Planes por Mes';
                             yii\helpers\Url::toRoute([
                                 '/reports/reports/customers-per-plan-per-month', 
                                 'download' => $model['download'], 
+                                'upload' => $model['upload'], 
                                 'technology' => $model['technology'], 
                                 'year_month' => $model['groupDate']
                             ])

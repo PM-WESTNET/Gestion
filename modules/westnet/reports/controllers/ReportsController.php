@@ -1281,7 +1281,7 @@ class ReportsController extends Controller
     }
     
 
-    public function actionCustomersPerPlanPerMonth($download, $technology, $year_month){
+    public function actionCustomersPerPlanPerMonth($download, $upload, $technology, $year_month){
         $reportSearch = new ReportSearch();
         $list_customer_by_plan = $reportSearch->findCustomersPerPlanPerMonth(Yii::$app->request->get());
         // get an array of plans name for a filter inside the view
@@ -1293,6 +1293,7 @@ class ReportsController extends Controller
                                     'reportSearch' => $reportSearch,
                                     'monthOfAnalisis' => $year_month,
                                     'download' => $download,
+                                    'upload' => $upload,
                                     'plansArray' => $plansArray,
                                 ]
                             );
