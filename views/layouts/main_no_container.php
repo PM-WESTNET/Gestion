@@ -21,7 +21,7 @@ AppAsset::register($this);
     <meta charset="<?= Yii::$app->charset ?>"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= Html::encode($this->title) ?></title>
-
+    <link rel="icon" type="image/x-icon" href= <?= isset(Yii::$app->params['favicon-filename'])? Yii::$app->params['favicon-filename'] : 'favicon.ico' ?> />
     <?php $this->head() ?>
     <?= Html::csrfMetaTags() ?>
 </head>

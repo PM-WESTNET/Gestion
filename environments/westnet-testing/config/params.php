@@ -6,6 +6,7 @@ return [
     'web_logo' => 'logo-westnet.png', //full path, por ejemplo 'http://localhost/arya/web/images/quoma.png',
     'web_logo_bgblack' => 'logo-westnet.png',
     'path'=> 'images',
+    'favicon-filename' => 'westnet-favicon.ico', // favicon filename for each company. 
 
     'gestion_owner_company' => 'westnet', // Name of the owners for this specific app instance. Used for company specific settings. 
     //Behaviors:

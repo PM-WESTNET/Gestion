@@ -7,6 +7,8 @@ return [
     'web_logo_bgblack' => 'logo01.svg',
     'path' => 'images',
     'logo-afip' => 'logo-afip.png',
+    'favicon-filename' => 'bigway-favicon.ico', // favicon filename for each company. 
+
     'gestion_owner_company' => 'bigway', // Name of the owners for this specific app instance. Used for company specific settings. 
     //Behaviors:
     
