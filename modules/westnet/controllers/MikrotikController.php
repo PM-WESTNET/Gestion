@@ -37,8 +37,13 @@ class MikrotikController extends Controller
         // create queue on mikrotik server
         $queueCreated = self::createMikrotikQueue($connection, $mikrotikIP);
         if (is_string($queueCreated) && isset(Yii::$app->session)) Yii::$app->session->addFlash('info', $queueCreated.' on server: '.$connection->server->name);
-        if (is_bool($queueCreated) && isset(Yii::$app->session)) Yii::$app->session->addFlash('error', 'Failed to create Queue on Mikrotik server'.$connection->server->name);
-
+        
+        // if FALSE
+        if (is_bool($queueCreated) && !$queueCreated) {
+            if(isset(Yii::$app->session)) Yii::$app->session->addFlash('error', 'Failed to create Queue on Mikrotik server'.$connection->server->name);
+            return false;
+        }
+        
         // delete queue in mikrotik server
         if (!is_null($old_ip4_1)) {
             $mikrotikIPDelete = $mikrotikIP;
@@ -66,9 +71,26 @@ class MikrotikController extends Controller
     {
         $contractDetailConnectionData = self::getContractDetailPlanesData($connection);
         $mikrotikConnectionStatus = self::getMikrotikConnectionStatus($connection);
+        $cliente_ip = long2ip($connection->ip4_1); // convert to ip. if null or 0 => 0.0.0.0
+
+        // check if any value is not valid
+        if( "0.0.0.0" == $cliente_ip || //ip sent to mikrotik server CANNOT be 0.0.0.0
+            empty($contractDetailConnectionData['download']) ||
+            empty($contractDetailConnectionData['upload'])
+            ){
+                // output error msgs
+                if(isset(Yii::$app->session))
+                {
+                    if("0.0.0.0" == $cliente_ip) Yii::$app->session->addFlash('error', 'IP value cannot be 0.0.0.0');
+                    if(empty($contractDetailConnectionData['download'])) Yii::$app->session->addFlash('error', 'Download speed of plan is null');
+                    if(empty($contractDetailConnectionData['upload'])) Yii::$app->session->addFlash('error', 'Upload speed of plan is null');
+                }
+                return false;
+            }
+
         // A queue to create in a mikrotik server
         $queueAdd = array(
-            "cliente_ip" => long2ip($connection->ip4_1), //connection->ip
+            "cliente_ip" => $cliente_ip, //connection->ip
             "download" => $contractDetailConnectionData['download'], //planes->download
             "upload" => $contractDetailConnectionData['upload'], // planes->upload
             "estado" => $mikrotikConnectionStatus // connection->status
