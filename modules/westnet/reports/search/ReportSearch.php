@@ -1064,14 +1064,18 @@ class ReportSearch extends Model
 
         // filtering of the customers per date range of adherence
         $dateRange = array('','');
-        $filterDateRange = '';
         if(!empty($this->groupDate)){
             $dateRange = explode(' - ', str_replace('/','-',$this->groupDate));
             $dateRange[0] = date("Y-m-d", strtotime($dateRange[0]));
             $dateRange[1] = date("Y-m-d", strtotime($dateRange[1]));
-
-            $filterDateRange = " and (contract_detail.date between '".$dateRange[0]."' and '".$dateRange[1]."') ";
+        }else{
+            $dateRange[0] = (new \DateTime('first day of this month'))->format('Y-m-d');
+            $dateRange[1] = (new \DateTime('last day of this month'))->format('Y-m-d');
         }
+        $this->groupDate = $dateRange[0].' - '.$dateRange[1];
+        //create date range for search filter
+        $filterDateRange = " and (contract_detail.date between '".$dateRange[0]."' and '".$dateRange[1]."') ";
+
         $filterPlan = '';
         if(!empty($this->pName)){
             $filterPlan = " and product.name = '".$this->pName."' ";
