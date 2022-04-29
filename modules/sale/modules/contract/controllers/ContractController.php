@@ -1133,7 +1133,8 @@ class ContractController extends Controller {
             $transaction= Yii::$app->db->beginTransaction();
             $contract->updateAttributes(['status' => Contract::STATUS_ACTIVE]);
             $connection= Connection::findOne(['contract_id' => $contract->contract_id]);
-            $connection->updateAttributes(['status' => Connection::STATUS_ENABLED]);
+            // $connection->updateAttributes(['status' => Connection::STATUS_ENABLED]);
+            $connection->save(); // CHANGE FROM THE LINE ABOVE: trigger account_status update and consequently a proper connection status update
             $contract->customer->updateAttributes(['status' => Customer::STATUS_ENABLED]);
             $transaction->commit();
             return $this->redirect(['view', 'id' => $contract_id]);

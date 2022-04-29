@@ -41,6 +41,7 @@ use app\modules\westnet\models\PaymentExtensionHistory;
 use app\modules\westnet\notifications\components\transports\EmailTransport;
 use app\modules\westnet\api\controllers\ContractController;
 use app\modules\westnet\models\Connection;
+use app\modules\sale\modules\contract\components\ContractLowService;
 use yii\data\ArrayDataProvider;
  
 use Da\QrCode\QrCode;
@@ -389,6 +390,31 @@ class TestController extends Controller {
         }
 
         die('end');
+        return true;
+    }
+
+    public function actionTestLowProcess($id){
+        $contract = Contract::findOne($id);
+        $credit = 0;
+        $category_id = 15;
+        $date = '2022-04-29';
+        $date = DateTime::createFromFormat('Y-m-d', $date);
+        // var_dump($date);die();
+
+        $service = new ContractLowService();
+        try{
+            if($service->startLowProcess($contract, $date, $category_id, $credit)){
+                var_dump('worked');
+
+            }else{
+                var_dump('failed');
+            }   
+        }catch(\Exception $ex){
+            var_dump($ex);
+            // die('end2');
+        }
+        // var_dump($contract);
+        // die('end');
         return true;
     }
 
