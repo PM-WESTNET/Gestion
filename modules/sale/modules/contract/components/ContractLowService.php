@@ -48,7 +48,7 @@ class ContractLowService
                     }
                     return true;
                 } else {
-                    //throw new \Exception(Yii::t('app', 'Can\'t begin the low process of this contract.'));
+                    throw new \Exception("Cannot update the specified contract attributes.");
                 }
             } else {
                 $contract->status = Contract::STATUS_LOW_PROCESS;
@@ -57,7 +57,8 @@ class ContractLowService
 
                     $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
 
-                    if ($connection->updateAttributes(['status_account'])) {
+                    // if ($connection->updateAttributes(['status_account'])) {
+                    if ($connection->save()) { // triggers all types of 
                         $this->createTicketLow($contract);
                         $transaction->commit();
                         //Deshabulito firstdata
