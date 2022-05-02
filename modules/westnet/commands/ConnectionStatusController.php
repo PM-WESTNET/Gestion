@@ -648,7 +648,9 @@ class ConnectionStatusController extends Controller
                                  * Habilito si:
                                  *  - solo debe la factura del mes actual y la fecha es menor a la de corte
                                  */
-                                if (!$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || ($debtLastBill <= 1 && $lastBillItsFromActualMonth && $date < $cortado_date)) {
+                                if (!$corta || !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || 
+                                    ($debtLastBill <= 1 && $lastBillItsFromActualMonth && $date < $cortado_date)
+                                    ) {
                                     $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                                 }
                             } else if (
