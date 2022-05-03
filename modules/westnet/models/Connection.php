@@ -53,7 +53,7 @@ class Connection extends ActiveRecord {
     const STATUS_ACCOUNT_ENABLED = 'enabled';
     const STATUS_ACCOUNT_DISABLED = 'disabled';
     const STATUS_ACCOUNT_FORCED = 'forced';
-    const STATUS_ACCOUNT_FORCED_DISABLED = 'forced-disabled';
+    // const STATUS_ACCOUNT_FORCED_DISABLED = 'forced-disabled';
     const STATUS_ACCOUNT_DEFAULTER = 'defaulter';
     const STATUS_ACCOUNT_CLIPPED = 'clipped';
     const STATUS_ACCOUNT_LOW= 'low';
