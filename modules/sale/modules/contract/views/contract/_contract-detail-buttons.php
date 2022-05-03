@@ -57,5 +57,23 @@ if ($model->status == Contract::STATUS_ACTIVE) {
             'data-loading-text' => Yii::t('westnet', 'Enabling') . "..."
         ]);
     }
+
+    // if (User::canRoute('/westnet/connection/force')) {
+    //     echo UserA::a(Yii::t('westnet', 'Force Disable'), null, [
+    //         'class' => 'btn btn-danger',
+    //         'id' => 'force-connection-disable',
+    //         'disabled' => 'disabled',
+    //         'data-loading-text' => Yii::t('westnet', 'Disabling') . "..."
+    //     ]);
+    // }
+
+    if ($connection->status_account != Connection::STATUS_ACCOUNT_FORCED_DISABLED && 
+        User::canRoute('/westnet/connection/force'))
+    {
+        echo UserA::a(Yii::t('westnet', 'Force Disable'), ['/westnet/connection/force-disable', 'connection_id'=>$connection->connection_id], [
+            'class' => 'btn btn-danger',
+        ]);
+    }
+
 }
 ?>

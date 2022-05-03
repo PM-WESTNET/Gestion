@@ -12,6 +12,7 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\config\models\Config;
 use app\modules\westnet\models\PaymentExtensionHistory;
+use Exception;
 
 /**
  * Class ConnectionController
@@ -128,5 +129,52 @@ class ConnectionController extends Controller
             //failed to save
         }
         return $this->redirect(['/sale/contract/contract/view', 'id' => $conn->contract_id]);
+    }
+
+    /**
+     * FORCE disable a connection. (TOGGLE)
+     * @return string 'success' or 'error'
+     */
+    public function actionForceDisable($connection_id)
+    {
+        // Yii::$app->response->format = 'json';
+        // get model
+        $model = $this->findModel($connection_id);
+        $model->status_account = Connection::STATUS_ACCOUNT_FORCED_DISABLED;
+        $model->due_date = null;
+        // update data
+        try{
+            if($model->save()){
+                var_dump($model->status_account);
+                
+                
+                throw new \Exception('worked ok ');
+
+            }
+            else // failed
+            {
+                // throw new Exception('failed to save the connection model '.var_export($model->errors));
+                throw new \Exception('failed to save the connection model ');
+            }
+        }catch(\Exception $ex)
+        {
+            echo $ex->getMessage(), "\n";
+
+        }
+        die('trace');
+
+
+        // disabled implementation
+        // Yii::$app->response->format = 'json';
+        // $model = $this->findModel($id);
+        // $model->status_account = Connection::STATUS_ACCOUNT_DISABLED;
+        // $model->due_date = null;
+        // $model->update(false);
+
+        // $result = ($model->status_account == Connection::STATUS_ACCOUNT_DISABLED);
+
+        // return [
+        //     'status' => ($result ? 'success' : 'error')
+        // ];
     }
 }

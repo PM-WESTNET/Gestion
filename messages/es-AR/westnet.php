@@ -47,6 +47,7 @@
     'ip4_2' => 'Ip Bridge',
     'ip4_public' => 'Ip Publica',
     'Force Activation' => 'Forzar Activación',
+    'Force Disabled' => 'Forzar Deshabilitado',
     'Force Connection' => 'Forzar conexión',
     'Forced Activation' => 'Activación Forzosa',
     'Forced Activation Due Date' => 'Fecha de vencimiento de Activación Forzada',
