@@ -50,7 +50,7 @@ class NodeSearch extends Node {
     public function search($params) {
         $query = Node::find();
         $query->innerJoin('server', 'node.server_id = server.server_id');
-        $query->innerJoin('zone', 'node.zone_id = zone.zone_id');
+        $query->innerJoin('zone', 'node.zone_id = zone.zone_id'); // comment this line if the zone table is not created on the db. (known error from backups 2021).
         $query->leftJoin('node n2', 'node.parent_node_id = n2.node_id');
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
