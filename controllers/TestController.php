@@ -348,7 +348,7 @@ class TestController extends Controller {
         $model = Contract::findOne($contract_id);
         $connection = Connection::findOne(['contract_id' => $model->contract_id]);
         echo "<pre>";
-        var_dump($model->status);
+        // var_dump($model->status);
         var_dump($connection->status);
         var_dump($connection->status_account);
         var_dump($model->customer_id);
@@ -366,7 +366,7 @@ class TestController extends Controller {
 
         }
 
-	    var_dump($model->status);
+	    // var_dump($model->status);
         var_dump($connection->status);
         var_dump($connection->status_account);
         var_dump($model->customer_id);

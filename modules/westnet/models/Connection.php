@@ -53,6 +53,7 @@ class Connection extends ActiveRecord {
     const STATUS_ACCOUNT_ENABLED = 'enabled';
     const STATUS_ACCOUNT_DISABLED = 'disabled';
     const STATUS_ACCOUNT_FORCED = 'forced';
+    const STATUS_ACCOUNT_FORCED_DISABLED = 'forced-disabled';
     const STATUS_ACCOUNT_DEFAULTER = 'defaulter';
     const STATUS_ACCOUNT_CLIPPED = 'clipped';
     const STATUS_ACCOUNT_LOW= 'low';
@@ -575,6 +576,7 @@ class Connection extends ActiveRecord {
     }
 
     public function updatedStatusAccount(){
+        $debug = false;
         // this is only done because of refactoring. didnt want to change the variable name
         $connection = $this;
 
@@ -657,17 +659,20 @@ class Connection extends ActiveRecord {
         $newContractsFromDate = clone $from_date;
         $newContractsFromDate->modify('+' . $newContractsDays . " days");
 
-        // $errMsg1 =
-        //         "\n - customer_id " . $contract->customer_id . " " .
-        //         "\n - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
-        //         "\n - aviso_date: " . $aviso_date->format('Y-m-d') .
-        //         "\n - cortado_date: " . $cortado_date->format('Y-m-d') .
-        //         "\n - due_date: " . $due_date->format('Y-m-d') .
-        //         "\n - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
-        //         "\n - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
-        //         "\n - debtLastBill: " . $debtLastBill .
-        //         "\n - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays;
-        // var_export($errMsg1);
+        if($debug){
+            $errMsg1 =
+            "\n - customer_id " . $contract->customer_id . " " .
+            "\n - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
+            "\n - aviso_date: " . $aviso_date->format('Y-m-d') .
+            "\n - cortado_date: " . $cortado_date->format('Y-m-d') .
+            "\n - due_date: " . $due_date->format('Y-m-d') .
+            "\n - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
+            "\n - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
+            "\n - debtLastBill: " . $debtLastBill .
+            "\n - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays;
+            var_export($errMsg1);
+        }
+
 
 
         // Si no esta en proceso de baja
@@ -693,15 +698,16 @@ class Connection extends ActiveRecord {
             $last_closed_bill_date = $last_closed_bill ? (new \DateTime($last_closed_bill->date)) : false;
             $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
             
-            // $errMsg2 = "\n - " . 'tiene_deuda: ' . ($tiene_deuda ? 's' : 'n') .
-            //         "\n - " . 'tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') . 
-            //         "\n - " . 'es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n') .
-            //         "\n - " . 'avisa: ' . ($avisa ? 's' : 'n') .
-            //         "\n - " . 'corta: ' . ($corta ? 's' : 'n') .
-            //         "\n - " . 'es_nuevo: ' . ($es_nuevo ? 's' : 'n') .
-            //         "\n - " . 'last_bill_date: ' . $last_bill_date->format('Y-m-d');
-            // var_export($errMsg2);
-
+            if($debug){
+                $errMsg2 = "\n - " . 'tiene_deuda: ' . ($tiene_deuda ? 's' : 'n') .
+                        "\n - " . 'tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') . 
+                        "\n - " . 'es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n') .
+                        "\n - " . 'avisa: ' . ($avisa ? 's' : 'n') .
+                        "\n - " . 'corta: ' . ($corta ? 's' : 'n') .
+                        "\n - " . 'es_nuevo: ' . ($es_nuevo ? 's' : 'n') .
+                        "\n - " . 'last_bill_date: ' . $last_bill_date->format('Y-m-d');
+                var_export($errMsg2);
+            }
 
             if (strtolower($customerClass->name) == 'free') {
                 $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
@@ -715,8 +721,9 @@ class Connection extends ActiveRecord {
                  * Habilito si:
                  *  - solo debe la factura del mes actual y la fecha es menor a la de corte
                  */
-                if (!$corta || !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || 
-                    ($debtLastBill <= 1 && $lastBillItsFromActualMonth && $date < $cortado_date)
+                if (
+                    !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || 
+                    (!($debtLastBill > 1) && !$corta && $lastBillItsFromActualMonth && $date < $cortado_date)
                     ) {                    
                     $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
                 }
