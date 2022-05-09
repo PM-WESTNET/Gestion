@@ -53,7 +53,6 @@ class Connection extends ActiveRecord {
     const STATUS_ACCOUNT_ENABLED = 'enabled';
     const STATUS_ACCOUNT_DISABLED = 'disabled';
     const STATUS_ACCOUNT_FORCED = 'forced';
-    // const STATUS_ACCOUNT_FORCED_DISABLED = 'forced-disabled';
     const STATUS_ACCOUNT_DEFAULTER = 'defaulter';
     const STATUS_ACCOUNT_CLIPPED = 'clipped';
     const STATUS_ACCOUNT_LOW= 'low';
@@ -637,6 +636,11 @@ class Connection extends ActiveRecord {
             $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
         }
         // $estadosAnteriores[$connection->status_account]++;
+
+        // if status_account comes disabled or is already, do:
+        if ($connection->status_account == Connection::STATUS_ACCOUNT_DISABLED) {
+            return $connection->status_account;
+        } 
 
         // Si la conexion esta forzada,
         // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda
