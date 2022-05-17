@@ -90,40 +90,40 @@ class DestinataryController extends Controller {
             $model->notification_id = $notification->notification_id;
             $post = Yii::$app->request->post();
 
-            if ($model->load($post)) {
-                if(isset($post['Destinatary'])){
-                    $ads_csv = $post['Destinatary']['ads_csv']; // get data from post
-                    if(!empty($ads_csv)) 
-                    {
-                        $ads_csv = str_replace("\r", '', $ads_csv); // dont comment this line! it removes a special char for the cursor
-    
-                        $ads_csv = str_replace("\n", ',', $ads_csv); // this makes it a CSV if it isnt
-                        $ads_csv = str_replace(",,", ',', $ads_csv); // this corrects the prev step if it was an CSV from the start
-    
-                        if (substr($ads_csv, -1) == ',') $ads_csv = rtrim($ads_csv,','); // removes last comma if it happens to be one
-    
-                        // test the string for only numbers and commas 
-                        $pattern = '/^[0-9,]*$/';
-                        $result = preg_match($pattern, $ads_csv);
-    
-                        // if no possible errors..
-                        if($result){
-                            $post['Destinatary']['ads_csv'] = $ads_csv; // re-set data to post var
-    
-                            // re-create data to post var as if it was coming from by_customers method
-                            $post['Destinatary']['type'] = 'by_customers';
-                            $post['Destinatary']['customers'] = Customer::getCustomerIDsViaCodes($ads_csv); // get a customer_id array based on the csv    
-                        }else{
-                            Yii::$app->session->setFlash("error", NotificationsModule::t('app', 'An error ocurred when saving this destinatary.'));
-                            return $this->render('create', [
-                                'model' => $model,
-                                'notification' => $notification,
-                            ]);
-                        }
+            if(isset($post['Destinatary'])){
+                $ads_csv = $post['Destinatary']['ads_csv']; // get data from post
+                if(!empty($ads_csv)) 
+                {
+                    $ads_csv = str_replace("\r", '', $ads_csv); // dont comment this line! it removes a special char for the cursor
+
+                    $ads_csv = str_replace("\n", ',', $ads_csv); // this makes it a CSV if it isnt
+                    $ads_csv = str_replace(",,", ',', $ads_csv); // this corrects the prev step if it was an CSV from the start
+
+                    if (substr($ads_csv, -1) == ',') $ads_csv = rtrim($ads_csv,','); // removes last comma if it happens to be one
+
+                    // test the string for only numbers and commas 
+                    $pattern = '/^[0-9,]*$/';
+                    $result = preg_match($pattern, $ads_csv);
+
+                    // if no possible errors..
+                    if($result){
+                        $post['Destinatary']['ads_csv'] = $ads_csv; // re-set data to post var
+
+                        // re-create data to post var as if it was coming from by_customers method
+                        $post['Destinatary']['type'] = 'by_customers';
+                        $post['Destinatary']['customers'] = Customer::getCustomerIDsViaCodes($ads_csv); // get a customer_id array based on the csv    
+                    }else{
+                        Yii::$app->session->setFlash("error", NotificationsModule::t('app', 'An error ocurred when saving this destinatary.'));
+                        return $this->render('create', [
+                            'model' => $model,
+                            'notification' => $notification,
+                        ]);
                     }
-                    // var_dump($post);
-                    // die();
                 }
+                // var_dump($post);
+                // die();
+            }
+            if ($model->load($post)) {
                 if ($model->save()) {
                     $this->redirect(['notification/wizard', 'id' => $model->notification_id, 'step' => 3]);
                 } else {
