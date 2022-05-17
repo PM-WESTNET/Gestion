@@ -29,7 +29,8 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'type')->dropDownList([
         'by_filters' => NotificationsModule::t('app','By filters'),
-        'by_customers' => NotificationsModule::t('app','By customers')
+        'by_customers' => NotificationsModule::t('app','By customers'),
+        'by_csv' => 'Importar ADS por CSV'
     ], ['id' => 'type']) ?>
     
     <div id="types">
@@ -195,6 +196,16 @@ use yii\widgets\ActiveForm;
             <?php endif;?>
         </div>
 
+        <div id="by_csv" style="display: none;">
+            <?php
+            echo "*ADS separados por comas</br></br>";
+            
+            echo $form->field($model, 'ads_csv')->textarea(['rows' => '6']);
+            
+
+            ?>
+        </div>
+
         <div id="by_customers" style="display: none;">
 
             <?php
@@ -203,13 +214,14 @@ use yii\widgets\ActiveForm;
                 $values[$customer->customer_id] = $customer->fullName;
             }
 
+            echo "Buscador</br>";
             echo Select2::widget([
                 'name' => 'Destinatary[customers]',
                 'value' => array_keys($values),
                 'initValueText' => $values,
                 'options' => [
                     'multiple' => true,
-                    'placeholder' => Yii::t('app', 'Search')
+                    'placeholder' => 'Buscar Clientes'
                 ],
                 'pluginOptions' => [
                     'allowClear' => true,

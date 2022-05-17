@@ -70,6 +70,7 @@ class Destinatary extends ActiveRecord {
 
     public $_customer_statuses= [];
 
+    public $ads_csv; // temp data file for efficiently loading destinataries that arent easy to filter
 
 
     /**
@@ -98,6 +99,7 @@ class Destinatary extends ActiveRecord {
             [['name'], 'string'],
             [['notification', '_nodes', '_companies', '_customer_categories', '_customer_class', '_plans', '_contract_statuses', '_customer_statuses', 'customers', 'has_app'], 'safe'],
             [['code'], 'string', 'max' => 255],
+            [['ads_csv'], 'string'],
         ];
     }
 
