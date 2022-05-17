@@ -8,6 +8,7 @@ use app\modules\sale\models\Discount;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Json;
 use app\components\web\Controller;
+use app\modules\sale\models\CustomerHasDiscount;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\sale\models\search\DiscountSearch;
@@ -104,8 +105,20 @@ class DiscountController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
+        // $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        $customerDiscounts = (new CustomerHasDiscount)->getAllCustomersFromDiscount($id);
+        if(!empty($customerDiscounts)){
+            foreach($customerDiscounts as $discountOfCustomer){
+                $discountOfCustomer->delete();
+            }
+        }
+        try{
+            // this only works if there are no bill_detail with the discount_id of deletion.
+            $model->delete(); 
+        }catch(\yii\db\IntegrityException $e){
+            if(strpos(implode(" ",$e->errorInfo),"delete") !== false) Yii::$app->session->addFlash('error','No se pudo eliminar el descuento debido a que hay comprobantes que lo utilizan');
+        }
         return $this->redirect(['index']);
     }
 

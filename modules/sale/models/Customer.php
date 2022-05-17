@@ -2334,4 +2334,15 @@ class Customer extends ActiveRecord {
     	return $contractModel; // if prioritizing active ones, this can return null in case a customer has only one contract and its disabled.
     }
 
+    /**
+     * return an array of customer_id's based on the input array customer's CODES.
+     */
+    public static function getCustomerIDsViaCodes($ads_csv){
+        $customer_ids = Customer::find()
+                            ->select(['customer_id'])
+                            ->where(['in', 'code', explode(',',$ads_csv)])
+                            ->column();
+    	return $customer_ids; // if prioritizing active ones, this can return null in case a customer has only one contract and its disabled.
+    }
+
 }
