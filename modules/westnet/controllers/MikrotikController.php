@@ -28,10 +28,12 @@ class MikrotikController extends Controller
      */
     public static function updateQueues($connection, $old_ip4_1 = null, $old_node_id = null)
     {
-        // if it isnt a mikrotik type server connection or is disabled
-        if (!($connection->server->load_balancer_type == 'Mikrotik') || ($connection->server->status != 'enabled')) return false;
         // return false if no server is associated
         if (!isset($connection->server,$connection->server->load_balancer_type)) return false;
+        
+        // if it isnt a mikrotik type server connection or is disabled
+        if (!($connection->server->load_balancer_type == 'Mikrotik') || ($connection->server->status != 'enabled')) return false;
+
 
         // if the mikrotik server has a known IP for GestionApp then it is most probably a wireless connection to be updated (without soldef help)
         if (!empty($connection->server->ip_of_load_balancer)){
