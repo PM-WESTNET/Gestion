@@ -631,10 +631,21 @@ class Contract extends ActiveRecord {
      */
     public function updateOnISP()
     {
+        $connection = $this->connection;
+        $server = $this->connection->server;
         if ($this->status === self::STATUS_ACTIVE) {
+
+            if(('app\modules\westnet\isp\wispro\MikrotikIsp' == $server->class)){
+                $api = IspFactory::getInstance()->getIsp($connection->server); // gets the API responsable for the isp if a server instance
+                
+                $mikrotikRequest = $api->getProviderApi(); // in this case, the server class is mikrotik
+                $mikrotikRequest->loadConnection($connection); // load connection and node data to mikrotik request api
+                return $mikrotikRequest->apply(); // rest req is applied and pushes out the ONU for reset (this causes the contract plan to update)
+            }
+
+            // default: use wispro controller *old more complete controller for wifi tech
             return SecureConnectionUpdate::update($this->connection, $this, true);
         }
-
         return false;
     }
 

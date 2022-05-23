@@ -212,6 +212,18 @@ class ContractDetail extends ActiveRecord
         }
     }
 
+    // public function afterSave($insert, $changedAttributes) {
+    //     parent::afterSave($insert, $changedAttributes);
+    //     if(isset($changedAttributes['product_id'])){
+    //         if($this->product->isProductCategory('Plan fibra')){
+    //             // update on ISP ()
+    //             $updated = $this->contract->updateOnISP();
+    //             if(Yii::$app->session && !$updated) {
+    //                 Yii::$app->session->addFlash('error', 'Plan fibra no se actualizó correctamente en ISP');
+    //             }
+    //         }    
+    //     }
+    // }
 
     /**
      * @inheritdoc
