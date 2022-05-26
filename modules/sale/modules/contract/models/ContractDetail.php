@@ -80,7 +80,7 @@ class ContractDetail extends ActiveRecord
     /**
      * @inheritdoc
      */
-  /*  public function behaviors()
+    /*  public function behaviors()
     {
 
         return [
@@ -212,6 +212,7 @@ class ContractDetail extends ActiveRecord
         }
     }
 
+    // todo change in future case the 'plan fibra' condition to be inside the function updateOnIsp()
     // public function afterSave($insert, $changedAttributes) {
     //     parent::afterSave($insert, $changedAttributes);
     //     if(isset($changedAttributes['product_id'])){

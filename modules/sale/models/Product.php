@@ -13,6 +13,8 @@ use app\modules\media\behaviors\MediaBehavior;
 use app\modules\config\models\Config;
 use yii\db\Expression;
 use yii\db\Query;
+use app\modules\sale\modules\contract\models\ContractDetail;
+
 /**
  * This is the model class for table "product".
  *
@@ -1157,4 +1159,12 @@ class Product extends ActiveRecord
         return $isCategory; // ret val is true if some category with the category_name is found related to the product
     }
 
+    public static function getPlanFromContract($id){
+        return Product::find()
+                    ->alias('prod')
+                    ->leftJoin(ContractDetail::tableName().' cd' , 'prod.product_id = cd.product_id')
+                    ->where(['contract_id' => $id])
+                    ->andWhere(['prod.type' => 'plan'])
+                    ->one();
+    }
 }

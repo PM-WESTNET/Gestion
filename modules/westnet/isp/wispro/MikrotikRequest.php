@@ -35,13 +35,11 @@ class MikrotikRequest extends RestRequest implements ApiProvider
     public function apply()
     {
         $data = array(
-            // 'ip_anterior' => long2ip($this->connection->ip4_1_old),
-            'ip_anterior' => long2ip($this->connection->ip4_1),
+            'ip_anterior' => long2ip($this->connection->ip4_1_old),
             'ip_nueva' => long2ip($this->connection->ip4_1),
             'nodo' => $this->node->name,
         );
-        // var_dump($data);
-
+        
         //Creates a new request for a client view
         $response = parent::getRequest(MikrotikRequest::BASE_URL, RestRequest::METHOD_PUT, $data, false, true);
         // var_dump($response);
