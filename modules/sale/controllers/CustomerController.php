@@ -206,7 +206,7 @@ class CustomerController extends Controller
                 'url_whatsapp' => $url_whatsapp
             ]);
         }else{
-           throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
+            throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));
         }
         
     }

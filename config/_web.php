@@ -411,7 +411,6 @@ if (YII_ENV_DEV) {
         'class' => 'yii\debug\Module',
         'allowedIPs' => ['*'],
     ];
-
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
@@ -435,31 +434,30 @@ if (YII_ENV_DEV) {
             ],
         ]
     ];
-/*    
-      // configuration adjustments for 'dev' environment
-      $config['bootstrap'][] = 'debug';
-      $config['modules']['debug'] = 'yii\debug\Module';
-	$config['modules']['debug'] = [
-		'class' => 'yii\debug\Module',
-		'allowedIps => ['168.227.99.11', '190.113.159.60', '201.190.245.57']
-	]
 
-      $config['bootstrap'][] = 'gii';
-      $config['modules']['gii'] = [
-      'class' => 'yii\gii\Module',
-      'allowedIPs' => ['127.0.0.1', '::1'],
-      'generators' => [
-      'crud'   => [
-      'class'     => 'yii\gii\generators\crud\Generator',
-      'templates' => ['arya-crud' => '@app/templates/generators/crud/default']
-      ]
-      ]
-      ];
-      //    $config['modules']['gii'] = [
-      //        'class' => 'yii\gii\Module',
-      //        'allowedIPs' => ['127.0.0.1', '::1'],
-      //    ];
-     */
-}
+
+    // configuration adjustments for 'dev' environment
+    // $config['bootstrap'][] = 'debug';
+    // $config['modules']['debug'] = 'yii\debug\Module';
+	// $config['modules']['debug'] = [
+	// 	'class' => 'yii\debug\Module',
+	// 	'allowedIps => ["168.227.99.11" ,"190.113.159.60" ,"201.190.245.57"],
+    // ];
+    // $config['bootstrap'][] = 'gii';
+    // $config['modules']['gii'] = [
+    //     'class' => 'yii\gii\Module',
+    //     'allowedIPs' => ['127.0.0.1', '::1'],
+    //     'generators' => [
+    //         'crud'   => [
+    //             'class'     => 'yii\gii\generators\crud\Generator',
+    //             'templates' => ['arya-crud' => '@app/templates/generators/crud/default']
+    //         ]
+    //     ]
+    //     ];
+    //     $config['modules']['gii'] = [
+    //         'class' => 'yii\gii\Module',
+    //         'allowedIPs' => ['127.0.0.1', '::1'],
+        
+};
 
 return $config;
