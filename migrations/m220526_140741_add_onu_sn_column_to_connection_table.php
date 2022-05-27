@@ -12,7 +12,7 @@ class m220526_140741_add_onu_sn_column_to_connection_table extends Migration
      */
     public function safeUp()
     {
-        $this->addColumn('connection', 'onu_sn', $this->varchar(50));
+        $this->addColumn('connection', 'onu_sn', $this->string(50));
     }
 
     /**
