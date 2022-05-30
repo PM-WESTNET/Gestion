@@ -140,6 +140,10 @@ $customer = $model->customer;
                         'value' => ($connection->accessPoint ? $connection->accessPoint->name : "" ),
                     ],
                     [
+                        'label' => Yii::t('westnet', 'ONU sn'),
+                        'value' => ($connection->onu_sn),
+                    ],
+                    [
                         'label' => Yii::t('westnet', 'ip4_1'),
                         'value' => long2ip($connection->ip4_1),
                     ],
