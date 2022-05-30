@@ -38,7 +38,7 @@ class ConnectionController extends Controller
         $model->due_date = null;
         $model->update(false);
 
-        $result = ($model->status_account == Connection::STATUS_ACCOUNT_ENABLED);
+        $result = (($model->status_account == Connection::STATUS_ACCOUNT_ENABLED) || ($model->status == Connection::STATUS_ENABLED));
 
         return [
             'status' => ($result ? 'success' : 'error')

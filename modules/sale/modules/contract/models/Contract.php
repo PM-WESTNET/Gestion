@@ -631,10 +631,38 @@ class Contract extends ActiveRecord {
      */
     public function updateOnISP()
     {
+        // if contract is not active returns false
         if ($this->status === self::STATUS_ACTIVE) {
-            return SecureConnectionUpdate::update($this->connection, $this, true);
-        }
+            $connection = $this->connection;
+            $server = (isset($this->connection->server)) ? $this->connection->server : null;
 
+            $isMikrotik = (!is_null($server)) ? ('app\modules\westnet\isp\wispro\MikrotikIsp' == $server->class) : false;
+            //the else statement does not exist because all else cases go to the previous Wispro API.
+            if($isMikrotik){
+                //get customer plan
+                $plan_associated = Product::getPlanFromContract($this->contract_id);
+                
+                //plan exists
+                if(!empty($plan_associated)){
+                    //if is fiber plan then run API for mikrotik
+                    $isFiber = $plan_associated->isProductCategory('Plan fibra');
+                    if($isFiber){
+                        // gets the API responsable for the isp if a server instance
+                        $api = IspFactory::getInstance()->getIsp($connection->server);
+
+                        // load connection and node data to mikrotik request api
+                        $mikrotikRequest = $api->getProviderApi();
+                        $mikrotikRequest->loadConnection($connection);
+
+                        // rest req is applied and pushes out the ONU for reset (this causes the contract plan to update)
+                        return $mikrotikRequest->apply();
+                    }
+                }
+            }
+
+            // use wispro controller *old more complete controller for wifi tech
+            return SecureConnectionUpdate::update($connection, $this, true);
+        }
         return false;
     }
 

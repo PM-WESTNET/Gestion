@@ -472,7 +472,7 @@ class ConnectionStatusController extends Controller
 
 
         if ($debug) { //1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression('customer_id in (100244,102031,1403,1533,2303)'));
+            $queryCustomer->andWhere(new Expression('customer_id in (104518)'));
         }
         //$queryCustomer->orderBy(['customer_id' => SORT_DESC]); //debugging comment to sort customers differently
         //$customers = $queryCustomer->limit(1000)->all(); //debugging comment to limit customer amount
@@ -558,6 +558,13 @@ class ConnectionStatusController extends Controller
                             $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
                         }
                         $estadosAnteriores[$connection->status_account]++;
+
+                        // if status_account comes disabled or is already, do:
+                        if ($connection->status_account == Connection::STATUS_ACCOUNT_DISABLED) {
+                            // return $connection->status_account; // if inside cronjob, logic is different so no return is used. instead use continue; and count++
+                            $estados[$connection->status_account]++;
+                            continue;
+                        }
 
                         // Si la conexion esta forzada,
                         // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda

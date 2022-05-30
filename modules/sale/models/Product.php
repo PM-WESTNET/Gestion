@@ -11,6 +11,9 @@ use app\modules\westnet\models\ProductCommission;
 use yii\behaviors\SluggableBehavior;
 use app\modules\media\behaviors\MediaBehavior;
 use app\modules\config\models\Config;
+use yii\db\Expression;
+use yii\db\Query;
+use app\modules\sale\modules\contract\models\ContractDetail;
 
 /**
  * This is the model class for table "product".
@@ -1139,4 +1142,29 @@ class Product extends ActiveRecord
         return self::find()->where(['type'=>'plan'])->all();
     }
 
+    /**
+     * returns true if the input string is associated with any category name of the current product via Product_Has_Category table.
+     */
+    public function isProductCategory($category_name){
+        $isCategory = false;
+        $isCategory = (new Query())
+            ->select(['*'])
+            ->from('product prod')
+            ->leftJoin('product_has_category phc', 'phc.product_id =  prod.product_id')
+            ->leftJoin('category cat', 'phc.category_id =  cat.category_id')
+            ->andWhere(['prod.product_id' => $this->product_id])
+            ->andWhere(['cat.name' => $category_name])
+            ->exists()
+            ;
+        return $isCategory; // ret val is true if some category with the category_name is found related to the product
+    }
+
+    public static function getPlanFromContract($id){
+        return Product::find()
+                    ->alias('prod')
+                    ->leftJoin(ContractDetail::tableName().' cd' , 'prod.product_id = cd.product_id')
+                    ->where(['contract_id' => $id])
+                    ->andWhere(['prod.type' => 'plan'])
+                    ->one();
+    }
 }

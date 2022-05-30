@@ -214,4 +214,15 @@ class CustomerHasDiscount extends \app\components\db\ActiveRecord
     {
         return $this->discount->name . ($this->description ? " - " . $this->description : '' );
     }
+    
+    public function getAllCustomersFromDiscount($id){
+        $query = $this
+            ->find()
+            ->where([
+                'discount_id'   => $id,
+                // 'status'        => Discount::STATUS_ENABLED
+            ])
+            ;
+        return $query->all();
+    }
 }
