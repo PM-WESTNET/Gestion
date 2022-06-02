@@ -276,12 +276,18 @@ class CompanySelector extends \yii\base\Widget{
         if(Yii::$app->params['companies']['byUser'] === false) {
             $companies_ids = Company::find()->select('company_id')->where($conditions)->asArray()->all();
         } else {
-            $companies_ids = Yii::$app->user->identity->getCompanies()->select('company_id')->where($conditions)->asArray()->all();
+            if(!empty(Yii::$app->user->identity)){
 
-            //Si el usuario no tiene asignada ninguna empresa, se muestran todas.
-            if(empty($companies_ids)){
+                $companies_ids = Yii::$app->user->identity->getCompanies()->select('company_id')->where($conditions)->asArray()->all();
+
+                //Si el usuario no tiene asignada ninguna empresa, se muestran todas.
+                if(empty($companies_ids)){
+                    $companies_ids = Company::find()->select('company_id')->where($conditions)->asArray()->all();
+                }
+            }else{
                 $companies_ids = Company::find()->select('company_id')->where($conditions)->asArray()->all();
             }
+
         }
 
         foreach ($companies_ids as $value) {
