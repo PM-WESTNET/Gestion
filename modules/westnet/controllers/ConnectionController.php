@@ -149,6 +149,8 @@ class ConnectionController extends Controller
 
         // get contentes of seeds from the file that should be populated in production of each company at the moment of execution
         $json = file_get_contents("../modules/westnet/onu_sn_seeds/migration_onu_serial_numbers.txt",true);
+        if(empty($json)) return false;
+        
         // create an array based on file contents . code => sn
         $customer_onu_array = array_column((json_decode($json,true)),'SN','Código cliente');
 
