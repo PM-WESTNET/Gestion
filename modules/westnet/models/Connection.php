@@ -125,6 +125,7 @@ class Connection extends ActiveRecord {
             'clean' => Yii::t('app', 'Clean'),
             'access_point_id' => Yii::t('app', 'Access Point'),
             'ip4_1_old' => 'Ip4 1 Anterior',
+            'onu_sn' => 'ONU SERIAL NUMBER',
         ];
     }
 
