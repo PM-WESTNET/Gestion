@@ -11,12 +11,14 @@ use yii\filters\VerbFilter;
 
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
+use yii\web\Response;
 
 /**
  * ObservationController implements the CRUD actions for Observations model.
  */
 class ObservationController extends Controller
 {
+
     /**
      * {@inheritdoc}
      */
@@ -65,17 +67,36 @@ class ObservationController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return mixed
      */
-    public function actionCreate()
+    public function actionCreateObservation($customer_id)
     {
-        $model = new Observation();
+        $request = Yii::$app->request;
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($request->isAjax) {
+
+            $model = new Observation();
+            $model->observation = $request->get('observation');
+            $model->customer_id = $request->get('customer_id');
+            $model->author_id = Yii::$app->user->identity->id;
+            $model->date = date('Y-m-d h:i:s');           
+            $result = $model->save();
+            if($result){
+                Yii::$app->response->statusCode = 200;
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                
+                return ['message' => 'Observación guardada con éxito.', 'result' => $result];
+            }else{
+                Yii::$app->response->statusCode = 400;
+                Yii::$app->response->format = Response::FORMAT_JSON;
+                $err= $model->getErrors();
+                return ['message' => 'No se pudo guardar la observación.', 'result' => $result, 'errors' => $err ];
+            }
+
+
+            // return $response;
+        } else {
+            throw new NotFoundHttpException('The requested page does not exist.');
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
     }
 
     /**
@@ -136,7 +157,7 @@ class ObservationController extends Controller
             'query' => $query->from("observations")->where("customer_id = ".$c->customer_id),
             // 'query' => Observation::find()->where("customer_id = ".$model->customer_id),
             'pagination' => [
-                'pageSize'=>4,
+                'pageSize'=>25,
             ],
         ]);
 

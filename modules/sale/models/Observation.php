@@ -2,7 +2,9 @@
 
 namespace app\modules\sale\models;
 
-use app\components\companies\User;
+// use app\components\companies\User;
+
+use webvimark\modules\UserManagement\models\User;
 
 use Yii;
 

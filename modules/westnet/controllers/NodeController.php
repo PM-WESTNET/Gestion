@@ -176,9 +176,10 @@ class NodeController extends Controller
     public function actionAllNodes()
     {
         if (Yii::$app->request->isAjax) {
+            var_dump(Yii::$app->request->get());die();
             $query = Node::find();
             $query->select(['node.node_id', 'concat(node.name, \' - \', s.name) as name', 'node.subnet'])
-                  ->leftJoin('server s', 'node.server_id = s.server_id');
+                    ->leftJoin('server s', 'node.server_id = s.server_id');
             $nodes= $query->all();
             Yii::$app->response->format= \yii\web\Response::FORMAT_JSON;
             return $nodes;

@@ -13,8 +13,8 @@
   */
 
 /* IMPORTANT!!! Do not comment or remove uncommented settings in this file
-   even if you are using session configuration.
-   See http://kcfinder.sunhater.com/install for setting descriptions */
+    even if you are using session configuration.
+    See http://kcfinder.sunhater.com/install for setting descriptions */
 
 $dir = '/var/www/arya2/web/kcfinder-master/upload';
 

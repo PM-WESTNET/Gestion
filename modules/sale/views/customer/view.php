@@ -1,5 +1,6 @@
 <?php
 
+use app\components\companies\User as CompaniesUser;
 use app\modules\sale\models\Company;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\Observation;
@@ -17,8 +18,12 @@ use webvimark\modules\UserManagement\models\User;
 use app\modules\firstdata\models\FirstdataAutomaticDebit;
 use app\modules\automaticdebit\models\AutomaticDebit;
 use app\modules\sale\controllers\ObservationController;
+use yii\base\Model;
+use yii\bootstrap\Modal;
 use yii\data\ActiveDataProvider;
 use yii\db\Query;
+use yii\web\Session;
+use yii\widgets\Pjax;
 
 /**
  * @var View $this
@@ -172,23 +177,29 @@ $this->params['breadcrumbs'][] = $this->title;
     <!--Observaciones-->
     <hr>
     <h2>Observaciones</h2>
-    
-    
         
-        <?php
-        // $sql = 'SELECT * FROM observations WHERE customer_id = '. $model->customer_id;
-        // var_dump(Observation::findBySql($sql));
-        
-        // var_dump(Observation::findAll(['customer_id' => $model->customer_id]));
-        // die();
-        ?>
-        
-                        
         <?php 
+            $ses = Yii::$app->user->identity;
+
+            Modal::begin([
+                'toggleButton' => ['label' => 'Nueva observación'],
+            ]);
+
+                echo '<p>Usuario creador: '.$ses->username.'</p>'; 
+                echo '<p>Cliente: '.$model->fullName.'</p>' ;
+                $obs = new Observation();
+                $obs->author_id = $ses->id;
+                $obs->customer_id = $model->customer_id;
+                $obs->date = date('Y-m-d h:i:s'); 
+                echo Html::input('text', 'observation', $obs->observation, ['style'=>'width:100%; height:30px', 'id' => 'obstxt']);
+                echo Html::a('Save', null, ['class' => 'btn btn-success','id' => 'create-observation']) ;
+
+            Modal::end();
             
             $dataProvider = ObservationController::getObservationDataProvider($model);
-            // var_dump($dataProvider);
-
+            $c = $c + 1;
+            
+            // Pjax::begin();
             echo GridView::widget([
                 'dataProvider' => $dataProvider,
                 'columns' => [
@@ -196,16 +207,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     [
                         'label' => Yii::t('app', 'autor'),
                         // 'value'=>'author',
-                        
                         'value'=>function($model){
-
-
-                        foreach ($model as $mod) {
-
-                            // return $mod->user;;
-                        }
-                         // var_dump($model);die();
-                            // return $model;
+                            $c = 0;
+                            foreach($model as $m){
+                                
+                                var_dump($c);
+                                // $query = New Query();
+                                // $query->select('username')->from('user')->where('id' == $model->author_id);
+                                
+                            }
                         },
                     ],
                     [
@@ -218,24 +228,8 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]
             ]);
-
-        
-            // DetailView::widget([
-            // 'model' => Observation::findAll(['customer_id' => $model->customer_id]) ,
-            // 'attributes' => [
-            //     'observation',
-            //     'date',
-            // ],
-            // ]) 
+            // Pjax::end();
         ?>
-            
-            
-            
-            
-            
-            
-
-
 
     <!--Contratos-->
     <hr>
@@ -641,6 +635,30 @@ $this->params['breadcrumbs'][] = $this->title;
             $(document).on('click', '#send-message-btn', function (e) {
                 e.preventDefault();
                 CustomerView.sendMessage($('#send-message-btn').data('message_id'))
+            });
+            $(document).on('click', '#create-observation', function(){
+                CustomerView.createObservation();
+            });
+        }
+
+        this.createObservation = function(){
+
+           
+
+            $.ajax({
+                url:'<?= Url::to(['/sale/observation/create-observation', 'customer_id' => $model->customer_id])?>&observation='+$('#obstxt').val(),
+                method: 'POST',
+                success: function(data){
+                    console.log(data.message);
+                    console.log(data.result);
+                    console.log(data.err);
+                                        
+
+                },
+                error: function(xhr,status,error){
+                    console.log(xhr);
+                    console.log(data.err);
+                }
             });
         }
 
