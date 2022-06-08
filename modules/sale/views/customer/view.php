@@ -176,15 +176,19 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <!--Observaciones-->
     <hr>
-    <h2>Observaciones</h2>
-        
+    <!-- <h2>Oservaciones</h2> -->
+    <button type="button" class="collapsible" style="cursor: pointer; padding: 18px; width: 100%; border: none; text-align: left; outline: none; font-size: 15px;"><h3>Observaciones</h3></button>
+    <div class="content" style="padding: 0 18px; display: none; overflow: hidden;">
+    
         <?php 
             $ses = Yii::$app->user->identity;
-
+            $dataProvider = ObservationController::getObservationDataProvider($model);
+            
+            // var_dump($dataProvider);die();
+            echo '<p></p>';
             Modal::begin([
                 'toggleButton' => ['label' => 'Nueva observación'],
             ]);
-
                 echo '<p>Usuario creador: '.$ses->username.'</p>'; 
                 echo '<p>Cliente: '.$model->fullName.'</p>' ;
                 $obs = new Observation();
@@ -192,13 +196,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 $obs->customer_id = $model->customer_id;
                 $obs->date = date('Y-m-d h:i:s'); 
                 echo Html::input('text', 'observation', $obs->observation, ['style'=>'width:100%; height:30px', 'id' => 'obstxt']);
+                echo '<p></p>';
                 echo Html::a('Save', null, ['class' => 'btn btn-success','id' => 'create-observation']) ;
-
             Modal::end();
             
-            $dataProvider = ObservationController::getObservationDataProvider($model);
-            $c = $c + 1;
-            
+            Pjax::begin(['timeout' => '10000', 'clientOptions' => ['container' => 'pjax-container']]);
             // Pjax::begin();
             echo GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -206,16 +208,9 @@ $this->params['breadcrumbs'][] = $this->title;
                     ['class' => 'yii\grid\SerialColumn'],
                     [
                         'label' => Yii::t('app', 'autor'),
-                        // 'value'=>'author',
+                        // 'value'=>'author_id',
                         'value'=>function($model){
-                            $c = 0;
-                            foreach($model as $m){
-                                
-                                var_dump($c);
-                                // $query = New Query();
-                                // $query->select('username')->from('user')->where('id' == $model->author_id);
-                                
-                            }
+                            return($model->user->username);
                         },
                     ],
                     [
@@ -228,8 +223,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     ],
                 ]
             ]);
-            // Pjax::end();
+            Pjax::end();
         ?>
+
+    </div>        
 
     <!--Contratos-->
     <hr>
@@ -705,6 +702,20 @@ $this->params['breadcrumbs'][] = $this->title;
             location.replace(url);
         }
 
+    }
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
     }
 </script>
 <?php $this->registerJs('CustomerView.init();') ?>
