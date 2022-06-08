@@ -187,7 +187,8 @@ $this->params['breadcrumbs'][] = $this->title;
             // var_dump($dataProvider);die();
             echo '<p></p>';
             Modal::begin([
-                'toggleButton' => ['label' => 'Nueva observación'],
+                'toggleButton' => ['label' => 'Nueva observación', 'id' => 'modal'],
+                'closeButton' => ['label' => 'Guardar', 'id' => 'create-observation'],
             ]);
                 echo '<p>Usuario creador: '.$ses->username.'</p>'; 
                 echo '<p>Cliente: '.$model->fullName.'</p>' ;
@@ -197,7 +198,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 $obs->date = date('Y-m-d h:i:s'); 
                 echo Html::input('text', 'observation', $obs->observation, ['style'=>'width:100%; height:30px', 'id' => 'obstxt']);
                 echo '<p></p>';
-                echo Html::a('Save', null, ['class' => 'btn btn-success','id' => 'create-observation']) ;
+                // echo Html::a('Save', null, ['class' => 'btn btn-success','id' => 'create-observation']) ;
             Modal::end();
             
             Pjax::begin(['timeout' => '10000', 'clientOptions' => ['container' => 'pjax-container']]);
@@ -208,7 +209,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     ['class' => 'yii\grid\SerialColumn'],
                     [
                         'label' => Yii::t('app', 'autor'),
-                        // 'value'=>'author_id',
                         'value'=>function($model){
                             return($model->user->username);
                         },
@@ -635,12 +635,11 @@ $this->params['breadcrumbs'][] = $this->title;
             });
             $(document).on('click', '#create-observation', function(){
                 CustomerView.createObservation();
+                location.reload();
             });
         }
 
         this.createObservation = function(){
-
-           
 
             $.ajax({
                 url:'<?= Url::to(['/sale/observation/create-observation', 'customer_id' => $model->customer_id])?>&observation='+$('#obstxt').val(),
@@ -703,6 +702,7 @@ $this->params['breadcrumbs'][] = $this->title;
         }
 
     }
+
     var coll = document.getElementsByClassName("collapsible");
     var i;
 

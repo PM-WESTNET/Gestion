@@ -157,11 +157,8 @@ class ObservationController extends Controller
             'pagination' => [
                 'pageSize'=> 5,
             ],
-            'sort'=> ['defaultOrder' => ['date' => SORT_DESC]],
+            'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
-
-        // var_dump($dataProvider->getModels());die();
-
         return $dataProvider;
     }
 
