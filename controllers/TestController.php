@@ -418,4 +418,13 @@ class TestController extends Controller {
         return true;
     }
 
+    public function actionGetCustomerDefaultBillType($id){
+        $customer = Customer::findOne($id);
+
+        $billType = $customer->getDefaultBillType();
+        var_dump($billType);
+
+        die();
+        return true;
+    }
 }

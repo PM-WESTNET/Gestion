@@ -12,6 +12,8 @@ use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\modules\config\models\Config;
 use app\modules\westnet\models\PaymentExtensionHistory;
+use app\modules\sale\models\Customer;
+use yii\db\Query;
 
 /**
  * Class ConnectionController
@@ -129,4 +131,69 @@ class ConnectionController extends Controller
         }
         return $this->redirect(['/sale/contract/contract/view', 'id' => $conn->contract_id]);
     }
+
+    /**
+     * ONU Serial number massive charge to all customers based on a JSON obj input.
+     * 
+     * example..
+     * {
+     *  "Código cliente": 72969,
+     *  "SN": "TPLGF7FCA479"
+     * }, ...
+     */
+    public function actionUpdateAllOnuSerialNumbers(){
+        // set time limit to unlimited cause it can take more than 40 minutes to complete
+        set_time_limit(0);
+
+        $logPath = "../modules/westnet/onu_sn_seeds/migrations.txt";
+
+        // get contentes of seeds from the file that should be populated in production of each company at the moment of execution
+        $json = file_get_contents("../modules/westnet/onu_sn_seeds/migration_onu_serial_numbers.txt",true);
+        if(empty($json)) return false;
+        
+        // create an array based on file contents . code => sn
+        $customer_onu_array = array_column((json_decode($json,true)),'SN','Código cliente');
+
+
+        // init header line for seeding
+        $content = "\nMigration started at ".date('d/m/y H:i:s')."\n";
+        // open migration .log to write any errors
+        file_put_contents($logPath, $content,FILE_APPEND);
+        
+        $i = 0;
+        foreach($customer_onu_array as $code => $onu_serial){
+
+            $query = Yii::$app->db->createCommand(
+                "update connection c
+                 set c.onu_sn = :onu_serial
+                 where c.connection_id = ( 
+                    select Conn2.connection_id from (
+                        select connection_id
+                        from customer cus
+                        left join contract cont on cont.customer_id = cus.customer_id
+                        left join connection conn on conn.contract_id = cont.contract_id
+                        where cont.status = 'active'
+                        and cus.code = :code
+                        order by conn.connection_id desc
+                        limit 1
+                    ) as Conn2
+                )")
+                ->bindValue('code', $code)
+                ->bindValue('onu_serial', $onu_serial)
+                ;
+
+            if( $query->execute() ){
+                $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE SUCCESS - ".$code." (code) ONU's SN to: ".$onu_serial;
+            }else{
+                $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE ERROR - customer: ".$code." (code)  couldn't update ONU's SN";
+            }
+            file_put_contents($logPath, $content,FILE_APPEND);
+            $i++;
+        }
+        // init header line for seeding
+        $content = "\nMigration end at ".date('d/m/y H:i:s')."\n";
+        file_put_contents($logPath, $content,FILE_APPEND);
+        return true;
+    }
+    
 }

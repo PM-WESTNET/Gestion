@@ -111,7 +111,7 @@ $customer = $model->customer;
                 </p>
             </div>
             <?php
-
+            // var_dump($connection->ip4_public);die();
             echo DetailView::widget([
                 'model' => $connection,
                 'attributes' => [
@@ -140,12 +140,19 @@ $customer = $model->customer;
                         'value' => ($connection->accessPoint ? $connection->accessPoint->name : "" ),
                     ],
                     [
+                        'label' => Yii::t('westnet', 'ONU sn'),
+                        'value' => ($connection->onu_sn),
+                    ],
+                    [
                         'label' => Yii::t('westnet', 'ip4_1'),
                         'value' => long2ip($connection->ip4_1),
                     ],
                     [
                         'label' => 'Ip4_1 Anterior',
-                        'value' => long2ip($connection->ip4_1_old),
+                        'value' => function($model)
+                        {
+                            return long2ip($model->ip4_1_old);
+                        },
                     ],
                     [
                         'label' => Yii::t('westnet', 'ip4_2'),
@@ -154,7 +161,10 @@ $customer = $model->customer;
                     ],
                     [
                         'label' => Yii::t('westnet', 'ip4_public'),
-                        'value' => long2ip($connection->ip4_public),
+                        'value' => function($model)
+                        {
+                            return (!empty($model->ip4_public)) ?  long2ip($model->ip4_public) : $model->ip4_public;
+                        },
                     ],
                     [
                         'label' => 'Estado de Conexión',
