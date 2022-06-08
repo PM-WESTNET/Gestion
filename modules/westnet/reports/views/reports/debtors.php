@@ -30,16 +30,34 @@ $this->params['breadcrumbs'][] = $this->title;
     $columns = [
         ['class' => 'yii\grid\SerialColumn'],
         [
-            'label' => 'Apellido',
-            'attribute' => 'lastname',
+            'label' => 'Nombre',
+            'format' => 'html',
+            'value' => function($model){
+                return Html::a(
+                    $model['name'],
+                    yii\helpers\Url::toRoute([
+                        '/sale/customer/view', 
+                        'id' => $model['customer_id'],
+                    ])
+                );
+            }
         ],
         [
-            'label' => 'Nombre',
-            'attribute' => 'name',
+            'label' => 'Contrato Estado Actual',
+            'format' => 'html',
+            'value' => function($model){
+                return Html::a(
+                    $model['status'],
+                    yii\helpers\Url::toRoute([
+                        '/sale/contract/contract/view', 
+                        'id' => $model['contract_id'],
+                    ])
+                );
+            }
         ],
         [
             'label' => 'Documento',
-            'attribute' => 'document_number',
+            'attribute' => 'document',
         ],
         [
             'label' => 'Tipo de Operacion',
@@ -52,9 +70,9 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'code',
         ],
         [
-            'attribute'=>'saldo', // customer debt
-            'format'=>'currency',
             'label'=>'importe',
+            'format'=>'currency',
+            'value' => 'currency',
         ],
         [
             'label' => 'FECHA EN LA CUAL ENTRO EN MORA',
@@ -73,8 +91,18 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
 
         [
-            'attribute'=> 'debt_bills',
+            // 'attribute'=> 'debt_bills',
             'label'=>Yii::t('app', 'Debt Bills'),
+            'format' => 'html',
+            'value' => function($model){
+                return Html::a(
+                    $model['debt_bills'],
+                    yii\helpers\Url::toRoute([
+                        '/checkout/payment/current-account', 
+                        'customer' => $model['customer_id'],
+                    ])
+                );
+            }
         ]
     ];
 

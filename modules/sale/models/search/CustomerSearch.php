@@ -666,9 +666,11 @@ class CustomerSearch extends Customer {
         $range = Yii::$app->db->createCommand("SELECT COUNT(*) AS count FROM customer")->queryOne()['count'] / 1000;
         do{
             $select = "SELECT cu.customer_id, cu.code, 
-                    CONCAT(' ', cu.name, cu.lastname) AS name,
+                    CONCAT_WS(', ', cu.lastname, cu.name) AS name,
                     cu.phone,
                     cu.current_account_balance AS currency,
+                    cu.document_number as document,
+                    co.contract_id,
                     co.status,
                     cu.total_bills as debt_bills ";
             $from = "FROM customer cu ";
