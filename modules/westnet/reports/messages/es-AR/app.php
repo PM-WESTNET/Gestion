@@ -53,4 +53,6 @@ return array(
     'Company from' => 'Empresa destino',
     'Company to' => 'Empresa destino',
     'Customer Registrations' => 'Alta de Clientes',
+    'Plans per month' => 'Alta de planes por mes',
+    'Debtor customers' => 'Clientes deudores',
 );

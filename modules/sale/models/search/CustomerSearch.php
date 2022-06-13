@@ -669,6 +669,7 @@ class CustomerSearch extends Customer {
                     CONCAT_WS(', ', cu.lastname, cu.name) AS name,
                     cu.phone,
                     cu.current_account_balance AS currency,
+                    cu.phone,cu.phone2,cu.phone3,cu.phone4, 
                     cu.document_number as document,
                     co.contract_id,
                     co.status,
@@ -677,7 +678,7 @@ class CustomerSearch extends Customer {
             $inner_join_contract = "INNER JOIN contract co ON co.customer_id = cu.customer_id
             INNER JOIN bill bi ON bi.customer_id = cu.customer_id
             INNER JOIN payment pay ON pay.customer_id = cu.customer_id WHERE ";
-            $final_where = "cu.customer_id BETWEEN $desde AND $hasta GROUP BY cu.customer_id ORDER BY cu.customer_id ASC LIMIT 1000";
+            $final_where = "cu.customer_id BETWEEN $desde AND $hasta GROUP BY cu.customer_id ORDER BY cu.customer_id ASC, co.contract_id DESC LIMIT 1000";
 
             $general_where = "";
 
