@@ -76,6 +76,7 @@ echo GridView::widget([
     /**
      * Tabla de totales:
      */
+    $taxes = $model->getTaxesApplied();
     ?>
     <div class="table-responsive">
         <table class="table table-bordered">
@@ -102,7 +103,8 @@ echo GridView::widget([
                     <td data-title="SUBTOTAL">
                         <?php
                         $formatter = Yii::$app->formatter;
-                        echo $formatter->asCurrency($model->calculateAmount());
+                        // echo $formatter->asCurrency($model->calculateAmount());
+                        echo $formatter->asCurrency($taxes[1]['base']);
                         ?>
                     </td >
                     <td data-title="DISCOUNT">
@@ -113,7 +115,8 @@ echo GridView::widget([
                     </td >
                     <td data-title="IVA">
                         <?php
-                        echo $formatter->asCurrency($model->calculateTaxes()); 
+                        // echo $formatter->asCurrency($model->calculateTaxes()); 
+                        echo $formatter->asCurrency($taxes[1]['amount']); 
                         ?>
                     </td>
                     <td data-title="TOTAL">
