@@ -98,6 +98,7 @@ class EmailTransport implements TransportInterface {
      */
     public function send($notification, $force_send = false){
         //log_email('Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
+        if(Yii::$app->request->isConsoleRequest) echo 'Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date("Y-m-d h:i:s") . "\n";
         
         $customers = NotificationHasCustomer::GetCustomerToCampaign($notification->notification_id);
 
@@ -110,7 +111,7 @@ class EmailTransport implements TransportInterface {
         $ok = 0;
         $error = 'Error: ';
 
-       /* try {*/
+        try {
             $layout = LayoutHelper::getLayoutAlias($notification->layout ? $notification->layout : 'Info');
             Yii::$app->mail->htmlLayout = $layout;
             $validator = new EmailValidator();
@@ -132,26 +133,16 @@ class EmailTransport implements TransportInterface {
                         $mailSender = MailSender::getInstance(null, null, null, $notification->emailTransport);
 
                         //log_email($customer);
-                        $toName = $customer['name'].' '.$customer['lastname'];
 
-                        //generate PDF in case of "@PdfAdjuntoFactura" tag 
-                        
-                        /* $pdfFileName = (object)[];
-                        //detect string in content
-                        if(strpos($notification->content, '@PdfAdjuntoFactura') !== false){ // good news, this IF didnt break anything in production!!!
-                            
-                            //create PDF corresponding to users
-                            //[FIX]: contemplate only ONE instance of pdf for every email sent
-                            $pdfFileName = $this->createLatestBillPDF($customer['customer_id']);
-                        } else{
-                            //echo "tag not found!";
-                        } */
+                        $toName = $customer['name'].' '.$customer['lastname'];
+                        $toMail = $customer['email'];
+                        if(Yii::$app->request->isConsoleRequest) echo date("Y-m-d h:i:s") .' cliente: ' . $toName . ' correo: ' .  $toMail ."\n";
 
                         //clone content and replace all "@" commands
                         $clone = clone $notification;
                         $clone->content = self::replaceText($notification->content, $customer);
                         
-                        if ($validator->validate($customer['email'], $err)) {
+                        if ($validator->validate($toMail, $err)) {
                             $result = (strpos($notification->content, '@PdfAdjuntoFactura'))
                                     ? $this->AttachmentPdf($customer['customer_id'],$customer['email'])
                                     : $mailSender->prepareMessageAndSend(
@@ -177,9 +168,17 @@ class EmailTransport implements TransportInterface {
                                 NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
                             else
                                 NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
-                        }else{
+                        }else{                            
+                            if(!isset($toName)){
+                                if(Yii::$app->request->isConsoleRequest) echo 'toName not setted ' . "\n";
+                            }
+                            if(!isset($toMail)){
+                                if(Yii::$app->request->isConsoleRequest) echo 'toMail not setted ' . "\n";
+                            }
                             $error .= " $toName <$toMail>; ";
-                            //log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+
+                            // log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
+                            if(Yii::$app->request->isConsoleRequest) echo 'Correo Invalido: ' . $toMail . ' - Customer '. $customer['code'] . '  ' . date("Y-m-d h:i:s") . "\n";
                             NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
                         }
 
@@ -202,7 +201,7 @@ class EmailTransport implements TransportInterface {
             }else{
                 $error = 'No hay mas destinatarios!';
             }
-/*       } catch(\Exception $ex) {
+        } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
             Yii::$app->cache->delete('success_'.$notification->notification_id);
             Yii::$app->cache->delete('error_'.$notification->notification_id);
@@ -211,7 +210,8 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-        }*/
+            if(Yii::$app->request->isConsoleRequest) echo 'Error: ' . $error . '  ' . date("Y-m-d h:i:s") . "\n";
+        }
 
 
         Yii::$app->cache->delete('status_'.$notification->notification_id);

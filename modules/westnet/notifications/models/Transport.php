@@ -130,6 +130,10 @@ class Transport extends \app\components\db\ActiveRecord {
     private function newTransportClass()
     {
         $class = $this->class;
+        if(Yii::$app->request->isConsoleRequest) {
+            echo "clase: ". print_r($class, 1);
+            echo "\n";
+        }
         return new $class;
         
     }
@@ -137,7 +141,6 @@ class Transport extends \app\components\db\ActiveRecord {
     public function send($notification, $force_send = false)
     {
         $transport = $this->newTransportClass();
-        
         $response = $transport->send($notification, $force_send);
 
         if(Yii::$app->request->isConsoleRequest) {

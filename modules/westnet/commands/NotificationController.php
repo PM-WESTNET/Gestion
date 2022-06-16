@@ -129,9 +129,12 @@ class NotificationController extends Controller
 	
         foreach ($notifications as $notification) {
             if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
+                $this->stdout("\n" . 'Start send for notification_id: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
+
                 $notification->updateAttributes(['status' => 'in_process']);
                 $transport = $notification->transport;
                 $result = $transport->send($notification);
+                $this->stdout('Notification batch end for: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
 
                 if ($result['status'] === 'success') {
                     $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
@@ -142,8 +145,10 @@ class NotificationController extends Controller
                 }else {
                     $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
                 }
-
+                $this->stdout('Notification status change: ' . $notification->status . ' at ' . date("Y-m-d h:i:s") . "\n");
+                
                 \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+                $this->stdout('mutex released at ' . date("Y-m-d h:i:s") . "\n");
             }
 
         }
