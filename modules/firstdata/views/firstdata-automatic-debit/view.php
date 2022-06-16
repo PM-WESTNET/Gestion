@@ -53,6 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => function($model) {
                     if(!$model->hiddenCreditCard){
                         Yii::$app->session->setFlash('error', "No se encuentra disponible en este momento el servicio que devuelve esta información. Intente nuevamente más tarde o comuníquese con el administrador del sistema.");
+                        // In case this error is triggered, there could be a possibility that the firstdata.service has crashed. search for it by using the app's item variables: 'firstdata_server_url' and 'firstdata_server_port'
                         return "<p class='not-set'>(Servicio no disponible)</p>";
                     }else{
                         return $model->hiddenCreditCard;
