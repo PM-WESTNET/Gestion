@@ -181,10 +181,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="content" style="padding: 0 18px; display: none; overflow: hidden;">
     
         <?php 
+
             $ses = Yii::$app->user->identity;
-            $dataProvider = ObservationController::getObservationDataProvider($model);
+            $dataProvider = ObservationController::getObservationDataProvider($model->customer_id);
             
-            // var_dump($dataProvider);die();
             echo '<p></p>';
             Modal::begin([
                 'toggleButton' => ['label' => 'Nueva observación', 'id' => 'modal'],
@@ -198,11 +198,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 $obs->date = date('Y-m-d h:i:s'); 
                 echo Html::input('text', 'observation', $obs->observation, ['style'=>'width:100%; height:30px', 'id' => 'obstxt']);
                 echo '<p></p>';
-                // echo Html::a('Save', null, ['class' => 'btn btn-success','id' => 'create-observation']) ;
             Modal::end();
             
             Pjax::begin(['timeout' => '10000', 'clientOptions' => ['container' => 'pjax-container']]);
-            // Pjax::begin();
             echo GridView::widget([
                 'dataProvider' => $dataProvider,
                 'columns' => [

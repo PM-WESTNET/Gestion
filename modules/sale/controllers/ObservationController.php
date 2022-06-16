@@ -151,14 +151,17 @@ class ObservationController extends Controller
 
     public function getObservationDataProvider($c){
         
-        $query = New Query();
+        $query = Observation::find()->where(["customer_id" => $c]);
+
         $dataProvider = new ActiveDataProvider([
-            'query' => Observation::find(["customer_id" => $c->customer_id]),
-            'pagination' => [
+            // 'query' => Observation::find()->where(["customer_id" => $c])->all(),
+            'query' => $query,
+            'pagination' => [ 
                 'pageSize'=> 5,
             ],
             'sort'=> ['defaultOrder' => ['id' => SORT_DESC]],
         ]);
+
         return $dataProvider;
     }
 
