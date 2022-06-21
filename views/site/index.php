@@ -25,7 +25,7 @@ $this->title = Yii::$app->params['web_title'];
 
     <?php endif; ?>
 
-    <h1 class="<?php if (empty(Yii::$app->params['web_title'])) echo 'hidden'; ?>"><?= Yii::$app->params['web_title']; ?> </h1>
+
 </div>
 
 <hr/>
