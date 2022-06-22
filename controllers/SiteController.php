@@ -44,7 +44,7 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-
+        $render_variables = array();
         //Si posee el rol, el  index debe ser la vista de agenda
         if(!Yii::$app->user->isGuest){
             if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
@@ -56,16 +56,18 @@ class SiteController extends Controller
                 Yii::$app->session->addFlash('info', Yii::t('app', 'Theres one or more notify payments by transference not verified'));
             }
 
+            // SIRO PAYMENTS ALERT
             if(Yii::$app->user->identity->hasRole('user-alert-non-verified-siro-payments', false))
             {
                 $payment_intention_accountability = PaymentIntentionAccountability::find()->where(['status' => 'draft'])->all();
-
-                return $this->render('index', ['payment_intention_accountability' => $payment_intention_accountability]);
+                if(count($payment_intention_accountability) > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['payment_intention_accountability'] = $payment_intention_accountability;
+                }
             }
-
-            
+            //...
         }
-        return $this->render('index');
+        return $this->render('index', $render_variables);
     }
 
     public function actionLogin()
