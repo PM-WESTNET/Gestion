@@ -1504,3 +1504,7 @@ a.ui-state-default.ui-state-active {
   background: hsla(192, 100%, 85%, 0.26);
   
 }
+
+#site-index .company-logo{
+  width: 15rem;
+}
