@@ -20,6 +20,7 @@ use app\models\ContactForm;
 use app\modules\sale\models\search\CustomerSearch;
 use IPv4\SubnetCalculator;
 use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
+use app\modules\sale\models\Bill;
 
 class SiteController extends Controller
 {
@@ -65,6 +66,21 @@ class SiteController extends Controller
                     $render_variables['payment_intention_accountability'] = $payment_intention_accountability;
                 }
             }
+
+            // FACTURACION
+            if(Yii::$app->user->identity->hasRole('user-alert-non-verified-siro-payments', false))
+            {
+                $bill_errors_count = (new Bill())->getErrorAndUnclosedBillsQuery()->count();
+                if($bill_errors_count > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['bill_errors_count'] = $bill_errors_count;
+                }
+            }
+            
+            // CRONS
+
+            // DD/DA firstdata.service
+
             //...
         }
         return $this->render('index', $render_variables);
@@ -319,7 +335,7 @@ class SiteController extends Controller
 
                     } else if ($connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED) {
                         //var_dump('IF Connection::STATUS_ACCOUNT_CLIPPED'."<br>");
-//                        $dateLastBill = new \DateTime($this->getLastBill($customer->customer_id));
+                        //  $dateLastBill = new \DateTime($this->getLastBill($customer->customer_id));
                         /**
                          * Habilito si:
                          *  - solo debe la factura del mes actual y la fecha es menor a la de corte
