@@ -68,7 +68,7 @@ class SiteController extends Controller
             }
 
             // FACTURACION
-            if(Yii::$app->user->identity->hasRole('user-alert-non-verified-siro-payments', false))
+            if(Yii::$app->user->identity->hasRole('batch-invoice-rol', false))
             {
                 $bill_errors_count = (new Bill())->getErrorAndUnclosedBillsQuery()->count();
                 if($bill_errors_count > 0){
