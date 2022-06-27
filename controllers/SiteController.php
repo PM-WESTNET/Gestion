@@ -70,11 +70,20 @@ class SiteController extends Controller
             // FACTURACION
             if(Yii::$app->user->identity->hasRole('batch-invoice-rol', false))
             {
+                // get bills that had an error
                 $bill_errors_count = (new Bill())->getErrorAndUnclosedBillsQuery()->count();
                 if($bill_errors_count > 0){
                     // push the amount of payment intentions in draft still
                     $render_variables['bill_errors_count'] = $bill_errors_count;
                 }
+
+                // get bills still havent been closed
+                $bill_unclosed_count = (new Bill())->getErrorAndUnclosedBillsQuery(false)->count();
+                if($bill_unclosed_count > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['bill_unclosed_count'] = $bill_unclosed_count;
+                }
+
             }
             
             // CRONS

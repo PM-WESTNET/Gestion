@@ -31,11 +31,14 @@ $this->title = Yii::$app->params['web_title'];
 <?php endif; ?>
 
 <!-- If user can route to the closing bills view, show them the bill count of draft bills -->
-<?php if( isset($bill_errors_count) && UserManagement::canRoute(['sale/batch-invoice/close-invoices-index']) ): ?>
+<?php if( ( isset($bill_errors_count) || isset($bill_unclosed_count) ) && UserManagement::canRoute(['sale/batch-invoice/close-invoices-index']) ): ?>
         <div>
             <a href=<?= Url::toRoute(['sale/bill',])?> >
                 <h2>
-                    <span class="label label-danger">Hay <?= $bill_errors_count ?> facturas sin cerrar.</span>
+                    <span class="label label-danger"> 
+                        <?= isset($bill_unclosed_count) ? "Hay ($bill_unclosed_count) facturas sin cerrar. " : '' ?> 
+                        <?= isset($bill_errors_count) ? "($bill_errors_count) tuvieron error al intentar cerrarse." : '' ?> 
+                    </span>
                 </h2>
             </a>
         </div>
