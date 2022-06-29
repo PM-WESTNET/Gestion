@@ -36,6 +36,7 @@ use yii\db\cubrid\QueryBuilder;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class ConnectionStatusController extends Controller
 {
@@ -51,6 +52,7 @@ class ConnectionStatusController extends Controller
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
             $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
             $this->updateConnections($save);
+            Yii::$app->mutex->release('update_connections_cron');
         }
     }
 
@@ -179,6 +181,8 @@ class ConnectionStatusController extends Controller
                     } catch (\Exception $ex) {
                         $this->stdout("Error al Actualizar: " . $contract_q['server_id'] . " - " . $contract_q['customer_id'] . " - " . $contract_q['contract_id'] . " - " . $ex->getMessage() . "\n", Console::BOLD, Console::FG_RED);
                         error_log($ex->getTraceAsString());
+                        // send error to telegram
+                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-all ****', $ex);
                     }
                 } else {
                     $this->stdout("Plan No Encontrado: " . $contract_q['customer_id'] . " - " . $contract_q['server_id'] . "_" . $contract_q['system'] . "\n", Console::BOLD, Console::FG_RED);
@@ -188,6 +192,8 @@ class ConnectionStatusController extends Controller
             $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getMessage() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-all ****', $ex);
         }
         /** @var IspInterface $api */
         foreach ($apis as $api) {
@@ -717,7 +723,10 @@ class ConnectionStatusController extends Controller
             echo $ex->getMessage();
             echo $ex->getLine();
             echo $ex->getTraceAsString();
-            $this->stdout("\nProcess finished unexpectedly.");
+            $this->stdout("\nProcess Finished Unexpectedly.");
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Finished Unexpectedly: connection-status/update ****', $ex);
         }
         
         $this->stdout("\n----Summary----\n");
@@ -841,6 +850,9 @@ class ConnectionStatusController extends Controller
                         $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
                         $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
                         $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+                        
+                        // send error to telegram
+                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-plan ****', $ex);
                     }
                 } else {
                     $this->stdout("Plan No Encontrado: " . $contractRes['customer_id'] . " - " . $contractRes['server_id'] . "_" . $contractRes['system'] . "\n", Console::BOLD, Console::FG_RED);
@@ -850,6 +862,9 @@ class ConnectionStatusController extends Controller
             $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-plan ****', $ex);
         }
 
         $this->stdout("Totales" . "\n", Console::BOLD, Console::FG_RED);
