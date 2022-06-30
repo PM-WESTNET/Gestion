@@ -105,6 +105,7 @@ class Customer extends ActiveRecord {
     private $_billsCount;
     // Se usa para saber si eñ cliente cambia de empresa;
     private $old_company_id;
+    private $previous_company_id;
     
     public $_sms_fields_notifications;
     public $_email_fields_notifications;
@@ -153,7 +154,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic','previous_company_id'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
@@ -189,6 +190,7 @@ class Customer extends ActiveRecord {
             ['phone4', 'compare', 'compareAttribute' => 'phone2', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             ['phone4', 'compare', 'compareAttribute' => 'phone3', 'operator' => '!=', 'message' => Yii::t('app', 'Phones cant be repeated')],
             //['birthdate', 'validateBirthdate']
+            [['previous_company_id'],'string'],
         ];
 
 
@@ -395,7 +397,7 @@ class Customer extends ActiveRecord {
     private function regexValitation() {
         //Validaciones relacionadas a documento y tipo de cliente
         $regexValidation = function() {
-           
+        
             //Validamos tipo de documento de acuedo a tipo de cliente
             if ($this->taxCondition && $this->taxCondition->documentType) {
 
@@ -409,7 +411,7 @@ class Customer extends ActiveRecord {
                 }
                 
                 if (!$valid) {
-                     $this->addError('document_type_id', Yii::t('app'
+                    $this->addError('document_type_id', Yii::t('app'
                             , 'Customer type "{taxCondition}" requires "{documentType}" to be set.'
                             , ['taxCondition' => $this->taxCondition->name, 'documentType' => $this->taxCondition->getDocumentTypesLabels()]));
                 }

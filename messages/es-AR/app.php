@@ -1423,6 +1423,7 @@
     'Can`t remove this customer' => 'No se puede eliminar ',
     'Are you sure to delete this customer?' => "¿Esta seguro que deseea eliminar este cliente",
     'Firstdata Automatic Debit Report' => 'Reporte Firstdata débito automático',
-    'Customer Registrations' => 'Altas de Clientes'
+    'Customer Registrations' => 'Altas de Clientes',
+    'Customer Previous Company' => 'Compañía anterior del cliente'
 
  );
