@@ -51,6 +51,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'name',
             'system',
+            [
+                'label' => 'Fecha Creacion',
+                'value' => function($model){
+                    return isset($model->create_timestamp) ? gmdate("Y-m-d H:i:s", ($model->create_timestamp)) : 'n/a';
+                },
+            ],
             'code',
             'description:ntext',
             [

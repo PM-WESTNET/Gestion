@@ -20,6 +20,7 @@ use app\models\ContactForm;
 use app\modules\sale\models\search\CustomerSearch;
 use IPv4\SubnetCalculator;
 use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
+use app\modules\sale\models\Bill;
 
 class SiteController extends Controller
 {
@@ -44,7 +45,7 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-
+        $render_variables = array();
         //Si posee el rol, el  index debe ser la vista de agenda
         if(!Yii::$app->user->isGuest){
             if (Yii::$app->user->identity->hasRole('home_is_agenda', false)) {
@@ -56,16 +57,42 @@ class SiteController extends Controller
                 Yii::$app->session->addFlash('info', Yii::t('app', 'Theres one or more notify payments by transference not verified'));
             }
 
+            // SIRO PAYMENTS ALERT
             if(Yii::$app->user->identity->hasRole('user-alert-non-verified-siro-payments', false))
             {
                 $payment_intention_accountability = PaymentIntentionAccountability::find()->where(['status' => 'draft'])->all();
-
-                return $this->render('index', ['payment_intention_accountability' => $payment_intention_accountability]);
+                if(count($payment_intention_accountability) > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['payment_intention_accountability'] = $payment_intention_accountability;
+                }
             }
 
+            // FACTURACION
+            if(Yii::$app->user->identity->hasRole('batch-invoice-rol', false))
+            {
+                // get bills that had an error
+                $bill_errors_count = (new Bill())->getErrorAndUnclosedBillsQuery()->count();
+                if($bill_errors_count > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['bill_errors_count'] = $bill_errors_count;
+                }
+
+                // get bills still havent been closed
+                $bill_unclosed_count = (new Bill())->getErrorAndUnclosedBillsQuery(false)->count();
+                if($bill_unclosed_count > 0){
+                    // push the amount of payment intentions in draft still
+                    $render_variables['bill_unclosed_count'] = $bill_unclosed_count;
+                }
+
+            }
             
+            // CRONS
+
+            // DD/DA firstdata.service
+
+            //...
         }
-        return $this->render('index');
+        return $this->render('index', $render_variables);
     }
 
     public function actionLogin()
@@ -317,7 +344,7 @@ class SiteController extends Controller
 
                     } else if ($connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED) {
                         //var_dump('IF Connection::STATUS_ACCOUNT_CLIPPED'."<br>");
-//                        $dateLastBill = new \DateTime($this->getLastBill($customer->customer_id));
+                        //  $dateLastBill = new \DateTime($this->getLastBill($customer->customer_id));
                         /**
                          * Habilito si:
                          *  - solo debe la factura del mes actual y la fecha es menor a la de corte

@@ -190,9 +190,7 @@ class BatchInvoiceController  extends Controller
         ]);
 
         //get bills not closed from prevous Close Invoices Processes and return them as $bills
-        $bills = new Bill();
-        $errorUnclosedBills = $bills->getErrorAndUnclosedBillsQuery();
-        $billCount = $errorUnclosedBills->count();
+        $billCount = (new Bill())->getErrorAndUnclosedBillsQuery()->count();
         
         return $this->render('close-invoices', [
             'dataProvider' => $dataProvider,

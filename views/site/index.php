@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use \yii\helpers\Url;
 use yii\web\User;
+use webvimark\modules\UserManagement\models\User as UserManagement;
 
 /**
  * @var yii\web\View $this
@@ -10,7 +11,16 @@ use yii\web\User;
 $this->title = Yii::$app->params['web_title'];
 ?>
 
-<?php if(isset($payment_intention_accountability)): ?>
+<div class="jumbotron">
+    <?php if (!empty(Yii::$app->params['web_logo'])): ?>
+        <img class="company-logo" alt="<?= Yii::$app->params['web_title']; ?>" src="<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?>"/>
+
+    <?php endif; ?>
+</div>
+
+<hr/>
+
+<?php if( isset($payment_intention_accountability) && UserManagement::canRoute(['westnet/notifications/siro/checker-of-payments']) ): ?>
         <div>
             <a href=<?= Url::toRoute(['westnet/notifications/siro/checker-of-payments'])?> >
                 <h2>
@@ -18,15 +28,18 @@ $this->title = Yii::$app->params['web_title'];
                 </h2>
             </a>
         </div>
-    <?php endif; ?>
-<div class="jumbotron">
-    <?php if (!empty(Yii::$app->params['web_logo'])): ?>
-        <img alt="<?= Yii::$app->params['web_title']; ?>" src="<?='/'.Yii::$app->params['path'].'/'.Yii::$app->params['web_logo']?>"/>
+<?php endif; ?>
 
-    <?php endif; ?>
-
-    <h1 class="<?php if (empty(Yii::$app->params['web_title'])) echo 'hidden'; ?>"><?= Yii::$app->params['web_title']; ?> </h1>
-</div>
-
-<hr/>
-
+<!-- If user can route to the closing bills view, show them the bill count of draft bills -->
+<?php if( ( isset($bill_errors_count) || isset($bill_unclosed_count) ) && UserManagement::canRoute(['sale/batch-invoice/close-invoices-index']) ): ?>
+        <div>
+            <a href=<?= Url::toRoute(['sale/bill',])?> >
+                <h2>
+                    <span class="label label-danger"> 
+                        <?= isset($bill_unclosed_count) ? "Hay ($bill_unclosed_count) facturas sin cerrar. " : '' ?> 
+                        <?= isset($bill_errors_count) ? "($bill_errors_count) tuvieron error al intentar cerrarse." : '' ?> 
+                    </span>
+                </h2>
+            </a>
+        </div>
+<?php endif; ?>
