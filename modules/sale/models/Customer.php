@@ -154,7 +154,7 @@ class Customer extends ActiveRecord {
     public function rules() {
         $rules = [
             [['name', 'lastname', 'phone2'],'required', 'on' => 'insert'],
-            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic','previous_company_id'], 'required'],
+            [['tax_condition_id', 'publicity_shape', 'document_number', 'has_debit_automatic'], 'required'],
             [['status'], 'in', 'range'=>['enabled','disabled','blocked']],
             [['name', 'lastname' ], 'string', 'max' => 150],
             [['document_number', 'email', 'email2'], 'string', 'max' => 45],
