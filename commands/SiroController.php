@@ -11,6 +11,7 @@ use app\modules\sale\models\Customer;
 use app\modules\config\models\Config;
 use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
 use app\modules\westnet\notifications\models\search\PaymentIntentionAccountabilitySearch;
+use app\modules\alertsbot\controllers\TelegramController;
 
 
 class SiroController extends Controller{
@@ -162,6 +163,9 @@ class SiroController extends Controller{
             $errorMsg,
             FILE_APPEND);
             $transaction->rollBack();
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch (ROLLBACK DONE): siro/checker-of-payments ****', $e);
         }
             
     }
@@ -397,6 +401,9 @@ class SiroController extends Controller{
             $errorMsg,
             FILE_APPEND);
             $transaction->rollBack();
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch (ROLLBACK DONE): find-duplicate-payments ****', $e);
         }
     }
 

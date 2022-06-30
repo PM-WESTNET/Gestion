@@ -21,6 +21,7 @@ use app\modules\westnet\notifications\models\Transport;
 use yii\console\Controller;
 use app\modules\checkout\models\search\PaymentSearch;
 use Yii;
+use app\modules\alertsbot\controllers\TelegramController;
 
 /**
  * Este comando consulta los clientes que tienen notificaciones de explorador y los guarda en cache, para ser consultados luego sin ejecutar la consulta de deudores.
@@ -84,6 +85,9 @@ class BrowserNotificationController extends Controller
             echo "error: " . $ex->getMessage();
             echo "\n";
             \Yii::info('Falla el proceso que guarda los clientes en cahe: ____'.$ex->getMessage() ."\n".$ex->getTraceAsString(), 'browser-notification-customers');
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: browser-notification/save-customer-from-browser-notification-in-cache ****', $ex);
+
         }
     }
 }

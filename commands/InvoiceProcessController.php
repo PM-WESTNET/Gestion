@@ -13,6 +13,7 @@ use yii\console\Controller;
 use app\modules\sale\modules\contract\components\ContractToInvoice;
 use Yii;
 use app\modules\sale\models\search\BillSearch;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class InvoiceProcessController extends Controller
 {
@@ -38,6 +39,8 @@ class InvoiceProcessController extends Controller
             } catch (\Exception $ex) {
                 echo "ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";
                 \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: invoice-process/control-creation-invoice-process ****', $ex);
             }
         }
     }
@@ -58,6 +61,8 @@ class InvoiceProcessController extends Controller
             } catch (\Exception $ex) {
                 echo "ERROR__________". $ex->getMessage() ."\n" . $ex->getTraceAsString();
                 \Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-cerrado');
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: invoice-process/control-close-invoice-process ****', $ex);
             }
         }
     }

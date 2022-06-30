@@ -11,6 +11,7 @@ use app\modules\sale\models\Product;
 use app\modules\sale\modules\contract\models\ContractDetail;
 use app\modules\sale\modules\contract\models\Contract;
 use app\modules\checkout\models\search\PaymentSearch;
+use app\modules\alertsbot\controllers\TelegramController;
 
 
 class VendorLiquidationController extends Controller{
@@ -51,6 +52,9 @@ class VendorLiquidationController extends Controller{
                 $err_msg="ERROR__________". 'Linea '.$ex->getLine()."\n" .'Archivo '.$ex->getFile() ."\n" .$ex->getMessage() ."\n" .$ex->getTraceAsString()."\n";
                 $this->stdout($err_msg);
                 //\Yii::info('ERROR ________________ ' . $ex->getMessage() ."\n" .$ex->getTraceAsString(), 'facturacion-creacion');
+
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: vendor-liquidation/liquidation-by-lot ****', $ex);
             }
         }else{
             //$this->stdout("\nNo Liquidation Found.\n");

@@ -7,6 +7,7 @@ use app\modules\westnet\notifications\models\SiroPaymentIntention;
 use app\modules\config\models\Config;
 use app\modules\westnet\notifications\components\siro\ApiSiro;
 use app\modules\sale\models\Customer;
+use app\modules\alertsbot\controllers\TelegramController;
 
 /**
  * Class SiroController
@@ -60,6 +61,10 @@ class SiroController extends Controller
             $transaction->rollBack();
             $this->stdout("Errors..\n");
             $this->stdout(var_export($ex, true));
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch (ROLLBACK DONE): westnet/siro/close-payment-intention ****', $ex);
+
         }
     }
 }

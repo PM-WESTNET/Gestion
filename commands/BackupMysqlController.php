@@ -5,6 +5,7 @@ namespace app\commands;
 use DateTime;
 use \Yii;
 use app\modules\backup\models\Backup;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class BackupMysqlController extends \yii\console\Controller
 {
@@ -106,6 +107,8 @@ class BackupMysqlController extends \yii\console\Controller
                 $backup->status = 'error';
                 $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups ' . $e->getMessage();
                 $backup->save();
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/percona-full-back ****', $e);
                 return;
             }
         }
@@ -171,6 +174,8 @@ class BackupMysqlController extends \yii\console\Controller
                 $backup->status = 'error';
                 $backup->description =$e->getMessage();
                 $backup->save();
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/percona-incremental-back ****', $e);
                 return;
             }
         }
@@ -217,6 +222,8 @@ class BackupMysqlController extends \yii\console\Controller
                         $backup->status = 'error';
                         $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups ' . $e->getMessage();
                         $backup->save();
+                        // send error to telegram
+                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/mysql-backup ****', $e);
                         return;
                     }
                 }else {

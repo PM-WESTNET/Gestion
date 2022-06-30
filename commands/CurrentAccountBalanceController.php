@@ -13,6 +13,7 @@ use app\modules\sale\models\Customer;
 use yii\console\Controller;
 use app\modules\checkout\models\search\PaymentSearch;
 use Yii;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class CurrentAccountBalanceController extends Controller
 {
@@ -58,6 +59,8 @@ class CurrentAccountBalanceController extends Controller
         } catch (\Exception $ex) {
 
             echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: current-account-balance/update-current-account-balance ****', $ex);
         }
 
     }
