@@ -34,9 +34,11 @@ class MikrotikRequest extends RestRequest implements ApiProvider
      */
     public function apply()
     {
+        $ip_nueva = long2ip($this->connection->ip4_1);
+        $ip_anterior = (isset($this->connection->ip4_1_old)) ? long2ip($this->connection->ip4_1_old) : $ip_nueva;
         $data = array(
-            'ip_anterior' => long2ip($this->connection->ip4_1_old),
-            'ip_nueva' => long2ip($this->connection->ip4_1),
+            'ip_anterior' => $ip_anterior,
+            'ip_nueva' => $ip_nueva,
             'nodo' => $this->node->name,
         );
         
