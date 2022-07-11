@@ -30,6 +30,13 @@ use webvimark\modules\UserManagement\models\User;
         'contract_id',
         'from_date',
         [
+            'label' => Yii::t('app','Contract Status'),
+            'value' => function($model){
+                $all_statuses = $model->getStatusRange();
+                return isset($all_statuses[$model->status])?$all_statuses[$model->status]:'ERROR:status not defined';
+            }
+        ],
+        [
             'label'=> Yii::t('app', 'Status Account'),
             'value'=>  function($model){
                 $con = $model->connection;
