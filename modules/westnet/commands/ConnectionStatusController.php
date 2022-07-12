@@ -128,6 +128,13 @@ class ConnectionStatusController extends Controller
                     $plansRequest = $api->getPlanApi();
                     $plans = $plansRequest->listAll();
                     $this->saveTime('planapi-listall');
+                    if(is_bool($plans)){
+                        // this error is most probably due to FTTH plans or something.
+                        $this->stdout('"Get Plan API" failed for customer:'.$contract_q['customer_id'].' contract id:'.$contract_q['contract_id']."\n");
+                        $this->stdout('Continue to next contract'."\n");
+                        continue;
+                    }
+
                     foreach ($plans as $plan) {
                         $planes[$contract_q['server_id'] . "_" . preg_replace("[ |/]", "-", strtolower($plan['plan']['name']))] = $plan['plan']['id'];
                     }
