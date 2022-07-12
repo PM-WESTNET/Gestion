@@ -61,7 +61,7 @@ use webvimark\modules\UserManagement\models\User;
         [
             'label' => Yii::t('app', 'Plan'),
             'value' => function ( $model){
-                return $model->getPlan()->name;
+                return (!empty($model->getPlan()))?$model->getPlan()->name:'n/a';
             }
         ],
         ['class' => 'yii\grid\ActionColumn',
