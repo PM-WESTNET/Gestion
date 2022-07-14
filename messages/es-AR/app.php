@@ -1428,4 +1428,6 @@
     'Customer Previous Companies' => 'Compañias anteriores de los clientes',
     'Create Customer Previous Company' => 'Crear compañia',
     'Current Account Status' => 'Estado Cuenta Corriente',
+    'Remove Payment Import' => 'Eliminar Importacion de Pagos',
+    'Filename' => 'Nombre del archivo',
   );
