@@ -1427,4 +1427,5 @@
     'Customer Previous Company' => 'Compañía anterior del cliente',
     'Customer Previous Companies' => 'Compañias anteriores de los clientes',
     'Create Customer Previous Company' => 'Crear compañia',
+    'Customers By Node Historic' => 'Clientes por Nodo Historico',
   );
