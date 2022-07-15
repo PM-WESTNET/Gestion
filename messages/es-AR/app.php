@@ -1428,4 +1428,5 @@
     'Customer Previous Companies' => 'Compañias anteriores de los clientes',
     'Create Customer Previous Company' => 'Crear compañia',
     'Current Account Status' => 'Estado Cuenta Corriente',
+    'Customers By Node Historic' => 'Clientes por Nodo Historico',
   );

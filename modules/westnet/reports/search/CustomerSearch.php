@@ -85,7 +85,7 @@ class CustomerSearch extends Model
 
         $mainQuery = new Query();
         $mainQuery->select(new Expression('cant, coalesce(periodo, \'06/2002\') as periodo, @cant:=@cant + cant as total'))
-                  ->from(['c'=>$query, '(SELECT @cant :=0) as tc'])
+        ->from(['c'=>$query, '(SELECT @cant :=0) as tc'])
         ;
 
         return $mainQuery->all();
@@ -147,6 +147,59 @@ class CustomerSearch extends Model
     }
 
     public function findByNode($params) {
+        $cS= new \app\modules\sale\models\search\CustomerSearch();
+
+        $subquery = $cS->buildSearchQuery($params);
+
+        $subquery->select(['customer.*','n.name as node', 'n.node_id as node_id']);
+        $subquery->innerJoin('node n', 'n.node_id=connection.node_id');
+
+        Yii::info($subquery->createCommand()->getRawSql());
+
+        $query= (new Query())
+            ->select(['c100.node_id', 'c100.node', 'COUNT(c100.customer_id) as total'])
+            ->from(['c100' => $subquery])
+            ->groupBy(['c100.node_id']);
+
+        $data = $query->all();
+
+        $result= [];
+
+        $nodesQuery = Node::find();
+
+        if (isset($params['CustomerSearch']['node_id']) && !empty($params['CustomerSearch']['node_id'])){
+            $nodesQuery->andFilterWhere(['node_id' => $params['CustomerSearch']['node_id']]);
+        }
+
+        $nodes = $nodesQuery->all();
+
+        Yii::info($data);
+        Yii::info($nodes);
+
+        foreach ($nodes as $node) {
+            $result[$node->node_id]= [
+                'node' => $node->name,
+                'total' => 0
+            ] ;
+        }
+
+        foreach ($data as $node) {
+
+            $result[$node['node_id']] = [
+                'node' => $node['node'],
+                'total' => $node['total']
+            ];
+        }
+
+        Yii::info($result);
+
+        $dataProvider = new ArrayDataProvider(['allModels' => $result]);
+
+        return $dataProvider;
+
+    }
+
+    public function findByNodeHistoric($params) {
         $cS= new \app\modules\sale\models\search\CustomerSearch();
 
         $subquery = $cS->buildSearchQuery($params);

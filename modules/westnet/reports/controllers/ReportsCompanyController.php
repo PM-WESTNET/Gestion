@@ -57,7 +57,6 @@ class ReportsCompanyController extends Controller
         ]);
     }
 
-
     /**
      * @return string
      * @throws \Exception
