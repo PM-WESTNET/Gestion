@@ -777,45 +777,9 @@ class ReportsController extends Controller
 
     public function actionCustomersByNodeHistoric()
     {
-        $search = new CustomerSearch();
-        $dataProvider = $search->findByNodeHistoric(Yii::$app->request->getQueryParams());
 
-        if(isset(Yii::$app->request->getQueryParams()['button']) && Yii::$app->request->getQueryParams()['button'] == 'btn-export' ){
+        return $this->render('customer-by-node-historic');
 
-            if (User::hasRole('admin')) {
-                return $this->renderPartial('customer-by-node-historic',['dataProvider' => $dataProvider]);
-
-            }else{
-                Yii::$app->session->setFlash('error', 'Usted no posee el rol adecuado para ejecutar esta función.');
-                return $this->redirect('/reports/reports/customers-by-node-historic');
-            }
-        }
-
-        return $this->render('customer-by-node-historic', ['dataProvider' => $dataProvider]);
-
-        // $search = new ReportCompanySearch();
-        // $data = $search->findReportDataActiveContracts((!Yii::$app->request->isPost) ? null : Yii::$app->request->post());
-
-        // $from = new \DateTime($search->date_from);
-        // $to = new \DateTime($search->date_to);
-
-        // $cols = [];
-        // $datas = [];
-        // foreach ($data as $item) {
-        //     $date = new \DateTime($item->period . '01');
-        //     if($item->company_id && $date->format('Ym') >= $from->format('Ym') && $date->format('Ym') <= $to->format('Ym')) {
-        //         $company = Company::findOne($item->company_id);
-        //         $cols[] = $date->format('m-Y') . ' - ' . $company->name;
-        //         $datas[] = $item->value;
-        //     }
-        // }
-
-        // return $this->render('/reports/customer-by-node-historic', [
-        //     var_dump($dataProvider),die()
-        //     // 'model' => $search,
-        //     // 'cols' => $cols,
-        //     // 'data' => $datas
-        // ]);
     }
 
     /**

@@ -20,6 +20,7 @@ use app\modules\westnet\models\Node;
 use app\modules\sale\models\Customer;
 use app\modules\westnet\reports\ReportsModule;
 use app\modules\sale\models\CustomerCompanyHistory;
+use yii\db\conditions\ConjunctionCondition;
 
 class CustomerSearch extends Model
 {
@@ -200,55 +201,34 @@ class CustomerSearch extends Model
     }
 
     public function findByNodeHistoric($params) {
-        $cS= new \app\modules\sale\models\search\CustomerSearch();
+        
+        $period = 202207;
+        // $queryInsert = new Query() ;
+        $querySelect = new Query() ;
+        $conjuction = ConjunctionCondition::class;
 
-        $subquery = $cS->buildSearchQuery($params);
+        $and = new Query();
+        $and->where([$period . ' BETWEEN DATE_FORMAT(cd.from_date, "%Y%m"'])
+        ->andWhere(['DATE_FORMAT(cd.to_date, "%Y%m"'])
+        ->orWhere('(DATE_FORMAT(cd.from_date, "%Y%m") <= '. $period)
+        ->orWhere(['cd.to_date IS NULL'])
+        ->orWhere(['cd.to_date = "0000-00-00"']);
 
-        $subquery->select(['customer.*','n.name as node', 'n.node_id as node_id']);
-        $subquery->innerJoin('node n', 'n.node_id=connection.node_id');
+        $querySelect->select(['UPPER(n.name) AS nodo', $period . ' AS periodo','COUNT(DISTINCT cd.contract_id) AS cantidad_contratos'])
+        ->from(['customer cu', ])
+        ->innerJoin(['customer_class_has_customer cchc', 'cchc.customer_id = cu.customer_id'])
+        ->leftJoin(['contract co', 'co.customer_id = cu.customer_id'])
+        ->leftJoin(['contract_detail cd', 'cd.contract_id = co.contract_id'])
+        ->leftJoin(['connection con', 'con.contract_id = co.contract_id'])
+        ->leftJoin(['node n', 'n.node_id = con.node_id'])
+        ->where([' n.name IS NOT NULL'])->andWhere([$and])
+        ;
 
-        Yii::info($subquery->createCommand()->getRawSql());
+    }
 
-        $query= (new Query())
-            ->select(['c100.node_id', 'c100.node', 'COUNT(c100.customer_id) as total'])
-            ->from(['c100' => $subquery])
-            ->groupBy(['c100.node_id']);
+    public function byNodeHistoricUpdater(){
 
-        $data = $query->all();
 
-        $result= [];
-
-        $nodesQuery = Node::find();
-
-        if (isset($params['CustomerSearch']['node_id']) && !empty($params['CustomerSearch']['node_id'])){
-            $nodesQuery->andFilterWhere(['node_id' => $params['CustomerSearch']['node_id']]);
-        }
-
-        $nodes = $nodesQuery->all();
-
-        Yii::info($data);
-        Yii::info($nodes);
-
-        foreach ($nodes as $node) {
-            $result[$node->node_id]= [
-                'node' => $node->name,
-                'total' => 0
-            ] ;
-        }
-
-        foreach ($data as $node) {
-
-            $result[$node['node_id']] = [
-                'node' => $node['node'],
-                'total' => $node['total']
-            ];
-        }
-
-        Yii::info($result);
-
-        $dataProvider = new ArrayDataProvider(['allModels' => $result]);
-
-        return $dataProvider;
 
     }
 
