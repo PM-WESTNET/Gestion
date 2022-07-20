@@ -19,6 +19,7 @@ use yii\helpers\ArrayHelper;
 use yii\web\HttpException;
 use app\modules\mailing\components\sender\MailSender;
 use app\modules\sale\models\Company;
+use app\modules\sale\modules\contract\models\Contract;
 
 /**
  * This is the model class for table "payment".
@@ -493,6 +494,23 @@ class Payment extends  ActiveRecord  implements CountableInterface
             $this->number = $number;
             $this->status = 'closed';
             $this->update(false);
+
+            // if payment closed and customer_id isnt null
+            if(!is_null($this->customer_id)){
+                // update get customers active contract to update its connection status and 
+                $contracts = Contract::find()->where(['customer_id'=>$this->customer_id])->all();
+                if(!empty($contracts)){
+                    //NOTE: i was going for only 'active' contracts connections at first but doubted of its effectiveness to performance tradeoff.
+                    // var_dump('$contracts',$contracts);
+                    foreach($contracts as $contract){
+                        if(empty($contract->contract_id)) continue;
+                        // var_dump('$contract->contract_id',$contract->contract_id);
+                        
+                        //NOTE. this function has a $connection->save() inside of it.
+                        $contract->updateConnectionsMoneyAccounts();
+                    }
+                }
+            }
             return true;
         }
         return false;

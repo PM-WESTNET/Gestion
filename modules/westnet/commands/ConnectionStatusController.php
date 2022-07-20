@@ -78,11 +78,16 @@ class ConnectionStatusController extends Controller
 
     /**
      * Actualizo todos los planes.
+     * 
+     * The newer comments are an attempt to document the cronjob previously not knowing anything about it. beware.
+     * This function updates all customer's contracts and plans.
+     * logs to >> /var/log/connection-update-all.log
      */
     public function actionUpdateAll()
     {
         $this->stdout("Westnet - Proceso de actualizacion de todos los clientes y contratos - " . (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
 
+        // get all active contracts and join them to other later needed tables. ('active' contracts strongly relates to real active customers)
         $query = (new Query())
             ->select([
                 'c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
@@ -96,15 +101,19 @@ class ConnectionStatusController extends Controller
             ->leftJoin('server s', 'con.server_id = s.server_id')
             ->where(['p.type' => 'plan', 'c.status' => 'active']);
 
+        // execute query. get array of models
         $contracts = $query->all();
 
+        // define variables job process
         $apis = [];
         $clientRequests = [];
         $contractRequests = [];
         $planes = [];
         $updated = 0;
 
+        // this app param variable seems to be used later on SecureConnectionUpdate to apply changes via API to the wispro servers
         Yii::$app->params['apply_wispro'] = false;
+
         try {
             $wispro = new SecureConnectionUpdate();
 
