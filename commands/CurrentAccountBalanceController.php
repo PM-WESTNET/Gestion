@@ -14,6 +14,7 @@ use yii\console\Controller;
 use app\modules\checkout\models\search\PaymentSearch;
 use Yii;
 use app\modules\alertsbot\controllers\TelegramController;
+use DateTime;
 
 class CurrentAccountBalanceController extends Controller
 {
@@ -25,10 +26,11 @@ class CurrentAccountBalanceController extends Controller
     public function actionUpdateCurrentAccountBalance()
     {
 
-
+        
         try {
             if(Yii::$app->mutex->acquire('mutex_update_current_account_balance')) {
-                echo "\nINICIO: ". date('Y-m-d h:i:s'). "\n";
+                $now = DateTime::createFromFormat('U.u', microtime(true));
+                echo "\nINICIO: ". $now->format('Y-m-d h:i:s.u'). "\n";
 
                 $today = time();
                 $customers_to_update = Customer::find()
@@ -39,6 +41,7 @@ class CurrentAccountBalanceController extends Controller
                     ->all();
 
                 echo "Cantidad de clientes a actualizar (activos/habilitados y forzados): ". count($customers_to_update) ."\n";
+                
 
                 foreach ($customers_to_update as $customer) {
                     $searchModel = new PaymentSearch();
@@ -47,12 +50,17 @@ class CurrentAccountBalanceController extends Controller
                     // $total = $searchModel->totalCalculationForQuery($customer->customer_id);
                     $total = $searchModel->accountTotal();
 
+
                     echo "Customer_ID: " . $customer->customer_id . " - " . "Update Total: " . round($total,2) . "\n";
 
                     $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
                 }
+                
+                
                 \Yii::$app->mutex->release('mutex_update_current_account_balance');
-                echo "FIN: ". date('Y-m-d h:i:s'). "\n\n";
+                $then = DateTime::createFromFormat('U.u', microtime(true));
+                echo "FIN: ". $then->format('Y-m-d h:i:s:u'). "\n\n";
+
             }else{
                 //echo "Ya hay un proceso corriendo \n";
             }
@@ -60,6 +68,7 @@ class CurrentAccountBalanceController extends Controller
         } catch (\Exception $ex) {
 
             echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
+            var_dump($ex);
             // send error to telegram
             TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: current-account-balance/update-current-account-balance ****', $ex);
         }
