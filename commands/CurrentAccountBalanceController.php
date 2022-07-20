@@ -44,7 +44,8 @@ class CurrentAccountBalanceController extends Controller
                     $searchModel = new PaymentSearch();
                     $searchModel->customer_id = $customer->customer_id;
                     
-                    $total = $searchModel->totalCalculationForQuery($customer->customer_id);
+                    // $total = $searchModel->totalCalculationForQuery($customer->customer_id);
+                    $total = $searchModel->accountTotal();
 
                     echo "Customer_ID: " . $customer->customer_id . " - " . "Update Total: " . round($total,2) . "\n";
 
