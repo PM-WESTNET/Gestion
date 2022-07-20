@@ -82,7 +82,13 @@ $customer = $model->customer;
     
     $columns[]= [
         'label' => Yii::t('app', 'Tentative Node'),
-        'value' => (empty($model->tentative_node) ? '' : Node::findOne(['subnet' => $model->tentative_node])->name)
+        'value' => function($model){
+            // if no tentative node is setted
+            if(empty($model->tentative_node)) return '-';
+            // if no subnet found from that tentative node
+            $node = Node::findOne(['subnet' => $model->tentative_node]);
+            return ((!empty($node)) ? $node->name : 'ERROR: subnet de nodo tentativo no encontrada');
+        }
     ];
     if($model->low_date) {
         $columns[]= [

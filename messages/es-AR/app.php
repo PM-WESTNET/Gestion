@@ -1429,4 +1429,6 @@
     'Create Customer Previous Company' => 'Crear compañia',
     'Current Account Status' => 'Estado Cuenta Corriente',
     'Customers By Node Historic' => 'Clientes por Nodo Historico',
+    'Remove Payment Import' => 'Eliminar Importacion de Pagos',
+    'Filename' => 'Nombre del archivo',
   );
