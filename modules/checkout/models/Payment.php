@@ -635,6 +635,7 @@ class Payment extends  ActiveRecord  implements CountableInterface
      * Retorna el total de las facturas del clientes
      */
     public static function totalCalculationForQuery($customer_id){
+
         $payment_method_id = Yii::$app->db->createCommand('SELECT payment_method_id FROM payment_method WHERE type = "account"')->queryOne();
         $payment_method_id  = !$payment_method_id ? 0 : $payment_method_id;
 
