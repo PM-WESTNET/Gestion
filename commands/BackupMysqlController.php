@@ -42,11 +42,11 @@ class BackupMysqlController extends \yii\console\Controller
             //
             //            $description = '';
             //
-            ////            for ($i = $init_log; $i === (count($fileLog)-1); $i++){
-            ////               $description .= $fileLog[$i]. PHP_EOL;
-            ////            }
-            ////
-            ////            $backup->description = $description;
+            //            for ($i = $init_log; $i === (count($fileLog)-1); $i++){
+            //               $description .= $fileLog[$i]. PHP_EOL;
+            //            }
+            //
+            //            $backup->description = $description;
 
             $backup->save();
 
@@ -73,6 +73,7 @@ class BackupMysqlController extends \yii\console\Controller
             $backup->status = 'error';
             $backup->description ='Falta Espacio en disco';
             $backup->save();
+            //todo:send message to telegram bot
             return; 
         }
 
@@ -83,6 +84,8 @@ class BackupMysqlController extends \yii\console\Controller
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
+        if(!isset($params['remoteBaseDir'])) return;
+        if(!isset($params['perconaFullDir'])) return;
 
         $command1 = "sudo innobackupex --host=$host --user=$user --password=$pass --no-timestamp  --no-lock $dir";
         $command2 = "sudo zip -r $fileOut $dir";
@@ -93,7 +96,7 @@ class BackupMysqlController extends \yii\console\Controller
         if ($result ==  '' && file_exists($fileOut)) {
             try {
 
-                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/full/'. $date->format('Y-m-d_H-i'). '.tar')) {
+                if($this->transferToRemoteServer($fileOut, $params['perconaFullDir']. $date->format('Y-m-d_H-i'). '.tar')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -146,6 +149,7 @@ class BackupMysqlController extends \yii\console\Controller
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
+        if(!isset($params['perconaIncrementalDir'])) return;
 
         $command = "sudo innobackupex --incremental --host=$host --user=$user --password=$pass  --no-timestamp  --no-lock --incremental-basedir=$dir $dirIncBefore ";
         $command2 = "sudo zip -r $fileOut $dirInc";
@@ -158,7 +162,7 @@ class BackupMysqlController extends \yii\console\Controller
 
         if ($result ==  '' && file_exists($fileOut)) {
             try {
-                if($this->transferToRemoteServer($fileOut, '/mnt/pruebaRaid/backupGestion/percona/incremental/'.$date->format('Y-m-d_H-i'). '.zip')) {
+                if($this->transferToRemoteServer($fileOut, $params['perconaIncrementalDir'].$date->format('Y-m-d_H-i'). '.zip')) {
                     $backup->status = 'success';
                 }else {
                     $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -188,6 +192,7 @@ class BackupMysqlController extends \yii\console\Controller
         $host = $params['host'];
         $user = $params['user'];
         $pass = $params['pass'];
+        if(!isset($params['mysqlDir'])) return;
 
         if (isset($params['databases'])) {
             foreach ($params['databases'] as $db) {
@@ -205,7 +210,7 @@ class BackupMysqlController extends \yii\console\Controller
                 if ($result ==  '' && file_exists($fileOutput)) {
                     try {
 
-                        if($this->transferToRemoteServer($fileOutput, '/mnt/pruebaRaid/backupGestion/mysql/'. $db.'_'. $date->format('dmY_His').'.sql')) {
+                        if($this->transferToRemoteServer($fileOutput, $params['mysqlDir']. $db.'_'. $date->format('dmY_His').'.sql')) {
                             $backup->status = 'success';
                         }else {
                             $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
@@ -257,7 +262,6 @@ class BackupMysqlController extends \yii\console\Controller
 
     private function transferToRemoteServer($filename, $remoteFile) {
         $params = Yii::$app->params['backups'];
-
         $connection = $this->connectToRemoterServer();
 
         if($connection !== false && $this->verifyRemoteSpace($connection)) {
@@ -272,7 +276,9 @@ class BackupMysqlController extends \yii\console\Controller
 
     private function verifyRemoteSpace($connection){
         $params = Yii::$app->params['backups'];
-        $command = "df -k /mnt/pruebaRaid | tr -s ' ' | cut -d' ' -f 4 | tr -dc '0-9'";
+        if(!isset($params['remoteBaseDir'])) return false;
+        $remoteBaseDir = $params['remoteBaseDir'];
+        $command = "df -k $remoteBaseDir | tr -s ' ' | cut -d' ' -f 4 | tr -dc '0-9'";
         $stream = ssh2_exec($connection, $command);
 
         if ($stream !== false) {
