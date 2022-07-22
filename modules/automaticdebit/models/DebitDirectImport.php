@@ -261,4 +261,14 @@ class DebitDirectImport extends \yii\db\ActiveRecord
     {
         return $this->getPayments()->where(['status' => Payment::PAYMENT_DRAFT])->exists();
     }
+    /**
+     * @return bool
+     * Returns true if ALL PAYMENTS from the import are draft still. making it possible to delete the import register and re-upload it.
+     */
+    public function areAllPaymentsPendingToClose()
+    {
+        $all_payments = $this->getPayments()->count();
+        $draft_payments = $this->getPayments()->where(['status' => Payment::PAYMENT_DRAFT])->count();
+        return ($all_payments == $draft_payments) ? true : false;
+    }
 }

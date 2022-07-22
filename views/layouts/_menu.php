@@ -28,6 +28,11 @@ $items = [];
 $alwaysVisibleItems = [];
 $notFilterable = [];
 
+// redirect to login view if not logged.
+$url = \yii\helpers\Url::to(['login'],true);
+if ( Yii::$app->user->isGuest )
+    return Yii::$app->getResponse()->redirect($url);
+
 //Home
 //$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 
@@ -141,27 +146,30 @@ $items[] = ['label' => Yii::t('app', 'Customers'), 'items' => [
     ['label' => Yii::t('app', 'Positive Balance Customers'), 'url' => ['/sale/customer/positive-balance-customers']],
     ['label' => Yii::t('app', 'Pending Installations'), 'url' => ['/sale/customer/pending-installations']],
     ['label' => Yii::t('app', 'Installations'), 'url' => ['/sale/customer/installations']],
-    //'<li class="divider"></li>',
     ['label' => Yii::t('app', 'Payments'), 'url' => ['/checkout/payment/index']],
     ['label' => Yii::t('app', 'Notify payments'), 'url' => ['/westnet/notify-payment']],
     ['label' => Yii::t('app', 'Programmed plan changes'), 'url' => ['/sale/contract/programmed-plan-change/index']],
-    //'<li class="divider"></li>',
-    ['label' => Yii::t('app', 'Profile Classes'), 'url' => ['/sale/profile-class/index']],
+    ['label' => Yii::t('app', 'Profile Classes'), 'url' => ['/sale/profile-class/index']], 
+
     ['label' => '<li class="divider"></li>', 'encode' => false],
+
     ['label' => Yii::t('app', 'Document Types'), 'url' => ['/sale/document-type/index']],
     ['label' => Yii::t('app', 'Tax Conditions'), 'url' => ['/sale/tax-condition/index']],
     ['label' => Yii::t('app', 'Customer Hour range'), 'url' => ['/sale/hour-range/index']],
-    //'<li class="divider"></li>',
     ['label' => Yii::t('app', 'Customer Classes'), 'url' => ['/sale/customer-class/index']],
+    ['label' => Yii::t('app', 'Customer Previous Company'), 'url' => ['/sale/customer-previous-company/index']],
     ['label' => Yii::t('app', 'Customer Categories'), 'url' => ['/sale/customer-category/index']],
     ['label' => Yii::t('app', 'Zones'), 'url' => ['/zone/zone/index'], 'visible' => User::canRoute(['/zone/zone/index'])],
-    //'<li class="divider"></li>',
     ['label' => Yii::t('app', 'Discounts'), 'url' => ['/sale/discount/index']],
     ['label' => Yii::t('app', 'Publicity Shapes'), 'url' => ['/sale/publicity-shape/index']],
     ['label' => Yii::t('app', 'Payment Methods'), 'url' => ['/checkout/payment-method/index'], 'visible' => User::canRoute('/checkout/payment-method/index')],
+    
     '<li class="divider"></li>',
+    
     ['label' => Yii::t('app', 'Billed and Cashed'), 'url' => ['/sale/customer/billed-and-cashed']],
+    
     '<li class="divider"></li>',
+    
     ['label' => Yii::t('app', 'Enviar comprobantes por email masivamente'), 'url' => ['/sale/bill/get-last-bills'], 'visible' => User::canRoute('/sale/bill/get-last-bills')],
     ['label' => Yii::t('app', 'Predefined Customer SMS Messages'), 'url' => ['/sale/customer-message/index']],
     ['label' => Yii::t('app', 'Verify Emails'), 'url' => ['/sale/customer/verify-emails']],

@@ -685,4 +685,18 @@ class Contract extends ActiveRecord {
 
         return $contracts;
     }
+
+    public function updateConnectionsMoneyAccounts(){
+        $connections = Connection::find()->where(['contract_id'=>$this->contract_id])->all();
+        if(empty($connections)) return false;
+        foreach($connections as $connection){
+            if(!isset($connection->connection_id)) continue;
+            // var_dump('$connection->connection_id',$connection->connection_id);
+            // todo: dont save all attributes. only update the needed money account and connection statuses
+            $ok = $connection->save();
+            // var_dump('$ok',$ok);
+        }
+        // return true;
+    }
+
 }

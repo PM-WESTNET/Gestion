@@ -16,6 +16,9 @@ use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use app\modules\automaticdebit\models\DebitDirectImportHasPayment;
+use app\modules\automaticdebit\models\DebitDirectFailedPayment;
+use app\modules\checkout\models\Payment;
 
 /**
  * BankController implements the CRUD actions for Bank model.
@@ -311,5 +314,73 @@ class BankController extends Controller
 
         Yii::$app->session->addFlash('success', Yii::t('app','Payments has been closed successfully'));
         return $this->redirect(['import-view', 'import_id' => $import->debit_direct_import_id]);
+    }
+
+    /**
+     * deletes a existing import that created draft payments and are interfiering with the customers current money account
+     * 
+     * returns false if error
+     */
+    public function actionDeleteImport($import_id){
+        // get import model
+        $import = DebitDirectImport::findOne($import_id);
+
+        //step 1: delete payments associated to the import. *including the pivot table registry
+
+        // get the pivot table model based on import_id
+        $debit_direct_import_has_payment_model = DebitDirectImportHasPayment::find()->where(['debit_direct_import_id' => $import_id])->all();
+
+        // variable to check that all payments are actually draft. if one isnt, rollback and return an error.
+        $error = false; 
+        $transaction = Yii::$app->db->beginTransaction(); // transaction in case of error
+        foreach($debit_direct_import_has_payment_model as $ddip){
+            // get payment model
+            $payment_model = Payment::findOne($ddip->payment_id);
+
+            if(!empty($payment_model)){
+
+                // if payment isnt draft checkout and notify error.
+                if(!($payment_model->status == Payment::PAYMENT_DRAFT)){
+                    $error = true;
+                    break; // error break
+                }
+
+                // delete draft payment
+                if($payment_model->delete()){
+                    // delete pivot registers
+                    if(!($ddip->delete())){
+                        $error = true;
+                        break;
+                    }
+                }
+            }
+            else{
+                $ddip->delete();
+            }
+        }
+
+        //step 2: delete failed payments from DebitDirectFailedPayment
+        $failed_payments = DebitDirectFailedPayment::find()->where(['import_id'=>$import_id])->all();
+        foreach($failed_payments as $payment){
+            if( !($payment->delete()) ) $error = true;
+        }
+
+        //step 3: delete import
+        if( !($import->delete()) ) $error = true;
+        
+        //step 4: commit or rollback
+        $flash_type = 'success';
+        $flash_msg = 'Draft payments and import registers deleted successfully';
+        if($error) {
+            $flash_type = 'error';
+            $flash_msg = "The payment import could not be deleted. Some constraint was found or payment is already closed.";
+            $transaction->rollback();
+        }else{
+            // commit changes
+            $transaction->commit();
+        }
+            
+        Yii::$app->session->addFlash($flash_type, $flash_msg);
+        return $this->redirect(['imports', 'bank_id' => $import->bank_id]);
     }
 }

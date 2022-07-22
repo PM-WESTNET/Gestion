@@ -17,8 +17,10 @@ use app\modules\sale\models\Customer;
 use app\modules\sale\models\HourRange;
 use app\modules\sale\models\search\CompanySearch;
 use app\modules\sale\models\Company;
+use app\modules\sale\models\CustomerPreviousCompany;
 use webvimark\modules\UserManagement\models\User;
 use kartik\widgets\FileInput;
+use yii\bootstrap\Dropdown;
 
 /**
  * @var yii\web\View $this
@@ -276,16 +278,30 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
                     ['prompt' => 'Seleccione una opción', '' => 'customer_category_id']);
             }
             ?>
-            
+
         </div>
+    
     </div>
 
     <div class="row">
         <div class="col-sm-12 col-xs-12">
             <?php
             echo $this->render('@app/modules/sale/views/customer/_find-with-autocomplete', ['form'=> $form, 'model' => $model, 'attribute' => 'customer_reference_id']);
+            
+            echo $this->render('@app/modules/sale/views/customer/_previous-company-form', ['form'=> $form, 'model' => $model, 'attribute' => 'previous_company_id']);
+
+            // $companies=CustomerPreviousCompany::find()->all();
+            
+            // $listData=ArrayHelper::map($companies,'id','company');
+            
+            // echo $form->field($model,  'previous_company_id')->dropDownList(
+            // $listData,
+            // ['prompt'=>'Seleccione una empresa...','id'=>'prevCompany','onchange'=>'console.log("averteeeee")']
+            // )->label(Yii::t('app', 'Customer Previous Company'));
+            
             ?>
         </div>
+        
     </div>
     <div class="row">
         <div class="col-sm-12 col-xs-12">
@@ -528,7 +544,6 @@ $permiso = Yii::$app->user->identity->hasRole('update-customer-data', false);
 
             $("#document_number_input").inputmask(options);
         }
-
 
         function onTaxConditionChange(e){
             var typeRequired = $(e.target).val();

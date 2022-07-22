@@ -36,6 +36,7 @@ use yii\db\cubrid\QueryBuilder;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class ConnectionStatusController extends Controller
 {
@@ -51,6 +52,7 @@ class ConnectionStatusController extends Controller
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
             $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
             $this->updateConnections($save);
+            Yii::$app->mutex->release('update_connections_cron');
         }
     }
 
@@ -76,11 +78,16 @@ class ConnectionStatusController extends Controller
 
     /**
      * Actualizo todos los planes.
+     * 
+     * The newer comments are an attempt to document the cronjob previously not knowing anything about it. beware.
+     * This function updates all customer's contracts and plans.
+     * logs to >> /var/log/connection-update-all.log
      */
     public function actionUpdateAll()
     {
         $this->stdout("Westnet - Proceso de actualizacion de todos los clientes y contratos - " . (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
 
+        // get all active contracts and join them to other later needed tables. ('active' contracts strongly relates to real active customers)
         $query = (new Query())
             ->select([
                 'c.customer_id', 'c.contract_id', 'cus.code',  'cd.contract_detail_id', 'c.external_id',
@@ -94,15 +101,19 @@ class ConnectionStatusController extends Controller
             ->leftJoin('server s', 'con.server_id = s.server_id')
             ->where(['p.type' => 'plan', 'c.status' => 'active']);
 
+        // execute query. get array of models
         $contracts = $query->all();
 
+        // define variables job process
         $apis = [];
         $clientRequests = [];
         $contractRequests = [];
         $planes = [];
         $updated = 0;
 
+        // this app param variable seems to be used later on SecureConnectionUpdate to apply changes via API to the wispro servers
         Yii::$app->params['apply_wispro'] = false;
+
         try {
             $wispro = new SecureConnectionUpdate();
 
@@ -126,6 +137,13 @@ class ConnectionStatusController extends Controller
                     $plansRequest = $api->getPlanApi();
                     $plans = $plansRequest->listAll();
                     $this->saveTime('planapi-listall');
+                    if(is_bool($plans)){
+                        // this error is most probably due to FTTH plans or something.
+                        $this->stdout('"Get Plan API" failed for customer:'.$contract_q['customer_id'].' contract id:'.$contract_q['contract_id']."\n");
+                        $this->stdout('Continue to next contract'."\n");
+                        continue;
+                    }
+
                     foreach ($plans as $plan) {
                         $planes[$contract_q['server_id'] . "_" . preg_replace("[ |/]", "-", strtolower($plan['plan']['name']))] = $plan['plan']['id'];
                     }
@@ -179,6 +197,8 @@ class ConnectionStatusController extends Controller
                     } catch (\Exception $ex) {
                         $this->stdout("Error al Actualizar: " . $contract_q['server_id'] . " - " . $contract_q['customer_id'] . " - " . $contract_q['contract_id'] . " - " . $ex->getMessage() . "\n", Console::BOLD, Console::FG_RED);
                         error_log($ex->getTraceAsString());
+                        // send error to telegram
+                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-all ****', $ex);
                     }
                 } else {
                     $this->stdout("Plan No Encontrado: " . $contract_q['customer_id'] . " - " . $contract_q['server_id'] . "_" . $contract_q['system'] . "\n", Console::BOLD, Console::FG_RED);
@@ -188,6 +208,8 @@ class ConnectionStatusController extends Controller
             $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getMessage() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-all ****', $ex);
         }
         /** @var IspInterface $api */
         foreach ($apis as $api) {
@@ -717,7 +739,10 @@ class ConnectionStatusController extends Controller
             echo $ex->getMessage();
             echo $ex->getLine();
             echo $ex->getTraceAsString();
-            $this->stdout("\nProcess finished unexpectedly.");
+            $this->stdout("\nProcess Finished Unexpectedly.");
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Finished Unexpectedly: connection-status/update ****', $ex);
         }
         
         $this->stdout("\n----Summary----\n");
@@ -841,6 +866,9 @@ class ConnectionStatusController extends Controller
                         $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
                         $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
                         $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+                        
+                        // send error to telegram
+                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-plan ****', $ex);
                     }
                 } else {
                     $this->stdout("Plan No Encontrado: " . $contractRes['customer_id'] . " - " . $contractRes['server_id'] . "_" . $contractRes['system'] . "\n", Console::BOLD, Console::FG_RED);
@@ -850,6 +878,9 @@ class ConnectionStatusController extends Controller
             $this->stdout("Exepcion.\n", Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getMessage() . " - " . $ex->getFile() . " - " . $ex->getLine(), Console::BOLD, Console::FG_RED);
             $this->stdout($ex->getTraceAsString(), Console::BOLD, Console::FG_RED);
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: connection-status/update-plan ****', $ex);
         }
 
         $this->stdout("Totales" . "\n", Console::BOLD, Console::FG_RED);

@@ -293,6 +293,7 @@ class CustomerController extends Controller
         $taxImageUpdate =  Yii::$app->request->post('tax_image_update', 0);
 
         if($model->canUpdate()){
+            // var_dump(Yii::$app->request->post());die();
             if ($model->load(Yii::$app->request->post()) && $address->load(Yii::$app->request->post())) {
 
                 if ($docImageUpdate) {
@@ -315,10 +316,12 @@ class CustomerController extends Controller
                         return $this->redirect(['view', 'id' => $model->customer_id]);
                     }
                 }
+
             }
             return $this->render('update', [
                         'model' => $model,
                         'address' => $address,
+
             ]);
         }else{
             throw new ForbiddenHttpException(\Yii::t('app', 'You can`t do this action'));

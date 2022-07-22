@@ -1893,14 +1893,17 @@ class Bill extends ActiveRecord implements CountableInterface
     }
 
     /**
-     * Get all bills where "Tuvo Error" is true and status is != from "closed"
+     * Get all bills where "Tuvo Error" is true and status is != from "closed"\
+     * by default, filters the error ones. But can be bypassed by setting the first param to false.
      */
-    public function getErrorAndUnclosedBillsQuery() {
+    public function getErrorAndUnclosedBillsQuery($had_error = true) {
         $billsWithErrors = self::find()
                 ->alias('b')
                 ->where(['!=', 'b.status','closed'])
-                ->andWhere(['b.had_error' => true])
                 ;
+        // filters error bills (had an error previously after trying to close the bill.)
+        if($had_error) $billsWithErrors->andWhere(['b.had_error' => true]);
+
         return $billsWithErrors;
     }
 

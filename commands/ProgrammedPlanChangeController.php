@@ -18,6 +18,7 @@ use app\modules\sale\modules\contract\models\ProgrammedPlanChange;
 use yii\console\Controller;
 use app\modules\checkout\models\search\PaymentSearch;
 use Yii;
+use app\modules\alertsbot\controllers\TelegramController;
 
 class ProgrammedPlanChangeController extends Controller
 {
@@ -80,6 +81,9 @@ class ProgrammedPlanChangeController extends Controller
             echo "\n";
 
             \Yii::info('Falla el proceso: '.$ex->getTraceAsString(), 'cambio-de-velocidad-programada');
+            
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: programmed-plan-change/apply-programmed-plan-changes ****', $ex);
         }
     }
 }

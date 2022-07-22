@@ -12,6 +12,7 @@ use yii\console\Controller;
 use app\modules\westnet\notifications\components\scheduler\Scheduler;
 use app\modules\westnet\notifications\models\Notification;
 use yii\helpers\Console;
+use app\modules\alertsbot\controllers\TelegramController;
 
 /**
  * Description of NotificationController
@@ -25,21 +26,28 @@ class NotificationController extends Controller
      */
     public function actionNotify()
     {
-        $this->stdout("Start\n");
-        $schedulers = Scheduler::getSchedulerObjects();
-        
-        foreach($schedulers as $scheduler){
-            $this->scheduler($scheduler);
+        try{
+                
+            $this->stdout("Start\n");
+            $schedulers = Scheduler::getSchedulerObjects();
+            
+            foreach($schedulers as $scheduler){
+                $this->scheduler($scheduler);
+            }
+            
+            //Parte fundamental del codigo:
+            $this->stderr("\n\n");
+            $this->stderr("****** ** ** *****    ***** **   ** **** \n", Console::FG_YELLOW);
+            $this->stderr("  **   ** ** **       **    ***  ** **  **\n", Console::FG_YELLOW);
+            $this->stderr("  **   ***** *****    ***** ** * ** **  **\n", Console::FG_YELLOW);
+            $this->stderr("  **   ** ** **       **    **  *** **  **\n", Console::FG_YELLOW);
+            $this->stderr("  **   ** ** *****    ***** **   ** **** \n", Console::FG_YELLOW);
+
         }
-        
-        //Parte fundamental del codigo:
-        $this->stderr("\n\n");
-        $this->stderr("****** ** ** *****    ***** **   ** **** \n", Console::FG_YELLOW);
-        $this->stderr("  **   ** ** **       **    ***  ** **  **\n", Console::FG_YELLOW);
-        $this->stderr("  **   ***** *****    ***** ** * ** **  **\n", Console::FG_YELLOW);
-        $this->stderr("  **   ** ** **       **    **  *** **  **\n", Console::FG_YELLOW);
-        $this->stderr("  **   ** ** *****    ***** **   ** **** \n", Console::FG_YELLOW);
-        
+        catch(\Exception $ex){
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: westnet/notification/notify ****', $ex);
+        }
     }
     
     /**
@@ -120,37 +128,43 @@ class NotificationController extends Controller
      * Comando para enviar las campañas de email no calendarizadas. Implementa mutex
      */
     public function actionSendEmails() {
+        try{
 
-        $notifications = Notification::find()
-            ->innerJoin('transport t', 't.transport_id=notification.transport_id')
-            ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
-            ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
-            ->all();
-	
-        foreach ($notifications as $notification) {
-            if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
-                $this->stdout("\n" . 'Start send for notification_id: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
+            $notifications = Notification::find()
+                ->innerJoin('transport t', 't.transport_id=notification.transport_id')
+                ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
+                ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
+                ->all();
+        
+            foreach ($notifications as $notification) {
+                if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
+                    $this->stdout("\n" . 'Start send for notification_id: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
 
-                $notification->updateAttributes(['status' => 'in_process']);
-                $transport = $notification->transport;
-                $result = $transport->send($notification);
-                $this->stdout('Notification batch end for: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
+                    $notification->updateAttributes(['status' => 'in_process']);
+                    $transport = $notification->transport;
+                    $result = $transport->send($notification);
+                    $this->stdout('Notification batch end for: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
 
-                if ($result['status'] === 'success') {
-                    $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
+                    if ($result['status'] === 'success') {
+                        $notification->updateAttributes(['status' => Notification::STATUS_SENT]);
 
-                }else if($result['status'] === 'paused') {
-                    $notification->updateAttributes(['status' => Notification::STATUS_PAUSED]);
+                    }else if($result['status'] === 'paused') {
+                        $notification->updateAttributes(['status' => Notification::STATUS_PAUSED]);
 
-                }else {
-                    $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+                    }else {
+                        $notification->updateAttributes(['status' => Notification::STATUS_ERROR]);
+                    }
+                    $this->stdout('Notification status change: ' . $notification->status . ' at ' . date("Y-m-d h:i:s") . "\n");
+                    
+                    \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
+                    $this->stdout('mutex released at ' . date("Y-m-d h:i:s") . "\n");
                 }
-                $this->stdout('Notification status change: ' . $notification->status . ' at ' . date("Y-m-d h:i:s") . "\n");
-                
-                \Yii::$app->mutex->release('send_emails_'. $notification->notification_id);
-                $this->stdout('mutex released at ' . date("Y-m-d h:i:s") . "\n");
-            }
 
+            }
+        }
+        catch(\Exception $ex){
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: westnet/notification/send-emails ****', $ex);
         }
     }
 
@@ -159,22 +173,28 @@ class NotificationController extends Controller
      */
     public function actionSendMobilePush()
     {
+        try{
+                
+            $notifications = Notification::find()
+                ->innerJoin('transport t', 't.transport_id=notification.transport_id')
+                ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
+                ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
+                ->all();
 
-        $notifications = Notification::find()
-            ->innerJoin('transport t', 't.transport_id=notification.transport_id')
-            ->andWhere(['t.name' => 'Mobile Push', 'notification.status' => 'pending'])
-            ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
-            ->all();
-	
-        foreach ($notifications as $notification) {
-            if (\Yii::$app->mutex->acquire('send_mobile_push_'.$notification->notification_id)){
-                $notification->updateAttributes(['status' => 'in_process']);
-                $transport = $notification->transport;
-                $transport->send($notification);
+            foreach ($notifications as $notification) {
+                if (\Yii::$app->mutex->acquire('send_mobile_push_'.$notification->notification_id)){
+                    $notification->updateAttributes(['status' => 'in_process']);
+                    $transport = $notification->transport;
+                    $transport->send($notification);
 
-                $notification->updateAttributes(['status' => 'sent']);
-                \Yii::$app->mutex->release('send_mobile_push_'. $notification->notification_id);
+                    $notification->updateAttributes(['status' => 'sent']);
+                    \Yii::$app->mutex->release('send_mobile_push_'. $notification->notification_id);
+                }
             }
+        }
+        catch(\Exception $ex){
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: westnet/notification/send-mobile-push ****', $ex);
         }
     }
 }
