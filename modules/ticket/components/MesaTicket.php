@@ -59,9 +59,17 @@ class MesaTicket
             /** @var Assignation $assign */
             foreach( $ticket->assignations as $assign) {
                 if($notify_this && !$notify) {
-                    $external_id = $api->create($ticket->contract->vendor->external_user_id, $ticket->category->external_user_id,
-                        $ticket->category_id, $ticket->title, $ticket->contract_id, $ticket->contract->customer->code, $ticket->external_tag_id);
-                    $notify = true;
+                        $external_id = $api->create(
+                            $ticket->contract->vendor->external_user_id, 
+                            $ticket->category->external_user_id,
+                            $ticket->category_id, 
+                            $ticket->title, 
+                            $ticket->contract_id, 
+                            $ticket->contract->customer->code, 
+                            $ticket->external_tag_id
+                        );
+                   
+                        $notify = true;
                     if(!$external_id) {
                         throw new \Exception($api->error);
                     }

@@ -99,12 +99,15 @@ class Backup extends \yii\db\ActiveRecord {
         parent::afterSave($insert, $changedAttributes);
 
         if ($this->status === 'error') {
-            $this->notifyError();
+            $result = ($this->notifyError());
+            //if($result){show errors?? do something when failure?}
         }
     }
 
     private function notifyError()
     {
+        if(!isset(Yii::$app->params['gestion_owner_company'])) return false;
+        $company_name = Yii::$app->params['gestion_owner_company'];
         
         $layout = '@app/modules/backup/views/backup/mail';
         Yii::$app->mail->htmlLayout = $layout;
@@ -117,7 +120,7 @@ class Backup extends \yii\db\ActiveRecord {
         foreach($destinataries as $destinatary) {
             $messages[] = $mailSender->prepareMessage(
                 ['email'=>$destinatary, 'name' => $destinatary],
-                'IMPORTANTE!!! - ERROR EN BACKUP DE GESTION',
+                'IMPORTANTE!!! - ERROR EN BACKUP DE GESTION '.strtoupper($company_name),
                 [ 'view'=> $layout ,'params' => [
                     'init_timestamp' => $this->init_timestamp,
                     'database' => $this->database,
@@ -127,6 +130,7 @@ class Backup extends \yii\db\ActiveRecord {
         }
 
         $result = $mailSender->sendMultiple($messages);
+        return true;
     }
 
 

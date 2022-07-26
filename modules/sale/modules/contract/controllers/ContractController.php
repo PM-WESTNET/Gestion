@@ -224,18 +224,23 @@ class ContractController extends Controller {
                     throw new \Exception('Contract cannot be saved. Some data is wrong or missing.');
                 }
 
-                $transaction->commit();
-
+                // check if model can create a Ticket on Mesa App.
                 if ($model->hasMethod('createMesaTicket')) {
-                    $config = Config::getConfig('disabled_communication_mesa');
-
-                    if(isset($config) && !$config->item->description){
-                    //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
-                        $model->createMesaTicket($model);
-                        
+                    // check in Config database for any mesa URL for the APIs
+                    if(empty(Config::getValue('mesa_server_address'))){
+                        throw new \Exception('There is no Url set on DB for MESA communication.');
                     }
-
+                    
+                    // get APP current configuration items 
+                    $config = Config::getConfig('disabled_communication_mesa');
+                    if(isset($config) && !$config->item->description){
+                        //Crea el ticket en mesa ver configuración de behaviors en modelo Contract
+                        $model->createMesaTicket($model);
+                    }
                 }
+
+                // commits all contract data to be saved.
+                $transaction->commit();
 
 
                 if(Yii::$app->request->post('mode') === '1'){

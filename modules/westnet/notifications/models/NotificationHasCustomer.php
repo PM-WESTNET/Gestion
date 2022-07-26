@@ -3,6 +3,7 @@
 namespace app\modules\westnet\notifications\models;
 
 use Yii;
+use app\components\helpers\DbHelper;
 
 /**
  * This is the model class for table "notification_has_customer".
@@ -155,12 +156,13 @@ class NotificationHasCustomer extends \app\components\db\ActiveRecord
      * Return all customer for notification_id
      */
     public static function GetCustomerToCampaign($notification_id){
+        $core_db_name = DbHelper::getDbName(Yii::$app->db);
         return self::getDb()->createCommand('SELECT 
                 cu.customer_id, cu.name, cu.lastname, nhc.email, cu.code, cu.phone, cu.phone2, 
                 cu.payment_code, nhc.node, nhc.saldo, nhc.company_code, nhc.debt_bills,
                 cu.status, nhc.category 
                 FROM notification_has_customer nhc 
-                LEFT JOIN westnet_2.customer cu ON cu.customer_id = nhc.customer_id 
+                LEFT JOIN '.$core_db_name.'.customer cu ON cu.customer_id = nhc.customer_id 
                 WHERE 
                     nhc.notification_id=:notification_id 
                 AND nhc.status = "pending"')
