@@ -20,17 +20,17 @@ $customer = $model->customer;
 ?>
 
 <div class="contract-view">
-    <?php if ($model->hasPendingPlanChange()): ?>
-        <?php $change = $model->getPendingPlanChange()?>
+    <?php if ($model->hasPendingPlanChange()) : ?>
+        <?php $change = $model->getPendingPlanChange() ?>
         <div class="alert alert-warning">
-            <h4><?= Yii::t('app','This contract has pending programmed plan change for {date}', ['date' => $change->date])?></h4>
+            <h4><?= Yii::t('app', 'This contract has pending programmed plan change for {date}', ['date' => $change->date]) ?></h4>
         </div>
     <?php endif; ?>
 
     <div class="title">
         <h1><?= Html::encode($this->title) ?></h1>
 
-        <p> <?= $this->render('_contract-buttons', [ 'model' => $model, ])?> </p>
+        <p> <?= $this->render('_contract-buttons', ['model' => $model,]) ?> </p>
     </div>
 
     <?php $columns = [
@@ -40,7 +40,7 @@ $customer = $model->customer;
         ],
         [
             'label' => Yii::t('app', 'Company'),
-            'value' => function($model) use ($customer){
+            'value' => function ($model) use ($customer) {
                 $company = $customer->company;
                 $parentCompany = $customer->parentCompany;
                 if (!$company) {
@@ -48,7 +48,7 @@ $customer = $model->customer;
                 }
                 $result = $company->name;
                 if ($parentCompany) {
-                    $result .= " ( " . $parentCompany->name ." )";
+                    $result .= " ( " . $parentCompany->name . " )";
                 }
                 return $result;
             },
@@ -64,11 +64,11 @@ $customer = $model->customer;
         [
             'label' => Yii::t('app', 'Address'),
             'format' => 'raw',
-            'value' => (isset($model->address) ? $model->address->fullAddress : $customer->address ),
+            'value' => (isset($model->address) ? $model->address->fullAddress : $customer->address),
         ],
     ];
 
-    $columns[]= [
+    $columns[] = [
         'label' => Yii::t('app', 'Instalation Schedule'),
         'value' => Yii::t('app', Yii::t('app', ucfirst($model->instalation_schedule))),
     ];
@@ -79,23 +79,23 @@ $customer = $model->customer;
             'value' => isset($model->vendor) ? $model->vendor->fullname : '',
         ];
     }
-    
-    $columns[]= [
+
+    $columns[] = [
         'label' => Yii::t('app', 'Tentative Node'),
-        'value' => function($model){
+        'value' => function ($model) {
             // if no tentative node is setted
-            if(empty($model->tentative_node)) return '-';
+            if (empty($model->tentative_node)) return '-';
             // if no subnet found from that tentative node
             $node = Node::findOne(['subnet' => $model->tentative_node]);
             return ((!empty($node)) ? $node->name : 'ERROR: subnet de nodo tentativo no encontrada');
         }
     ];
-    if($model->low_date) {
-        $columns[]= [
+    if ($model->low_date) {
+        $columns[] = [
             'label' => Yii::t('westnet', 'Date of start of low'),
             'value' => (new \DateTime($model->low_date))->format('d-m-Y'),
         ];
-        $columns[]=[
+        $columns[] = [
             'label' => Yii::t('westnet', 'Reason of low'),
             'value' => $model->lowCategory->name,
         ];
@@ -108,15 +108,15 @@ $customer = $model->customer;
     if (Yii::$app->getModule('westnet')) {
         $connection = Connection::findOne(['contract_id' => $model->contract_id]);
         if ($connection) {
-            ?>
+    ?>
             <div id="messages"></div>
             <h2><?php echo Yii::t('westnet', 'Connection Details') ?></h2>
             <div class="title">
                 <p>
-                    <?= $this->render('_contract-detail-buttons', [ 'model' => $model, 'connection' => $connection ])?>
+                    <?= $this->render('_contract-detail-buttons', ['model' => $model, 'connection' => $connection]) ?>
                 </p>
             </div>
-            <?php
+        <?php
             // var_dump($connection->ip4_public);die();
             echo DetailView::widget([
                 'model' => $connection,
@@ -124,14 +124,16 @@ $customer = $model->customer;
                     [
                         'label' => Yii::t('westnet', 'Server'),
                         'format' => 'html',
-                        'value' => function($model){
+                        'value' => function ($model) {
 
-                            $retHTML = ($model->server ? $model->server->name : "" );
-                            if(isset($model->server->load_balancer_type)){ // is mikrotik server, then
-                                if($model->server->load_balancer_type == 'Mikrotik'){
-                                    return  Html::a('<span class="label label-success">Actualizar IP Principal en '.$retHTML.'</span>', 
-                                    ['/westnet/connection/update-on-mikrotik', 'connection_id' => $model->connection_id], 
-                                    ['class' => 'profile-link']);   
+                            $retHTML = ($model->server ? $model->server->name : "");
+                            if (isset($model->server->load_balancer_type)) { // is mikrotik server, then
+                                if ($model->server->load_balancer_type == 'Mikrotik') {
+                                    return  Html::a(
+                                        '<span class="label label-success">Actualizar IP Principal en ' . $retHTML . '</span>',
+                                        ['/westnet/connection/update-on-mikrotik', 'connection_id' => $model->connection_id],
+                                        ['class' => 'profile-link']
+                                    );
                                 }
                             }
                             return $retHTML;
@@ -139,11 +141,11 @@ $customer = $model->customer;
                     ],
                     [
                         'label' => Yii::t('westnet', 'Node'),
-                        'value' => ($connection->node ? $connection->node->name : "" ),
+                        'value' => ($connection->node ? $connection->node->name : ""),
                     ],
                     [
                         'label' => Yii::t('westnet', 'Access Point'),
-                        'value' => ($connection->accessPoint ? $connection->accessPoint->name : "" ),
+                        'value' => ($connection->accessPoint ? $connection->accessPoint->name : ""),
                     ],
                     [
                         'label' => Yii::t('westnet', 'ONU sn'),
@@ -155,8 +157,7 @@ $customer = $model->customer;
                     ],
                     [
                         'label' => 'Ip4_1 Anterior',
-                        'value' => function($model)
-                        {
+                        'value' => function ($model) {
                             return long2ip($model->ip4_1_old);
                         },
                     ],
@@ -167,8 +168,7 @@ $customer = $model->customer;
                     ],
                     [
                         'label' => Yii::t('westnet', 'ip4_public'),
-                        'value' => function($model)
-                        {
+                        'value' => function ($model) {
                             return (!empty($model->ip4_public)) ?  long2ip($model->ip4_public) : $model->ip4_public;
                         },
                     ],
@@ -202,7 +202,7 @@ $customer = $model->customer;
             ['class' => 'yii\grid\SerialColumn'],
             [
                 'header' => Yii::t('app', 'Product Type'),
-                'value' => function($model) {
+                'value' => function ($model) {
                     if (!empty($model->product)) {
                         return Yii::t('app', ucfirst($model->product->type));
                     }
@@ -210,55 +210,57 @@ $customer = $model->customer;
             ],
             [
                 'header' => Yii::t('app', 'Product'),
-                'value' => function($model) {
+                'value' => function ($model) {
                     return  $model->product->name;
-                    
                 }
             ],
             [
                 'attribute' => 'count',
-                'value' => function($model) {
+                'value' => function ($model) {
                     return $model->count > 0 ? $model->count : '';
                 }
             ],
             [
                 'header' => Yii::t('app', 'Amount'),
-                'value' => function($model) {
+                'value' => function ($model) {
                     return Yii::$app->getFormatter()->asCurrency(
-                                    $model->funding_plan_id ?
-                                            $model->fundingPlan->getFinalAmount() :
-                                            $model->product->getFinalPrice($model));
+                        $model->funding_plan_id ?
+                            $model->fundingPlan->getFinalAmount() :
+                            $model->product->getFinalPrice($model)
+                    );
                 }
             ],
             [
                 'header' => Yii::t('app', 'Quantity Payments'),
-                'value' => function($model){
+                'value' => function ($model) {
                     if (empty($model->fundingPlan->qty_payments)) {
                         return 1;
-                    }else{
+                    } else {
                         return $model->fundingPlan->qty_payments;
                     }
                 }
             ],
             [
                 'header' => Yii::t('app', 'Total amount funded'),
-                'value' => function($model) {
+                'value' => function ($model) {
                     return Yii::$app->getFormatter()->asCurrency(($model->funding_plan_id ?
-                                            $model->fundingPlan->getFinalTotalAmount() :
-                                            $model->count * $model->product->getFinalPrice($model)));
+                        $model->fundingPlan->getFinalTotalAmount() :
+                        $model->count * $model->product->getFinalPrice($model)));
                 }
             ],
             'from_date',
             'to_date',
             [
                 'attribute' => 'status',
-                'value' => function($model) {
+                'value' => function ($model) {
                     return $model->status ? Yii::t('app', ucfirst($model->status)) : null;
                 }
             ],
             [
                 'attribute' => 'vendor_id',
-                'value' => function($model){ return $model->vendor ? $model->vendor->fullName : null; }
+                'value' => function ($model) {
+                    return $model->vendor ? $model->vendor->fullName : null;
+                }
             ],
         ],
     ]);
@@ -272,142 +274,141 @@ $customer = $model->customer;
 </div>
 
 <!-- Modal -->
-<?= $this->render('_modal-contract-connection', ['model' => $model, 'products' => $products, 'vendors' => $vendors])?>
+<?= $this->render('_modal-contract-connection', ['model' => $model, 'products' => $products, 'vendors' => $vendors]) ?>
 
 <!-- Modal de company -->
-<?= $this->render('_modal-contract-company', ['connection' => $connection, 'model' => $model])?>
+<?= $this->render('_modal-contract-company', ['connection' => $connection, 'model' => $model]) ?>
 
 <!-- Modal de Nodo -->
-<?= $this->render('_modal-contract-node', [ 'connection' => $connection ])?>
+<?= $this->render('_modal-contract-node', ['connection' => $connection]) ?>
 
 <!-- Modal de Impresion ADS -->
-<?= $this->render('_modal-contract-ads')?>
+<?= $this->render('_modal-contract-ads') ?>
 
 <!-- Modal de Proceso de baja -->
-<?= $this->render('_modal-contract-low-process')?>
+<?= $this->render('_modal-contract-low-process') ?>
 
 <!-- Modal comienzo de proceso de baja-->
-<?= $this->render('_modal-contract-start-low-process')?>
+<?= $this->render('_modal-contract-start-low-process') ?>
 
 <script>
-    var ContractView = new function () {
-        
-        this.tentative_node= '<?php 
-                             $tentativeNode= Node::findOne(['subnet' => $model->tentative_node]); 
-                            echo (empty($tentativeNode) ? '0' : $tentativeNode->node_id ); ?>';
-        this.init = function () {
+    var ContractView = new function() {
+
+        this.tentative_node = '<?php
+                                $tentativeNode = Node::findOne(['subnet' => $model->tentative_node]);
+                                echo (empty($tentativeNode) ? '0' : $tentativeNode->node_id); ?>';
+        this.init = function() {
             $(document).off('click', '#disable-connection')
-                    .on('click', '#disable-connection', function () {
-                        $(this).button('loading');
-                        ContractView.disable();
-                    });
+                .on('click', '#disable-connection', function() {
+                    $(this).button('loading');
+                    ContractView.disable();
+                });
             $(document).off('click', '#enable-connection')
-                    .on('click', '#enable-connection', function () {
-                        $(this).button('loading');
-                        $("#force-connection").button('loading');
-                        ContractView.enable();
-                    });
+                .on('click', '#enable-connection', function() {
+                    $(this).button('loading');
+                    $("#force-connection").button('loading');
+                    ContractView.enable();
+                });
             $(document).off('click', '#force-connection')
-                    .on('click', '#force-connection', function () {
-                        $(this).button('loading');
-                        $("#enable-connection").button('loading');
-                        ContractView.showForce();
-                    });
+                .on('click', '#force-connection', function() {
+                    $(this).button('loading');
+                    $("#enable-connection").button('loading');
+                    ContractView.showForce();
+                });
 
             $(document).off('click', '#change-company')
-                    .on('click', '#change-company', function () {
-                        ContractView.showChangeCompany();
-                    });
+                .on('click', '#change-company', function() {
+                    ContractView.showChangeCompany();
+                });
 
             $(document).off('click', '#change-node')
-                    .on('click', '#change-node', function () {
-                        ContractView.showChangeNode();
-                    });
+                .on('click', '#change-node', function() {
+                    ContractView.showChangeNode();
+                });
 
-            $(document).off('click', '#btn-change-company').on('click', '#btn-change-company', function (e) {
+            $(document).off('click', '#btn-change-company').on('click', '#btn-change-company', function(e) {
                 $(this).button('loading');
                 ContractView.changeCompany()
             });
 
-            $(document).off('click', '#btn-change-node').on('click', '#btn-change-node', function () {
+            $(document).off('click', '#btn-change-node').on('click', '#btn-change-node', function() {
                 $(this).button('loading');
                 ContractView.changeNode()
             });
-            
-            $(document).on('click', '#btn-definitive-low', function (e) {
+
+            $(document).on('click', '#btn-definitive-low', function(e) {
                 e.preventDefault();
                 $(this).button('loading');
                 ContractView.showLowProcess();
             });
-            
-            $(document).on('click', '#low-button', function (e) {
+
+            $(document).on('click', '#low-button', function(e) {
                 e.preventDefault();
-                $(this).button('loading');
                 ContractView.lowProcess();
             });
 
-            $(document).on('click', '#change-ip', function (e) {
+            $(document).on('click', '#change-ip', function(e) {
                 e.preventDefault();
                 $(this).button('loading');
                 ContractView.changeIp();
             });
 
-            $(document).off('click', '#btn-active-new-items').on('click', '#btn-active-new-items', function () {
+            $(document).off('click', '#btn-active-new-items').on('click', '#btn-active-new-items', function() {
                 $(this).button('loading');
                 ContractView.activeNewItems()
             });
-            $(document).on('click', '#print-button', function(e){
-               e.preventDefault();
-               $('#ads-modal').modal('hide');
-               ContractView.printAds();
+            $(document).on('click', '#print-button', function(e) {
+                e.preventDefault();
+                $('#ads-modal').modal('hide');
+                ContractView.printAds();
             });
-            
-            $(document).on('click', '#print-ads', function(e){
 
-               e.preventDefault();
-               if(ContractView.tentative_node === '0'){
+            $(document).on('click', '#print-ads', function(e) {
+
+                e.preventDefault();
+                if (ContractView.tentative_node === '0') {
                     $('#ads-modal').modal();
-               }else{
-                   ContractView.printAds(ContractView.tentative_node);
+                } else {
+                    ContractView.printAds(ContractView.tentative_node);
                 }
             });
 
-            $(document).off('click', '#btn-low-process').on('click', '#btn-low-process', function(evt){
+            $(document).off('click', '#btn-low-process').on('click', '#btn-low-process', function(evt) {
                 evt.preventDefault();
                 $('#start-low-process-modal').modal();
             });
 
-            $(document).off('click', '#start-low-button').on('click', '#start-low-button', function(evt){
+            $(document).off('click', '#start-low-button').on('click', '#start-low-button', function(evt) {
                 evt.preventDefault();
                 var category_id = $('#start-low-process-modal select').val();
                 var date = $('#start-low-process-modal #date_low').val();
                 var credit = 0;
 
-                if($('#credit_note').is(':checked')) {
+                if ($('#credit_note').is(':checked')) {
                     credit = 1;
                 }
                 $('#start-low-process-modal').modal('hide');
-                if(category_id) {
+                if (category_id) {
                     $.ajax({
-                        url: '<?php echo Url::to(['/sale/contract/contract/low-process-contract', 'contract_id'=>$model->contract_id]) ?>',
+                        url: '<?php echo Url::to(['/sale/contract/contract/low-process-contract', 'contract_id' => $model->contract_id]) ?>',
                         data: {
                             category_id: category_id,
                             date: date,
                             credit: credit
                         },
                         method: 'POST',
-                    }).done(function(data){
+                    }).done(function(data) {
                         if (data.status == 'success') {
                             window.location.reload();
                         } else {
-                            $('#messages').html('<div class="alert alert-danger">'+data.message +'</div>');
+                            $('#messages').html('<div class="alert alert-danger">' + data.message + '</div>');
                         }
                     });
                 }
             });
 
-            $('#connection-modal').on('hidden.bs.modal',function(e){
-                
+            $('#connection-modal').on('hidden.bs.modal', function(e) {
+
                 e.preventDefault();
                 $('#connection-modal').modal('hide');
                 $('#force-connection').button('reset');
@@ -415,12 +416,12 @@ $customer = $model->customer;
                 $('#message-con').empty();
             });
 
-            $('#create_product').change(function () {
+            $('#create_product').change(function() {
                 if (!$('#create_product').is(':checked')) {
 
                     $('#extend_product_id').prop('disabled', 'disabled');
                     $('#vendor_id').prop('disabled', 'disabled');
-                }else{
+                } else {
 
                     $('#extend_product_id').removeAttr('disabled');
                     $('#vendor_id').removeAttr('disabled');
@@ -430,28 +431,28 @@ $customer = $model->customer;
             $('#node-modal').removeAttr('tabindex');
             ContractView.map();
             $('[data-toogle="tooltip"]').tooltip();
-            ContractView.getNodes();            
+            ContractView.getNodes();
 
         }
 
-        this.disable = function () {
+        this.disable = function() {
             if (confirm('<?= Yii::t('westnet', 'Are you sure you want to disable this connection?') ?>')) {
-                ContractView.execute('<?= Url::to(['/westnet/connection/disable', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>')
+                ContractView.execute('<?= Url::to(['/westnet/connection/disable', 'id' => ($connection ? $connection->connection_id : 0)]) ?>')
             } else {
                 $('#disable-connection').button('reset');
             }
         }
 
-        this.enable = function () {
+        this.enable = function() {
             if (confirm('<?= Yii::t('westnet', 'Are you sure you want to activate this connection?') ?>')) {
-                ContractView.execute('<?= Url::to(['/westnet/connection/enable', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>')
+                ContractView.execute('<?= Url::to(['/westnet/connection/enable', 'id' => ($connection ? $connection->connection_id : 0)]) ?>')
             } else {
                 $('#enable-connection').button('reset');
             }
 
         }
 
-        this.showForce = function () {
+        this.showForce = function() {
             if (confirm('<?php echo Yii::t('westnet', 'Are you sure you want to force the activation of this connection?') ?>')) {
                 $('#connection-modal').modal('show')
             } else {
@@ -460,27 +461,30 @@ $customer = $model->customer;
             }
         }
 
-        this.force = function () {
-            if ($('#due_date').val() !=='' && $('#reason').val() !== '' ) {
+        this.force = function() {
+            if ($('#due_date').val() !== '' && $('#reason').val() !== '') {
                 $('#connection-modal').modal('hide')
                 if ($('#due_date').kvDatepicker('getDate') != null) {
                     var vDate = $('#due_date').kvDatepicker('getDate');
-                    ContractView.execute('<?= Url::to(['/westnet/connection/force', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>', {
-                    due_date: $('#due_date').val(), reason: $('#reason').val(), create_product: $('#create_product').is(':checked'),
-                        product_id: $('#extend_product_id').val(), vendor_id: $('#vendor_id').val()
+                    ContractView.execute('<?= Url::to(['/westnet/connection/force', 'id' => ($connection ? $connection->connection_id : 0)]) ?>', {
+                        due_date: $('#due_date').val(),
+                        reason: $('#reason').val(),
+                        create_product: $('#create_product').is(':checked'),
+                        product_id: $('#extend_product_id').val(),
+                        vendor_id: $('#vendor_id').val()
                     });
                 }
-            }else{
+            } else {
                 $('#message-con').html('<div class="alert alert-danger">Por favor, complete fecha de vencimiento y motivo.</div>');
             }
         }
 
-        this.execute = function (url, data, button) {
+        this.execute = function(url, data, button) {
             $.ajax({
                 url: url,
                 data: data,
                 method: 'POST',
-                success: function (data) {
+                success: function(data) {
                     if (data.status == 'success') {
                         window.location.reload();
                         return true;
@@ -492,7 +496,7 @@ $customer = $model->customer;
                         $('#disable-connection').button('reset');
                         $('#enable-connection').button('reset');
                         if (data.message) {
-                            $('#messages').html('<div class="alert alert-danger">'+data.message +'</div>');
+                            $('#messages').html('<div class="alert alert-danger">' + data.message + '</div>');
                         } else {
                             alert('Error');
                         }
@@ -502,22 +506,22 @@ $customer = $model->customer;
             });
         }
 
-        this.showChangeNode = function () {
+        this.showChangeNode = function() {
             $('#node-modal').modal('show');
         }
-        
-        this.showLowProcess = function () {
+
+        this.showLowProcess = function() {
             $('#low-process-modal').modal('show');
         }
 
-        this.changeCompany = function () {
+        this.changeCompany = function() {
             var id = $('#form-company #connection-company_id').val();
             if (id) {
-                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-company', 'connection_id' => ($connection ? $connection->connection_id : '' )]) ?>&company_id=' + id, [], '#btn-change-company');
+                ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/change-company', 'connection_id' => ($connection ? $connection->connection_id : '')]) ?>&company_id=' + id, [], '#btn-change-company');
             }
         }
 
-        this.changeNode = function () {
+        this.changeNode = function() {
             var id = $('#form-node #node_id').val();
             var ap_id = $('#form-node #ap_id').val();
             if (id) {
@@ -525,17 +529,19 @@ $customer = $model->customer;
             }
         }
 
-        this.activeNewItems = function () {
+        this.activeNewItems = function() {
             ContractView.execute('<?= \yii\helpers\Url::to(['/sale/contract/contract/active-new-items', 'contract_id' => $model->contract_id]) ?>', [], '#btn-active-new-items');
         }
 
-        this.map = function () {
-            var lat = {<?php
+        this.map = function() {
+            var lat = {
+                <?php
                 if ($model->address) {
                     $lt = explode(",", ($model->address->geocode == NULL ? "-32.8892793,-68.8438426" : $model->address->geocode));
                     echo "lat:" . $lt[0] . ", lng:" . $lt[1];
                 }
-                ?>};
+                ?>
+            };
             var map = new google.maps.Map(document.getElementById('map_canvas'), {
                 center: lat,
                 scrollwheel: false,
@@ -552,48 +558,87 @@ $customer = $model->customer;
             });
 
         };
-        
-        this.getNodes= function(){
+
+        this.getNodes = function() {
             $('#ads-modal #node_id option').remove();
             $.ajax({
-                url : "<?= \yii\helpers\Url::to(['/westnet/node/all-nodes'])?>",
+                url: "<?= \yii\helpers\Url::to(['/westnet/node/all-nodes']) ?>",
                 method: "post",
                 dataType: "json",
-                success: function(data){
-                    $.each(data, function(i,n){
-                        $('#ads-modal #node_id').append('<option value="'+n.node_id+'">'+n.name+'</option>');
+                success: function(data) {
+                    $.each(data, function(i, n) {
+                        $('#ads-modal #node_id').append('<option value="' + n.node_id + '">' + n.name + '</option>');
                     });
-                    
-                    
+
+
                 }
             });
         }
 
-        this.printAds= function(node){
-            if(node === '0' || typeof  node === 'undefined'){
-                window.open("<?= Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ $('#node_id').val());
+        this.printAds = function(node) {
+            if (node === '0' || typeof node === 'undefined') {
+                window.open("<?= Url::to(['/westnet/ads/print']) ?>&id=<?= $model->contract_id ?>&node_id=" + $('#node_id').val());
                 location.reload();
-            }else{
-                window.open("<?= Url::to(['/westnet/ads/print'])?>&id=<?=$model->contract_id?>&node_id="+ node);
+            } else {
+                window.open("<?= Url::to(['/westnet/ads/print']) ?>&id=<?= $model->contract_id ?>&node_id=" + node);
                 location.reload();
             }
 
         }
-        
-        this.lowProcess= function(){
-            $.ajax({
-                url : '<?= Url::to(['/sale/contract/contract/cancel-contract'])?>',
-                data: {id: <?= $model->contract_id?>, mac_address: $('#mac-address').val()},
-                dataType: 'json',
-                success: function(data){
-                    location.href= '<?= Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id])?>';
+
+
+
+        this.lowProcess = function() {
+
+
+            var radioVal = $('.radios').is(':checked');
+
+            if (radioVal) {
+
+                // $(this).button('loading');
+                $('#low-button').button('loading')
+
+                if(document.querySelector('input[name="equipment_recovered"]:checked').value == "True"){
+                    er = 1
+                }else{
+                    er = 0 
                 }
-            });
+
+                $.ajax({
+                    // method: 'GET',
+                    url: '<?= Url::to(['/sale/contract/contract/cancel-contract']) ?>',
+                    data: {
+                        id: <?= $model->contract_id ?>,
+                        mac_address: $('#mac-address').val(),
+                        equipment_recovered: er,
+                    },
+                    dataType: 'json',
+                    success: function(data,status,xhr) {
+                        // console.log(data);
+                        // console.log(status);
+                        // console.log(xhr);
+                        // location.reload();
+                        // location.href = '< Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id]) ?>';
+                    },
+                    error: function(data,status,xhr){
+                        // console.log(data);
+                        // console.log(status);
+                        // console.log(xhr);
+                    }
+                });
+
+            } else {
+                alert("Por favor seleccione una opción");
+            }
+
+
+
         }
 
-        this.changeIp = function () {
+
+        this.changeIp = function() {
             if (confirm('<?= Yii::t('westnet', 'Are you sure you want to change the ip of this connection?') ?>')) {
-                ContractView.execute('<?= Url::to(['/sale/contract/contract/change-ip', 'id' => ($connection ? $connection->connection_id : 0 )]) ?>')
+                ContractView.execute('<?= Url::to(['/sale/contract/contract/change-ip', 'id' => ($connection ? $connection->connection_id : 0)]) ?>')
             } else {
                 $('#change-ip').button('reset');
             }

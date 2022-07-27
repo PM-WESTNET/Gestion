@@ -124,8 +124,9 @@ class Connection extends ActiveRecord {
             'status_account' => Yii::t('app', 'Status Account'),
             'clean' => Yii::t('app', 'Clean'),
             'access_point_id' => Yii::t('app', 'Access Point'),
-            'ip4_1_old' => 'Ip4 1 Anterior',
-            'onu_sn' => 'ONU SERIAL NUMBER',
+            'ip4_1_old' => Yii::t('app', 'Previous Ip4 1'),
+            'onu_sn' => Yii::t('app', 'ONU SERIAL NUMBER'),
+            'mac_address' => Yii::t('app', 'MAC Address'),
         ];
     }
 

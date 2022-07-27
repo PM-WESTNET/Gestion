@@ -1431,4 +1431,7 @@
     'Customers By Node Historic' => 'Clientes por Nodo Historico',
     'Remove Payment Import' => 'Eliminar Importacion de Pagos',
     'Filename' => 'Nombre del archivo',
+    'Equipos Recuperados' => 'Equipment Recovered',
+    'IP4 1 anterior' => 'Previous Ip4 1',
+    'Número de serie de la ONU' => 'ONU SERIAL NUMBER'
   );

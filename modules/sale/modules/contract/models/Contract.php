@@ -40,7 +40,7 @@ use yii\db\ActiveQuery;
  * @property integer $print_ads 
  * @property string $low_date
  * @property integer $category_low_id
- *
+ * @property tinyint $equipment_recovered
  * @property Address $address
  * @property Customer $customer
  * @property ContractDetail[] $contractDetails
@@ -106,7 +106,7 @@ class Contract extends ActiveRecord {
     public function rules() {
 
         return [
-            [['customer_id', 'address_id', 'vendor_id', 'external_id', 'tentative_node', 'print_ads', 'category_low_id'], 'integer'],
+            [['customer_id', 'address_id', 'vendor_id', 'external_id', 'tentative_node', 'print_ads', 'category_low_id','equipment_recovered'], 'integer'],
             [['date'], 'required'],
             [['date', 'from_date', 'to_date', 'address', 'customer', 'products', 'vendor', 'customerCodeADS', 'tentative_node', 'instalation_schedule', 'print_ads', 'low_date'], 'safe'],
             [['date', 'from_date', 'to_date', 'low_date'], 'date'],
@@ -119,6 +119,7 @@ class Contract extends ActiveRecord {
             //[['instalation_schedule'], 'default', 'value' => 'all day'],
             [['status'], 'default', 'value' => 'draft'],
             [['from_date'], 'required', 'on' => 'invoice'],
+            
         ];
     }
 
@@ -142,6 +143,7 @@ class Contract extends ActiveRecord {
             'vendor_id' => Yii::t('westnet', 'Vendor'),
             'Address' => \Yii::t('app', 'Address'),
             'instalation_schedule' => Yii::t('app', 'Instalation Schedule'),
+            'equipment_recovered' => Yii::t('app', 'Equipment Recovered'),
         ];
     }
 

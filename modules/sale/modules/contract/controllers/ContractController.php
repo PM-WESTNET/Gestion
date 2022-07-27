@@ -916,19 +916,26 @@ class ContractController extends Controller {
         
         if(Yii::$app->request->isAjax){
             Yii::$app->response->format= Response::FORMAT_JSON;
-            $model = $this->findModel($id);
+            $data = Yii::$app->request;
 
+            $model = $this->findModel($id);
+            
+            
             //$connection = Connection::findOne(['contract_id' => $model->contract_id]);
             $model->setScenario('cancel');
+            $model->equipment_recovered = $data->get('equipment_recovered');
             $model->to_date = (new DateTime())->format('d-m-Y');
             if ($model->save(true)) {               
                 
                 $cti = new ContractToInvoice();
                 
                 if ($cti->cancelContract($model)) {
-                    //$connection= Connection::findOne(['contract_id' => $model->contract_id]);
-                    //$connection->status= Connection::STATUS_DISABLED;
-                    //$connection->update(false);
+                    $connection = Connection::find()->where(['contract_id' => $model->contract_id])->one();
+                    $connection->status = Connection::STATUS_DISABLED;
+                    $connection->mac_address =  $data->get('mac_address');
+                    $connection->update(false);
+
+    
                     
                     // search for other contracts
                     $otherContracts = $model->getAllContractsStatusesFromCurrentCustomer(); 
@@ -945,9 +952,9 @@ class ContractController extends Controller {
                 }
             }else{
                 Yii::$app->session->setFlash('error', Yii::t('app', 'Can\`t cancel this contract'));
-                return ['status' => 'error'];
+                return ['status' => 'error', 'data' => $model->getErrorSummary(true)];
             }
-           
+        
         }else{
             throw new ForbiddenHttpException();
         }
