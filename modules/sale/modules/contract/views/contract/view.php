@@ -614,11 +614,7 @@ $customer = $model->customer;
                     },
                     dataType: 'json',
                     success: function(data,status,xhr) {
-                        // console.log(data);
-                        // console.log(status);
-                        // console.log(xhr);
-                        // location.reload();
-                        // location.href = '< Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id]) ?>';
+                        location.href= '<?= Url::to(['/sale/contract/contract/view', 'id' => $model->contract_id])?>';
                     },
                     error: function(data,status,xhr){
                         // console.log(data);
