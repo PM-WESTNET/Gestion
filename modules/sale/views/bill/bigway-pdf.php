@@ -132,7 +132,7 @@ if($profile) {
 		            <div class="barcode-data">
 		                <p>CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
 		                <?php if($debt < 0) { ?>
-		                    <p>DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
+		                    <p>IMPORTE AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
 		                <?php } ?>
 		            </div>
 		        </div>
@@ -305,7 +305,7 @@ if($profile) {
 			        <div class="barcode-data">
 			            <p>CÓDIGO DE PAGO:<br><?= $model->customer->payment_code ?></p>
 			            <?php if($debt < 0) { ?>
-			                <p>DEUDA AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
+			                <p>IMPORTE AL <?php echo (new \DateTime('now'))->format('d/m/Y') . ": " . Yii::$app->formatter->asCurrency(abs($debt)) ?></p>
 			            <?php } ?>
 			        </div>
 	    		</div>

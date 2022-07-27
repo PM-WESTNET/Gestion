@@ -28,6 +28,11 @@ $items = [];
 $alwaysVisibleItems = [];
 $notFilterable = [];
 
+// redirect to login view if not logged.
+$url = \yii\helpers\Url::to(['login'],true);
+if ( Yii::$app->user->isGuest )
+    return Yii::$app->getResponse()->redirect($url);
+
 //Home
 //$alwaysVisibleItems[] = ['label' => Yii::t('app', 'Home'), 'url' => ['/site/index']];
 

@@ -712,11 +712,11 @@ class Ticket extends \app\components\db\ActiveRecord {
      */
     public static function getTagsForSelect()
     {
-
+        $mesaUrl = Config::getValue('mesa_server_address');
         $client = new Client();
         $response = $client->createRequest()
                 ->setMethod('GET')
-                ->setUrl('https://mesa.westnet.com.ar/gestion/etiquetas')
+                ->setUrl($mesaUrl.'gestion/etiquetas')
                 ->setHeaders(['content-type' => 'application/x-www-form-urlencoded'])
                 ->send();
         return json_decode($response->content);
@@ -729,12 +729,12 @@ class Ticket extends \app\components\db\ActiveRecord {
      */
     public static function getTagByName($tag_name)
     {
-
+        $mesaUrl = Config::getValue('mesa_server_address');
         $client = new Client();
         $tag_id = '';
         $response = $client->createRequest()
                 ->setMethod('GET')
-                ->setUrl('https://mesa.westnet.com.ar/gestion/etiquetas')
+                ->setUrl($mesaUrl.'gestion/etiquetas')
                 ->setHeaders(['content-type' => 'application/x-www-form-urlencoded'])
                 ->send();
 

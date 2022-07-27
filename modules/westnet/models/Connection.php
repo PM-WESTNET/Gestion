@@ -166,17 +166,10 @@ class Connection extends ActiveRecord {
             // Pongo el estado en base al estado de cuenta.
             //$this->status = ( $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ?
             //                Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
-
-            //todo: check status of monetary account to see if it has any debt and update it status
+            
             $this->status_account = $this->updatedStatusAccount();
-
-            $this->status = ( 
-                ( 
-                    $this->status_account == Connection::STATUS_ACCOUNT_CLIPPED ||
-                    $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ||
-                    $this->status_account == Connection::STATUS_ACCOUNT_LOW 
-                ) ? Connection::STATUS_DISABLED : Connection::STATUS_ENABLED );
-
+            $this->status = $this->updateConnectionStatus();
+            
             // Pongo en formato long las ips que no son obligatorias
             $this->ip4_public = ($this->has_public_ip ? ip2long($this->ip4_public) : 0 );
             $this->ip4_2 = ($this->use_second_ip ? $this->ip4_1 + 1 : 0 );
@@ -782,4 +775,18 @@ class Connection extends ActiveRecord {
         }
         return $rs['debt_bills'];
     }
+
+    /**
+     * returns the current connection status based on current money account status value. should be called after
+     */
+    private function updateConnectionStatus()
+    {
+        return (
+            ($this->status_account == Connection::STATUS_ACCOUNT_CLIPPED ||
+                $this->status_account == Connection::STATUS_ACCOUNT_DISABLED ||
+                $this->status_account == Connection::STATUS_ACCOUNT_LOW
+            ) ? Connection::STATUS_DISABLED : Connection::STATUS_ENABLED
+        );
+    }
+
 }
