@@ -11,6 +11,7 @@ use app\modules\westnet\notifications\components\scheduler\types\EachDayOfWeekSc
 use Yii;
 use app\modules\westnet\notifications\models\Image;
 use app\modules\westnet\notifications\NotificationsModule;
+use app\modules\sale\models\Company;
 
 /**
  * This is the model class for table "notification".
@@ -193,6 +194,13 @@ class Notification extends ActiveRecord {
      */
     public function getTransport() {
         return $this->hasOne(Transport::className(), ['transport_id' => 'transport_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCompany() {
+        return $this->hasOne(Company::className(), ['company_id' => 'company_id']);
     }
 
     /**

@@ -39,6 +39,13 @@ $this->params['breadcrumbs'][] = $this->title;
         ['class' => 'yii\grid\SerialColumn'],
         'notification_id',
         [
+            'label' => Yii::t('app','Company'),
+            'value' => function($model){
+                if(!isset($model->company->name)) return 'n/a';
+                return $model->company->name;
+            }
+        ],
+        [
             'attribute' => 'status',
             'format' => 'raw',
             'filter' => \app\modules\westnet\notifications\models\Notification::staticFetchStatuses(),
