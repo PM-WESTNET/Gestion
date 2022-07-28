@@ -86,10 +86,19 @@ $contracts = new ActiveDataProvider([
             ],
             [
                 'label'=>Yii::t('app','Date'),
-                'value'=>function($model){
-                    return $model['date'];
+                'value' => function ($model) {
+                    $date_time = 'n/a';
+                    // if both date and time are set
+                    if (isset($model['date'], $model['time'])) {
+                        $date_time = ($model['date'] . ' - ' . $model['time']);
+                    }
+                    // if by some chance only date is setted. (which SHOULD always.)
+                    elseif (isset($model['date'])) {
+                        $date_time = $model['date'];
+                    }
+                    return $date_time;
                 },
-                'format' => 'date'
+                'format' => 'text'
             ],
             [
                 'label'=>Yii::t('app','Apply to'),
