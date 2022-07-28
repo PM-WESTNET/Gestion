@@ -200,38 +200,6 @@ class CustomerSearch extends Model
 
     }
 
-    public function findByNodeHistoric($params) {
-        
-        $period = 202207;
-        // $queryInsert = new Query() ;
-        $querySelect = new Query() ;
-        $conjuction = ConjunctionCondition::class;
-
-        $and = new Query();
-        $and->where([$period . ' BETWEEN DATE_FORMAT(cd.from_date, "%Y%m"'])
-        ->andWhere(['DATE_FORMAT(cd.to_date, "%Y%m"'])
-        ->orWhere('(DATE_FORMAT(cd.from_date, "%Y%m") <= '. $period)
-        ->orWhere(['cd.to_date IS NULL'])
-        ->orWhere(['cd.to_date = "0000-00-00"']);
-
-        $querySelect->select(['UPPER(n.name) AS nodo', $period . ' AS periodo','COUNT(DISTINCT cd.contract_id) AS cantidad_contratos'])
-        ->from(['customer cu', ])
-        ->innerJoin(['customer_class_has_customer cchc', 'cchc.customer_id = cu.customer_id'])
-        ->leftJoin(['contract co', 'co.customer_id = cu.customer_id'])
-        ->leftJoin(['contract_detail cd', 'cd.contract_id = co.contract_id'])
-        ->leftJoin(['connection con', 'con.contract_id = co.contract_id'])
-        ->leftJoin(['node n', 'n.node_id = con.node_id'])
-        ->where([' n.name IS NOT NULL'])->andWhere([$and])
-        ;
-
-    }
-
-    public function byNodeHistoricUpdater(){
-
-
-
-    }
-
     public function changeCompanyHistory($params)
     {
         $query = CustomerCompanyHistory::find();

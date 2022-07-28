@@ -775,13 +775,6 @@ class ReportsController extends Controller
         return $this->render('customer-by-node', ['dataProvider' => $dataProvider]);
     }
 
-    public function actionCustomersByNodeHistoric()
-    {
-
-        return $this->render('customer-by-node-historic');
-
-    }
-
     /**
      * Muestra un reporte de la cantidad de clientes por medio de publicidad.
      */
