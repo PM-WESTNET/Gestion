@@ -20,6 +20,7 @@ class MikrotikRequest extends RestRequest implements ApiProvider
 {
     private $connection;
     private $node;
+    private $customer_code;
     const BASE_URL = 'api/v1/fibra/UpdateRadiusPlanAPI';
 
     public function __construct($base_url, $token='')
@@ -40,6 +41,7 @@ class MikrotikRequest extends RestRequest implements ApiProvider
             'ip_anterior' => $ip_anterior,
             'ip_nueva' => $ip_nueva,
             'nodo' => $this->node->name,
+            'codigo' => $this->customer_code,
         );
         
         //Creates a new request for a client view
@@ -63,6 +65,7 @@ class MikrotikRequest extends RestRequest implements ApiProvider
     public function loadConnection(ContractConnection $connection){
         $this->connection = $connection;
         $this->node = Node::findOne($connection->node_id);
+        $this->customer_code = $connection->contract->customer->code;
         return true;
     }
 }
