@@ -133,6 +133,8 @@ class ConnectionController extends Controller
     }
 
     /**
+     * trigger url /index.php?r=westnet%2Fconnection%2Fupdate-all-onu-serial-numbers
+     * 
      * ONU Serial number massive charge to all customers based on a JSON obj input.
      * 
      * example..
@@ -142,6 +144,7 @@ class ConnectionController extends Controller
      * }, ...
      */
     public function actionUpdateAllOnuSerialNumbers(){
+        echo("--start--\n");
         // set time limit to unlimited cause it can take more than 40 minutes to complete
         set_time_limit(0);
 
@@ -149,10 +152,13 @@ class ConnectionController extends Controller
 
         // get contentes of seeds from the file that should be populated in production of each company at the moment of execution
         $json = file_get_contents("../modules/westnet/onu_sn_seeds/migration_onu_serial_numbers.txt",true);
-        if(empty($json)) return false;
+        if(empty($json)){
+            echo("--empty json--\n");
+            return false;
+        } 
         
         // create an array based on file contents . code => sn
-        $customer_onu_array = array_column((json_decode($json,true)),'SN','Código cliente');
+        $customer_onu_array = array_column((json_decode($json,true)),'sn','codigo_cliente');
 
 
         // init header line for seeding
@@ -162,37 +168,63 @@ class ConnectionController extends Controller
         
         $i = 0;
         foreach($customer_onu_array as $code => $onu_serial){
+            // skip empty ONU serials
+            if(!empty($onu_serial)){
+                $select_query = "select conn.onu_sn,conn.connection_id
+                    from customer cus
+                    left join contract cont on cont.customer_id = cus.customer_id
+                    left join connection conn on conn.contract_id = cont.contract_id
+                    where cont.status = 'active'
+                    and cus.code = :code
+                    order by conn.connection_id desc
+                    limit 1";
+                $connection_data = Yii::$app->db->createCommand($select_query)
+                    ->bindValue('code', $code)
+                    ->queryOne();
+                $onu_sn_old = $connection_data['onu_sn'];
+                $connection_id = $connection_data['connection_id'];
+                // var_dump($code,$connection_data);
+                // die();
 
-            $query = Yii::$app->db->createCommand(
-                "update connection c
-                 set c.onu_sn = :onu_serial
-                 where c.connection_id = ( 
-                    select Conn2.connection_id from (
-                        select connection_id
-                        from customer cus
-                        left join contract cont on cont.customer_id = cus.customer_id
-                        left join connection conn on conn.contract_id = cont.contract_id
-                        where cont.status = 'active'
-                        and cus.code = :code
-                        order by conn.connection_id desc
-                        limit 1
-                    ) as Conn2
-                )")
-                ->bindValue('code', $code)
-                ->bindValue('onu_serial', $onu_serial)
-                ;
-
-            if( $query->execute() ){
-                $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE SUCCESS - ".$code." (code) ONU's SN to: ".$onu_serial;
-            }else{
-                $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE ERROR - customer: ".$code." (code)  couldn't update ONU's SN";
+                $query = Yii::$app->db->createCommand(
+                    "update connection c
+                    set c.onu_sn = :onu_serial
+                    where c.connection_id = ( 
+                        select Conn2.connection_id from (
+                            select connection_id
+                            from customer cus
+                            left join contract cont on cont.customer_id = cus.customer_id
+                            left join connection conn on conn.contract_id = cont.contract_id
+                            where cont.status = 'active'
+                            and cus.code = :code
+                            order by conn.connection_id desc
+                            limit 1
+                        ) as Conn2
+                    )")
+                    ->bindValue('code', $code)
+                    ->bindValue('onu_serial', $onu_serial)
+                    ;
+                try {
+                    // throws new \Exception in case of failure
+                    $query->execute();
+                    
+                    $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE SUCCESS - ".$code." (code) - CONNECTION_ID: $connection_id - ONU's SN from: $onu_sn_old to: ".$onu_serial;
+                } catch (\Exception $ex) {
+                    // echo 'Query failed';
+                    $content = "\n".date('d/m/y H:i:s')." - $i - UPDATE ERROR - customer: ".$code." (code)  couldn't update ONU's SN\n".$ex->getMessage();
+                }
             }
+            else{
+                $content = "\n".date('d/m/y H:i:s')." - $i - SKIPPED - ".$code." (code) - ERR. EMPTY ONU SERIAL";
+            }
+            
             file_put_contents($logPath, $content,FILE_APPEND);
             $i++;
         }
         // init header line for seeding
         $content = "\nMigration end at ".date('d/m/y H:i:s')."\n";
         file_put_contents($logPath, $content,FILE_APPEND);
+        echo('end');
         return true;
     }
     
