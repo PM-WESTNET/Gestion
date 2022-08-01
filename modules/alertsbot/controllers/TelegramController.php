@@ -52,15 +52,11 @@ class TelegramController extends Controller
         };
 
         if($company == 'westnet'){
-            if ($la < 5.6) {
-                return TelegramController::sendMessage("Todo bien, el Load Averge es de " . $la . "\n" . 'Alerta WESTNET');
-            } else if ($la > 5.6) {
+            if ($la > 5.6) {
                 return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la . "\n" .'Alerta WESTNET');
             };
         }else if($company == 'bigway'){
-            if ($la < 2.8) {
-                return TelegramController::sendMessage("Todo bien, el Load Averge es de " . $la . "\n" . 'Alerta BIGWAY');
-            } else if ($la > 2.8) {
+            if ($la > 2.8) {
                 return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la . "\n" .'Alerta BIGWAY');
             };
         }
