@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Handles adding timestamp to table `contract_detail_log`.
+ * Handles adding created_at to table `contract_detail_log`.
  */
-class m220801_151127_add_timestamp_column_to_contract_detail_log_table extends Migration
+class m220801_151127_add_created_at_column_to_contract_detail_log_table extends Migration
 {
     /**
      * {@inheritdoc}
