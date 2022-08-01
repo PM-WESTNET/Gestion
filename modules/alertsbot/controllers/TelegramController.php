@@ -64,14 +64,6 @@ class TelegramController extends Controller
                 return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la . "\n" .'Alerta BIGWAY');
             };
         }
-
-        if ($la < 0.8) {
-            echo "Todo bien, el Load Averge es de " . $la;
-        } else if ($la > 0.3) {
-            return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la);
-        };
-
-        // return TelegramController::sendMessage('System load average is '.$load_avg[0].' (1min), '.$load_avg[1].' (5min), '.$load_avg[2].' (15min)');
     }
 
     /**
