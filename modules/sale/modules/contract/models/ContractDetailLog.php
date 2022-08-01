@@ -68,6 +68,19 @@ class ContractDetailLog extends \app\components\db\ActiveRecord
     }
     */
 
+    public function behaviors()
+    {
+        return [
+            'created_at' => [
+                'class' => 'yii\behaviors\TimestampBehavior',
+                'attributes' => [
+                    yii\db\ActiveRecord::EVENT_BEFORE_INSERT => ['created_at'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
     /**
      * @inheritdoc
      */
