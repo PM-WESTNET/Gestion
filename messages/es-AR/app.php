@@ -1433,5 +1433,7 @@
     'Filename' => 'Nombre del archivo',
     'Equipos Recuperados' => 'Equipment Recovered',
     'IP4 1 anterior' => 'Previous Ip4 1',
-    'Número de serie de la ONU' => 'ONU SERIAL NUMBER'
+    'Número de serie de la ONU' => 'ONU SERIAL NUMBER',
+    'Total Bills' => 'Facturas Totales',
+    'Previous Company ID' => 'Compania Anterior ID',
   );

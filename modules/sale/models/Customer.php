@@ -567,7 +567,8 @@ class Customer extends ActiveRecord {
 	        'hash_customer_id' => Yii::t('app', 'Hash Cliente ID'),
 	        'current_account_balance' => Yii::t('app','Current Account Balance'),
             'description' => Yii::t('app','Description'),
-            'total_bills' => 'Facturas Totales',
+            'total_bills' => Yii::t('app','Total Bills'),
+            'previous_company_id' => Yii::t('app','Previous Company ID'),
         ];
 
         //Labels adicionales definidos para los profiles
