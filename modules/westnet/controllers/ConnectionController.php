@@ -79,7 +79,9 @@ class ConnectionController extends Controller
         if(Yii::$app->request->isAjax && Yii::$app->request->isPost) {
             $data = Yii::$app->request->post();
             $create_pti= $data['create_product'] === 'true' ? 1 : 0;
-            if ($model->canForce()) {
+            // check if superadmin is making the request. had to do the ternary with ISSET cause i dont know if this function is used by console commands
+            $isSuperadmin = (isset(Yii::$app->user)) ? Yii::$app->user->isSuperadmin : false;
+            if ($model->canForce() or $isSuperadmin) {
                 if ($model->force($data['due_date'], $data['product_id'], $data['vendor_id'], $create_pti)) {
                     // had this piece of code inside the ->force() function before, but was triggering cause of APP and IVR when forcing connections from other scripts--
                     $payment_extension_product = Config::getValue('extend_payment_product_id'); // this dynamically gets the product ID from DB

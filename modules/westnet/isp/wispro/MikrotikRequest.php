@@ -50,12 +50,12 @@ class MikrotikRequest extends RestRequest implements ApiProvider
         // die();
 
         if($response['code'] == 200 ) {
-            if(Yii::$app->session && is_string($response['rawResponse'])) {
+            if((!Yii::$app instanceof Yii\console\Application) && is_string($response['rawResponse'])) {
                 Yii::$app->session->addFlash('success', $response['rawResponse']);
             }
             return true;
         } else {
-            if(Yii::$app->session && is_string($response['rawResponse'])) {
+            if((!Yii::$app instanceof Yii\console\Application) && is_string($response['rawResponse'])) {
                 Yii::$app->session->addFlash('error', $response['rawResponse']);
             }
             return false;

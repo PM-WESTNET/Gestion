@@ -402,9 +402,9 @@ class Connection extends ActiveRecord {
     public function canForce(){
 
         //TODO: Remover esta condicion cuando se haya finalizado el desarrollo de IVR
-        if ($this->contract->customer->code === 27237){
-            return true;
-        }
+        // if ($this->contract->customer->code === 27237){
+        //     return true;
+        // }
 
         $lastForced = $this->contract->customer->getLastForced();
         $timeBetween = (int)Config::getValue('time_between_payment_extension');

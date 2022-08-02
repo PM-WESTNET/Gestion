@@ -213,18 +213,22 @@ class ContractDetail extends ActiveRecord
     }
 
     // todo change in future case the 'plan fibra' condition to be inside the function updateOnIsp()
-    // public function afterSave($insert, $changedAttributes) {
-    //     parent::afterSave($insert, $changedAttributes);
-    //     if(isset($changedAttributes['product_id'])){
-    //         if($this->product->isProductCategory('Plan fibra')){
-    //             // update on ISP ()
-    //             $updated = $this->contract->updateOnISP();
-    //             if(Yii::$app->session && !$updated) {
-    //                 Yii::$app->session->addFlash('error', 'Plan fibra no se actualizó correctamente en ISP');
-    //             }
-    //         }    
-    //     }
-    // }
+    public function afterSave($insert, $changedAttributes) {
+        parent::afterSave($insert, $changedAttributes);
+        if(isset($changedAttributes['product_id'])){
+            // only fiber tech goes to Radius API.
+            // if($this->product->isProductCategory('Plan fibra')){
+                // update on ISP
+                $updated = $this->contract->updateOnISP();
+                if(!$updated){
+                    if(!Yii::$app instanceof Yii\console\Application) {
+                        // display error message to users
+                        Yii::$app->session->addFlash('error', '(SecureUpdate) El plan no se actualizó correctamente en el endpoint solicitado');
+                    }
+                }
+            // }
+        }
+    }
 
     /**
      * @inheritdoc

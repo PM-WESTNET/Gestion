@@ -42,9 +42,24 @@ class TelegramController extends Controller
      * sends load average of system to telegram
      * load average can be used to see system task stress at any time as an average streched across 1,5 and 15 minutes.
      */
-    public function actionMessageSysLoadAvg(){
-        $load_avg = sys_getloadavg();
-        return TelegramController::sendMessage('System load average is '.$load_avg[0].' (1min), '.$load_avg[1].' (5min), '.$load_avg[2].' (15min)');
+    public function actionMessageSysLoadAvg($la){
+
+        $company = NULL;
+
+        if(isset(Yii::$app->params['gestion_owner_company'])){
+            $company = Yii::$app->params['gestion_owner_company'];
+            strtolower($company);
+        };
+
+        if($company == 'westnet'){
+            if ($la > 5.6) {
+                return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la . "\n" .'Alerta WESTNET');
+            };
+        }else if($company == 'bigway'){
+            if ($la > 2.8) {
+                return TelegramController::sendMessage('ALERTA! REVISAR!, el Load Average del sistema es de ' . $la . "\n" .'Alerta BIGWAY');
+            };
+        }
     }
 
     /**
