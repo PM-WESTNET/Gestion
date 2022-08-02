@@ -146,27 +146,40 @@ class ConnectionController extends Controller
      * }, ...
      */
     public function actionUpdateAllOnuSerialNumbers(){
-        echo("--start--\n");
+        // check for superadmin only
+        if(!Yii::$app->user->isSuperadmin) return;
+
+        $response = ("<pre>");
+        $response .= ("--start--\n");
+
         // set time limit to unlimited cause it can take more than 40 minutes to complete
         set_time_limit(0);
+
+        //* DANGER. never set to TRUE without a backup first!
+        $SET_ALL_ONU_SERIALS_TO_NULL = false;
+        $response .= ("SET_ALL_ONU_SERIALS_TO_NULL set to ".(($SET_ALL_ONU_SERIALS_TO_NULL)?"TRUE":"FALSE")."\n");
+        $LOGS_ENABLED = false;
+        $response .= ("LOGS_ENABLED set to ".(($LOGS_ENABLED)?"TRUE":"FALSE")."\n");
 
         $logPath = "../modules/westnet/onu_sn_seeds/migrations.txt";
 
         // get contentes of seeds from the file that should be populated in production of each company at the moment of execution
         $json = file_get_contents("../modules/westnet/onu_sn_seeds/migration_onu_serial_numbers.txt",true);
         if(empty($json)){
-            echo("--empty json--\n");
-            return false;
+            $response .= ("--empty json--\n");
+            return $response;
         } 
-        
+
         // create an array based on file contents . code => sn
         $customer_onu_array = array_column((json_decode($json,true)),'sn','codigo_cliente');
 
 
         // init header line for seeding
         $content = "\nMigration started at ".date('d/m/y H:i:s')."\n";
+
+        $response .= ($content);
         // open migration .log to write any errors
-        file_put_contents($logPath, $content,FILE_APPEND);
+        if($LOGS_ENABLED) file_put_contents($logPath, $content,FILE_APPEND);
         
         $i = 0;
         foreach($customer_onu_array as $code => $onu_serial){
@@ -187,7 +200,9 @@ class ConnectionController extends Controller
                 $connection_id = $connection_data['connection_id'];
                 // var_dump($code,$connection_data);
                 // die();
-
+                
+                // force onus to be null
+                if($SET_ALL_ONU_SERIALS_TO_NULL) $onu_serial = null;
                 $query = Yii::$app->db->createCommand(
                     "update connection c
                     set c.onu_sn = :onu_serial
@@ -219,15 +234,17 @@ class ConnectionController extends Controller
             else{
                 $content = "\n".date('d/m/y H:i:s')." - $i - SKIPPED - ".$code." (code) - ERR. EMPTY ONU SERIAL";
             }
-            
-            file_put_contents($logPath, $content,FILE_APPEND);
+            $response .= ($content);
+            if($LOGS_ENABLED) file_put_contents($logPath, $content,FILE_APPEND);
             $i++;
         }
         // init header line for seeding
         $content = "\nMigration end at ".date('d/m/y H:i:s')."\n";
-        file_put_contents($logPath, $content,FILE_APPEND);
-        echo('end');
-        return true;
+        $response .= ($content);
+        if($LOGS_ENABLED) file_put_contents($logPath, $content,FILE_APPEND);
+        $response .= ('end');
+        $response .= ("</pre>");
+        return $response;
     }
     
 }
