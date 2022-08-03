@@ -94,6 +94,10 @@ class CustomerDataHelper {
             return false;
         } else {
             if ($response_data['status'] === 'not found') {
+                if (!Yii::$app instanceof Yii\console\Application) {
+                    $error = ( isset( $response_data['error'] ) ? $response_data['error'] : 'Data not found on API' );
+                    Yii::$app->session->addFlash('error', Yii::t('app', $error) );
+                }
                 return false;
             }
         }

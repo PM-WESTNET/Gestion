@@ -1436,4 +1436,5 @@
     'Número de serie de la ONU' => 'ONU SERIAL NUMBER',
     'Total Bills' => 'Facturas Totales',
     'Previous Company ID' => 'Compania Anterior ID',
+    'Data not found on API' => 'Datos no encontrados en la API',
   );
