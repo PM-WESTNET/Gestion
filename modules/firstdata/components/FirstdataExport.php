@@ -36,7 +36,7 @@ class FirstdataExport {
 
         $card = CustomerDataHelper::getCustomerCreditCard($customer->code);
         // if card is not valid
-        if ($card === false) {
+        if (empty($card)) {
             if (Yii::$app instanceof Application) {
                 Yii::$app->session->addFlash('error', Yii::t('app','Customer data not found . Customer : {code}', ['code' => $customer->code]));
             }

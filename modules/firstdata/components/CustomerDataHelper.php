@@ -10,33 +10,39 @@ class CustomerDataHelper {
 
     /**
      * Devuevle el nro de tarjeta de credito del cliente recibido.
+     * @return Null if card wasnt found
+     * @return False if api didnt work
+     * @return Object if some data was retrieved
      */
-    public static function getCustomerCreditCard($code)
+    public static function getCustomerCreditCard($code, $hide_card = false)
     {
         $data = self::getCustomerData($code);
-
+        if ($data['status'] === 'not found') {
+            return null;
+        }
+        // if data == false, the api failed.
         if($data === false) {
             return false;
         }
-
+        if( $hide_card ) return $data['last_four'];
         return $data['card_number'];
     }
 
     /**
      * Devuevle el nro de tarjeta de credito del cliente recibido.
      */
-    public static function getCustomerHiddenCreditCard($code)
-    {
-        $data = self::getCustomerData($code);
+    // public static function getCustomerHiddenCreditCard($code)
+    // {
+    //     $data = self::getCustomerData($code);
 
-        if($data === false) {
-            return false;
-        }
+    //     if($data === false) {
+    //         return false;
+    //     }
 
-        Yii::trace($data);
+    //     Yii::trace($data);
 
-        return $data['last_four'];
-    }
+    //     return $data['last_four'];
+    // }
 
     /**
      * Crea el registros de datos del Cliente en el server de firstdata
@@ -68,6 +74,8 @@ class CustomerDataHelper {
 
     /**
      * Realiza la llamada a la api de firstdata para buscar los datos de un cliente
+     * @return False if api didnt work
+     * @return Object if data was retrieved
      */
     private static function getCustomerData($code)
     {
@@ -92,14 +100,6 @@ class CustomerDataHelper {
         Yii::trace($response_data);
         if (curl_getinfo($curl, CURLINFO_RESPONSE_CODE) !== 200) {
             return false;
-        } else {
-            if ($response_data['status'] === 'not found') {
-                if (!Yii::$app instanceof Yii\console\Application) {
-                    $error = ( isset( $response_data['error'] ) ? $response_data['error'] : 'Data not found on API' );
-                    Yii::$app->session->addFlash('error', Yii::t('app', $error) );
-                }
-                return false;
-            }
         }
 
         return $response_data;
