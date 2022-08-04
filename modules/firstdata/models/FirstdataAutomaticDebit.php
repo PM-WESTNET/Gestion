@@ -6,6 +6,7 @@ use Yii;
 use app\components\db\ActiveRecord;
 use app\modules\sale\models\Customer;
 use app\modules\firstdata\components\CustomerDataHelper;
+use yii\web\Application;
 use webvimark\modules\UserManagement\models\User;
 use yii\behaviors\TimestampBehavior;
 
@@ -154,9 +155,11 @@ class FirstdataAutomaticDebit extends ActiveRecord
         $this->cardToBlocks();
         if ($insert) {
             if (CustomerDataHelper::newCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4)) {
-                Yii::$app->session->addFlash('success', Yii::t('app', 'Customer data saved successfully'));
+                if( Yii::$app instanceof Application ) Yii::$app->session->addFlash('success', Yii::t('app', 'Customer data saved successfully'));
             } else {
-                Yii::$app->session->addFlash('error', Yii::t('app', 'Cant save customer data'));
+                if( Yii::$app instanceof Application ) Yii::$app->session->addFlash('error', Yii::t('app', 'Could not create customer on Firstdata API'));
+                // remove the registry
+                $this->delete();
             }
         }else  {
             CustomerDataHelper::modifyCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4, $this->status);
