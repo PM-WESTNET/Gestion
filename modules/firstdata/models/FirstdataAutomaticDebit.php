@@ -65,7 +65,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
     public function validateCardLenght() 
     {
         if ($this->card && strlen(trim($this->card, '_')) < 16) {
-            $this->addError('card', Yii::t('app', 'Card number must has 16 digits'));
+            $this->addError('card', Yii::t('app', 'Card number must have 16 digits'));
             return false;
         }
     }
@@ -139,7 +139,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             if ($config){
                 $this->company_config_id = $config->firstdata_company_config_id;
             } else {
-                $this->addError('config_company_id', Yii::t('app', 'The customer`s company havent firstdata configurations'));
+                $this->addError('config_company_id', Yii::t('app', 'The customer`s company does not have firstdata configurations set'));
                 return false;
             }
         }
