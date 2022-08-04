@@ -1437,4 +1437,5 @@
     'Total Bills' => 'Facturas Totales',
     'Previous Company ID' => 'Compania Anterior ID',
     'Data not found on API' => 'Datos no encontrados en la API',
+    'This customer has no card setted' => 'Este cliente no tiene tarjeta establecida',
   );

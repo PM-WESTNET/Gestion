@@ -174,7 +174,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
      * Devuelve el ultimo eslabon del nro de tarjeta, completando el resto con X
      */
     public function getHiddenCreditCard() {
-        return CustomerDataHelper::getCustomerHiddenCreditCard($this->customer->code);
+        return CustomerDataHelper::getCustomerCreditCard($this->customer->code, $hide_card = true);
     }
 
     /**
@@ -183,7 +183,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
     public function chargeCreditCard() {
         $card = CustomerDataHelper::getCustomerCreditCard($this->customer->code);
 
-        if ($card === false) {
+        if (empty($card)) {
             return false;
         }
 
