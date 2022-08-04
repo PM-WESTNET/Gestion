@@ -159,7 +159,7 @@ class FirstdataAutomaticDebit extends ActiveRecord
             } else {
                 if( Yii::$app instanceof Application ) Yii::$app->session->addFlash('error', Yii::t('app', 'Could not create customer on Firstdata API'));
                 // remove the registry
-                $this->delete();
+                // $this->delete(); this seems like too harsh of a solution for the problem // todo: come up with a better solution
             }
         }else  {
             CustomerDataHelper::modifyCustomerData($this->customer->code, $this->block1, $this->block2, $this->block3, $this->block4, $this->status);
