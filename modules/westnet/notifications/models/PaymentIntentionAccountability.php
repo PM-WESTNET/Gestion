@@ -45,6 +45,7 @@ class PaymentIntentionAccountability extends ActiveRecord
     public function rules()
     {
         return [
+            [['siro_payment_intention_id','customer_id'], 'number'],
             [['collection_channel_description','customer_name','company_name','payment_intention_accountability_id', 'customer_id', 'siro_payment_intention_id', 'total_amount', 'payment_method', 'status', 'collection_channel', 'rejection_code', 'payment_date', 'accreditation_date', 'created_at', 'updated_at', 'payment_id'], 'safe'],
         ];
     }
