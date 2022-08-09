@@ -1440,4 +1440,6 @@
     'This customer has no card setted' => 'Este cliente no tiene tarjeta establecida',
     'Create on Firstdata API' => 'Crear en API Firstdata',
     'Could not create customer on Firstdata API' => 'No se pudo crear el cliente en la API de Firstdata',
+    'File path' => 'Ruta de archivo',
+    'Name' => 'Nombre',
   );

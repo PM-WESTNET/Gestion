@@ -117,3 +117,7 @@ composer.lock*
 composer.json*
 composer.lock
 web/uploads/*
+
+# company images folder (each company owner of gestion should have its own logos)
+web/images/company/*
+!web/images/company/instructions.md

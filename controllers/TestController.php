@@ -424,7 +424,32 @@ class TestController extends Controller {
         $billType = $customer->getDefaultBillType();
         var_dump($billType);
 
-        die();
+        // die();
         return true;
     }
+
+    /**
+     * renders a view to see all images associated with notification layouts and the app in general.
+     * 
+     * 
+     * this was created to test the standardized version of the image files, for example:
+     * changing from westnet-logo-long -> company-logo-long.
+     * and adding the specified path to app params probably.
+     * todo: errors to solve --
+     * no standardized name for image files.
+     * multiple layouts use different images and depends on company subjectivity.
+     * image file existence is not checked before usage, allowing a module
+     * (like mailing) to work even if no image is sent.
+     * there is no test environment (this function purpose)
+     * 
+     */
+    public function actionTestCompanyImages(){
+        // $connection = Connection::findOne('64');
+        // $customer_code = $connection->contract->customer->code;
+        // var_dump($customer_code);
+        // die();
+        // $var->connection->contract->customer->code;
+        return $this->render('company-images');
+    }
+
 }

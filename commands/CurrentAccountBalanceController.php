@@ -68,7 +68,7 @@ class CurrentAccountBalanceController extends Controller
         } catch (\Exception $ex) {
 
             echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
-            var_dump($ex);
+
             // send error to telegram
             TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: current-account-balance/update-current-account-balance ****', $ex);
         }
