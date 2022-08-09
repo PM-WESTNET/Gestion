@@ -93,8 +93,10 @@ class AdsController extends Controller {
         return PDFService::makePdf($view);
     }
 
-    public function actionPrintEmptyAds($company_id = null, $node_id = null, $qty = null)
+    public function actionPrintEmptyAds($company_id = null, $node_id = null, $qty = NULL)
     {
+
+        $qty = 1;
 
         if ($node_id !== null && $qty !== null && $company_id !== null) {
             // decide which pdf library to use based on config. 
@@ -250,7 +252,6 @@ class AdsController extends Controller {
 //                'isConsumidorFinal' => $isConsumidorFinal,
 //                'profile' => $profile,
 //               'companyData' => $companyData,
-//                'qrCode' => $qrCode
 
                 'qty' => $qty,
                 'codes' => $codes,
