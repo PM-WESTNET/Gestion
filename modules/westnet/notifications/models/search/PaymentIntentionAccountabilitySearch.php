@@ -49,7 +49,8 @@ class PaymentIntentionAccountabilitySearch extends PaymentIntentionAccountabilit
 
         $query->andFilterWhere(['like', 'concat(concat(cus.lastname," ",cus.name), " ", cus.code)', $this->customer_name]);
         $query->andFilterWhere(['like', 'pia.siro_payment_intention_id', $this->siro_payment_intention_id.'%',false]);
-        if(!empty($this->payment_id)) $query->andFilterWhere(['like', 'pia.payment_id', $this->payment_id.'%',false]); // this line has the empty() foo because the wildcard of the Like operator does not give back Null values (no payment ID)
+        //* had to comment this filter because a BUG was found. Payments were being created and closed without payment intention id setted
+        // if(!empty($this->payment_id)) $query->andFilterWhere(['like', 'pia.payment_id', $this->payment_id.'%',false]); // this line has the empty() foo because the wildcard of the Like operator does not give back Null values (no payment ID)
         $query->andFilterWhere(['like', 'pia.customer_id', $this->customer_id.'%',false]);
         $query->andFilterWhere(['like', 'pia.payment_intention_accountability_id', $this->payment_intention_accountability_id.'%',false]);
         
