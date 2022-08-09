@@ -47,11 +47,11 @@ $model = new Node();
                 ?>
             </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-md-6">
-                <?php echo $form->field($model, 'count')->textInput()->label(Yii::t('app', 'ADS Count')) ?>
+                <php echo $form->field($model, 'count')->textInput()->label(Yii::t('app', 'ADS Count')) ?>
             </div>
-        </div>
+        </div> -->
         <div class="row">
             <?= \yii\bootstrap\Html::submitButton(Yii::t('app', 'Generate Empty ADS'), ['id' => 'generate', 'class' => 'btn btn-success']); ?>
             <?php $form->end(); ?>
