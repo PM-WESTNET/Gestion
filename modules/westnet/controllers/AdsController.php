@@ -93,7 +93,7 @@ class AdsController extends Controller {
         return PDFService::makePdf($view);
     }
 
-    public function actionPrintEmptyAds($company_id = null, $node_id = null)
+    public function actionPrintEmptyAds($company_id = null, $node_id = null, $qty = NULL)
     {
 
         $qty = 1;
