@@ -57,7 +57,8 @@ $model = new Node();
             this.init = function () {
                 $(document).off('click', '#generate').on('click', '#generate', function (e) {
                     e.preventDefault();
-                    var cantidad = $("#node-count").val();
+                    // var cantidad = $("#node-count").val();
+                    var cantidad = 1;
                     var node = $("#node-node_id").val();
                     var company = $("#company_id").val();
 

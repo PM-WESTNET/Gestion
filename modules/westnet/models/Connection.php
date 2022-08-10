@@ -362,7 +362,9 @@ class Connection extends ActiveRecord {
         $this->server_id = $node->server_id;
 
         $plan = $this->FindPlanConnection($this->contract->contract_id);
+        // if plan exists and its category is "big_plan" = 1
         if(!empty($plan) && $plan['big_plan']){
+            // this hardcoded subnet is the NODO PLANES GRANDES from the first gestion company owners. //Todo: change to a variable and exception
             $node = Node::findNodeBySubnet(235);
             $this->ip4_1_old = $this->ip4_1;
             $this->ip4_1 = $node->getUsableIp($ap);
