@@ -26,6 +26,7 @@ use yii\filters\AccessControl;
 use app\modules\checkout\models\Payment;
 use app\modules\checkout\models\PaymentItem;
 use app\modules\checkout\models\PaymentMethod;
+use app\modules\westnet\notifications\components\helpers\LayoutHelper;
 
 /**
  * NotificationController implements the CRUD actions for Notification model.
@@ -83,6 +84,17 @@ class NotificationController extends Controller {
         return $this->render('view', [
             'model' => $this->findModel($id),
         ]);
+    }
+
+    public function actionPreview($id){
+        $model = $this->findModel($id);
+        return $this->renderPartial(
+            LayoutHelper::getLayoutAlias($model->layout),
+            ['content' => $this->render(
+                '@app/modules/westnet/notifications/body/content/content',
+                ['notification' => $model]
+            )]
+        );
     }
 
     public function actionCreate()

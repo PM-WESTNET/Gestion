@@ -87,25 +87,44 @@ $this->params['breadcrumbs'][] = $this->title;
             'format' => 'html'
         ],
         [
+            'attribute' => 'layout',
+            'value' => function($model) {
+                return NotificationsModule::t('app', $model->layout);
+            },
+            'format' => 'raw'
+        ],
+        [
             'attribute' => 'content',
-            'value' => $model->layout ? $this->render(
-                LayoutHelper::getLayoutAlias($model->layout),
-                ['content' => $this->render(
-                    '@app/modules/westnet/notifications/body/content/content',
-                    ['notification' => $model]
-                )]
-            ) : $model->content,
-            'format' => 'html'
+            'value' => function($model){
+                $content = $model->content;
+                // if this notification has a layout set, render a preview button for the layout and
+                if(!empty($model->layout)){
+                    // render button
+                    $content .= Html::a(
+                        '<span class="glyphicon glyphicon-eye-close updateItem btn btn-default"> '.Yii::t('app',"Preview layout").'</span>',
+                        ['preview', 'id' =>  $model->notification_id],
+                        ['target' => '_blank']
+                    );
+                }
+                else{
+                    // send flash to the user that no layout was found and which default is set for the notification type
+                    if(!empty($model->emailTransport)){
+                        $flash = Yii::t('app', 'This notification has no specific layout and will be sent with {layout}', ['layout' => $model->emailTransport->layout]);
+                        Yii::$app->session->addFlash('info', $flash);
+                    }else{
+                        //no email transport setted ? 
+                    }
+                }
+
+                return $content;
+            },
+            'format' => 'raw'
         ],
         'from_date:date',
         'from_time',
         'to_date:date',
         'to_time',
         'times_per_day',
-        [
-            'attribute' => 'layout',
-            'value' => NotificationsModule::t('app', $model->layout)
-        ],
         [
             'attribute' => 'status',
             'value' => NotificationsModule::t('app', ucfirst($model->status))
