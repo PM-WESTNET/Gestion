@@ -1442,6 +1442,4 @@
     'Could not create customer on Firstdata API' => 'No se pudo crear el cliente en la API de Firstdata',
     'File path' => 'Ruta de archivo',
     'Name' => 'Nombre',
-    'Preview layout' => 'Vista previa de diseño',
-    'This notification has no specific layout and will be sent with {layout}' => 'Esta notificación no tiene un diseño específico y se enviará con {layout}',
   );
