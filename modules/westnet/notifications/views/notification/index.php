@@ -29,6 +29,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     echo Html::a("<span class='glyphicon glyphicon-clock'></span> " . NotificationsModule::t('app', 'Programmed Notifications'), ['index-programmed'], ['class' => 'btn btn-warning']);
                 }
             ?>
+            <?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . NotificationsModule::t('app',"Edit notifications layouts"), 
+                ['company-has-notification-layout/index'], ['class' => 'btn btn-default', 'target' => '_blank']);
+            ?>
+            
         </p>
     </div>
 
