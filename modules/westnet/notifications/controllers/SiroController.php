@@ -298,7 +298,11 @@ class SiroController extends Controller
      */
     public function MassiveClosure(){
         $transaction = Yii::$app->db->beginTransaction();
-        $models = PaymentIntentionAccountability::find()->where(['status' => 'draft', 'payment_id' => null])->all();
+        $models = PaymentIntentionAccountability::find()
+            ->where(['status' => 'draft', 'payment_id' => null])
+            ->andWhere(['not', ['siro_payment_intention_id' => null]])
+            ->all();
+
         $payment_method = PaymentMethod::findOne(['name' => 'Botón de Pago']);
         try {
             foreach ($models as $key => $model) {
