@@ -66,19 +66,17 @@ EcopagoAsset::register($this);
                             <h3>
                             <?php
                             $flashes = Yii::$app->getSession()->getAllFlashes();
-                            foreach ($flashes as $class => $flash):
-                                if ($class == 'error')
-                                    $class = 'danger';
-                                ?>
-                                <?=
-                                \yii\bootstrap\Alert::widget([
-                                    'options' => [
-                                        'class' => 'alert-' . $class
-                                    ],
-                                    'body' => $flash
-                                ]);
-                                ?>
-                            <?php endforeach; ?>
+                            foreach ($flashes as $class => $flash){
+                                // if a nested array is found, it can crash the layout. this fixes it. not the best solution but a practical one for common use.
+                                if(is_array($flash)){
+                                    continue;
+                                }
+                                // change to fit bootstrap class better
+                                if ($class == 'error') $class = 'danger';
+                                // flash out an alert message
+                                echo \yii\bootstrap\Alert::widget(['options' => ['class' => 'alert-' . $class],'body' => $flash]);
+                            }
+                            ?>
                             </h3>    
                         </div>
                     </div>
