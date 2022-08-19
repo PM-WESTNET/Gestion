@@ -104,6 +104,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
                 'amount:currency',
                 [
+                    'label' => Yii::t('app', 'Payment Status'),
+                    'value' => function($model){
+                        return Yii::t('app',$model->status);
+                    }
+                ],
+                [
                     'class' => 'app\components\grid\ActionColumn',
                     'template' => '{view}',
                     'buttons' => [

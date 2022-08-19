@@ -48,6 +48,10 @@ echo GridView::widget([
                 'format'=>'currency'
             ],
             [
+                'attribute'=>'line_subtotal',
+                'format'=>'currency'
+            ],
+            [
                 'attribute'=>'line_total',
                 'format'=>'currency'
             ],

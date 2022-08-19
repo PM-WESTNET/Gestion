@@ -197,10 +197,12 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
     public function getDeletable()
     {
         if($this->type == self::TYPE_PAYMENT) {
-            if($this->status == PagomiscuentasFile::STATUS_PENDING) { return true; }
-            return ($this->getPagomiscuentasPayments()->count() == 0);
+            // if($this->status == PagomiscuentasFile::STATUS_PENDING) { return true; }
+            $has_no_payments = ($this->getPagomiscuentasPayments()->count() == 0);
+            return $has_no_payments;
         } else {
-            return ($this->getPagomiscuentasBills()->count() == 0);;
+            $has_no_bills = ($this->getPagomiscuentasBills()->count() == 0);
+            return $has_no_bills;
         }
 
         if($this->created_by_invoice_process_id) {
@@ -265,6 +267,7 @@ class PagomiscuentasFile extends \app\components\companies\ActiveRecord
      */
     public function close()
     {
+        set_time_limit(0);
         if($this->status == self::STATUS_DRAFT || $this->status == self::STATUS_PENDING) {
             if($this->type == self::TYPE_PAYMENT) {
                 return $this->closeImport();

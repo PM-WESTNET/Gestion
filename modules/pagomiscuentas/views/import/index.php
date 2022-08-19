@@ -113,6 +113,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view}{delete}',
                 'buttons' => [
                     'delete' => function($url, $model, $key){
+                        /** object(app\modules\pagomiscuentas\models\PagomiscuentasFile) **/
                         if($model->deletable){
                             return Html::a('<span class="glyphicon glyphicon-trash"></span>', $url, [
                                 'title' => Yii::t('yii', 'Delete'),
