@@ -226,6 +226,17 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
                 },
                 'format' => 'raw',
             ],
+            [
+                'label'=>Yii::t('app','Customer Category'),
+                'value' => function ($model) {
+                    if (!empty($model->customer)){
+                        $customer_cat = ($model->customer->getCustomerCategory());
+                        if(!empty($customer_cat)) return ($customer_cat->one()->name);
+                    }
+                    return 'n/a';
+                },
+                'format' => 'raw',
+            ],
             'date:date',
             [
                 'attribute' => 'expiration',
