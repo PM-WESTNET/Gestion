@@ -239,19 +239,19 @@ class AdsController extends Controller {
 
             $formatter = Yii::$app->formatter;
 
-            $barcode = new BarcodeGeneratorPNG();
+            // $barcode = new BarcodeGeneratorPNG();
             
             $content = $this->renderPartial('bigway-pdf.php',[
                 'formatter' => $formatter,
-//                'model' => $model,
-//                'dataProvider' => $dataProvider,
-//                'cupon_bill_types' => $cupon_bill_types,
-//                'is_cupon' => $is_cupon,
-//                'payment' => $payment,
-//                'debt' => $debt,
-//                'isConsumidorFinal' => $isConsumidorFinal,
-//                'profile' => $profile,
-//               'companyData' => $companyData,
+                //  'model' => $model,
+                //  'dataProvider' => $dataProvider,
+                //  'cupon_bill_types' => $cupon_bill_types,
+                //  'is_cupon' => $is_cupon,
+                //  'payment' => $payment,
+                //  'debt' => $debt,
+                //  'isConsumidorFinal' => $isConsumidorFinal,
+                //  'profile' => $profile,
+                //  'companyData' => $companyData,
 
                 'qty' => $qty,
                 'codes' => $codes,
@@ -259,7 +259,7 @@ class AdsController extends Controller {
                 'date_now' => date('d/m/Y', time()),
                 'payment_code' => $payment_code,
                 'init_value' => $init_value,
-                'barcode' => $barcode
+                // 'barcode' => $barcode
             ]);
 
                 
@@ -288,26 +288,75 @@ class AdsController extends Controller {
      * @return type
      */
     public function actionPrintOneEmptyAds($empty_ads_id){
+
+        $pdf_company = Config::getConfig('pdf_company')->description;
+        $qty = 1;
         $this->layout = '//pdf';
 
         $emptyAds= EmptyAds::findOne(['empty_ads_id' => $empty_ads_id]);
+
         $node = Node::findOne(['node_id'=> $emptyAds->node_id]);
 
-        $plans = $this->getPlans($emptyAds->company_id);
+        $company = $emptyAds->company;
 
-        $view = $this->render('pdf', [
-            'codes' => [['payment_code' => $emptyAds->payment_code, 'code'=> $emptyAds->code]],
-            'node'  =>  $node,
-            'plans' => $plans,
-            'company' => $emptyAds->company
-        ]);
 
-        $response = Yii::$app->getResponse();
-        $response->format = Response::FORMAT_RAW;
-        $response->headers->set('Content-type: application/pdf');
-        $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
 
-        return PDFService::makePdf($view);
+        if($pdf_company == "westnet"){
+
+            $plans = $this->getPlans($emptyAds->company_id);
+
+            $view = $this->render('pdf', [
+                'codes' => [['payment_code' => $emptyAds->payment_code, 'code'=> $emptyAds->code]],
+                'node'  =>  $node,
+                'plans' => $plans,
+                'company' => $company
+            ]);
+    
+            $response = Yii::$app->getResponse();
+            $response->format = Response::FORMAT_RAW;
+            $response->headers->set('Content-type: application/pdf');
+            $response->setDownloadHeaders('bill.pdf', 'application/pdf', true);
+    
+            return PDFService::makePdf($view);
+
+        }else if($pdf_company == "bigway"){
+
+            $formatter = Yii::$app->formatter;
+
+            $barcode = new BarcodeGeneratorPNG();
+
+            $content = $this->renderPartial('bigway-pdf.php',[
+                'formatter' => $formatter,
+                'qty' => $qty,
+                'codes' => [['payment_code' => $emptyAds->payment_code, 'code'=> $emptyAds->code]],
+                'company' => $company,
+                'date_now' => date('d/m/Y', time()),
+                'payment_code' => $emptyAds->payment_code,
+                'barcode' => $barcode
+            ]);
+
+                
+            $pdf = new Pdf([
+                'mode' => Pdf::MODE_UTF8, 
+                'format' => Pdf::FORMAT_A4, 
+                //'orientation' => Pdf::ORIENT_PORTRAIT, 
+                'destination' => Pdf::DEST_BROWSER,
+                'content' => $content,  
+                'filename' => strtolower($company->name."-".$node->name."-newcodes.pdf"), // lowercased company + node ..
+                'cssFile' => '@app/modules/westnet/web/css/empty-ads-pdf.css',
+                'options' => ['title' => ""],
+                'marginTop' => 0,
+                'marginBottom' => 0,
+                'marginLeft' => 0,
+                'marginRight' => 0,
+            ]);
+
+            return $pdf->render();
+
+        }
+
+        return false;
+
     }
     /**
      * Finds the IpRange model based on its primary key value.
