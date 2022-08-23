@@ -49,10 +49,10 @@ AdminAsset::register($this);
 
 					<div class="header-data-container float-right w-50">
 						<!--convert to variables and retrieve from db-->
-						<div class="barcode center-div">
-							<?=($i==0)?'':'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($code['payment_code'], $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
-							<?=($i==0)?'':'<p class="text-center">'.$code['payment_code'].'</p>'?>
-						</div>
+						<!-- <div class="barcode center-div">
+							<=($i==0)?'':'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($code['payment_code'], $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
+							<=($i==0)?'':'<p class="text-center">'.$code['payment_code'].'</p>'?>
+						</div> -->
 						<div>
 							<p class="text-center spaced-letters current-date">
 								FICHA <?= ($i==0)?'EMPRESA':'CLIENTE'?> <?= $date_now ?>
@@ -145,7 +145,7 @@ AdminAsset::register($this);
 						</div>
 						<!--convert to variables and retrieve from db-->
 						<div class="float-right instalation-percentages">
-							CIR 75%
+							CIR 80%
 							<br>
 							DISPONIBILIDAD ANUAL 96%
 						</div>
@@ -230,6 +230,8 @@ AdminAsset::register($this);
 							<li>No se realizan periodos de prueba</li>
 							<li>Los equipos instalados son en comodato.</li>
 							<li>Firmando acepta la forma y estetica de la instalación, modificaciones posterioriores tendrán recargo adicional.</li>
+							<li>Plazo minimo de permanencia de 6 meses</li>
+							<li>3 meses de garantia en la instalacion</li>
 						</ol>
 
 					</div>
@@ -242,6 +244,7 @@ AdminAsset::register($this);
 						<ul>
 							<li>Servicio técnico: 2613439030</li>
 							<li>Administración: 2616577260</li>
+							<li>Central telefonica: 4762784</li>
 							<li>Correo electrónico: administracion@bigway.com.ar</li>
 							<li>Horarios de atención:</li>
 							<ul>

@@ -323,7 +323,7 @@ class AdsController extends Controller {
 
             $formatter = Yii::$app->formatter;
 
-            $barcode = new BarcodeGeneratorPNG();
+            // $barcode = new BarcodeGeneratorPNG();
 
             $content = $this->renderPartial('bigway-pdf.php',[
                 'formatter' => $formatter,
@@ -332,7 +332,7 @@ class AdsController extends Controller {
                 'company' => $company,
                 'date_now' => date('d/m/Y', time()),
                 'payment_code' => $emptyAds->payment_code,
-                'barcode' => $barcode
+                // 'barcode' => $barcode
             ]);
 
                 
