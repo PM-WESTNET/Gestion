@@ -285,7 +285,8 @@ if($profile) {
 				</div>
 				<div class="data-account">
 					<div><?= $model->observation? 'Observación: '. $model->observation : ''?></div>
-			   		<div>Puede retirar su factura en: <?php echo $model->company->address  ?></div>
+			   		<!-- <div>Puede retirar su factura en: <?php 
+					// echo $model->company->address  ?></div> -->
 					    <?php if (!$model->hasDirectDebit()):?>
 					        <div>Medios de Pago:</div>
 					        <div><ul><li> <?= Config::getValue('pdf_bill_payment_methods')?> </li></ul></div>
