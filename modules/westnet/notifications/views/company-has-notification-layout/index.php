@@ -30,22 +30,22 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             // 'id',
             [
-                'attribute' => 'layout_path',
-                'label' => NotificationsModule::t('app', 'Layouts Path'),
-                'value' => function($model){
-                    return $model->layouts_base_path.'/<span class="label label-default">'.$model->layout_path.'</span>'.'.php';
-                },
-                'format' => 'raw'
-            ],
-            [
                 'attribute' => 'company_id',
                 'label' => NotificationsModule::t('app', 'Company'),
                 'value' => function ($model) {
+                    // if company is empty and throws an error, this models migration could have run with another name due to the dbhelper dynamic table get
                     return $model->company->name;
                 },
                 // 'format' => 'raw'
             ],
-            // 'is_enabled',
+            [
+                'attribute' => 'layout_path',
+                'label' => NotificationsModule::t('app', 'Layouts Path'),
+                'value' => function($model){
+                    return $model->layouts_base_path.'/<span class="label label-primary">'.$model->layout_path.'</span>'.'.php';
+                },
+                'format' => 'raw'
+            ],
             [
                 'attribute' => 'is_enabled',
                 'label' => NotificationsModule::t('app', 'Is Enabled?'),
