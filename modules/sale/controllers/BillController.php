@@ -965,6 +965,7 @@ class BillController extends Controller
         $debt = $payment->accountTotal();
         $isConsumidorFinal = false;
         $profile = $model->customer->getCustomerProfiles()->where(['name'=>'Consumidor Final'])->one();
+        $company = $model->customer->company;
         $company = (isset($company) ? $company : $model->customer->parentCompany );
         $companyData = $model->company;
 
@@ -1037,7 +1038,7 @@ class BillController extends Controller
         ]);
 
             
-            return $pdf->render();   
+        return $pdf->render();   
     }
 
     /**

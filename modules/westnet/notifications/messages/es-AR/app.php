@@ -203,4 +203,17 @@ return array(
     'Button send bill' => 'Botón enviar comprobante',
 
     'Resume' => 'Resumen',
+
+    'Preview layout' => 'Vista previa de diseño',
+    'This notification has no specific layout and will be sent with {layout}' => 'Esta notificación no tiene un diseño específico y se enviará con {layout}',
+    'Edit notifications layouts' => 'Editar diseños de notificaciones',
+    'Is Enabled?' => 'Está Habilitado?',
+    'No' => 'No',
+    'Yes' => 'Sí',
+    'Layouts Path' => 'Ruta de diseño',
+    'Edit company layouts' => 'Editar diseños de cada empresa',
+    'There are no notification designs available for the selected company' => 'No hay diseños de notificación disponibles para la empresa seleccionada',
+
+
+
 );

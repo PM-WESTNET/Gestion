@@ -33,6 +33,13 @@ class LayoutHelper extends Component{
         //i18n
         $names = array_map(function($item){ return NotificationsModule::t('app', $item); }, $layouts);
         
+        /**
+         * example of the format returned:
+         * array (size=8)
+         *   'Billing BW' => string 'Billing BW' (length=10)
+         *   'Billing NEW' => string 'Billing NEW' (length=11)
+         *   ...
+         */
         return array_combine($layouts, $names);
     }
    
