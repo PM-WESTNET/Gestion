@@ -36,7 +36,7 @@ class ReferencedDiscount
 
             $discounts = Discount::find()
                 ->where(['referenced' => 1, 'status' => Discount::STATUS_ENABLED])
-  	              ->orderBy(['discount_id' => SORT_DESC])->all();
+  	              ->orderBy(['discount_id' => SORT_DESC])->all();
 
             foreach ($discounts as $discount) {
                 //Verifico que la primera factura esté pagada y que no tenga un descuento
