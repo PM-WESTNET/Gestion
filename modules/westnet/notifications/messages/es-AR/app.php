@@ -211,6 +211,9 @@ return array(
     'No' => 'No',
     'Yes' => 'Sí',
     'Layouts Path' => 'Ruta de diseño',
+    'Edit company layouts' => 'Editar diseños de cada empresa',
+    'There are no notification designs available for the selected company' => 'No hay diseños de notificación disponibles para la empresa seleccionada',
+
 
 
 );

@@ -24,7 +24,7 @@ class CompanyHasNotificationLayout extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'gestion_notifications.company_has_notification_layout';
+        return 'company_has_notification_layout';
     }
 
     /**
@@ -66,5 +66,27 @@ class CompanyHasNotificationLayout extends \yii\db\ActiveRecord
         return $this->hasOne(Company::class, ['company_id' => 'company_id']);
     }
 
+    /**
+     * gets all layouts in an ordered array.
+     * in case company_id is supplied, then only its layouts from the model are returned.
+     * @return Array
+     */
+    public static function getLayouts($company_id = null){
+        // define empty layouts
+        $layouts = array();
+        $layoutsQuery = self::find()->select(['layout_path'])->where(['company_id' => $company_id])->column();
+        foreach($layoutsQuery as $layoutName){
+            $layouts[$layoutName] = $layoutName;
+        }
+                
+        /**
+         * example of the format returned:
+         * array (size=8)
+         *   'Billing BW' => string 'Billing BW' (length=10)
+         *   'Billing NEW' => string 'Billing NEW' (length=11)
+         *   ...
+         */
+        return $layouts;
+    }
 
 }
