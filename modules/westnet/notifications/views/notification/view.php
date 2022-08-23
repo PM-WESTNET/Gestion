@@ -101,15 +101,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 if(!empty($model->layout)){
                     // render button
                     $content .= Html::a(
-                        '<span class="glyphicon glyphicon-eye-close updateItem btn btn-default"> '.Yii::t('app',"Preview layout").'</span>',
+                        '<span class="glyphicon glyphicon-eye-open"></span> '.NotificationsModule::t('app',"Preview layout").'',
                         ['preview', 'id' =>  $model->notification_id],
-                        ['target' => '_blank']
+                        ['class' => 'btn btn-default', 'target' => '_blank']
                     );
                 }
                 else{
                     // send flash to the user that no layout was found and which default is set for the notification type
                     if(!empty($model->emailTransport)){
-                        $flash = Yii::t('app', 'This notification has no specific layout and will be sent with {layout}', ['layout' => $model->emailTransport->layout]);
+                        $flash = NotificationsModule::t('app', 'This notification has no specific layout and will be sent with {layout}', ['layout' => $model->emailTransport->layout]);
                         Yii::$app->session->addFlash('info', $flash);
                     }else{
                         //no email transport setted ? 
