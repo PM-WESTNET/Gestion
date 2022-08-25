@@ -25,10 +25,8 @@ class CurrentAccountBalanceController extends Controller
      */
     public function actionUpdateCurrentAccountBalance()
     {
-
-        
-        try {
-            if(Yii::$app->mutex->acquire('mutex_update_current_account_balance')) {
+        if(Yii::$app->mutex->acquire('mutex_update_current_account_balance')) {
+            try {
                 $now = DateTime::createFromFormat('U.u', microtime(true));
                 echo "\nINICIO: ". $now->format('Y-m-d h:i:s.u'). "\n";
 
@@ -51,7 +49,7 @@ class CurrentAccountBalanceController extends Controller
                     $total = $searchModel->accountTotal();
 
 
-                    echo "Customer_ID: " . $customer->customer_id . " - " . "Update Total: " . round($total,2) . "\n";
+                    // echo "Customer_ID: " . $customer->customer_id . " - " . "Update Total: " . round($total,2) . "\n";
 
                     $customer->updateAttributes(['current_account_balance' => round($total,2), 'last_balance' => $today]);
                 }
@@ -61,17 +59,22 @@ class CurrentAccountBalanceController extends Controller
                 $then = DateTime::createFromFormat('U.u', microtime(true));
                 echo "FIN: ". $then->format('Y-m-d h:i:s:u'). "\n\n";
 
-            }else{
-                //echo "Ya hay un proceso corriendo \n";
+            } catch (\Exception $ex) {
+
+                echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
+                $formatted_text = "\n";
+                $formatted_text .= 'At - '.(new \DateTime())->format('d-m-Y H:i:s').' (server time) '."\n";
+                $formatted_text .= 'File - '.$ex->getFile(). "\n";
+                $formatted_text .= 'Error - '.$ex->getMessage()."\n";
+                $formatted_text .= 'Line - '.$ex->getLine()."\n";
+                $formatted_text .= 'Trace - '.$ex->getTraceAsString()."\n";
+                
+                echo $formatted_text;
+                // send error to telegram
+                TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: current-account-balance/update-current-account-balance ****', $ex);
             }
-
-        } catch (\Exception $ex) {
-
-            echo "Ha ocurrido un error en el proceso de actualización de saldos"."\n";
-
-            // send error to telegram
-            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: current-account-balance/update-current-account-balance ****', $ex);
+        }else{
+            //echo "Ya hay un proceso corriendo \n";
         }
-
     }
 }

@@ -1687,4 +1687,107 @@ class CustomerController extends Controller
             ]
         ];
     }
+
+
+    /**
+     * Returns a simple format with some customer data. 
+     * the request comes as a POST.
+     * Note: only made this endpoint because too much sensible customer data was being sent in the previous one.
+     */
+    public function actionGetCustomerDataSimpleFormat(){
+        // return if req isnt POST
+        if(!Yii::$app->request->isPost) return;
+
+        $data = Yii::$app->request->post();
+
+        // return error when code isnt specified on req
+        if (!isset($data['code']) or empty($data['code'])){
+            return [
+                'error' => true,
+                'message' => "code is empty or not setted",
+            ];
+        }
+
+        // find customer based on code
+        $customer = Customer::findOne(['code' => $data['code']]);
+        // return error when customer isnt found
+        if (empty($customer)) {
+            return [
+                'error' => 'true',
+                'message' => 'Customer not found with the supplied code',
+            ];
+        }
+
+        /** get and prepare data from customer for the response */
+        $fulladdress = isset($customer->address) ? $customer->address->fulladdress : 'El cliente no posee dirección';
+        $latest_contract = $customer->getLastContract($customer->customer_id, $prioritizeActiveContract = true);
+        $latest_connection = $latest_contract->connection;
+        $bills_due_quantity = Customer::getOwedBills($customer->customer_id);
+
+        $customer_data = [
+            /** basic */
+            'name' => $customer->name,
+            'lastname' => $customer->lastname,
+            'code' => $customer->code,
+            'customer_status' => $customer->status,
+            'address' => $fulladdress,
+            'latest_contract_status' => $latest_contract->status,
+            'latest_connection_status' => $latest_connection->status,
+            
+            /** money account */
+            'money_account_status' => $latest_connection->status_account,
+            'bills_due_quantity' => $bills_due_quantity,
+            'bills_due_amount' => $customer->current_account_balance,
+            'tax_condition' => $customer->taxCondition->name,
+            'payment_code' => $customer->payment_code,
+            'extra_data' => self::getBankRoelaDataForResponse($customer),
+
+            /** unused return data from previous api: */
+            // 'national_id' => $customer->document_number,
+            // 'phone' => $customer->phone,
+            // 'phone_mobile' => $customer->phone2,
+            // 'email' => $customer->email,
+            // 'idcustomer' => $customer->customer_id,
+        ];
+
+        
+        return [
+            'error' => false,
+            'customer_data' => $customer_data,
+            // 'extra_data' => $extra_data,
+        ];
+    }
+
+    private static function getBankRoelaDataForResponse($customer){
+        if(empty($customer)) return;
+
+        /** 
+         * Note:
+         * gbermudez left a bit of configuration items inside gestion
+         * that should be useful in this specific case so as not to pollute
+         * other gestions apps that arent owned by Westnet.
+         * [siro_communication_bank_roela]
+         */
+
+        $data = null;
+        $company_name = Yii::$app->params['gestion_owner_company'];
+        $siro_comm_enabled = Config::getConfig('siro_communication_bank_roela')->item->description;
+    
+        // if company name is set, is westnet and siro communication is enabled
+        if( (!empty($company_name)) and ($company_name == 'westnet') and ($siro_comm_enabled) ){
+            $siro_payment_url = 'Actualmente no pueden pagar por ese medio de pago.';
+            // if customer has hash_customer_id (used for siro) and corresponds to any of the following companies
+            //todo: change the hardcoded company_ids that gabi bermudez left for something more dynamic so as not to bug Bigways companies
+            if(((!empty($customer->hash_customer_id)) && ($customer->company_id == 2 || $customer->company_id == 7))){
+                $siro_payment_url = 'http://pago.westnet.com.ar:3000/portal/payment-intention/' . $customer->hash_customer_id;
+            }
+            $data = [
+                'siro_communication_enabled' => $siro_comm_enabled ? "true" : "false",
+                'siro_payment_url' => $siro_payment_url,
+            ];
+        }
+
+        return $data;
+    }
+
 }
