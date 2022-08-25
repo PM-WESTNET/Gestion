@@ -64,7 +64,13 @@ class Payment extends  ActiveRecord  implements CountableInterface
      */
     public function rules()
     {
-        $statuses = ['draft','closed', 'tabulated', 'conciled', 'cancelled'];
+        $statuses = [
+            self::PAYMENT_DRAFT,
+            self::PAYMENT_CLOSED,
+            self::PAYMENT_TABULATED,
+            self::PAYMENT_CONCILED,
+            self::PAYMENT_CANCELLED
+        ];
 
         $rules = [
             [['date', 'time', 'customer', 'company_id', 'partnerDistributionModel'], 'safe'],
@@ -262,6 +268,26 @@ class Payment extends  ActiveRecord  implements CountableInterface
         if($this->bill_id){
             $this->bill->checkPayment();
         }*/
+
+        // Update the connection status based on current money account. For closing payments only. sadly we have to iterate for every contract and every connection.
+        if($this->status == self::PAYMENT_CLOSED){
+            // if payment closed and customer_id isnt null
+            if(!is_null($this->customer_id)){
+                // update get customers active contract to update its connection status and 
+                $contracts = Contract::find()->where(['customer_id'=>$this->customer_id])->all();
+                if(!empty($contracts)){
+                    //NOTE: i was going for only 'active' contracts connections at first but doubted of its effectiveness to performance tradeoff.
+                    // var_dump('$contracts',$contracts);
+                    foreach($contracts as $contract){
+                        if(empty($contract->contract_id)) continue;
+                        // var_dump('$contract->contract_id',$contract->contract_id);
+                        
+                        //NOTE. this function has a $connection->save() inside of it.
+                        $contract->updateConnectionsMoneyAccounts();
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -495,22 +521,6 @@ class Payment extends  ActiveRecord  implements CountableInterface
             $this->status = 'closed';
             $this->update(false);
 
-            // if payment closed and customer_id isnt null
-            if(!is_null($this->customer_id)){
-                // update get customers active contract to update its connection status and 
-                $contracts = Contract::find()->where(['customer_id'=>$this->customer_id])->all();
-                if(!empty($contracts)){
-                    //NOTE: i was going for only 'active' contracts connections at first but doubted of its effectiveness to performance tradeoff.
-                    // var_dump('$contracts',$contracts);
-                    foreach($contracts as $contract){
-                        if(empty($contract->contract_id)) continue;
-                        // var_dump('$contract->contract_id',$contract->contract_id);
-                        
-                        //NOTE. this function has a $connection->save() inside of it.
-                        $contract->updateConnectionsMoneyAccounts();
-                    }
-                }
-            }
             return true;
         }
         return false;
