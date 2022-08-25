@@ -400,6 +400,10 @@ class ContractController extends RestController
         $validIPs = array_column($validContracts, 'ip'); // *valid IPs are the same when flipped, cause the assignation algorithm cannot repeat them.
         $potentialIPs = array_column($contractsArr, 'ip');
 
+        // Clean IPs in case some null value gets to here like it has happend before
+        self::cleanIPArray($validIPs);
+        self::cleanIPArray($potentialIPs);
+
         // Flipping 
         $at = array_flip($validIPs);
         $bt = array_flip($potentialIPs); 
@@ -420,6 +424,14 @@ class ContractController extends RestController
         $contracts = array_values($contractsArr); // this solves the ""BUG"" commented before
         return $contracts;
     }
+
+    private static function cleanIPArray(&$ipArr){
+        foreach($ipArr as $index => $ip){
+            if(is_null($ip)) unset($ipArr[$index]);
+        }
+    }
+
+
     /**
      * Retorna un array con todos los contratos/conexiones del nodo pasado como parametro.
      *
