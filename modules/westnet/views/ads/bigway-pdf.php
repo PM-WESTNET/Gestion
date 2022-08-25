@@ -49,10 +49,10 @@ AdminAsset::register($this);
 
 					<div class="header-data-container float-right w-50">
 						<!--convert to variables and retrieve from db-->
-						<!-- <div class="barcode center-div">
-							<=($i==0)?'':'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($code['payment_code'], $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
-							<=($i==0)?'':'<p class="text-center">'.$code['payment_code'].'</p>'?>
-						</div> -->
+						<div class="barcode center-div">
+							<?=($i==0)?'':'<img src="data:image/png;base64,' . base64_encode($barcode->getBarcode($code['payment_code'], $barcode::TYPE_CODABAR, 3, 60)) . '">';?>
+							<?=($i==0)?'':'<p class="text-center">'.$code['payment_code'].'</p>'?>
+						</div> 
 						<div>
 							<p class="text-center spaced-letters current-date">
 								FICHA <?= ($i==0)?'EMPRESA':'CLIENTE'?> <?= $date_now ?>
