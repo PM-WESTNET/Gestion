@@ -227,11 +227,10 @@ AdminAsset::register($this);
 					<div class="bottom">
 
 						<ol>
-							<li>No se realizan periodos de prueba</li>
+							<li>No se realizan periodos de prueba.</li>
 							<li>Los equipos instalados son en comodato.</li>
 							<li>Firmando acepta la forma y estetica de la instalación, modificaciones posterioriores tendrán recargo adicional.</li>
-							<li>Plazo minimo de permanencia de 6 meses</li>
-							<li>3 meses de garantia en la instalacion</li>
+							<li>Plazo minimo de permanencia de 6 meses.</li>
 						</ol>
 
 					</div>
@@ -244,7 +243,7 @@ AdminAsset::register($this);
 						<ul>
 							<li>Servicio técnico: 2613439030</li>
 							<li>Administración: 2616577260</li>
-							<li>Central telefonica: 4762784</li>
+							<li>Central telefonica: 4762784.</li>
 							<li>Correo electrónico: administracion@bigway.com.ar</li>
 							<li>Horarios de atención:</li>
 							<ul>
