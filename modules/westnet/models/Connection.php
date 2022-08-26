@@ -96,6 +96,7 @@ class Connection extends ActiveRecord {
             [['contract_id'], 'required'],
             [['contract_id', 'node_id', 'server_id', 'ip4_1', 'ip4_2', 'clean', 'old_server_id', 'access_point_id'], 'integer'],
             [['status', 'ip4_public', 'status_account'], 'string'],
+            [['onu_sn'], 'string'],
             [['due_date', 'contract', 'node', 'server', 'use_second_ip', 'has_public_ip', 'access_point_id', 'mac_address' ], 'safe'],
             [['due_date'], 'date'],
             ['node_id', 'required', 'on' => self::SCENARIO_DEFAULT],
@@ -218,9 +219,15 @@ class Connection extends ActiveRecord {
             $this->payment_code = str_pad($company_code, 4, "0", STR_PAD_LEFT) . ($company_code == '9999' ? '' : '000' ) .
                     str_pad($customerCode, 5, "0", STR_PAD_LEFT) . str_pad($rightCode, 2, "0", STR_PAD_LEFT);
 
+            $this->formatOnuSn();
+
             return true;
         }
         return false;
+    }
+
+    private function formatOnuSn(){
+        $this->onu_sn = strtoupper($this->onu_sn);
     }
 
     public function afterSave($insert, $changedAttributes)

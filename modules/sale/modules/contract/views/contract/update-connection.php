@@ -103,6 +103,18 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Connection');
             ?>
             <div class="help-block"></div>
         </div>
+            
+        <div class="form-group field-contract-onu_sn required">
+            <?php
+                echo $form->field($connection, 'onu_sn', [
+                    'options' => [
+                        // 'placeholder' => Yii::t("app", "Select"), 
+                        // 'encode' => false, 
+                        'id' => 'onu_sn'
+                    ]
+                ]);
+            ?>
+        </div>
 
         <div class="form-group">
             <?= Html::a(Yii::t('app', 'Update'  ), null, ['class' => 'btn btn-primary', 'id'=>'submit']); ?>
@@ -131,8 +143,18 @@ $this->params['breadcrumbs'][] = Yii::t('westnet', 'Connection');
         }
 
         this.submit = function(){
-            if(confirm('<?=Yii::t('westnet', 'Are you sure you want to update this connection?')?>')) {
-                $('#form_invoice').submit();
+            if( confirm('<?=Yii::t('westnet', 'Are you sure you want to update this connection?')?>') ) {
+                // check if onu_sn value is going to change and alert the user to alter the other servers data
+                if( ($('#connection-onu_sn').val()).toUpperCase() != '<?= strtoupper($connection->onu_sn) ?>' ){
+                    if( confirm('<?= Yii::t('westnet', 'Al cambiar el numero de serie de ONU, deberá corroborar la integridad de los datos en el resto de sistemas manualmente (Napear, Mesa, SmartOLT y Soldef)') ?>') ){
+                        $('#form_invoice').submit();
+                    }else{
+                        //change value of input to same of current val
+                        $('#connection-onu_sn').val('<?= $connection->onu_sn ?>');
+                    }
+                }else{
+                    $('#form_invoice').submit();
+                }
             }
         }
 
