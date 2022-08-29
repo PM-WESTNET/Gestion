@@ -657,7 +657,7 @@ class Connection extends ActiveRecord {
                 $connection->due_date = null;
             }
             // Si la fecha de forzado es mayor a hoy, es porque todavia no se cumple y lo tengo que omitir
-            if ($due_forced >= $date) {
+            if ( ($due_forced >= $date) and !is_null($connection->due_date) ) {
                 return $connection->status_account;
             }
         }
