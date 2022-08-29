@@ -50,9 +50,7 @@ class ConnectionStatusController extends Controller
     public function actionUpdate($save = false) // when activating the cron you can pass a parameter (like 1 for TRUE)
     {
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
-            $this->stdout("\nINICIO PROCESO actionUpdate(...) ".'At - '.(new \DateTime())->format('d-m-Y H:i:s').' (server time) '."\n");
             $this->updateConnections($save);
-            $this->stdout("\nFIN PROCESO actionUpdate(...) ".'At - '.(new \DateTime())->format('d-m-Y H:i:s').' (server time) '."\n");
             Yii::$app->mutex->release('update_connections_cron');
         }
     }
@@ -453,6 +451,7 @@ class ConnectionStatusController extends Controller
      */
     private function updateConnections($save = false)
     {
+        $this->stdout("Westnet - Proceso de actualizacion de conexiones - " . (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
         $debug = false; // change to debug specific customers
 
         $due_day = Config::getValue('bill_due_day');
@@ -490,251 +489,256 @@ class ConnectionStatusController extends Controller
         $estados[Connection::STATUS_ACCOUNT_CLIPPED] = 0;
         $estados[Connection::STATUS_ACCOUNT_LOW] = 0;
 
-        // Traigo todos los customer para poder iterar.
-        $queryCustomer = Customer::find()->andWhere(['status' => 'enabled']);
-
-
-        if ($debug) { //1403,1533,2303, 25372
-            $queryCustomer->andWhere(new Expression('customer_id in (104518)'));
-        }
-        //$queryCustomer->orderBy(['customer_id' => SORT_DESC]); //debugging comment to sort customers differently
-        //$customers = $queryCustomer->limit(1000)->all(); //debugging comment to limit customer amount
-        $customers = $queryCustomer->all();
-        $this->stdout("\ncustomers query runned");
-        
-        $this->stdout("\nquerying ".count($customers)." customers (with status:enabled)"); // debug: uncomment to see the customers total number queried (regardless of Contract Status).
-
-        $subprice = (new Query())
-            ->select(['product_id', new Expression('max(date) maxdate')])
-            ->from('product_price')
-            ->groupBy(['product_id']);
-        //$this->stdout("\nsubprice query created\n");
-
-
-        $query_plan = (new Query())
-            ->select(['(net_price + taxes) as price'])
-            ->from(['contract c'])
-            ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
-            ->leftJoin('product p', 'cd.product_id = p.product_id')
-            ->leftJoin('product_price pp', 'p.product_id = pp.product_id')
-            ->innerJoin(['ppppim' => $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
-            ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
-            ->orderBy(['pp.date' => SORT_DESC]);
-        $this->stdout("\nquery_plan query runned\n");
-
-        $this->stdout("Westnet - Proceso de actualizacion de conexiones - " . (new \DateTime())->format('d-m-Y H:i:s') . "\n", Console::BOLD, Console::FG_CYAN);
-        $r = 0;
-        $i = 0;
         try {
-            error_log("customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$");
+            // Traigo todos los customer para poder iterar.
+            $queryCustomer = Customer::find()->where(['status' => 'enabled']);
 
-            foreach ($customers as $customer) {
-                //$this->stdout("\n".$customer->customer_id." processing customer");
 
-                /* if($customer->customer_id == 100244){ // debug customer ID, uncomment to see in the log file if a particular customer was processed
-                    $this->stdout("\n\n\n ".$customer->customer_id." is being processed----------DEBUG----------\n\n\n");
-                } */
+            if ($debug) { //1403,1533,2303, 25372
+                $queryCustomer->andWhere(new Expression('customer_id in (104518)'));
+            }
+            //$queryCustomer->orderBy(['customer_id' => SORT_DESC]); //debugging comment to sort customers differently
 
-                /** @var CustomerClass $customerClass */
-                $customerClass = $customer->getCustomerClass()->one();
+            $subprice = (new Query())
+                ->select(['product_id', new Expression('max(date) maxdate')])
+                ->from('product_price')
+                ->groupBy(['product_id']);
+            //$this->stdout("\nsubprice query created\n");
 
-                if(!isset($customerClass) or empty($customerClass)){ // if the previous query doesnt return anything, its probably a case of a customer created for testing. so we set a default value for it.
-                    $this->stdout("\n".$customer->customer_id." (id) didn't had any CustomerClass - Setting it a new one.");
-                    //break;
-                    $customer->setCustomerClass(5);
-                    $customerClass = $customer->getCustomerClass(); // get it again.
-                }
 
-                $aviso_date = clone $due_date;
-                $cortado_date = clone $due_date;
-                $aviso_date->modify('+' . $customerClass->tolerance_days . ' day');
-                $cortado_date->modify('+' . $customerClass->days_duration . ' day');
+            $query_plan = (new Query())
+                ->select(['(net_price + taxes) as price'])
+                ->from(['contract c'])
+                ->leftJoin('contract_detail cd', 'c.contract_id = cd.contract_id')
+                ->leftJoin('product p', 'cd.product_id = p.product_id')
+                ->leftJoin('product_price pp', 'p.product_id = pp.product_id')
+                ->innerJoin(['ppppim' => $subprice], 'ppppim.product_id = pp.product_id and ppppim.maxdate = pp.date')
+                ->where("c.status ='active' and p.type = 'plan' and c.customer_id = :customer_id and c.contract_id = :contract_id")
+                ->orderBy(['pp.date' => SORT_DESC]);
+            $this->stdout("\nquery_plan query runned\n");
 
-                $contracts = [];
+            $r = 0;
+            $i = 0;
+            // $queryCustomer->limit(100); // debug
+            //$customers = $queryCustomer->limit(1000)->all(); //debug
+            // $customers = $queryCustomer->all();
+            // $this->stdout("\ncustomers query runned");
 
-                // Si no tiene deuda o la deuda es menor a la tolerancia, habilito.
-                $payment = new Payment();
-                $payment->customer_id = $customer->customer_id;
-                $amount = round($payment->accountTotal());
-                $contracts = Contract::findAll(['customer_id' => $customer->customer_id]);
+            // error_log("customer_id\tfacturas\tdebt_bills\tpayed_bills\tnuevo\t$\t$");
+            $this->stdout("\nQuerying ".$queryCustomer->count()." (with status=>enabled)");
+            $batchSize=1000;
+            foreach ( $queryCustomer->batch($batchSize) as $batch_index => $customers ){
+                $this->stdout("\nBatch(#$batch_index) start - current batch size (".count($customers).")");
 
-                //TODO Si el contrato tiene fecha de hoy y tiene deuda se corta
-                foreach ($contracts as $contract) {
-                    $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
-
-                    $precio_plan = clone $query_plan;
-
-                    $precioPlan = $query_plan->addParams([
-                        ':customer_id' => $contract->customer_id,
-                        ':contract_id' => $contract->contract_id
-                    ])->scalar();
-
-                    try {
-                        $from_date = new \DateTime(($contract->from_date ? $contract->from_date : $contract->date));
-                    } catch (\Exception $ex) {
-                        continue;
+                foreach ($customers as $customer) {
+                    //$this->stdout("\n".$customer->customer_id." processing customer");
+    
+                    /* if($customer->customer_id == 100244){ // debug customer ID, uncomment to see in the log file if a particular customer was processed
+                        $this->stdout("\n\n\n ".$customer->customer_id." is being processed----------DEBUG----------\n\n\n");
+                    } */
+    
+                    /** @var CustomerClass $customerClass */
+                    $customerClass = $customer->getCustomerClass()->one();
+    
+                    if(!isset($customerClass) or empty($customerClass)){ // if the previous query doesnt return anything, its probably a case of a customer created for testing. so we set a default value for it.
+                        $this->stdout("\n".$customer->customer_id." (id) didn't had any CustomerClass - Setting it a new one.");
+                        //break;
+                        $customer->setCustomerClass(5);
+                        $customerClass = $customer->getCustomerClass(); // get it again.
                     }
-
-                    if ($connection) {
-                        $status_old = $connection->status_account;
-                        if (is_null($status_old)) {
-                            $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
-                        }
-                        $estadosAnteriores[$connection->status_account]++;
-
-                        // if status_account comes disabled or is already, do:
-                        if ($connection->status_account == Connection::STATUS_ACCOUNT_DISABLED) {
-                            // return $connection->status_account; // if inside cronjob, logic is different so no return is used. instead use continue; and count++
-                            $estados[$connection->status_account]++;
+    
+                    $aviso_date = clone $due_date;
+                    $cortado_date = clone $due_date;
+                    $aviso_date->modify('+' . $customerClass->tolerance_days . ' day');
+                    $cortado_date->modify('+' . $customerClass->days_duration . ' day');
+    
+                    $contracts = [];
+    
+                    // Si no tiene deuda o la deuda es menor a la tolerancia, habilito.
+                    $payment = new Payment();
+                    $payment->customer_id = $customer->customer_id;
+                    $amount = round($payment->accountTotal());
+                    $contracts = Contract::findAll(['customer_id' => $customer->customer_id]);
+    
+                    //TODO Si el contrato tiene fecha de hoy y tiene deuda se corta
+                    foreach ($contracts as $contract) {
+                        $connection = Connection::findOne(['contract_id' => $contract->contract_id]);
+    
+                        $precio_plan = clone $query_plan;
+    
+                        $precioPlan = $query_plan->addParams([
+                            ':customer_id' => $contract->customer_id,
+                            ':contract_id' => $contract->contract_id
+                        ])->scalar();
+    
+                        try {
+                            $from_date = new \DateTime(($contract->from_date ? $contract->from_date : $contract->date));
+                        } catch (\Exception $ex) {
                             continue;
                         }
-
-                        // Si la conexion esta forzada,
-                        // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda
-                        // y demas.
-                        if ($connection->status_account == Connection::STATUS_ACCOUNT_FORCED) {
-                            $due_forced = $date;
-                            try {
-                                $due_forced = new \DateTime($connection->due_date);
-                            } catch (\Exception $ex) {
-                                $connection->due_date = null;
+    
+                        if ($connection) {
+                            $status_old = $connection->status_account;
+                            if (is_null($status_old)) {
+                                $status_old = $connection->status_account = Connection::STATUS_ACCOUNT_DISABLED;
                             }
-                            // Si la fecha de forzado es mayor a hoy, es porque todavia no se cumple y lo tengo que omitir
-                            if ($due_forced >= $date) {
+                            $estadosAnteriores[$connection->status_account]++;
+    
+                            // if status_account comes disabled or is already, do:
+                            if ($connection->status_account == Connection::STATUS_ACCOUNT_DISABLED) {
+                                // return $connection->status_account; // if inside cronjob, logic is different so no return is used. instead use continue; and count++
                                 $estados[$connection->status_account]++;
                                 continue;
                             }
-                        }
-
-
-                        $debtLastBill = $this->debtLastBill($customer->customer_id);
-
-                        //$bills = $this->getBills($customer->customer_id);
-
-                        $newContractsFromDate = clone $from_date;
-                        $newContractsFromDate->modify('+' . $newContractsDays . " days");
-
-                        if ($debug) {
-                            error_log(
-                                "\n - customer_id " . $contract->customer_id . " " .
-                                "\n - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
-                                "\n - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
-                                "\n - aviso_date: " . $aviso_date->format('Y-m-d') .
-                                "\n - cortado_date: " . $cortado_date->format('Y-m-d') .
-                                "\n - due_date: " . $due_date->format('Y-m-d') .
-                                "\n - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
-                                "\n - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
-                                "\n - debtLastBill: " . $debtLastBill .
-                                "\n - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
-                            );
-                        }
-
-                        // Si no esta en proceso de baja
-                        if (
-                            $contract->status != Contract::STATUS_LOW_PROCESS &&
-                            $contract->status != Contract::STATUS_LOW &&
-                            $connection->status_account != Connection::STATUS_ACCOUNT_LOW
-                        ) {
-                            /** Habilito
-                             *  - es free o
-                             *  - No tiene deuda o
-                             *  - Tiene deuda menor al porcentaje de tolerancia y hoy es menor a la fecha de corte y menor a la fecha de corte por nuevo y debe una o menos facturas
-                             *
-                             */
-                            $tiene_deuda = ($amount < 0); // amount (account balance) is calculated in runtime (resource extensive)
-                            $tiene_deuda_sobre_tolerante = (round(abs($amount)) >= $customerClass->percentage_tolerance_debt); // BEWARE, even if 'percentage' is written, here is using the integer value. not a percentage
-                            $es_nueva_instalacion = ($date->diff($from_date)->days <= $newContractsDays);
-                            $avisa = ($date >= $aviso_date && $date < $cortado_date);
-                            $corta = ($date >= $cortado_date);
-                            $es_nuevo = ($from_date >= $last_bill_date && $from_date <= $bill_date);
-                            //Verificamos que la ultima factura cerrada sea del mes corriente.
-                            $last_closed_bill = $customer->getLastClosedBill();
-                            $last_closed_bill_date = $last_closed_bill ? (new \DateTime($last_closed_bill->date)) : false;
-                            $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
-
+    
+                            // Si la conexion esta forzada,
+                            // En el caso de que la fecha de forzado sea mayor a hoy, proceso normalmente, buscando deuda
+                            // y demas.
+                            if ($connection->status_account == Connection::STATUS_ACCOUNT_FORCED) {
+                                $due_forced = $date;
+                                try {
+                                    $due_forced = new \DateTime($connection->due_date);
+                                } catch (\Exception $ex) {
+                                    $connection->due_date = null;
+                                }
+                                // Si la fecha de forzado es mayor a hoy, es porque todavia no se cumple y lo tengo que omitir
+                                if ($due_forced >= $date) {
+                                    $estados[$connection->status_account]++;
+                                    continue;
+                                }
+                            }
+    
+    
+                            $debtLastBill = $this->debtLastBill($customer->customer_id);
+    
+                            //$bills = $this->getBills($customer->customer_id);
+    
+                            $newContractsFromDate = clone $from_date;
+                            $newContractsFromDate->modify('+' . $newContractsDays . " days");
+    
                             if ($debug) {
                                 error_log(
-                                    "\n - " . 'tiene_deuda: ' . ($tiene_deuda ? 's' : 'n') .
-                                    "\n - " . 'tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') . 
-                                    "\n - " . 'es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n') .
-                                    "\n - " . 'avisa: ' . ($avisa ? 's' : 'n') .
-                                    "\n - " . 'corta: ' . ($corta ? 's' : 'n') .
-                                    "\n - " . 'es_nuevo: ' . ($es_nuevo ? 's' : 'n') .
-                                    "\n - " . 'last_bill_date: ' . $last_bill_date->format('Y-m-d'));
+                                    "\n - customer_id " . $contract->customer_id . " " .
+                                    "\n - from: " . $from_date->format('Y-m-d') . " - newContracts: " . $newContracts->format('Y-m-d') .
+                                    "\n - newContractsFromDate: " . $newContractsFromDate->format('Y-m-d') .
+                                    "\n - aviso_date: " . $aviso_date->format('Y-m-d') .
+                                    "\n - cortado_date: " . $cortado_date->format('Y-m-d') .
+                                    "\n - due_date: " . $due_date->format('Y-m-d') .
+                                    "\n - due_forced: " . ($due_forced ? $due_forced->format('Y-m-d') : '') .
+                                    "\n - amount: " . $amount . " - tolerancia: " . $customerClass->percentage_tolerance_debt .
+                                    "\n - debtLastBill: " . $debtLastBill .
+                                    "\n - days: " . $date->diff($from_date)->days . " - newContractsDays: " . $newContractsDays
+                                );
                             }
-
-
-                            if (strtolower($customerClass->name) == 'free') {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                            } else if ($es_nueva_instalacion) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                            } else if ($es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-
-                            } else if ($connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED) {
-                                /**
-                                 * Habilito si:
-                                 *  - solo debe la factura del mes actual y la fecha es menor a la de corte
+    
+                            // Si no esta en proceso de baja
+                            if (
+                                $contract->status != Contract::STATUS_LOW_PROCESS &&
+                                $contract->status != Contract::STATUS_LOW &&
+                                $connection->status_account != Connection::STATUS_ACCOUNT_LOW
+                            ) {
+                                /** Habilito
+                                 *  - es free o
+                                 *  - No tiene deuda o
+                                 *  - Tiene deuda menor al porcentaje de tolerancia y hoy es menor a la fecha de corte y menor a la fecha de corte por nuevo y debe una o menos facturas
+                                 *
                                  */
-                                if (
-                                    !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || 
-                                    (!($debtLastBill > 1) && !$corta && $lastBillItsFromActualMonth && $date < $cortado_date)
-                                    ) {
-                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                $tiene_deuda = ($amount < 0); // amount (account balance) is calculated in runtime (resource extensive)
+                                $tiene_deuda_sobre_tolerante = (round(abs($amount)) >= $customerClass->percentage_tolerance_debt); // BEWARE, even if 'percentage' is written, here is using the integer value. not a percentage
+                                $es_nueva_instalacion = ($date->diff($from_date)->days <= $newContractsDays);
+                                $avisa = ($date >= $aviso_date && $date < $cortado_date);
+                                $corta = ($date >= $cortado_date);
+                                $es_nuevo = ($from_date >= $last_bill_date && $from_date <= $bill_date);
+                                //Verificamos que la ultima factura cerrada sea del mes corriente.
+                                $last_closed_bill = $customer->getLastClosedBill();
+                                $last_closed_bill_date = $last_closed_bill ? (new \DateTime($last_closed_bill->date)) : false;
+                                $lastBillItsFromActualMonth = $last_closed_bill_date ? ($date->format('Y-m') == $last_closed_bill_date->format('Y-m')) : true;
+    
+                                if ($debug) {
+                                    error_log(
+                                        "\n - " . 'tiene_deuda: ' . ($tiene_deuda ? 's' : 'n') .
+                                        "\n - " . 'tiene_deuda_sobre_tolerante: ' . ($tiene_deuda_sobre_tolerante ? 's' : 'n') .
+                                        "\n - " . 'es_nueva_instalacion: ' . ($es_nueva_instalacion ? 's' : 'n') .
+                                        "\n - " . 'avisa: ' . ($avisa ? 's' : 'n') .
+                                        "\n - " . 'corta: ' . ($corta ? 's' : 'n') .
+                                        "\n - " . 'es_nuevo: ' . ($es_nuevo ? 's' : 'n') .
+                                        "\n - " . 'last_bill_date: ' . $last_bill_date->format('Y-m-d'));
                                 }
-                            } else if (
-                                (!$tiene_deuda ||
-                                    ($tiene_deuda && !$tiene_deuda_sobre_tolerante) ||
-                                    ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && $lastBillItsFromActualMonth && !$corta && !$avisa)
-                                )
-                            ) {
-                                $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
-                            } else if (($tiene_deuda && $tiene_deuda_sobre_tolerante) && $avisa && $debtLastBill <= 1) {
-                                /**
-                                 * Deudor:
-                                 *  -  No esta en proceso de baja
-                                 *  -  Tiene deuda mayor a la tolerancia.
-                                 *  -  Hoy es mayor a la fecha de aviso y menor a la de corte o
-                                 *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
-                                 */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
-                            } else if (
-                                (($tiene_deuda && $tiene_deuda_sobre_tolerante) &&
-                                    ($corta && $debtLastBill >= 1) ||
-                                    ($debtLastBill >= 1 && !$es_nueva_instalacion)) &&
-                                (($connection->status_account == Connection::STATUS_ACCOUNT_FORCED &&  ($due_date && $due_forced ? $date > $due_forced : false)) || $connection->status_account != Connection::STATUS_ACCOUNT_FORCED) ||
-                                $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED
-                            ) {
-                                /**
-                                 * Cortado
-                                 *  -  Si tiene deuda mayor a la tolerancia y
-                                 *      -  debe una o mas facturas y
-                                 *      -  hoy es mayor a la fecha de aviso y menor a la fecha de corte
-                                 *  -  Esta forzado y hoy es mayor a la fecha de forzado
-                                 *  -  No esta en proceso de baja
-                                 */
-                                $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
-                                //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill2['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+    
+    
+                                if (strtolower($customerClass->name) == 'free') {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                } else if ($es_nueva_instalacion) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                } else if ($es_nuevo && $tiene_deuda && $tiene_deuda_sobre_tolerante) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                    //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                                    //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+    
+                                } else if ($connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED) {
+                                    /**
+                                     * Habilito si:
+                                     *  - solo debe la factura del mes actual y la fecha es menor a la de corte
+                                     */
+                                    if (
+                                        !$tiene_deuda || ($tiene_deuda && !$tiene_deuda_sobre_tolerante) || 
+                                        (!($debtLastBill > 1) && !$corta && $lastBillItsFromActualMonth && $date < $cortado_date)
+                                        ) {
+                                        $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                    }
+                                } else if (
+                                    (!$tiene_deuda ||
+                                        ($tiene_deuda && !$tiene_deuda_sobre_tolerante) ||
+                                        ($tiene_deuda && $tiene_deuda_sobre_tolerante && $debtLastBill <= 1 && $lastBillItsFromActualMonth && !$corta && !$avisa)
+                                    )
+                                ) {
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_ENABLED;
+                                } else if (($tiene_deuda && $tiene_deuda_sobre_tolerante) && $avisa && $debtLastBill <= 1) {
+                                    /**
+                                     * Deudor:
+                                     *  -  No esta en proceso de baja
+                                     *  -  Tiene deuda mayor a la tolerancia.
+                                     *  -  Hoy es mayor a la fecha de aviso y menor a la de corte o
+                                     *      - hoy es menor a la de aviso y menor a la de corte y debe mas de una factura
+                                     */
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_DEFAULTER;
+                                } else if (
+                                    (($tiene_deuda && $tiene_deuda_sobre_tolerante) &&
+                                        ($corta && $debtLastBill >= 1) ||
+                                        ($debtLastBill >= 1 && !$es_nueva_instalacion)) &&
+                                    (($connection->status_account == Connection::STATUS_ACCOUNT_FORCED &&  ($due_date && $due_forced ? $date > $due_forced : false)) || $connection->status_account != Connection::STATUS_ACCOUNT_FORCED) ||
+                                    $connection->status_account == Connection::STATUS_ACCOUNT_CLIPPED
+                                ) {
+                                    /**
+                                     * Cortado
+                                     *  -  Si tiene deuda mayor a la tolerancia y
+                                     *      -  debe una o mas facturas y
+                                     *      -  hoy es mayor a la fecha de aviso y menor a la fecha de corte
+                                     *  -  Esta forzado y hoy es mayor a la fecha de forzado
+                                     *  -  No esta en proceso de baja
+                                     */
+                                    $connection->status_account = Connection::STATUS_ACCOUNT_CLIPPED;
+                                    //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill  . "\t" .$debtLastBill  . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                                    //error_log( $contract->customer_id . "\t" . $bills ."\t". $debtLastBill2['debt_bills'] . "\t" .$debtLastBill2['payed_bills'] . "\t" .$debtLastBill . "\t" . $amount . "\t" . ceil($precioPlan) );
+                                }
                             }
-                        }
-
-                        $estados[$connection->status_account]++;
-                        if ($save) {
-                            if ($status_old != $connection->status_account) {
-                                $connection->detachBehaviors();
-                                $connection->update(false);
+    
+                            $estados[$connection->status_account]++;
+                            if ($save) {
+                                if ($status_old != $connection->status_account) {
+                                    $connection->detachBehaviors();
+                                    $connection->update(false);
+                                }
                             }
-                        }
-                        $i++;
-                        if (($i % 1000) == 0) {
-                            $this->stdout("Westnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
+                            $i++;
+                            if (($i % 1000) == 0) {
+                                $this->stdout("Westnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
+                            }
                         }
                     }
                 }
             }
+
             //$this->stdout(var_dump($estadosAnteriores,$estados)); // only for debugging
         } catch (\Exception $ex) {
             echo $ex->getMessage();
