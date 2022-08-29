@@ -732,7 +732,7 @@ class ConnectionStatusController extends Controller
                             }
                             $i++;
                             if (($i % 1000) == 0) {
-                                $this->stdout("\nWestnet - procesados:" . $i . "\n", Console::BOLD, Console::FG_CYAN);
+                                $this->stdout("\nWestnet - procesados:" . $i, Console::BOLD, Console::FG_CYAN);
                             }
                         }
                     }
