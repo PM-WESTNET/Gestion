@@ -890,6 +890,7 @@ class BillController extends Controller
      */
     public function WestnetPdf($id)
     {
+        $this->layout = '//pdf';
 
         $response = Yii::$app->getResponse();
         $response->format = \yii\web\Response::FORMAT_RAW;
@@ -899,7 +900,6 @@ class BillController extends Controller
         $model = $this->findModel($id);
         $companyData = $model->company;
 
-        $this->layout = '//pdf';
 
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $model->getBillDetails(),
@@ -951,6 +951,8 @@ class BillController extends Controller
      */
     public function BigwayPdf($id)
     {      
+        $this->layout = '//pdf';
+
         $model = $this->findModel($id);
         $dataProvider = new \yii\data\ActiveDataProvider([
             'query' => $model->getBillDetails(),
