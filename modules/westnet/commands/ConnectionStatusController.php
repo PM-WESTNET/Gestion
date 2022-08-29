@@ -50,8 +50,9 @@ class ConnectionStatusController extends Controller
     public function actionUpdate($save = false) // when activating the cron you can pass a parameter (like 1 for TRUE)
     {
         if (Yii::$app->mutex->acquire('update_connections_cron')) {
-            $this->stdout("\nINICIO PROCESO actionUpdate(...)\n");
+            $this->stdout("\nINICIO PROCESO actionUpdate(...) ".'At - '.(new \DateTime())->format('d-m-Y H:i:s').' (server time) '."\n");
             $this->updateConnections($save);
+            $this->stdout("\nFIN PROCESO actionUpdate(...) ".'At - '.(new \DateTime())->format('d-m-Y H:i:s').' (server time) '."\n");
             Yii::$app->mutex->release('update_connections_cron');
         }
     }
