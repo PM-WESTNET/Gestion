@@ -528,8 +528,7 @@ class ConnectionStatusController extends Controller
             $this->stdout("\nQuerying ".$queryCustomer->count()." (with status=>enabled)");
             $batchSize=1000;
             foreach ( $queryCustomer->batch($batchSize) as $batch_index => $customers ){
-                $this->stdout("\nBatch(#$batch_index) start - current batch size (".count($customers).")");
-
+                // $this->stdout("\nBatch(#$batch_index) start - current batch size (".count($customers).")");
                 foreach ($customers as $customer) {
                     //$this->stdout("\n".$customer->customer_id." processing customer");
     
