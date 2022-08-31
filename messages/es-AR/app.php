@@ -1445,4 +1445,6 @@
     'Preview layout' => 'Vista previa de diseño',
     'This notification has no specific layout and will be sent with {layout}' => 'Esta notificación no tiene un diseño específico y se enviará con {layout}',
     'Payment Status' => 'Estado de Pago',
+    'Backup saved locally. Could not transfer to backup server' => 'Backup Realizado localmente. No se pudo transferir a servidor de backups',
+    'Backup file not found' => 'Archivo de backup no encontrado'
   );

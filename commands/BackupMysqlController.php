@@ -192,51 +192,59 @@ class BackupMysqlController extends \yii\console\Controller
 
     public function actionMysqlBackup()
     {
-        $params = Yii::$app->params['backups'];
-        $date = (new DateTime('now'));
-        $host = $params['host'];
-        $user = $params['user'];
-        $pass = $params['pass'];
-        if(!isset($params['mysqlDir'])) return;
+        try{
+            $params = Yii::$app->params['backups'];
+            $date = (new DateTime('now'));
+            $host = $params['host'];
+            $user = $params['user'];
+            $pass = $params['pass'];
+            if(!isset($params['mysqlDir'])) return;
 
-        if (isset($params['databases'])) {
-            foreach ($params['databases'] as $db) {
-                $backup = new Backup();
-                $backup->init_timestamp = $date->format('d-m-Y H:i:s');
-                $backup->status = 'in_process';
-                $backup->database = $db;
-                $backup->save();
-
-                $name = $db.'.sql';
-                $fileOutput = $params['backupMysqlDir'] .'/'. $name;
-                $command = "mysqldump -h$host -u$user -p$pass $db > $fileOutput";
-                $result = shell_exec($command);
-
-                if ($result ==  '' && file_exists($fileOutput)) {
-                    try {
-
-                        if($this->transferToRemoteServer($fileOutput, $params['mysqlDir']. $db.'_'. $date->format('dmY_His').'.sql')) {
-                            $backup->status = 'success';
-                        }else {
-                            $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups';
-                            $backup->status = 'error';
-                            
-                        }
-                        $backup->save();
-                    }catch(\Exception $e) {
-                        $backup->status = 'error';
-                        $backup->description = 'Backup Realizado localmente. No se pudo transferir a servidor de backups ' . $e->getMessage();
-                        $backup->save();
-                        // send error to telegram
-                        TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/mysql-backup ****', $e);
-                        return;
-                    }
-                }else {
-                    $backup->status = 'error';
-                    $backup->description ='Error desconocido';
+            if (isset($params['databases'])) {
+                foreach ($params['databases'] as $db) {
+                    $backup = new Backup();
+                    $backup->init_timestamp = $date->format('d-m-Y H:i:s');
+                    $backup->status = 'in_process';
+                    $backup->database = $db;
                     $backup->save();
+
+                    $name = $db.'.sql';
+                    $fileOutput = $params['backupMysqlDir'] .'/'. $name;
+                    $command = "mysqldump -h$host -u$user -p$pass $db > $fileOutput";
+                    $result = shell_exec($command);
+
+                    if ($result ==  '' && file_exists($fileOutput)) {
+                        try {
+                            if($this->transferToRemoteServer($fileOutput, $params['mysqlDir']. $db.'_'. $date->format('dmY_His').'.sql')) {
+                                $backup->status = 'success';
+
+                            }else {
+                                $backup->description = Yii::t('app', 'Backup saved locally. Could not transfer to backup server');
+                                $backup->status = 'error';
+                                
+                                throw new \Exception( $backup->description );
+                            }
+                            $backup->save();
+                        }catch(\Exception $e) {
+                            $backup->status = 'error';
+                            $backup->description = Yii::t('app', 'Backup saved locally. Could not transfer to backup server') . ' ' . $e->getMessage();
+                            $backup->save();
+
+                            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/mysql-backup ****', $e);
+                        }
+                    }else {
+                        $backup->status = 'error';
+                        $backup->description = Yii::t('app', 'Backup file not found') . ' - ' . $name;
+                        $backup->save();
+
+                        throw new \Exception( $backup->description );
+                    }
                 }
             }
+        }
+        catch(\Exception $e) {
+            
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/mysql-backup ****', $e);
         }
     }
 
@@ -267,18 +275,24 @@ class BackupMysqlController extends \yii\console\Controller
         return false;
     }
 
-    private function transferToRemoteServer($filename, $remoteFile) {
-        $params = Yii::$app->params['backups'];
+    private function transferToRemoteServer($filename, $remoteFile) {        
+        // connect to remote server
         $connection = $this->connectToRemoterServer();
 
+        // default case: something went wrong
+        $return_val = false;
+
+        // if connected and space is availible, send sql via ssh2_scp_send
         if($connection !== false && $this->verifyRemoteSpace($connection)) {
             if(ssh2_scp_send($connection, $filename, $remoteFile, 0777)){
-                return true;
+                // finally, close ssh connection. this theorically prevents truncated/incompleted file transfers  
+                ssh2_exec($connection, 'exit');
+                
+                $return_val = true;
             }
         }
 
-        return false;
-
+        return $return_val;
     }
 
     private function verifyRemoteSpace($connection){
