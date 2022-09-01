@@ -194,24 +194,34 @@ class BackupMysqlController extends \yii\console\Controller
     {
         try{
             $params = Yii::$app->params['backups'];
-            $date = (new DateTime('now'));
             $host = $params['host'];
             $user = $params['user'];
             $pass = $params['pass'];
+            $date = (new DateTime('now'));
             if(!isset($params['mysqlDir'])) return;
 
             if (isset($params['databases'])) {
                 foreach ($params['databases'] as $db) {
+                    // create backup register for db
                     $backup = new Backup();
+                    // start timestamp
                     $backup->init_timestamp = $date->format('d-m-Y H:i:s');
                     $backup->status = 'in_process';
                     $backup->database = $db;
-                    $backup->save();
 
+
+                    // backup name, path to save to, and command to excecute
                     $name = $db.'.sql';
                     $fileOutput = $params['backupMysqlDir'] .'/'. $name;
                     $command = "mysqldump -h$host -u$user -p$pass $db > $fileOutput";
+                    // create a backup and save it locally on $fileOutput path
                     $result = shell_exec($command);
+
+
+                    // finish timestamp
+                    $backup->finish_timestamp = (new DateTime('now'))->format('d-m-Y H:i:s');
+                    // save temporal backup attributes on DB before trying to send them to the storage server
+                    $backup->save();
 
                     if ($result ==  '' && file_exists($fileOutput)) {
                         try {
@@ -243,7 +253,7 @@ class BackupMysqlController extends \yii\console\Controller
             }
         }
         catch(\Exception $e) {
-            
+
             TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: backup-mysql/mysql-backup ****', $e);
         }
     }
