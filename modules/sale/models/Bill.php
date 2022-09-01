@@ -1605,7 +1605,7 @@ class Bill extends ActiveRecord implements CountableInterface
         $send_email1 = true;
         $send_email2 = true;
         $send = true;
-        $message_subject = "Envio de factura de: " . $this->customer->parentCompany->name;
+        $message_subject = "Envio de factura de: " . $this->customer->company->name;
         $message = [
             'params'=>[
                 'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
