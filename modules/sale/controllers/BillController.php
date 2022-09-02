@@ -1069,6 +1069,12 @@ class BillController extends Controller
      */
     public function actionEmail($id, $from = 'all_bills', $email = null)
     {
+        
+        
+        try{
+            
+            
+            
         $model = $this->findModel($id);
 
         $pdf = $this->actionPdf($id);
@@ -1079,21 +1085,40 @@ class BillController extends Controller
         fclose($file);
 
         if (empty($email) && trim($model->customer->email) == "" && trim($model->customer->email2) == "") {
-            Yii::$app->session->setFlash("error", Yii::t("app", "The Client don't have email."));
+            Yii::$app->session->setFlash("error", Yii::t("app", "The Client doesn't have email."));
             return $this->redirect(['index']);
+        //    var_dump("success", 'OPCION 1 !!!!!!');
         }
 
         if ($model->sendEmail($fileName, $email)) {
             Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+            // var_dump("success", 'OPCION 2 !!!!!!');
         } else {
+            // var_dump("success", 'OPCION 3 !!!!!!');
             Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
         };
 
         if ($from === 'all_bills') {
+            // var_dump("success", 'OPCION 4 !!!!!!');
             return $this->redirect(['index']);
         } else {
+            // var_dump("success", 'OPCION 5 !!!!!!');
             return $this->redirect(['/checkout/payment/current-account', 'customer' => $model->customer_id]);
         }
+            
+        
+        // die('tracedie');
+            
+            
+        }catch(\Exception $ex){
+            var_dump($ex);
+            die();
+
+        
+        }
+    
+    
+    
     }
 	
     /**
