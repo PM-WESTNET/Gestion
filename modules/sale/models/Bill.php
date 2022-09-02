@@ -1599,34 +1599,55 @@ class Bill extends ActiveRecord implements CountableInterface
      */
     public function sendEmail($pdfFileName, $email)
     {
-        $pointOfSale = $this->getPointOfSale()->number;
 
-        $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->parent_company_id);
-        $send_email1 = true;
-        $send_email2 = true;
-        $send = true;
-        $message_subject = "Envio de factura de: " . $this->customer->company->name;
-        $message = [
-            'params'=>[
-                'image'         => Yii::getAlias("@app/web/". $this->customer->parentCompany->getLogoWebPath()),
-                'comprobante'   => $this->billType->name . " " . sprintf("%08d", $this->number )
-            ]
-        ];
 
-        if (empty($email)) {
-            if($this->customer->email_status == Customer::EMAIL_STATUS_ACTIVE) {
-                $send_email1 = $sender->send( $this->customer->email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
-            }
+        try{
+
+            $pointOfSale = $this->getPointOfSale()->number;
+
+            $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->company_id);
+            $send_email1 = true;
+            $send_email2 = true;
+            $send = true;
+
+            // var_dump($sender);die();
             
-            if($this->customer->email2_status == Customer::EMAIL_STATUS_ACTIVE) {
-                $send_email2 = $sender->send( $this->customer->email2, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;;
+            $message_subject = "Envio de factura de: " . $this->customer->company->name;
+
+            $message = [
+                'params'=>[
+                    'image'         => Yii::getAlias("@app/web/". $this->customer->company->getLogoWebPath()),
+                    'comprobante'   => $this->billType->name . " " . sprintf("%08d", $this->number )
+                ]
+            ];
+           
+
+            
+
+            if (empty($email)) {
+                if($this->customer->email_status == Customer::EMAIL_STATUS_ACTIVE) {
+                    $send_email1 = $sender->send( $this->customer->email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
+                }
+
+                if($this->customer->email2_status == Customer::EMAIL_STATUS_ACTIVE) {
+                    $send_email2 = $sender->send( $this->customer->email2, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;;
+                }
+            } else {
+                $send = $sender->send($email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
+                return $send;
             }
-        } else {
-            $send = $sender->send($email, $message_subject, $message,[], [],[$pdfFileName]) ? true : false ;
-            return $send;
+
+            return $send_email1 && $send_email2;
+           
+        }catch(\Exception $ex){
+            var_dump($ex);
+            die();
+
+    
         }
 
-        return $send_email1 && $send_email2;
+
+
     }
 
     /**
