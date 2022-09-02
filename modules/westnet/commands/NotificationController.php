@@ -132,7 +132,7 @@ class NotificationController extends Controller
 
             $notifications = Notification::find()
                 ->innerJoin('transport t', 't.transport_id=notification.transport_id')
-                ->andWhere(['t.name' => 'Email', 'notification.status' => 'pending'])
+                ->andWhere(['t.name' => 'Email', 'notification.status' => Notification::STATUS_PENDING])
                 ->andWhere(['or',['notification.scheduler' => null], ['notification.scheduler' => '']])
                 ->all();
         
@@ -140,7 +140,7 @@ class NotificationController extends Controller
                 if (\Yii::$app->mutex->acquire('send_emails_'.$notification->notification_id)){
                     $this->stdout("\n" . 'Start send for notification_id: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
 
-                    $notification->updateAttributes(['status' => 'in_process']);
+                    $notification->updateAttributes(['status' => Notification::STATUS_IN_PROCESS]);
                     $transport = $notification->transport;
                     $result = $transport->send($notification);
                     $this->stdout('Notification batch end for: ' . $notification->notification_id . ' at ' . date("Y-m-d h:i:s") . "\n");
@@ -163,6 +163,7 @@ class NotificationController extends Controller
             }
         }
         catch(\Exception $ex){
+            $this->stdout('Error Catch at' . date("Y-m-d h:i:s") . "\n" . "With message " . $ex->getMessage() . "\n");
             // send error to telegram
             TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch: westnet/notification/send-emails ****', $ex);
         }

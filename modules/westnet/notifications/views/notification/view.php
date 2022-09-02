@@ -77,6 +77,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'create_timestamp:datetime',
         'update_timestamp:datetime',
         [
+            'attribute' => 'status',
+            'value' => NotificationsModule::t('app', ucfirst($model->status))
+        ],
+        [
+            'attribute' => 'status_message',
+            'value' => $model->status_message,
+        ],
+        [
             'attribute' => 'transport_id',
             'value' => $model->transport->name
         ],
@@ -125,10 +133,6 @@ $this->params['breadcrumbs'][] = $this->title;
         'to_date:date',
         'to_time',
         'times_per_day',
-        [
-            'attribute' => 'status',
-            'value' => NotificationsModule::t('app', ucfirst($model->status))
-        ],
         [
             'attribute' => 'last_sent',
             'value' => Yii::$app->formatter->asDate($model->last_sent),

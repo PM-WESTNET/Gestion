@@ -101,7 +101,9 @@ class EmailTransport implements TransportInterface {
         if(Yii::$app->request->isConsoleRequest) echo 'Comenzando envio de notificación: ' . $notification->notification_id . '  ' . date("Y-m-d h:i:s") . "\n";
         
         $customers = NotificationHasCustomer::GetCustomerToCampaign($notification->notification_id);
-
+        echo(count($customers)." - customers PENDING TO SEND found \n");
+        $already_sent = NotificationHasCustomer::GetCustomerToCampaign($notification->notification_id, Notification::STATUS_SENT);
+        echo(count($already_sent)." - customers ALREADY SENT found \n");
         Yii::$app->cache->set('status_'.$notification->notification_id, 'in_proccess', 600);
         Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
 
@@ -199,7 +201,7 @@ class EmailTransport implements TransportInterface {
                 }
                 //log_email('Fin de envio de notificación: ' . $notification->notification_id . '  ' . date('Y-m-d H:i'));
             }else{
-                $error = 'No hay mas destinatarios!';
+                $error = 'No existen destinatarios PENDIENTES para la notificacion seleccionada.';
             }
         } catch(\Exception $ex) {
             Yii::$app->cache->delete('status_'.$notification->notification_id);
@@ -210,7 +212,7 @@ class EmailTransport implements TransportInterface {
             $error = $ex->getMessage();
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
-            if(Yii::$app->request->isConsoleRequest) echo 'Error: ' . $error . '  ' . date("Y-m-d h:i:s") . "\n";
+            if(Yii::$app instanceof Yii\console\Application) echo 'Error: ' . $error . '  ' . date("Y-m-d h:i:s") . "\n";
         }
 
 
@@ -293,6 +295,9 @@ class EmailTransport implements TransportInterface {
     }
 
    public function AttachmentPdf($customer_id, $email){
+    //todo: fix potential error that the lastest bill can be a credit note and not an invoice
+    // check that bill_type relation has class 'app\modules\sale\models\bills\Bill' . because that is the class used by invoice instances (fact A , B , C. M)
+    // find the lastest closed bill from customer.
 	$bill = Bill::find()
             ->select(['b.bill_id', 'b.class'])
             ->from(['bill b'])
@@ -301,7 +306,19 @@ class EmailTransport implements TransportInterface {
             ->andWhere(['b.status' => 'closed'])
             ->orderBy(['b.date'=>SORT_DESC])
             ->one()->bill_id;
-	$url ="https://gestion.westnet.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+    
+    //*DOC https://www.yiiframework.com/doc/guide/2.0/en/runtime-routing
+    // remember this routing is done by an Application Console routing is a bit different
+    $url = Url::toRoute(
+        [
+            '/sale/bill/email-console',
+            'id' => $bill,
+            'from' => 'account_current',
+            'email' => $email,
+        ]);
+    // echo $url;
+	// $url ="https://gestion.bigway.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+
 	$ch = curl_init();
         $options = array(
                 CURLOPT_URL             => $url,

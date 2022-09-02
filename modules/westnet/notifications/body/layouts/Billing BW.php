@@ -43,10 +43,9 @@ $urlBase = Url::base(($use_https) ? 'https' : false);
                     <tr>
                       <td>
                         <!-- LOGO BIGWAY -->
-                        <div class="div1" style=" border-radius: 23px; display: flex; justify-content: center; ">
+                        <div class="logoDiv" style=" border-radius: 23px;">
                           <?= Html::img($urlBase . '/images/logo-bigway.png',
-                            ['alt' => 'BigWaylogo', 'class' => 'footer-img', 'style' => 'width: 60%;border-radius: 23px;filter: invert(1);']
-                          ) ?>
+                            ['alt' => 'BigWaylogo', 'class' => 'footer-img', 'style' => "width: 60%;border-radius: 23px;margin-left: 109px;margin-right: 109px;"]) ?>
                         </div>
                       </td>
                     </tr>
@@ -61,7 +60,7 @@ $urlBase = Url::base(($use_https) ? 'https' : false);
                       <td height="auto" style="max-width:100px;text-align: center;  background-color: #ffffff;">
                         <table align="center" style="border-spacing: 0;">
                           <tr>
-                            <td style="padding: 0;text-align: center;color: #0000;">
+                            <td style="padding: 0;text-align: center;color: #000000;">
                               <p style="font-weight: bold;font-size: 24px; letter-spacing: 1.6px;margin: 20px 0;">
                                 <?= $title ?>
                               </p>
@@ -78,12 +77,12 @@ $urlBase = Url::base(($use_https) ? 'https' : false);
                       <td width="15px" height="auto" style="background-color: #FFFFFF; border-radius: 0 0 0 25px;">
                         &nbsp;
                       </td>
-                      <td height="auto" style="text-align: center; padding-bottom: 15px; padding-top: 15px; background-color: #ffffff;">
+                      <td height="auto" style="text-align: center; padding-bottom: 15px; padding-top: 0px; background-color: #ffffff;">
                         <table align="center" style="border-spacing: 0;">
 
                           <tr>
                             <td width="800px" style="text-align: center;">
-                              <table align="center" style="border-spacing: 0;font-size:9px;letter-spacing: 1.2px;">
+                              <table align="center" style="border-spacing: 0;font-size:14px;letter-spacing: 1.2px;">
                                 <tr>
                                   <td style="padding: 0;">
                                     <p style="font-size:12px;margin: 20px 0;">
@@ -111,20 +110,20 @@ $urlBase = Url::base(($use_https) ? 'https' : false);
 
         <!-- footer -->
         <tr>
-          <td style="padding: 0; background-color: #F9EEFE;">
+          <td style=" background-color: #F9EEFE;">
             <table width="100%" style="border-spacing: 0;text-align: center;">
               <tr>
-                <td style="background-color: #F9EEFE; display: flex; justify-content: center; ">
-                  <table class="email-footer" style="border-spacing: 0;text-align: center;">
-                    <tr class="footer-item" style="text-align: center;">
-                      <td style="width: 25%;"></td>
-                      <td style="padding: 0; text-align: center;">
-                        <p style="font-size: 9px;margin: 15px 0;margin: 20px 0 8px;padding: 0;text-align: center;"> Visitanos en
+                <td style="background-color: #F9EEFE;">
+                  <table class="email-footer" style="border-spacing: 0;">
+                    <tr class="footer-item" >
+                      <td style="width: 207px;"></td>
+                      <td>
+                        <p style="font-size: 9px;"> Visitanos en
                           <br>
-                          <a style="color: #0645AD;text-decoration: none;font-size: 11px;text-align: center;" href="https://www.bigway.com.ar">https://www.bigway.com.ar</a>
+                          <a style="color: #0645AD;text-decoration: none;font-size: 11px;" href="https://www.bigway.com.ar">https://www.bigway.com.ar</a>
                         </p>
                       </td>
-                      <td style="width: 25%;"></td>
+                      <td style="width: 207px;"></td>
                     </tr>
                   </table>
                 </td>
