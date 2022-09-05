@@ -163,13 +163,26 @@ class EmailTransport implements TransportInterface {
                                 [],
                                 []
                             );
-                            
-                            if($result){
-                                NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'sent');
-                            }else if(!$result)
-                                NotificationHasCustomer::MarkSendEmail($customer['email'],$notification->notification_id,'error');
-                            else
-                                NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error',VarDumper::dumpAsString($result));
+                            // echo "\nresultvalue:\n";
+                            // var_export($result);
+                            // echo "\n";
+                            // result = true or 1
+                            if(($result) and !is_string($result)){
+                                NotificationHasCustomer::MarkSendEmail($customer['email'], $notification->notification_id, 'sent');
+                            }
+                            // result boolean FALSE or STRING
+                            else{
+                                // separate string - "false/0" value posibility
+                                $obs = null;
+                                if(is_string($result)){
+                                    $obs = VarDumper::dumpAsString($result);
+                                }
+                                NotificationHasCustomer::MarkSendEmail($customer['email'], $notification->notification_id, 'error', $obs);
+
+                                // increment error counter
+                                $ok ++;
+                            }
+
                         }else{                            
                             if(!isset($toName)){
                                 if(Yii::$app->request->isConsoleRequest) echo 'toName not setted ' . "\n";
@@ -178,14 +191,13 @@ class EmailTransport implements TransportInterface {
                                 if(Yii::$app->request->isConsoleRequest) echo 'toMail not setted ' . "\n";
                             }
                             $error .= " $toName <$toMail>; ";
-
-                            // log_email('Correo Inválido: ' . $toMail. ' - Customer '. $customer['code']);
-                            if(Yii::$app->request->isConsoleRequest) echo 'Correo Invalido: ' . $toMail . ' - Customer '. $customer['code'] . '  ' . date("Y-m-d h:i:s") . "\n";
-                            NotificationHasCustomer::MarkObservationEmail($customer['email'],$notification->notification_id,'error','Correo Inválido: ' . $toMail. ' - Customer '. $customer['code'], 'emails');
+                            
+                            $errStr = 'Invalid email: '.$toMail.' - Customer: '.$customer['code'].' - Date: '.date("Y-m-d h:i:s");
+                            // log_email($errStr);
+                            if(Yii::$app->request->isConsoleRequest) echo $errStr."\n";
+                            NotificationHasCustomer::MarkSendEmail($customer['email'], $notification->notification_id, 'error', $errStr);
                         }
-
-                        $ok += $result;
-
+                        
                         Yii::$app->cache->set('success_'.$notification->notification_id, $ok, 600);
                         Yii::$app->cache->set('error_message_'.$notification->notification_id, $error,600);
                         Yii::$app->cache->set('total_'.$notification->notification_id, count($customers), 600);
@@ -209,7 +221,7 @@ class EmailTransport implements TransportInterface {
             Yii::$app->cache->delete('error_'.$notification->notification_id);
             Yii::$app->cache->set('error_message_'.$notification->notification_id, $ex->getTraceAsString(), 600);
 
-            $error = $ex->getMessage();
+            $error = "ERROR ".$ex->getMessage()." - FILE ".$ex->getFile()."(".$ex->getLine().")";
             $notification->updateAttributes(['error_msg' => $error]);
             $ok = false;
             if(Yii::$app instanceof Yii\console\Application) echo 'Error: ' . $error . '  ' . date("Y-m-d h:i:s") . "\n";
@@ -304,6 +316,9 @@ class EmailTransport implements TransportInterface {
      * @return mixed
      */
     public function AttachmentPdf($customer_id, $email){
+        // default error value. later changes if email is sent ok
+        $response = false;
+
         //todo: fix potential error that the lastest bill can be a credit note and not an invoice
         // check that bill_type relation has class 'app\modules\sale\models\bills\Bill' . because that is the class used by invoice instances (fact A , B , C. M)
         // find the lastest closed bill from customer.
@@ -314,48 +329,60 @@ class EmailTransport implements TransportInterface {
                 ->where(['c.customer_id' => $customer_id])
                 ->andWhere(['b.status' => 'closed'])
                 ->orderBy(['b.date'=>SORT_DESC])
-                ->one()->bill_id;
-        
-        //*DOC https://www.yiiframework.com/doc/guide/2.0/en/runtime-routing
-        // remember this routing is done by an Application Console routing is a bit different
-        $url = Url::toRoute(
-            [
-                '/sale/bill/email-console',
-                'id' => $bill,
-                'from' => 'account_current',
-                'email' => $email,
-            ]);
-        // echo $url;
-        // $url ="https://gestion.bigway.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+                ->one();
 
-        // init curl
-        $ch = curl_init();
-        // set curl options array
-        $options = array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-            CURLOPT_POSTFIELDS => "",
-        );
-        // sets options
-        curl_setopt_array($ch,$options);
+        // if a bill is found related to customer
+        if(!empty($bill)){ 
 
-        // curl exec. At this point the /sale/bill/email-console triggers and sends an email in the instance context of yii2 CONSOLE App
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);   //get status code
+            //*DOC https://www.yiiframework.com/doc/guide/2.0/en/runtime-routing
+            // remember this routing is done by an Application Console so routing is a tiny bit different
+            $url = Url::toRoute(
+                [
+                    '/sale/bill/email-console',
+                    'id' => $bill->bill_id,
+                    'from' => 'account_current',
+                    'email' => $email,
+                ]);
+            // echo $url;
+            // $url ="https://gestion.bigway.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
 
-        if ( $httpCode != 200 ){
-            echo "Return code is {$httpCode} \n".curl_error($ch);
-        } else {
-            echo htmlspecialchars($response);
+            // init curl
+            $ch = curl_init();
+            // set curl options array
+            $options = array(
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 120,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_POSTFIELDS => "",
+            );
+            // sets options
+            curl_setopt_array($ch,$options);
+
+            // curl exec. At this point the /sale/bill/email-console triggers and sends an email in the instance context of yii2 CONSOLE App
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);   //get status code
+
+            // for some reason , curl response is a stringyfied version of the boolean it represents..
+            if( ($response == '1') or ($response == '0') ){
+                $response = intval($response);
+            }
+            
+            if ( $httpCode != 200 ){
+                echo "Return code is {$httpCode} \n".curl_error($ch);
+            } else {
+                echo htmlspecialchars($response);
+            }
+            // close connection
+            curl_close($ch);
+
         }
-        // close connection
-        curl_close($ch);
-
+        else{
+            $response = Yii::t('app', 'This customer has no closed bill that could be sent');
+        }
         return $response;
     }
 }

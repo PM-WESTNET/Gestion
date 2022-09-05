@@ -175,20 +175,10 @@ class NotificationHasCustomer extends \app\components\db\ActiveRecord
     /**
      * Return customer fo customer_id
      */
-    public static function MarkSendEmail($email,$notification_id, $status){
+    public static function MarkSendEmail($email,$notification_id, $status, $observation = null){
         $model = self::find()->where(['email' => $email])->andWhere(['notification_id' => $notification_id])->one();
         $model->status = $status;
-        $model->updatedAt = date('Y-m-d H:i');
-        $model->save(false); 
-    }
-
-    /**
-     * Return customer fo customer_id
-     */
-    public static function MarkObservationEmail($email,$notification_id, $status, $observation){
-        $model = self::find()->where(['email' => $email])->andWhere(['notification_id' => $notification_id])->one();
-        $model->status = $status;
-        $model->observation = $observation;
+        if(!is_null($observation)) $model->observation = $observation;
         $model->updatedAt = date('Y-m-d H:i');
         $model->save(false); 
     }
