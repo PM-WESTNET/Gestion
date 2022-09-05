@@ -286,6 +286,9 @@ class Payment extends  ActiveRecord  implements CountableInterface
                         $contract->updateConnectionsMoneyAccounts();
                     }
                 }
+
+                // update current customer's money account balance. this is so as to get rid of the current very old cronjob implementation
+                $this->customer->updateAttributes(['current_account_balance' => round($this->accountTotal(), 2), 'last_balance' => time()]);
             }
         }
     }
