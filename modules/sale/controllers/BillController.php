@@ -27,6 +27,7 @@ use app\modules\config\models\Config;
 use yii\helpers\Url;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use yii\filters\AccessControl;
+use yii\web\Application;
 
 /**
  * BillController implements the CRUD actions for Bill model.
@@ -1078,6 +1079,7 @@ class BillController extends Controller
         $model = $this->findModel($id);
 
         $pdf = $this->actionPdf($id);
+
         $pdf = substr($pdf, strrpos($pdf, '%PDF-'));
         $fileName = "/tmp/" . 'Comprobante' . sprintf("%04d", $model->getPointOfSale()->number) . "-" . sprintf("%08d", $model->number) . "-" . $model->customer_id . ".pdf";
         $file = fopen($fileName, "w+");
@@ -1085,17 +1087,17 @@ class BillController extends Controller
         fclose($file);
 
         if (empty($email) && trim($model->customer->email) == "" && trim($model->customer->email2) == "") {
-            Yii::$app->session->setFlash("error", Yii::t("app", "The Client doesn't have email."));
+            if(Yii::$app instanceof Application) Yii::$app->session->addFlash("error", Yii::t("app", "The Client doesn't have email."));
             return $this->redirect(['index']);
         //    var_dump("success", 'OPCION 1 !!!!!!');
         }
 
         if ($model->sendEmail($fileName, $email)) {
-            Yii::$app->session->setFlash("success", Yii::t('app', 'The email is sended succesfully.'));
+            if(Yii::$app instanceof Application) Yii::$app->session->addFlash("success", Yii::t('app', 'The email is sended succesfully.'));
             // var_dump("success", 'OPCION 2 !!!!!!');
         } else {
             // var_dump("success", 'OPCION 3 !!!!!!');
-            Yii::$app->session->setFlash("error", Yii::t('app', 'The email could not be sent.'));
+            if(Yii::$app instanceof Application) Yii::$app->session->addFlash("error", Yii::t('app', 'The email could not be sent.'));
         };
 
         if ($from === 'all_bills') {

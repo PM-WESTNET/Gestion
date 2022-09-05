@@ -294,60 +294,68 @@ class EmailTransport implements TransportInterface {
         
     }
 
-   public function AttachmentPdf($customer_id, $email){
-    //todo: fix potential error that the lastest bill can be a credit note and not an invoice
-    // check that bill_type relation has class 'app\modules\sale\models\bills\Bill' . because that is the class used by invoice instances (fact A , B , C. M)
-    // find the lastest closed bill from customer.
-	$bill = Bill::find()
-            ->select(['b.bill_id', 'b.class'])
-            ->from(['bill b'])
-            ->leftJoin('customer c', 'c.customer_id = b.customer_id')
-            ->where(['c.customer_id' => $customer_id])
-            ->andWhere(['b.status' => 'closed'])
-            ->orderBy(['b.date'=>SORT_DESC])
-            ->one()->bill_id;
-    
-    //*DOC https://www.yiiframework.com/doc/guide/2.0/en/runtime-routing
-    // remember this routing is done by an Application Console routing is a bit different
-    $url = Url::toRoute(
-        [
-            '/sale/bill/email-console',
-            'id' => $bill,
-            'from' => 'account_current',
-            'email' => $email,
-        ]);
-    // echo $url;
-	// $url ="https://gestion.bigway.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
+    /**
+     * This function sends the lastest closed bill for the specified customer_id.
+     * This function was made by a previous programmer so i dont really know why
+     * it was made using CURLs. 
+     * this will crash in the case of a firewall or connection drop. i suggest it
+     * being redone
+     * 
+     * @return mixed
+     */
+    public function AttachmentPdf($customer_id, $email){
+        //todo: fix potential error that the lastest bill can be a credit note and not an invoice
+        // check that bill_type relation has class 'app\modules\sale\models\bills\Bill' . because that is the class used by invoice instances (fact A , B , C. M)
+        // find the lastest closed bill from customer.
+        $bill = Bill::find()
+                ->select(['b.bill_id', 'b.class'])
+                ->from(['bill b'])
+                ->leftJoin('customer c', 'c.customer_id = b.customer_id')
+                ->where(['c.customer_id' => $customer_id])
+                ->andWhere(['b.status' => 'closed'])
+                ->orderBy(['b.date'=>SORT_DESC])
+                ->one()->bill_id;
+        
+        //*DOC https://www.yiiframework.com/doc/guide/2.0/en/runtime-routing
+        // remember this routing is done by an Application Console routing is a bit different
+        $url = Url::toRoute(
+            [
+                '/sale/bill/email-console',
+                'id' => $bill,
+                'from' => 'account_current',
+                'email' => $email,
+            ]);
+        // echo $url;
+        // $url ="https://gestion.bigway.com.ar/index.php?r=/sale/bill/email-console&id=".$bill."&from=account_current&email=".$email;
 
-	$ch = curl_init();
+        // init curl
+        $ch = curl_init();
+        // set curl options array
         $options = array(
-                CURLOPT_URL             => $url,
-                CURLOPT_REFERER         => $url,
-                CURLOPT_FOLLOWLOCATION  => 1,
-                CURLOPT_RETURNTRANSFER  => 1,
-                CURLOPT_COOKIESESSION   => true,
-                CURLOPT_COOKIEJAR       => 'curl-cookie.txt',
-                CURLOPT_COOKIEFILE      => '/tmp',
-                CURLOPT_CONNECTTIMEOUT  => 120,
-                CURLOPT_TIMEOUT         => 120,
-                CURLOPT_MAXREDIRS       => 10,
-                CURLOPT_USERAGENT       => "Dark Secret Ninja/1.0",
-                CURLOPT_CUSTOMREQUEST   => 'GET',
-                CURLOPT_SSL_VERIFYPEER  => false,
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_POSTFIELDS => "",
         );
-        curl_setopt_array( $ch, $options );
+        // sets options
+        curl_setopt_array($ch,$options);
 
+        // curl exec. At this point the /sale/bill/email-console triggers and sends an email in the instance context of yii2 CONSOLE App
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);   //get status code
 
         if ( $httpCode != 200 ){
-                 echo "Return code is {$httpCode} \n"
-                .curl_error($ch);
+            echo "Return code is {$httpCode} \n".curl_error($ch);
         } else {
-                echo htmlspecialchars($response);
+            echo htmlspecialchars($response);
         }
+        // close connection
         curl_close($ch);
 
-	return $response;
-   }
+        return $response;
+    }
 }

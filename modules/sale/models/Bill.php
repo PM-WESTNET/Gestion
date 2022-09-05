@@ -1609,8 +1609,6 @@ class Bill extends ActiveRecord implements CountableInterface
             $send_email1 = true;
             $send_email2 = true;
             $send = true;
-
-            // var_dump($sender);die();
             
             $message_subject = "Envio de factura de: " . $this->customer->company->name;
 
@@ -1645,8 +1643,6 @@ class Bill extends ActiveRecord implements CountableInterface
 
     
         }
-
-
 
     }
 
