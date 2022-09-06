@@ -125,52 +125,7 @@ $this->registerCss('.inactive{opacity: 0.8; font-style: italic;}');
             ?>
         </div>
         
-        <!-- Modulo Filtros por fecha -->
-        <div class="col-sm-5 text-right">
-            <form class="form-inline" role="form">
-                <div class="form-group">
-                    <?php $form = ActiveForm::begin(['method' => 'get']); ?>
-                        <?=$form->field($searchModel, 'number')
-                        ->input('bill-number', ['placeholder' => "Numero Comprobante"])
-                        ->label(false); ?>
-                    <?php ActiveForm::end(); ?>
-                </div>
-                <div class="form-group">
-                    <?= Html::activeLabel($searchModel, 'fromDate', ['class'=>'sr-only']); ?>
-                    <?= DatePicker::widget([
-                        'language' => Yii::$app->language,
-                        'model' => $searchModel,
-                        'attribute' => 'fromDate',
-                        'dateFormat' => 'dd-MM-yyyy',
-                        'options'=>[
-                            'class'=>'form-control filter dates',
-                            'placeholder'=>Yii::t('app','From Date')
-                        ]
-                    ]);
-                    ?>
-                    <?php //Html::activeTextInput($searchModel, 'fromDate', ['class'=>'form-control filter','placeholder'=>Yii::t('app','From Date')]); ?>
-                </div>
-                <div class="form-group">
-                    <?= Html::activeLabel($searchModel, 'toDate', ['class'=>'sr-only']); ?>
-                    <?= DatePicker::widget([
-                        'language' => Yii::$app->language,
-                        'model' => $searchModel,
-                        'attribute' => 'toDate',
-                        'dateFormat' => 'dd-MM-yyyy',
-                        'options'=>[
-                            'class'=>'form-control filter dates',
-                            'placeholder'=>Yii::t('app','To Date')
-                        ]
-                    ]);
-                    ?>
-                    <?php // Html::activeTextInput($searchModel, 'toDate', ['class'=>'form-control filter','placeholder'=>Yii::t('app','To Date')]); ?>
-                </div>
-                <div class="form-group">
-                    <a id="clean-date-btn" onclick="Search.clearDates();" class="btn btn-warning"><span class="glyphicon glyphicon-remove"></span> <?= Yii::t('app','Clean dates'); ?></a>
-                </div>
-            </form>
-        </div>
-            
+       
     </div>
     
     <?php
