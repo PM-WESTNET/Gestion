@@ -20,8 +20,11 @@ use Yii;
  */
 class SiroPaymentIntention extends \app\components\db\ActiveRecord
 {
+    //Statuses
+    const STATUS_PROCESSED = "PROCESADA";
 
 
+    
     /**
      * @inheritdoc
      */

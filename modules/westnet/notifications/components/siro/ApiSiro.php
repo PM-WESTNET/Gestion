@@ -159,4 +159,34 @@ class ApiSiro extends Component{
 
     	return false;
     }
+
+    /**
+     * Search intention payment created in BD of Siro
+     */
+    public static function ObtainPaymentAccountabilityApi($token,$date_from, $date_to, $cuit_administrator, $company_id){
+        $url = 'https://apisiro.bancoroela.com.ar:49220/siro/Listados/Proceso';
+        $authorization = "Authorization: Bearer ".$token['access_token'];
+
+        $conexion = curl_init();
+
+        $datos = array(
+            'fecha_desde' => $date_from,
+            'fecha_hasta' => $date_to,
+            'cuit_administrador' => $cuit_administrator,
+            'nro_empresa' => ($company_id == 2) ? 5150075933 : 5150076022, //Redes del Oeste ID de convenio = 5150075933 Servicargas ID de convenio = 5150076022
+        );
+
+
+        curl_setopt($conexion, CURLOPT_URL,$url);
+        curl_setopt($conexion, CURLOPT_POSTFIELDS, json_encode($datos));
+        curl_setopt($conexion, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
+        curl_setopt($conexion, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($conexion, CURLOPT_CUSTOMREQUEST, 'POST'); 
+
+        $respuesta=curl_exec($conexion);
+
+        curl_close($conexion);
+
+        return json_decode($respuesta,true);
+    } 
 }
