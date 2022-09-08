@@ -10,6 +10,8 @@ use yii\widgets\ActiveForm;
 use yii\helpers\ArrayHelper;
 use app\modules\sale\models\BillType;
 use app\modules\sale\models\Currency;
+use app\modules\westnet\notifications\NotificationsModule;
+use app\modules\sale\models\CustomerCategory;
 
 /**
  * @var yii\web\View $this
@@ -131,6 +133,26 @@ use app\modules\sale\models\Currency;
                 </div>
                 <div class="col-sm-6">
                     <?= $form->field($model, 'expired')->dropDownList([0 => Yii::t('app', 'Hide Expired'), 1 => Yii::t('app', 'Show Expired')], ['prompt' => Yii::t('app', 'All')]) ?>                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <?php
+                            echo $form->field($model, '_customer_class')->widget(Select2::classname(), [
+                                'language' => 'es',
+                                'data' => ArrayHelper::map(CustomerCategory::find()->orderBy('name')->all(), 'customer_category_id', 'name'),
+                                'options' => [
+                                    'multiple' => true,
+                                    'placeholder' => NotificationsModule::t('app', 'Select an option...')
+                                ],
+                                'pluginOptions' => [
+                                    'allowClear' => true
+                                ],
+                            ])->label(NotificationsModule::t('app', 'Customer class'));
+                        ?>
+                </div>
+                <div class="col-sm-6">
+
                 </div>
             </div>
         </div>

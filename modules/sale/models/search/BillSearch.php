@@ -57,6 +57,9 @@ class BillSearch extends Bill
     //Para Bills en general que han fallado por algun motivo
     // public $had_error;
 
+    // For getting the bills customer related customer category //*copying this format from Destinatary model
+    public $_customer_class = [];
+
     /**
      * Instancia un nuevo objeto de acuerdo al tipo. El objeto puede ser:
      *  Order.
@@ -86,7 +89,8 @@ class BillSearch extends Bill
             ['bill_types', 'each', 'rule' => ['integer']],
             ['payment_methods', 'each', 'rule' => ['integer']],
             ['statuses', 'each', 'rule' => ['in', 'range' => $statuses]],
-            // [['had_error'], 'boolean'], //'string', 'max' => 255]
+            // [['had_error'], 'boolean'], //'string', 'max' => 255],
+            [['_customer_class'], 'safe'],
         ];
     }
 
@@ -138,6 +142,8 @@ class BillSearch extends Bill
     public function search($params)
     {
         $query = self::find();
+        // a mini flag so as not to join the table again with bill if it is already
+        $isJoinedWithCustomer = false;
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -182,6 +188,7 @@ class BillSearch extends Bill
             } else {
                 $query->leftJoin('customer c', 'bill.customer_id = c.customer_id');
                 $where['c.parent_company_id'] = $this->company_id;
+                $isJoinedWithCustomer = true;
             }
         }
 
@@ -214,12 +221,28 @@ class BillSearch extends Bill
         //Expiration
         $this->periodTotal = $query->sum('total * multiplier');
 
+        // filter the customer class. this filter uses multiple joins so we pass a flag for it not to join with customer if it was already joined previously
+        $this->filterCustomerClass($query, $isJoinedWithCustomer);
+
         $countQuery = clone $query;
         $dataProvider->setTotalCount($countQuery->count());
 
         return $dataProvider;
     }
 
+    private function filterCustomerClass($query, $isJoinedWithCustomer = false){
+        if(!empty($this->_customer_class)){
+
+            // if its not joined with customer, we join it.
+            if(!$isJoinedWithCustomer) $query->leftJoin('customer c', 'bill.customer_id = c.customer_id');
+            $query->leftJoin('customer_category_has_customer cch', 'cch.customer_id = c.customer_id');
+            $query->leftJoin('customer_category cc', 'cc.customer_category_id = cch.customer_category_id');
+            $query->andFilterWhere(['in','cc.customer_category_id',$this->_customer_class]);
+            // var_export($query->createCommand()->rawSql);
+            // die();
+        }
+    }
+    
     /**
      * Aplica filtro a estado. Si statuses esta definido, aplica una condicion
      * "in". Sino aplica un "=" con status
