@@ -184,9 +184,10 @@ class CustomerController extends Controller
             $contracts = ContractSearch::getdataProviderContract($model->customer_id);
             $messages = CustomerMessage::find()->andWhere(['status' => CustomerMessage::STATUS_ENABLED])->all();
 
+            $value = Config::getValue('extend_payment_product_id');
             $products = ArrayHelper::map(Product::find()
                 ->andWhere(['type' => 'product'])
-                ->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])
+                ->andWhere(['=', 'product_id', $value])
                 ->all(), 'product_id', 'name');
 
             $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')

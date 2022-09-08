@@ -91,7 +91,9 @@ class ContractController extends Controller {
      */
     public function actionView($id) {
         $model= $this->findModel($id);
-        $products = ArrayHelper::map(Product::find()->andWhere(['type' => 'product'])->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])->all(), 'product_id', 'name');
+
+        $value = Config::getValue('extend_payment_product_id');
+        $products = ArrayHelper::map(Product::find()->andWhere(['type' => 'product'])->andWhere(['=', 'product_id', $value ])->all(), 'product_id', 'name');
 
         $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
             ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])

@@ -21,6 +21,9 @@ use \app\modules\accounting\models\search\AccountMovementSearch;
 use app\modules\sale\models\Product;
 use app\modules\westnet\models\Vendor;
 use yii\helpers\Url;
+use app\modules\config\models\Config;
+
+
 
 /**
  * PaymentController implements the CRUD actions for Payment model.
@@ -213,7 +216,9 @@ class PaymentController extends Controller {
         }
         $searchModel = new PaymentSearch();
         $searchModel->customer_id = $customer->customer_id;
-        $products = ArrayHelper::map(Product::find()->andWhere(['type' => 'product'])->andWhere(['LIKE', 'name', 'Recargo por Extensión de Pago'])->all(), 'product_id', 'name');
+
+        $value = Config::getValue('extend_payment_product_id');
+        $products = ArrayHelper::map(Product::find()->andWhere(['type' => 'product'])->andWhere(['=', 'product_id', $value])->all(), 'product_id', 'name');
 
         $vendors = ArrayHelper::map(Vendor::find()->leftJoin('user', 'user.id=vendor.user_id')
             ->andWhere(['OR',['IS', 'user.status', null], ['user.status' => 1]])
