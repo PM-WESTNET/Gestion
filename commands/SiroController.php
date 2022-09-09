@@ -80,11 +80,10 @@ class SiroController extends Controller{
         $transaction = Yii::$app->db->beginTransaction();
         try {
             foreach ($accountability as $_index => $value) {
-                // if(!($_index == '446' or $_index == '838')) continue; // skip for debugging purposes
+                if(!($_index == '446' or $_index == '838')) continue; // skip for debugging purposes
 
                 // define empty array for intention data separation
                 $reg_decoded = PaymentIntentionAccountability::decodePaymentRegisterLine($value);
-
                 // edit and adapt data for it to be much more human-readable and have correct formatting for db.
                 $payment_data = PaymentIntentionAccountability::formatPaymentData($reg_decoded);
 
@@ -99,6 +98,7 @@ class SiroController extends Controller{
                     // var_dump('payment_data',$payment_data);
                     // echo "passes 1 $_index\n";//debugging purpose
 
+                    // searches for a siro_payment_intention that we COULD have related to the ones from the siro API (it could be that it doesnt exist for some reason)
                     $siro_payment_intention = Yii::$app->db->createCommand(
                         'SELECT spi.estado, spi.payment_id 
                         FROM siro_payment_intention spi 
@@ -106,6 +106,7 @@ class SiroController extends Controller{
                     ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
                     ->queryOne();
                     
+                    // searches for an accountability record related to the current siro_payment_intention_id
                     $payment_intention_accountability = Yii::$app->db->createCommand(
                         'SELECT pia.payment_intention_accountability_id 
                         FROM payment_intentions_accountability pia 
@@ -113,7 +114,7 @@ class SiroController extends Controller{
                     ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
                     ->queryOne();
 
-                    var_dump('siro_payment_intention and accountability',$siro_payment_intention, $payment_intention_accountability);//debugging purpose
+                    // var_dump('siro_payment_intention and accountability',$siro_payment_intention, $payment_intention_accountability);//debugging purpose
 
                     if(
                         !empty($siro_payment_intention) && // siro payment intention related record isnt empty
@@ -134,9 +135,10 @@ class SiroController extends Controller{
                         $model->payment_method = $payment_data['payment_method'];
                         $model->siro_payment_intention_id = $payment_data['siro_payment_intention_id'];
 
+                        $collection = PaymentIntentionAccountability::CODES_COLLECTION_CHANNEL[$payment_data['collection_channel']];
                         // check if code exists on db 
-                        if(isset( PaymentIntentionAccountability::CODES_COLLECTION_CHANNEL[$payment_data['collection_channel']] )){
-                            $model->collection_channel_description = PaymentIntentionAccountability::CODES_COLLECTION_CHANNEL[$payment_data['collection_channel']];
+                        if(isset( $collection )){
+                            $model->collection_channel_description = $collection;
                         }else{
                             $model->collection_channel_description = 'No se reconoce el código: ' . $payment_data['collection_channel'];
                         }
@@ -375,4 +377,208 @@ class SiroController extends Controller{
         }
         return $arrOfPaymentIDs;
     }
+
+    //todo : update cronjob in production to trigger this action: siro/close-payment-intention
+    /**
+     * this function is intended to close all payment intentions that go over the limit lifespan of about 10-15 minutes
+     */
+    public function actionClosePaymentIntention()
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+        try {
+            $this->stdout("\nactionClosePaymentIntention() start\n");
+            $unclosedPaymentIntentions = SiroPaymentIntention::find()
+                ->where(['status' => 'pending']) // get all STILL pending
+                ->orderBy(['siro_payment_intention_id' => SORT_ASC]) //gets the first records first
+                //->limit(1000) // limit as not to overload the server (very unlikely)
+                ->all(); // get all records
+
+            $this->stdout("\nQuery hit count: " . count($unclosedPaymentIntentions) . "\n");
+
+            foreach ($unclosedPaymentIntentions as $paymentIntention) {
+                $this->stdout("\npayment id: $paymentIntention->siro_payment_intention_id \n");
+
+                $current_date = strtotime(date("d-m-Y H:i:00", time()));
+                $payment_date = strtotime($paymentIntention->createdAt);
+                $expiry_time = (int)Config::getConfig('siro_expiry_time')->item->description * 60; // small calc to get the minute integer
+
+                $this->stdout("created at: \t\t" . date('d-m-Y H:i:00', $payment_date) . "\n");
+                $this->stdout("lifespan limit: \t" . date('d-m-Y H:i:00', ($payment_date + $expiry_time)) . "\n");
+
+                if ($current_date > ($payment_date + $expiry_time)) { // if the current date is smaller than the lifespan limit
+                    $this->stdout("Must close this payment intention\n");
+                    $paymentIntention->status = 'canceled';
+                    if ($paymentIntention->save(true, ['status'])) {
+                        $this->stdout("payment intent saved\n");
+                    } else {
+                        $this->stdout("payment intent didnt save\n");
+                        $this->stdout(var_export($paymentIntention->getErrorSummary(true)) . "\n");
+                    }
+                } else {
+                    $this->stdout("This payment intention is still valid\n");
+                }
+                $this->stdout("\n");
+            }
+            $this->stdout("Finished switching state for siro payment intentions\n");
+            $transaction->commit();
+        } catch (\Exception $ex) {
+            $transaction->rollBack();
+            $this->stdout("Errors..\n");
+            $this->stdout(var_export($ex, true));
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch (ROLLBACK DONE): westnet/siro/close-payment-intention ****', $ex);
+
+        }
+    }
+
+    //todo 1: merge previous actions // still to do// also check bpr and all other rejection channels
+    //todo 2: make log file in production with correct permissions to write and read
+    //todo 3: update crontab to trigger this action at the same frequency of the previous actions
+    //todo 4: dont forget to add the $save variable for debugging needs
+    /**
+     * NEW
+     * this is a merge from previous action to check payments and duplicates,
+     * in a hope for it to be more efficient and readable.
+     * 
+     * This action is triggered by a system task (cronjob) and logs to /var/log/siro-revise-payments.log
+     */
+    public function actionPaymentsRevisor($save = false)
+    {
+    	/**
+    	 * Redes del Oeste ID : 2
+    	 * Servicargas ID : 7
+    	 */
+        $this->stdout("\n----SIRO SINGLE PAYMENTS REVISOR INITIATED (SINGLE + DUPLICATE CHECKER)---- ".date("Y-m-d H:i:s")."\n");
+        //todo: create a model that stores company capability to run this, store its ids  like 2,7 in the westnet case, and the API consumption numbers too
+    	$companies = Company::find()->where(['in', 'company_id', [2,7]])->all();
+    	foreach ($companies as $company) {
+    		$this->reviseAllPayments($company, $save);
+    	}
+        $this->stdout("\n----END---- ".date("Y-m-d H:i:s")."\n");
+	     
+    }
+
+    /**
+     * 
+     */
+    private function reviseAllPayments($company, $save){
+        $this->stdout("INFO\n");
+        $this->stdout("Company: ".$company->name."\n");
+
+        // debug variables and data
+        $debug_mode = TRUE;
+        $testfile_name = 'siro-data-testing-3.txt';
+
+        $test_data = null;
+        if(file_exists($testfile_name) and $debug_mode){
+            $filecontents = file_get_contents($testfile_name);
+            $test_data = (json_decode($filecontents));
+        }
+        
+        // choose between test_data (for debugging) or API call
+        if(!is_null($test_data)){
+            $accountability = $test_data;
+        }else{
+            // get token for API
+            $token = ApiSiro::getTokenApi($company->company_id);
+
+            // select date range to revise
+            $from_date = date('Y-m-d', strtotime("-7 days"));
+            $today = date('Y-m-d');
+            $this->stdout("Revise date range from: $from_date to: $today\n");
+            
+            // get cuit_administrator from company model
+            $cuit_administrator = str_replace('-', '', $company->tax_identification);
+            $this->stdout("Cuit administrator selected: $cuit_administrator\n");
+
+            $accountability = ApiSiro::ObtainPaymentAccountabilityApi($token, $from_date, $today, $cuit_administrator, $company->company_id);
+        }
+
+        // re-encode data to save into a testing file in case we need it. (if file doesnt exist, create it)
+        if(((!file_exists($testfile_name)) and $debug_mode)) file_put_contents($testfile_name, json_encode($accountability));
+        
+        // start process of payment revision 
+        $transaction = Yii::$app->db->beginTransaction();
+        try {
+            // process accountability array into a decoded ordered version
+            $acc_decoded_arr = PaymentIntentionAccountability::processPaymentAccountabilityApi($accountability);
+
+            $intentions_ids = [];
+            foreach($acc_decoded_arr as $payment_data){
+                $intentions_ids[] = $payment_data['siro_payment_intention_id'];
+            }
+            //calculate hit count of any intention given
+            $intentions_freq = array_count_values($intentions_ids);
+            foreach($intentions_freq as $id => $qty){
+                if($qty>1)
+                echo ("id: $id qty: ".$qty."\n");
+            }
+            // echo ("items in intentions_ids: ".count($intentions_ids)."\n");
+            // echo ("items in intentions_freq: ".count($intentions_freq)."\n");
+
+            $test_id = '281543';
+            $AccInstancesCounter = Yii::$app->db->createCommand('SELECT * 
+            FROM payment_intentions_accountability pia 
+            WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+                ->bindValue('siro_payment_intention_id', $test_id)
+                ->queryAll();
+            
+            var_dump($AccInstancesCounter);
+
+            die();
+            foreach ($acc_decoded_arr as $_index => $payment_data) {
+                
+                // if(!($_index < 10)) continue; // skip for debugging purposes
+                $debug_arr = ['446','838','1'];
+                if(!in_array($_index, $debug_arr)) continue; // skip for debugging purposes
+                var_dump($payment_data);
+
+                var_dump($accountability[$_index]); // in case you want to know the original values the current $payment_data were taken from
+                $payment_validity = PaymentIntentionAccountability::checkPaymentValidity($payment_data);
+                if(!empty($payment_validity['error_msg'])) echo 'Error msg: '.$payment_validity['error_msg']."\n";
+
+                $AccInstancesCounter = Yii::$app->db->createCommand('SELECT count(*) as counter 
+                FROM payment_intentions_accountability pia 
+                WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+                    ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
+                    ->count();
+
+                if($payment_validity['is_valid']){
+                    echo "payment is VALID - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                    // create accountability record
+                    $model = new PaymentIntentionAccountability();
+                    $model->createPaymentAccountabilityRecord($payment_data, $save);
+                }else{
+                    echo "payment is NOT needed to be accounted for - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                }
+
+            }
+            if($save){
+                $transaction->commit();
+            }else{
+                $transaction->rollBack();
+            }
+            echo "'--end--'\n";//debugging purpose
+            die();//debugging purpose
+
+        } catch (\Exception $e) {
+            $errorMsg = "Ha Ocurrido un error: \n" .
+            "Hora: " . date('Y-m-d H:m:s') . "\n" .
+            "Respuesta de Siro: " . json_encode($accountability) . "\n" .
+            "Error: " . json_encode($e) .
+            "-----------------------------------------------------------------------------\n";
+            $this->stdout($errorMsg);
+            file_put_contents(Yii::getAlias('@runtime/logs/log_contrastador_cron.txt'),
+            $errorMsg,
+            FILE_APPEND);
+            $transaction->rollBack();
+
+            // send error to telegram
+            TelegramController::sendProcessCrashMessage('**** Cronjob Error Catch (ROLLBACK DONE): siro/checker-of-payments ****', $e);
+        }
+            
+    }
+
+
 }

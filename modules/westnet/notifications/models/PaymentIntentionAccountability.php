@@ -143,7 +143,7 @@ class PaymentIntentionAccountability extends ActiveRecord
     /**
      * before save trigger
      * in this case i use it to add dates without using behaviours
-     * @return Bool
+     * @return Boolean
      */
     public function beforeSave($insert) {
         if (parent::beforeSave($insert)) {
@@ -284,5 +284,133 @@ class PaymentIntentionAccountability extends ActiveRecord
         return (new \DateTime($unformatted))->format($format);
     }
 
+    /**
+     * processes all the payments registers retrieved from Siro API call.
+     * @return Array
+     */
+    public static function processPaymentAccountabilityApi($accountability){
+        $processed_acc_file = [];
+        foreach($accountability as $reg_value){
+            // define empty array for intention data separation
+            $reg_decoded = self::decodePaymentRegisterLine($reg_value);
+
+            // edit and adapt data for it to be much more human-readable and have correct formatting for db.
+            $payment_data = self::formatPaymentData($reg_decoded);
+
+            // push data array into the new accountability array
+            array_push($processed_acc_file, $payment_data);
+        }
+        return $processed_acc_file;
+    }
+
+    /**
+     * this function checks a payments validity based on its data
+     * the payment must be decoded already into an array form,
+     * provided by the formatPaymentData() function
+     * 
+     * @return Boolean
+     */
+    public static function checkPaymentValidity($payment_data){
+        // default value is FALSE. later changes if payment IS actually valid.
+        // response is just the error string for debugging
+        $response = [
+            'is_valid' => false,
+            'error_msg' => ''
+        ];
+
+        // validity checker logic
+        if($payment_data['total_amount'] > 0){
+            // var_dump('payment_data',$payment_data);
+            // echo "passes 1 $_index\n";//debugging purpose
+            echo "payment id used: (".$payment_data['siro_payment_intention_id'].")\n";
+
+            // searches for a siro_payment_intention that we COULD have related to the ones from the siro API (it could be that it doesnt exist for some reason)
+            $siro_payment_intention = Yii::$app->db->createCommand(
+                'SELECT spi.estado, spi.payment_id 
+                FROM siro_payment_intention spi 
+                WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+            ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
+            ->queryOne();
+
+            // check payment intentions table
+            if(!empty($siro_payment_intention)){
+
+                // todo: modify this query to know how much payments to create in case of duplicates. do AFTER the check of Rejection channels
+                // searches for an accountability record related to the current siro_payment_intention_id
+                $payment_intention_accountability = Yii::$app->db->createCommand(
+                    'SELECT pia.payment_intention_accountability_id 
+                    FROM payment_intentions_accountability pia 
+                    WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+                ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
+                ->queryOne();
+
+                // check accountability table
+                if(empty($payment_intention_accountability)){
+                    // check status
+                    if($siro_payment_intention['estado'] != SiroPaymentIntention::STATUS_PROCESSED){
+                        $response['is_valid'] = true;
+                        // $response['error_msg'] = "No errors";
+                    }else{
+                        $response['error_msg'] = "Our payment intention status is ".SiroPaymentIntention::STATUS_PROCESSED;
+                    }
+                }else{
+                    $response['error_msg'] = "There is an accountability record related for this payment";
+                }
+            }else{
+                $response['error_msg'] = "No siro payment intention related record was found";
+            }
+
+            // var_dump('siro_payment_intention and accountability',$siro_payment_intention, $payment_intention_accountability);//debugging purpose
+
+            // if(
+            //     !empty($siro_payment_intention) && // siro payment intention related record isnt empty
+            //     $siro_payment_intention['estado'] != SiroPaymentIntention::STATUS_PROCESSED && // its status != "PROCESADA"
+            //     empty($payment_intention_accountability)) // there is no accountability related record found for it
+            // {
+            //     // echo "passes 2 $_index\n";//debugging purpose
+            // }
+        }
+        return $response;
+    }
+
+    /**
+     * this function receives a payment_data variable as an 
+     * array of data from a pre-processed payment
+     * Returns true if saved successfully
+     * @return Boolean
+     */
+    private function createPaymentAccountabilityRecord($payment_data, $save = true){
+
+        // load data 
+        $this->payment_date = $payment_data['payment_date'];
+        $this->accreditation_date =  $payment_data['accreditation_date'];
+        $this->total_amount =  $payment_data['total_amount'];
+        $this->customer_id = $payment_data['customer_id'];
+        $this->payment_method = $payment_data['payment_method'];
+        $this->siro_payment_intention_id = $payment_data['siro_payment_intention_id'];
+
+        $collection = PaymentIntentionAccountability::CODES_COLLECTION_CHANNEL[$payment_data['collection_channel']];
+        // check if code exists on db 
+        if(isset( $collection )){
+            $this->collection_channel_description = $collection;
+        }else{
+            $this->collection_channel_description = 'No se reconoce el código: ' . $payment_data['collection_channel'];
+        }
+
+        $this->collection_channel = $payment_data['collection_channel'];
+        $this->rejection_code = $payment_data['rejection_code'];
+
+        
+        if(empty($siro_payment_intention['payment_id'])){
+            $this->status = 'draft';
+            
+        }else{
+            $this->payment_id = $siro_payment_intention['payment_id'];
+            $this->status = 'payed';
+        }
+        var_dump('--- $model data displayed TO SAVE ---', $this);
+        // returns save TRUE only if the model saved successfully. if $save is false, returns that instead.
+        return ($save) ? $this->save() : $save;
+    }
 
 }
