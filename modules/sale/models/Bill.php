@@ -23,6 +23,8 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 use Da\QrCode\QrCode;
 use kartik\mpdf\Pdf;
 use yii\web\NotFoundHttpException;
+use app\modules\mailing\services\ConfigMailing;
+use Exception;
 
 /**
  * This is the model class for table "bill".
@@ -1605,7 +1607,32 @@ class Bill extends ActiveRecord implements CountableInterface
 
             $pointOfSale = $this->getPointOfSale()->number;
 
-            $sender = MailSender::getInstance("COMPROBANTE", Company::class, $this->customer->company_id);
+
+            $name = "COMPROBANTE";
+            $relation_class = Company::class;
+            // search current company config
+            $sender_config = ConfigMailing::getConfig($name,$relation_class, $this->customer->company_id);
+            $relation_id = $this->customer->company_id; // default , but changes if no config is found
+
+            // if no config is found for current company:
+            if(empty($sender_config)){
+                // search for it on parent company
+                if(isset($this->customer->company->parent_id)){
+                    $sender_config = ConfigMailing::getConfig($name,$relation_class, $this->customer->company->parent_id);
+                    // if found, use that ID instead of the previous null one
+                    if(!empty($sender_config)){
+                        $relation_id = $this->customer->company->parent_id;
+                    }
+                    else{
+                        throw new \Exception('No email transport config found for parent company id: '.$this->customer->company->parent_id);
+                    }
+                }
+                else{
+                    throw new \Exception('No email transport config found for current company id: '.$this->customer->company_id.' and no parent id available');
+                }
+            }
+                
+            $sender = MailSender::getInstance($name, $relation_class, $relation_id);
             $send_email1 = true;
             $send_email2 = true;
             $send = true;
