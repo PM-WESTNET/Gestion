@@ -432,10 +432,10 @@ class SiroController extends Controller{
         }
     }
 
-    //todo 1: merge previous actions // still to do// also check bpr and all other rejection channels
-    //todo 2: make log file in production with correct permissions to write and read
-    //todo 3: update crontab to trigger this action at the same frequency of the previous actions
-    //todo 4: dont forget to add the $save variable for debugging needs
+    // todo 1: merge previous actions // still to do// also check bpr and all other rejection channels
+    // todo 2: make log file in production with correct permissions to write and read
+    // todo 3: update crontab to trigger this action at the same frequency of the previous actions
+    // todo 4: dont forget to add the $save variable for debugging needs
     /**
      * NEW
      * this is a merge from previous action to check payments and duplicates,
@@ -460,107 +460,122 @@ class SiroController extends Controller{
     }
 
     /**
+     * gets an array of payments an unsets all invalid payments
+     * based on amount and rejection codes
+     */
+    private function unsetInvalidPayments($payments_arr){
+
+        // iterate payments arr
+        foreach($payments_arr as $_index => $payment_data){
+            // check validity
+            $is_valid_payment = PaymentIntentionAccountability::checkPaymentValidity($payment_data);
+
+            // echo ("index: $_index Valid: ".(($is_valid_payment)?"TRUE":"FALSE")." "
+            // ."($".$payment_data['total_amount'].")"
+            // ."(R-code ".$payment_data['rejection_code'].")"
+            
+            // ."\n");
+            
+            // unset invalid payments
+            if(!$is_valid_payment){
+                unset($payments_arr[$_index]);
+            }else{
+                // echo ("index: $_index Valid: ".(($is_valid_payment)?"TRUE":"FALSE")." "
+                // ."($".$payment_data['total_amount'].")"
+                // ."(R-code ".$payment_data['rejection_code'].")"
+                
+                // ."\n");
+            }
+        }
+
+        // return clear array
+        return $payments_arr;
+    }
+
+
+    /**
      * 
      */
     private function reviseAllPayments($company, $save){
         $this->stdout("INFO\n");
         $this->stdout("Company: ".$company->name."\n");
 
-        // debug variables and data
-        $debug_mode = TRUE;
-        $testfile_name = 'siro-data-testing-3.txt';
+        // get data from siro (or debug data locally)
+        $accountability = PaymentIntentionAccountability::getSiroDataArray($debug_mode = true, $company->company_id, $company->tax_identification);
 
-        $test_data = null;
-        if(file_exists($testfile_name) and $debug_mode){
-            $filecontents = file_get_contents($testfile_name);
-            $test_data = (json_decode($filecontents));
-        }
-        
-        // choose between test_data (for debugging) or API call
-        if(!is_null($test_data)){
-            $accountability = $test_data;
-        }else{
-            // get token for API
-            $token = ApiSiro::getTokenApi($company->company_id);
-
-            // select date range to revise
-            $from_date = date('Y-m-d', strtotime("-7 days"));
-            $today = date('Y-m-d');
-            $this->stdout("Revise date range from: $from_date to: $today\n");
-            
-            // get cuit_administrator from company model
-            $cuit_administrator = str_replace('-', '', $company->tax_identification);
-            $this->stdout("Cuit administrator selected: $cuit_administrator\n");
-
-            $accountability = ApiSiro::ObtainPaymentAccountabilityApi($token, $from_date, $today, $cuit_administrator, $company->company_id);
-        }
-
-        // re-encode data to save into a testing file in case we need it. (if file doesnt exist, create it)
-        if(((!file_exists($testfile_name)) and $debug_mode)) file_put_contents($testfile_name, json_encode($accountability));
-        
         // start process of payment revision 
         $transaction = Yii::$app->db->beginTransaction();
         try {
             // process accountability array into a decoded ordered version
             $acc_decoded_arr = PaymentIntentionAccountability::processPaymentAccountabilityApi($accountability);
 
+            /**
+             * FILTER ALL PAYMENTS THAT ARE NOT VALID
+             */
+            if(Yii::$app instanceof Yii\console\Application) echo ("(".count($acc_decoded_arr).") before values\n");
+            $acc_valid_payments = self::unsetInvalidPayments($acc_decoded_arr);
+            if(Yii::$app instanceof Yii\console\Application) echo ("(".count($acc_valid_payments).") after values\n");
+
             $intentions_ids = [];
-            foreach($acc_decoded_arr as $payment_data){
+            foreach($acc_valid_payments as $_index => $payment_data){
+                // if(empty($payment_data['siro_payment_intention_id'])) echo "$_index index has an empty payment intention?\n";
                 $intentions_ids[] = $payment_data['siro_payment_intention_id'];
             }
-            //calculate hit count of any intention given
             $intentions_freq = array_count_values($intentions_ids);
-            foreach($intentions_freq as $id => $qty){
-                if($qty>1)
-                echo ("id: $id qty: ".$qty."\n");
+
+            /**
+             * DEBUG
+             */
+            // var_dump($accountability[$_index]); // in case you want to know the original values the current $payment_data were taken from
+            $created_payments_debug = [];
+            $invalid_payments_debug = [];
+            $duplicate_counter = 0;
+            foreach($intentions_freq as $_index => $qty){
+                if($qty>1){
+                    $duplicate_counter++;
+                    // echo "$_index-$qty\n";
+                }
             }
-            // echo ("items in intentions_ids: ".count($intentions_ids)."\n");
-            // echo ("items in intentions_freq: ".count($intentions_freq)."\n");
 
-            $test_id = '281543';
-            $AccInstancesCounter = Yii::$app->db->createCommand('SELECT * 
-            FROM payment_intentions_accountability pia 
-            WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
-                ->bindValue('siro_payment_intention_id', $test_id)
-                ->queryAll();
-            
-            var_dump($AccInstancesCounter);
+            foreach ($acc_valid_payments as $_index => $payment_data) {
+                // if(!($_index < 5)) continue; // skip for debugging purposes
 
-            die();
-            foreach ($acc_decoded_arr as $_index => $payment_data) {
+                $payment_validity = PaymentIntentionAccountability::checkPaymentOccurrences($payment_data, $intentions_freq);
+                // if(!empty($payment_validity['error_msg'])) echo 'Error msg: '.$payment_validity['error_msg']."\n";
                 
-                // if(!($_index < 10)) continue; // skip for debugging purposes
-                $debug_arr = ['446','838','1'];
-                if(!in_array($_index, $debug_arr)) continue; // skip for debugging purposes
-                var_dump($payment_data);
-
-                var_dump($accountability[$_index]); // in case you want to know the original values the current $payment_data were taken from
-                $payment_validity = PaymentIntentionAccountability::checkPaymentValidity($payment_data);
-                if(!empty($payment_validity['error_msg'])) echo 'Error msg: '.$payment_validity['error_msg']."\n";
-
-                $AccInstancesCounter = Yii::$app->db->createCommand('SELECT count(*) as counter 
-                FROM payment_intentions_accountability pia 
-                WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
-                    ->bindValue('siro_payment_intention_id', $payment_data['siro_payment_intention_id'])
-                    ->count();
-
-                if($payment_validity['is_valid']){
-                    echo "payment is VALID - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                $payment_end_status = '';
+                if($payment_validity['create_payment']){
+                    $payment_end_status .= "payment is VALID - CREATING PAYMENT - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']." - name: ".$payment_data['full_name']." - code: ".$payment_data['customer_code']."\n";
                     // create accountability record
                     $model = new PaymentIntentionAccountability();
-                    $model->createPaymentAccountabilityRecord($payment_data, $save);
+                    $is_saved = $model->createPaymentAccountabilityRecord($payment_data);
+                    if($is_saved){
+                        $created_payments_debug[] = $payment_data;
+                    }
                 }else{
-                    echo "payment is NOT needed to be accounted for - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                    // $payment_end_status .= "payment does NOT need to be accounted for - SKIPPING - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                    $invalid_payments_debug[] = $payment_data;
                 }
-
+                if(Yii::$app instanceof Yii\console\Application) echo $payment_end_status;
             }
+            /**
+             * DEBUG
+             */            
+            if(Yii::$app instanceof Yii\console\Application) {
+                echo ('$created_payments_debug counter ('.count($created_payments_debug).")\n");
+                echo ('$invalid_payments_debug counter ('.count($invalid_payments_debug).")\n");
+                echo ('$acc_valid_payments count('.count($acc_valid_payments).")\n"); // should be equal to the sum of $intentions_freq + $duplicate_counter
+                echo ('$intentions_freq count('.count($intentions_freq).")\n");
+                echo ("DUPLICATES:($duplicate_counter)\n");
+            }
+
             if($save){
                 $transaction->commit();
             }else{
                 $transaction->rollBack();
             }
-            echo "'--end--'\n";//debugging purpose
-            die();//debugging purpose
+            // echo "'--end--'\n";//debugging purpose
+            // die();//debugging purpose
 
         } catch (\Exception $e) {
             $errorMsg = "Ha Ocurrido un error: \n" .

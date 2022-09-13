@@ -20,8 +20,14 @@ use Yii;
  */
 class SiroPaymentIntention extends \app\components\db\ActiveRecord
 {
-    //Statuses
+    //Statuses 
+    //*the problem with this is that in the db model is not setted as an Enum type. its just strings.. so yeah,. have it in mind
     const STATUS_PROCESSED = "PROCESADA";
+    const STATUS_CANCELLED = "CANCELADA";
+    const STATUS_ERROR = "ERROR";
+    const STATUS_GENERATED = "GENERADA";
+    const STATUS_REGISTERED = "REGISTRADA";
+    const STATUS_NULL = null;
 
 
     
