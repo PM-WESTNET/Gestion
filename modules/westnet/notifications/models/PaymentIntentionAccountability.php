@@ -179,6 +179,9 @@ class PaymentIntentionAccountability extends ActiveRecord
     public static function decodePaymentRegisterLine($reg_str){
         $reg_decoded = [];
 
+        // original register line
+        $reg_decoded['original_register'] = $reg_str;
+
         // date on which the client made the payment
         $reg_decoded['payment_date'] = self::trimAndUpdate($reg_str, 8); 
 
@@ -204,7 +207,6 @@ class PaymentIntentionAccountability extends ActiveRecord
         $reg_decoded['siro_payment_intention_id'] = self::trimAndUpdate($reg_str, 20);
 
         // payment channel from which the payment was made. check doc for more info . 
-        //todo: create db migration and make it into a model.
         $reg_decoded['collection_channel'] = self::trimAndUpdate($reg_str, 3);
 
         // rejection code for Debito Directo and Boton de Pagos. 
@@ -264,9 +266,10 @@ class PaymentIntentionAccountability extends ActiveRecord
         $character_to_trim = '0';
         $payment_data['customer_id'] = ltrim($payment_data['customer_id'], $character_to_trim);
 
-        //todo: change for active-record Customer.. or a better more performant way.
+
         $customer = Yii::$app->db->createCommand('SELECT cu.code,cu.name,cu.lastname FROM customer cu WHERE cu.customer_id = :customer_id')
             ->bindValue('customer_id', $payment_data['customer_id']);
+
         // query one and save customer code into payment data
         $payment_data['customer_code'] = $customer->queryOne()['code'];
         $payment_data['full_name'] = $customer->queryOne()['name']." ".$customer->queryOne()['lastname'];
@@ -274,6 +277,10 @@ class PaymentIntentionAccountability extends ActiveRecord
         // trimm siro payment intention the way the previous programmer was doing it. im not sure this is right.
         $trimmed_siro_payment_intention = ltrim($payment_data['siro_payment_intention_id'], $character_to_trim);
         $payment_data['siro_payment_intention_id'] = preg_replace('/'.$payment_data['customer_code'].'/', '', $trimmed_siro_payment_intention, 1);
+
+        // trimm bar_code 
+        $payment_data['decoded_bar_code'] = self::getTrimmedBarcode($payment_data['bar_code']);
+
 
         return $payment_data;
     }
@@ -388,7 +395,10 @@ class PaymentIntentionAccountability extends ActiveRecord
             $steps .= "step 2  - ";
             // payment is already created and processed for this register
             // ...
-            //todo: add case for first checked ok but duplicates didnt
+
+            // this step is added to compensate for the algorithm logic. As a Payment is ALREADY PAYED in the other siro_payment_intention table
+            $accountability_counter++;
+
             // create only if accountability_counter is less than CURRENT quantity of repetitions of siro_payment_intention_id's
             if( self::isDuplicate($intentions_freq, $payment_data) and 
                 self::hasDuplicatesStill($intentions_freq, $payment_data, $accountability_counter) 
@@ -404,7 +414,8 @@ class PaymentIntentionAccountability extends ActiveRecord
         $steps .= "END\n";
         // echo $steps; // debug
 
-        // if($payment_data['siro_payment_intention_id'] == '272459'){
+        // if($payment_data['siro_payment_intention_id'] == '244464'){
+        //     echo $steps; // debug
         //     die();
         // }
         
@@ -413,9 +424,6 @@ class PaymentIntentionAccountability extends ActiveRecord
     }
 
     private static function isDuplicate($intentions_freq, $payment_data){
-        // echo ($payment_data['siro_payment_intention_id']." - ($".$payment_data['total_amount'].")"."\n");
-        // echo ($intentions_freq[$payment_data['siro_payment_intention_id']]." << COUNTER\n");
-
         if( $intentions_freq[$payment_data['siro_payment_intention_id']] > 1 ) return true;
         return false;
     }
@@ -442,29 +450,45 @@ class PaymentIntentionAccountability extends ActiveRecord
      * Returns true if saved successfully
      * @return Boolean
      */
-    public function createPaymentAccountabilityRecord($payment_data){
+    public function createPaymentAccountabilityRecord($payment_data, $is_duplicate = false){
 
-        // todo: save ALL DATA . ALL. Create migration for missing fields if needed
         // load data 
-        $this->payment_date = $payment_data['payment_date'];
-        $this->accreditation_date =  $payment_data['accreditation_date'];
-        $this->total_amount =  $payment_data['total_amount'];
         $this->customer_id = $payment_data['customer_id'];
-        $this->payment_method = $payment_data['payment_method'];
         $this->siro_payment_intention_id = $payment_data['siro_payment_intention_id'];
-
+        $this->total_amount =  $payment_data['total_amount'];
+        $this->payment_method = $payment_data['decoded_bar_code']['payment_method'];
         $collection = PaymentIntentionAccountability::CODES_COLLECTION_CHANNEL[$payment_data['collection_channel']];
-        // check if code exists on db 
         if(isset( $collection )){
             $this->collection_channel_description = $collection;
         }else{
             $this->collection_channel_description = 'No se reconoce el código: ' . $payment_data['collection_channel'];
         }
-
         $this->collection_channel = $payment_data['collection_channel'];
         $this->rejection_code = $payment_data['rejection_code'];
+        $this->rejection_description = $payment_data['rejection_description'];
 
-        //todo: check where to find the payment id on old code
+        $this->payment_date = $payment_data['payment_date'];
+        $this->accreditation_date =  $payment_data['accreditation_date'];
+        $this->first_expiration = $payment_data['first_expiration'];
+
+        //later you can decode it if needed
+        $this->bar_code = $payment_data['bar_code'];
+
+        // we filter by this values so they should always be empty in the table , i guess...
+        $this->rejection_code = $payment_data['rejection_code'];
+        $this->bar_code = $payment_data['rejection_description'];
+
+        $this->payment_quotas = $payment_data['payment_quotas'];
+        $this->card = $payment_data['card'];
+        $this->filler = $payment_data['filler'];
+        $this->result_id = $payment_data['result_id'];
+
+        $this->is_duplicate = ($is_duplicate) ? 1 : 0;
+
+
+        // $siro_payment_intention = Yii::$app->db->createCommand('SELECT spi.estado, spi.payment_id FROM siro_payment_intention spi WHERE spi.siro_payment_intention_id = :siro_payment_intention_id')
+        // ->bindValue('siro_payment_intention_id', $siro_payment_intention_id)
+        // ->queryOne();
         if(empty($siro_payment_intention['payment_id'])){
             $this->status = 'draft';
             
@@ -474,10 +498,11 @@ class PaymentIntentionAccountability extends ActiveRecord
         }
         // var_dump('--- $model data displayed TO SAVE ---', $this); //debugging
 
+        // save data to model
         $saved = $this->save();
         if(!$saved){
             echo "not saved correctly - ".""."\n";
-            var_dump($this->getErrorSummary(true));
+            // var_dump($this->getErrorSummary(true));
         }
 
         // returns save TRUE only if the model saved successfully.
@@ -487,13 +512,13 @@ class PaymentIntentionAccountability extends ActiveRecord
     /**
      * 
      */
-    public static function getSiroDataArray($debug_mode = FALSE, $company_id, $company_tax_identification){
+    public static function getSiroDataArray($debug_mode = FALSE, $company_id, $company_tax_identification, $from_date, $to_date){
         // debug variables and data
-        $testfile_name = 'siro-data-testing-4.txt';
+        $testfile_name = 'testing-data-company-id-'.$company_id.'.txt';
 
         $test_data = null;
         if(file_exists($testfile_name) and $debug_mode){
-            // var_dump("file exist");
+            if(Yii::$app instanceof Yii\console\Application) echo ("Debug mode TRUE - Using file \"$testfile_name\"\n");
             $filecontents = file_get_contents($testfile_name);
             $test_data = (json_decode($filecontents));
         }
@@ -505,17 +530,14 @@ class PaymentIntentionAccountability extends ActiveRecord
         }else{
             // get token for API
             $token = ApiSiro::getTokenApi($company_id);
-
-            // select date range to revise
-            $from_date = date('Y-m-d', strtotime("-7 days"));
-            $today = date('Y-m-d');
-            echo ("Revise date range from: $from_date to: $today\n");
             
             // get cuit_administrator from company model
             $cuit_administrator = str_replace('-', '', $company_tax_identification);
-            echo ("Cuit administrator selected: $cuit_administrator\n");
+            if(Yii::$app instanceof Yii\console\Application) echo ("Revise date range from: $from_date to: $to_date\n");
+            if(Yii::$app instanceof Yii\console\Application) echo ("Cuit administrator selected: $cuit_administrator\n");
 
-            $accountability = ApiSiro::ObtainPaymentAccountabilityApi($token, $from_date, $today, $cuit_administrator, $company_id);
+            $accountability = ApiSiro::ObtainPaymentAccountabilityApi($token, $from_date, $to_date, $cuit_administrator, $company_id);
+            if($accountability == false) return false;
         }
 
         // re-encode data to save into a testing file in case we need it. (if file doesnt exist, create it)
@@ -523,5 +545,194 @@ class PaymentIntentionAccountability extends ActiveRecord
         
         // return data array of payment strings
         return $accountability;
+    }
+
+    /**
+     * gets an array of payments an unsets all invalid payments
+     * based on amount and rejection codes
+     */
+    private function unsetInvalidPayments($payments_arr){
+
+        // iterate payments arr
+        foreach($payments_arr as $_index => $payment_data){
+            // check validity
+            $is_valid_payment = PaymentIntentionAccountability::checkPaymentValidity($payment_data);
+
+            // echo ("index: $_index Valid: ".(($is_valid_payment)?"TRUE":"FALSE")." "
+            // ."($".$payment_data['total_amount'].")"
+            // ."(R-code ".$payment_data['rejection_code'].")"
+            
+            // ."\n");
+            
+            // unset invalid payments
+            if(!$is_valid_payment){
+                unset($payments_arr[$_index]);
+            }else{
+                // echo ("index: $_index Valid: ".(($is_valid_payment)?"TRUE":"FALSE")." "
+                // ."($".$payment_data['total_amount'].")"
+                // ."(R-code ".$payment_data['rejection_code'].")"
+                
+                // ."\n");
+            }
+        }
+
+        // return clear array
+        return $payments_arr;
+    }
+
+
+    /**
+     * 
+     */
+    private static function getIntentionsFrequency($acc_valid_payments){
+        $intentions_ids = [];
+        foreach($acc_valid_payments as $_index => $payment_data){
+            // if(empty($payment_data['siro_payment_intention_id'])) echo "$_index index has an empty payment intention?\n";
+            $intentions_ids[] = $payment_data['siro_payment_intention_id'];
+        }
+        return array_count_values($intentions_ids);
+    }
+
+    /**
+     * 
+     */
+    private static function getDuplicateCounter($intentions_freq){
+        $duplicate_counter = 0;
+        foreach($intentions_freq as $_index => $qty){
+            if($qty>1){
+                $duplicate_counter++;
+                echo "$_index-$qty\n";
+            }
+        }        
+        return $duplicate_counter;
+    }
+
+    /**
+     * Process that checks all payments based on company_id given
+     * checks individual missing payments from our system using Siros APIs
+     * checks also for duplicated missing payments. 
+     * 
+     * recieves a Company model
+     * 
+     * 
+     * @return Mixed why?
+     */
+    public static function revisePaymentsProcess($company, $from_date, $to_date){
+        // fast check to know if company given is really enabled. (as this process can be triggered from any view or cron task)
+        if(!in_array($company->company_id, SiroCompanyConfig::getEnabledCompaniesIds())) return false;
+
+        // default return value. changes if something fails
+        $ret_val = true;
+
+        // get data from siro (or debug data locally)
+        $accountability = PaymentIntentionAccountability::getSiroDataArray($debug_mode = false, $company->company_id, $company->tax_identification, $from_date, $to_date);
+        if(empty($accountability)){
+            $errorMsg = "ERROR: Accountability data array return value is empty, either from Siro endpoint or debug file.\n".
+                        "Hora: " . date('Y-m-d H:m:s') . "\n";
+
+            if(Yii::$app instanceof Yii\console\Application) echo $errorMsg;
+        }
+
+        // process accountability array into a decoded ordered version
+        $acc_decoded_arr = PaymentIntentionAccountability::processPaymentAccountabilityApi($accountability);
+
+        /**
+         * FILTER ALL PAYMENTS THAT ARE NOT VALID
+         */
+        if(Yii::$app instanceof Yii\console\Application) echo ("(".count($acc_decoded_arr).") before values\n");
+        $acc_valid_payments = self::unsetInvalidPayments($acc_decoded_arr);
+        if(Yii::$app instanceof Yii\console\Application) echo ("(".count($acc_valid_payments).") after values\n");
+
+        
+        /**
+         * DEBUG VARIABLES
+         */
+        // var_dump($accountability[$_index]); // in case you want to know the original values the current $payment_data were taken from
+        $created_payments_debug = [];
+        $failed_payments_debug = [];
+        $invalid_payments_debug = [];
+        $intentions_freq = self::getIntentionsFrequency($acc_valid_payments);
+        $duplicate_counter = self::getDuplicateCounter($intentions_freq);
+
+        foreach ($acc_valid_payments as $_index => $payment_data) {
+            // if(!($_index < 5)) continue; // skip for debugging purposes
+
+            // check if payment is duplicated based on frequency. this has to be done before the checkPaymentOccurrences function cause of pointers.
+            $is_duplicate_payment = PaymentIntentionAccountability::isDuplicate($intentions_freq, $payment_data);
+            $payment_validity = PaymentIntentionAccountability::checkPaymentOccurrences($payment_data, $intentions_freq);
+            // if(!empty($payment_validity['error_msg'])) echo 'Error msg: '.$payment_validity['error_msg']."\n";
+            
+            //payment trace status message for debugging
+            $payment_end_status = '';
+            if($payment_validity['create_payment']){
+                // create accountability record
+                $model = new PaymentIntentionAccountability();
+                $is_saved = $model->createPaymentAccountabilityRecord($payment_data, $is_duplicate_payment);
+                if($is_saved){
+                    $created_payments_debug[] = $payment_data;
+                    $payment_end_status .= "Payment saved";
+                }else{
+                    //todo:  check what to do when a payment model fails to save correctly 
+                    $failed_payments_debug[] = $payment_data;
+                    $payment_end_status .= "Payment could not be saved";
+
+                    // fail flag
+                    $ret_val = false;
+                }
+                // concat more info for the valid payment cases
+                $payment_end_status .= " - index: $_index";
+                $payment_end_status .= " - siro_payment_id: ".$payment_data['siro_payment_intention_id'];
+                $payment_end_status .= " - code: ".$payment_data['customer_code'];
+                $payment_end_status .= " - name: ".$payment_data['full_name'];
+                if($is_duplicate_payment) $payment_end_status .= " *DUPLICATED";
+                $payment_end_status .= "\n";
+            
+            }else{
+                // $payment_end_status .= "payment does NOT need to be accounted for - SKIPPING - index: $_index - siro_payment_id: ".$payment_data['siro_payment_intention_id']."\n";
+                $invalid_payments_debug[] = $payment_data;
+            }
+            if(Yii::$app instanceof Yii\console\Application) echo $payment_end_status;
+        }
+        /**
+         * DEBUG
+         */            
+        if(Yii::$app instanceof Yii\console\Application) {
+            echo ('$created_payments_debug counter ('.count($created_payments_debug).")\n");
+            echo ('$failed_payments_debug counter ('.count($failed_payments_debug).")\n");
+            echo ('$invalid_payments_debug counter ('.count($invalid_payments_debug).")\n");
+            echo ('$acc_valid_payments count('.count($acc_valid_payments).") *total valid payments (duplicates included)\n"); // should be equal to the sum of $intentions_freq + $duplicate_counter
+            echo ('$intentions_freq count('.count($intentions_freq).") *unique siro_payment_intention_id's\n");
+            echo ("DUPLICATES:($duplicate_counter)\n");
+            echo "--end--\n\n";//debugging purpose
+        }
+
+        // die();//debugging purpose
+        
+        // returns true if everything went ok
+        return $ret_val;
+    }
+
+
+    /**
+     * based on https://drive.google.com/file/d/1aJKatSu_BX78DTl9lsfOdbZLWb-hWzf6/view
+     * this function returns a decoded array for the barcode information.
+     * 
+     * @return Array decoded array based on input string
+     */
+    public static function getTrimmedBarcode($reg_str){
+        $trimmed_bc = [];
+
+        $trimmed_bc['payment_method'] = self::trimAndUpdate($reg_str,4);
+        $trimmed_bc['concept_id'] = self::trimAndUpdate($reg_str,1);
+        $trimmed_bc['reference_number'] = self::trimAndUpdate($reg_str,8);
+        $trimmed_bc['first_expiration_date'] = self::trimAndUpdate($reg_str,6);
+        $trimmed_bc['first_expiration_amount'] = self::trimAndUpdate($reg_str,8); // 6 integers. 2 decimals
+        $trimmed_bc['second_expiration'] = self::trimAndUpdate($reg_str,2);
+        $trimmed_bc['second_expiration_amount'] = self::trimAndUpdate($reg_str,8);
+        $trimmed_bc['accreditation_account_id'] = self::trimAndUpdate($reg_str,10);
+        $trimmed_bc['check_digits'] = self::trimAndUpdate($reg_str,2);
+        
+        // return decoded arr
+        return $trimmed_bc;
     }
 }

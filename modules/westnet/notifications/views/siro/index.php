@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 		Empresa
 		<?= Select2::widget([
 			'name' => 'company_id',
-			'data' => ['2' => 'Redes del Oeste', '7' => 'Servicargas'],
+			'data' => $companies_arr,
 			'options' => [
 				'placeholder' => 'Seleccionar empresa...',
 				'required' => true
@@ -47,7 +47,9 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="">
 	<input type="submit" class="btn btn-success" name="enviar" value="Confirmar">
 
-	<input type="submit" class="btn btn-info" name="buscar_pagos_duplicados" value="Buscar Pagos Duplicados">
+	<?= Html::a("<span class='glyphicon glyphicon-pencil'></span> " . "Edit companies", 
+                ['siro-company-config/index'], ['class' => 'btn btn-default', 'target' => '_blank']);
+    ?>
 </div>
 <?= Html::endForm() ?>
 <?= Html::beginForm(['siro/checker-of-payments'], 'post', ['enctype' => 'multipart/form-data']) ?>

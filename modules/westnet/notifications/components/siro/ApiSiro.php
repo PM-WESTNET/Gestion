@@ -4,11 +4,10 @@ namespace app\modules\westnet\notifications\components\siro;
 use Yii;
 use yii\base\Component;
 use app\modules\config\models\Config;
-use app\modules\sale\models\Bill;
 use app\modules\sale\models\Company;
 use app\modules\westnet\notifications\models\SiroPaymentIntention;
 use app\modules\checkout\models\Payment;
-
+use app\modules\westnet\notifications\models\SiroCompanyConfig;
 class ApiSiro extends Component{
     /**
      * Return token access api
@@ -169,13 +168,23 @@ class ApiSiro extends Component{
 
         $conexion = curl_init();
 
+        // get siro configuration model for company ids
+        $siro_company_config_model = SiroCompanyConfig::find()->where(['company_id' => $company_id])->one();
+        // if no company is found, return false
+        if(empty($siro_company_config_model)){
+            return false;
+        }
+        
+        //* Redes del Oeste ID de convenio = 5150075933 
+        //* Servicargas ID de convenio = 5150076022
+        $cpe_number = (int)$siro_company_config_model['company_agreement_id'];
+
         $datos = array(
             'fecha_desde' => $date_from,
             'fecha_hasta' => $date_to,
             'cuit_administrador' => $cuit_administrator,
-            'nro_empresa' => ($company_id == 2) ? 5150075933 : 5150076022, //Redes del Oeste ID de convenio = 5150075933 Servicargas ID de convenio = 5150076022
+            'nro_empresa' => $cpe_number, 
         );
-
 
         curl_setopt($conexion, CURLOPT_URL,$url);
         curl_setopt($conexion, CURLOPT_POSTFIELDS, json_encode($datos));

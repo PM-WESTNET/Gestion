@@ -4,6 +4,7 @@ namespace app\modules\westnet\notifications\models;
 use app\modules\sale\models\Customer;
 use app\modules\sale\models\Company;
 use Yii;
+use app\modules\westnet\notifications\models\PaymentIntentionAccountability;
 
 /**
  * This is the model class for table "siro_payment_intention".
@@ -100,8 +101,32 @@ class SiroPaymentIntention extends \app\components\db\ActiveRecord
             'status' => 'Status',
             'id_resultado' => 'Resultado ID'
         ];
-    }    
+    }
 
+    // public function beforeSave($insert) {
+    //     if (parent::beforeSave($insert)) {
+    //         // update if new 
+    //         if ($this->isNewRecord) {
+    //             // check if no accountability record is already created for this payment intention ID
+    //             if(!empty($this->siro_payment_intention_id)){
+    //                 $accountability_query = Yii::$app->db->createCommand(
+    //                     'SELECT count(*) as qty 
+    //                     FROM payment_intentions_accountability pia 
+    //                     WHERE pia.siro_payment_intention_id = :siro_payment_intention_id')
+    //                     ->bindValue('siro_payment_intention_id', $this->siro_payment_intention_id);
+    //                 // get counter
+    //                 $accountability_counter = (int)$accountability_query->queryScalar();
+
+    //                 // if any register is found. dont create the payment intention
+    //                 if($accountability_counter>0){
+    //                     return false;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return parent::beforeSave($insert);
+    // }
      
     /**
      * @inheritdoc
