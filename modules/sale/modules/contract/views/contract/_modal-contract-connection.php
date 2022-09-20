@@ -14,6 +14,11 @@ use kartik\widgets\Select2;
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" id="myModalLabel"><?= Yii::t('westnet', 'Forced Activation') ?></h4>
             </div>
+            <!-- BORRAR SOLO PARA PRUEBAS -->
+            <!-- BORRAR SOLO PARA PRUEBAS -->
+            <h1>ESTE ES EL MODAL QUE SI FUNCIONA</h1>
+            <!-- BORRAR SOLO PARA PRUEBAS -->
+            <!-- BORRAR SOLO PARA PRUEBAS -->
             <div class="modal-body">
                 <div id="message-con"></div>
                 <div class="form-group">

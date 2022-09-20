@@ -56,8 +56,8 @@ $this->params['breadcrumbs'][] = $this->title;
         }
     ?>
     <style>
-           h1 {color: <?= $color ?>; padding: 20px;}
-           h1 {background-color: <?= $bgColor ?>}
+            h1 {color: <?= $color ?>; padding: 20px;}
+            h1 {background-color: <?= $bgColor ?>}
     </style>
     <?php endif; ?>
 
@@ -143,7 +143,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <?php endif; ?>
 
             <?php if (User::canRoute('/sale/customer/send-message')):?>
-            <div class="pull-right" style="margin-right: ; margin-top: 5px; ">
+            <div class="pull-right" style="margin-top: 5px; ">
                 <div class="dropdown">
                     <button class="btn btn-default" id="send-message" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                         <?= $model->canSendSMSMessage() ? '': 'disabled'?>>
@@ -240,6 +240,23 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php } ?>
     <hr>
     <!--Fin Contratos-->
+
+
+    <!--Contratos-->
+    <hr>
+    <?php if($contracts->getCount() >= 1) {
+        echo $this->render('../../../sale/views/customer/_customer-contracts', [
+            'model' => $model,
+            'contracts' => $contracts,
+            'products' => $products,
+            'vendors' => $vendors
+        ]);
+    } else { ?>
+        <label> <?= Yii::t('app', 'This customer doenst have any contract yet')?></label>
+    <?php } ?>
+    <hr>
+    <!--Fin Contratos-->
+
 
     <h2> <?= Yii::t('app', 'Customer data')?>  </h2>
 
